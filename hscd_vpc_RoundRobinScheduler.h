@@ -23,12 +23,13 @@ class RoundRobinScheduler : public Scheduler, public sc_module{
   sc_event& RoundRobinScheduler::getNotifyEvent();
   sc_event notify_scheduler;
 
-  void schedule(int process);
+
   void schedule_thread();
   action_struct* getNextNewCommand(int pid);
 
   virtual ~RoundRobinScheduler();
  protected:
+  int getSchedulerTimeSlice(sc_time& time);
   map<int,action_struct> *open_commands;
   map<int,p_struct> ready_tasks,running_tasks;
   deque<int> rr_fifo;

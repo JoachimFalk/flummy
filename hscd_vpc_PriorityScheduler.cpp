@@ -8,7 +8,7 @@ void PriorityScheduler::registerComponent(Component *comp){
   //  ready_tasks=new map<int,p_struct>;
   //running_tasks=new map<int,p_struct>;
 }
-void PriorityScheduler::schedule(int process){}
+
 void PriorityScheduler::schedule_thread(){
   map<int,p_struct> *newTasks;
   action_struct cmd;
@@ -78,8 +78,8 @@ void PriorityScheduler::schedule_thread(){
 	cmd2.command=assign;
 	(*open_commands)[max_priority_pid]=cmd2;
 
-	notify(*pcb.interupt);
-	notify(*(running_tasks[max_priority_pid].interupt));
+	notify(SC_ZERO_TIME,*pcb.interupt);
+	notify(SC_ZERO_TIME,*(running_tasks[max_priority_pid].interupt));
 
       } 
     }else{  //kein Task auf running!
@@ -89,7 +89,7 @@ void PriorityScheduler::schedule_thread(){
       cmd2.target_pid=max_priority_pid;
       cmd2.command=assign;
       (*open_commands)[max_priority_pid]=cmd2;
-      notify(*(running_tasks[max_priority_pid].interupt));
+      notify(SC_ZERO_TIME,*(running_tasks[max_priority_pid].interupt));
       ready_tasks.erase(max_priority_pid);                             //auf running setzen
       }
     }

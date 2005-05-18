@@ -1,4 +1,3 @@
-
 #ifndef HSCD_VPC_PRIORITYSCHEDULER_H
 #define HSCD_VPC_PRIORITYSCHEDULER_H
 #include "systemc.h"
@@ -20,7 +19,7 @@ class PriorityScheduler : public Scheduler, public sc_module{
   sc_event& PriorityScheduler::getNotifyEvent();
   sc_event notify_scheduler;
 
-  void schedule(int process);
+ 
   void schedule_thread();
   action_struct* getNextNewCommand(int pid);
 

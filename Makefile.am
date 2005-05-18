@@ -56,11 +56,15 @@ lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =			\
 	hscd_vpc_Component.h			\
 	hscd_vpc_Director.h			\
-	hscd_vpc_Scheduler.h			\
-	hscd_vpc_RoundRobinScheduler.h		\
-	hscd_vpc_PriorityScheduler.h		\
-	hscd_vpc_RateMonotonicScheduler.h	\
-	hscd_vpc_datatypes.h
+	hscd_vpc_datatypes.h			\
+	hscd_vpc_SchedulerProxy.h		\
+	hscd_vpc_Scheduler.h			
+#	hscd_vpc_RoundRobinScheduler.h		\
+#	hscd_vpc_PriorityScheduler.h		\
+#	hscd_vpc_RateMonotonicScheduler.h	\
+#	hscd_vpc_SimpleScheduler.h	\
+#	hscd_vpc_TestScheduler.h	\
+#	hscd_vpc_SpecialTestScheduler.h	
 
 #noinst_HEADERS=	oneof.hpp
 
@@ -68,16 +72,22 @@ libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)	\
 	$(hscd_pggen_hpp_CH_LTOBJS)
 
-libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++
+libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++ -lefence
 libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
 libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
 
-libsystemcvpc_la_SOURCES =		\
+libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
 	hscd_vpc_Director.cpp			\
-	hscd_vpc_RoundRobinScheduler.cpp		\
-	hscd_vpc_PriorityScheduler.cpp		\
-	hscd_vpc_RateMonotonicScheduler.cpp
+	hscd_vpc_SchedulerProxy.cpp		\
+	hscd_vpc_FCFSScheduler.cpp
+
+#	hscd_vpc_RateMonotonicScheduler.cpp	
+#	hscd_vpc_RoundRobinScheduler.cpp	\
+#	hscd_vpc_PriorityScheduler.cpp		\
+#	hscd_vpc_TestScheduler.cpp		\
+#	hscd_vpc_SpecialTestScheduler.cpp	\
+#	hscd_vpc_SimpleScheduler.cpp	
 
 # Need pkinclude files in include/$(pkgincludeprefix)
 $(libsystemcvpc_la_OBJECTS) $(libsystemcvpc_CH_LTOBJS): include

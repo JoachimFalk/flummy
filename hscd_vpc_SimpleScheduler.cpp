@@ -1,26 +1,27 @@
-#include "hscd_vpc_RoundRobinScheduler.h"
+#include "hscd_vpc_SimpleScheduler.h"
 #include "hscd_vpc_Director.h"
 #include "hscd_vpc_Component.h"
 
-void RoundRobinScheduler::registerComponent(Component *comp){
+void SimpleScheduler::registerComponent(Component *comp){
   this->component=comp;
   open_commands=new map<int,action_struct>;
   //  ready_tasks=new map<int,p_struct>;
   //running_tasks=new map<int,p_struct>;
 }
 
-void RoundRobinScheduler::schedule_thread(){
+void SimpleScheduler::schedule_thread(){
 
   map<int,p_struct> *newTasks;
   action_struct cmd;
   vector<action_struct> *actions;
-  sc_time timeslice;
+  sc_time timeslice; 
   while(1){
-    if(getSchedulerTimeSlice(timeslice)){
-      wait(/*TIMESLICE,SC_NS*/timeslice,notify_scheduler);
-    }else{
+    /*  if(getSchedulerTimeSlice(timeslice)){
+	wait(timeslice,notify_scheduler);
+	}else{
+    */
       wait(notify_scheduler);
-    }
+      //}
     //delete &t;
     deque<int>::iterator iter;
     //for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
@@ -35,13 +36,19 @@ void RoundRobinScheduler::schedule_thread(){
 	cerr << "add "<< running_tasks.size()<< " - " <<ready_tasks.size() <<endl;
 	ready_tasks[cmd.target_pid]=(*newTasks)[cmd.target_pid]; // übername in ready liste
 	newTasks->erase(cmd.target_pid);
-
-	rr_fifo.push_front(cmd.target_pid);
+	///////////////////////////
+	action_struct cmd2;
+	cmd2.target_pid=cmd.target_pid;//ready_tasks[cmd.target_pid].pid;
+	cmd2.command=assign;
+	(*open_commands)[cmd.target_pid]=cmd2;
+	notify(SC_ZERO_TIME,*(ready_tasks[cmd.target_pid].interupt));
+	/////////////////////////
+	//rr_fifo.push_front(cmd.target_pid);
  
      }
       else if(cmd.command==retire){    // aus allen listen entfernen!
-	cerr << "retire "<< running_tasks.size()<< " - " <<ready_tasks.size() <<endl;
-	if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
+	cerr << "ssch:retire "<< running_tasks.size()<< " - " <<ready_tasks.size() <<endl;
+	/*if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
 	  if(running_tasks.find(cmd.target_pid)!=running_tasks.end()){ 
 	    running_tasks.erase(cmd.target_pid);
 	    
@@ -57,10 +64,12 @@ void RoundRobinScheduler::schedule_thread(){
 	    break;
 	  }
 	}
+	*/
       } //else if(...)
       actions->pop_back();                // Kommando aus Liste entfernen
     } 
-    if(rr_fifo.size()>0){
+      /*
+	if(rr_fifo.size()>0){
 
       int rr_new_task = rr_fifo.front();
       rr_fifo.pop_front();
@@ -86,8 +95,8 @@ void RoundRobinScheduler::schedule_thread(){
 	cmd2.command=assign;
 	(*open_commands)[rr_new_task]=cmd2;
 	
-	notify(SC_ZERO_TIME,*pcb.interupt);
-	notify(SC_ZERO_TIME,*(running_tasks[rr_new_task].interupt));
+	notify(*pcb.interupt);
+	notify(*(running_tasks[rr_new_task].interupt));
 	
       }else{  //kein Task auf running!
 	running_tasks[rr_new_task]=ready_tasks[rr_new_task];   //neuen von ready
@@ -95,14 +104,16 @@ void RoundRobinScheduler::schedule_thread(){
 	cmd2.target_pid=ready_tasks[rr_new_task].pid;
 	cmd2.command=assign;
 	(*open_commands)[rr_new_task]=cmd2;
-	notify(SC_ZERO_TIME,*(running_tasks[rr_new_task].interupt));
+	notify(*(running_tasks[rr_new_task].interupt));
 	ready_tasks.erase(rr_new_task);                             //auf running setzen
       }
     }
+*/
+
   }    
     
 }
-action_struct* RoundRobinScheduler::getNextNewCommand(int pid){
+action_struct* SimpleScheduler::getNextNewCommand(int pid){
   map<int,action_struct>::iterator it;
   it=open_commands->find(pid);
   if(it==open_commands->end()){   // kein Komando
@@ -114,15 +125,15 @@ action_struct* RoundRobinScheduler::getNextNewCommand(int pid){
   }
 }
 
-sc_event& RoundRobinScheduler::getNotifyEvent(){
+sc_event& SimpleScheduler::getNotifyEvent(){
   return notify_scheduler;
 }
 
-RoundRobinScheduler::~RoundRobinScheduler(){
+SimpleScheduler::~SimpleScheduler(){
   delete open_commands;
 }
 
-int RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time ){
+int SimpleScheduler::getSchedulerTimeSlice(sc_time& time ){
   if(rr_fifo.size()==0) return 0;
   time=sc_time(40,SC_NS);
   return 1;

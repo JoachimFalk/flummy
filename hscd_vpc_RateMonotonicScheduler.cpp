@@ -9,14 +9,14 @@ void RateMonotonicScheduler::registerComponent(Component *comp){
   //  ready_tasks=new map<int,p_struct>;
   //running_tasks=new map<int,p_struct>;
 }
-void RateMonotonicScheduler::schedule(int process){}
+
 void RateMonotonicScheduler::schedule_thread(){
   map<int,p_struct> *newTasks;
   action_struct cmd;
   vector<action_struct> *actions;
   while(1){
     wait(notify_scheduler);
-     newTasks=&component->getNewTasks();   // neue Tasks
+    newTasks=&component->getNewTasks();   // neue Tasks
     actions=&component->getNewCommands(); // Kommandos
 
     while(actions->size()){
@@ -79,8 +79,8 @@ void RateMonotonicScheduler::schedule_thread(){
 	cmd2.command=assign;
 	(*open_commands)[min_rate_pid]=cmd2;
 
-	notify(*pcb.interupt);
-	notify(*(running_tasks[min_rate_pid].interupt));
+	notify(SC_ZERO_TIME,*pcb.interupt);
+	notify(SC_ZERO_TIME,*(running_tasks[min_rate_pid].interupt));
 
       } 
     }else{  //kein Task auf running!
@@ -90,7 +90,7 @@ void RateMonotonicScheduler::schedule_thread(){
       cmd2.target_pid=min_rate_pid;
       cmd2.command=assign;
       (*open_commands)[min_rate_pid]=cmd2;
-      notify(*(running_tasks[min_rate_pid].interupt));
+      notify(SC_ZERO_TIME,*(running_tasks[min_rate_pid].interupt));
       ready_tasks.erase(min_rate_pid);                             //auf running setzen
       }
     }
