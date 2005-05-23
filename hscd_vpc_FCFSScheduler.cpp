@@ -30,13 +30,13 @@ scheduling_decision FCFSScheduler::schedulingDecision(int& task_to_resign, int& 
     //return nochange;
     // }else{
     if(rr_fifo.size()>0){
-      cerr << "only_asssign" << endl;
+      //      cerr << "only_assign" << endl;
       task_to_assign = rr_fifo.front();
       rr_fifo.pop_front();
-      return only_assign;
+      return ONLY_ASSIGN;
     }
   }
-  return nochange;
+  return NOCHANGE;
   /* if(rr_fifo.size()>0){
     task_to_assign = rr_fifo.front();//int rr_new_task = rr_fifo.front();
     rr_fifo.pop_front();
@@ -48,12 +48,12 @@ scheduling_decision FCFSScheduler::schedulingDecision(int& task_to_resign, int& 
 
       rr_fifo.push_back(task_to_resign);
 
-      return preempt;
+      RETURN PREEMPT;
     }else{  //kein Task auf running!
       
-      return only_assign;
+      return ONLY_ASSIGN;
     }
   }else{
-    return resigned;
+    return RESIGNED;
     }*/
 }

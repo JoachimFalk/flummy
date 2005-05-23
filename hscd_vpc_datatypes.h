@@ -20,7 +20,7 @@ typedef struct {
 }p_struct;
 
 
-enum action_command { assign,resign,retire,add};
+enum action_command { ASSIGN,RESIGN,RETIRE,ADD};
 
 typedef struct{
   int target_pid;
@@ -28,9 +28,15 @@ typedef struct{
 }action_struct;
 
 
-enum scheduling_decision {only_assign // neuer Task keine alten
-			  ,preempt    // neuer Task verdrängt alten
-			  ,resigned   // alter Task beendet, kein neuer
-			  ,nochange}; //keine änderung 
+enum scheduling_decision {ONLY_ASSIGN // neuer Task keine alten
+			  ,PREEMPT    // neuer Task verdrängt alten
+			  ,RESIGNED   // alter Task beendet, kein neuer
+			  ,NOCHANGE}; //keine änderung 
+typedef char trace_value;
+
+#define BLOCKED 'b';
+#define READY 'r';
+#define RUNNING 'R';
+//enum trace_value {blocked,ready,running};
 
 #endif

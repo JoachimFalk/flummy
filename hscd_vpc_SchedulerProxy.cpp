@@ -27,14 +27,14 @@ void SchedulerProxy::schedule_thread(){
     actions=&component->getNewCommands(); // Kommandos
     while(actions->size()){
       cmd=actions->at(actions->size()-1); // letztes kommando
-      if(cmd.command==add){               // was ist zu tun
-	cerr << "add" <<endl;
+      if(cmd.command==ADD){               // was ist zu tun
+	//	cerr << "add" <<endl;
 	ready_tasks[cmd.target_pid]=(*newTasks)[cmd.target_pid]; // übername in ready liste
 	newTasks->erase(cmd.target_pid);
 	scheduler->addedNewTask(cmd.target_pid);
       }
-      else if(cmd.command==retire){    // aus allen listen entfernen!
-	    cerr << "remove" <<endl;
+      else if(cmd.command==RETIRE){    // aus allen listen entfernen!
+	//  cerr << "remove" <<endl;
 
 	if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
 	  if(running_tasks.find(cmd.target_pid)!=running_tasks.end()){ 
@@ -53,24 +53,24 @@ void SchedulerProxy::schedule_thread(){
 
     int task_to_resign, task_to_assign;
     scheduling_decision decision=scheduler->schedulingDecision(task_to_resign, task_to_assign,ready_tasks,running_tasks);
-    if(decision != nochange){ //nichts tun
-      if(decision!=resigned){ // zZ auch nichts  tun! keine Thread mehr da, und Listen sind schon gereinigt!
+    if(decision != NOCHANGE){ //nichts tun
+      if(decision!=RESIGNED){ // zZ auch nichts  tun! keine Thread mehr da, und Listen sind schon gereinigt!
 	
 	running_tasks[task_to_assign]=ready_tasks[task_to_assign];   //neuen von ready
 	ready_tasks.erase(task_to_assign);                              //auf running setzen
 	
 	action_struct cmd2;
 	cmd2.target_pid=task_to_assign;
-	cmd2.command=assign;
+	cmd2.command=ASSIGN;
 	(*open_commands)[task_to_assign]=cmd2;
 	
-	if(decision==preempt){
+	if(decision==PREEMPT){
 	  ready_tasks[task_to_resign]=running_tasks[task_to_resign];       //running  -> ready
 	  running_tasks.erase(task_to_resign);                           //nicht mehr ready
 	  
 	  action_struct cmd1;
 	  cmd1.target_pid=task_to_resign;
-	  cmd1.command=resign;
+	  cmd1.command=RESIGN;
 	  (*open_commands)[task_to_resign]=cmd1;
 	  
 	  

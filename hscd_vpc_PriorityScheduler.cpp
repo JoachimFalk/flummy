@@ -20,11 +20,11 @@ void PriorityScheduler::schedule_thread(){
 
     while(actions->size()){
       cmd=actions->at(actions->size()-1); // letztes kommando
-      if(cmd.command==add){               // was ist zu tun
+      if(cmd.command==ADD){               // was ist zu tun
 	ready_tasks[cmd.target_pid]=(*newTasks)[cmd.target_pid]; // übername in ready liste
 	newTasks->erase(cmd.target_pid);
       }
-      else if(cmd.command==retire){    // aus allen listen entfernen!
+      else if(cmd.command==RETIRE){    // aus allen listen entfernen!
 	if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
 	  if(running_tasks.find(cmd.target_pid)!=running_tasks.end()){ 
 	    running_tasks.erase(cmd.target_pid);
@@ -68,14 +68,14 @@ void PriorityScheduler::schedule_thread(){
  	ready_tasks[pcb.pid]=pcb;            //ready setzen
 	action_struct cmd1;
 	cmd1.target_pid=pcb.pid;
-	cmd1.command=resign;
+	cmd1.command=RESIGN;
 	(*open_commands)[pcb.pid]=cmd1;
 	
 	running_tasks[max_priority_pid]=ready_tasks[max_priority_pid];   //neuen von ready
 	ready_tasks.erase(max_priority_pid);                              //auf running setzen
 	action_struct cmd2;
 	cmd2.target_pid=max_priority_pid;
-	cmd2.command=assign;
+	cmd2.command=ASSIGN;
 	(*open_commands)[max_priority_pid]=cmd2;
 
 	notify(SC_ZERO_TIME,*pcb.interupt);
@@ -87,7 +87,7 @@ void PriorityScheduler::schedule_thread(){
       running_tasks[max_priority_pid]=ready_tasks[max_priority_pid];   //neuen von ready
       action_struct cmd2;
       cmd2.target_pid=max_priority_pid;
-      cmd2.command=assign;
+      cmd2.command=ASSIGN;
       (*open_commands)[max_priority_pid]=cmd2;
       notify(SC_ZERO_TIME,*(running_tasks[max_priority_pid].interupt));
       ready_tasks.erase(max_priority_pid);                             //auf running setzen

@@ -33,12 +33,12 @@ scheduling_decision SpecialTestScheduler::schedulingDecision(int& task_to_resign
 
       rr_fifo.push_back(task_to_resign);
 
-      return preempt;
+      return PREEMPT;
     }else{  //kein Task auf running!
       
-      return only_assign;
+      return ONLY_ASSIGN;
     }
   }else{
-    return resigned;
+    return RESIGNED;
   }
 }

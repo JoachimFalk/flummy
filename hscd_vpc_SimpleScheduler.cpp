@@ -32,21 +32,21 @@ void SimpleScheduler::schedule_thread(){
     
     while(actions->size()){
       cmd=actions->at(actions->size()-1); // letztes kommando
-      if(cmd.command==add){               // was ist zu tun
+      if(cmd.command==ADD){               // was ist zu tun
 	cerr << "add "<< running_tasks.size()<< " - " <<ready_tasks.size() <<endl;
 	ready_tasks[cmd.target_pid]=(*newTasks)[cmd.target_pid]; // übername in ready liste
 	newTasks->erase(cmd.target_pid);
 	///////////////////////////
 	action_struct cmd2;
 	cmd2.target_pid=cmd.target_pid;//ready_tasks[cmd.target_pid].pid;
-	cmd2.command=assign;
+	cmd2.command=ASSIGN;
 	(*open_commands)[cmd.target_pid]=cmd2;
 	notify(SC_ZERO_TIME,*(ready_tasks[cmd.target_pid].interupt));
 	/////////////////////////
 	//rr_fifo.push_front(cmd.target_pid);
  
      }
-      else if(cmd.command==retire){    // aus allen listen entfernen!
+      else if(cmd.command==RETIRE){    // aus allen listen entfernen!
 	cerr << "ssch:retire "<< running_tasks.size()<< " - " <<ready_tasks.size() <<endl;
 	/*if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
 	  if(running_tasks.find(cmd.target_pid)!=running_tasks.end()){ 
@@ -86,13 +86,13 @@ void SimpleScheduler::schedule_thread(){
   
 	action_struct cmd1;
 	cmd1.target_pid=pcb.pid;
-	cmd1.command=resign;
+	cmd1.command=RESIGN;
 	(*open_commands)[pcb.pid]=cmd1;
 	running_tasks[rr_new_task]=ready_tasks[rr_new_task];   //neuen von ready
 	ready_tasks.erase(rr_new_task);                              //auf running setzen
 	action_struct cmd2;
 	cmd2.target_pid=rr_new_task;
-	cmd2.command=assign;
+	cmd2.command=ASSIGN;
 	(*open_commands)[rr_new_task]=cmd2;
 	
 	notify(*pcb.interupt);

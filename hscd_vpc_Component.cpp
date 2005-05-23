@@ -24,12 +24,12 @@
 
 void Component::compute( const char *name ) { 
   p_struct  actualTask = Director::getInstance().getProcessControlBlock(name);
-  sc_signal<int> *trace_signal=0;
+  sc_signal<trace_value> *trace_signal=0;
   if(1==trace_map_by_name.count(actualTask.name)){
-    map<string,sc_signal<int>*>::iterator iter = trace_map_by_name.find(actualTask.name);
+    map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask.name);
     trace_signal=(iter->second);
   }
-  *trace_signal=1;
+  if(trace_signal!=0)*trace_signal=READY;
 
 
   
@@ -38,15 +38,15 @@ void Component::compute( const char *name ) {
   //wait(10, SC_NS);
   compute(actualTask);
   cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time()<<endl;
-  *trace_signal=0;
+  if(trace_signal!=0)*trace_signal=BLOCKED;
   
 }
 
-void Component::compute(int process){
+/*void Component::compute(int process){
   /////////
   p_struct actualTask = Director::getInstance().getProcessControlBlock(process);
   compute(actualTask);
-}
+  }*/
 void Component::compute(p_struct actualTask){
   sc_event interupt;
   action_struct *cmd;
@@ -54,9 +54,9 @@ void Component::compute(p_struct actualTask){
   double rest_of_delay;
   bool task_is_running=false;
   int process=actualTask.pid;
-  sc_signal<int> *trace_signal=0;
+  sc_signal<trace_value> *trace_signal=NULL;
   if(1==trace_map_by_name.count(actualTask.name)){
-      map<string,sc_signal<int>*>::iterator iter = trace_map_by_name.find(actualTask.name);
+      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask.name);
       trace_signal=(iter->second);
   }
 
@@ -66,7 +66,7 @@ void Component::compute(p_struct actualTask){
   new_tasks[process]=actualTask;
   cmd = new action_struct;
   cmd->target_pid = process;
-  cmd->command = add;
+  cmd->command = ADD;
   open_commands.push_back(*cmd);               //          add
 
   // cout <<"VPC says: New Task: "<< actualTask.name <<" at: "<< sc_simulation_time() << " on: "<< this->name<<" - "<<this->id << endl; 
@@ -75,16 +75,16 @@ void Component::compute(p_struct actualTask){
   while(1){
     if(task_is_running){
       last_delta_start_time=sc_simulation_time();
-      *trace_signal=100;     
+      if(trace_signal!=0)*trace_signal=RUNNING;     
       //   cout << actualTask.name << " is running! "<< sc_simulation_time() << endl; 
       wait(rest_of_delay,SC_NS,*actualTask.interupt);
       //cout << actualTask.name << " is stoped! "<< sc_simulation_time() << endl; 
-      *trace_signal=1;
+      if(trace_signal!=0)*trace_signal=READY;
       rest_of_delay-=sc_simulation_time()-last_delta_start_time;
       if(rest_of_delay==0){ // Process beim Scheduler abmelden
 	cmd=new action_struct;
 	cmd->target_pid = process;
-	cmd->command = retire;
+	cmd->command = RETIRE;
 	open_commands.push_back(*cmd);
 	notify(e);    //Muss auf den Scheduler gewarted werden? (Nein)
 	wait(SC_ZERO_TIME);
@@ -101,19 +101,19 @@ void Component::compute(p_struct actualTask){
     cmd=scheduler->getNextNewCommand(process);
     if(NULL != cmd){
       switch(cmd->command){
-      case retire:
+      case RETIRE:
 	//cerr << "retire" << endl;
 	// Kann nicht sein
 	break;
-      case add: 
+      case ADD: 
 	//cerr << "add" << endl;
 	// Ok aber keine Information, besser: Nichts zu tun!
 	break;
-      case assign:
+      case ASSIGN:
 	//	cerr << "assign" << endl;
 	task_is_running=true;
 	break;
-      case resign:
+      case RESIGN:
 	//cerr << "resign" << endl;
  	task_is_running=false;
 	break;
@@ -126,9 +126,6 @@ void Component::compute(p_struct actualTask){
   //new_tasks.erase(process);
 } 
 Component::Component(const char *name,const char *schedulername){
-  // cerr << "Component(const char,const char) " << endl;
-
-    //this->name=string(name).c_str();
     strcpy(this->name,name);
     /* if(0==strcmp(schedulername,"RoundRobin") || 0==strcmp(schedulername,"RR")){
 	this->id=2;
@@ -144,7 +141,6 @@ Component::Component(const char *name,const char *schedulername){
     this->id=99;
     
     scheduler->registerComponent(this);
-    //  cerr << "creating: " << this->name << " - "<< this->id << endl;
     string tracefilename=this->name;
     char tracefilechar[VPC_MAX_STRING_LENGTH];
     char* traceprefix= getenv("VPCTRACEFILEPREFIX");
@@ -153,7 +149,9 @@ Component::Component(const char *name,const char *schedulername){
     }
     strcpy(tracefilechar,tracefilename.c_str());
     //cerr << "Trace: "<<tracefilechar <<endl;
-    this->trace = sc_create_vcd_trace_file (tracefilechar);//this->name); ///////////////////////
+    this->trace =sc_create_vcd_trace_file (tracefilechar);//this->name); ///////////////////////
+    ((vcd_trace_file*)this->trace)->sc_set_vcd_time_unit(-9);
+    //    this->trace_wif = sc_create_wif_trace_file (tracefilechar);//this->name); ///////////////////////
     
     int i;
     for(i=0;i<23;i++){
@@ -171,9 +169,10 @@ Component::~Component(){
   delete scheduler;
 }
 void Component::informAboutMapping(string module){
-    sc_signal<int> *newsignal=new sc_signal<int>();
-    trace_map_by_name.insert(pair<string,sc_signal<int>*>(module,newsignal));
+    sc_signal<trace_value> *newsignal=new sc_signal<trace_value>();
+    trace_map_by_name.insert(pair<string,sc_signal<trace_value>*>(module,newsignal));
     sc_trace(this->trace,*newsignal,module.c_str());
+    //    sc_trace(this->trace_wif,*newsignal,module.c_str());
 }
 
 vector<action_struct> &Component::getNewCommands() {

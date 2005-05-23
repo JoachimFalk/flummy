@@ -23,22 +23,26 @@
 #include <vector.h>
 #include <map.h>
 
-
+/**
+ * \brief The interface definition to a Virtual-Processing-Component (VPC).
+ */
 class AbstractComponent{
  public:
-    static const int RISC3=2;
     virtual void compute( const char *name )=0;
-    virtual void compute(int iprocess)=0;
+    //    virtual void compute(int iprocess)=0;
     virtual ~AbstractComponent(){};
 };
 
-
+/**
+ * \brief An implementation of AbstractComponent.
+ * An event based kommunikation to an Scheduler is realised by using the SchedulerProxy.
+ */
 class Component : public AbstractComponent{
  public:
   map<int,p_struct> &getNewTasks();
   vector<action_struct> &getNewCommands();
   virtual void compute( const char *name );
-  virtual void compute(int process);
+  //  virtual void compute(int process);
   Component();
   Component(const char *name,const char *schedulername);
   virtual ~Component();
@@ -46,10 +50,11 @@ class Component : public AbstractComponent{
 
  protected:
   void compute(p_struct actualTask);
-  map<string,sc_signal<int>*> trace_map_by_name;
+  map<string,sc_signal<trace_value>*> trace_map_by_name;
   map<int,p_struct>      new_tasks;
   vector<action_struct>  open_commands;
   sc_trace_file *trace;   ////////////////////////                              
+  //  sc_trace_file *trace_wif;   ////////////////////////                              
   SchedulerProxy *scheduler;
   int id;
   char name [VPC_MAX_STRING_LENGTH];
