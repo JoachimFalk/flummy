@@ -72,7 +72,11 @@ libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)	\
 	$(hscd_pggen_hpp_CH_LTOBJS)
 
-libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++ -lefence
+## DISABLE -lefence because is causes crashes on systemc where libefence is linked with -lpthread
+## because of quick-thread (SystemC) pthread incompatibilities
+#libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++ -lefence
+libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++
+
 libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
 libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
 
