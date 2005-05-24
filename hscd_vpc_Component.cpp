@@ -29,17 +29,17 @@ void Component::compute( const char *name ) {
     map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask.name);
     trace_signal=(iter->second);
   }
-  if(trace_signal!=0)*trace_signal=READY;
-
-
-  
-  cerr <<"VPC says: PG node "<<name << " start execution " << sc_simulation_time()<< " on: "<< this->name <<endl;
+  if (trace_signal != NULL ) {
+    *trace_signal = READY;
+    std::cerr << "VPC says: PG node " << name << " start execution " << sc_simulation_time() << " on: " << this->name << std::endl;
+  }
   //wait((80.0*rand()/(RAND_MAX+1.0)), SC_NS);
   //wait(10, SC_NS);
   compute(actualTask);
-  cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time()<<endl;
-  if(trace_signal!=0)*trace_signal=BLOCKED;
-  
+  if (trace_signal != NULL ) {
+    *trace_signal = BLOCKED;
+    std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
+  }
 }
 
 /*void Component::compute(int process){
