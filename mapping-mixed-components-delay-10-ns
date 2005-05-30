@@ -1,6 +1,6 @@
 component: HWM1 FCFS
 component: HWM2 FCFS
-component: HWM3 FCFS
+component: HWM3 RR
 component: HWM4 FCFS
 
 sim_mod.h_hca.qpc_manager HWM1 10

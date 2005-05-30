@@ -1,9 +1,21 @@
-#include "systemc.h"
 #ifndef HSCD_VPC_P_STRUCT_H
 #define HSCD_VPC_P_STRUCT_H
+#include "systemc.h"
+#include <string>
+
+
+
 #define VPC_MAX_STRING_LENGTH 128
 
-#include <string>
+#define STR_ROUNDROBIN "RoundRobin"
+#define STR_RR "RR"
+#define STR_PRIORITYSCHEDULER "PriorityScheduler"
+#define STR_PS "PS"
+#define STR_RATEMONOTONIC "RateMonotonic"
+#define STR_RM "RM"
+#define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServe"
+#define STR_FCFS "FCFS"
+
 using std::string;
 
 
@@ -35,7 +47,7 @@ enum scheduling_decision {ONLY_ASSIGN // neuer Task keine alten
 typedef char trace_value;
 
 #define BLOCKED 'b';
-#define READY 'r';
+#define READY   'w';
 #define RUNNING 'R';
 //enum trace_value {blocked,ready,running};
 

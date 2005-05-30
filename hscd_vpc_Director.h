@@ -15,12 +15,12 @@
  * -----------------------------------------------------------------------------
  * $log$
  ******************************************************************************/
+#ifndef HSCD_VPC_DIRECTOR_H
+#define HSCD_VPC_DIRECTOR_H
 #include "hscd_vpc_Component.h"
 #include "hscd_vpc_datatypes.h"
 #include <string>
 using std::string;
-#ifndef HSCD_VPC_DIRECTOR_H
-#define HSCD_VPC_DIRECTOR_H
 
 class Director{
 private:
@@ -39,8 +39,8 @@ private:
 public:
   bool FALLBACKMODE;
   AbstractComponent& getResource( const char *name );
-  AbstractComponent& getResource(int process);
-  p_struct& getProcessControlBlock(int process);
+  //  AbstractComponent& getResource(int process);
+  //  p_struct& getProcessControlBlock(int process);
   p_struct& getProcessControlBlock( const char *name );
   static Director& getInstance(){
     return *singleton;

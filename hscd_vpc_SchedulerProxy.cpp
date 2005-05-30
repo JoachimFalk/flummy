@@ -1,15 +1,33 @@
 #include "hscd_vpc_SchedulerProxy.h"
 #include "hscd_vpc_FCFSScheduler.h"
+#include "hscd_vpc_RoundRobinScheduler.h"
 #include "hscd_vpc_Director.h"
 #include "hscd_vpc_Component.h"
 
 void SchedulerProxy::registerComponent(Component *comp){
   this->component=comp;
   open_commands=new map<int,action_struct>;
-  scheduler=new FCFSScheduler();
   //  ready_tasks=new map<int,p_struct>;
   //running_tasks=new map<int,p_struct>;
 }
+void  SchedulerProxy::setScheduler(const char *schedulername){
+  if(0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN)) || 0==strncmp(schedulername,STR_RR,strlen(STR_RR))){
+     scheduler=new RoundRobinScheduler((const char*)schedulername);
+    //scheduler=new FCFSScheduler();
+  }else if(0==strncmp(schedulername,STR_PRIORITYSCHEDULER,strlen(STR_PRIORITYSCHEDULER)) || 0==strncmp(schedulername,STR_PS,strlen(STR_PS))){
+    //scheduler=new PriorityScheduler(this->name);
+    scheduler=new FCFSScheduler();
+  }else if(0==strncmp(schedulername,STR_RATEMONOTONIC,strlen(STR_RATEMONOTONIC)) || 0==strncmp(schedulername,STR_RM,strlen(STR_RM))){
+    //scheduler=new RateMonotonicScheduler(this->name);
+    scheduler=new FCFSScheduler();
+  }else if(0==strncmp(schedulername,STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE)) || 0==strncmp(schedulername,STR_FCFS,strlen(STR_FCFS))){
+    scheduler=new FCFSScheduler();
+  }else{
+    //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVE << endl;
+    scheduler=new FCFSScheduler();
+  }
+}
+
 
 void SchedulerProxy::schedule_thread(){
   map<int,p_struct> *newTasks;

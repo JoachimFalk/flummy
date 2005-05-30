@@ -12,16 +12,18 @@ class Component;
 class FCFSScheduler : public Scheduler{
  public:
 
+  FCFSScheduler(const char *schedulername){
+  }
   FCFSScheduler(){
-      TIMESLICE=15;
   }
   virtual ~FCFSScheduler(){}
- protected:
-  int getSchedulerTimeSlice(sc_time &time, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks);
+  int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks);
   void addedNewTask(int pid);
   void removedTask(int pid);
   scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks);
-  deque<int> rr_fifo;
-  double TIMESLICE;
+ protected:
+
+  deque<int> fcfs_fifo;
+  //  double TIMESLICE;
 };
 #endif

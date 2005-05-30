@@ -19,9 +19,12 @@
 #define HSCD_VPC_COMPONENT_H
 #include "systemc.h"
 #include "hscd_vpc_datatypes.h"
-#include "hscd_vpc_SchedulerProxy.h"
+//#include "hscd_vpc_SchedulerProxy.h"
 #include <vector.h>
 #include <map.h>
+
+class SchedulerProxy;
+
 
 /**
  * \brief The interface definition to a Virtual-Processing-Component (VPC).
@@ -55,8 +58,8 @@ class Component : public AbstractComponent{
   vector<action_struct>  open_commands;
   sc_trace_file *trace;   ////////////////////////                              
   //  sc_trace_file *trace_wif;   ////////////////////////                              
-  SchedulerProxy *scheduler;
-  int id;
+  SchedulerProxy *schedulerproxy;
+  //  int id;
   char name [VPC_MAX_STRING_LENGTH];
 };
 #endif

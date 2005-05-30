@@ -31,14 +31,14 @@ void Component::compute( const char *name ) {
   }
   if (trace_signal != NULL ) {
     *trace_signal = READY;
-    std::cerr << "VPC says: PG node " << name << " start execution " << sc_simulation_time() << " on: " << this->name << std::endl;
+    //std::cerr << "VPC says: PG node " << name << " start execution " << sc_simulation_time() << " on: " << this->name << std::endl;
   }
   //wait((80.0*rand()/(RAND_MAX+1.0)), SC_NS);
   //wait(10, SC_NS);
   compute(actualTask);
   if (trace_signal != NULL ) {
     *trace_signal = BLOCKED;
-    std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
+    // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
   }
 }
 
@@ -69,8 +69,7 @@ void Component::compute(p_struct actualTask){
   cmd->command = ADD;
   open_commands.push_back(*cmd);               //          add
 
-  // cout <<"VPC says: New Task: "<< actualTask.name <<" at: "<< sc_simulation_time() << " on: "<< this->name<<" - "<<this->id << endl; 
-  sc_event& e = scheduler->getNotifyEvent();
+  sc_event& e = schedulerproxy->getNotifyEvent();
   notify(SC_ZERO_TIME,e);
   while(1){
     if(task_is_running){
@@ -98,7 +97,7 @@ void Component::compute(p_struct actualTask){
     }
     //Scheduler fragen: Was ist los?
     action_struct *cmd;
-    cmd=scheduler->getNextNewCommand(process);
+    cmd=schedulerproxy->getNextNewCommand(process);
     if(NULL != cmd){
       switch(cmd->command){
       case RETIRE:
@@ -127,20 +126,9 @@ void Component::compute(p_struct actualTask){
 } 
 Component::Component(const char *name,const char *schedulername){
     strcpy(this->name,name);
-    /* if(0==strcmp(schedulername,"RoundRobin") || 0==strcmp(schedulername,"RR")){
-	this->id=2;
-	scheduler=new RoundRobinScheduler(this->name);
-    }else if(0==strcmp(schedulername,"PriorityScheduler") || 0==strcmp(schedulername,"PS")){
-	this->id=0;
-	scheduler=new PriorityScheduler(this->name);
-    }else{
-	this->id=1;
-	scheduler=new RateMonotonicScheduler(this->name);
-    }*/
-    scheduler=new SchedulerProxy(this->name);
-    this->id=99;
-    
-    scheduler->registerComponent(this);
+    schedulerproxy=new SchedulerProxy(this->name);
+    schedulerproxy->setScheduler(schedulername);
+    schedulerproxy->registerComponent(this);
     string tracefilename=this->name;
     char tracefilechar[VPC_MAX_STRING_LENGTH];
     char* traceprefix= getenv("VPCTRACEFILEPREFIX");
@@ -166,7 +154,7 @@ Component::~Component(){
   sc_close_vcd_trace_file(this->trace);
   //  delete open_commands;
   //  delete new_tasks;
-  delete scheduler;
+  delete schedulerproxy;
 }
 void Component::informAboutMapping(string module){
     sc_signal<trace_value> *newsignal=new sc_signal<trace_value>();
@@ -203,7 +191,7 @@ Component::Component(int id){
     }
   }
 
-  scheduler->registerComponent(this);
+  schedulerproxy->registerComponent(this);
   this->trace = sc_create_vcd_trace_file (this->name); ///////////////////////
   int i;
   for(i=0;i<27;i++){
@@ -235,7 +223,7 @@ Component::Component(const char *name,int id){
 	}
     }
     
-    scheduler->registerComponent(this);
+    schedulerproxy->registerComponent(this);
     this->trace = sc_create_vcd_trace_file (this->name); ///////////////////////
     
     int i;

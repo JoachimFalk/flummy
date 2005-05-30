@@ -2,128 +2,135 @@
 #include "hscd_vpc_Director.h"
 #include "hscd_vpc_Component.h"
 
-void RoundRobinScheduler::registerComponent(Component *comp){
-  this->component=comp;
-  open_commands=new map<int,action_struct>;
-  //  ready_tasks=new map<int,p_struct>;
-  //running_tasks=new map<int,p_struct>;
-}
 
-void RoundRobinScheduler::schedule_thread(){
-
-  map<int,p_struct> *newTasks;
-  action_struct cmd;
-  vector<action_struct> *actions;
-  sc_time timeslice;
-  while(1){
-    if(getSchedulerTimeSlice(timeslice)){
-      wait(/*TIMESLICE,SC_NS*/timeslice,notify_scheduler);
-    }else{
-      wait(notify_scheduler);
-    }
-    //delete &t;
-    deque<int>::iterator iter;
-    //for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
-    //}
-    newTasks=&component->getNewTasks();   // neue Tasks
-    actions=&component->getNewCommands(); // Kommandos
-    //    deque<int>::iterator iter;
-    
-    while(actions->size()){
-      cmd=actions->at(actions->size()-1); // letztes kommando
-      if(cmd.command==ADD){               // was ist zu tun
-	cerr << "add "<< running_tasks.size()<< " - " <<ready_tasks.size() <<endl;
-	ready_tasks[cmd.target_pid]=(*newTasks)[cmd.target_pid]; // übername in ready liste
-	newTasks->erase(cmd.target_pid);
-
-	rr_fifo.push_front(cmd.target_pid);
- 
-     }
-      else if(cmd.command==RETIRE){    // aus allen listen entfernen!
-	cerr << "retire "<< running_tasks.size()<< " - " <<ready_tasks.size() <<endl;
-	if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
-	  if(running_tasks.find(cmd.target_pid)!=running_tasks.end()){ 
-	    running_tasks.erase(cmd.target_pid);
-	    
-	  }
-	}else{
-	  ready_tasks.erase(cmd.target_pid);
-	}
-	for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
-	  if( *iter == cmd.target_pid){
-
-	    rr_fifo.erase(iter);
-
-	    break;
-	  }
-	}
-      } //else if(...)
-      actions->pop_back();                // Kommando aus Liste entfernen
-    } 
-    if(rr_fifo.size()>0){
-
-      int rr_new_task = rr_fifo.front();
-      rr_fifo.pop_front();
-
-
-      if(running_tasks.size()>0){
-	map<int,p_struct>::iterator iter2;
-	iter2=running_tasks.begin();
-	p_struct pcb=iter2->second;
-	running_tasks.erase(pcb.pid);       //Alten Task von running auf
-	ready_tasks[pcb.pid]=pcb;            //ready setzen
-
-	rr_fifo.push_back(pcb.pid);
-  
-	action_struct cmd1;
-	cmd1.target_pid=pcb.pid;
-	cmd1.command=RESIGN;
-	(*open_commands)[pcb.pid]=cmd1;
-	running_tasks[rr_new_task]=ready_tasks[rr_new_task];   //neuen von ready
-	ready_tasks.erase(rr_new_task);                              //auf running setzen
-	action_struct cmd2;
-	cmd2.target_pid=rr_new_task;
-	cmd2.command=ASSIGN;
-	(*open_commands)[rr_new_task]=cmd2;
-	
-	notify(SC_ZERO_TIME,*pcb.interupt);
-	notify(SC_ZERO_TIME,*(running_tasks[rr_new_task].interupt));
-	
-      }else{  //kein Task auf running!
-	running_tasks[rr_new_task]=ready_tasks[rr_new_task];   //neuen von ready
-	action_struct cmd2;
-	cmd2.target_pid=ready_tasks[rr_new_task].pid;
-	cmd2.command=ASSIGN;
-	(*open_commands)[rr_new_task]=cmd2;
-	notify(SC_ZERO_TIME,*(running_tasks[rr_new_task].interupt));
-	ready_tasks.erase(rr_new_task);                             //auf running setzen
+RoundRobinScheduler::RoundRobinScheduler(const char *schedulername){
+      TIMESLICE=1;
+      LASTASSIGN=0;
+      char rest[VPC_MAX_STRING_LENGTH];
+      //      char muell[VPC_MAX_STRING_LENGTH];
+/*
+      if(0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN))){
+	cerr << "Scheduler: "<< STR_ROUNDROBIN <<" - "<< schedulername <<endl;
+	sscanf(schedulername,"%s-%s",muell,rest);
+	cerr << "----- Rest: "<<rest<< " muell: "<<muell<<endl;
+      }else if(0==strncmp(schedulername,STR_RR,strlen(STR_RR))){
+	cerr << "Scheduler: "<< STR_RR << endl;
       }
-    }
-  }    
-    
+      */
+      int sublength;
+      char *secondindex;
+      char *firstindex=strchr(schedulername,':'); 
+      while(firstindex!=NULL){
+	secondindex=strchr(firstindex+1,':');        //':' überspringen
+	if(secondindex!=NULL)
+	  sublength=secondindex-firstindex;
+	else
+	  sublength=strlen(firstindex);
+	strncpy(rest,firstindex+1,sublength-1);
+	rest[sublength-1]='\0';
+	firstindex=secondindex;                     
+
+
+	char *key, *value;
+	value=strstr(rest,"-");
+	if(value!=NULL){
+	  value[0]='\0';
+	  value++;
+	  key=rest;
+	  setProperty(key,value);
+	}
+
+      }
 }
-action_struct* RoundRobinScheduler::getNextNewCommand(int pid){
-  map<int,action_struct>::iterator it;
-  it=open_commands->find(pid);
-  if(it==open_commands->end()){   // kein Komando
-    return NULL;
-  }else{
-    action_struct *action = &it->second;
-    open_commands->erase(it);
-    return action;
+
+void RoundRobinScheduler::setProperty(char* key, char* value){
+	if(0==strncmp(key,"timeslice",strlen("timeslice"))){
+	  char *domain;
+	  domain=strstr(value,"ns");
+	  if(domain!=NULL){
+	    domain[0]='\0';
+	    sscanf(value,"%lf",&TIMESLICE);
+	  }
+
+	}
+}
+
+int RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks){
+  if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
+  time=sc_time(TIMESLICE,SC_NS);
+  return 1;
+}
+void RoundRobinScheduler::addedNewTask(int pid){
+  rr_fifo.push_back(pid);
+}
+void RoundRobinScheduler::removedTask(int pid){
+  deque<int>::iterator iter;
+  for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
+    if( *iter == pid){
+      rr_fifo.erase(iter);
+      break;
+    }
   }
 }
+scheduling_decision RoundRobinScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks){
+  /*
+  if(running_tasks.size()==0){
+    if(rr_fifo.size()>0){
+      //      cerr << "only_assign" << endl;
+      task_to_assign = rr_fifo.front();
+      rr_fifo.pop_front();
+      return ONLY_ASSIGN;
+    }
+  }
+  return NOCHANGE;
+  */
+  scheduling_decision ret_decision=NOCHANGE;
+  //  cerr << LASTASSIGN+TIMESLICE << " : "<<sc_simulation_time()<< " : " << LASTASSIGN << " : " << TIMESLICE<< " : " <<rr_fifo.size()<<endl;
+  if(LASTASSIGN+TIMESLICE==sc_simulation_time()){//Zeitscheibe wirklich abgelaufen!
+    if(rr_fifo.size()>0){    // neuen Task bestimmen
+      task_to_assign = rr_fifo.front();
+      rr_fifo.pop_front();
+      ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "RETIRE") -> kein preemption!
+      if(running_tasks.size()!=0){  // alten Task entfernen
+	map<int,p_struct>::iterator iter;
+	iter=running_tasks.begin();
+	p_struct pcb=iter->second;
+	task_to_resign=pcb.pid;
+	rr_fifo.push_back(pcb.pid);
+	ret_decision= PREEMPT;	
+      }// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "RETIRE")
+    }    
+  }else{//neuer Task hinzugefügt -> nichts tun 
+        //oder alter entfernt    -> neuen setzen
+    
+    //neuen setzen:
+    if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
+      if(rr_fifo.size()>0){            // ist da auch ein neuer da?
+	task_to_assign = rr_fifo.front();
+	rr_fifo.pop_front();
+	ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "RETIRE") -> kein preemption!
+      }
+    }
+    
+    //nichts tun:
+    //     ret_decision=NOCHANGE;         //neuer Task hinzugefügt -> nichts tun
+  } 
 
-sc_event& RoundRobinScheduler::getNotifyEvent(){
-  return notify_scheduler;
-}
 
-RoundRobinScheduler::~RoundRobinScheduler(){
-  delete open_commands;
-}
+  if(ret_decision==ONLY_ASSIGN || ret_decision==PREEMPT){
+    LASTASSIGN=sc_simulation_time();
+  }
 
-int RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time ){
-  if(rr_fifo.size()==0) return 0;
-  time=sc_time(40,SC_NS);
-  return 1;
+
+  /*if(ret_decision==ONLY_ASSIGN){
+    cerr << "ONLY_ASSIGN" <<endl;
+  }else if(ret_decision==PREEMPT){
+    cerr << "PREEMPT" <<endl;
+  }else if(ret_decision==NOCHANGE){
+    cerr << "NOCHANGE " <<endl;
+  }else if(ret_decision==RESIGNED){
+    cerr << "RESIGNED " <<endl;
+    }*/
+
+  return ret_decision;
 }

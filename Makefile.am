@@ -56,9 +56,9 @@ lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =			\
 	hscd_vpc_Component.h			\
 	hscd_vpc_Director.h			\
-	hscd_vpc_datatypes.h			\
-	hscd_vpc_SchedulerProxy.h		\
-	hscd_vpc_Scheduler.h			
+	hscd_vpc_datatypes.h			
+#	hscd_vpc_SchedulerProxy.h		\
+#	hscd_vpc_Scheduler.h			
 #	hscd_vpc_RoundRobinScheduler.h		\
 #	hscd_vpc_PriorityScheduler.h		\
 #	hscd_vpc_RateMonotonicScheduler.h	\
@@ -84,10 +84,10 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
 	hscd_vpc_Director.cpp			\
 	hscd_vpc_SchedulerProxy.cpp		\
+	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp
 
 #	hscd_vpc_RateMonotonicScheduler.cpp	
-#	hscd_vpc_RoundRobinScheduler.cpp	\
 #	hscd_vpc_PriorityScheduler.cpp		\
 #	hscd_vpc_TestScheduler.cpp		\
 #	hscd_vpc_SpecialTestScheduler.cpp	\

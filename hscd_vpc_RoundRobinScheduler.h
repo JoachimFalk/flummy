@@ -1,4 +1,3 @@
-
 #ifndef HSCD_VPC_ROUNDROBINSCHEDULER_H
 #define HSCD_VPC_ROUNDROBINSCHEDULER_H
 #include "systemc.h"
@@ -10,30 +9,23 @@
 
 class Component;
 
-class RoundRobinScheduler : public Scheduler, public sc_module{
+class RoundRobinScheduler : public Scheduler{
  public:
-  SC_CTOR(RoundRobinScheduler){
-    SC_THREAD(schedule_thread);
-    // cerr << "Scheduler: rr"<<endl;
-    TIMESLICE=15;
+
+  RoundRobinScheduler(){
+      TIMESLICE=1;
+      LASTASSIGN=0;
   }
-  //  map<int,p_struct> getReadyTasks();
-  // map<int,p_struct> getRunningTasks();
-  void registerComponent(Component *comp);
-  sc_event& RoundRobinScheduler::getNotifyEvent();
-  sc_event notify_scheduler;
-
-
-  void schedule_thread();
-  action_struct* getNextNewCommand(int pid);
-
-  virtual ~RoundRobinScheduler();
+  RoundRobinScheduler(const char *schedulername);
+  virtual ~RoundRobinScheduler(){}
+  int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks);
+  void addedNewTask(int pid);
+  void removedTask(int pid);
+  scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks);
+  void setProperty(char* key, char* value);
  protected:
-  int getSchedulerTimeSlice(sc_time& time);
-  map<int,action_struct> *open_commands;
-  map<int,p_struct> ready_tasks,running_tasks;
   deque<int> rr_fifo;
   double TIMESLICE;
-  Component *component;
+  double LASTASSIGN;
 };
 #endif

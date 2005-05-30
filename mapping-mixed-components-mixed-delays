@@ -1,7 +1,7 @@
 component: HWM1 FCFS
-component: HWM2 FCFS
-component: HWM3 FCFS
-component: HWM4 FCFS
+component: HWM2 RoundRobin:timeslice-2ns:debug-on
+component: HWM3 RM
+component: HWM4 PS
 
 sim_mod.h_hca.qpc_manager HWM1 4
 sim_mod.h_hca.pi_context HWM2 2

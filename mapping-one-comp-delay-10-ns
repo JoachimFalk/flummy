@@ -1,4 +1,4 @@
-component: HWM1 FCFS
+component: HWM1 RR
 
 sim_mod.h_hca.qpc_manager HWM1 10
 sim_mod.h_hca.pi_context HWM1 10
@@ -18,9 +18,9 @@ sim_mod.h_hca.h_mstore HWM1 10
 sim_mod.h_hca.h_mfetch HWM1 10
 sim_mod.h_hca.h_send_port HWM1 10
 sim_mod.h_hca.h_recv_port HWM1 10
-sim_mod.h_hca2fifo HWM1 10
-sim_mod.h_fifo2hca HWM1 10
-sim_mod.h_libhca HWM1 10
-sim_mod.h_libhca_writer HWM1 10
+sim_mod.h_hca2fifo HWM1 0
+sim_mod.h_fifo2hca HWM1 0
+sim_mod.h_libhca HWM1 0
+sim_mod.h_libhca_writer HWM1 0
 sim_mod.h_hca.h_aethgen HWM1 10
 sim_mod.h_hca.h_aethchk HWM1 10
