@@ -6,31 +6,32 @@
 #include <map.h>
 #include <deque.h>
 
+namespace SystemC_VPC{
+  class Component;
 
-class Component;
-
-class SchedulerProxy : public sc_module{
- public:
+  class SchedulerProxy : public sc_module{
+  public:
   
-  SC_CTOR(SchedulerProxy){
-    SC_THREAD(schedule_thread);
-  }
-  sc_event notify_scheduler;
+    SC_CTOR(SchedulerProxy){
+      SC_THREAD(schedule_thread);
+    }
+    sc_event notify_scheduler;
 
   
-  sc_event& getNotifyEvent();
-  void registerComponent(Component *comp);
-  action_struct* getNextNewCommand(int pid);
-  void setScheduler(const char *schedulername);
-  void schedule_thread();
+    sc_event& getNotifyEvent();
+    void registerComponent(Component *comp);
+    action_struct* getNextNewCommand(int pid);
+    void setScheduler(const char *schedulername);
+    void schedule_thread();
   
-  virtual ~SchedulerProxy();
- protected:
+    virtual ~SchedulerProxy();
+  protected:
   
-  map<int,action_struct> *open_commands;
-  map<int,p_struct> ready_tasks,running_tasks;
-  Component *component;
-  Scheduler *scheduler;
+    map<int,action_struct> *open_commands;
+    map<int,p_struct> ready_tasks,running_tasks;
+    Component *component;
+    Scheduler *scheduler;
 
-};
+  };
+}
 #endif
