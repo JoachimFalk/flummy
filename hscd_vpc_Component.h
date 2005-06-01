@@ -29,10 +29,16 @@ namespace SystemC_VPC{
   /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).
    * 
-   * An application using this Framework should call the <compute>() Funktion.
+   * An application using this Framework should call the AbstractComponent::compute(const char *) Funktion.
    */
   class AbstractComponent{
   public:
+
+    /**
+     * \brief Simulate an execution on this "Virtual Component".
+     *
+     * While this simulation is running SystemC simulation time is consumed.
+     */
     virtual void compute( const char *name )=0;
     //    virtual void compute(int iprocess)=0;
     virtual ~AbstractComponent(){};
@@ -40,7 +46,9 @@ namespace SystemC_VPC{
 
   /**
    * \brief An implementation of AbstractComponent.
-   * An event based kommunikation to an Scheduler is realised by using the SchedulerProxy.
+   * 
+   * This is an "Virtual Component" used to simulate execution time and scheduling (also preemptive scheduling).
+   * An event based communication to a Scheduler is realised, using the SchedulerProxy as counterpart.
    */
   class Component : public AbstractComponent{
   public:
@@ -53,7 +61,7 @@ namespace SystemC_VPC{
     virtual ~Component();
     virtual void informAboutMapping(string component);
 
-  protected:
+  private:
     void compute(p_struct actualTask);
     map<string,sc_signal<trace_value>*> trace_map_by_name;
     map<int,p_struct>      new_tasks;
