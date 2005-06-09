@@ -72,5 +72,13 @@ namespace SystemC_VPC{
     //  int id;
     char name [VPC_MAX_STRING_LENGTH];
   };
+  class FallbackComponent : public AbstractComponent{
+  public:
+    virtual void compute( const char *name ){}
+    FallbackComponent(const char *name,const char *schedulername){}
+    virtual ~FallbackComponent(){}
+  private:
+    //char name [VPC_MAX_STRING_LENGTH];
+  };
 }
 #endif

@@ -27,10 +27,10 @@ namespace SystemC_VPC{
   private:
     static std::auto_ptr<Director> singleton; 
     Director();
-    map<string,Component*> component_map_by_name;
-    map<int,Component*> component_map_by_pid;
-    map<string,Component*> mapping_map_by_name;
-    map<int,Component*> mapping_map_by_pid;
+    map<string,AbstractComponent*> component_map_by_name;
+    map<int,AbstractComponent*> component_map_by_pid;
+    map<string,AbstractComponent*> mapping_map_by_name;
+    map<int,AbstractComponent*> mapping_map_by_pid;
     map<string,p_struct> p_struct_map_by_name;
     map<int,p_struct> p_struct_map_by_pid;
 

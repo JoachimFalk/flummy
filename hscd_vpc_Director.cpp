@@ -78,17 +78,17 @@ namespace SystemC_VPC{
 	if(0==strcmp(module,"component:")){
 	  //eine Komponente
 	  fscanf(fconffile,"%s %s",component,scheduler);
-	  component_map_by_name.insert(pair<string,Component*>(component,new Component(component,scheduler)));
+	  component_map_by_name.insert(pair<string,AbstractComponent*>(component,new Component(component,scheduler)));
 	  //cerr << "comp " << module << component << scheduler<<endl;
 	}else{
 	  //eine Abbildung: process -> Komponente
 	  fscanf(fconffile,"%s %lf",component,&delay);
 	  assert(component_map_by_name.count(component)==1);//Component not in conf-file!
-	  map<string,Component*>::iterator iter;
+	  map<string,AbstractComponent*>::iterator iter;
 	  iter=component_map_by_name.find(component);
-	  mapping_map_by_name.insert(pair<string,Component*>(module,iter->second));
+	  mapping_map_by_name.insert(pair<string,AbstractComponent*>(module,iter->second));
 	  //cerr << "mapping " << module << component << delay<<endl;
-	  iter->second->informAboutMapping(module);
+	  ((Component*)iter->second)->informAboutMapping(module);
 	  p_struct p;
 	  p.name=module;
 	  p.priority=p_struct_map_by_name.size();
@@ -102,9 +102,9 @@ namespace SystemC_VPC{
 	  
       }
     }else{
-      Component *fall=new Component("Fallback-Component","FCFS");
-      component_map_by_name.insert(pair<string,Component*>("Fallback-Component",fall));
-      mapping_map_by_name.insert(pair<string,Component*>("Fallback-Component",fall));
+      FallbackComponent *fall=new FallbackComponent("Fallback-Component","FCFS");
+      component_map_by_name.insert(pair<string,AbstractComponent*>("Fallback-Component",fall));
+      mapping_map_by_name.insert(pair<string,AbstractComponent*>("Fallback-Component",fall));
       
 
       
