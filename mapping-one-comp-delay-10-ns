@@ -1,4 +1,6 @@
 component: HWM1 RR
+component: TIMER FCFS
+sim_mod.h_hca.h_timer	 	TIMER 1000
 
 sim_mod.h_hca.qpc_manager HWM1 10
 sim_mod.h_hca.pi_context HWM1 10

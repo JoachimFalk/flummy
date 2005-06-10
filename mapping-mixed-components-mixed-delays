@@ -2,7 +2,8 @@ component: HWM1 FCFS
 component: HWM2 RoundRobin:timeslice-2ns:debug-on
 component: HWM3 RM
 component: HWM4 PS
-
+component: TIMER FCFS
+sim_mod.h_hca.h_timer	 	TIMER 1000
 sim_mod.h_hca.qpc_manager HWM1 4
 sim_mod.h_hca.pi_context HWM2 2
 sim_mod.h_hca.vl_manager HWM3 3

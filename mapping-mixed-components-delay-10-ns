@@ -1,3 +1,4 @@
+component: TIMER FCFS
 component: HWM1 FCFS
 component: HWM2 FCFS
 component: HWM3 RR
@@ -27,3 +28,4 @@ sim_mod.h_libhca HWM1 10
 sim_mod.h_libhca_writer HWM2 10
 sim_mod.h_hca.h_aethgen HWM3 10
 sim_mod.h_hca.h_aethchk HWM4 10
+sim_mod.h_hca.h_timer	 	TIMER 1000
