@@ -63,6 +63,8 @@ namespace SystemC_VPC{
   }
   //AbstractComponent& Director::getResource(int process){}
   Director::Director(){
+
+
     srand(time(NULL));
     FALLBACKMODE=false;
     //  cerr << "-"<< getenv("VPCCONFIG")<< "-"<< endl;
@@ -72,6 +74,7 @@ namespace SystemC_VPC{
     if(!fconffile)FALLBACKMODE=true;
     char module[VPC_MAX_STRING_LENGTH],component[VPC_MAX_STRING_LENGTH],scheduler[VPC_MAX_STRING_LENGTH];
     double delay;
+    int priority;
     if(!FALLBACKMODE){
       while(!feof(fconffile)){
 	fscanf(fconffile,"%s",module);
@@ -82,7 +85,7 @@ namespace SystemC_VPC{
 	  //cerr << "comp " << module << component << scheduler<<endl;
 	}else{
 	  //eine Abbildung: process -> Komponente
-	  fscanf(fconffile,"%s %lf",component,&delay);
+	  fscanf(fconffile,"%s %lf %i",component,&delay,&priority);
 	  assert(component_map_by_name.count(component)==1);//Component not in conf-file!
 	  map<string,AbstractComponent*>::iterator iter;
 	  iter=component_map_by_name.find(component);
@@ -91,7 +94,7 @@ namespace SystemC_VPC{
 	  ((Component*)iter->second)->informAboutMapping(module);
 	  p_struct p;
 	  p.name=module;
-	  p.priority=p_struct_map_by_name.size();
+	  p.priority=priority;//p_struct_map_by_name.size();
 	  p.deadline=1000;
 	  p.period=2800.0;
 	  p.pid=p_struct_map_by_name.size();

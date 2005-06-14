@@ -25,11 +25,31 @@ namespace SystemC_VPC{
     sc_event* interupt;
     double delay;
     double remaining_delay;
-    double priority;
+    int priority;
     double period;
     double deadline;
 
   }p_struct;
+
+
+  struct p_queue_entry{
+    int fifo_order;  // sekundärstrategie
+    p_struct pcb;
+  };
+  struct p_queue_compare{
+    bool operator()(const p_queue_entry& pqe1,
+		    const p_queue_entry& pqe2) const
+    {
+      if (pqe1.pcb.priority > pqe2.pcb.priority)
+	return true;
+      else if(pqe1.pcb.priority == pqe2.pcb.priority)
+	return (pqe1.fifo_order>pqe2.fifo_order);
+      else 
+	return false;
+    }
+    
+  };
+
 
 
   enum action_command { ASSIGN,RESIGN,RETIRE,ADD};
@@ -50,5 +70,8 @@ namespace SystemC_VPC{
 #define READY   'w';
 #define RUNNING 'R';
   //enum trace_value {blocked,ready,running};
-}
+
+
+
+} // namespace SystemC_VPC
 #endif

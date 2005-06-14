@@ -1,0 +1,29 @@
+component:	TIMER	FCFS
+component:	HWM1	FCFS
+component:	HWM2	RoundRobin:timeslice-2ns
+
+sim_mod.h_hca.qpc_manager	HWM1	4	50
+sim_mod.h_hca.pi_context	HWM2	2	50
+sim_mod.h_hca.vl_manager	HWM1	3	50
+sim_mod.h_hca.h_wqm		HWM2	3	50
+sim_mod.h_hca.h_cqm		HWM1	5	50
+sim_mod.h_hca.h_sched		HWM2	4	50
+sim_mod.h_hca.h_transmit_queue	HWM1	2	50
+sim_mod.h_hca.h_receive_queue	HWM2	2	50
+sim_mod.h_hca.h_ack_queue	HWM1	2	50
+sim_mod.h_hca.h_rethgen		HWM2	4	50
+sim_mod.h_hca.h_rethchk		HWM1	2	50
+sim_mod.h_hca.h_bth_grh_gen	HWM2	1	50
+sim_mod.h_hca.h_bth_grh_chk	HWM1	1	50
+sim_mod.h_hca.h_atu		HWM2	6	50
+sim_mod.h_hca.h_mstore		HWM1	5	50
+sim_mod.h_hca.h_mfetch		HWM2	4	50
+sim_mod.h_hca.h_send_port	HWM1	1	50
+sim_mod.h_hca.h_recv_port	HWM2	2	50
+sim_mod.h_hca2fifo		HWM1	2	50
+sim_mod.h_fifo2hca		HWM2	2	50
+sim_mod.h_libhca		HWM1	1	50
+sim_mod.h_libhca_writer		HWM2	3	50
+sim_mod.h_hca.h_aethgen		HWM1	6	50
+sim_mod.h_hca.h_aethchk		HWM2	3	50
+sim_mod.h_hca.h_timer		TIMER	1000	50

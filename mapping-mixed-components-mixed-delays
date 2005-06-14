@@ -1,30 +1,30 @@
-component: HWM1 FCFS
-component: HWM2 RoundRobin:timeslice-2ns:debug-on
-component: HWM3 RM
-component: HWM4 PS
-component: TIMER FCFS
-sim_mod.h_hca.h_timer	 	TIMER 1000
-sim_mod.h_hca.qpc_manager HWM1 4
-sim_mod.h_hca.pi_context HWM2 2
-sim_mod.h_hca.vl_manager HWM3 3
-sim_mod.h_hca.h_wqm HWM4 3
-sim_mod.h_hca.h_cqm HWM1 5
-sim_mod.h_hca.h_sched HWM2 4
-sim_mod.h_hca.h_transmit_queue HWM3 2
-sim_mod.h_hca.h_receive_queue HWM4 2
-sim_mod.h_hca.h_ack_queue HWM1 2
-sim_mod.h_hca.h_rethgen HWM2 4
-sim_mod.h_hca.h_rethchk HWM3 2
-sim_mod.h_hca.h_bth_grh_gen HWM4 1
-sim_mod.h_hca.h_bth_grh_chk HWM1 1
-sim_mod.h_hca.h_atu HWM2 6
-sim_mod.h_hca.h_mstore HWM3 5
-sim_mod.h_hca.h_mfetch HWM4 4
-sim_mod.h_hca.h_send_port HWM1 1
-sim_mod.h_hca.h_recv_port HWM2 2
-sim_mod.h_hca2fifo HWM3 2
-sim_mod.h_fifo2hca HWM4 2
-sim_mod.h_libhca HWM1 1
-sim_mod.h_libhca_writer HWM2 3
-sim_mod.h_hca.h_aethgen HWM3 6
-sim_mod.h_hca.h_aethchk HWM4 3
+component:	HWM1	FCFS
+component:	HWM2	RoundRobin:timeslice-2ns:debug-on
+component:	HWM3	RM
+component:	HWM4	PS
+component:	TIMER	FCFS
+sim_mod.h_hca.h_timer		TIMER	1000	50
+sim_mod.h_hca.qpc_manager	HWM1	4	50
+sim_mod.h_hca.pi_context	HWM2	2	50
+sim_mod.h_hca.vl_manager	HWM3	3	50
+sim_mod.h_hca.h_wqm		HWM4	3	50
+sim_mod.h_hca.h_cqm		HWM1	5	50
+sim_mod.h_hca.h_sched		HWM2	4	50
+sim_mod.h_hca.h_transmit_queue	HWM3	2	50
+sim_mod.h_hca.h_receive_queue	HWM4	2	50
+sim_mod.h_hca.h_ack_queue	HWM1	2	50
+sim_mod.h_hca.h_rethgen		HWM2	4	50
+sim_mod.h_hca.h_rethchk		HWM3	2	50
+sim_mod.h_hca.h_bth_grh_gen	HWM4	1	50
+sim_mod.h_hca.h_bth_grh_chk	HWM1	1	50
+sim_mod.h_hca.h_atu		HWM2	6	50
+sim_mod.h_hca.h_mstore		HWM3	5	50
+sim_mod.h_hca.h_mfetch		HWM4	4	50
+sim_mod.h_hca.h_send_port	HWM1	1	50
+sim_mod.h_hca.h_recv_port	HWM2	2	50
+sim_mod.h_hca2fifo		HWM3	2	50
+sim_mod.h_fifo2hca		HWM4	2	50
+sim_mod.h_libhca		HWM1	1	50
+sim_mod.h_libhca_writer		HWM2	3	50
+sim_mod.h_hca.h_aethgen		HWM3	6	50
+sim_mod.h_hca.h_aethchk		HWM4	3	50

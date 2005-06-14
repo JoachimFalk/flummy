@@ -20,7 +20,6 @@
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_Director.h"
 
-//char* AbstractComponent::NAMES[3]={"RISC1","RISC2","RISC3"};
 namespace SystemC_VPC{
   void Component::compute( const char *name ) { 
     p_struct  actualTask = Director::getInstance().getProcessControlBlock(name);
@@ -43,10 +42,9 @@ namespace SystemC_VPC{
   }
 
   /*void Component::compute(int process){
-/////////
-p_struct actualTask = Director::getInstance().getProcessControlBlock(process);
-compute(actualTask);
-}*/
+    p_struct actualTask = Director::getInstance().getProcessControlBlock(process);
+    compute(actualTask);
+    }*/
   void Component::compute(p_struct actualTask){
     sc_event interupt;
     action_struct *cmd;

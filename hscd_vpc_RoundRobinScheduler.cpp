@@ -60,13 +60,13 @@ namespace SystemC_VPC{
     time=sc_time(TIMESLICE,SC_NS);
     return 1;
   }
-  void RoundRobinScheduler::addedNewTask(int pid){
-    rr_fifo.push_back(pid);
+  void RoundRobinScheduler::addedNewTask(p_struct pcb){
+    rr_fifo.push_back(pcb.pid);
   }
-  void RoundRobinScheduler::removedTask(int pid){
+  void RoundRobinScheduler::removedTask(p_struct pcb){
     deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
-      if( *iter == pid){
+      if( *iter == pcb.pid){
 	rr_fifo.erase(iter);
 	break;
       }

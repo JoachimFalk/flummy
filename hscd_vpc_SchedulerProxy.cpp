@@ -1,6 +1,7 @@
 #include "hscd_vpc_SchedulerProxy.h"
 #include "hscd_vpc_FCFSScheduler.h"
 #include "hscd_vpc_RoundRobinScheduler.h"
+#include "hscd_vpc_PriorityScheduler.h"
 #include "hscd_vpc_Director.h"
 #include "hscd_vpc_Component.h"
 namespace SystemC_VPC{
@@ -15,8 +16,8 @@ namespace SystemC_VPC{
       scheduler=new RoundRobinScheduler((const char*)schedulername);
       //scheduler=new FCFSScheduler();
     }else if(0==strncmp(schedulername,STR_PRIORITYSCHEDULER,strlen(STR_PRIORITYSCHEDULER)) || 0==strncmp(schedulername,STR_PS,strlen(STR_PS))){
-      //scheduler=new PriorityScheduler(this->name);
-      scheduler=new FCFSScheduler();
+      scheduler=new PriorityScheduler((const char*)schedulername);
+      //scheduler=new FCFSScheduler();
     }else if(0==strncmp(schedulername,STR_RATEMONOTONIC,strlen(STR_RATEMONOTONIC)) || 0==strncmp(schedulername,STR_RM,strlen(STR_RM))){
       //scheduler=new RateMonotonicScheduler(this->name);
       scheduler=new FCFSScheduler();
@@ -49,20 +50,22 @@ namespace SystemC_VPC{
 	  //	cerr << "add" <<endl;
 	  ready_tasks[cmd.target_pid]=(*newTasks)[cmd.target_pid]; // übername in ready liste
 	  newTasks->erase(cmd.target_pid);
-	  scheduler->addedNewTask(cmd.target_pid);
+	  scheduler->addedNewTask(ready_tasks[cmd.target_pid]);
 	}
 	else if(cmd.command==RETIRE){    // aus allen listen entfernen!
 	  //  cerr << "remove" <<endl;
 
 	  if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
 	    if(running_tasks.find(cmd.target_pid)!=running_tasks.end()){ 
+	      p_struct pcb_to_remove=running_tasks[cmd.target_pid];
 	      running_tasks.erase(cmd.target_pid);
-	      scheduler->removedTask(cmd.target_pid);
+	      scheduler->removedTask(pcb_to_remove);
 	
 	    }
 	  }else{
+	    p_struct pcb_to_remove=ready_tasks[cmd.target_pid];
 	    ready_tasks.erase(cmd.target_pid);
-	    scheduler->removedTask(cmd.target_pid);
+	    scheduler->removedTask(pcb_to_remove);
 	
 	  }
 	} //else if(...)
