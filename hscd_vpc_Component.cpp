@@ -21,7 +21,7 @@
 #include "hscd_vpc_Director.h"
 
 namespace SystemC_VPC{
-  void Component::compute( const char *name ) { 
+  void Component::compute( const char *name, sc_event *end) { 
     p_struct  actualTask = Director::getInstance().getProcessControlBlock(name);
     sc_signal<trace_value> *trace_signal=0;
     if(1==trace_map_by_name.count(actualTask.name)){
@@ -41,7 +41,7 @@ namespace SystemC_VPC{
     }
   }
 
-  /*void Component::compute(int process){
+  /*void Component::compute(int process, sc_event *end){
     p_struct actualTask = Director::getInstance().getProcessControlBlock(process);
     compute(actualTask);
     }*/
@@ -146,12 +146,7 @@ namespace SystemC_VPC{
   }
 
   Component::~Component(){
-    cerr << "~Component() " << endl;
-
-    // cout << "<kill component=\"" << this->name << "\"/>" << endl;
     sc_close_vcd_trace_file(this->trace);
-    //  delete open_commands;
-    //  delete new_tasks;
     delete schedulerproxy;
   }
   void Component::informAboutMapping(string module){
@@ -168,68 +163,4 @@ namespace SystemC_VPC{
   map<int,p_struct> &Component::getNewTasks() {
     return new_tasks;
   }
-
-  /*  old stuff
-      Component::Component(int id){
-      cerr << "Component(int) " << endl;
-
-      //  open_commands=new vector<action_struct>;
-      //  new_tasks=new map<int,p_struct>;
-      mutex=0;
-      //  this->name= AbstractComponent::NAMES[id];
-      this->id=id;
-      // cerr << "Scheduler: " << id << endl;
-      if(id==0){
-      scheduler=new PriorityScheduler(this->name);
-      }else{
-      if(id==1){
-      scheduler=new RateMonotonicScheduler(this->name);
-      }else{
-      scheduler=new RoundRobinScheduler(this->name);
-      }
-      }
-
-      schedulerproxy->registerComponent(this);
-      this->trace = sc_create_vcd_trace_file (this->name); ///////////////////////
-      int i;
-      for(i=0;i<27;i++){
-      //    sc_trace(this->trace,trace_signal[i],Director::PROCESS[i]);
-      }
-      }
-      Component::Component(const Component &comp){
-      cerr << "Component(const Component) " << endl;
-      scheduler=new PriorityScheduler(this->name);
-
-      }
-      Component::Component(){
-      cerr << "Component() " << endl;
-      scheduler=new PriorityScheduler(this->name);
-
-      }
-
-      Component::Component(const char *name,int id){
-      cerr << "Component(const char,int) " << endl;
-      strcpy(this->name,name);
-      this->id=id;
-      if(id==0){
-      scheduler=new PriorityScheduler(this->name);
-      }else{
-      if(id==1){
-      scheduler=new RateMonotonicScheduler(this->name);
-      }else{
-      scheduler=new RoundRobinScheduler(this->name);
-      }
-      }
-
-      schedulerproxy->registerComponent(this);
-      this->trace = sc_create_vcd_trace_file (this->name); ///////////////////////
-
-      int i;
-      for(i=0;i<23;i++){
-      //    sc_trace(this->trace,trace_signal[i],Director::PROCESS[i]);
-      }
-      }
-
-
-  */
 }

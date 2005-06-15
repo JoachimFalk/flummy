@@ -39,7 +39,7 @@ namespace SystemC_VPC{
      *
      * While this simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute( const char *name )=0;
+    virtual void compute( const char *name, sc_event *end=NULL)=0;
     //    virtual void compute(int iprocess)=0;
     virtual ~AbstractComponent(){};
   };
@@ -54,8 +54,8 @@ namespace SystemC_VPC{
   public:
     map<int,p_struct> &getNewTasks();
     vector<action_struct> &getNewCommands();
-    virtual void compute( const char *name );
-    //  virtual void compute(int process);
+    virtual void compute( const char *name, sc_event *end=NULL);
+    //  virtual void compute(int process, sc_event *end=NULL);
     Component();
     Component(const char *name,const char *schedulername);
     virtual ~Component();
@@ -74,11 +74,10 @@ namespace SystemC_VPC{
   };
   class FallbackComponent : public AbstractComponent{
   public:
-    virtual void compute( const char *name ){}
+    virtual void compute( const char *name, sc_event *end=NULL){}
     FallbackComponent(const char *name,const char *schedulername){}
     virtual ~FallbackComponent(){}
   private:
-    //char name [VPC_MAX_STRING_LENGTH];
   };
 }
 #endif
