@@ -5,7 +5,17 @@
 #include <map.h>
 
 namespace SystemC_VPC{
+  enum scheduling_decision {ONLY_ASSIGN // neuer Task keine alten
+			    ,PREEMPT    // neuer Task verdrängt alten
+			    ,RESIGNED   // alter Task beendet, kein neuer
+			    ,NOCHANGE}; //keine änderung 
   class Component;
+
+  /**
+   * \brief A callback class called from SchedulerProxy to do Scheduling.
+   *
+   * Main part is virtual funktion scheduling_decision schedulingDecision(int&, int&, map<int,p_struct>, map<int,p_struct>)
+   */
   class Scheduler{
   public:
     virtual ~Scheduler() {};
@@ -15,9 +25,28 @@ namespace SystemC_VPC{
      * 
      */
     virtual int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks)=0;
+
+    /**
+     * \brief Inform Scheduler about new tasks.
+     */
     virtual void addedNewTask(p_struct pcb)=0;
+    
+    /**
+     * \brief Inform Scheduler about removed tasks.
+     */
     virtual void removedTask(p_struct pcb)=0;
-    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks)=0;
+
+    /**
+     * \brief Call the Scheduler to do a scheduling decision.
+     *
+     * The tasks to ressign and to assign have to be calculated. 
+     * \param [out] task_to_resign The task that have to be resigned.
+     * \param [out] task_to_assign The task that have to be assigned.
+     * \param [in] ready_tasks A map of ready tasks! SchedulerProxy knowes this map.
+     * \param [in] running_tasks A map of running tasks! Usualy only one! SchedulerProxy knowes this map.
+     * \ret Returns a scheduling_decision enum. So SchedulerProxy knows what he has to do.
+     */
+    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks)=0;
 
   };
 }

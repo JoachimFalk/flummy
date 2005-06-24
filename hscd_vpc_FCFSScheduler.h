@@ -21,7 +21,7 @@ namespace SystemC_VPC{
     void addedNewTask(p_struct pcb);
     void removedTask(p_struct pcb);
     sc_event& getNotifyEvent();
-    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks);
+    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks);
   protected:
 
     deque<int> fcfs_fifo;

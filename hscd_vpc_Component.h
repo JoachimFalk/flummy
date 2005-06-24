@@ -70,7 +70,7 @@ namespace SystemC_VPC{
     vector<action_struct> &getNewCommands();
     
     /**
-     * \brief One implementation of AbstractComponent::compute(const char *, sc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, sc_event).
      */
     virtual void compute( const char *name, sc_event *end=NULL);
     //  virtual void compute(int process, sc_event *end=NULL);
@@ -80,14 +80,15 @@ namespace SystemC_VPC{
      */
     Component(const char *name,const char *schedulername);
     virtual ~Component();
+
     /**
      * \brief Used to create the Tracefiles.
      *
      * To create a vcd-trace-file in SystemC all the signals to 
      * trace have to be in a "global" scope. The signals have to 
-     * be created in elaboration phase.
+     * be created in elaboration phase (before first sc_start).
      */
-    virtual void informAboutMapping(string component);
+    virtual void informAboutMapping(string module);
 
   private:
     void compute(p_struct actualTask);
@@ -102,7 +103,17 @@ namespace SystemC_VPC{
   };
   class FallbackComponent : public AbstractComponent{
   public:
+
+    /**
+     * \brief An implementation of AbstractComponent::compute(const char *, sc_event).
+     *
+     * Privides backward compatibility! It does nothing -> No schedling! No delaying!
+     */
     virtual void compute( const char *name, sc_event *end=NULL){}
+
+    /**
+     * \brief A backward compatible implementation of AbstractComponent.
+     */
     FallbackComponent(const char *name,const char *schedulername){}
     virtual ~FallbackComponent(){}
   private:

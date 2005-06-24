@@ -19,7 +19,7 @@ namespace SystemC_VPC{
       }
     }
   }
-  scheduling_decision FCFSScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks){
+  scheduling_decision FCFSScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks){
     if(running_tasks.size()==0){
       if(fcfs_fifo.size()>0){
 	//      cerr << "only_assign" << endl;

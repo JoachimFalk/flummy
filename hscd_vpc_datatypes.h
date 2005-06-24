@@ -40,9 +40,27 @@ namespace SystemC_VPC{
     bool operator()(const p_queue_entry& pqe1,
 		    const p_queue_entry& pqe2) const
     {
-      if (pqe1.pcb.priority > pqe2.pcb.priority)
+      int p1=pqe1.pcb.priority;
+      int p2=pqe2.pcb.priority;
+      if (p1 > p2)
 	return true;
-      else if(pqe1.pcb.priority == pqe2.pcb.priority)
+      else if(p1 == p2)
+	return (pqe1.fifo_order>pqe2.fifo_order);
+      else 
+	return false;
+    }
+    
+  };
+
+  struct rm_queue_compare{
+    bool operator()(const p_queue_entry& pqe1,
+		    const p_queue_entry& pqe2) const
+    {
+      double p1=pqe1.pcb.priority/pqe1.pcb.period;
+      double p2=pqe2.pcb.priority/pqe2.pcb.period;
+      if (p1 > p2)
+	return true;
+      else if(p1 == p2)
 	return (pqe1.fifo_order>pqe2.fifo_order);
       else 
 	return false;
@@ -60,10 +78,7 @@ namespace SystemC_VPC{
   }action_struct;
 
 
-  enum scheduling_decision {ONLY_ASSIGN // neuer Task keine alten
-			    ,PREEMPT    // neuer Task verdrängt alten
-			    ,RESIGNED   // alter Task beendet, kein neuer
-			    ,NOCHANGE}; //keine änderung 
+
   typedef char trace_value;
 
 #define BLOCKED 'b';

@@ -1,35 +1,35 @@
-
 #ifndef HSCD_VPC_RATEMONOTONICSCHEDULER_H
 #define HSCD_VPC_RATEMONOTONICSCHEDULER_H
 #include "systemc.h"
 #include "hscd_vpc_Scheduler.h"
 #include "hscd_vpc_datatypes.h"
 #include <map.h>
+#include <queue.h>
 #include <vector.h>
+
 namespace SystemC_VPC{
   class Component;
 
-  class RateMonotonicScheduler : public Scheduler, public sc_module{
+  class RateMonotonicScheduler : public Scheduler{
   public:
-    SC_CTOR(RateMonotonicScheduler){
-      SC_THREAD(schedule_thread);
-      //   cerr << "Scheduler: dms"<<endl;
+
+    RateMonotonicScheduler(){
+      order_counter=0;
     }
-    //  map<int,p_struct> getReadyTasks();
-    // map<int,p_struct> getRunningTasks();
-    void registerComponent(Component *comp);
+    RateMonotonicScheduler(const char *schedulername);
+    virtual ~RateMonotonicScheduler(){}
+    int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks);
+    void addedNewTask(p_struct pcb);
+    void removedTask(p_struct pcb);
     sc_event& getNotifyEvent();
-    sc_event notify_scheduler;
-
-
-    void schedule_thread();
-    action_struct* getNextNewCommand(int pid);
-
-    virtual ~RateMonotonicScheduler();
+    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks);
+    void setProperty(char* key, char* value);
   protected:
-    map<int,action_struct> *open_commands;
-    map<int,p_struct> ready_tasks,running_tasks;
-    Component *component;
+    int order_counter;
+    rm_queue_compare comp;
+    priority_queue<p_queue_entry,vector<p_queue_entry>,rm_queue_compare> pqueue;
+
+
   };
 }
 #endif

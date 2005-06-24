@@ -59,7 +59,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  scheduling_decision PriorityScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks){
+  scheduling_decision PriorityScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks){
     scheduling_decision ret_decision=ONLY_ASSIGN;
     if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
     p_queue_entry prior_ready=pqueue.top();  // höchste priorität der ready tasks
@@ -68,7 +68,7 @@ namespace SystemC_VPC{
 
 
     if(running_tasks.size()!=0){  // läuft noch einer ?
-      map<int,p_struct>::iterator iter;
+      map<int,p_struct>::const_iterator iter;
       iter=running_tasks.begin();
       p_struct pcb=iter->second;
       if(pcb.priority <= d_prior_ready){             //laufender mit höherer oder gleicher priorität ->

@@ -78,12 +78,9 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_SchedulerProxy.cpp		\
 	hscd_vpc_PriorityScheduler.cpp		\
 	hscd_vpc_RoundRobinScheduler.cpp	\
-	hscd_vpc_FCFSScheduler.cpp
+	hscd_vpc_FCFSScheduler.cpp		\
+	hscd_vpc_RateMonotonicScheduler.cpp
 
-#	hscd_vpc_RateMonotonicScheduler.cpp	
-#	hscd_vpc_TestScheduler.cpp		\
-#	hscd_vpc_SpecialTestScheduler.cpp	\
-#	hscd_vpc_SimpleScheduler.cpp	
 
 # Need pkinclude files in include/$(pkgincludeprefix)
 $(libsystemcvpc_la_OBJECTS) $(libsystemcvpc_CH_LTOBJS): include

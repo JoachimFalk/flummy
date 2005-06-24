@@ -72,7 +72,7 @@ namespace SystemC_VPC{
       }
     }
   }
-  scheduling_decision RoundRobinScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign, map<int,p_struct> &ready_tasks, map<int,p_struct> &running_tasks){
+  scheduling_decision RoundRobinScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks){
     /*
       if(running_tasks.size()==0){
       if(rr_fifo.size()>0){
@@ -92,7 +92,7 @@ namespace SystemC_VPC{
 	rr_fifo.pop_front();
 	ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "RETIRE") -> kein preemption!
 	if(running_tasks.size()!=0){  // alten Task entfernen
-	  map<int,p_struct>::iterator iter;
+	  map<int,p_struct>::const_iterator iter;
 	  iter=running_tasks.begin();
 	  p_struct pcb=iter->second;
 	  task_to_resign=pcb.pid;
