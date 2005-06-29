@@ -75,4 +75,4 @@ sim_mod.h_fifo2hca			HWM2	0	50
 sim_mod.h_libhca			HWM1	0	50
 sim_mod.h_hca.h_aethgen			HWM1	6	50
 sim_mod.h_hca.h_aethchk			HWM2	3	50
-sim_mod.h_hca.h_timer			TIMER1	1000	50
+sim_mod.h_hca.h_timer			TIMER1	250	50
