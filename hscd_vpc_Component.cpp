@@ -23,6 +23,8 @@
 namespace SystemC_VPC{
   void Component::compute( const char *name, sc_event *end) { 
     p_struct  actualTask = Director::getInstance().getProcessControlBlock(name);
+
+#ifndef MODES_EVALUATOR
     sc_signal<trace_value> *trace_signal=0;
     if(1==trace_map_by_name.count(actualTask.name)){
       map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask.name);
@@ -30,15 +32,21 @@ namespace SystemC_VPC{
     }
     if (trace_signal != NULL ) {
       *trace_signal = READY;
-      //std::cerr << "VPC says: PG node " << name << " start execution " << sc_simulation_time() << " on: " << this->name << std::endl;
     }
+#endif //MODES_EVALUATOR
+
+    //cerr<<"VPC says: PG node "<<name<<" start execution "<<sc_simulation_time()<<" on: "<<this->name<<std::endl;
     //wait((80.0*rand()/(RAND_MAX+1.0)), SC_NS);
     //wait(10, SC_NS);
     compute(actualTask);
+
+#ifndef MODES_EVALUATOR
     if (trace_signal != NULL ) {
       *trace_signal = BLOCKED;
-      // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
     }
+#endif //MODES_EVALUATOR
+
+      // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
   }
 
   /*void Component::compute(int process, sc_event *end){
@@ -52,11 +60,14 @@ namespace SystemC_VPC{
     double rest_of_delay;
     bool task_is_running=false;
     int process=actualTask.pid;
+
+#ifndef MODES_EVALUATOR
     sc_signal<trace_value> *trace_signal=NULL;
     if(1==trace_map_by_name.count(actualTask.name)){
       map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask.name);
       trace_signal=(iter->second);
     }
+#endif //MODES_EVALUATOR
 
 
     actualTask.interupt = &interupt; 
@@ -72,11 +83,19 @@ namespace SystemC_VPC{
     while(1){
       if(task_is_running){
 	last_delta_start_time=sc_simulation_time();
+
+#ifndef MODES_EVALUATOR
 	if(trace_signal!=0)*trace_signal=RUNNING;     
+#endif //MODES_EVALUATOR
+
 	//   cout << actualTask.name << " is running! "<< sc_simulation_time() << endl; 
 	wait(rest_of_delay,SC_NS,*actualTask.interupt);
 	//cout << actualTask.name << " is stoped! "<< sc_simulation_time() << endl; 
+
+#ifndef MODES_EVALUATOR
 	if(trace_signal!=0)*trace_signal=READY;
+#endif //MODES_EVALUATOR
+
 	rest_of_delay-=sc_simulation_time()-last_delta_start_time;
 	if(rest_of_delay==0){ // Process beim Scheduler abmelden
 	  cmd=new action_struct;
@@ -127,6 +146,8 @@ namespace SystemC_VPC{
     schedulerproxy=new SchedulerProxy(this->name);
     schedulerproxy->setScheduler(schedulername);
     schedulerproxy->registerComponent(this);
+
+#ifndef MODES_EVALUATOR
     string tracefilename=this->name;
     char tracefilechar[VPC_MAX_STRING_LENGTH];
     char* traceprefix= getenv("VPCTRACEFILEPREFIX");
@@ -135,25 +156,30 @@ namespace SystemC_VPC{
     }
     strcpy(tracefilechar,tracefilename.c_str());
     //cerr << "Trace: "<<tracefilechar <<endl;
-    this->trace =sc_create_vcd_trace_file (tracefilechar);//this->name); ///////////////////////
+    this->trace =sc_create_vcd_trace_file (tracefilechar);
     ((vcd_trace_file*)this->trace)->sc_set_vcd_time_unit(-9);
-    //    this->trace_wif = sc_create_wif_trace_file (tracefilechar);//this->name); ///////////////////////
+    //    this->trace_wif = sc_create_wif_trace_file (tracefilechar);
+#endif //MODES_EVALUATOR
 
-    int i;
-    for(i=0;i<23;i++){
-      //    sc_trace(this->trace,trace_signal[i],Director::PROCESS[i]);
-    }
   }
 
   Component::~Component(){
+
+#ifndef MODES_EVALUATOR
     sc_close_vcd_trace_file(this->trace);
+#endif //MODES_EVALUATOR
     delete schedulerproxy;
+
   }
   void Component::informAboutMapping(string module){
+
+#ifndef MODES_EVALUATOR
     sc_signal<trace_value> *newsignal=new sc_signal<trace_value>();
     trace_map_by_name.insert(pair<string,sc_signal<trace_value>*>(module,newsignal));
     sc_trace(this->trace,*newsignal,module.c_str());
     //    sc_trace(this->trace_wif,*newsignal,module.c_str());
+#endif //MODES_EVALUATOR
+
   }
 
   vector<action_struct> &Component::getNewCommands() {

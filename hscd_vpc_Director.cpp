@@ -81,12 +81,14 @@ namespace SystemC_VPC{
     }
   }
   Director::~Director(){
-     map<string,AbstractComponent*>::iterator it = component_map_by_name.begin();
+    //    cerr << "~Director()"<<endl;
+    
+    map<string,AbstractComponent*>::iterator it = component_map_by_name.begin();
     while(it != component_map_by_name.end()){
       delete it->second;
       it++;
     }
-
+    
   }
 
   p_struct& Director::getProcessControlBlock( const char *name ){
