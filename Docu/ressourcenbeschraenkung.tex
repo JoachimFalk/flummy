@@ -49,7 +49,9 @@ eingesetzt werden.
 \includegraphics[width=12cm]{ib_spec_graph}
 \caption{Spezifikationsgraph: Prozesse aus dem Problemgraphen ($G_P$)
 werden mittels Abbildungskanten ($E_M$) auf die Ressourcen des
-Architekturgraphen ($G_A$) abgebildet.}
+Architekturgraphen ($G_A$) abgebildet. Eine Abbildung zwischen 
+Problemgraph und Architekturgraph kennzeichnet die Ausführbarkeit
+eines Prozesses $v_i \in V_P$ auf einer Ressource $v_j \in V_A$ dar.}
 \label{fig:ib_spec_graph}
 \end{center}
 \end{figure} 
@@ -80,7 +82,7 @@ Umfang des Simulators explodieren.
 
 
 Alternativ wird ein System zur Simulation durch entsprechend abstraktere Modelle
-dargestellt. Beispiele hierfür sind Petri-Netze\ cite{baumgarten:1990}, 
+dargestellt. Beispiele hierfür sind Petri-Netze \cite{baumgarten:1990}, 
 Zustandsautomaten \cite{harel:1987} oder der
 oben vorgestellte Problemgraph. Ein solches Modell beschreibt eine Komposition
 von Prozessen. Da Implementierungsdetails der Prozesse dabei nicht
@@ -111,10 +113,11 @@ Ablaufplanungsstrategien, die simuliert werden müssen, gekennzeichnet.
 \end{center}
 \end{figure}
 
-Für die Simulation des InfiniBand-HCA wurde dieses in 17 separate Prozesse 
+Für die Simulation des InfiniBand-HCA wurde dieses in 20 separate Prozesse 
 zerlegt (vgl. Abbildung \ref{fig:hca_func_units_lib} auf Seite 
-\pageref{fig:hca_func_units_lib}). Jeder dieser Prozesse
- stellt einen Problemgraphknoten $v \in V_P$dar.
+\pageref{fig:hca_func_units_lib} sowie Abbildung \ref{fig:hca_modules}  
+auf Seite \pageref{fig:hca_modules}). Jeder dieser Prozesse stellt
+einen Problemgraphknoten $v \in V_P$ dar.
 
 Ein objektorientiertes Modell soll die Architektur für die Simulation
   abbilden. Jede Komponente\footnote{Knoten des
@@ -183,7 +186,7 @@ zugewiesen. Die \module{Component} besitzt eine Schnittstelle, die
 Prozess übergibt der Funktion eine eindeutige Identifikation (numerisch
 oder alphanumerisch). Durch den Aufruf von \code{wait} wird die dem Prozess
 zugeordnete Wartezeit abgewartet. Anschließend kehrt die
-\code{compute}-Funktion mit \code{return} zurück und das Problem-Modul kann
+\code{compute}-Funktion mit \code{return} zurück und der Prozess kann
 die Berechnung fertig stellen. 
 
 
@@ -218,7 +221,7 @@ Aktivierung eines Prozesses ist sehr wohl eine andere Bindung möglich.
 
 \subsection{Resourcen-Konfigurationsdatei}\label{resconfig}
 
-Die zu verwendende Allokation und Bindung für eine Simulation wir in Form
+Die zu verwendende Allokation und Bindung für eine Simulation wird in Form
 einer Konfigurationsdatei vorgegeben und soll hier am Beispiel des 
 InfiniBand-HCA vorgestellt werden. Eine Konfiguration besteht aus zwei 
 Teilen, der Allokation gefolgt von der Bindung. Die Allokation wird durch 
@@ -399,7 +402,7 @@ Diese Problem resultiert aus der \emph{verteilten Event-Queue} der getrennten
 Simulatoren. Mögliche Ansätze dieses Problem zu lösen sind:
 \begin{itemize}
 \item Keine Trennung der beiden Simulationen (Gemeisame Event-Queue).
-\item Anpassung des SystemCQuellcodes, um verteilte Event-Queues zu unterstützen.
+\item Anpassung des SystemC Quellcodes, um verteilte Event-Queues zu unterstützen.
 \item Aufgabe der Ereignisorientierten Simulation.
 \end{itemize}
 
@@ -453,7 +456,7 @@ Simulation unabhängig arbeiten, sie bekommt Zeit ``geschenkt''.}
 \end{figure}
 
 In der Implementierung sieht dies wie folgt aus: Auf dem Kanal zwischen den Simulationen
-werden Paket versendet. Diese Pakete bestehen aus einem Header und dem eigentlichen
+werden Pakete versendet. Diese Pakete bestehen aus einem Header und dem eigentlichen
 Datenpaket. Der Header enthält die Größe des Datenpakets und den Typ der Daten. Zur 
 Zeit existieren zwei Typen: 
 \begin{description}
