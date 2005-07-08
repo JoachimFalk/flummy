@@ -65,7 +65,7 @@ Verfahren \cite{lrd:2001}. Für die Simulation des InfiniBand-HCA
 Ressourcenbeschränkung nachgestellt werden kann. Dieses 
 trägt den Namen \emph{Virtual-Processing-Components}-Framework 
 (\emph{VPC}-Framework) und wird im Folgenden erläutert.
-%TODO zitat
+
 
 \section{VPC-Framework}
 
@@ -87,7 +87,7 @@ Zustandsautomaten \cite{harel:1987} oder der
 oben vorgestellte Problemgraph. Ein solches Modell beschreibt eine Komposition
 von Prozessen. Da Implementierungsdetails der Prozesse dabei nicht
 betrachtet werden, ist das Zusammenspiel und Zeitverhalten der Prozesse Gegenstand der
-Simulation. Dabei geht leider der Bezug zur Architektur (z.\,B. Hardwarekomponenten) %%todo
+Simulation. Dabei geht leider der Bezug zur Architektur (z.\,B. Hardwarekomponenten) 
  verloren. 
 
 
@@ -168,7 +168,7 @@ der \code{wait}-Funktion ein mächtiges Konzept zur Zeitmodellierung
 
 
 
-%%%todo
+
 Unterschiedliche \emph{delay}-Zeiten werden wie folgt modelliert 
 (vgl. Abbildung \ref{fig:task-component-compute}):
 \begin{figure}
@@ -219,7 +219,7 @@ steht die Bindung für den aufrufenden Prozess fest. Eine
 und die Fortsetzung auf einer Anderen ist nicht möglich. Bei einer erneuten
 Aktivierung eines Prozesses ist sehr wohl eine andere Bindung möglich. 
 
-\subsection{Resourcen-Konfigurationsdatei}\label{resconfig}
+\subsection{Ressourcen-Konfigurationsdatei}\label{resconfig}
 
 Die zu verwendende Allokation und Bindung für eine Simulation wird in Form
 einer Konfigurationsdatei vorgegeben und soll hier am Beispiel des 
@@ -229,7 +229,7 @@ das Schlüsselwort \code{component:} eingeleitet, gefolgt durch den Namen
 der Komponente und den zu verwendenden Scheduler. Der Scheduler kann dabei
 weitere Parameter enthalten. Eine Bindung setzt sich aus dem Namen des 
 Prozesses, der zu verwendenden Komponente, der Ausführungszeit (in Nanosekunden) und der 
-Priorität\footnote{Wird nur für prioritätsbasietes Scheduling 
+Priorität\footnote{Wird nur für prioritätsbasiertes Scheduling 
 ausgewertet.} des Prozesses zusammen. Als Trennzeichen werden ein oder 
 mehr \emph{Whitespaces} erwartet. Ein Beispiel:\\
 \begin{verbatim}
@@ -242,9 +242,9 @@ sim_mod.h_hca.h_transmit_queue  HWM2 2000 50
 ...
 \end{verbatim}
 In diesem Beispiel werden zwei Komponenten, \emph{HWM1} und \emph{HWM2},
-verwendet. Die Ablaufplannung auf Ressource \emph{HWM1} unterliegt der
+verwendet. Die Ablaufplanung auf Ressource \emph{HWM1} unterliegt der
 \emph{First-Come-First-Serve}-Stra\-te\-gie. Ein \emph{Round-Robin}-Verfahren
-mit einer Zeitscheibe von 200 ns dient als Ablaufplannungsstartegie auf
+mit einer Zeitscheibe von 200 ns dient als Ablaufplanungsstrategie auf
 Komponente \emph{HWM2}. An die Komponente 
 \emph{HWM1} werden die Prozesse \emph{sim\_mod.h\_hca.qpc\_manager}
  und \emph{sim\_mod.h\_hca.h\_send\_port}  gebunden, ihre Ausführungszeiten betragen 4000
@@ -313,15 +313,15 @@ Instanzen der Funktion. Der Sequenzgraph in Abbildung
 Dabei handelt es sich um quasi-parallele Ausführung\footnote{Jede dieser Instanzen
 ist dem Kontext des aufrufenden Problemknoten zugeordnet.}, die Umschaltung erfolgt
 durch das SystemC-Modell. Diese Parallelität  ermöglicht letztendlich die Simulation
-von Ablaufplannungsstrategien. Eine detaillierte Beschreibung bezüglich der
+von Ablaufplanungsstrategien. Eine detaillierte Beschreibung bezüglich der
 Scheduling-Simulation findet sich in \cite{vpc:2005}.
 
-%%todo
+
 
 Der durch die Simulation entstandene Ablaufplan wird aufgezeichnet und 
 kann mit Hilfe von Wave-Form-Viewern visualisiert werden.\footnote{Die 
 Aufzeichnung erfolgt im \emph{VCD}-Format (\emph{Value Change Dump}).}
-Dabei wird für jede Ressource eine Datei ereugt, z.\,B.
+Dabei wird für jede Ressource eine Datei erzeugt, z.\,B.
 \file{HCA1-HWM1.vcd}. Ein Signal, in solch einer Datei, repräsentiert 
 einen Prozess, welcher auf der entsprechenden Ressource gebunden ist. 
 Der Typ des Signals ist \code{char}, wobei die Zeichen 'R', 'w', 'b'
@@ -355,7 +355,7 @@ er\-läut\-ert.
 %%\subsubsection{Ereignisorientierte Simulation}
 Die ereignisorientierte Simulation ist dadurch gekennzeichnet, dass der
 Simulator nur dann in Aktion tritt, wenn eine Änderung (Event) stattgefunden hat. Anstatt
-sich von Zeitschritt $i$ zu Zeitschritt $i+1$ zu hangeln, springt der   %%todo hangeln?????????
+sich von Zeitschritt $i$ zu Zeitschritt $i+1$ zu hangeln, springt der 
 Simulator von einem Event zum (im Zeitverlauf) nächsten Event. Gleichzeitig
 schreitet die simulierte Zeit um diese Differenz voran. Folglich kann die
 Zeitauflösung groß gewählt werden, ohne zusätzliche Aktivierungen des
@@ -376,7 +376,7 @@ Delta-Zyklen möglich. Ein zu häufiges Auftreten von Ereignissen kann die
 Simulation nachteilig beeinflussen. Bei der zeitorientierten Simulation wird
 jeder kleinste Zeitschritt nur einmal bewertet, die Delta-Zyklen der
 ereignisorientierten Simulation machen unter
-Umständen eine mehrfache Betrachtung des gleichen Zeitpunkts notwendig.
+Umständen eine mehrfache Betrachtung des gleichen Zeitpunktes notwendig.
 
 Dieses Simulationskonzept führt dazu das die Zeit nicht Schritt für Schritt
 voranschreitet sondern in verschieden großen Schritten. Bei der Zusammenschaltung der
@@ -402,7 +402,7 @@ ein Datenpaket für den HCA-2, diese kommt dort jedoch in der Vergangenheit an.
 Diese Problem resultiert aus der \emph{verteilten Event-Queue} der getrennten
 Simulatoren. Mögliche Ansätze dieses Problem zu lösen sind:
 \begin{itemize}
-\item Keine Trennung der beiden Simulationen (Gemeisame Event-Queue).
+\item Keine Trennung der beiden Simulationen (Gemeinsame Event-Queue).
 \item Anpassung des SystemC Quellcodes, um verteilte Event-Queues zu unterstützen.
 \item Aufgabe der Ereignisorientierten Simulation.
 \end{itemize}
@@ -413,7 +413,7 @@ zu testen. Eine gemeinsame Simulation würde diese Eigenschaften zerstören.
 
 Eine Anpassung der SystemC-Bibliothek benötigt einen direkten Eingriff in den 
 Quellcode. Dies führt zur Inkompatibilität der InfiniBand-HCA-Simulation mit anderen 
-SystemC-Installationen. Das Kosten-Nutzen-Verhältniss steht dann, auch 
+SystemC-Installationen. Das Kosten-Nutzen-Verhältnis steht dann, auch 
 wegen dem Implementierungsaufwand, in einem nicht tragbaren Verhältnis.
 
 Bleibt als letzte Lösung die Aufgabe der ereignisorientierten 
@@ -439,7 +439,7 @@ Paket bei ihm ankommen muss. Wegen dem Wissen das ihm HCA-1 neue Pakete früheste
 oder zu späteren Zeiten produziert werden können, kann sich der paketlesende Prozess
 bis zu dieser Zeit blockieren. Während dieser Blockade können die anderen Prozesse der 
 Simulation arbeiten. Dies ist damit zu vergleichen, dass die Simulatoren sich gegenseitig 
-Zeit ``schenken''\footnote{Wegen der Verögerung kann garantiert werden, dass eine Simulation
+Zeit ``schenken''\footnote{Wegen der Verzögerung kann garantiert werden, dass eine Simulation
 keine Aktivitäten bei der anderen auslöst.} um zu arbeiten (vgl. 
 Abbildung \ref{fig:zeitfluss}). Da nicht ständig Pakete 
 gesendet werden können, und somit keine Zeit garantiert werden kann, müssen sich die 
@@ -472,13 +472,3 @@ provisorisch ein Zeitstempelpaket versendet und somit der anderen Simulation Zei
 Deadlock zu vermeiden. Weiterhin ist es notwendig das die Simulationen beim Starten sich als
 erstes einen Zeitstempel zusenden, damit die Simulation starten kann.
 
- 
-
-
-
-
-
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "Diplomarbeit"
-%%% End: 
