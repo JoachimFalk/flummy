@@ -20,7 +20,7 @@ Den ausführenden Einheiten (Ressourcen) stehen auszuführende Einheiten
   \emph{Aufgabe} werden in dieser Studie synonym, als Bezeichnung für
   Tätigkeiten, verwendet.}  gegenüber. Notwendigerweise benötigt
 jeder Prozess eine Ressource zur Ausführung. Es besteht jedoch die
-Möglichkeit das ein Prozess auf unterschiedlichen Ressourcen ausgeführt
+Möglichkeit, dass ein Prozess auf unterschiedlichen Ressourcen ausgeführt
 werden könnte. Dieser Zusammenhang ist in Abbildung \ref{fig:ib_spec_graph}
 dargestellt. Die formale Grundlage für diese Modellierungsform ist in den 
 Arbeiten \cite{btt:1998, teich:1997} beschrieben. Folgende Begrifflichkeiten 
@@ -51,7 +51,7 @@ eingesetzt werden.
 werden mittels Abbildungskanten ($E_M$) auf die Ressourcen des
 Architekturgraphen ($G_A$) abgebildet. Eine Abbildung zwischen 
 Problemgraph und Architekturgraph kennzeichnet die Ausführbarkeit
-eines Prozesses $v_i \in V_P$ auf einer Ressource $v_j \in V_A$ dar.}
+eines Prozesses $v_i \in V_P$ auf einer Ressource $v_j \in V_A$.}
 \label{fig:ib_spec_graph}
 \end{center}
 \end{figure} 
@@ -143,19 +143,19 @@ Vir\-tu\-al-Pro\-cess\-ing-Com\-pone\-nts-Frame\-works. Daher folgt auch der Nam
 Frameworks. 
 
 
-Eine Komponente stellt die ausführende Umgebung für ein Prozess dar. Einen
+Eine Komponente stellt die ausführende Umgebung für einen Prozess dar. Einen
 Prozess an eine Ressource zu binden, führt zu unterschiedlichen Kosten oder
 Bewertungen. Für die Systemsimulation sind
 die Ausführungszeiten der Prozesse und somit die Latenz des Problems die
 wichtigste Zielfunktion. Die Bindung eines Tasks an eine Komponente zieht also
 unterschiedliche Ausführungszeiten und somit eine unterschiedliche Latenz nach 
-sich.\footnote{Die einzelnen Ausführungszeiten eines Prozesses muss für alle 
+sich.\footnote{Die einzelnen Ausführungszeiten eines Prozesses müssen für alle 
 zur Ausführung in Frage kommenden Ressourcen bekannt sein, 
 z.\,B. durch Schätzung.}
 
 Die Ausführung eines Prozesses auf einer Ressource wird als eine funktional 
 atomare Operation angesehen. Unterbrechungen durch Multitasking führen nicht
-zu unterschiedlichem Verhalten sondern nur zu verschiedenen Antwortzeiten der 
+zu unterschiedlichem Verhalten, sondern nur zu verschiedenen Antwortzeiten der 
 Prozesse. Dieses \emph{prozessakurate} Simulationskonzept ermöglicht einen geringen 
 Simulationsaufwand. Trotzdem sind die Auswirkungen von Ressourcenbeschränkung 
 und Schedulingstrategien auf die Latenz simulierbar. Dazu müssen den einzelnen 
@@ -213,10 +213,10 @@ dieser Klasse.  Diese Instanz kann über die statische Funktion
 Problem-Moduls stattfinden. Es liegt nahe, diese analog zu der Identifikation
 der \code{compute}-Funktion in der \module{Component} zu gestalten. Der gesamte
 Mechanismus ermöglicht sowohl statische als auch dynamische Bindung der
-Prozesse an die Komponenten. Nachdem Aufruf der \code{getResource} Funktion
+Prozesse an die Komponenten. Nach dem Aufruf der \code{getResource} Funktion
 steht die Bindung für den aufrufenden Prozess fest. Eine
 \emph{Migration} von Prozessen d.\,h., die Unterbrechung eines Prozesses auf einer Ressource
-und die Fortsetzung auf einer Anderen ist nicht möglich. Bei einer erneuten
+und die Fortsetzung auf einer Anderen, ist nicht möglich. Bei einer erneuten
 Aktivierung eines Prozesses ist sehr wohl eine andere Bindung möglich. 
 
 \subsection{Ressourcen-Konfigurationsdatei}\label{resconfig}
@@ -341,7 +341,7 @@ VPC-Framework zeigt Abbildung \ref{fig:trace}
 
 \section{Simulator-Synchronisation}
 \label{sec:Simulator-Synchronisation}
-Die oben vorgestellten Mechanismen dienen dazu jedem Prozess eine 
+Die oben vorgestellten Mechanismen dienen dazu, jedem Prozess eine 
 Aus\-füh\-rungs\-zeit in Abhängigkeit zur Bindung und Schedulingstrategie 
 zuzuordnen. Die Zeitmodellierung verwendet hierbei die 
 Mechanismen von SystemC. Die Auftrennung in zwei 
@@ -378,8 +378,8 @@ jeder kleinste Zeitschritt nur einmal bewertet, die Delta-Zyklen der
 ereignisorientierten Simulation machen unter
 Umständen eine mehrfache Betrachtung des gleichen Zeitpunktes notwendig.
 
-Dieses Simulationskonzept führt dazu das die Zeit nicht Schritt für Schritt
-voranschreitet sondern in verschieden großen Schritten. Bei der Zusammenschaltung der
+Dieses Simulationskonzept führt dazu, dass die Zeit nicht Schritt für Schritt
+voranschreitet, sondern in verschieden großen Schritten. Bei der Zusammenschaltung der
 beiden InfiniBand-HCA-Simulatoren würde jede Simulatorinstanz nur ihre eigene 
 Zeitlinie betrachten. Wenn ein Simulator ein Datenpaket zu einem Zeitpunkt an den
 anderen Simulator schickt ist nicht gewährleistet, dass es dort zum gleichen Zeitpunkt
@@ -392,15 +392,15 @@ starten zum gleichen Zeitpunkt (sowohl gleiche Simulationszeit, als auch gleiche
 Ausführungszeit). Einer der beiden, in diesem Fall HCA-1, soll eine Reihe von Anfragen
 abarbeiten, dabei werden Datenpakete erzeugt und zum HCA-2 gesendet. HCA-2 hat 
 gerade nichts  zu tun und soll erst zu einem späteren Zeitpunkt eine Consumer-Anfrage
-abarbeiten. Die ereignisgesteuerte Simulation sorgt dafür das zu dem 
+abarbeiten. Die ereignisgesteuerte Simulation sorgt dafür, dass zu dem 
 Zeitpunkt vorwärts gesprungen wird, an dem weiter gearbeitet werden kann. Wegen der 
 starken Aktivität im HCA-1 wird die Zeit nur in kleinen Schritten, gefolgt 
 von Simulatoraktivität, weitergeschaltet. Im HCA-2 findet ein großer Sprung
 in die Zukunft statt. Nun erzeugt der HCA-1 nach einigen Berechnungsschritten 
-ein Datenpaket für den HCA-2, diese kommt dort jedoch in der Vergangenheit an.
+ein Datenpaket für den HCA-2, dieses kommt dort jedoch in der Vergangenheit an.
 
-Diese Problem resultiert aus der \emph{verteilten Event-Queue} der getrennten
-Simulatoren. Mögliche Ansätze dieses Problem zu lösen sind:
+Dieses Problem resultiert aus der \emph{verteilten Event-Queue} der getrennten
+Simulatoren. Mögliche Ansätze, dieses Problem zu lösen, sind:
 \begin{itemize}
 \item Keine Trennung der beiden Simulationen (Gemeinsame Event-Queue).
 \item Anpassung des SystemC Quellcodes, um verteilte Event-Queues zu unterstützen.
@@ -408,7 +408,7 @@ Simulatoren. Mögliche Ansätze dieses Problem zu lösen sind:
 \end{itemize}
 
 Die Trennung der Simulation in zwei Instanzen ermöglicht Tests über Rechnergrenzen
-hinweg. Und somit auch die Möglichkeit einen Simulator gegen eine Hardwareimplementierung
+hinweg. Und somit auch die Möglichkeit, einen Simulator gegen eine Hardwareimplementierung
 zu testen. Eine gemeinsame Simulation würde diese Eigenschaften zerstören. 
 
 Eine Anpassung der SystemC-Bibliothek benötigt einen direkten Eingriff in den 
@@ -417,7 +417,7 @@ SystemC-Installationen. Das Kosten-Nutzen-Verhältnis steht dann, auch
 wegen dem Implementierungsaufwand, in einem nicht tragbaren Verhältnis.
 
 Bleibt als letzte Lösung die Aufgabe der ereignisorientierten 
-Simulation: In jeder Simulation läuft ein Prozess der in einem festen 
+Simulation: In jeder Simulation läuft ein Prozess, der in einem festen 
 Simulationszeitintervall die Simulationen synchronisiert. Um das Auseinanderdriften
 zu verhindern, sollte dieses Intervall möglichst klein sein. Eine solche Umsetzung 
 hat nun wiederum den Effekt, dass die Vorteile der ereignisorientierten  
@@ -434,16 +434,16 @@ den InfiniBand-HCA-Simulatoren eine Verzögerungszeit angenommen wird. Diese hier
 Variante funktioniert dann wie folgt: Ein Simulator HCA-1 erzeugt zu einem Zeitpunkt 
 ein Datenpaket, dieses Paket wird mit einem Zeitstempel versehen. Dieser Zeitstempel
 setzt sich aus der Simulationszeit von HCA-1 und der Kanalverzögerung zusammen. Der
-zweite Simulator, HCA-2 empfängt dieses Paket und erkennt zu welchem Zeitpunkt dieses
-Paket bei ihm ankommen muss. Wegen dem Wissen das ihm HCA-1 neue Pakete frühestens zu selben
-oder zu späteren Zeiten produziert werden können, kann sich der paketlesende Prozess
+zweite Simulator, HCA-2, empfängt dieses Paket und erkennt, zu welchem Zeitpunkt dieses
+Paket bei ihm ankommen muss. Aufgrund des Wissens, dass HCA-1 neue Pakete frühestens zum selben
+oder zu späteren Zeiten produzieren könnte, kann sich der paketlesende Prozess
 bis zu dieser Zeit blockieren. Während dieser Blockade können die anderen Prozesse der 
 Simulation arbeiten. Dies ist damit zu vergleichen, dass die Simulatoren sich gegenseitig 
 Zeit ``schenken''\footnote{Wegen der Verzögerung kann garantiert werden, dass eine Simulation
-keine Aktivitäten bei der anderen auslöst.} um zu arbeiten (vgl. 
+keine Aktivitäten bei der anderen auslöst.}, um zu arbeiten (vgl. 
 Abbildung \ref{fig:zeitfluss}). Da nicht ständig Pakete 
-gesendet werden können, und somit keine Zeit garantiert werden kann, müssen sich die 
-Simulationen immer wieder Pseudo-Pakete zusenden um sich gegenseitig Zeit zu 
+gesendet werden können und somit keine Zeit garantiert werden kann, müssen sich die 
+Simulationen immer wieder Pseudo-Pakete zusenden, um sich gegenseitig Zeit zu 
 ``schenken''. 
 
 \begin{figure}
@@ -463,12 +463,12 @@ Zeit existieren zwei Typen:
 \begin{description}
 \item[ib\_packet:] Ein echtes Datenpaket (Bytearray), das zwischen den Simulationen
 ausgetauscht wird.
-\item[timestamp:] Ein Zeitstempelpaket, das dazu dient dem Empfänger Zeit zu garantieren.
+\item[timestamp:] Ein Zeitstempelpaket, welches dazu dient, dem Empfänger Zeit zu garantieren.
 \end{description}
 Vor jedem  ib\_packet wird ein Zeitstempelpaket versendet, welches die Ankunftszeit des
 Paketes spezifiziert. Wird in einem festen Zeitraum kein ib\_packet versendet, so wird
 provisorisch ein Zeitstempelpaket versendet und somit der anderen Simulation Zeit 
-``geschenkt''. Dieser feste Zeitraum muss kleiner gleich der Kanalverzögerung sein um einen
-Deadlock zu vermeiden. Weiterhin ist es notwendig das die Simulationen beim Starten sich als
+``geschenkt''. Dieser feste Zeitraum muss kleiner gleich der Kanalverzögerung sein, um einen
+Deadlock zu vermeiden. Weiterhin ist es notwendig, dass die Simulationen beim Starten sich als
 erstes einen Zeitstempel zusenden, damit die Simulation starten kann.
 
