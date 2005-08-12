@@ -65,15 +65,19 @@ namespace SystemC_VPC{
       {
 	satisfiableCounter=1;
       }
+    virtual ~Literal(){}
   private:
     ///task
     p_struct task;
-    ///activation count
-    int activation;
-    /// activation rule
-    activation_rule rule;
+
     /// opertion in expression
     operator_type operation;
+
+    ///activation count
+    int activation;
+
+    /// activation rule
+    activation_rule rule;
   };
 
     /**
@@ -86,6 +90,7 @@ namespace SystemC_VPC{
     void addTerm(Term *t){
       terms.push_back(t);
     }
+    virtual ~ComplexTerm(){}
   protected:
     vector<Term*> terms;
   };

@@ -90,7 +90,7 @@ namespace SystemC_VPC{
       if(rr_fifo.size()>0){    // neuen Task bestimmen
 	task_to_assign = rr_fifo.front();
 	rr_fifo.pop_front();
-	ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "RETIRE") -> kein preemption!
+	ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
 	if(running_tasks.size()!=0){  // alten Task entfernen
 	  map<int,p_struct*>::const_iterator iter;
 	  iter=running_tasks.begin();
@@ -98,7 +98,7 @@ namespace SystemC_VPC{
 	  task_to_resign=pcb->pid;
 	  rr_fifo.push_back(pcb->pid);
 	  ret_decision= PREEMPT;	
-	}// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "RETIRE")
+	}// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
       }    
     }else{//neuer Task hinzugefügt -> nichts tun 
       //oder alter entfernt    -> neuen setzen
@@ -108,7 +108,7 @@ namespace SystemC_VPC{
 	if(rr_fifo.size()>0){            // ist da auch ein neuer da?
 	  task_to_assign = rr_fifo.front();
 	  rr_fifo.pop_front();
-	  ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "RETIRE") -> kein preemption!
+	  ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
 	}
       }
     

@@ -44,13 +44,13 @@ namespace SystemC_VPC{
       actions=&component->getNewCommands(); // Kommandos
       while(actions->size()){
 	cmd=actions->at(actions->size()-1); // letztes kommando
-	if(cmd.command==ADD){               // was ist zu tun
-	  //	cerr << "add" <<endl;
+	if(cmd.command==READY){               // was ist zu tun
+	  //	cerr << "ready" <<endl;
 	  ready_tasks[cmd.target_pid]=(*newTasks)[cmd.target_pid]; // übername in ready liste
 	  newTasks->erase(cmd.target_pid);
 	  scheduler->addedNewTask(ready_tasks[cmd.target_pid]);
 	}
-	else if(cmd.command==RETIRE){    // aus allen listen entfernen!
+	else if(cmd.command==BLOCK){    // aus allen listen entfernen!
 	  //  cerr << "remove" <<endl;
 
 	  if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 

@@ -28,7 +28,10 @@ namespace SystemC_VPC{
 #define VPC_ERROR __FILE__<<":"<<__LINE__<<"\e[1;31;40mVPC: ERROR> " 
 #define NORMAL "\e[0m"
 #define NENDL "\e[0m"<<endl;
-  
+#ifdef MODES_EVALUATOR
+#define  NO_VCD_TRACES
+#endif // MODES_EVALUATOR
+ 
 
   using std::string;
   
@@ -102,7 +105,7 @@ namespace SystemC_VPC{
 
 
 
-  enum action_command { ASSIGN,RESIGN,RETIRE,ADD};
+  enum action_command { ASSIGN,RESIGN,BLOCK,READY};
 
   typedef struct{
     int target_pid;
@@ -113,9 +116,9 @@ namespace SystemC_VPC{
 
   typedef char trace_value;
 
-#define BLOCKED 'b';
-#define READY   'w';
-#define RUNNING 'R';
+#define S_BLOCKED 'b';
+#define S_READY   'w';
+#define S_RUNNING 'R';
   //enum trace_value {blocked,ready,running};
 
 

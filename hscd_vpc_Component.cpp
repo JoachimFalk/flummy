@@ -24,27 +24,27 @@ namespace SystemC_VPC{
   void Component::compute( const char *name, sc_event *end) { 
     p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
 
-#ifndef MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
     sc_signal<trace_value> *trace_signal=0;
     if(1==trace_map_by_name.count(actualTask->name)){
       map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->name);
       trace_signal=(iter->second);
     }
     if (trace_signal != NULL ) {
-      *trace_signal = READY;
+      *trace_signal = S_READY;
     }
-#endif //MODES_EVALUATOR
+#endif //NO_VCD_TRACES
 
     //cerr<<"VPC says: PG node "<<name<<" start execution "<<sc_simulation_time()<<" on: "<<this->name<<std::endl;
     //wait((80.0*rand()/(RAND_MAX+1.0)), SC_NS);
     //wait(10, SC_NS);
     compute(actualTask);
 
-#ifndef MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
     if (trace_signal != NULL ) {
-      *trace_signal = BLOCKED;
+      *trace_signal = S_BLOCKED;
     }
-#endif //MODES_EVALUATOR
+#endif //NO_VCD_TRACES
 
     // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
   }
@@ -65,13 +65,13 @@ namespace SystemC_VPC{
     Director::getInstance().checkConstraints();
     actualTask->state=aktiv;
 
-#ifndef MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
     sc_signal<trace_value> *trace_signal=NULL;
     if(1==trace_map_by_name.count(actualTask->name)){
       map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->name);
       trace_signal=(iter->second);
     }
-#endif //MODES_EVALUATOR
+#endif //NO_VCD_TRACES
 
 
     actualTask->interupt = &interupt; 
@@ -79,7 +79,7 @@ namespace SystemC_VPC{
     new_tasks[process]=actualTask;
     cmd = new action_struct;
     cmd->target_pid = process;
-    cmd->command = ADD;
+    cmd->command = READY;
     open_commands.push_back(*cmd);               //          add
 
     sc_event& e = schedulerproxy->getNotifyEvent();
@@ -88,23 +88,23 @@ namespace SystemC_VPC{
       if(task_is_running){
 	last_delta_start_time=sc_simulation_time();
 
-#ifndef MODES_EVALUATOR
-	if(trace_signal!=0)*trace_signal=RUNNING;     
-#endif //MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
+	if(trace_signal!=0)*trace_signal=S_RUNNING;     
+#endif //NO_VCD_TRACES
 
 	//   cout << actualTask->name << " is running! "<< sc_simulation_time() << endl; 
 	wait(rest_of_delay,SC_NS,*actualTask->interupt);
 	//cout << actualTask->name << " is stoped! "<< sc_simulation_time() << endl; 
 
-#ifndef MODES_EVALUATOR
-	if(trace_signal!=0)*trace_signal=READY;
-#endif //MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
+	if(trace_signal!=0)*trace_signal=S_READY;
+#endif //NO_VCD_TRACES
 
 	rest_of_delay-=sc_simulation_time()-last_delta_start_time;
 	if(rest_of_delay==0){ // Process beim Scheduler abmelden
 	  cmd=new action_struct;
 	  cmd->target_pid = process;
-	  cmd->command = RETIRE;
+	  cmd->command = BLOCK;
 	  open_commands.push_back(*cmd);
 	  notify(e);    //Muss auf den Scheduler gewarted werden? (Nein)
 	  wait(SC_ZERO_TIME);
@@ -121,12 +121,12 @@ namespace SystemC_VPC{
       cmd=schedulerproxy->getNextNewCommand(process);
       if(NULL != cmd){
 	switch(cmd->command){
-	case RETIRE:
-	  //cerr << "retire" << endl;
+	case BLOCK:
+	  //cerr << "block" << endl;
 	  // Kann nicht sein
 	  break;
-	case ADD: 
-	  //cerr << "add" << endl;
+	case READY: 
+	  //cerr << "ready" << endl;
 	  // Ok aber keine Information, besser: Nichts zu tun!
 	  break;
 	case ASSIGN:
@@ -157,7 +157,7 @@ namespace SystemC_VPC{
     schedulerproxy->setScheduler(schedulername);
     schedulerproxy->registerComponent(this);
 
-#ifndef MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
     string tracefilename=this->name;
     char tracefilechar[VPC_MAX_STRING_LENGTH];
     char* traceprefix= getenv("VPCTRACEFILEPREFIX");
@@ -169,26 +169,26 @@ namespace SystemC_VPC{
     this->trace =sc_create_vcd_trace_file (tracefilechar);
     ((vcd_trace_file*)this->trace)->sc_set_vcd_time_unit(-9);
     //    this->trace_wif = sc_create_wif_trace_file (tracefilechar);
-#endif //MODES_EVALUATOR
+#endif //NO_VCD_TRACES
 
   }
 
   Component::~Component(){
 
-#ifndef MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
     sc_close_vcd_trace_file(this->trace);
-#endif //MODES_EVALUATOR
+#endif //NO_VCD_TRACES
     delete schedulerproxy;
 
   }
   void Component::informAboutMapping(string module){
 
-#ifndef MODES_EVALUATOR
+#ifndef NO_VCD_TRACES
     sc_signal<trace_value> *newsignal=new sc_signal<trace_value>();
     trace_map_by_name.insert(pair<string,sc_signal<trace_value>*>(module,newsignal));
     sc_trace(this->trace,*newsignal,module.c_str());
     //    sc_trace(this->trace_wif,*newsignal,module.c_str());
-#endif //MODES_EVALUATOR
+#endif //NO_VCD_TRACES
 
   }
 

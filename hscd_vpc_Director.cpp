@@ -76,15 +76,15 @@ namespace SystemC_VPC{
       cerr << VPC_ERROR<<"Director> Error initializing Xerces:\n"<<XMLString::transcode(e.getMessage())<<NENDL; // << endl;
     }
     XMLCh *constraintStr  = XMLString::transcode("constraint");
-    XMLCh *excludeStr     = XMLString::transcode("exclude");
-    XMLCh *anytermStr     = XMLString::transcode("anyterm");
+    //    XMLCh *excludeStr     = XMLString::transcode("exclude");
+    //    XMLCh *anytermStr     = XMLString::transcode("anyterm");
     //XMLCh *Str = XMLString::transcode("");
     
     XMLCh *nameAttrStr    = XMLString::transcode("name");
     XMLCh *countAttrStr   = XMLString::transcode("count");
-    XMLCh *processAttrStr = XMLString::transcode("process");
+    //    XMLCh *processAttrStr = XMLString::transcode("process");
     XMLCh *dividerAttrStr = XMLString::transcode("divider");
-    XMLCh *stateAttrStr   = XMLString::transcode("state");
+    //    XMLCh *stateAttrStr   = XMLString::transcode("state");
     
 
     char *vpc_evaluator_prefix = getenv("VPC_EVALUATOR");

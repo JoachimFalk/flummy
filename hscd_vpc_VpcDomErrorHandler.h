@@ -55,6 +55,7 @@ public:
          << ", line " << domError.getLocation()->getLineNumber()
          << ", char " << domError.getLocation()->getColumnNumber()
          << "\n  Message: " << XMLString::transcode( domError.getMessage()) <<NORMAL<<endl;
+    return true;
   }
 
   //void resetErrors();
