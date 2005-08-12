@@ -114,6 +114,11 @@ namespace SystemC_VPC{
 	  fscanf(fconffile,"%s %s",component,scheduler);
 	  component_map_by_name.insert(pair<string,AbstractComponent*>(component,new Component(component,scheduler)));
 	  //cerr << "comp " << module << component << scheduler<<endl;
+	}else if(0==strcmp(module,"threadedcomponent:")){
+	  //eine Komponente
+	  fscanf(fconffile,"%s %s",component,scheduler);
+	  component_map_by_name.insert(pair<string,AbstractComponent*>(component,new ThreadedComponent(component)));
+	  //cerr << "comp " << module << component << scheduler<<endl;
 	}else{
 	  //eine Abbildung: process -> Komponente
 	  fscanf(fconffile,"%s %lf %i",component,&delay,&priority);

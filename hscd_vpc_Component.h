@@ -22,6 +22,7 @@
 //#include "hscd_vpc_SchedulerProxy.h"
 #include <vector.h>
 #include <map.h>
+#include <deque.h>
 namespace SystemC_VPC{
   class SchedulerProxy;
 
@@ -116,6 +117,33 @@ namespace SystemC_VPC{
      */
     FallbackComponent(const char *name,const char *schedulername){}
     virtual ~FallbackComponent(){}
+  private:
+  };
+
+  class ThreadedComponent : public AbstractComponent, public sc_module{
+  public:
+    SC_CTOR(ThreadedComponent){
+       SC_THREAD(schedule_thread);
+     
+    }
+
+  private:
+    sc_event notify_scheduler;
+    void schedule_thread(); 
+    deque<sc_event*> events;
+  public:
+    /**
+     * \brief An implementation of AbstractComponent::compute(const char *, sc_event).
+     *
+     */
+    virtual void compute( const char *name, sc_event *end=NULL);
+
+    /**
+     * \brief A backward compatible implementation of AbstractComponent.
+     */
+    ThreadedComponent(const char *name,const char *schedulername){}
+    virtual ~ThreadedComponent(){}
+    virtual void informAboutMapping(string module);
   private:
   };
 }

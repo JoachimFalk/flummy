@@ -67,9 +67,11 @@ namespace SystemC_VPC{
     if(term->isSatisfied(excludes)){
       activationTime=sc_simulation_time();
       //cerr << GREEN("YES "<< sc_simulation_time())<<NENDL;
+      return true;
     }else{
       //cerr << RED("NO "<< sc_simulation_time())<<NENDL;
     }
+    return false;
   }
 
   /**
