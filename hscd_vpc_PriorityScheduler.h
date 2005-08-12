@@ -18,11 +18,11 @@ namespace SystemC_VPC{
     }
     PriorityScheduler(const char *schedulername);
     virtual ~PriorityScheduler(){}
-    int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks);
-    void addedNewTask(p_struct pcb);
-    void removedTask(p_struct pcb);
+    int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks);
+    void addedNewTask(p_struct *pcb);
+    void removedTask(p_struct *pcb);
     sc_event& getNotifyEvent();
-    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks);
+    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks);
     void setProperty(char* key, char* value);
   protected:
     int order_counter;

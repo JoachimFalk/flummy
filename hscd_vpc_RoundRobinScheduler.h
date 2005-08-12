@@ -13,16 +13,16 @@ namespace SystemC_VPC{
   public:
 
     RoundRobinScheduler(){
-      TIMESLICE=1;
+      TIMESLICE=10;
       LASTASSIGN=0;
     }
     RoundRobinScheduler(const char *schedulername);
     virtual ~RoundRobinScheduler(){}
-    int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks);
-    void addedNewTask(p_struct pcb);
-    void removedTask(p_struct pcb);
+    int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks);
+    void addedNewTask(p_struct *pcb);
+    void removedTask(p_struct *pcb);
     sc_event& getNotifyEvent();
-    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks);
+    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks);
     void setProperty(char* key, char* value);
   protected:
     deque<int> rr_fifo;

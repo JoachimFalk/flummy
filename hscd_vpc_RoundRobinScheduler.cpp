@@ -55,24 +55,24 @@ namespace SystemC_VPC{
     }
   }
 
-  int RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks){
+  int RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
     time=sc_time(TIMESLICE,SC_NS);
     return 1;
   }
-  void RoundRobinScheduler::addedNewTask(p_struct pcb){
-    rr_fifo.push_back(pcb.pid);
+  void RoundRobinScheduler::addedNewTask(p_struct *pcb){
+    rr_fifo.push_back(pcb->pid);
   }
-  void RoundRobinScheduler::removedTask(p_struct pcb){
+  void RoundRobinScheduler::removedTask(p_struct *pcb){
     deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
-      if( *iter == pcb.pid){
+      if( *iter == pcb->pid){
 	rr_fifo.erase(iter);
 	break;
       }
     }
   }
-  scheduling_decision RoundRobinScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct> &ready_tasks,const  map<int,p_struct> &running_tasks){
+  scheduling_decision RoundRobinScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
     /*
       if(running_tasks.size()==0){
       if(rr_fifo.size()>0){
@@ -92,11 +92,11 @@ namespace SystemC_VPC{
 	rr_fifo.pop_front();
 	ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "RETIRE") -> kein preemption!
 	if(running_tasks.size()!=0){  // alten Task entfernen
-	  map<int,p_struct>::const_iterator iter;
+	  map<int,p_struct*>::const_iterator iter;
 	  iter=running_tasks.begin();
-	  p_struct pcb=iter->second;
-	  task_to_resign=pcb.pid;
-	  rr_fifo.push_back(pcb.pid);
+	  p_struct *pcb=iter->second;
+	  task_to_resign=pcb->pid;
+	  rr_fifo.push_back(pcb->pid);
 	  ret_decision= PREEMPT;	
 	}// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "RETIRE")
       }    

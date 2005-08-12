@@ -24,17 +24,17 @@ namespace SystemC_VPC{
      * /brief Called from SchedulerProxy to determine a "time slice" used as time out.
      * 
      */
-    virtual int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks)=0;
+    virtual int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
 
     /**
      * \brief Inform Scheduler about new tasks.
      */
-    virtual void addedNewTask(p_struct pcb)=0;
+    virtual void addedNewTask(p_struct *pcb)=0;
     
     /**
      * \brief Inform Scheduler about removed tasks.
      */
-    virtual void removedTask(p_struct pcb)=0;
+    virtual void removedTask(p_struct *pcb)=0;
 
     /**
      * \brief Call the Scheduler to do a scheduling decision.
@@ -46,7 +46,7 @@ namespace SystemC_VPC{
      * \param [in] running_tasks A map of running tasks! Usualy only one! SchedulerProxy knowes this map.
      * \ret Returns a scheduling_decision enum. So SchedulerProxy knows what he has to do.
      */
-    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,p_struct> &ready_tasks,const map<int,p_struct> &running_tasks)=0;
+    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
 
   };
 }

@@ -18,9 +18,15 @@
 #ifndef HSCD_VPC_DIRECTOR_H
 #define HSCD_VPC_DIRECTOR_H
 #include "hscd_vpc_Component.h"
-#include "hscd_vpc_datatypes.h"
+
 #include <string>
+
+
 namespace SystemC_VPC{
+
+  struct p_struct;
+  class Constraint;
+
   using std::string;
 
   /**
@@ -37,15 +43,17 @@ namespace SystemC_VPC{
     static std::auto_ptr<Director> singleton; 
 
     /**
-     * \brief Read allokation and binding from file.
+     * \brief Reads allokation and binding from file.
      */
     Director();
     map<string,AbstractComponent*> component_map_by_name;
     //map<int,AbstractComponent*> component_map_by_pid;
     map<string,AbstractComponent*> mapping_map_by_name;
     //map<int,AbstractComponent*> mapping_map_by_pid;
-    map<string,p_struct> p_struct_map_by_name;
+    map<string,p_struct*> p_struct_map_by_name;
     //map<int,p_struct> p_struct_map_by_pid;
+
+    vector<Constraint*> constraints;
 
   public:
     bool FALLBACKMODE;
@@ -56,12 +64,29 @@ namespace SystemC_VPC{
      */
     AbstractComponent& getResource( const char *name );
     //  AbstractComponent& getResource(int process);
-    //  p_struct& getProcessControlBlock(int process);
 
     /**
      * \brief Get the process controll block used within SystemC-VPC Modell.
      */
-    p_struct& getProcessControlBlock( const char *name );
+    p_struct* getProcessControlBlock( const char *name );
+    //  p_struct& getProcessControlBlock(int process);
+
+    /**
+     *
+     */
+    map<string,p_struct*>& getPcbMap(){
+      return p_struct_map_by_name;
+    }
+
+    /**
+     *
+     */
+    void checkConstraints();
+
+    /**
+     *
+     */
+    void getReport();
 
     /**
      * \brief Access to singleton Director. 

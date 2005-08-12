@@ -41,6 +41,8 @@ INCLUDES =				\
 	-I$(srcdir)
 #	-I$(root_srcdir)/systemc-2.0.1/src
 
+#AM_LDFLAGS=                            \
+#        @SYSTEMC_LDFLAGS@                     
 
 #noinst_SCRIPTS  = test_pathstuff.sh
 
@@ -60,6 +62,8 @@ pkginclude_HEADERS =			\
 
 #noinst_HEADERS=	oneof.hpp
 
+AM_CPPFLAGS=-Wno-deprecated
+
 libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)	\
 	$(hscd_pggen_hpp_CH_LTOBJS)
@@ -67,7 +71,7 @@ libsystemcvpc_CH_LTOBJS=			\
 ## DISABLE -lefence because is causes crashes on systemc where libefence is linked with -lpthread
 ## because of quick-thread (SystemC) pthread incompatibilities
 #libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++ -lefence
-libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++
+libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++ -lxerces-c
 
 libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
 libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
@@ -79,7 +83,9 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_PriorityScheduler.cpp		\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
-	hscd_vpc_RateMonotonicScheduler.cpp
+	hscd_vpc_RateMonotonicScheduler.cpp	\
+	hscd_vpc_XmlHelper.cpp	\
+	hscd_vpc_Term.cpp
 
 
 # Need pkinclude files in include/$(pkgincludeprefix)

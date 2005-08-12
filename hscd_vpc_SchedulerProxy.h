@@ -28,7 +28,7 @@ namespace SystemC_VPC{
   protected:
   
     map<int,action_struct> *open_commands;
-    map<int,p_struct> ready_tasks,running_tasks;
+    map<int,p_struct*> ready_tasks,running_tasks;
     Component *component;
     Scheduler *scheduler;
 

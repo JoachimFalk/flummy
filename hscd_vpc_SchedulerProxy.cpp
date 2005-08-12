@@ -29,7 +29,7 @@ namespace SystemC_VPC{
 
 
   void SchedulerProxy::schedule_thread(){
-    map<int,p_struct> *newTasks;
+    map<int,p_struct*> *newTasks;
     action_struct cmd;
     vector<action_struct> *actions;
     sc_time timeslice;
@@ -55,13 +55,13 @@ namespace SystemC_VPC{
 
 	  if(ready_tasks.find(cmd.target_pid)==ready_tasks.end()){ 
 	    if(running_tasks.find(cmd.target_pid)!=running_tasks.end()){ 
-	      p_struct pcb_to_remove=running_tasks[cmd.target_pid];
+	      p_struct *pcb_to_remove=running_tasks[cmd.target_pid];
 	      running_tasks.erase(cmd.target_pid);
 	      scheduler->removedTask(pcb_to_remove);
 	
 	    }
 	  }else{
-	    p_struct pcb_to_remove=ready_tasks[cmd.target_pid];
+	    p_struct *pcb_to_remove=ready_tasks[cmd.target_pid];
 	    ready_tasks.erase(cmd.target_pid);
 	    scheduler->removedTask(pcb_to_remove);
 	
@@ -93,9 +93,9 @@ namespace SystemC_VPC{
 	    (*open_commands)[task_to_resign]=cmd1;
 	  
 	  
-	    notify(SC_ZERO_TIME,*(ready_tasks[task_to_resign].interupt));
+	    notify(SC_ZERO_TIME,*(ready_tasks[task_to_resign]->interupt));
 	  }
-	  notify(SC_ZERO_TIME,*(running_tasks[task_to_assign].interupt));
+	  notify(SC_ZERO_TIME,*(running_tasks[task_to_assign]->interupt));
 	}
       }
     }    

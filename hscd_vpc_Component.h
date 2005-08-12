@@ -59,7 +59,7 @@ namespace SystemC_VPC{
      * If a task calls compute he will noted down in a map. This funktion provides
      * access to this map.
      */
-    map<int,p_struct> &getNewTasks();
+    map<int,p_struct*> &getNewTasks();
 
     /**
      * \brief A vector of commandos, so the Scheduler can descide what to do.
@@ -91,9 +91,9 @@ namespace SystemC_VPC{
     virtual void informAboutMapping(string module);
 
   private:
-    void compute(p_struct actualTask);
+    void compute(p_struct *actualTask);
     map<string,sc_signal<trace_value>*> trace_map_by_name;
-    map<int,p_struct>      new_tasks;
+    map<int,p_struct*>      new_tasks;
     vector<action_struct>  open_commands;
     sc_trace_file *trace;   ////////////////////////                              
     //  sc_trace_file *trace_wif;   ////////////////////////                              

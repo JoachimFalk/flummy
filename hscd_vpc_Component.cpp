@@ -22,12 +22,12 @@
 
 namespace SystemC_VPC{
   void Component::compute( const char *name, sc_event *end) { 
-    p_struct  actualTask = Director::getInstance().getProcessControlBlock(name);
+    p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
 
 #ifndef MODES_EVALUATOR
     sc_signal<trace_value> *trace_signal=0;
-    if(1==trace_map_by_name.count(actualTask.name)){
-      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask.name);
+    if(1==trace_map_by_name.count(actualTask->name)){
+      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->name);
       trace_signal=(iter->second);
     }
     if (trace_signal != NULL ) {
@@ -46,32 +46,36 @@ namespace SystemC_VPC{
     }
 #endif //MODES_EVALUATOR
 
-      // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
+    // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
   }
 
   /*void Component::compute(int process, sc_event *end){
     p_struct actualTask = Director::getInstance().getProcessControlBlock(process);
     compute(actualTask);
     }*/
-  void Component::compute(p_struct actualTask){
+  void Component::compute(p_struct *actualTask){
     sc_event interupt;
     action_struct *cmd;
     double last_delta_start_time;
     double rest_of_delay;
     bool task_is_running=false;
-    int process=actualTask.pid;
+    int process=actualTask->pid;
+
+    actualTask->state=starting;
+    Director::getInstance().checkConstraints();
+    actualTask->state=aktiv;
 
 #ifndef MODES_EVALUATOR
     sc_signal<trace_value> *trace_signal=NULL;
-    if(1==trace_map_by_name.count(actualTask.name)){
-      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask.name);
+    if(1==trace_map_by_name.count(actualTask->name)){
+      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->name);
       trace_signal=(iter->second);
     }
 #endif //MODES_EVALUATOR
 
 
-    actualTask.interupt = &interupt; 
-    rest_of_delay=actualTask.delay;
+    actualTask->interupt = &interupt; 
+    rest_of_delay=actualTask->delay;
     new_tasks[process]=actualTask;
     cmd = new action_struct;
     cmd->target_pid = process;
@@ -88,9 +92,9 @@ namespace SystemC_VPC{
 	if(trace_signal!=0)*trace_signal=RUNNING;     
 #endif //MODES_EVALUATOR
 
-	//   cout << actualTask.name << " is running! "<< sc_simulation_time() << endl; 
-	wait(rest_of_delay,SC_NS,*actualTask.interupt);
-	//cout << actualTask.name << " is stoped! "<< sc_simulation_time() << endl; 
+	//   cout << actualTask->name << " is running! "<< sc_simulation_time() << endl; 
+	wait(rest_of_delay,SC_NS,*actualTask->interupt);
+	//cout << actualTask->name << " is stoped! "<< sc_simulation_time() << endl; 
 
 #ifndef MODES_EVALUATOR
 	if(trace_signal!=0)*trace_signal=READY;
@@ -104,11 +108,11 @@ namespace SystemC_VPC{
 	  open_commands.push_back(*cmd);
 	  notify(e);    //Muss auf den Scheduler gewarted werden? (Nein)
 	  wait(SC_ZERO_TIME);
-	  return;
+	  break;
 	}else{}     //Scheduler fragen: Was ist los?
 
       }else{
-	wait(*actualTask.interupt);  // Scheduler abwarten
+	wait(*actualTask->interupt);  // Scheduler abwarten
 	//Scheduler fragen: Was ist los?
 
       }
@@ -139,8 +143,14 @@ namespace SystemC_VPC{
 	}
       }
     }
+
+    actualTask->state=ending;
+    Director::getInstance().checkConstraints();
+    actualTask->state=inaktiv;
+
+
     //new_tasks.erase(process);
-  } 
+  }
   Component::Component(const char *name,const char *schedulername){
     strcpy(this->name,name);
     schedulerproxy=new SchedulerProxy(this->name);
@@ -186,7 +196,7 @@ namespace SystemC_VPC{
     return open_commands;
   }
 
-  map<int,p_struct> &Component::getNewTasks() {
+  map<int,p_struct*> &Component::getNewTasks() {
     return new_tasks;
   }
 }
