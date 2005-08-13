@@ -50,6 +50,7 @@ AC_EXEEXT
 # Checks for library functions.
 
 ACJF_SYSTEMC
+ACJF_CHECK_LIB_XERCES
 
 AC_CONFIG_FILES([Makefile])
 

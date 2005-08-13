@@ -40,6 +40,7 @@ compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 
 INCLUDES =						\
 	@SYSTEMC_INCLUDE@				\
+	@XERCES_INCLUDE@				\
         -I$(SYSTEMOC_V3_SRCDIR)				\
 	-I./include					\
 	-I$(srcdir)
@@ -59,7 +60,7 @@ PROGLDFLAGS=
 pkgincludeprefix=systemcvpc/
 
 lib_LTLIBRARIES = libsystemcvpc.la
-pkginclude_HEADERS =			\
+pkginclude_HEADERS =				\
 	hscd_vpc_Component.h			\
 	hscd_vpc_Director.h			\
 	hscd_vpc_datatypes.h			
@@ -69,13 +70,13 @@ pkginclude_HEADERS =			\
 AM_CPPFLAGS=-Wno-deprecated
 
 libsystemcvpc_CH_LTOBJS=			\
-	$(hscd_op_hpp_CH_LTOBJS)	\
+	$(hscd_op_hpp_CH_LTOBJS)		\
 	$(hscd_pggen_hpp_CH_LTOBJS)
 
 ## DISABLE -lefence because is causes crashes on systemc where libefence is linked with -lpthread
 ## because of quick-thread (SystemC) pthread incompatibilities
-#libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++ -lefence
-libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -lsystemc -lstdc++ -lxerces-c
+#libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++ -lefence
+libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++
 
 libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
 libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
@@ -91,7 +92,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
-	hscd_vpc_XmlHelper.cpp	\
+	hscd_vpc_XmlHelper.cpp			\
 	hscd_vpc_Term.cpp
 
 
