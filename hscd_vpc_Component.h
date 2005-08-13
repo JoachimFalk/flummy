@@ -23,6 +23,8 @@
 #include <vector.h>
 #include <map.h>
 #include <deque.h>
+#include <smoc_event.hpp>
+
 namespace SystemC_VPC{
   class SchedulerProxy;
 
@@ -40,7 +42,7 @@ namespace SystemC_VPC{
      *
      * While this simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute( const char *name, sc_event *end=NULL)=0;
+    virtual void compute( const char *name, smoc_event *end=NULL)=0;
     //    virtual void compute(int iprocess)=0;
     virtual ~AbstractComponent(){};
   };
@@ -55,7 +57,7 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief A map of tasks that newly called compute(const char *, sc_event).
+     * \brief A map of tasks that newly called compute(const char *, smoc_event).
      *
      * If a task calls compute he will noted down in a map. This funktion provides
      * access to this map.
@@ -71,10 +73,10 @@ namespace SystemC_VPC{
     vector<action_struct> &getNewCommands();
     
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, sc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
      */
-    virtual void compute( const char *name, sc_event *end=NULL);
-    //  virtual void compute(int process, sc_event *end=NULL);
+    virtual void compute( const char *name, smoc_event *end=NULL);
+    //  virtual void compute(int process, smoc_event *end=NULL);
     Component();
     /**
      * \brief Initialize a Component with a Scheduler.
@@ -106,11 +108,14 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, sc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
      *
      * Privides backward compatibility! It does nothing -> No schedling! No delaying!
      */
-    virtual void compute( const char *name, sc_event *end=NULL){}
+    virtual void compute( const char *name, smoc_event *end=NULL){
+      cerr << "FallBack::compute("<<name<<") at time: " << sc_simulation_time() << endl;
+      if(NULL!=end) smoc_notify(*end);
+    }
 
     /**
      * \brief A backward compatible implementation of AbstractComponent.
@@ -130,13 +135,13 @@ namespace SystemC_VPC{
   private:
     sc_event notify_scheduler;
     void schedule_thread(); 
-    deque<sc_event*> events;
+    deque<smoc_event*> events;
   public:
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, sc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
      *
      */
-    virtual void compute( const char *name, sc_event *end=NULL);
+    virtual void compute( const char *name, smoc_event *end=NULL);
 
     /**
      * \brief A backward compatible implementation of AbstractComponent.

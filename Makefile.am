@@ -21,9 +21,12 @@
 # $Log$
 
 root_srcdir=$(top_srcdir)/..
+root_builddir=$(top_builddir)/..
 
 SUBDIRS=
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
+
+SYSTEMOC_V3_SRCDIR=$(root_srcdir)/SysteMoC-v0.3
 
 ac_aux_dir = @ac_aux_dir@
 
@@ -35,9 +38,10 @@ include $(ac_aux_dir)/jfrules.mk
 compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 	@date > $@
 
-INCLUDES =				\
-	@SYSTEMC_INCLUDE@		\
-	-I./include			\
+INCLUDES =						\
+	@SYSTEMC_INCLUDE@				\
+        -I$(SYSTEMOC_V3_SRCDIR)				\
+	-I./include					\
 	-I$(srcdir)
 #	-I$(root_srcdir)/systemc-2.0.1/src
 
@@ -75,6 +79,9 @@ libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ -
 
 libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
 libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
+
+
+
 
 libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
