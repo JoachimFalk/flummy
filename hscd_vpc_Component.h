@@ -113,7 +113,9 @@ namespace SystemC_VPC{
      * Privides backward compatibility! It does nothing -> No schedling! No delaying!
      */
     virtual void compute( const char *name, smoc_event *end=NULL){
+#ifdef VPC_DEBUG
       cerr << "FallBack::compute("<<name<<") at time: " << sc_simulation_time() << endl;
+#endif
       if(NULL!=end) smoc_notify(*end);
     }
 

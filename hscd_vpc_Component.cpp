@@ -212,7 +212,9 @@ namespace SystemC_VPC{
     }
   }
   void ThreadedComponent::compute(const char *name, smoc_event *end){
+#ifdef VPC_DEBUG
     cerr << "compute("<<name<<") at time: " << sc_simulation_time() << endl;
+#endif
     events.push_back(end);
     notify(notify_scheduler);
     return;
