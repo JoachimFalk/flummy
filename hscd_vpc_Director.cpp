@@ -97,9 +97,10 @@ namespace SystemC_VPC{
       cerr <<"config found"<<vpc_conf_file << endl;
       fconffile=fopen(vpc_conf_file,"r");
     }else{
-      cerr << "-"<< getenv("VPCCONFIGURATION")<< "-"<< endl;
       char *cfile= getenv("VPCCONFIGURATION");
       if(!cfile)FALLBACKMODE=true;
+      else cerr << "-"<<cfile << "-"<< endl;
+
       fconffile=fopen(cfile,"r");
     }
     if(!fconffile)FALLBACKMODE=true;
