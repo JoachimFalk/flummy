@@ -22,7 +22,7 @@
 #include <smoc_event.hpp>
 
 namespace SystemC_VPC{
-  void Component::compute( const char *name, smoc_event *end) { 
+  void Component::compute( const char *name, const char *funcname, smoc_event *end) { 
     p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
 
 #ifndef NO_VCD_TRACES
@@ -211,9 +211,10 @@ namespace SystemC_VPC{
       }while(events.size()>0);
     }
   }
-  void ThreadedComponent::compute(const char *name, smoc_event *end){
+  void ThreadedComponent::compute(const char *name, const char *funcname, smoc_event *end){
 #ifdef VPC_DEBUG
-    cerr << "compute("<<name<<") at time: " << sc_simulation_time() << endl;
+    cout << flush;
+    cerr << RED("ThreadedComponent::compute(") <<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time() << endl);
 #endif
     events.push_back(end);
     notify(notify_scheduler);

@@ -32,7 +32,7 @@ namespace SystemC_VPC{
   /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).
    * 
-   * An application using this Framework should call the AbstractComponent::compute(const char *, sc_event) Funktion.
+   * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
    */
   class AbstractComponent{
   public:
@@ -42,7 +42,7 @@ namespace SystemC_VPC{
      *
      * While this simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute( const char *name, smoc_event *end=NULL)=0;
+    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL)=0;
     //    virtual void compute(int iprocess)=0;
     virtual ~AbstractComponent(){};
   };
@@ -57,7 +57,7 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief A map of tasks that newly called compute(const char *, smoc_event).
+     * \brief A map of tasks that newly called compute(const char *, const char *, smoc_event).
      *
      * If a task calls compute he will noted down in a map. This funktion provides
      * access to this map.
@@ -73,9 +73,9 @@ namespace SystemC_VPC{
     vector<action_struct> &getNewCommands();
     
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, const char *, smoc_event).
      */
-    virtual void compute( const char *name, smoc_event *end=NULL);
+    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL);
     //  virtual void compute(int process, smoc_event *end=NULL);
     Component();
     /**
@@ -112,9 +112,10 @@ namespace SystemC_VPC{
      *
      * Privides backward compatibility! It does nothing -> No schedling! No delaying!
      */
-    virtual void compute( const char *name, smoc_event *end=NULL){
+    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL){
 #ifdef VPC_DEBUG
-      cerr << "FallBack::compute("<<name<<") at time: " << sc_simulation_time() << endl;
+      cout << flush;
+      cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
       if(NULL!=end) smoc_notify(*end);
     }
@@ -140,10 +141,10 @@ namespace SystemC_VPC{
     deque<smoc_event*> events;
   public:
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, const char *, smoc_event).
      *
      */
-    virtual void compute( const char *name, smoc_event *end=NULL);
+    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL);
 
     /**
      * \brief A backward compatible implementation of AbstractComponent.
