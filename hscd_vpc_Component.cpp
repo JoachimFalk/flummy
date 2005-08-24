@@ -205,7 +205,7 @@ namespace SystemC_VPC{
     while(1){
       wait(notify_scheduler);
       do{
-	wait(10,SC_NS);
+	wait(2,SC_NS);
 	smoc_notify(*(events.front()));
 	events.pop_front();
       }while(events.size()>0);
