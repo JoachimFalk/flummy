@@ -1,7 +1,8 @@
 #ifndef HSCD_VPC_P_STRUCT_H
 #define HSCD_VPC_P_STRUCT_H
-#include "systemc.h"
+#include <systemc.h>
 #include <string>
+#include <smoc_event.hpp>
 
 
 namespace SystemC_VPC{
@@ -56,6 +57,7 @@ namespace SystemC_VPC{
     string name;
     int pid;
     sc_event* interupt;
+    smoc_event* smoc_interupt;
     double delay;
     double remaining_delay;
     int priority;

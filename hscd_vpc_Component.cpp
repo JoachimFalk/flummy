@@ -15,13 +15,17 @@
  * -----------------------------------------------------------------------------
  * $log$
  ******************************************************************************/
-#include "hscd_vpc_Component.h"
-#include "hscd_vpc_SchedulerProxy.h"
-#include "hscd_vpc_datatypes.h"
-#include "hscd_vpc_Director.h"
+#include <hscd_vpc_Component.h>
+#include <hscd_vpc_SchedulerProxy.h>
+#include <hscd_vpc_datatypes.h>
+#include <hscd_vpc_Director.h>
 #include <smoc_event.hpp>
 
 namespace SystemC_VPC{
+
+  /**
+   *
+   */
   void Component::compute( const char *name, const char *funcname, smoc_event *end) { 
     p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
 
@@ -36,9 +40,6 @@ namespace SystemC_VPC{
     }
 #endif //NO_VCD_TRACES
 
-    //cerr<<"VPC says: PG node "<<name<<" start execution "<<sc_simulation_time()<<" on: "<<this->name<<std::endl;
-    //wait((80.0*rand()/(RAND_MAX+1.0)), SC_NS);
-    //wait(10, SC_NS);
     compute(actualTask);
 
 #ifndef NO_VCD_TRACES
@@ -46,14 +47,37 @@ namespace SystemC_VPC{
       *trace_signal = S_BLOCKED;
     }
 #endif //NO_VCD_TRACES
-
-    // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
   }
 
-  /*void Component::compute(int process, smoc_event *end){
-    p_struct actualTask = Director::getInstance().getProcessControlBlock(process);
+  /**
+   *
+   */
+  void Component::compute( const char *name, smoc_event *end) { 
+    p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
+
+#ifndef NO_VCD_TRACES
+    sc_signal<trace_value> *trace_signal=0;
+    if(1==trace_map_by_name.count(actualTask->name)){
+      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->name);
+      trace_signal=(iter->second);
+    }
+    if (trace_signal != NULL ) {
+      *trace_signal = S_READY;
+    }
+#endif //NO_VCD_TRACES
+
     compute(actualTask);
-    }*/
+
+#ifndef NO_VCD_TRACES
+    if (trace_signal != NULL ) {
+      *trace_signal = S_BLOCKED;
+    }
+#endif //NO_VCD_TRACES
+  }
+
+  /**
+   *
+   */
   void Component::compute(p_struct *actualTask){
     sc_event interupt;
     action_struct *cmd;
@@ -152,6 +176,10 @@ namespace SystemC_VPC{
 
     //new_tasks.erase(process);
   }
+
+  /**
+   *
+   */
   Component::Component(const char *name,const char *schedulername){
     strcpy(this->name,name);
     schedulerproxy=new SchedulerProxy(this->name);
@@ -174,6 +202,10 @@ namespace SystemC_VPC{
 
   }
 
+
+  /**
+   *
+   */
   Component::~Component(){
 
 #ifndef NO_VCD_TRACES
@@ -182,6 +214,10 @@ namespace SystemC_VPC{
     delete schedulerproxy;
 
   }
+
+  /**
+   *
+   */
   void Component::informAboutMapping(string module){
 
 #ifndef NO_VCD_TRACES
@@ -193,14 +229,26 @@ namespace SystemC_VPC{
 
   }
 
+
+  /**
+   *
+   */
   vector<action_struct> &Component::getNewCommands() {
     return open_commands;
   }
 
+
+  /**
+   *
+   */
   map<int,p_struct*> &Component::getNewTasks() {
     return new_tasks;
   }
 
+
+  /**
+   *
+   */
   void ThreadedComponent::schedule_thread(){
     while(1){
       wait(notify_scheduler);
@@ -211,6 +259,22 @@ namespace SystemC_VPC{
       }while(events.size()>0);
     }
   }
+
+  /**
+   *
+   */
+  void ThreadedComponent::compute(const char *name, smoc_event *end){
+#ifdef VPC_DEBUG
+    cout << flush;
+    cerr << RED("ThreadedComponent::compute(") <<WHITE(name)<< RED(" ) at time: " << sc_simulation_time() << endl);
+#endif
+    compute(name,"",end);
+    return;
+  }
+
+  /**
+   *
+   */
   void ThreadedComponent::compute(const char *name, const char *funcname, smoc_event *end){
 #ifdef VPC_DEBUG
     cout << flush;
@@ -221,6 +285,10 @@ namespace SystemC_VPC{
     return;
   }
 
+
+  /**
+   *
+   */
   void ThreadedComponent::informAboutMapping(string module){
 
   }
