@@ -51,6 +51,15 @@ namespace SystemC_VPC{
     virtual void compute( const char *name, smoc_event *end=NULL)=0;
     //    virtual void compute(int iprocess)=0;
     virtual ~AbstractComponent(){};
+
+    /**
+     * \brief Used to create the Tracefiles.
+     *
+     * To create a vcd-trace-file in SystemC all the signals to 
+     * trace have to be in a "global" scope. The signals have to 
+     * be created in elaboration phase (before first sc_start).
+     */
+    virtual void informAboutMapping(string module)=0;
   };
 
   /**
@@ -143,6 +152,11 @@ namespace SystemC_VPC{
 #endif
       if(NULL!=end) smoc_notify(*end);
     }
+
+    /**
+     * No VCD tracing in FallbackComponent needed.
+     */
+    virtual void informAboutMapping(string module){};
 
     /**
      * \brief A backward compatible implementation of AbstractComponent.

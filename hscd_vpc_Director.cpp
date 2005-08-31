@@ -128,7 +128,7 @@ namespace SystemC_VPC{
 	  iter=component_map_by_name.find(component);
 	  mapping_map_by_name.insert(pair<string,AbstractComponent*>(module,iter->second));
 	  //cerr << "mapping " << module << component << delay<<endl;
-	  ((Component*)iter->second)->informAboutMapping(module);
+	  (iter->second)->informAboutMapping(module);
 	  p_struct *p= new p_struct;
 	  p->name=module;
 	  p->priority=priority;
