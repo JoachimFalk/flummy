@@ -1,10 +1,10 @@
-#include "hscd_vpc_SchedulerProxy.h"
-#include "hscd_vpc_FCFSScheduler.h"
-#include "hscd_vpc_RoundRobinScheduler.h"
-#include "hscd_vpc_PriorityScheduler.h"
-#include "hscd_vpc_RateMonotonicScheduler.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
+#include <hscd_vpc_SchedulerProxy.h>
+#include <hscd_vpc_FCFSScheduler.h>
+#include <hscd_vpc_RoundRobinScheduler.h>
+#include <hscd_vpc_PriorityScheduler.h>
+#include <hscd_vpc_RateMonotonicScheduler.h>
+#include <hscd_vpc_Director.h>
+#include <hscd_vpc_Component.h>
 namespace SystemC_VPC{
   void SchedulerProxy::registerComponent(Component *comp){
     this->component=comp;
@@ -74,7 +74,8 @@ namespace SystemC_VPC{
       scheduling_decision decision=scheduler->schedulingDecision(task_to_resign, task_to_assign,ready_tasks,running_tasks);
       if(decision != NOCHANGE){ //nichts tun
 	if(decision!=RESIGNED){ // zZ auch nichts  tun! keine Thread mehr da, und Listen sind schon gereinigt!
-	
+	  //FIXME: error if using TDMA Scheduling!!!
+
 	  running_tasks[task_to_assign]=ready_tasks[task_to_assign];   //neuen von ready
 	  ready_tasks.erase(task_to_assign);                              //auf running setzen
 	

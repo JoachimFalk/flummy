@@ -1,8 +1,8 @@
 #ifndef HSCD_VPC_PRIORITYSCHEDULER_H
 #define HSCD_VPC_PRIORITYSCHEDULER_H
-#include "systemc.h"
-#include "hscd_vpc_Scheduler.h"
-#include "hscd_vpc_datatypes.h"
+#include <systemc.h>
+#include <hscd_vpc_Scheduler.h>
+#include <hscd_vpc_datatypes.h>
 #include <map.h>
 #include <queue.h>
 #include <vector.h>
@@ -18,7 +18,7 @@ namespace SystemC_VPC{
     }
     PriorityScheduler(const char *schedulername);
     virtual ~PriorityScheduler(){}
-    int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks);
+    bool getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks);
     void addedNewTask(p_struct *pcb);
     void removedTask(p_struct *pcb);
     sc_event& getNotifyEvent();

@@ -1,13 +1,13 @@
 #ifndef HSCD_VPC_SCHEDULERPROXY_H
 #define HSCD_VPC_SCHEDULERPROXY_H
-#include "systemc.h"
-#include "hscd_vpc_Scheduler.h"
-#include "hscd_vpc_datatypes.h"
+#include <systemc.h>
+#include <hscd_vpc_datatypes.h>
 #include <map.h>
 #include <deque.h>
 
 namespace SystemC_VPC{
   class Component;
+  class Scheduler;
 
   class SchedulerProxy : public sc_module{
   public:
@@ -30,8 +30,9 @@ namespace SystemC_VPC{
     map<int,p_struct*> ready_tasks,running_tasks;
     Component *component;
     Scheduler *scheduler;
+    virtual void schedule_thread();
+
   private:
-    void schedule_thread();
 
   };
 }

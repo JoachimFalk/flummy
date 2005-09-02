@@ -1,7 +1,7 @@
-#include "systemc.h"
+#include <systemc.h>
 #ifndef HSCD_VPC_SCHEDULER_H
 #define HSCD_VPC_SCHEDULER_H
-#include "hscd_vpc_datatypes.h"
+#include <hscd_vpc_datatypes.h>
 #include <map.h>
 
 namespace SystemC_VPC{
@@ -24,7 +24,7 @@ namespace SystemC_VPC{
      * /brief Called from SchedulerProxy to determine a "time slice" used as time out.
      * 
      */
-    virtual int getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
+    virtual bool getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
 
     /**
      * \brief Inform Scheduler about new tasks.

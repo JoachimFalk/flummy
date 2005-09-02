@@ -34,13 +34,13 @@
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
 #include <iostream>
  
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
-#include "hscd_vpc_Term.h"
-#include "hscd_vpc_XmlHelper.h"
-#include "hscd_vpc_VpcDomErrorHandler.h"
+#include <hscd_vpc_Director.h>
+#include <hscd_vpc_Component.h>
+#include <hscd_vpc_Term.h>
+#include <hscd_vpc_XmlHelper.h>
+#include <hscd_vpc_VpcDomErrorHandler.h>
 
-#include "systemc.h"
+#include <systemc.h>
 #include <map>
 
 XERCES_CPP_NAMESPACE_USE 
@@ -94,13 +94,18 @@ namespace SystemC_VPC{
     if(vpc_evaluator_prefix){
       char vpc_conf_file[VPC_MAX_STRING_LENGTH];
       sprintf(vpc_conf_file,"%s%s",vpc_evaluator_prefix,STR_VPC_CONF_FILE);
+#ifdef VPC_DEBUG
       cerr <<"config found"<<vpc_conf_file << endl;
+#endif //VPC_DEBUG
       fconffile=fopen(vpc_conf_file,"r");
     }else{
       char *cfile= getenv("VPCCONFIGURATION");
       if(!cfile)FALLBACKMODE=true;
-      else cerr << "-"<<cfile << "-"<< endl;
-
+      else{
+#ifdef VPC_DEBUG
+ cerr << "-"<<cfile << "-"<< endl;
+#endif //VPC_DEBUG
+      }
       fconffile=fopen(cfile,"r");
     }
     if(!fconffile)FALLBACKMODE=true;
@@ -118,7 +123,7 @@ namespace SystemC_VPC{
 	}else if(0==strcmp(module,"threadedcomponent:")){
 	  //eine Komponente
 	  fscanf(fconffile,"%s %s",component,scheduler);
-	  component_map_by_name.insert(pair<string,AbstractComponent*>(component,new ThreadedComponent(component)));
+	  component_map_by_name.insert(pair<string,AbstractComponent*>(component,new ThreadedComponent(component,scheduler)));
 	  //cerr << "comp " << module << component << scheduler<<endl;
 	}else{
 	  //eine Abbildung: process -> Komponente
@@ -148,8 +153,10 @@ namespace SystemC_VPC{
     }
     
     if(!vpc_evaluator_prefix){
+      /*
       cerr << VPC_ERROR << "No VPC_EVALUATOR Environment\n"
 	   << "Hint: try to export/setenv VPC_EVALUATOR"<< NENDL; //<< endl;
+      */
     }else{
       char vpc_result_file[VPC_MAX_STRING_LENGTH];
       sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
@@ -273,7 +280,9 @@ namespace SystemC_VPC{
       if(vpc_evaluator_prefix){
 	char vpc_result_file[VPC_MAX_STRING_LENGTH];
 	sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
+#ifdef VPC_DEBUG
 	cerr << "result_file: "<< vpc_result_file << endl;
+#endif //VPC_DEBUG
 	FILE *resultFile;
 	resultFile=fopen(vpc_result_file,"w");
 	if(resultFile){

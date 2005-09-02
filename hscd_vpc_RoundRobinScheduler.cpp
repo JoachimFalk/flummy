@@ -1,6 +1,6 @@
-#include "hscd_vpc_RoundRobinScheduler.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
+#include <hscd_vpc_RoundRobinScheduler.h>
+#include <hscd_vpc_Director.h>
+#include <hscd_vpc_Component.h>
 
 namespace SystemC_VPC{
   RoundRobinScheduler::RoundRobinScheduler(const char *schedulername){
@@ -55,10 +55,10 @@ namespace SystemC_VPC{
     }
   }
 
-  int RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
+  bool RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
     time=sc_time(TIMESLICE,SC_NS);
-    return 1;
+    return true;
   }
   void RoundRobinScheduler::addedNewTask(p_struct *pcb){
     rr_fifo.push_back(pcb->pid);

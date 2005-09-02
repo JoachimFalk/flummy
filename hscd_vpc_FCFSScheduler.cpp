@@ -1,11 +1,11 @@
-#include "hscd_vpc_FCFSScheduler.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
+#include <hscd_vpc_FCFSScheduler.h>
+#include <hscd_vpc_Director.h>
+#include <hscd_vpc_Component.h>
 
 namespace SystemC_VPC{
 
-  int FCFSScheduler::getSchedulerTimeSlice(sc_time& time,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
-    return 0;
+  bool FCFSScheduler::getSchedulerTimeSlice(sc_time& time,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
+    return false;
   }
   void FCFSScheduler::addedNewTask(p_struct *pcb){
     fcfs_fifo.push_back(pcb->pid);

@@ -1,7 +1,7 @@
-#include "hscd_vpc_PriorityScheduler.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
-#include "hscd_vpc_datatypes.h"
+#include <hscd_vpc_PriorityScheduler.h>
+#include <hscd_vpc_Director.h>
+#include <hscd_vpc_Component.h>
+#include <hscd_vpc_datatypes.h>
 
 namespace SystemC_VPC{
   PriorityScheduler::PriorityScheduler(const char *schedulername){
@@ -40,8 +40,8 @@ namespace SystemC_VPC{
   void PriorityScheduler::setProperty(char* key, char* value){
   }
 
-  int PriorityScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
-     return 0;
+  bool PriorityScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
+     return false;
   }
   /**
    *

@@ -35,7 +35,14 @@ namespace SystemC_VPC{
 
   using std::string;
   
-    enum activation_state {inaktiv, starting, aktiv, ending};
+  enum activation_state {inaktiv, starting, aktiv, ending};
+
+  typedef char trace_value;
+#define S_BLOCKED 'b';
+#define S_READY   'w';
+#define S_RUNNING 'R';
+  //enum trace_value {blocked,ready,running};
+
 
   struct p_struct{
     /* p_struct(const p_struct& p){
@@ -65,6 +72,7 @@ namespace SystemC_VPC{
     double deadline;
     int activation_count;
     activation_state state;
+    sc_signal<trace_value> *traceSignal;
   };
 
 
@@ -114,13 +122,6 @@ namespace SystemC_VPC{
   }action_struct;
 
 
-
-  typedef char trace_value;
-
-#define S_BLOCKED 'b';
-#define S_READY   'w';
-#define S_RUNNING 'R';
-  //enum trace_value {blocked,ready,running};
 
 
 

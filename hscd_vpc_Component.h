@@ -18,14 +18,19 @@
 #ifndef HSCD_VPC_COMPONENT_H
 #define HSCD_VPC_COMPONENT_H
 #include <systemc.h>
+
 #include <hscd_vpc_datatypes.h>
+#include <hscd_vpc_SchedulerProxy.h>
+
 #include <vector.h>
 #include <map.h>
 #include <deque.h>
+
 #include <smoc_event.hpp>
 
 namespace SystemC_VPC{
-  class SchedulerProxy;
+  //  class SchedulerProxy;
+  class Scheduler;
 
 
   /**
@@ -97,7 +102,7 @@ namespace SystemC_VPC{
      */
     virtual void compute( const char *name, smoc_event *end=NULL);
     //  virtual void compute(int process, smoc_event *end=NULL);
-    Component();
+    Component(){}
     /**
      * \brief Initialize a Component with a Scheduler.
      */
@@ -113,16 +118,15 @@ namespace SystemC_VPC{
      */
     virtual void informAboutMapping(string module);
 
-  private:
-    void compute(p_struct *actualTask);
+  protected:
+    virtual void compute(p_struct *actualTask);
+    char componentName [VPC_MAX_STRING_LENGTH];
+    sc_trace_file *traceFile;
     map<string,sc_signal<trace_value>*> trace_map_by_name;
-    map<int,p_struct*>      new_tasks;
+  private:
+    map<int,p_struct*>      newTasks;
     vector<action_struct>  open_commands;
-    sc_trace_file *trace;   ////////////////////////                              
-    //  sc_trace_file *trace_wif;   ////////////////////////                              
     SchedulerProxy *schedulerproxy;
-    //  int id;
-    char name [VPC_MAX_STRING_LENGTH];
   };
   class FallbackComponent : public AbstractComponent{
   public:
@@ -166,38 +170,50 @@ namespace SystemC_VPC{
   private:
   };
 
-  class ThreadedComponent : public AbstractComponent, public sc_module{
-  public:
-    SC_CTOR(ThreadedComponent){
-       SC_THREAD(schedule_thread);
-     
-    }
-
+  class ThreadedComponent : public Component, public SchedulerProxy/*, public sc_module*/{
+    // SC_HAS_PROCESS(ThreadedComponent);
+  protected:
+    virtual void compute(p_struct *actualTask);
+    virtual void schedule_thread(); 
   private:
-    sc_event notify_scheduler;
-    void schedule_thread(); 
+    deque<p_struct*>      newTasks;
+    //    map<int,action_struct> *open_commands;
+    map<int,p_struct*> readyTasks,runningTasks;
+
+    sc_event notify_scheduler_thread;
     deque<smoc_event*> events;
+
+    inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
+    inline void ThreadedComponent::assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
   public:
 
-    /**
-     * \brief An implementation of AbstractComponent::compute(const char *, const char *, smoc_event).
-     *
-     */
-    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL);
 
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
-     *
+     * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
      */
-    virtual void compute( const char *name, smoc_event *end=NULL);
-
-    /**
-     * \brief An implementation of AbstractComponent used together with passive actors and global SMoC Schedulers.
-     */
-    ThreadedComponent(const char *name,const char *schedulername){}
+    ThreadedComponent(sc_module_name name,const char *schedulername):/*sc_module*/SchedulerProxy(name){
+      //SC_THREAD(schedule_thread);
+      strcpy(this->componentName,name);
+      setScheduler(schedulername);
+      /*    schedulerproxy=new SchedulerProxy(this->componentName);
+	    schedulerproxy->setScheduler(schedulername);
+	    schedulerproxy->registerComponent(this);
+      */
+#ifndef NO_VCD_TRACES
+      string tracefilename=this->componentName;
+      char tracefilechar[VPC_MAX_STRING_LENGTH];
+      char* traceprefix= getenv("VPCTRACEFILEPREFIX");
+      if(0!=traceprefix){
+	tracefilename.insert(0,traceprefix);
+      }
+      strcpy(tracefilechar,tracefilename.c_str());
+      this->traceFile =sc_create_vcd_trace_file (tracefilechar);
+      ((vcd_trace_file*)this->traceFile)->sc_set_vcd_time_unit(-9);
+#endif //NO_VCD_TRACES
+      
+    }
     virtual ~ThreadedComponent(){}
-    virtual void informAboutMapping(string module);
-  private:
+    
   };
 }
 #endif

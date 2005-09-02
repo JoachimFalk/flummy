@@ -1,7 +1,7 @@
-#include "hscd_vpc_RateMonotonicScheduler.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
-#include "hscd_vpc_datatypes.h"
+#include <hscd_vpc_RateMonotonicScheduler.h>
+#include <hscd_vpc_Director.h>
+#include <hscd_vpc_Component.h>
+#include <hscd_vpc_datatypes.h>
 
 namespace SystemC_VPC{
   RateMonotonicScheduler::RateMonotonicScheduler(const char *schedulername){
@@ -40,8 +40,8 @@ namespace SystemC_VPC{
   void RateMonotonicScheduler::setProperty(char* key, char* value){
   }
 
-  int RateMonotonicScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
-     return 0;
+  bool RateMonotonicScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
+     return false;
   }
   /**
    *
