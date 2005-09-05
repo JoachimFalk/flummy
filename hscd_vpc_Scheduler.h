@@ -48,6 +48,10 @@ namespace SystemC_VPC{
      */
     virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
 
+    /**
+     *\brief The overhead needed to determine the scheduling descission.
+     */
+    virtual sc_time* schedulingOverhead()=0;
   };
 }
 #endif

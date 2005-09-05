@@ -255,37 +255,46 @@ namespace SystemC_VPC{
     /////////////////////////////////////
     sc_time timeslice;
     sc_time actualRemainingDelay;
+    sc_time *overhead;
     int actualRunningPID;
+    bool newTaskDuringOverhead=false;
     while(1){
       //determine the time slice for next scheduling descission and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice(timeslice, readyTasks,runningTasks);
       sc_time startTime=sc_time_stamp();
-      if(runningTasks.size()<=0){                    // no running task
-	if(hasTimeSlice){                           
-	  wait(timeslice, notify_scheduler_thread);
-	}else{
-	  wait(notify_scheduler_thread);
-	}
-      }else{                                        // a task allready runs
-	if(hasTimeSlice && timeslice < actualRemainingDelay){ 
-	  wait(timeslice, notify_scheduler_thread);
-	}else{
-	  wait(actualRemainingDelay, notify_scheduler_thread);
-	}
-	sc_time runTime=sc_time_stamp()-startTime;
-	assert(runTime.value()>=0);
-	actualRemainingDelay-=runTime;
-	assert(actualRemainingDelay.value()>=0);
-	if(actualRemainingDelay.value()==0){
-	  // all execution time simulated -> BLOCK running task.
-	  p_struct *task=runningTasks[actualRunningPID];
-	  smoc_notify(*(task->smoc_interupt));
-	  scheduler->removedTask(task);
+      if(!newTaskDuringOverhead){ 
+
+	if(runningTasks.size()<=0){                    // no running task
+	  if(hasTimeSlice){                           
+	    wait(timeslice - (*overhead), notify_scheduler_thread);
+	    delete overhead;
+	  }else{
+	    wait(notify_scheduler_thread);
+	  }
+	}else{                                        // a task allready runs
+	  if(hasTimeSlice && (timeslice - (*overhead)) < actualRemainingDelay){ 
+	    wait(timeslice - (*overhead), notify_scheduler_thread);
+	  }else{
+	    wait(actualRemainingDelay, notify_scheduler_thread);
+	  }
+	  sc_time runTime=sc_time_stamp()-startTime;
+	  assert(runTime.value()>=0);
+	  actualRemainingDelay-=runTime;
+	  assert(actualRemainingDelay.value()>=0);
+	  if(actualRemainingDelay.value()==0){
+	    // all execution time simulated -> BLOCK running task.
+	    p_struct *task=runningTasks[actualRunningPID];
+	    smoc_notify(*(task->smoc_interupt));
+	    scheduler->removedTask(task);
 #ifndef NO_VCD_TRACES
-	  if(task->traceSignal!=0) *(task->traceSignal)=S_READY;     
+	    if(task->traceSignal!=0) *(task->traceSignal)=S_BLOCKED;     
 #endif //NO_VCD_TRACES
-	  runningTasks.erase(actualRunningPID);
+	    runningTasks.erase(actualRunningPID);
+	    wait(SC_ZERO_TIME);
+	  }
 	}
+      }else{
+	  newTaskDuringOverhead=false;
       }
 
       //look for new tasks (they called compute)
@@ -296,6 +305,9 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
 	cerr<< "received new Task: " << newTask->name << endl;
 #endif // VPCDEBUG
+#ifndef NO_VCD_TRACES
+	*(newTask->traceSignal)=S_READY;     
+#endif //NO_VCD_TRACES
 	//insert new task in read list
 	readyTasks[newTask->pid]=newTask;
 	scheduler->addedNewTask(newTask);
@@ -303,7 +315,13 @@ namespace SystemC_VPC{
       int taskToResign,taskToAssign;
       scheduling_decision decision=
 	scheduler->schedulingDecision(taskToResign, taskToAssign, readyTasks, runningTasks);
-      
+
+
+
+
+
+
+
       //resign task
       if(decision==RESIGNED || decision==PREEMPT){
 	readyTasks[taskToResign]=runningTasks[taskToResign];
@@ -314,6 +332,25 @@ namespace SystemC_VPC{
 	if(readyTasks[taskToResign]->traceSignal!=0) *(readyTasks[taskToResign]->traceSignal)=S_READY;     
 #endif //NO_VCD_TRACES
       }
+
+      sc_time timestamp=sc_time_stamp();
+      delete overhead;
+      overhead=scheduler->schedulingOverhead();
+      if(overhead!=NULL){
+	schedulerTrace=S_RUNNING;
+	//    actual time    < endtime
+	while(sc_time_stamp()<timestamp+(*overhead)){
+	  wait((timestamp+(*overhead))-sc_time_stamp(), notify_scheduler_thread);
+	  if(sc_time_stamp()<timestamp+(*overhead)){
+	    //look for new tasks (they called compute)
+	    if(newTasks.size()>0){
+	      newTaskDuringOverhead=true;
+	    }
+	  }
+	}
+	schedulerTrace=S_READY;
+      }
+
 
       //assign task
       if(decision==ONLY_ASSIGN || decision==PREEMPT){

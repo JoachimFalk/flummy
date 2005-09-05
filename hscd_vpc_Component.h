@@ -182,6 +182,7 @@ namespace SystemC_VPC{
 
     sc_event notify_scheduler_thread;
     deque<smoc_event*> events;
+    sc_signal<trace_value> schedulerTrace;
 
     inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
     inline void ThreadedComponent::assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
@@ -210,7 +211,9 @@ namespace SystemC_VPC{
       this->traceFile =sc_create_vcd_trace_file (tracefilechar);
       ((vcd_trace_file*)this->traceFile)->sc_set_vcd_time_unit(-9);
 #endif //NO_VCD_TRACES
-      
+#ifndef NO_VCD_TRACES
+      sc_trace(this->traceFile,schedulerTrace,schedulername);
+#endif //NO_VCD_TRACES      
     }
     virtual ~ThreadedComponent(){}
     

@@ -1,4 +1,4 @@
-threadedcomponent:	HWM1	FCFS
+threadedcomponent:	HWM1	RoundRobin:timeslice-20ns
 
 IN			HWM1	100	50
 C_IN_RF			HWM1	100	49

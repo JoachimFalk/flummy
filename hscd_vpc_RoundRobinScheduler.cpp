@@ -134,4 +134,12 @@ namespace SystemC_VPC{
 
     return ret_decision;
   }
+
+
+  /**
+   *
+   */
+  sc_time* RoundRobinScheduler::schedulingOverhead(){
+    return new sc_time(1,SC_NS);
+  }
 }
