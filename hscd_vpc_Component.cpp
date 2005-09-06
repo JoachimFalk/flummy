@@ -19,10 +19,9 @@
 #include "hscd_vpc_SchedulerProxy.h"
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_Director.h"
-#include <smoc_event.hpp>
 
 namespace SystemC_VPC{
-  void Component::compute( const char *name, smoc_event *end) { 
+  void Component::compute( const char *name, sc_event *end) { 
     p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
 
 #ifndef NO_VCD_TRACES
@@ -50,7 +49,7 @@ namespace SystemC_VPC{
     // std::cerr << "VPC says: PG node " << name << " stop execution " << sc_simulation_time() << std::endl;
   }
 
-  /*void Component::compute(int process, smoc_event *end){
+  /*void Component::compute(int process, sc_event *end){
     p_struct actualTask = Director::getInstance().getProcessControlBlock(process);
     compute(actualTask);
     }*/
@@ -200,25 +199,4 @@ namespace SystemC_VPC{
   map<int,p_struct*> &Component::getNewTasks() {
     return new_tasks;
   }
-
-  void ThreadedComponent::schedule_thread(){
-    while(1){
-      wait(notify_scheduler);
-      do{
-	wait(10,SC_NS);
-	smoc_notify(*(events.front()));
-	events.pop_front();
-      }while(events.size()>0);
-    }
-  }
-  void ThreadedComponent::compute(const char *name, smoc_event *end){
-    cerr << "compute("<<name<<") at time: " << sc_simulation_time() << endl;
-    events.push_back(end);
-    notify(notify_scheduler);
-    return;
-  }
-
-  void ThreadedComponent::informAboutMapping(string module){
-
-  }
-} //namespace SystemC_VPC
+}

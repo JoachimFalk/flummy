@@ -22,6 +22,7 @@ namespace SystemC_VPC{
     void registerComponent(Component *comp);
     action_struct* getNextNewCommand(int pid);
     void setScheduler(const char *schedulername);
+    void schedule_thread();
   
     virtual ~SchedulerProxy();
   protected:
@@ -30,8 +31,6 @@ namespace SystemC_VPC{
     map<int,p_struct*> ready_tasks,running_tasks;
     Component *component;
     Scheduler *scheduler;
-  private:
-    void schedule_thread();
 
   };
 }

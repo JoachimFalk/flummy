@@ -39,7 +39,7 @@ namespace SystemC_VPC{
       }else{
 	wait(notify_scheduler);
       }
-      //     deque<int>::iterator iter;
+      deque<int>::iterator iter;
       newTasks=&component->getNewTasks();   // neue Tasks
       actions=&component->getNewCommands(); // Kommandos
       while(actions->size()){

@@ -6,6 +6,7 @@
 
 namespace SystemC_VPC{
 #define VPC_MAX_STRING_LENGTH 128
+
 #define STR_ROUNDROBIN "RoundRobin"
 #define STR_RR "RR"
 #define STR_PRIORITYSCHEDULER "PriorityScheduler"
