@@ -19,8 +19,8 @@
 #define HSCD_VPC_COMPONENT_H
 #include <systemc.h>
 
-#include <hscd_vpc_datatypes.h>
-#include <hscd_vpc_SchedulerProxy.h>
+#include "hscd_vpc_datatypes.h"
+#include "hscd_vpc_SchedulerProxy.h"
 
 #include <vector.h>
 #include <map.h>

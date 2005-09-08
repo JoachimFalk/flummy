@@ -1,9 +1,13 @@
 #ifndef HSCD_VPC_SCHEDULERPROXY_H
 #define HSCD_VPC_SCHEDULERPROXY_H
-#include <systemc.h>
-#include <hscd_vpc_datatypes.h>
+
 #include <map.h>
+
 #include <deque.h>
+
+#include "hscd_vpc_datatypes.h"
+
+#include <systemc.h>
 
 namespace SystemC_VPC{
   class Component;
