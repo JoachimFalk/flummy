@@ -140,6 +140,6 @@ namespace SystemC_VPC{
    *
    */
   sc_time* RoundRobinScheduler::schedulingOverhead(){
-    return new sc_time(1,SC_NS);
+    return NULL; //new sc_time(1,SC_NS);
   }
 }

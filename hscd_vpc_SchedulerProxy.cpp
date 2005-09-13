@@ -121,6 +121,11 @@ namespace SystemC_VPC{
     delete open_commands;
     delete scheduler;
   }
-
+  /**
+   *
+   */
+  void SchedulerProxy::processAndForwardParameter(char *sType,char *sValue){
+    scheduler->setProperty(sType,sValue);
+  }
 }
 

@@ -32,8 +32,9 @@
 #include <xercesc/dom/DOMLocator.hpp>
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
+
 #include <iostream>
- 
+#include <values.h> 
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_Component.h>
 #include <hscd_vpc_Term.h>
@@ -78,84 +79,304 @@ namespace SystemC_VPC{
     XMLCh *constraintStr  = XMLString::transcode("constraint");
     //    XMLCh *excludeStr     = XMLString::transcode("exclude");
     //    XMLCh *anytermStr     = XMLString::transcode("anyterm");
+    XMLCh *measurefileStr = XMLString::transcode("measurefile");
+    XMLCh *resultfileStr = XMLString::transcode("resultfile");
+    XMLCh *resourcesStr = XMLString::transcode("resources");
+    XMLCh *mappingsStr = XMLString::transcode("mappings");
+    XMLCh *componentStr = XMLString::transcode("component");
+    XMLCh *mappingStr = XMLString::transcode("mapping");
+    XMLCh *attributeStr = XMLString::transcode("attribute");
     //XMLCh *Str = XMLString::transcode("");
     
     XMLCh *nameAttrStr    = XMLString::transcode("name");
     XMLCh *countAttrStr   = XMLString::transcode("count");
-    //    XMLCh *processAttrStr = XMLString::transcode("process");
+    XMLCh *typeAttrStr = XMLString::transcode("type");
     XMLCh *dividerAttrStr = XMLString::transcode("divider");
-    //    XMLCh *stateAttrStr   = XMLString::transcode("state");
+    XMLCh *schedulerAttrStr   = XMLString::transcode("scheduler");
+    XMLCh *valueAttrStr   = XMLString::transcode("value");
+    XMLCh *targetAttrStr   = XMLString::transcode("target");
+    XMLCh *sourceAttrStr   = XMLString::transcode("source");
+    //    XMLCh *AttrStr   = XMLString::transcode("");
     
-
     char *vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
-    FILE *fconffile;
-
     FALLBACKMODE=false;
-    if(vpc_evaluator_prefix){
-      char vpc_conf_file[VPC_MAX_STRING_LENGTH];
-      sprintf(vpc_conf_file,"%s%s",vpc_evaluator_prefix,STR_VPC_CONF_FILE);
-#ifdef VPC_DEBUG
-      cerr <<"config found"<<vpc_conf_file << endl;
-#endif //VPC_DEBUG
-      fconffile=fopen(vpc_conf_file,"r");
+    /* OLD CODE
+       FILE *fconffile;
+
+       if(vpc_evaluator_prefix){
+       char vpc_conf_file[VPC_MAX_STRING_LENGTH];
+       sprintf(vpc_conf_file,"%s%s",vpc_evaluator_prefix,STR_VPC_CONF_FILE);
+       #ifdef VPC_DEBUG
+       cerr <<"config found"<<vpc_conf_file << endl;
+       #endif //VPC_DEBUG
+       fconffile=fopen(vpc_conf_file,"r");
+       }else{
+       char *cfile= getenv("VPCCONFIGURATION");
+       if(!cfile)FALLBACKMODE=true;
+       else{
+       #ifdef VPC_DEBUG
+       cerr << "-"<<cfile << "-"<< endl;
+       #endif //VPC_DEBUG
+       }
+       fconffile=fopen(cfile,"r");
+       }
+    */
+    char *cfile= getenv("VPCCONFIGURATION");
+    if(!cfile){             // test environment
+      FALLBACKMODE=true;
     }else{
-      char *cfile= getenv("VPCCONFIGURATION");
-      if(!cfile)FALLBACKMODE=true;
-      else{
+      FILE *fconffile=fopen(cfile,"r");
+      if( NULL == fconffile ){       // test if file exists
+	FALLBACKMODE=true;
+      }else{
+	fclose(fconffile);
 #ifdef VPC_DEBUG
- cerr << "-"<<cfile << "-"<< endl;
+	cerr << "configuration: "<<cfile << endl;
 #endif //VPC_DEBUG
       }
-      fconffile=fopen(cfile,"r");
     }
-    if(!fconffile)FALLBACKMODE=true;
-    char module[VPC_MAX_STRING_LENGTH],component[VPC_MAX_STRING_LENGTH],scheduler[VPC_MAX_STRING_LENGTH];
-    double delay;
-    int priority;
-    if(!FALLBACKMODE){
-      while(!feof(fconffile)){
-	fscanf(fconffile,"%s",module);
-	if(0==strcmp(module,"component:")){
-	  //eine Komponente
-	  fscanf(fconffile,"%s %s",component,scheduler);
-	  component_map_by_name.insert(pair<string,AbstractComponent*>(component,new Component(component,scheduler)));
-	  //cerr << "comp " << module << component << scheduler<<endl;
-	}else if(0==strcmp(module,"threadedcomponent:")){
-	  //eine Komponente
-	  fscanf(fconffile,"%s %s",component,scheduler);
-	  component_map_by_name.insert(pair<string,AbstractComponent*>(component,new ThreadedComponent(component,scheduler)));
-	  //cerr << "comp " << module << component << scheduler<<endl;
-	}else{
-	  //eine Abbildung: process -> Komponente
-	  fscanf(fconffile,"%s %lf %i",component,&delay,&priority);
-	  assert(component_map_by_name.count(component)==1);//Component not in conf-file!
-	  map<string,AbstractComponent*>::iterator iter;
-	  iter=component_map_by_name.find(component);
-	  mapping_map_by_name.insert(pair<string,AbstractComponent*>(module,iter->second));
-	  //cerr << "mapping " << module << component << delay<<endl;
-	  (iter->second)->informAboutMapping(module);
-	  p_struct *p= new p_struct;
-	  p->name=module;
-	  p->priority=priority;
-	  p->deadline=1000;//FIXME
-	  p->period=2800.0;//FIXME
-	  p->pid=p_struct_map_by_name.size();//HACK
-	  p->delay=delay;
-	  p->activation_count=0;
-	  p->state=inaktiv;
-	  p_struct_map_by_name.insert(pair<string,p_struct*>(module,p));
-	}
-      }
-    }else{
+    if(FALLBACKMODE){
       FallbackComponent *fall=new FallbackComponent("Fallback-Component","FCFS");
       component_map_by_name.insert(pair<string,AbstractComponent*>("Fallback-Component",fall));
       mapping_map_by_name.insert(pair<string,AbstractComponent*>("Fallback-Component",fall));
-    }
+    }else{
+      // process xml
+      DOMTreeWalker *vpcConfigTreeWalker;
+      DOMDocument *vpcConfigDoc;
+      DOMBuilder *configParser;
+      static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
+      DOMImplementation *configImpl = DOMImplementationRegistry::getDOMImplementation(gLS);
+      // create an error handler and install it
+      VpcDomErrorHandler *configErrorh=new VpcDomErrorHandler();
+      configParser = ((DOMImplementationLS*)configImpl)->createDOMBuilder(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
+      // turn on validation
+      configParser->setFeature(XMLUni::fgDOMValidation, true);
+      configParser->setErrorHandler(configErrorh);
+      try {                                                             
+	// reset document pool - clear all previous allocated data
+	configParser->resetDocumentPool();                                    
+	vpcConfigDoc = configParser->parseURI(cfile);
+      }
+      catch (const XMLException& toCatch) {
+	cerr << "\nError while parsing xml file: '" << cfile << "'\n"
+	     << "Exception message is:  \n"
+	     << XMLString::transcode( toCatch.getMessage()) << "\n" << endl;
+      }
+      catch (const DOMException& toCatch) {
+	const unsigned int maxChars = 2047;
+	XMLCh errText[maxChars + 1];
+      
+	cerr << "\nDOM Error while parsing xml file: '" << cfile << "'\n"
+	     << "DOMException code is:  " << XMLString::transcode( toCatch.msg) << endl;
+      
+	if (DOMImplementation::loadDOMExceptionMsg(toCatch.code, errText, maxChars))
+	  cerr << "Message is: " << XMLString::transcode( errText) << endl;
+
+      }
+      catch (...) {
+	cerr << "\nUnexpected exception while parsing xml file: '" << cfile << "'\n";
+      
+      }
+
+      // set treewalker to documentroot
+      vpcConfigTreeWalker = vpcConfigDoc->createTreeWalker( (DOMNode*)vpcConfigDoc->getDocumentElement(), DOMNodeFilter::SHOW_ELEMENT, 0, true);
+      vpcConfigTreeWalker->setCurrentNode( (DOMNode*)vpcConfigDoc->getDocumentElement());
     
-    if(!vpc_evaluator_prefix){
+      // moves the Treewalker to the first Child 
+      DOMNode *node = vpcConfigTreeWalker->firstChild(); 
+      const XMLCh *xmlName;
+      while(node!=0){
+	xmlName=node->getNodeName();
+
+	// find resources tag
+	if( 0==XMLString::compareNString( xmlName, resourcesStr, sizeof(resourcesStr) ) ){
+
+	  // walk down hierachy to components
+	  node = vpcConfigTreeWalker->firstChild();
+
+	  while(node!=0){
+	    xmlName=node->getNodeName();
+	    //find all component tags
+	    if( 0==XMLString::compareNString( xmlName, componentStr, sizeof(componentStr))){
+	      DOMNamedNodeMap * atts=node->getAttributes();
+	      char *sName, *sType, *sScheduler;
+	      sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+	      sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+	      sScheduler=XMLString::transcode(atts->getNamedItem(schedulerAttrStr)->getNodeValue());
+	      AbstractComponent *comp=NULL;
+	      if(0==strncmp(sType,STR_VPC_COMPONENTSTRING,sizeof(STR_VPC_COMPONENTSTRING))){
+		comp=new Component(sName,sScheduler);
+		component_map_by_name.insert(pair<string,AbstractComponent*>(sName,comp));
+	      }else if(0==strncmp(sType,STR_VPC_THREADEDCOMPONENTSTRING,sizeof(STR_VPC_THREADEDCOMPONENTSTRING))){
+		comp=new ThreadedComponent(sName,sScheduler);
+		component_map_by_name.insert(pair<string,AbstractComponent*>(sName,comp));
+	      }else {
+		cerr << "VPC> Found unknown Component type: name=" << sName << "type=" << sType << endl;
+	      }
+
+	      if(comp!=NULL){
+		node = vpcConfigTreeWalker->firstChild();
+   
+		// find all attributes
+		while(node!=0){
+		  xmlName=node->getNodeName();
+		  if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+		    DOMNamedNodeMap * atts=node->getAttributes();
+		    char *sType, *sValue;
+		    sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+		    sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+		    comp->processAndForwardParameter(sType,sValue);
+		  }
+		  node = vpcConfigTreeWalker->nextSibling();
+		}
+	      }
+	      node = vpcConfigTreeWalker->parentNode();
+	    }
+	    node = vpcConfigTreeWalker->nextSibling();
+	  }
+	  node = vpcConfigTreeWalker->parentNode();
+	  // find mappings tag (not mapping)
+	}else if( 0==XMLString::compareNString( xmlName, mappingsStr, sizeof(mappingsStr) ) ){
+	  node = vpcConfigTreeWalker->firstChild();
+	  while(node!=0){
+	    xmlName=node->getNodeName();
+
+	    // find mapping tag (not mappings)
+	    if( 0==XMLString::compareNString( xmlName, mappingStr, sizeof(mappingStr))){
+	      DOMNamedNodeMap * atts=node->getAttributes();
+	      char *sTarget, *sSource;
+	      sTarget=XMLString::transcode(atts->getNamedItem(targetAttrStr)->getNodeValue());
+	      sSource=XMLString::transcode(atts->getNamedItem(sourceAttrStr)->getNodeValue());
+
+	      if(component_map_by_name.count(sTarget)==1){
+#ifdef VPC_DEBUG
+		cerr << "VPC> Found mapping attribute: source=" << sSource << " target=" << sTarget << endl; 
+#endif //VPC_DEBUG
+		map<string,AbstractComponent*>::iterator iter=component_map_by_name.find(sTarget);
+		mapping_map_by_name.insert(pair<string,AbstractComponent*>(sSource,iter->second));
+		(iter->second)->informAboutMapping(sSource);
+	      
+		p_struct *p= new p_struct;
+		p->name=sSource;
+		p->pid=p_struct_map_by_name.size(); // just enumerate to get unique pid
+		p->activation_count=0; //default
+		p->state=inaktiv;      //default
+		p->priority=0;         //default
+		p->deadline=MAXDOUBLE; //default
+		p->period=MAXDOUBLE;   //default
+ 	      
+		//walk down hierarchy to attributes
+		node = vpcConfigTreeWalker->firstChild();
+	      
+		// find all attributes
+		while(node!=0){
+		  xmlName=node->getNodeName();
+		  if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+		    DOMNamedNodeMap * atts=node->getAttributes();
+		    char *sType, *sValue;
+		    sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+		    sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+		    if( 0 == strncmp(sType, STR_VPC_PRIORITY, sizeof(STR_VPC_PRIORITY) )){
+		      sscanf(sValue, 
+"%d", 
+&(p->priority));
+		    }else if( 0 == strncmp(sType, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
+		      sscanf(sValue, "%lf", &(p->deadline));
+		    }else if( 0 == strncmp(sType, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
+		      sscanf(sValue, "%lf", &(p->period));
+		    }else if( 0 == strncmp(sType, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
+		      sscanf(sValue, "%lf", &(p->delay));
+		    }else{
+#ifdef VPC_DEBUG
+		      cerr << "VPC> Unknown mapping attribute: type=" << sType << " value=" << sValue << endl; 
+		      cerr << "VPC> Try to interpret as function specific delay!!" << endl;
+#endif //VPC_DEBUG
+		      double delay;
+		      if( 1 == sscanf(sValue, "%lf", &delay) ){
+			  p->functionDelays.insert(pair<string,double>(sType,delay));
+		      } else {
+#ifdef VPC_DEBUG
+			  cerr <<  "VPC> Mapping realy unknown!" << endl;
+#endif //VPC_DEBUG
+		      }
+		    }
+		  }
+		  node = vpcConfigTreeWalker->nextSibling();
+		}
+		node = vpcConfigTreeWalker->parentNode();
+
+		p_struct_map_by_name.insert(pair<string,p_struct*>(sSource,p));
+	      }else{
+		cerr << "VPC> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
+	      }
+	    }
+	    node = vpcConfigTreeWalker->nextSibling();
+	  }
+	  node = vpcConfigTreeWalker->parentNode();
+	}else if( 0==XMLString::compareNString( xmlName, measurefileStr, sizeof(measurefileStr) ) ){
+
+	}else if( 0==XMLString::compareNString( xmlName, resultfileStr, sizeof(resultfileStr) ) ){
+
+	}else{
+
+	}
+
+	node = vpcConfigTreeWalker->nextSibling();
+       
+      }
+    }
+    /*
+      fconffile=fopen(cfile,"r");
+      if(!fconffile)FALLBACKMODE=true;
+      char module[VPC_MAX_STRING_LENGTH],component[VPC_MAX_STRING_LENGTH],scheduler[VPC_MAX_STRING_LENGTH];
+      double delay;
+      int priority;
+      if(!FALLBACKMODE){
+      while(!feof(fconffile)){
+      fscanf(fconffile,"%s",module);
+      if(0==strcmp(module,"component:")){
+      //eine Komponente
+      fscanf(fconffile,"%s %s",component,scheduler);
+      component_map_by_name.insert(pair<string,AbstractComponent*>(component,new Component(component,scheduler)));
+      //cerr << "comp " << module << component << scheduler<<endl;
+      }else if(0==strcmp(module,"threadedcomponent:")){
+      //eine Komponente
+      fscanf(fconffile,"%s %s",component,scheduler);
+      component_map_by_name.insert(pair<string,AbstractComponent*>(component,new ThreadedComponent(component,scheduler)));
+      //cerr << "comp " << module << component << scheduler<<endl;
+      }else{
+      //eine Abbildung: process -> Komponente
+      fscanf(fconffile,"%s %lf %i",component,&delay,&priority);
+      assert(component_map_by_name.count(component)==1);//Component not in conf-file!
+      map<string,AbstractComponent*>::iterator iter;
+      iter=component_map_by_name.find(component);
+      mapping_map_by_name.insert(pair<string,AbstractComponent*>(module,iter->second));
+      //cerr << "mapping " << module << component << delay<<endl;
+      (iter->second)->informAboutMapping(module);
+      p_struct *p= new p_struct;
+      p->name=module;
+      p->priority=priority;
+      p->deadline=1000;//FIXME
+      p->period=2800.0;//FIXME
+      p->pid=p_struct_map_by_name.size();//HACK
+      p->delay=delay;
+      p->activation_count=0;
+      p->state=inaktiv;
+      p_struct_map_by_name.insert(pair<string,p_struct*>(module,p));
+      }
+      }
+      }else{
+      FallbackComponent *fall=new FallbackComponent("Fallback-Component","FCFS");
+      component_map_by_name.insert(pair<string,AbstractComponent*>("Fallback-Component",fall));
+      mapping_map_by_name.insert(pair<string,AbstractComponent*>("Fallback-Component",fall));
+      }
+    */
+
+
+    if(/*!vpc_evaluator_prefix*/true){
       /*
-      cerr << VPC_ERROR << "No VPC_EVALUATOR Environment\n"
-	   << "Hint: try to export/setenv VPC_EVALUATOR"<< NENDL; //<< endl;
+	cerr << VPC_ERROR << "No VPC_EVALUATOR Environment\n"
+	<< "Hint: try to export/setenv VPC_EVALUATOR"<< NENDL; //<< endl;
       */
     }else{
       char vpc_result_file[VPC_MAX_STRING_LENGTH];
@@ -183,7 +404,7 @@ namespace SystemC_VPC{
 	// reset document pool - clear all previous allocated data
 	parser->resetDocumentPool();                                    
 	vpc_measure_doc = parser->parseURI(vpc_measure_file);
-     }
+      }
       catch (const XMLException& toCatch) {
 	cerr << "\nError while parsing xml file: '" << vpc_measure_file << "'\n"
 	     << "Exception message is:  \n"
@@ -227,12 +448,12 @@ namespace SystemC_VPC{
 	  
 	  DOMNamedNodeMap * atts=n->getAttributes();
 	  //cerr << GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
-	  char *scount,*sdivider,*sname;
-	  sname=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-	  scount=XMLString::transcode(atts->getNamedItem(countAttrStr)->getNodeValue());
-	  sdivider=XMLString::transcode(atts->getNamedItem(dividerAttrStr)->getNodeValue());
+	  char *sCount,*sDivider,*sName;
+	  sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+	  sCount=XMLString::transcode(atts->getNamedItem(countAttrStr)->getNodeValue());
+	  sDivider=XMLString::transcode(atts->getNamedItem(dividerAttrStr)->getNodeValue());
 	  
-	  Constraint *cons=new Constraint(sname,scount,sdivider);
+	  Constraint *cons=new Constraint(sName,sCount,sDivider);
 	  XmlHelper::xmlFillConstraint(cons,n->getFirstChild());
 	  constraints.push_back(cons);
 	}
@@ -311,7 +532,10 @@ namespace SystemC_VPC{
 
   p_struct* Director::getProcessControlBlock( const char *name ){
     if(!FALLBACKMODE){
-      assert(1==p_struct_map_by_name.count(name));
+      if(1!=p_struct_map_by_name.count(name)){
+	cerr << "VPC> No p_struct found for task \"" << name << "\"" << endl;
+	exit(0);
+      }
       return p_struct_map_by_name[name];
     }else{
       if(1==p_struct_map_by_name.count(name)){

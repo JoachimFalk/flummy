@@ -28,6 +28,11 @@ namespace SystemC_VPC{
     void setScheduler(const char *schedulername);
   
     virtual ~SchedulerProxy();
+
+    /**
+     * \brief Set parameter for Component and Scheduler.
+     */
+    virtual void processAndForwardParameter(char *sType,char *sValue);
   protected:
   
     map<int,action_struct> *open_commands;

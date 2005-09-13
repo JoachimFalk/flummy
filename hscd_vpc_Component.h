@@ -65,6 +65,11 @@ namespace SystemC_VPC{
      * be created in elaboration phase (before first sc_start).
      */
     virtual void informAboutMapping(string module)=0;
+
+    /**
+     * \brief Set parameter for Component and Scheduler.
+     */
+    virtual void processAndForwardParameter(char *sType,char *sValue)=0;
   };
 
   /**
@@ -117,6 +122,12 @@ namespace SystemC_VPC{
      * be created in elaboration phase (before first sc_start).
      */
     virtual void informAboutMapping(string module);
+ 
+   /**
+     * \brief Set parameter for Component and Scheduler.
+     */
+    virtual void processAndForwardParameter(char *sType,char *sValue);
+
 
   protected:
     virtual void compute(p_struct *actualTask);
@@ -167,33 +178,68 @@ namespace SystemC_VPC{
      */
     FallbackComponent(const char *name,const char *schedulername){}
     virtual ~FallbackComponent(){}
+
+   /**
+     * \brief No parameter are set in FallbackComponent.
+     */
+    virtual void processAndForwardParameter(char *sType,char *sValue){}
   private:
   };
 
-  class ThreadedComponent : public Component, public SchedulerProxy/*, public sc_module*/{
-    // SC_HAS_PROCESS(ThreadedComponent);
+  class ThreadedComponent : public AbstractComponent, public sc_module{
+    SC_HAS_PROCESS(ThreadedComponent);
   protected:
     virtual void compute(p_struct *actualTask);
     virtual void schedule_thread(); 
   private:
+    char componentName [VPC_MAX_STRING_LENGTH];
+    sc_trace_file *traceFile;
+    map<string,sc_signal<trace_value>*> trace_map_by_name;
+    Scheduler *scheduler;
     deque<p_struct*>      newTasks;
     //    map<int,action_struct> *open_commands;
     map<int,p_struct*> readyTasks,runningTasks;
 
     sc_event notify_scheduler_thread;
-    deque<smoc_event*> events;
+    //deque<smoc_event*> events;
     sc_signal<trace_value> schedulerTrace;
 
     inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
     inline void ThreadedComponent::assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
   public:
+    void setScheduler(const char *schedulername);
+    /**
+     * \brief An implementation of AbstractComponent::compute(const char *, const char *, smoc_event).
+     */
+    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL);
+    
+    /**
+     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
+     */
+    virtual void compute( const char *name, smoc_event *end=NULL);
+    /**
+     * \brief A vector of commandos, so the Scheduler can descide what to do.
+     *
+     * If a task calls compute, the command "ready" is generated. If the whole 
+     * delay-time is delayed the command "block" is generated.
+     */
+    vector<action_struct> &getNewCommands();
+
+    /**
+     * \brief Used to create the Tracefiles.
+     *
+     * To create a vcd-trace-file in SystemC all the signals to 
+     * trace have to be in a "global" scope. The signals have to 
+     * be created in elaboration phase (before first sc_start).
+     */
+    virtual void informAboutMapping(string module);
 
 
     /**
      * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
      */
-    ThreadedComponent(sc_module_name name,const char *schedulername):/*sc_module*/SchedulerProxy(name){
-      //SC_THREAD(schedule_thread);
+    ThreadedComponent(sc_module_name name,const char *schedulername):sc_module(name){
+      SC_THREAD(schedule_thread);
       strcpy(this->componentName,name);
       setScheduler(schedulername);
       /*    schedulerproxy=new SchedulerProxy(this->componentName);
@@ -216,6 +262,10 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES      
     }
     virtual ~ThreadedComponent(){}
+   /**
+     * \brief Set parameter for Component and Scheduler.
+     */
+    virtual void processAndForwardParameter(char *sType,char *sValue);
     
   };
 }

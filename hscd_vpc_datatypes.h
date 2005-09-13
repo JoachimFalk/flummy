@@ -1,7 +1,10 @@
 #ifndef HSCD_VPC_P_STRUCT_H
 #define HSCD_VPC_P_STRUCT_H
 #include <systemc.h>
+
 #include <string>
+#include <map.h>
+
 #include <smoc_event.hpp>
 
 
@@ -19,6 +22,13 @@ namespace SystemC_VPC{
 #define STR_VPC_MEASURE_FILE "measure.xml"
 #define STR_VPC_RESULT_FILE "result"
 #define STR_VPC_CONF_FILE "config"
+
+#define STR_VPC_THREADEDCOMPONENTSTRING "threaded"
+#define STR_VPC_COMPONENTSTRING "normal"
+#define STR_VPC_DELAY "delay"
+#define STR_VPC_PRIORITY "priority"
+#define STR_VPC_PERIOD "period"
+#define STR_VPC_DEADLINE "deadline"
 
 #define RED(str) "\e[31;1m" <<str<< "\e[0m"
 #define GREEN(str) "\e[32;1m" <<str<< "\e[0m"
@@ -66,13 +76,14 @@ namespace SystemC_VPC{
     sc_event* interupt;
     smoc_event* smoc_interupt;
     double delay;
-    double remaining_delay;
+    double remainingDelay;
     int priority;
     double period;
     double deadline;
     int activation_count;
     activation_state state;
     sc_signal<trace_value> *traceSignal;
+    map<string,double>  functionDelays;
   };
 
 

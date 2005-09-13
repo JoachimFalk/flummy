@@ -52,6 +52,14 @@ namespace SystemC_VPC{
      *\brief The overhead needed to determine the scheduling descission.
      */
     virtual sc_time* schedulingOverhead()=0;
+
+    /**
+     *\brief Customize scheduler options, like timeslice or scheduling overhead.
+     *
+     * Does nothing by default.
+     */
+    virtual void setProperty(char* key, char* value){}
+
   };
 }
 #endif
