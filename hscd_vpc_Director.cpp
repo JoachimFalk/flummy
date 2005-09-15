@@ -494,7 +494,9 @@ namespace SystemC_VPC{
       else if(0==strncmp("end",cons_name,3))
 	end=(*iter)->getSatisfiedTime();
     }
+#ifdef VPC_DEBUG
     cerr << "start: " << start << " end: " << end << endl;
+#endif //VPC_DEBUG
     if (start!=-1 && end!=-1){
       cout << "latency: " << end - start << endl;
       char* vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
