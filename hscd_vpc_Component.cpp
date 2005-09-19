@@ -401,6 +401,7 @@ namespace SystemC_VPC{
    */
   void ThreadedComponent::compute(p_struct *actualTask){
 
+
 #ifndef NO_VCD_TRACES
     if(1==trace_map_by_name.count(actualTask->name)){
       map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->name);
@@ -420,8 +421,8 @@ namespace SystemC_VPC{
     newTasks.push_back(actualTask);
 
     //awake scheduler thread
-    notify(SC_ZERO_TIME,notify_scheduler_thread);
-
+    notify(notify_scheduler_thread);
+    wait(SC_ZERO_TIME);
 
     ////////////////////////////////////////////////
     //events.push_back(actualTask->smoc_interupt);//
@@ -464,7 +465,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("ThreadedComponent::compute(") <<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << RED("ThreadedComponent::compute( ") <<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
 #ifndef NO_VCD_TRACES
@@ -515,7 +516,7 @@ namespace SystemC_VPC{
   void ThreadedComponent::compute( const char *name, smoc_event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("ThreadedComponent::compute(") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << RED("ThreadedComponent::compute( ") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
     compute(name,"",end);
