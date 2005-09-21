@@ -310,6 +310,11 @@ namespace SystemC_VPC{
 	  if(actualRemainingDelay.value()==0){
 	    // all execution time simulated -> BLOCK running task.
 	    p_struct *task=runningTasks[actualRunningPID];
+
+	    task->state=ending;
+	    Director::getInstance().checkConstraints();
+	    task->state=inaktiv;
+
 	    smoc_notify(*(task->smoc_interupt));
 	    scheduler->removedTask(task);
 #ifndef NO_VCD_TRACES
