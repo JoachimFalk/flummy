@@ -285,7 +285,7 @@ namespace SystemC_VPC{
     sc_time *overhead;
     int actualRunningPID;
     bool newTaskDuringOverhead=false;
-    wait(SC_ZERO_TIME);
+    //wait(SC_ZERO_TIME);
     while(1){
       //determine the time slice for next scheduling descission and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice(timeslice, readyTasks,runningTasks);
@@ -497,7 +497,6 @@ namespace SystemC_VPC{
 	// general delay for actor
 	actualTask->remainingDelay = actualTask->delay;
     }
-    cerr << "Delay for " << actualTask->name << " is " << actualTask->remainingDelay << endl;
   
 
     if( actualTask->smoc_interupt == NULL ){
