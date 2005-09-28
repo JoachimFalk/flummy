@@ -26,7 +26,7 @@ root_builddir=$(top_builddir)/..
 SUBDIRS=
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
-SYSTEMOC_V3_SRCDIR=$(root_srcdir)/SysteMoC-v0.3
+SYSTEMOC_V3_SRCDIR=$(root_srcdir)/SysteMoC
 
 ac_aux_dir = @ac_aux_dir@
 
