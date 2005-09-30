@@ -315,6 +315,10 @@ namespace SystemC_VPC{
 	    Director::getInstance().checkConstraints();
 	    task->state=inaktiv;
 
+#ifdef VPC_DEBUG
+	    cerr << "PID: " << actualRunningPID<< " > ";
+	    cerr << "removed Task: " << task->name << endl;
+#endif // VPCDEBUG
 	    smoc_notify(*(task->smoc_interupt));
 	    scheduler->removedTask(task);
 #ifndef NO_VCD_TRACES
@@ -340,6 +344,9 @@ namespace SystemC_VPC{
 	*(newTask->traceSignal)=S_READY;     
 #endif //NO_VCD_TRACES
 	//insert new task in read list
+	assert(readyTasks.find(newTask->pid)   == readyTasks.end()   /* An task can call compute only one time! */);
+	assert(runningTasks.find(newTask->pid) == runningTasks.end() /* An task can call compute only one time! */);
+	
 	readyTasks[newTask->pid]=newTask;
 	scheduler->addedNewTask(newTask);
       }
@@ -388,7 +395,14 @@ namespace SystemC_VPC{
 	runningTasks[taskToAssign]=readyTasks[taskToAssign];
 	readyTasks.erase(taskToAssign);
 	actualRunningPID=taskToAssign;
+#ifdef VPC_DEBUG
+	cerr << "PID: " << taskToAssign;
+	cerr << "> remaining delay for " << runningTasks[taskToAssign]->name;
+#endif // VPCDEBUG
 	actualRemainingDelay=sc_time(runningTasks[taskToAssign]->remainingDelay,SC_NS);
+#ifdef VPC_DEBUG
+	cerr<< " is " << runningTasks[taskToAssign]->remainingDelay << endl;
+#endif // VPCDEBUG
 #ifndef NO_VCD_TRACES
 	if(runningTasks[taskToAssign]->traceSignal!=0) *(runningTasks[taskToAssign]->traceSignal)=S_RUNNING;     
 #endif //NO_VCD_TRACES
