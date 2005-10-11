@@ -17,17 +17,16 @@
  ******************************************************************************/
 #ifndef HSCD_VPC_DIRECTOR_H
 #define HSCD_VPC_DIRECTOR_H
-#include "hscd_vpc_Component.h"
+#include "hscd_vpc_AbstractComponent.h"
 
 #include <string>
-
+#include <map.h>
+#include <vector.h>
 
 namespace SystemC_VPC{
 
   struct p_struct;
   class Constraint;
-
-  using std::string;
 
   /**
    * \brief Director knowes all (Abstract-)Components, all mappings (task -> component).
@@ -46,11 +45,11 @@ namespace SystemC_VPC{
      * \brief Reads allokation and binding from file.
      */
     Director();
-    map<string,AbstractComponent*> component_map_by_name;
+    map<std::string,AbstractComponent*> component_map_by_name;
     //map<int,AbstractComponent*> component_map_by_pid;
-    map<string,AbstractComponent*> mapping_map_by_name;
+    map<std::string,AbstractComponent*> mapping_map_by_name;
     //map<int,AbstractComponent*> mapping_map_by_pid;
-    map<string,p_struct*> p_struct_map_by_name;
+    map<std::string,p_struct*> p_struct_map_by_name;
     //map<int,p_struct> p_struct_map_by_pid;
 
     vector<Constraint*> constraints;
@@ -74,7 +73,7 @@ namespace SystemC_VPC{
     /**
      *
      */
-    map<string,p_struct*>& getPcbMap(){
+    map<std::string,p_struct*>& getPcbMap(){
       return p_struct_map_by_name;
     }
 

@@ -61,10 +61,8 @@ pkgincludeprefix=systemcvpc/
 
 lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
-	hscd_vpc_SchedulerProxy.h		\
-	hscd_vpc_Component.h			\
 	hscd_vpc_Director.h			\
-	hscd_vpc_datatypes.h			
+	hscd_vpc_AbstractComponent.h
 
 #noinst_HEADERS=	oneof.hpp
 

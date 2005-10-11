@@ -21,6 +21,7 @@
 
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_SchedulerProxy.h"
+#include "hscd_vpc_AbstractComponent.h"
 
 #include <vector.h>
 #include <map.h>
@@ -31,46 +32,6 @@
 namespace SystemC_VPC{
   //  class SchedulerProxy;
   class Scheduler;
-
-
-  /**
-   * \brief The interface definition to a Virtual-Processing-Component (VPC).
-   * 
-   * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
-   */
-  class AbstractComponent{
-  public:
-
-    /**
-     * \brief Simulate an execution on this "Virtual Component".
-     *
-     * While this simulation is running SystemC simulation time is consumed.
-     */
-    virtual void compute( const char *name, const char *funcname, smoc_event *end=NULL)=0;
-
-    /**
-     * \brief Simulate an execution on this "Virtual Component".
-     *
-     * While this simulation is running SystemC simulation time is consumed.
-     */
-    virtual void compute( const char *name, smoc_event *end=NULL)=0;
-    //    virtual void compute(int iprocess)=0;
-    virtual ~AbstractComponent(){};
-
-    /**
-     * \brief Used to create the Tracefiles.
-     *
-     * To create a vcd-trace-file in SystemC all the signals to 
-     * trace have to be in a "global" scope. The signals have to 
-     * be created in elaboration phase (before first sc_start).
-     */
-    virtual void informAboutMapping(string module)=0;
-
-    /**
-     * \brief Set parameter for Component and Scheduler.
-     */
-    virtual void processAndForwardParameter(char *sType,char *sValue)=0;
-  };
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -121,7 +82,7 @@ namespace SystemC_VPC{
      * trace have to be in a "global" scope. The signals have to 
      * be created in elaboration phase (before first sc_start).
      */
-    virtual void informAboutMapping(string module);
+    virtual void informAboutMapping(std::string module);
  
    /**
      * \brief Set parameter for Component and Scheduler.
@@ -133,7 +94,7 @@ namespace SystemC_VPC{
     virtual void compute(p_struct *actualTask);
     char componentName [VPC_MAX_STRING_LENGTH];
     sc_trace_file *traceFile;
-    map<string,sc_signal<trace_value>*> trace_map_by_name;
+    map<std::string,sc_signal<trace_value>*> trace_map_by_name;
   private:
     map<int,p_struct*>      newTasks;
     vector<action_struct>  open_commands;
@@ -171,7 +132,7 @@ namespace SystemC_VPC{
     /**
      * No VCD tracing in FallbackComponent needed.
      */
-    virtual void informAboutMapping(string module){};
+    virtual void informAboutMapping(std::string module){};
 
     /**
      * \brief A backward compatible implementation of AbstractComponent.
@@ -194,7 +155,7 @@ namespace SystemC_VPC{
   private:
     char componentName [VPC_MAX_STRING_LENGTH];
     sc_trace_file *traceFile;
-    map<string,sc_signal<trace_value>*> trace_map_by_name;
+    map<std::string,sc_signal<trace_value>*> trace_map_by_name;
     Scheduler *scheduler;
     deque<p_struct*>      newTasks;
     //    map<int,action_struct> *open_commands;
@@ -232,7 +193,7 @@ namespace SystemC_VPC{
      * trace have to be in a "global" scope. The signals have to 
      * be created in elaboration phase (before first sc_start).
      */
-    virtual void informAboutMapping(string module);
+    virtual void informAboutMapping(std::string module);
 
 
     /**
@@ -247,7 +208,7 @@ namespace SystemC_VPC{
 	    schedulerproxy->registerComponent(this);
       */
 #ifndef NO_VCD_TRACES
-      string tracefilename=this->componentName;
+      std::string tracefilename=this->componentName;
       char tracefilechar[VPC_MAX_STRING_LENGTH];
       char* traceprefix= getenv("VPCTRACEFILEPREFIX");
       if(0!=traceprefix){
