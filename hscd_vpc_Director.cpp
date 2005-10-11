@@ -117,6 +117,7 @@ namespace SystemC_VPC{
     if(cfile){
       fconffile=fopen(cfile,"r");
       if( NULL == fconffile ){       // test if file exists
+	assert( "VPCCONFIGURATION is set, but points to nowhere" == NULL );  // for joachim
 	FALLBACKMODE=true;
       }else{
 	fclose(fconffile);

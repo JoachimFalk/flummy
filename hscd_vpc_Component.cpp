@@ -122,7 +122,8 @@ namespace SystemC_VPC{
     cmd = new action_struct;
     cmd->target_pid = process;
     cmd->command = READY;
-    open_commands.push_back(*cmd);               //          add
+    open_commands.push_back(*cmd);               //          add 
+    // FIXME delete pointer
 
     sc_event& e = schedulerproxy->getNotifyEvent();
     notify(SC_ZERO_TIME,e);
