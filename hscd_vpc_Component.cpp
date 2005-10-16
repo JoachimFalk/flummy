@@ -442,7 +442,7 @@ namespace SystemC_VPC{
 
     //awake scheduler thread
     notify(notify_scheduler_thread);
-    wait(SC_ZERO_TIME);
+    //    wait(SC_ZERO_TIME);
 
     ////////////////////////////////////////////////
     //events.push_back(actualTask->smoc_interupt);//
