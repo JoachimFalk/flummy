@@ -34,7 +34,7 @@
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
 
 #include <iostream>
-#include <values.h> 
+#include <float.h> 
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_Component.h>
 #include <hscd_vpc_Term.h>
@@ -262,8 +262,8 @@ namespace SystemC_VPC{
 		p->activation_count=0; //default
 		p->state=inaktiv;      //default
 		p->priority=0;         //default
-		p->deadline=MAXDOUBLE; //default
-		p->period=MAXDOUBLE;   //default
+		p->deadline = DBL_MAX; //default
+		p->period   = DBL_MAX; //default
  	      
 		//walk down hierarchy to attributes
 		node = vpcConfigTreeWalker->firstChild();

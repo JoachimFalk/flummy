@@ -27,7 +27,6 @@
 
 #include <smoc_event.hpp>
 
-#include <values.h>
 namespace SystemC_VPC{
 
   /**
