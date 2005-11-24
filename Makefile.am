@@ -26,8 +26,6 @@ root_builddir=$(top_builddir)/..
 SUBDIRS=
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
-SYSTEMOC_V3_SRCDIR=$(root_srcdir)/SysteMoC-v0.3
-
 ac_aux_dir = @ac_aux_dir@
 
 include $(ac_aux_dir)/jfrules.mk
@@ -38,16 +36,17 @@ include $(ac_aux_dir)/jfrules.mk
 compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 	@date > $@
 
+# FIXME: Decouple SystemC-VPC and SysteMoC by moving SysteMoC
+#        dependant code from SystemC-VPC into SysteMoC
+#        restore thread based compute interface to SystemC-VPC
 INCLUDES =						\
 	@SYSTEMC_INCLUDE@				\
 	@XERCES_INCLUDE@				\
-        -I$(SYSTEMOC_V3_SRCDIR)				\
+	-I$(root_srcdir)/SysteMoC			\
 	-I./include					\
 	-I$(srcdir)
-#	-I$(root_srcdir)/systemc-2.0.1/src
 
-#AM_LDFLAGS=                            \
-#        @SYSTEMC_LDFLAGS@                     
+#AM_LDFLAGS=
 
 #noinst_SCRIPTS  = test_pathstuff.sh
 
