@@ -21,7 +21,7 @@
 
 #include <string.h>
 
-#include <jf-libs/systemc_support.hpp>
+#include <cosupport/systemc_support.hpp>
 
 namespace SystemC_VPC{
 
