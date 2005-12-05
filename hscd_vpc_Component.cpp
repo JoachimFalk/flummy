@@ -25,16 +25,16 @@
 #include <hscd_vpc_datatypes.h>
 #include <hscd_vpc_Director.h>
 
-#include <smoc_event.hpp>
+#include <jf-libs/systemc_support.hpp>
 
 namespace SystemC_VPC{
 
   /**
    *
    */
-  void Component::compute( const char *name, const char *funcname, smoc_event *end) { 
+  void Component::compute( const char *name, const char *funcname, CoSupport::SystemC::Event *end) { 
     p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
-    actualTask->smoc_interupt=end;
+    actualTask->blockEvent=end;
 
 #ifdef VPC_DEBUG
     cout << flush;
@@ -81,7 +81,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::compute( const char *name, smoc_event *end) { 
+  void Component::compute( const char *name, CoSupport::SystemC::Event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
     cerr << RED("Component::compute(") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
@@ -275,7 +275,7 @@ namespace SystemC_VPC{
     //  wait(notify_scheduler_thread);
     //   do{
     //     wait(2,SC_NS);
-    //     smoc_notify(*(events.front()));
+    //     notify(*(events.front()));
     //     events.pop_front();
     //   }while(events.size()>0);
     // }
@@ -319,7 +319,7 @@ namespace SystemC_VPC{
 	    cerr << "PID: " << actualRunningPID<< " > ";
 	    cerr << "removed Task: " << task->name << endl;
 #endif // VPCDEBUG
-	    smoc_notify(*(task->smoc_interupt));
+	    notify(*(task->blockEvent));
 	    scheduler->removedTask(task);
 #ifndef NO_VCD_TRACES
 	    if(task->traceSignal!=0) *(task->traceSignal)=S_BLOCKED;     
@@ -444,7 +444,7 @@ namespace SystemC_VPC{
     //    wait(SC_ZERO_TIME);
 
     ////////////////////////////////////////////////
-    //events.push_back(actualTask->smoc_interupt);//
+    //events.push_back(actualTask->blockEvent);//
     //notify(notify_scheduler_thread);            //
     //return;                                     //
     ////////////////////////////////////////////////
@@ -478,9 +478,9 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::compute( const char *name, const char *funcname, smoc_event *end) { 
+  void ThreadedComponent::compute( const char *name, const char *funcname, CoSupport::SystemC::Event *end) { 
     p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
-    actualTask->smoc_interupt=end;
+    actualTask->blockEvent=end;
 
 #ifdef VPC_DEBUG
     cout << flush;
@@ -513,13 +513,13 @@ namespace SystemC_VPC{
     }
   
 
-    if( actualTask->smoc_interupt == NULL ){
+    if( actualTask->blockEvent == NULL ){
 	// active mode -> returns if simulated delay time has expired (blocking compute call)
-	actualTask->smoc_interupt = new smoc_event();
+	actualTask->blockEvent = new CoSupport::SystemC::Event();
 	compute(actualTask);
-	smoc_wait(*(actualTask->smoc_interupt));
-	delete actualTask->smoc_interupt;
-	actualTask->smoc_interupt = NULL;
+        CoSupport::SystemC::wait(*(actualTask->blockEvent));
+	delete actualTask->blockEvent;
+	actualTask->blockEvent = NULL;
 	// return
     } else {
 	// passive mode -> return immediatly (no blocking)
@@ -531,7 +531,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::compute( const char *name, smoc_event *end) { 
+  void ThreadedComponent::compute( const char *name, CoSupport::SystemC::Event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
     cerr << RED("ThreadedComponent::compute( ") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;

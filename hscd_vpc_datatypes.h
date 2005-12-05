@@ -5,10 +5,9 @@
 #include <string>
 #include <map.h>
 
-#include <smoc_event.hpp>
+#include <jf-libs/systemc_support.hpp>
 
-
-namespace SystemC_VPC{
+namespace SystemC_VPC {
 #define VPC_MAX_STRING_LENGTH 128
 #define STR_ROUNDROBIN "RoundRobin"
 #define STR_RR "RR"
@@ -54,7 +53,7 @@ namespace SystemC_VPC{
   //enum trace_value {blocked,ready,running};
 
 
-  struct p_struct{
+  struct p_struct {
     /* p_struct(const p_struct& p){
       cerr<< VPC_ERROR<< "copy constructor: p_struct(const p_struct& p)"<< NORMAL<<endl;
       pid=p.pid;
@@ -74,7 +73,7 @@ namespace SystemC_VPC{
     string name;
     int pid;
     sc_event* interupt;
-    smoc_event* smoc_interupt;
+    CoSupport::SystemC::Event* blockEvent;
     double delay;
     double remainingDelay;
     int priority;
