@@ -27,9 +27,9 @@
 #include <map.h>
 #include <deque.h>
 
-#include <smoc_event.hpp>
+#include <cosupport/systemc_support.hpp>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
   //  class SchedulerProxy;
   class Scheduler;
 
@@ -43,7 +43,7 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief A map of tasks that newly called compute(const char *, const char *, smoc_event).
+     * \brief A map of tasks that newly called compute(const char *, const char *, CoSupport::SystemC::Event).
      *
      * If a task calls compute he will noted down in a map. This funktion provides
      * access to this map.
@@ -59,15 +59,15 @@ namespace SystemC_VPC{
     vector<action_struct> &getNewCommands();
     
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, const char *, CoSupport::SystemC::Event).
      */
-    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL);
+    virtual void compute( const char *name, const char *funcname=NULL, CoSupport::SystemC::Event *end=NULL);
     
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, CoSupport::SystemC::Event).
      */
-    virtual void compute( const char *name, smoc_event *end=NULL);
-    //  virtual void compute(int process, smoc_event *end=NULL);
+    virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL);
+    //  virtual void compute(int process, CoSupport::SystemC::Event *end=NULL);
     Component(){}
     /**
      * \brief Initialize a Component with a Scheduler.
@@ -104,29 +104,29 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, const char *, CoSupport::SystemC::Event).
      *
      * Privides backward compatibility! It does nothing -> No schedling! No delaying!
      */
-    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL){
+    virtual void compute( const char *name, const char *funcname=NULL, CoSupport::SystemC::Event *end=NULL){
 #ifdef VPC_DEBUG
       cout << flush;
       cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
-      if(NULL!=end) smoc_notify(*end);
+      if(NULL!=end) notify(*end);
     }
 
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, CoSupport::SystemC::Event).
      *
      * Privides backward compatibility! It does nothing -> No schedling! No delaying!
      */
-    virtual void compute( const char *name, smoc_event *end=NULL){
+    virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL){
 #ifdef VPC_DEBUG
       cout << flush;
       cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
-      if(NULL!=end) smoc_notify(*end);
+      if(NULL!=end) notify(*end);
     }
 
     /**
@@ -162,7 +162,7 @@ namespace SystemC_VPC{
     map<int,p_struct*> readyTasks,runningTasks;
 
     sc_event notify_scheduler_thread;
-    //deque<smoc_event*> events;
+    //deque<CoSupport::SystemC::Event*> events;
     sc_signal<trace_value> schedulerTrace;
 
     inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
@@ -170,14 +170,14 @@ namespace SystemC_VPC{
   public:
     void setScheduler(const char *schedulername);
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, const char *, CoSupport::SystemC::Event).
      */
-    virtual void compute( const char *name, const char *funcname=NULL, smoc_event *end=NULL);
+    virtual void compute( const char *name, const char *funcname=NULL, CoSupport::SystemC::Event *end=NULL);
     
     /**
-     * \brief An implementation of AbstractComponent::compute(const char *, smoc_event).
+     * \brief An implementation of AbstractComponent::compute(const char *, CoSupport::SystemC::Event).
      */
-    virtual void compute( const char *name, smoc_event *end=NULL);
+    virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL);
     /**
      * \brief A vector of commandos, so the Scheduler can descide what to do.
      *

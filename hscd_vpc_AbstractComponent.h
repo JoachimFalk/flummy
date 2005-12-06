@@ -21,7 +21,7 @@
 
 #include <string.h>
 
-#include <smoc_event.hpp>
+#include <cosupport/systemc_support.hpp>
 
 namespace SystemC_VPC{
 
@@ -38,14 +38,14 @@ namespace SystemC_VPC{
      *
      * While this simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute( const char *name, const char *funcname, smoc_event *end=NULL)=0;
+    virtual void compute( const char *name, const char *funcname, CoSupport::SystemC::Event *end=NULL)=0;
 
     /**
      * \brief Simulate an execution on this "Virtual Component".
      *
      * While this simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute( const char *name, smoc_event *end=NULL)=0;
+    virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL)=0;
     //    virtual void compute(int iprocess)=0;
     virtual ~AbstractComponent(){};
 

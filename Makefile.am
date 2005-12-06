@@ -39,12 +39,11 @@ compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 # FIXME: Decouple SystemC-VPC and SysteMoC by moving SysteMoC
 #        dependant code from SystemC-VPC into SysteMoC
 #        restore thread based compute interface to SystemC-VPC
-INCLUDES =						\
-	@SYSTEMC_INCLUDE@				\
-	@XERCES_INCLUDE@				\
-	-I$(root_srcdir)/SysteMoC			\
-	-I./include					\
-	-I$(srcdir)
+INCLUDES = @INCLUDES@					\
+	   @SYSTEMC_INCLUDE@				\
+	   @XERCES_INCLUDE@				\
+	   -I./include					\
+	   -I$(srcdir)
 
 #AM_LDFLAGS=
 
