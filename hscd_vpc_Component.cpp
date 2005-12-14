@@ -32,7 +32,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::schedule_thread(){
+  void Component::schedule_thread(){
     /////////////////////////////////////
     // while(1){
     //  wait(notify_scheduler_thread);
@@ -181,7 +181,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::compute(p_struct *actualTask){
+  void Component::compute(p_struct *actualTask){
 
 
 #ifndef NO_VCD_TRACES
@@ -216,14 +216,14 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::processAndForwardParameter(char *sType,char *sValue){
+  void Component::processAndForwardParameter(char *sType,char *sValue){
     scheduler->setProperty(sType,sValue);
   }
 
   /**
    *
    */
-  void  ThreadedComponent::setScheduler(const char *schedulername){
+  void  Component::setScheduler(const char *schedulername){
     if(0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN)) || 0==strncmp(schedulername,STR_RR,strlen(STR_RR))){
       scheduler=new RoundRobinScheduler((const char*)schedulername);
     }else if(0==strncmp(schedulername,STR_PRIORITYSCHEDULER,strlen(STR_PRIORITYSCHEDULER)) || 0==strncmp(schedulername,STR_PS,strlen(STR_PS))){
@@ -241,13 +241,13 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::compute( const char *name, const char *funcname, CoSupport::SystemC::Event *end) { 
+  void Component::compute( const char *name, const char *funcname, CoSupport::SystemC::Event *end) { 
     p_struct  *actualTask = Director::getInstance().getProcessControlBlock(name);
     actualTask->blockEvent=end;
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("ThreadedComponent::compute( ") <<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << " on: "<< componentName << endl;
+    cerr << RED("Component::compute( ") <<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << " on: "<< componentName << endl;
 #endif
 
 #ifndef NO_VCD_TRACES
@@ -297,10 +297,10 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::compute( const char *name, CoSupport::SystemC::Event *end) { 
+  void Component::compute( const char *name, CoSupport::SystemC::Event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("ThreadedComponent::compute( ") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << RED("Component::compute( ") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
     compute(name,"",end);
@@ -309,7 +309,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void ThreadedComponent::informAboutMapping(string module){
+  void Component::informAboutMapping(string module){
 #ifndef NO_VCD_TRACES
     sc_signal<trace_value> *newsignal=new sc_signal<trace_value>();
     trace_map_by_name.insert(pair<string,sc_signal<trace_value>*>(module,newsignal));

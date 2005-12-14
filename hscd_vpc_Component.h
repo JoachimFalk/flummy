@@ -85,8 +85,8 @@ namespace SystemC_VPC {
   private:
   };
 
-  class ThreadedComponent : public AbstractComponent, public sc_module{
-    SC_HAS_PROCESS(ThreadedComponent);
+  class Component : public AbstractComponent, public sc_module{
+    SC_HAS_PROCESS(Component);
   protected:
     virtual void compute(p_struct *actualTask);
     virtual void schedule_thread(); 
@@ -104,7 +104,7 @@ namespace SystemC_VPC {
     sc_signal<trace_value> schedulerTrace;
 
     inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
-    inline void ThreadedComponent::assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
+    inline void Component::assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
   public:
     void setScheduler(const char *schedulername);
     /**
@@ -137,7 +137,7 @@ namespace SystemC_VPC {
     /**
      * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
      */
-    ThreadedComponent(sc_module_name name,const char *schedulername):sc_module(name){
+    Component(sc_module_name name,const char *schedulername):sc_module(name){
       SC_THREAD(schedule_thread);
       strcpy(this->componentName,name);
       setScheduler(schedulername);
@@ -160,7 +160,7 @@ namespace SystemC_VPC {
       sc_trace(this->traceFile,schedulerTrace,schedulername);
 #endif //NO_VCD_TRACES      
     }
-    virtual ~ThreadedComponent(){}
+    virtual ~Component(){}
    /**
      * \brief Set parameter for Component and Scheduler.
      */

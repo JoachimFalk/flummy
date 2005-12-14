@@ -12,7 +12,7 @@ namespace SystemC_VPC{
   class Component;
 
   /**
-   * \brief A callback class called from ThreadedComponent to do Scheduling.
+   * \brief A callback class called from Component to do Scheduling.
    *
    * Main part is virtual funktion scheduling_decision schedulingDecision(int&, int&, map<int,p_struct>, map<int,p_struct>)
    */
@@ -21,7 +21,7 @@ namespace SystemC_VPC{
     virtual ~Scheduler() {};
 
     /**
-     * /brief Called from ThreadedComponent to determine a "time slice" used as time out.
+     * /brief Called from Component to determine a "time slice" used as time out.
      * 
      */
     virtual bool getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
@@ -42,9 +42,9 @@ namespace SystemC_VPC{
      * The tasks to ressign and to assign have to be calculated. 
      * \param [out] task_to_resign The task that have to be resigned.
      * \param [out] task_to_assign The task that have to be assigned.
-     * \param [in] ready_tasks A map of ready tasks! ThreadedComponent knowes this map.
-     * \param [in] running_tasks A map of running tasks! Usualy only one! ThreadedComponent knowes this map.
-     * \return Returns a scheduling_decision enum. So ThreadedComponent knows what he has to do.
+     * \param [in] ready_tasks A map of ready tasks! Component knowes this map.
+     * \param [in] running_tasks A map of running tasks! Usualy only one! Component knowes this map.
+     * \return Returns a scheduling_decision enum. So Component knows what he has to do.
      */
     virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
 

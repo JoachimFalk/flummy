@@ -206,7 +206,7 @@ namespace SystemC_VPC{
 // 		component_map_by_name.insert(pair<string, AbstractComponent*>(sName, comp));
 // 	      }else 
 		if(0==strncmp(sType, STR_VPC_THREADEDCOMPONENTSTRING, sizeof(STR_VPC_THREADEDCOMPONENTSTRING))){
-		comp=new ThreadedComponent(sName,sScheduler);
+		comp=new Component(sName,sScheduler);
 		component_map_by_name.insert(pair<string, AbstractComponent*>(sName, comp));
 		cerr << "VPC> Found Component name=" << sName << "type=" << sType << endl;
 	      }else {
