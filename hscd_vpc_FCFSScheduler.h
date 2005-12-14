@@ -22,7 +22,7 @@ namespace SystemC_VPC{
     void removedTask(p_struct *pcb);
     sc_event& getNotifyEvent();
     scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks);
-    sc_time* schedulingOverhead(){return 0;}//;
+    sc_time* schedulingOverhead(){return 0;}//new sc_time(1,SC_NS);
   protected:
 
     deque<int> fcfs_fifo;

@@ -102,6 +102,7 @@ namespace SystemC_VPC{
     char *cfile;
     char *vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
     char vpc_conf_file[VPC_MAX_STRING_LENGTH];
+    char *vpc_measure_file;
 
     FALLBACKMODE=false;
     if(vpc_evaluator_prefix){
@@ -200,10 +201,11 @@ namespace SystemC_VPC{
 	      sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
 	      sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
 	      sScheduler=XMLString::transcode(atts->getNamedItem(schedulerAttrStr)->getNodeValue());
-	      if(0==strncmp(sType, STR_VPC_COMPONENTSTRING, sizeof(STR_VPC_COMPONENTSTRING))){
-		comp=new Component(sName, sScheduler);
-		component_map_by_name.insert(pair<string, AbstractComponent*>(sName, comp));
-	      }else if(0==strncmp(sType, STR_VPC_THREADEDCOMPONENTSTRING, sizeof(STR_VPC_THREADEDCOMPONENTSTRING))){
+// 	      if(0==strncmp(sType, STR_VPC_COMPONENTSTRING, sizeof(STR_VPC_COMPONENTSTRING))){
+// 		comp=new Component(sName, sScheduler);
+// 		component_map_by_name.insert(pair<string, AbstractComponent*>(sName, comp));
+// 	      }else 
+		if(0==strncmp(sType, STR_VPC_THREADEDCOMPONENTSTRING, sizeof(STR_VPC_THREADEDCOMPONENTSTRING))){
 		comp=new ThreadedComponent(sName,sScheduler);
 		component_map_by_name.insert(pair<string, AbstractComponent*>(sName, comp));
 		cerr << "VPC> Found Component name=" << sName << "type=" << sType << endl;
@@ -314,7 +316,8 @@ namespace SystemC_VPC{
 	  }
 	  node = vpcConfigTreeWalker->parentNode();
 	}else if( 0==XMLString::compareNString( xmlName, measurefileStr, sizeof(measurefileStr) ) ){
-
+	  DOMNamedNodeMap * atts=node->getAttributes();
+	  vpc_measure_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
 	}else if( 0==XMLString::compareNString( xmlName, resultfileStr, sizeof(resultfileStr) ) ){
 
 	}else{
@@ -324,29 +327,23 @@ namespace SystemC_VPC{
 	node = vpcConfigTreeWalker->nextSibling();
        
       }
-    }
 
-
-    if(!vpc_evaluator_prefix){
-      /*
-	cerr << VPC_ERROR << "No VPC_EVALUATOR Environment\n"
-	<< "Hint: try to export/setenv VPC_EVALUATOR"<< NENDL; //<< endl;
-      */
-    }else{
       char vpc_result_file[VPC_MAX_STRING_LENGTH];
       sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
       remove(vpc_result_file);
-      char vpc_measure_file[VPC_MAX_STRING_LENGTH];
-      sprintf(vpc_measure_file,"%s%s",vpc_evaluator_prefix,STR_VPC_MEASURE_FILE);
       cerr << "measure_file: "<< vpc_measure_file << endl;
       if(!vpc_measure_file){
 	cerr << VPC_ERROR << "No vpc_measure_file"<< NENDL; //<< endl;
-	exit(0); //FIXME
-      }  
+	return;
+      }else{
+	FILE* f=fopen(vpc_measure_file,"r");
+	if(!f) return;
+	fclose(f);
+      }
       DOMTreeWalker *vpc_measure_TreeWalker;
       DOMDocument *vpc_measure_doc;
       DOMBuilder *parser;
-      static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
+      //static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
       DOMImplementation *impl = DOMImplementationRegistry::getDOMImplementation(gLS);
       // create an error handler and install it
       VpcDomErrorHandler *errorh=new VpcDomErrorHandler();

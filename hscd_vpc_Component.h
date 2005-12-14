@@ -20,7 +20,7 @@
 #include <systemc.h>
 
 #include "hscd_vpc_datatypes.h"
-#include "hscd_vpc_SchedulerProxy.h"
+//#include "hscd_vpc_SchedulerProxy.h"
 #include "hscd_vpc_AbstractComponent.h"
 
 #include <vector.h>
@@ -36,70 +36,8 @@ namespace SystemC_VPC {
   /**
    * \brief An implementation of AbstractComponent.
    * 
-   * This is a "Virtual Component" used to simulate execution time and scheduling (also preemptive scheduling).
-   * An event based communication to a Scheduler is realised, using the SchedulerProxy as counterpart.
+   *  Privides backward compatibility! It does nothing -> No schedling! No delaying!
    */
-  class Component : public AbstractComponent{
-  public:
-
-    /**
-     * \brief A map of tasks that newly called compute(const char *, const char *, CoSupport::SystemC::Event).
-     *
-     * If a task calls compute he will noted down in a map. This funktion provides
-     * access to this map.
-     */
-    map<int,p_struct*> &getNewTasks();
-
-    /**
-     * \brief A vector of commandos, so the Scheduler can descide what to do.
-     *
-     * If a task calls compute, the command "ready" is generated. If the whole 
-     * delay-time is delayed the command "block" is generated.
-     */
-    vector<action_struct> &getNewCommands();
-    
-    /**
-     * \brief An implementation of AbstractComponent::compute(const char *, const char *, CoSupport::SystemC::Event).
-     */
-    virtual void compute( const char *name, const char *funcname=NULL, CoSupport::SystemC::Event *end=NULL);
-    
-    /**
-     * \brief An implementation of AbstractComponent::compute(const char *, CoSupport::SystemC::Event).
-     */
-    virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL);
-    //  virtual void compute(int process, CoSupport::SystemC::Event *end=NULL);
-    Component(){}
-    /**
-     * \brief Initialize a Component with a Scheduler.
-     */
-    Component(const char *name,const char *schedulername);
-    virtual ~Component();
-
-    /**
-     * \brief Used to create the Tracefiles.
-     *
-     * To create a vcd-trace-file in SystemC all the signals to 
-     * trace have to be in a "global" scope. The signals have to 
-     * be created in elaboration phase (before first sc_start).
-     */
-    virtual void informAboutMapping(std::string module);
- 
-   /**
-     * \brief Set parameter for Component and Scheduler.
-     */
-    virtual void processAndForwardParameter(char *sType,char *sValue);
-
-
-  protected:
-    virtual void compute(p_struct *actualTask);
-    char componentName [VPC_MAX_STRING_LENGTH];
-    sc_trace_file *traceFile;
-    map<std::string,sc_signal<trace_value>*> trace_map_by_name;
-  private:
-    map<int,p_struct*>      newTasks;
-    vector<action_struct>  open_commands;
-    SchedulerProxy *schedulerproxy;
-  };
   class FallbackComponent : public AbstractComponent{
   public:
 
