@@ -84,13 +84,13 @@ libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
 libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
 	hscd_vpc_Director.cpp			\
-	hscd_vpc_SchedulerProxy.cpp		\
 	hscd_vpc_PriorityScheduler.cpp		\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_XmlHelper.cpp			\
 	hscd_vpc_Term.cpp
+#	hscd_vpc_SchedulerProxy.cpp		
 
 
 # Need pkinclude files in include/$(pkgincludeprefix)
