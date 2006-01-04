@@ -5,7 +5,8 @@
 #include <string>
 #include <map.h>
 
-#include <cosupport/systemc_support.hpp>
+//#include <cosupport/systemc_support.hpp>
+#include <systemc_support.hpp>
 
 namespace SystemC_VPC {
 #define VPC_MAX_STRING_LENGTH 128
@@ -17,6 +18,18 @@ namespace SystemC_VPC {
 #define STR_RM "RM"
 #define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServe"
 #define STR_FCFS "FCFS"
+
+	/************************/
+	/*  EXTENSION SECTION   */
+	/************************/
+
+#define STR_VPC_RECONFIGURABLECOMPONENTSTRING "reconfigurable"
+
+#define VPC_DEBUG true;
+
+	/**************************/
+	/*  END OF EXTENSION      */
+	/**************************/
 
 #define STR_VPC_MEASURE_FILE "measure.xml"
 #define STR_VPC_RESULT_FILE "result"
@@ -82,14 +95,22 @@ namespace SystemC_VPC {
     int activation_count;
     activation_state state;
     sc_signal<trace_value> *traceSignal;
-    map<string,double>  functionDelays;
+    /*
+     * Replaced by new version to enable multiple
+     * delays for different components on different 
+     * functions
+    	map<string,double>  functionDelays;
+    */
+    std::map<std::string, std::map<std::string, double> > compDelays;
+    
   };
 
 
   struct p_queue_entry{
-    int fifo_order;  // sekundärstrategie
+    int fifo_order;  // sekund?rstrategie
     p_struct *pcb;
   };
+  
   struct p_queue_compare{
     bool operator()(const p_queue_entry& pqe1,
 		    const p_queue_entry& pqe2) const

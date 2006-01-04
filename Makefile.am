@@ -89,6 +89,11 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_FCFSScheduler.cpp		\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_XmlHelper.cpp			\
+	hscd_vpc_PreemptivController.cpp	\
+	hscd_vpc_Configuration.cpp		\
+	hscd_vpc_NonPreemptivController.cpp	\
+	hscd_vpc_ReconfigurableComponent.cpp	\
+	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_Term.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 

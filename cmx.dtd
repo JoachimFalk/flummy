@@ -1,4 +1,4 @@
-<!ELEMENT configuration (resultfile?,measurefile?,resources,mappings)>
+<!ELEMENT vpcconfiguration (resultfile?,measurefile?,resources,mappings)>
 
 <!ELEMENT resultfile EMPTY>
 <!ATTLIST resultfile
@@ -10,7 +10,7 @@ name CDATA #REQUIRED>
 
 <!ELEMENT resources (component)*>
 
-<!ELEMENT component (attribute)*>
+<!ELEMENT component ((configuration*,switchtimes)?, attribute*)>
 <!ATTLIST component
 name CDATA #REQUIRED
 type CDATA #REQUIRED
@@ -20,6 +20,19 @@ scheduler CDATA #REQUIRED>
 <!ATTLIST attribute 
 type CDATA #REQUIRED
 value CDATA #REQUIRED>
+
+<!ELEMENT configuration (component)*>
+<!ATTLIST configuration
+name CDATA #REQUIRED
+value CDATA #REQUIRED>
+
+<!ELEMENT switchtimes (switchtime)*>
+
+<!ELEMENT switchtime EMPTY>
+<!ATTLIST switchtime
+name CDATA #REQUIRED
+loadtime CDATA #REQUIRED
+storetime  CDATA #REQUIRED>
 
 <!ELEMENT mappings (mapping)*>
 
