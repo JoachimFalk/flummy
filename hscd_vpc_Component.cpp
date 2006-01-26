@@ -25,6 +25,17 @@
 #include <hscd_vpc_datatypes.h>
 #include <hscd_vpc_Director.h>
 
+//FIXME: Hack TraceLog only exists in SysteMoc <- this is only needed for InfiniBand HCA "hybrid mode"
+#include <smoc_moc.hpp>
+#include <smoc_port.hpp>
+#include <smoc_fifo.hpp>
+#include <smoc_node_types.hpp>
+#ifndef __SCFE__
+//# include <smoc_scheduler.hpp>
+# include <smoc_pggen.hpp>
+#endif
+//FIXME: end of hack
+
 #include <cosupport/systemc_support.hpp>
 
 namespace SystemC_VPC{
@@ -280,6 +291,11 @@ namespace SystemC_VPC{
   
 
     if( actualTask->blockEvent == NULL ){
+        //FIXME: (Hack) TraceLog only exists in SysteMoc <- this is only needed for InfiniBand HCA "hybrid mode"
+        //assume this is an smoc1 actor
+#ifdef SYSTEMOC_TRACE
+        TraceLog << "<compute actor=\""<<name<<"\" function=\""<<funcname<<"\"/>" << std::endl;
+#endif
 	// active mode -> returns if simulated delay time has expired (blocking compute call)
 	actualTask->blockEvent = new CoSupport::SystemC::Event();
 	compute(actualTask);

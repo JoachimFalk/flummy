@@ -45,6 +45,9 @@ INCLUDES = @INCLUDES@					\
 	   -I./include					\
 	   -I$(srcdir)
 
+#FIXME: (Hack) TraceLog only exists in SysteMoc <- this is only needed for InfiniBand HCA "hybrid mode"
+INCLUDES += -I$(root_srcdir)/SysteMoC
+
 #AM_LDFLAGS=
 
 #noinst_SCRIPTS  = test_pathstuff.sh
