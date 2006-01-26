@@ -157,7 +157,8 @@ namespace SystemC_VPC {
       ((vcd_trace_file*)this->traceFile)->sc_set_vcd_time_unit(-9);
 #endif //NO_VCD_TRACES
 #ifndef NO_VCD_TRACES
-      sc_trace(this->traceFile,schedulerTrace,schedulername);
+      //disabled <- scheduling overhead doesn't work yet
+      //sc_trace(this->traceFile,schedulerTrace,schedulername);
 #endif //NO_VCD_TRACES      
     }
     virtual ~Component(){}
