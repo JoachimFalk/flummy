@@ -88,15 +88,15 @@ namespace SystemC_VPC{
     XMLCh *attributeStr = XMLString::transcode("attribute");
     //XMLCh *Str = XMLString::transcode("");
     
-    XMLCh *nameAttrStr    = XMLString::transcode("name");
-    XMLCh *countAttrStr   = XMLString::transcode("count");
-    XMLCh *typeAttrStr = XMLString::transcode("type");
-    XMLCh *dividerAttrStr = XMLString::transcode("divider");
-    XMLCh *schedulerAttrStr   = XMLString::transcode("scheduler");
-    XMLCh *valueAttrStr   = XMLString::transcode("value");
-    XMLCh *targetAttrStr   = XMLString::transcode("target");
-    XMLCh *sourceAttrStr   = XMLString::transcode("source");
-    //    XMLCh *AttrStr   = XMLString::transcode("");
+    XMLCh *nameAttrStr         = XMLString::transcode("name");
+    XMLCh *countAttrStr        = XMLString::transcode("count");
+    XMLCh *typeAttrStr         = XMLString::transcode("type");
+    XMLCh *dividerAttrStr      = XMLString::transcode("divider");
+    XMLCh *schedulerAttrStr    = XMLString::transcode("scheduler");
+    XMLCh *valueAttrStr        = XMLString::transcode("value");
+    XMLCh *targetAttrStr       = XMLString::transcode("target");
+    XMLCh *sourceAttrStr       = XMLString::transcode("source");
+    //    XMLCh *AttrStr    = XMLString::transcode("");
 
     FILE *fconffile;
     char *cfile;
@@ -319,7 +319,9 @@ namespace SystemC_VPC{
 	  DOMNamedNodeMap * atts=node->getAttributes();
 	  vpc_measure_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
 	}else if( 0==XMLString::compareNString( xmlName, resultfileStr, sizeof(resultfileStr) ) ){
-
+	  DOMNamedNodeMap * atts=node->getAttributes();
+	  vpc_result_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+	  //cerr << "result_file: " <<  vpc_result_file << endl;
 	}else{
 
 	}
@@ -328,16 +330,19 @@ namespace SystemC_VPC{
        
       }
 
-      char vpc_result_file[VPC_MAX_STRING_LENGTH];
-      sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
-      remove(vpc_result_file);
+      //char vpc_result_file[VPC_MAX_STRING_LENGTH];
+      //sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
+      remove(vpc_result_file.c_str());
       cerr << "measure_file: "<< vpc_measure_file << endl;
       if(!vpc_measure_file){
 	cerr << VPC_ERROR << "No vpc_measure_file"<< NENDL; //<< endl;
 	return;
       }else{
 	FILE* f=fopen(vpc_measure_file,"r");
-	if(!f) return;
+	if(!f) {
+	  cerr << "Warning: " << vpc_measure_file << " does not exists!" << endl; 
+	  return;
+	}
 	fclose(f);
       }
       DOMTreeWalker *vpc_measure_TreeWalker;
@@ -448,17 +453,17 @@ namespace SystemC_VPC{
     //#  i fdef VPC_DEBUG
     cerr << "start: " << start << " end: " << end << endl;
     //# e ndif //VPC_DEBUG
-    if (start!=-1 && end!=-1){
+    if ((start != -1) && (end != -1)){
       cout << "latency: " << end - start << endl;
-      char* vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
-      if(vpc_evaluator_prefix){
-	char vpc_result_file[VPC_MAX_STRING_LENGTH];
-	sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
+      //char* vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
+      if(0 != vpc_result_file.compare("")){
+	//char vpc_result_file[VPC_MAX_STRING_LENGTH];
+	//sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
 #ifdef VPC_DEBUG
 	cerr << "result_file: "<< vpc_result_file << endl;
 #endif //VPC_DEBUG
 	FILE *resultFile;
-	resultFile=fopen(vpc_result_file,"w");
+	resultFile=fopen(vpc_result_file.c_str(),"w");
 	if(resultFile){
 	  fprintf(resultFile,"%lf",end-start);
 	}

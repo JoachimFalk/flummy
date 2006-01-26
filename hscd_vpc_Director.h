@@ -54,8 +54,10 @@ namespace SystemC_VPC{
 
     vector<Constraint*> constraints;
 
-  public:
+    std::string vpc_result_file;
+
     bool FALLBACKMODE;
+  public:
 
     /**
      * \brief A task (identifikation by name) calling this Funktion gets the 
@@ -95,6 +97,7 @@ namespace SystemC_VPC{
     }
 
     virtual ~Director();
+
   };
 }
 #endif
