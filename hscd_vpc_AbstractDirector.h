@@ -2,7 +2,7 @@
 #define HSCD_VPC_ABSTRACTDIRECTOR_H_
 
 //#include <cosupport/systemc_support.hpp>
-#include <systemc_support.hpp>
+#include <hscd_vpc_datatypes.h>
 
 #include <hscd_vpc_AbstractComponent.h>
 
@@ -13,26 +13,7 @@ namespace SystemC_VPC{
 	public:
     
     virtual ~AbstractDirector(){}
-    
-    /**
-     * \brief Delegate task to mapped component.
-     *
-     * Determines for a given task the component to run on.
-     * \param name of task
-     * \param name of function
-     * \param event to signal finished request
-     */
-    virtual void compute(const char* name, const char* funcname, CoSupport::SystemC::Event* end=NULL)=0;
-   
-    /**
-     * \brief Delegate task to mapped component.
-     *
-     * Determines for a given task the component to run on.
-     * \param name of task
-     * \param event to signal finished request
-     */
-    virtual void compute(const char *name, CoSupport::SystemC::Event *end=NULL)=0;
-    
+     
     /**
      * \brief Register component to Director
      * Used to register a component to the Director for

@@ -26,9 +26,6 @@
 #include <map.h>
 #include <deque.h>
 
-//#include <cosupport/systemc_support.hpp>
-#include <systemc_support.hpp>
-
 namespace SystemC_VPC{
 
 	//  class SchedulerProxy;
@@ -44,11 +41,11 @@ namespace SystemC_VPC{
 	public:
 
 		/**
-		 * \brief An implementation of AbstractComponent::compute(const char *, const char *, CoSupport::SystemC::Event).
+		 * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
 		 *
 		 * Privides backward compatibility! It does nothing -> No schedling! No delaying!
 		 */
-		virtual void compute( const char *name, const char *funcname=NULL, CoSupport::SystemC::Event *end=NULL){
+		virtual void compute( const char *name, const char *funcname=NULL, VPC_Event *end=NULL){
 #ifdef VPC_DEBUG
 			cout << flush;
 			cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << endl;
@@ -58,11 +55,11 @@ namespace SystemC_VPC{
 		}
 
 		/**
-		 * \brief An implementation of AbstractComponent::compute(const char *, CoSupport::SystemC::Event).
+		 * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
 		 *
 		 * Privides backward compatibility! It does nothing -> No schedling! No delaying!
 		 */
-		virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL){
+		virtual void compute( const char *name, VPC_Event *end=NULL){
 #ifdef VPC_DEBUG
 			cout << flush;
 			cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
@@ -100,9 +97,10 @@ namespace SystemC_VPC{
 		/**
 		 * \brief Preempts execution of component
 		 * Used to preempt the current execution of a component.
-		 * Actual executed tasks are "stored" for late execution
+		 * As there is no time consumption tasks are executed at once,
+		 * so no effect on completion of running tasks.
 		 */
-		virtual void preempt(){ 
+		virtual void preempt(bool kill){ 
 			//TODO IMPLEMENT
 		}
 		
@@ -115,21 +113,10 @@ namespace SystemC_VPC{
 		}
 		
 		/**
-		 * \brief Determines minimum time till next idle state of component
-		 * Used to determine how long it will take till component finishes
-		 * currently running tasks.
-		 * \return sc_time specifying the time till idle
-		 */
-		virtual sc_time* minTimeToIdle(){
-			// TODO IMPLEMENT
-			return NULL;
-		}
-		
-		/**
 		 * \brief An implementation of AbstractComponent::compute(p_struct* , const char *).
 		 */
-		virtual void compute( p_struct* pcb, const char *funcname){
-			this->compute(pcb->name.c_str(), funcname, pcb->blockEvent);
+		virtual void compute( p_struct* pcb){
+			this->compute(pcb->name.c_str(), pcb->funcname, pcb->blockEvent);
 		}
 		
 	/**************************/
@@ -143,7 +130,7 @@ namespace SystemC_VPC{
 
 	protected:
 
-		virtual void compute(p_struct *actualTask);
+		//virtual void compute(p_struct *actualTask);
 		virtual void schedule_thread(); 
 
 	private:
@@ -156,7 +143,7 @@ namespace SystemC_VPC{
 		map<int,p_struct*> readyTasks,runningTasks;
 		
 		sc_event notify_scheduler_thread;
-		//deque<CoSupport::SystemC::Event*> events;
+		//deque<VPC_Event*> events;
 		sc_signal<trace_value> schedulerTrace;
 		
 		inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
@@ -168,15 +155,17 @@ namespace SystemC_VPC{
 	public:
 		 
 		void setScheduler(const char *schedulername);
-		/**
-		 * \brief An implementation of AbstractComponent::compute(const char *, const char *, CoSupport::SystemC::Event).
-		 */
-		virtual void compute( const char *name, const char *funcname=NULL, CoSupport::SystemC::Event *end=NULL);
+		
 		
 		/**
-		 * \brief An implementation of AbstractComponent::compute(const char *, CoSupport::SystemC::Event).
+		 * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
 		 */
-		virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL);
+		virtual void compute( const char *name, const char *funcname=NULL, VPC_Event *end=NULL);
+		
+		/**
+		 * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
+		 */
+		virtual void compute( const char *name, VPC_Event *end=NULL);
 		
 		/**
 		 * \brief A vector of commandos, so the Scheduler can descide what to do.
@@ -194,8 +183,7 @@ namespace SystemC_VPC{
 		 * be created in elaboration phase (before first sc_start).
 		 */
 		virtual void informAboutMapping(std::string module);
-		
-		
+			
 		/**
 		 * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
 		 */
@@ -235,7 +223,7 @@ namespace SystemC_VPC{
 		  /*  END OF EXTENSION      */
 		  /**************************/
 		}
-		
+			
 		virtual ~Component(){}
 		/**
 		 * \brief Set parameter for Component and Scheduler.
@@ -259,28 +247,27 @@ namespace SystemC_VPC{
 		/**
 		 * \brief Preempts execution of component
 		 * Used to preempt the current execution of a component.
-		 * Actual executed tasks are "stored" for late execution
+		 * \sa AbstractComponent::preempt
 		 */
-		virtual void preempt();
+		virtual void preempt(bool kill);
 		
 		/**
 		 * \brief Resumes preempted execution
 		 * Used to resume execution of preempted component.
+		 * \sa AbstractComponent
 		 */
 		virtual void resume();
 		
 		/**
-		 * \brief Determines minimum time till next idle state of component
-		 * Used to determine how long it will take till component finishes
-		 * currently running tasks.
-		 * \return sc_time specifying the time till idle
-		 */
-		virtual sc_time* minTimeToIdle();
-		
-		/**
 		 * \brief An implementation of AbstractComponent::compute(p_struct* , const char *).
 		 */
-		virtual void compute( p_struct* pcb, const char *funcname);
+		virtual void compute(p_struct* pcb);
+	
+	private:
+	
+		void killAllTasks();
+		
+		void setTraceSignalReadyTasks(trace_value value);
 		
 	/**************************/
 	/*  END OF EXTENSION      */

@@ -10,46 +10,31 @@
 #include <hscd_vpc_AbstractDirector.h>
 #include <hscd_vpc_Configuration.h>
 #include <hscd_vpc_datatypes.h>
+#include <hscd_vpc_TaskEventListener.h>
+
+#include <hscd_vpc_InvalidArgumentException.h>
 
 namespace SystemC_VPC{
 	
 	class ReconfigurableComponent;
 	
+	// not used right now
 	struct my_taskInfo{
 		const char* name;
 		const char* funcname;
-		CoSupport::SystemC::Event* end;
+		VPC_Event* end;
 	};
 	
-	class AbstractController : public AbstractDirector{
+	/**
+	 * \brief Specification the interface provieded by a controller
+	 * This abstract class is used to declare a common interface for all controller
+	 * used within the VPC framework.
+	 */
+	class AbstractController : public AbstractDirector, public TaskEventListener{
 	
 	protected:
 		
 		char controllerName [VPC_MAX_STRING_LENGTH];
-		
-	protected:
-	
-		// controlled component of instance
-		ReconfigurableComponent* managedComponent;
-		// time caused by reconfiguration
-		sc_time loadTime;
-		// time indicating next request wish
-		sc_time* waitInterval;
-		
-		// maps tasks to their corresponding names of configuration
-		std::map<std::string, std::string > mapping_map_configs;
-		
-		// maps tasks to their corresponding names of component
-		std::map<std::string, std::string > mapping_map_component_ids;
-		
-		/*
-		 * map of maps for reconfigration times
-		 * first key specifies current configuration
-		 * second key specifies next configuration
-		 * value specifies the time needed to switch btw first and second
-		 */
-		std::map<std::string, sc_time> loadTime_map;
-		std::map<std::string, sc_time> storeTime_map;
 				
 	public:
 
@@ -58,80 +43,17 @@ namespace SystemC_VPC{
 		/**
 		 * \brief Getter for controller name
 		 */
-		char* getName(){
+		virtual char* getName()=0;
 			
-			return this->controllerName;
-			
-		}
-		
-		/**
-		 * \brief Adds specific load time for a configuration
-		 * \param config specifies the name of the configuration
-		 * \param time specifies the corresponding load time
-		 */
-		virtual void addLoadTime(const char* config, const char* time){
-		
-			assert(this->managedComponent != NULL);
-			assert(config != NULL);
-			
-			double timeVal = atof(time);
-
-#ifdef VPC_DEBUG
-			std::cerr << "AbstractController> adding load time: " 
-				<< YELLOW( config << " = " << time) << std::endl;
-#endif //VPC_DEBUG
-		
-			this->loadTime_map[config] = sc_time(timeVal, SC_NS);
-		}
-
-		/**
-		 * \brief Adds specific store time for a configuration
-		 * \param config specifies the name of the configuration
-		 * \param time specifies the corresponding store time
-		 */
-		virtual void addStoreTime(const char* config, const char* time){
-		
-			assert(this->managedComponent != NULL);
-			assert(config != NULL);
-			
-			double timeVal = atof(time);
-
-#ifdef VPC_DEBUG
-			std::cerr << "AbstractController> adding store time: " 
-				<< YELLOW( config << " = " << time) << std::endl;
-#endif //VPC_DEBUG
-		
-			this->storeTime_map[config] = sc_time(timeVal, SC_NS);
-		}		
-
 		/**
 		 * \brief Sets the currently controlled reconfigurable Component of instance
 		 */
-		void setManagedComponent(ReconfigurableComponent* managedComponent){
-			
-			assert(managedComponent != NULL);
-			this->managedComponent = managedComponent;
-		
-		}
+		virtual void setManagedComponent(ReconfigurableComponent* managedComponent)=0;
 		
 		/**
 		 * \brief Gets the currently conrtolled reconfigurable Component of instance
 		 */
-		ReconfigurableComponent* getManagedComponent(){
-			
-			return this->managedComponent;
-			
-		}
-		
-		/**
-		 * \brief Returns time needed for reconfiguration
-		 * Returns the time needed for reconfiguration, if any happened.
-		 */
-		virtual sc_time getReconfigurationTime(){
-			
-			return this->loadTime;
-			
-		}
+		virtual ReconfigurableComponent* getManagedComponent()=0;
 		
 		/**
 		 * \brief Returns time to wait until next notification of controller is needed
@@ -139,11 +61,7 @@ namespace SystemC_VPC{
 		 * next time.
 		 * \return time interval to wait or NULL if no time interval required
 		 */
-		sc_time* getWaitInterval(){
-			
-			return this->waitInterval;
-			
-		}
+		virtual sc_time* getWaitInterval()=0;
 		
 		/**
 		 * \brief Used to set controller specific values
@@ -159,7 +77,7 @@ namespace SystemC_VPC{
 	 	* controller. It is used to initialize and set up all necessary data for a new "round" of
 	 	* scheduling. 
 	 	*/
-	 	virtual void addTasksToSchedule(std::deque<std::pair<p_struct* , const char* > >& newTasks)=0;
+	 	virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks)=0;
 	 	
 	 	/**
 	 	 * \brief Returns next configuration to be loaded
@@ -190,13 +108,38 @@ namespace SystemC_VPC{
 	 	 * \return pair containing p_struct of task and requested function
 	 	 * to be simulated.
 	 	 */
-	 	virtual std::pair<p_struct*, const char* > getNextTask()=0;
-	
-		sc_time* getNotifyInterval(){
+	 	virtual p_struct* getNextTask()=0;
 		
-			return this->waitInterval;
+		/**
+		 * \brief Setter to specify if controller should use "kill" by preemption
+		 */
+		virtual void setPreemptionStrategy(bool kill)=0;
 		
-		}
+		/**
+		 * \brief Getter to determine which preemption mode is used
+		 */
+		virtual bool preemptByKill()=0;
+				
+		/**
+		 * \brief Callback Mehtode used to inform Controller about task state
+		 */
+		virtual void signalTaskEvent(p_struct* pcb)=0;
+		
+		
+		/**
+		 * \brief Signals to controller that managed component has been preempted.
+		 * Used within controller to adapt scheduling to preemption of managed
+		 * component.
+		 */
+		virtual void signalPreemption()=0;
+		
+		/**
+		 * \brief Signals to controller that managed component has been resumed.
+		 * Used within controller to adapt scheduling to resuming of managed
+		 * component.
+		 */
+		virtual void signalResume()=0;
+		
 	};
 
 }

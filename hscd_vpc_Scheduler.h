@@ -5,6 +5,7 @@
 #include <map.h>
 
 namespace SystemC_VPC{
+	
   enum scheduling_decision {ONLY_ASSIGN // neuer Task keine alten
 			    ,PREEMPT    // neuer Task verdrängt alten
 			    ,RESIGNED   // alter Task beendet, kein neuer
@@ -60,6 +61,25 @@ namespace SystemC_VPC{
      */
     virtual void setProperty(char* key, char* value){}
 
+	/**************************/
+	/*   EXTENSION SECTION    */
+	/**************************/
+	
+	virtual const char* getName(){
+		return this->name;
+	}
+	
+	virtual void setName(const char* name){
+		assert(name != NULL);
+		this->name = name;
+	}
+	
+	private:
+		const char* name;
+	/**************************/
+	/*  END OF EXTENSION      */
+	/**************************/
   };
+
 }
 #endif

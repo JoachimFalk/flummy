@@ -20,6 +20,7 @@
 
 #include <hscd_vpc_AbstractDirector.h>
 #include "hscd_vpc_AbstractComponent.h"
+#include <hscd_vpc_TaskEventListener.h>
 
 #include <string>
 #include <map.h>
@@ -37,7 +38,7 @@ namespace SystemC_VPC{
    *
    * Direktor reads allokation and binding from file.
    */
-  class Director : public AbstractDirector{
+  class Director : public AbstractDirector, public TaskEventListener{
   private:
 
     /**
@@ -65,7 +66,7 @@ namespace SystemC_VPC{
      * \brief A task (identifikation by name) calling this Funktion gets the 
      * AbstractComponent where he is binded to.
      */
-    AbstractComponent& getResource( const char *name );
+    //AbstractComponent& getResource( const char *name );
     //  AbstractComponent& getResource(int process);
 
     /**
@@ -106,23 +107,23 @@ namespace SystemC_VPC{
     /**************************/
 
     /**
-     * \brief Delegate task to mapped component.
-     *
-     * Determines for a given task the component to run on.
+     * \brief Simulates computation of a given task
+     * 
+     * Determines for a given task the component to run on and delegates it.
      * \param name of task
      * \param name of function
      * \param event to signal finished request
      */
-    virtual void compute(const char* name, const char* funcname, CoSupport::SystemC::Event* end=NULL);
+    virtual void compute(const char* name, const char* funcname, VPC_Event* end=NULL);
    
     /**
-     * \brief Delegate task to mapped component.
+     * \brief Simulates computation of a given task
      *
-     * Determines for a given task the component to run on.
+     * Determines for a given task the component to run on and delegates it.
      * \param name of task
      * \param event to signal finished request
      */
-    virtual void compute(const char *name, CoSupport::SystemC::Event *end=NULL);
+    virtual void compute(const char *name, VPC_Event *end=NULL);
  
     /**
      * \brief Adds new constraint to Director
@@ -155,6 +156,8 @@ namespace SystemC_VPC{
      * PCB for given task;
      */
     p_struct* generatePCB(const char* name);
+    
+    void signalTaskEvent(p_struct* pcb);
     
     /**************************/
     /*  END OF EXTENSION      */

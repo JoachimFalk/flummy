@@ -122,6 +122,8 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 						// register "upper-layer" components to Director
 						this->director->registerComponent(comp);
+						comp->setParentController(this->director);
+						
 						node = vpcConfigTreeWalker->nextSibling();
 					}
 					
@@ -248,7 +250,6 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 	}
 
-
 	/**
 	 * \brief Initialize a component from the configuration file
 	 * \return pointer to the initialized component
@@ -292,7 +293,8 @@ namespace SystemC_VPC{
 				cerr << "VPCBuilder> Found Component name=" << sName << " type=" << sType << endl;
 #endif //VPC_DEBUG
 				
-				comp = new ReconfigurableComponent(sName, sScheduler);
+				comp = new ReconfigurableComponent(sName, this->generateController(sScheduler, sName));
+				
 				this->knownComps.insert(pair<string, AbstractComponent* >(sName, comp));
 				this->initConfigurations((ReconfigurableComponent*)comp);
 				this->initCompAttributes(comp);
@@ -379,13 +381,19 @@ namespace SystemC_VPC{
 				//create and initialize configuration
 				DOMNamedNodeMap* atts=node->getAttributes();
 				char* sName;
+				char* sLoadTime;
+				char* sStoreTime;
+				// read values
 				sName = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-				 
+				sLoadTime = XMLString::transcode(atts->getNamedItem(loadTimeAttrStr)->getNodeValue());
+				sStoreTime = XMLString::transcode(atts->getNamedItem(storeTimeAttrStr)->getNodeValue());
+				
 #ifdef VPC_DEBUG
 				std::cout << "VPCBuilder> Initializing new config: "<< sName << endl;
+				std::cout << "VPCBuilder> with load time = "<< sLoadTime << " and store time = " << sStoreTime << endl;
 #endif //VPC_DEBUG
 	
-				Configuration* conf = new Configuration(sName);
+				Configuration* conf = new Configuration(sName, sLoadTime, sStoreTime);
 				// add configuration to node
 				comp->addConfiguration(sName, conf);
 				
@@ -397,16 +405,19 @@ namespace SystemC_VPC{
 				// register relation between configuration and component
 				this->config_to_Comp.insert(std::pair<std::string, std::string>(conf->getName(), comp->getName()));
 					
-				this->initConfiguration(conf);
+				this->initConfiguration(comp, conf);
 				
-			}else // if switchtimes specification exists init
-			if( 0==XMLString::compareNString( xmlName, VPCBuilder::switchtimesStr, sizeof(VPCBuilder::switchtimesStr))){
+			}else // if default configuration is defined init
+			if( 0==XMLString::compareNString( xmlName, VPCBuilder::defaultConfStr, sizeof(VPCBuilder::defaultConfStr))){
 			
-				this->initSwitchTimesOfComponent(comp);
+				DOMNamedNodeMap* atts=node->getAttributes();
+				char* sName;
+				sName = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
 			
+				comp->setActivConfiguration(sName);
 			}
 				
-				node = vpcConfigTreeWalker->nextSibling();
+			node = vpcConfigTreeWalker->nextSibling();
 			
 		}
 		// set back walker to upper node level
@@ -417,7 +428,7 @@ namespace SystemC_VPC{
 	/**
 	 * \brief Implementation of VPCBuilder::initConfiguration
 	 */
-	void VPCBuilder::initConfiguration(Configuration* conf){
+	void VPCBuilder::initConfiguration(ReconfigurableComponent* comp, Configuration* conf){
 	
 		// set hierarchie down for inner components
 		DOMNode* node = vpcConfigTreeWalker->firstChild();
@@ -432,7 +443,8 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
 			std::cerr << RED("Adding Component=" << innerComp->getName() << " to Configuration=" << conf->getName()) << std::endl;
 #endif //VPC_DEBUG
-
+			
+			innerComp->setParentController(comp->getController());
 			conf->addComponent(innerComp->getName(), innerComp);
 			
 			// register mapping
@@ -445,49 +457,7 @@ namespace SystemC_VPC{
 		vpcConfigTreeWalker->parentNode();
 
 	}
-	
-	/**
-	 * \brief Implementation of VPCBuilder::initConfiguration
-	 */
-	void VPCBuilder::initSwitchTimesOfComponent(ReconfigurableComponent* comp){
 		
-#ifdef VPC_DEBUG
-		std::cerr << "VPCBuilder> initSwitchTimes for: " << comp->getName() << std::endl;
-#endif //VPC_DEBUG
-
-		// set hierarchie down for inner components
-		DOMNode* node = vpcConfigTreeWalker->firstChild();
-  		const XMLCh* xmlName;
-		// find all specified switchtimes
-		while( node != NULL ){
-
-			xmlName = node->getNodeName();
-			// check if its an attribute to add
-			if( 0==XMLString::compareNString( xmlName, switchtimeStr, sizeof(switchtimeStr))){
-				DOMNamedNodeMap * atts = node->getAttributes();
-				char* sName;
-				char* loadTimeValue;
-				char* storeTimeValue;
-				
-				sName = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-				loadTimeValue = XMLString::transcode(atts->getNamedItem(loadTimeAttrStr)->getNodeValue());
-				storeTimeValue = XMLString::transcode(atts->getNamedItem(storeTimeAttrStr)->getNodeValue());
-#ifdef VPC_DEBUG
-		std::cerr << "VPCBuilder> adding switchtime: " << sName << " loadtime= " << loadTimeValue << " storetime= " << storeTimeValue << std::endl;
-#endif //VPC_DEBUG
-
-				comp->getController()->addLoadTime(sName, loadTimeValue);
-				comp->getController()->addStoreTime(sName, storeTimeValue);
-			}
-			node = vpcConfigTreeWalker->nextSibling();
-
-		}
-
-		// set back walker to upper level
-		vpcConfigTreeWalker->parentNode();
-		
-	}
-	
 	/**
 	 * \brief Initializes the mappings and process structures.
 	 */
@@ -629,8 +599,34 @@ namespace SystemC_VPC{
 		}
 	}
 
-/*
- * 
- */
- 
+	/**
+	 * \brief Implementation of VPCBuilder::generateController
+	 */
+	AbstractController* VPCBuilder::generateController(const char* controllertype, const char* id){
+		// TODO IMPLEMENT WHEN CONTROLLER IS IMPLEMENTED
+		AbstractController* controller;
+		
+		if(0==strncmp(controllertype, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
+			|| 0==strncmp(controllertype, STR_FCFS,strlen(STR_FCFS))){
+			controller = new FCFSController(id);			
+		}else 
+		if(0==strncmp(controllertype, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
+			|| 0==strncmp(controllertype, STR_RR, strlen(STR_RR))){
+			controller = new RoundRobinController(id);
+		}else
+		if(0==strncmp(controllertype, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
+			|| 0==strncmp(controllertype, STR_PS, strlen(STR_PS))){
+			controller = new PriorityController(id);
+		}else
+		if(0==strncmp(controllertype, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
+			|| 0==strncmp(controllertype, STR_EDF, strlen(STR_EDF))){
+			controller = new EDFController(id);
+		}else{
+			std::cerr << RED("VPCBuilder> Cannot map " << controllertype << " to known controllers -> setting default controller") << std::endl;
+			controller = new FCFSController(id);
+		}
+		
+		return controller;
+	}
+
 }// namespace SystemC_VPC

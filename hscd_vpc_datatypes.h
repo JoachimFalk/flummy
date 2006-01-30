@@ -5,8 +5,8 @@
 #include <string>
 #include <map.h>
 
-//#include <cosupport/systemc_support.hpp>
-#include <systemc_support.hpp>
+#include <cosupport/systemc_support.hpp>
+//#include <systemc_support.hpp>
 
 namespace SystemC_VPC {
 #define VPC_MAX_STRING_LENGTH 128
@@ -23,10 +23,28 @@ namespace SystemC_VPC {
 	/*  EXTENSION SECTION   */
 	/************************/
 
+#define STR_EARLIESTDEADLINEFIRST "EarliestDeadlineFirst"
+#define STR_EDF "EDF"
+
+// definitions for configuration file parsing
 #define STR_VPC_RECONFIGURABLECOMPONENTSTRING "reconfigurable"
 
-#define VPC_DEBUG true;
+// definition for tracing configurations state
+#define S_ACTIV 'A';
+#define S_PASSIV 'P';
+#define S_CONFIG 'c';
 
+// extension definition for tracing task state
+#define S_SUSPENDED 's';
+#define S_KILLED 'k';
+
+// definition for hiding cosupport as vpc_event
+	typedef CoSupport::SystemC::Event VPC_Event;
+	typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
+	
+// set for debugging output
+#define VPC_DEBUG true;
+	
 	/**************************/
 	/*  END OF EXTENSION      */
 	/**************************/
@@ -57,7 +75,12 @@ namespace SystemC_VPC {
 
   using std::string;
   
-  enum activation_state {inaktiv, starting, aktiv, ending};
+  enum activation_state {inaktiv, 
+  						 starting,
+  						 aktiv,
+  						 ending,
+  						 aborted
+  						 };
 
   typedef char trace_value;
 #define S_BLOCKED 'b';
@@ -84,6 +107,7 @@ namespace SystemC_VPC {
       cerr<< VPC_ERROR<< "constructor: p_struct()"<< NORMAL<<endl;
       }*/
     string name;
+    const char* funcname;
     int pid;
     sc_event* interupt;
     CoSupport::SystemC::Event* blockEvent;

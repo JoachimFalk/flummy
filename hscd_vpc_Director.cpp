@@ -35,6 +35,7 @@ namespace SystemC_VPC{
   /**
    *
    */
+   /*
   AbstractComponent& Director::getResource( const char *name ){
     if(!FALLBACKMODE){
       if(1!=mapping_map_by_name.count(name))
@@ -46,7 +47,8 @@ namespace SystemC_VPC{
     }
   }
   //AbstractComponent& Director::getResource(int process){}
-
+	*/
+	
   /**
    *
    */
@@ -115,7 +117,7 @@ namespace SystemC_VPC{
     
     getReport();
     
-
+	// clear components
     map<string,AbstractComponent*>::iterator it = component_map_by_name.begin();
     
     while(it != component_map_by_name.end()){
@@ -124,6 +126,15 @@ namespace SystemC_VPC{
     }
     
     component_map_by_name.clear();
+    
+    //clear p_structs
+    std::map<std::string, p_struct* >::iterator iter;
+    for(iter = this->p_struct_map_by_name.begin(); iter != this->p_struct_map_by_name.end(); iter++){
+    	delete iter->second;
+    }
+    
+    this->p_struct_map_by_name.clear();
+    
   }
 
   p_struct* Director::getProcessControlBlock( const char *name ){
@@ -157,11 +168,22 @@ namespace SystemC_VPC{
 	/*  EXTENSION SECTION   */
 	/************************/
 
-	void Director::compute(const char* name, const char* funcname, CoSupport::SystemC::Event* end){
+	void Director::compute(const char* name, const char* funcname, VPC_Event* end){
 		
 #ifdef VPC_DEBUG
-		std::cerr << RED("Director> compute(") << WHITE(name) << RED(",") << WHITE(funcname) << RED(") at: ") << sc_simulation_time() << std::endl;
+		std::cerr << YELLOW("Director> compute(") << WHITE(name) << YELLOW(",") << WHITE(funcname) << YELLOW(") at: ") << sc_simulation_time() << std::endl;
 #endif //VPC_DEBUG
+		
+		p_struct* pcb = this->getProcessControlBlock(name);
+		pcb->funcname = funcname;
+		
+		if( end == NULL ){
+			// prepare active mode
+			pcb->blockEvent = new VPC_Event();
+		}else{
+			// prepare passiv mode
+			pcb->blockEvent = end;
+		}
 
 		if(!FALLBACKMODE){
 			
@@ -177,25 +199,31 @@ namespace SystemC_VPC{
 			AbstractComponent* comp = mapping_map_by_name.find(name)->second;
 
 #ifdef VPC_DEBUG
-			std::cerr << RED("Director> delegating to ") << WHITE(comp->getName()) << std::endl;
+			std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->getName()) << std::endl;
 #endif //VPC_DEBUG			
 			
 			// compute task on found component
-			comp->compute(name, funcname, end);
+			comp->compute(pcb);
 		
 		}else{
 			AbstractComponent* comp = (component_map_by_name["Fallback-Component"]);
 			if(comp == NULL){
 				std::cerr << "no Fallback defined!" << std::endl;
 			}
+			comp->compute(pcb);
 			
-			comp->compute(name, funcname, end);
-			
+		}
+		
+		if( end == NULL){
+			// active mode -> returns if simulated delay time has expiYELLOW (blocking compute call)
+			CoSupport::SystemC::wait(*(pcb->blockEvent));
+			delete pcb->blockEvent;
+			pcb->blockEvent = NULL;
 		}
 	
 	}
 
-	void Director::compute(const char* name, CoSupport::SystemC::Event* end){
+	void Director::compute(const char* name, VPC_Event* end){
 	
 		this->compute(name, "", end);
 	
@@ -264,6 +292,30 @@ namespace SystemC_VPC{
     	
     }
     
+    /**
+     * \brief Implementation of Director::notifyTaskEvent
+     */
+    void Director::signalTaskEvent(p_struct* pcb){
+    
+#ifdef VPC_DEBUG
+		std::cerr << "Director> got notified from: " << pcb->name << std::endl;
+#endif //VPC_DEBUG
+		if(pcb->state != activation_state(aborted)){
+#ifdef VPC_DEBUG
+		std::cerr << "Director> task successful finished: " << pcb->name << std::endl;
+#endif //VPC_DEBUG
+			pcb->blockEvent->notify();
+		}else{
+#ifdef VPC_DEBUG
+		std::cerr << "Director> re-compute: " << pcb->name << std::endl;
+#endif //VPC_DEBUG
+			// get Component
+			AbstractComponent* comp = mapping_map_by_name.find(pcb->name)->second;
+			comp->compute(pcb);
+		}
+    }
+    
+
 	/**************************/
 	/*  END OF EXTENSION      */
 	/**************************/

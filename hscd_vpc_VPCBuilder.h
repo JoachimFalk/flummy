@@ -20,7 +20,13 @@
 #include <hscd_vpc_AbstractComponent.h>
 #include <hscd_vpc_Component.h>
 #include <hscd_vpc_ReconfigurableComponent.h>
-//#include <hscd_vpc_Scheduler.h>
+
+#include <hscd_vpc_AbstractController.h>
+#include <hscd_vpc_FCFSController.h>
+#include <hscd_vpc_RoundRobinController.h>
+#include <hscd_vpc_PriorityController.h>
+#include <hscd_vpc_EDFController.h>
+
 #include <hscd_vpc_Configuration.h>
 
 XERCES_CPP_NAMESPACE_USE
@@ -43,6 +49,7 @@ namespace SystemC_VPC{
 		XMLCh* configurationStr;
 		XMLCh* switchtimesStr;
 		XMLCh* switchtimeStr;
+		XMLCh* defaultConfStr;
 		//XMLCh *Str;
 		
 		XMLCh* nameAttrStr;
@@ -106,6 +113,7 @@ namespace SystemC_VPC{
 			configurationStr= XMLString::transcode("configuration");
 			switchtimesStr	= XMLString::transcode("switchtimes");
 			switchtimeStr	= XMLString::transcode("switchtime");
+			defaultConfStr	= XMLString::transcode("defaultconfiguration");
 			//XMLCh* VPCBuilder::Str = XMLString::transcode("");
 			
 			nameAttrStr		= XMLString::transcode("name");
@@ -171,7 +179,7 @@ namespace SystemC_VPC{
 		 * added to the given Configuration.
 		 * \param comp represents the component for which to initialize the configurations
 		 */
-		void initConfiguration(Configuration* conf);
+		void initConfiguration(ReconfigurableComponent* comp, Configuration* conf);
 		
 		/**
 		 * \brief Initializes the Configuration switch times for a component
@@ -182,6 +190,9 @@ namespace SystemC_VPC{
 		void initSwitchTimesOfComponent(ReconfigurableComponent* comp);
 		
 		void VPCBuilder::initMappingAPStruct();
+		
+		AbstractController* generateController(const char* type, const char* id);
+		
 	};
 		
 }

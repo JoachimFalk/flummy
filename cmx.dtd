@@ -10,7 +10,7 @@ name CDATA #REQUIRED>
 
 <!ELEMENT resources (component)*>
 
-<!ELEMENT component ((configuration*,switchtimes)?, attribute*)>
+<!ELEMENT component ((configuration*, defaultconfiguration?)?, attribute*)>
 <!ATTLIST component
 name CDATA #REQUIRED
 type CDATA #REQUIRED
@@ -24,15 +24,12 @@ value CDATA #REQUIRED>
 <!ELEMENT configuration (component)*>
 <!ATTLIST configuration
 name CDATA #REQUIRED
-value CDATA #REQUIRED>
+loadtime CDATA "0 ns"
+storetime CDATA "0 ns">
 
-<!ELEMENT switchtimes (switchtime)*>
-
-<!ELEMENT switchtime EMPTY>
-<!ATTLIST switchtime
-name CDATA #REQUIRED
-loadtime CDATA #REQUIRED
-storetime  CDATA #REQUIRED>
+<!ELEMENT defaultconfiguration EMPTY>
+<!ATTLIST defaultconfiguration
+name CDATA #REQUIRED>
 
 <!ELEMENT mappings (mapping)*>
 

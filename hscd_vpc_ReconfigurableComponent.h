@@ -7,13 +7,8 @@
 #include <map>
 #include <deque>
 
-//#include <cosupport/systemc_support.hpp>
-#include <systemc_support.hpp>
-
 #include <hscd_vpc_datatypes.h>
 #include <hscd_vpc_AbstractController.h>
-#include <hscd_vpc_NonPreemptivController.h>
-#include <hscd_vpc_PreemptivController.h>
 #include <hscd_vpc_AbstractComponent.h>
 #include <hscd_vpc_Configuration.h>
 
@@ -27,27 +22,38 @@ namespace SystemC_VPC{
 		
 		SC_HAS_PROCESS(ReconfigurableComponent);
 		
+		// used to create vcd tracefiles for configurations
+		sc_trace_file *traceFile;
+		map<std::string, sc_signal<trace_value>* > trace_map_by_name;
+		
+		// pointer to controller of component
 		AbstractController* controller;
-		// mapping of configurations by their name
+		// mapping of possible configurations by their name
 		std::map<std::string, Configuration* > config_map_by_name;
 		// pointer to currently activ Configuration
 		Configuration* activConfiguration;
 		
 		// queue containing new task to be added
-		std::deque<std::pair<p_struct*, const char* > > newTasks;
-		// maps containing task ready to run or already running
-		map<int,p_struct*> readyTasks,runningTasks;
+		std::deque<p_struct* > newTasks;
 		
+		// used to notify new tasks to the component
 		sc_event notify_schedule_thread;
+		// used to indicate preemption
 		sc_event notify_preempt;
+		// used to indicate resume after preemption
 		sc_event notify_resume;
+		
+		// start time of reconfiguration
+		sc_time reconfStart;
+		// time needed for reconfiguration 
+		sc_time reconfTime;
 		
 	public:
 
 		/**
 		 * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
 		 */
-		ReconfigurableComponent(sc_module_name name, const char* type);
+		ReconfigurableComponent(sc_module_name name, AbstractController* controller);
 		    
 		virtual ~ReconfigurableComponent();
 	
@@ -60,19 +66,19 @@ namespace SystemC_VPC{
 		void ReconfigurableComponent::schedule_thread();
 
 		/**
-		 * \brief An implementation of AbstractComponent::compute(const char *, const char *, CoSupport::SystemC::Event).
+		 * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
 		 */
-		virtual void compute( const char *name, const char *funcname, CoSupport::SystemC::Event *end=NULL);
+		virtual void compute( const char *name, const char *funcname, VPC_Event *end=NULL);
 		
 		/**
-		 * \brief An implementation of AbstractComponent::compute(const char *, CoSupport::SystemC::Event).
+		 * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
 		 */
-		virtual void compute( const char *name, CoSupport::SystemC::Event *end=NULL);
+		virtual void compute( const char *name, VPC_Event *end=NULL);
 		
 		/**
 		 * \brief An implementation of AbstractComponent::compute(p_struct*, const char *).
 		 */
-		virtual void compute(p_struct* pcb, const char *funcname);
+		virtual void compute(p_struct* pcb);
 		
 		/**
 		 * \brief Used to create the Tracefiles.
@@ -91,9 +97,9 @@ namespace SystemC_VPC{
 		/**
 		 * \brief Preempts execution of component
 		 * Used to preempt the current execution of a component.
-		 * Actual executed tasks are "stored" for late execution
+		 * \sa AbstractComponent
 		 */
-		virtual void preempt();
+		virtual void preempt(bool kill);
 		
 		/**
 		 * \brief Resumes preempted execution
@@ -102,12 +108,22 @@ namespace SystemC_VPC{
 		virtual void resume();
 		
 		/**
+		 * \see IPreemptable::timeToPreempt
+		 */
+		virtual sc_time* timeToPreempt();
+		
+		/**
+		 * \see IPreemptable::timeToResume
+		 */
+		virtual sc_time* timeToResume();
+		
+		/**
 		 * \brief Determines minimum time till next idle state of component
 		 * Used to determine how long it will take till component finishes
 		 * currently running tasks.
 		 * \return sc_time specifying the time till idle
 		 */
-		virtual sc_time* minTimeToIdle();
+		//virtual sc_time* minTimeToIdle();
 		
 		/**
 		 * \brief Adds new Configuration to the reconfigurable component.
@@ -155,18 +171,38 @@ namespace SystemC_VPC{
 		 * \param controllertype specifies the type of requested controller to be
 		 * associated to the component.
 		 */
-		void setController(const char* controllertype);
+		//void setController(const char* controllertype);
+	
+		/**
+		 * \brief Sets controller for current instance
+		 * \param controller references the requested controller to be
+		 * associated to the component.
+		 */
+		void setController(AbstractController* controller);
 		
 		/**
-		 * \brief Loads a given configuration
-		 * Loads a given configuration by simulating loadtime given as additional
-		 * parameter.
-		 * \param newConfig refers to the configuration to be loaded
-		 * \param timeToLoad specifies the time it needs to load new configuration
-		 * plus additional time needed for probably storing another configuration.
-		 */ 
-		void loadNewConfiguration(Configuration* newConfig, sc_time timeToLoad);
+		 * \brief Used to enable notification initialized from Controller side
+		 * This method is called if controller gets notified of finished or killed
+		 * task, which need new scheduling decisions.
+		 */
+		inline void wakeUp(){
+			this->notify_schedule_thread.notify();
+		}
 		
+	private:
+	
+		/**
+		 * \brief Loads a given configuration
+		 * Loads a given configuration by simulating loadtime.
+		 * \note Loading is only performed if new configuration is unequal to activ configuration
+		 * \param newConfig refers to the configuration to be loaded
+		 */ 
+		//void loadNewConfiguration(Configuration* newConfig);
+		
+		bool loadConfiguration(Configuration* config);
+		bool storeActivConfiguration(bool kill);
+		
+		bool reconfigurationInterrupted(sc_time timeStamp, sc_time interval);
 	};
 
 }
