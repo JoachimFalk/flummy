@@ -5,8 +5,8 @@
 #include <string>
 #include <map.h>
 
-#include <cosupport/systemc_support.hpp>
-//#include <systemc_support.hpp>
+//#include <cosupport/systemc_support.hpp>
+#include <systemc_support.hpp>
 
 namespace SystemC_VPC {
 #define VPC_MAX_STRING_LENGTH 128
@@ -19,35 +19,35 @@ namespace SystemC_VPC {
 #define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServe"
 #define STR_FCFS "FCFS"
 
-	/************************/
-	/*  EXTENSION SECTION   */
-	/************************/
+  /************************/
+  /*  EXTENSION SECTION   */
+  /************************/
 
 #define STR_EARLIESTDEADLINEFIRST "EarliestDeadlineFirst"
 #define STR_EDF "EDF"
+
+// extension definition for tracing task state
+#define S_SUSPENDED 's'
+#define S_KILLED 'k'
 
 // definitions for configuration file parsing
 #define STR_VPC_RECONFIGURABLECOMPONENTSTRING "reconfigurable"
 
 // definition for tracing configurations state
-#define S_ACTIV 'A';
-#define S_PASSIV 'P';
-#define S_CONFIG 'c';
-
-// extension definition for tracing task state
-#define S_SUSPENDED 's';
-#define S_KILLED 'k';
+#define S_ACTIV 'A'
+#define S_PASSIV 'P'
+#define S_CONFIG 'c'
 
 // definition for hiding cosupport as vpc_event
-	typedef CoSupport::SystemC::Event VPC_Event;
-	typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
-	
+  typedef CoSupport::SystemC::Event VPC_Event;
+  typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
+  
 // set for debugging output
 #define VPC_DEBUG true;
-	
-	/**************************/
-	/*  END OF EXTENSION      */
-	/**************************/
+  
+  /**************************/
+  /*  END OF EXTENSION      */
+  /**************************/
 
 #define STR_VPC_MEASURE_FILE "measure.xml"
 #define STR_VPC_RESULT_FILE "result"
@@ -76,16 +76,17 @@ namespace SystemC_VPC {
   using std::string;
   
   enum activation_state {inaktiv, 
-  						 starting,
-  						 aktiv,
-  						 ending,
-  						 aborted
-  						 };
+               starting,
+               aktiv,
+               ending,
+               aborted
+               };
 
   typedef char trace_value;
-#define S_BLOCKED 'b';
-#define S_READY   'w';
-#define S_RUNNING 'R';
+#define S_BLOCKED 'b'
+#define S_READY   'w'
+#define S_RUNNING 'R'
+
   //enum trace_value {blocked,ready,running};
 
 
@@ -123,7 +124,7 @@ namespace SystemC_VPC {
      * Replaced by new version to enable multiple
      * delays for different components on different 
      * functions
-    	map<string,double>  functionDelays;
+      map<string,double>  functionDelays;
     */
     std::map<std::string, std::map<std::string, double> > compDelays;
     
@@ -137,32 +138,32 @@ namespace SystemC_VPC {
   
   struct p_queue_compare{
     bool operator()(const p_queue_entry& pqe1,
-		    const p_queue_entry& pqe2) const
+        const p_queue_entry& pqe2) const
     {
       int p1=pqe1.pcb->priority;
       int p2=pqe2.pcb->priority;
       if (p1 > p2)
-	return true;
+  return true;
       else if(p1 == p2)
-	return (pqe1.fifo_order>pqe2.fifo_order);
+  return (pqe1.fifo_order>pqe2.fifo_order);
       else 
-	return false;
+  return false;
     }
     
   };
 
   struct rm_queue_compare{
     bool operator()(const p_queue_entry& pqe1,
-		    const p_queue_entry& pqe2) const
+        const p_queue_entry& pqe2) const
     {
       double p1=pqe1.pcb->priority/pqe1.pcb->period;
       double p2=pqe2.pcb->priority/pqe2.pcb->period;
       if (p1 > p2)
-	return true;
+  return true;
       else if(p1 == p2)
-	return (pqe1.fifo_order>pqe2.fifo_order);
+  return (pqe1.fifo_order>pqe2.fifo_order);
       else 
-	return false;
+  return false;
     }
     
   };

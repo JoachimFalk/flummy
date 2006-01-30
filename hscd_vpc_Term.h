@@ -63,7 +63,7 @@ namespace SystemC_VPC{
     Literal(p_struct &pcb, operator_type op, int activation,activation_rule rule):
       task(pcb),operation(op),activation(activation),rule(rule)
       {
-	satisfiableCounter=1;
+  satisfiableCounter=1;
       }
     virtual ~Literal(){}
   private:
@@ -108,7 +108,7 @@ namespace SystemC_VPC{
       satisfiableCounter--;
       vector<Term*>::const_iterator iter=terms.begin();
       for(;iter!=terms.end();iter++){
-	if((*iter)->isSatisfied(excludes))return true;
+  if((*iter)->isSatisfied(excludes))return true;
       }
       return false;
     }

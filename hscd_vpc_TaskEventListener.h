@@ -8,11 +8,11 @@ namespace SystemC_VPC{
 class TaskEventListener{
 
 public:
-	
-	virtual void signalTaskEvent(p_struct* pcb)=0;
-	
-	virtual void signalStateChanged(){};
-	
+  
+  virtual void signalTaskEvent(p_struct* pcb)=0;
+  
+  virtual void signalStateChanged(){};
+  
 };
 
 }

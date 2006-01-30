@@ -101,15 +101,15 @@ namespace SystemC_VPC{
       map<string,p_struct*> pcb_map =  Director::getInstance().getPcbMap();
       map<string,p_struct*>::const_iterator iter;
       for(iter=pcb_map.begin();iter!=pcb_map.end(); iter++){
-	p_struct *pcb=(iter->second);
-	if(0==excludes.count(pcb->name)){
-	  if((rule==start && pcb->state==starting)){
-	    satisfiableCounter=0;
-	    return true;
-	  }else if((rule==end && pcb->state==ending)){
-	    return true;
-	  }
-	}
+  p_struct *pcb=(iter->second);
+  if(0==excludes.count(pcb->name)){
+    if((rule==start && pcb->state==starting)){
+      satisfiableCounter=0;
+      return true;
+    }else if((rule==end && pcb->state==ending)){
+      return true;
+    }
+  }
       }
     }
     return false;

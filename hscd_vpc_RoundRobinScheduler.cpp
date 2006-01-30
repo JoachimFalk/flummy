@@ -23,9 +23,9 @@ namespace SystemC_VPC{
     while(firstindex!=NULL){
       secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
       if(secondindex!=NULL)
-	sublength=secondindex-firstindex;          //Länge bestimmen
+  sublength=secondindex-firstindex;          //Länge bestimmen
       else
-	sublength=strlen(firstindex);              
+  sublength=strlen(firstindex);              
       strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
       rest[sublength-1]='\0';
       firstindex=secondindex;                     
@@ -34,10 +34,10 @@ namespace SystemC_VPC{
       char *key, *value;               // key und value trennen und Property setzen
       value=strstr(rest,"-");
       if(value!=NULL){
-	value[0]='\0';
-	value++;
-	key=rest;
-	setProperty(key,value);
+  value[0]='\0';
+  value++;
+  key=rest;
+  setProperty(key,value);
       }
     
     }
@@ -48,8 +48,8 @@ namespace SystemC_VPC{
       char *domain;
       domain=strstr(value,"ns");
       if(domain!=NULL){
-	domain[0]='\0';
-	sscanf(value,"%lf",&TIMESLICE);
+  domain[0]='\0';
+  sscanf(value,"%lf",&TIMESLICE);
       }
     
     }
@@ -67,8 +67,8 @@ namespace SystemC_VPC{
     deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
       if( *iter == pcb->pid){
-	rr_fifo.erase(iter);
-	break;
+  rr_fifo.erase(iter);
+  break;
       }
     }
   }
@@ -88,28 +88,28 @@ namespace SystemC_VPC{
     //  cerr << LASTASSIGN+TIMESLICE << " : "<<sc_simulation_time()<< " : " << LASTASSIGN << " : " << TIMESLICE<< " : " <<rr_fifo.size()<<endl;
     if(LASTASSIGN+TIMESLICE==sc_simulation_time()){//Zeitscheibe wirklich abgelaufen!
       if(rr_fifo.size()>0){    // neuen Task bestimmen
-	task_to_assign = rr_fifo.front();
-	rr_fifo.pop_front();
-	ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
-	if(running_tasks.size()!=0){  // alten Task entfernen
-	  map<int,p_struct*>::const_iterator iter;
-	  iter=running_tasks.begin();
-	  p_struct *pcb=iter->second;
-	  task_to_resign=pcb->pid;
-	  rr_fifo.push_back(pcb->pid);
-	  ret_decision= PREEMPT;	
-	}// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
+  task_to_assign = rr_fifo.front();
+  rr_fifo.pop_front();
+  ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
+  if(running_tasks.size()!=0){  // alten Task entfernen
+    map<int,p_struct*>::const_iterator iter;
+    iter=running_tasks.begin();
+    p_struct *pcb=iter->second;
+    task_to_resign=pcb->pid;
+    rr_fifo.push_back(pcb->pid);
+    ret_decision= PREEMPT;  
+  }// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
       }    
     }else{//neuer Task hinzugefügt -> nichts tun 
       //oder alter entfernt    -> neuen setzen
     
       //neuen setzen:
       if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-	if(rr_fifo.size()>0){            // ist da auch ein neuer da?
-	  task_to_assign = rr_fifo.front();
-	  rr_fifo.pop_front();
-	  ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
-	}
+  if(rr_fifo.size()>0){            // ist da auch ein neuer da?
+    task_to_assign = rr_fifo.front();
+    rr_fifo.pop_front();
+    ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
+  }
       }
     
       //nichts tun:

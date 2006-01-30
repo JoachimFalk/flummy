@@ -43,19 +43,19 @@ namespace SystemC_VPC{
     XMLCh *excludeStr     = XMLString::transcode("exclude");
     while(node){
       if(node->getNodeType()==DOMNode::ELEMENT_NODE){
-	if(0==XMLString::compareNString(node->getNodeName(),excludeStr,sizeof(excludeStr))){
-	  DOMNamedNodeMap *atts=node->getAttributes();
-	  char *excludename=XMLString::transcode(atts->getNamedItem(processAttrStr)->getNodeValue());
+  if(0==XMLString::compareNString(node->getNodeName(),excludeStr,sizeof(excludeStr))){
+    DOMNamedNodeMap *atts=node->getAttributes();
+    char *excludename=XMLString::transcode(atts->getNamedItem(processAttrStr)->getNodeValue());
 
-	  cons->addExclude(excludename);
-	  XMLString::release(&excludename);//debug
-	}else if(0==XMLString::compareNString(node->getNodeName(),anytermStr,sizeof(anytermStr))){
-	  DOMNamedNodeMap *atts=node->getAttributes();
-	  char *statename=XMLString::transcode(atts->getNamedItem(stateAttrStr)->getNodeValue());
+    cons->addExclude(excludename);
+    XMLString::release(&excludename);//debug
+  }else if(0==XMLString::compareNString(node->getNodeName(),anytermStr,sizeof(anytermStr))){
+    DOMNamedNodeMap *atts=node->getAttributes();
+    char *statename=XMLString::transcode(atts->getNamedItem(stateAttrStr)->getNodeValue());
 
-	  cons->addAnyTerm(statename);
-	  XMLString::release(&statename);//debug
-	}	
+    cons->addAnyTerm(statename);
+    XMLString::release(&statename);//debug
+  }  
       }
       
 

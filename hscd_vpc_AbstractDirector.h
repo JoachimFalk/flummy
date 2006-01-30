@@ -8,9 +8,9 @@
 
 namespace SystemC_VPC{
 
-	class AbstractDirector{
-	
-	public:
+  class AbstractDirector{
+  
+  public:
     
     virtual ~AbstractDirector(){}
      
@@ -30,7 +30,7 @@ namespace SystemC_VPC{
      */
     virtual void registerMapping(const char* taskName, const char* compName)=0;
     
-	};
-	
+  };
+  
 }
 #endif /*HSCD_VPC_ABSTRACTDIRECTOR_H_*/

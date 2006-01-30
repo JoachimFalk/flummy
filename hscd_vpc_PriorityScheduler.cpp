@@ -17,9 +17,9 @@ namespace SystemC_VPC{
     while(firstindex!=NULL){
       secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
       if(secondindex!=NULL)
-	sublength=secondindex-firstindex;          //Länge bestimmen
+  sublength=secondindex-firstindex;          //Länge bestimmen
       else
-	sublength=strlen(firstindex);              
+  sublength=strlen(firstindex);              
       strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
       rest[sublength-1]='\0';
       firstindex=secondindex;                     
@@ -28,10 +28,10 @@ namespace SystemC_VPC{
       char *key, *value;               // key und value trennen und Property setzen
       value=strstr(rest,"-");
       if(value!=NULL){
-	value[0]='\0';
-	value++;
-	key=rest;
-	setProperty(key,value);
+  value[0]='\0';
+  value++;
+  key=rest;
+  setProperty(key,value);
       }
     
     }
@@ -72,17 +72,17 @@ namespace SystemC_VPC{
       iter=running_tasks.begin();
       p_struct *pcb=iter->second;
       if(pcb->priority <= d_prior_ready){             //laufender mit höherer oder gleicher priorität ->
-	ret_decision=NOCHANGE;                       //nicht verdrängen
+  ret_decision=NOCHANGE;                       //nicht verdrängen
       }else{
-	ret_decision=PREEMPT;                        //verdrängen
-	task_to_resign=pcb->pid; 
-	pqueue.pop();
-	p_queue_entry pqe={0,pcb};
-	pqueue.push(pqe);
+  ret_decision=PREEMPT;                        //verdrängen
+  task_to_resign=pcb->pid; 
+  pqueue.pop();
+  p_queue_entry pqe={0,pcb};
+  pqueue.push(pqe);
       }
     }else{
       pqueue.pop();
-      ret_decision=ONLY_ASSIGN;	
+      ret_decision=ONLY_ASSIGN;  
     }
 
    

@@ -27,7 +27,7 @@
 #include <hscd_vpc_TaskEventListener.h>
 
 namespace SystemC_VPC{
-	
+  
   /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).
    * 
@@ -76,69 +76,69 @@ namespace SystemC_VPC{
      
     // used to reflect state of component
     bool activ;
-	
-	// used to reflect if components execution has been killed
-	bool killed;
-	
-	// name of component
-	char componentName [VPC_MAX_STRING_LENGTH];
-	
-	// points to direct associated controlling instance
-	TaskEventListener* parentControlUnit;
-	
+  
+  // used to reflect if components execution has been killed
+  bool killed;
+  
+  // name of component
+  char componentName [VPC_MAX_STRING_LENGTH];
+  
+  // points to direct associated controlling instance
+  TaskEventListener* parentControlUnit;
+  
   public:
-	
-	AbstractComponent(){
-		
-		this->killed = false;
-		this->activ = true;
-		
-	}
-	
-	/**
-	 * \brief Getter for name of component
-	 */
-	char* getName(){
-		
-		return this->componentName;
-		
-	}
+  
+  AbstractComponent(){
+    
+    this->killed = false;
+    this->activ = true;
+    
+  }
+  
+  /**
+   * \brief Getter for name of component
+   */
+  char* getName(){
+    
+    return this->componentName;
+    
+  }
 
-	/**
-	 * \brief Getter to determine if component is set to activ
-	 */
-	inline bool isActiv(){
-		
-		return this->activ;
-		
-	}
-	
-	/**
-	 * \brief Setter to set value of component to activ or not
-	 */
-	inline void setActiv(bool newVal){
-		
-		this->activ = newVal;
-		
-	}
-	
-	/**
-	 * \brief Getter to determine if kill has been called on component
-	 */
-	inline bool hasBeenKilled(){
-		
-		return this->killed;
-		
-	}
-		
-	virtual sc_time* timeToPreempt(){
-		return new sc_time(SC_ZERO_TIME);
-	}
-		
-	virtual sc_time* timeToResume(){
-		return new sc_time(SC_ZERO_TIME);
-	}
-	
+  /**
+   * \brief Getter to determine if component is set to activ
+   */
+  inline bool isActiv(){
+    
+    return this->activ;
+    
+  }
+  
+  /**
+   * \brief Setter to set value of component to activ or not
+   */
+  inline void setActiv(bool newVal){
+    
+    this->activ = newVal;
+    
+  }
+  
+  /**
+   * \brief Getter to determine if kill has been called on component
+   */
+  inline bool hasBeenKilled(){
+    
+    return this->killed;
+    
+  }
+    
+  virtual sc_time* timeToPreempt(){
+    return new sc_time(SC_ZERO_TIME);
+  }
+    
+  virtual sc_time* timeToResume(){
+    return new sc_time(SC_ZERO_TIME);
+  }
+  
     /**
      * \brief Determines minimum time till next idle state of component
      * Used to determine how long it will take till component finishes
@@ -147,36 +147,36 @@ namespace SystemC_VPC{
      */
     //virtual sc_time* minTimeToIdle()=0;
 
-	/**
+  /**
      * \brief Simulate an execution on this "Virtual Component".
      *
      * While this simulation is running SystemC simulation time is consumed.
      */
-	virtual void compute(p_struct* pcb)=0;
-	
-	/**
-	 * \brief Sets next controlling instance of component
-	 * Used for callback mechanism to store pointer to "direct" controlling instance
-	 * for later infroming about finished or killed tasks.
-	 * \param controller points to controlling instance which is
-	 * responsible for component.
-	 */
-	virtual void setParentController(TaskEventListener* controller){
-	
-		this->parentControlUnit = controller;
-	
-	}
-	
-	/**
-	 * \brief Notifies parent controlling instance about task event
-	 * This mehtod is used to inform "direct" controlling instance about
-	 * finished or killed tasks.
-	 * \param pcb points to the finished or killed task
-	 */
-	virtual void notifyParentController(p_struct* pcb){
-		this->parentControlUnit->signalTaskEvent(pcb);
-	}
-	
+  virtual void compute(p_struct* pcb)=0;
+  
+  /**
+   * \brief Sets next controlling instance of component
+   * Used for callback mechanism to store pointer to "direct" controlling instance
+   * for later infroming about finished or killed tasks.
+   * \param controller points to controlling instance which is
+   * responsible for component.
+   */
+  virtual void setParentController(TaskEventListener* controller){
+  
+    this->parentControlUnit = controller;
+  
+  }
+  
+  /**
+   * \brief Notifies parent controlling instance about task event
+   * This mehtod is used to inform "direct" controlling instance about
+   * finished or killed tasks.
+   * \param pcb points to the finished or killed task
+   */
+  virtual void notifyParentController(p_struct* pcb){
+    this->parentControlUnit->signalTaskEvent(pcb);
+  }
+  
     /**************************/
     /*  END OF EXTENSION      */
     /**************************/
