@@ -77,27 +77,27 @@ namespace SystemC_VPC{
     sc_time* getWaitInterval();
     
     /**
-       * \brief Register component to Director
-       * Used to register a component to the Director for
-       * later computation of task on it. The components name
-       * is used as identifier for it.
-       * \param comp points to component instance to be registered
-       */
-      virtual void registerComponent(AbstractComponent* comp);
+     * \brief Register component to Director
+     * Used to register a component to the Director for
+     * later computation of task on it. The components name
+     * is used as identifier for it.
+     * \param comp points to component instance to be registered
+     */
+    virtual void registerComponent(AbstractComponent* comp);
       
-      /**
-       * \brief Registers mapping between task and component to Director
-       * \param taskName specifies name of task
-       * \param compName specifies name of component
-       */
-      virtual void registerMapping(const char* taskName, const char* compName);
+    /**
+     * \brief Registers mapping between task and component to Director
+     * \param taskName specifies name of task
+     * \param compName specifies name of component
+     */
+    virtual void registerMapping(const char* taskName, const char* compName);
               
-     /**
-      * \brief Returns mapped component for a given task
-      * \param task specifies the task to get component for
-      * \return pointer to AbstractComponent refering to mapped component
-      */
-     virtual AbstractComponent* getMappedComponent(p_struct* task);
+    /**
+     * \brief Returns mapped component for a given task
+     * \param task specifies the task to get component for
+     * \return pointer to AbstractComponent refering to mapped component
+     */
+    virtual AbstractComponent* getMappedComponent(p_struct* task);
     
     /**
      * \brief Used to set controller specific values

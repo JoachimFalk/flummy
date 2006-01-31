@@ -197,11 +197,18 @@ namespace SystemC_VPC{
      * \note Loading is only performed if new configuration is unequal to activ configuration
      * \param newConfig refers to the configuration to be loaded
      */ 
-    //void loadNewConfiguration(Configuration* newConfig);
-    
     bool loadConfiguration(Configuration* config);
+    
+    /**
+     * \brief Stores activ configuration
+     * Stores currently activ configuration regarding to the passed
+     * parameter kill, which indicates if configuration should be stored.
+     */
     bool storeActivConfiguration(bool kill);
     
+    /**
+     * \brief Helper method to determine interruption
+     */
     bool reconfigurationInterrupted(sc_time timeStamp, sc_time interval);
   };
 

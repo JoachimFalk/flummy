@@ -5,7 +5,8 @@
 namespace SystemC_VPC{
   RoundRobinScheduler::RoundRobinScheduler(const char *schedulername){
     TIMESLICE=5;
-    LASTASSIGN=0;
+    lastassign=0;
+    this->remainingSlice = 0;
     char rest[VPC_MAX_STRING_LENGTH];
     //      char muell[VPC_MAX_STRING_LENGTH];
     /*
@@ -73,54 +74,47 @@ namespace SystemC_VPC{
     }
   }
   scheduling_decision RoundRobinScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
-    /*
-      if(running_tasks.size()==0){
-      if(rr_fifo.size()>0){
-      //      cerr << "only_assign" << endl;
-      task_to_assign = rr_fifo.front();
-      rr_fifo.pop_front();
-      return ONLY_ASSIGN;
-      }
-      }
-      return NOCHANGE;
-    */
+    
     scheduling_decision ret_decision=NOCHANGE;
     //  cerr << LASTASSIGN+TIMESLICE << " : "<<sc_simulation_time()<< " : " << LASTASSIGN << " : " << TIMESLICE<< " : " <<rr_fifo.size()<<endl;
-    if(LASTASSIGN+TIMESLICE==sc_simulation_time()){//Zeitscheibe wirklich abgelaufen!
+    this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
+    this->lastassign = sc_simulation_time();
+    
+    if(this->remainingSlice <= 0){//Zeitscheibe wirklich abgelaufen!
       if(rr_fifo.size()>0){    // neuen Task bestimmen
-  task_to_assign = rr_fifo.front();
-  rr_fifo.pop_front();
-  ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
-  if(running_tasks.size()!=0){  // alten Task entfernen
-    map<int,p_struct*>::const_iterator iter;
-    iter=running_tasks.begin();
-    p_struct *pcb=iter->second;
-    task_to_resign=pcb->pid;
-    rr_fifo.push_back(pcb->pid);
-    ret_decision= PREEMPT;  
-  }// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
+        task_to_assign = rr_fifo.front();
+        rr_fifo.pop_front();
+        ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
+        if(running_tasks.size()!=0){  // alten Task entfernen
+          map<int,p_struct*>::const_iterator iter;
+          iter=running_tasks.begin();
+          p_struct *pcb=iter->second;
+          task_to_resign=pcb->pid;
+          rr_fifo.push_back(pcb->pid);
+          ret_decision= PREEMPT;  
+        }// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
       }    
     }else{//neuer Task hinzugefügt -> nichts tun 
       //oder alter entfernt    -> neuen setzen
     
       //neuen setzen:
       if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-  if(rr_fifo.size()>0){            // ist da auch ein neuer da?
-    task_to_assign = rr_fifo.front();
-    rr_fifo.pop_front();
-    ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
-  }
+        if(rr_fifo.size()>0){            // ist da auch ein neuer da?
+          task_to_assign = rr_fifo.front();
+          rr_fifo.pop_front();
+          ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
+        }
       }
     
       //nichts tun:
       //     ret_decision=NOCHANGE;         //neuer Task hinzugefügt -> nichts tun
     } 
 
-
+    /*
     if(ret_decision==ONLY_ASSIGN || ret_decision==PREEMPT){
       LASTASSIGN=sc_simulation_time();
     }
-
+    */
 
     /*if(ret_decision==ONLY_ASSIGN){
       cerr << "ONLY_ASSIGN" <<endl;
@@ -141,5 +135,19 @@ namespace SystemC_VPC{
    */
   sc_time* RoundRobinScheduler::schedulingOverhead(){
     return NULL; //new sc_time(1,SC_NS);
+  }
+
+  /**
+   * \brief Implementation of RoundRobinScheduler::signalPreemption
+   */
+  void RoundRobinScheduler::signalPreemption(){
+    this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
+  }
+  
+  /**
+   * \brief Implementation of RoundRobinScheduler::signalResume
+   */  
+  void RoundRobinScheduler::signalResume(){
+    this->lastassign = sc_simulation_time();
   }
 }

@@ -43,7 +43,9 @@ namespace SystemC_VPC{
     // signals if configuration has been stored successful
     bool stored;
     
+    // represents time needed to store configuration
     sc_time storeTime;
+    // represents time needed to load configuration
     sc_time loadTime;
     
   public:

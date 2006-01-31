@@ -8,9 +8,9 @@
 
 namespace SystemC_VPC{
    
-   /**
-    * \brief sets ups VPC Framework
-    */
+  /**
+   * \brief sets ups VPC Framework
+   */
   void VPCBuilder::buildVPC(){
 
     // open file and check existence
@@ -115,16 +115,22 @@ namespace SystemC_VPC{
           // pointer to currently initiated component
           AbstractComponent* comp;
           // init all components
-          while(node!=0){
-            comp = initComponent();
+          for(; node!=0; node = vpcConfigTreeWalker->nextSibling()){
+            try{
+              comp = initComponent();
+            }catch(InvalidArgumentException &e){
+              std::cerr << "VPCBuilder> " << e.what() << std::endl;
+              std::cerr << "VPCBuilder> ignoring specification of component, going on with initialization" << std::endl;
+              continue;
+            }
+            
 #ifdef VPC_DEBUG
             std::cout << "registering component: "<< comp->getName() << " to Director" << endl;
 #endif //VPC_DEBUG
             // register "upper-layer" components to Director
             this->director->registerComponent(comp);
             comp->setParentController(this->director);
-            
-            node = vpcConfigTreeWalker->nextSibling();
+           
           }
           
           node = vpcConfigTreeWalker->parentNode();
@@ -254,7 +260,7 @@ namespace SystemC_VPC{
    * \brief Initialize a component from the configuration file
    * \return pointer to the initialized component
    */
-  AbstractComponent* VPCBuilder::initComponent(){
+  AbstractComponent* VPCBuilder::initComponent() throw(InvalidArgumentException){
     
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     const XMLCh* xmlName = node->getNodeName(); 
@@ -292,8 +298,19 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         cerr << "VPCBuilder> Found Component name=" << sName << " type=" << sType << endl;
 #endif //VPC_DEBUG
+        AbstractController* controller;
+        try{
+          controller = this->generateController(sScheduler, sName);
+        }catch(InvalidArgumentException &e){
+          std::cerr << "VPCBuilder> Error: " << e.what() << std::endl;
+          std::cerr << "VPCBuilder> setting default FCFS for "<< sName << std::endl;
+          controller = this->generateController("FCFS", sName);
+        }catch(...){
+          std::cerr << "VPCBuilder> unkown exception occured while creating controller instance" << std::endl;
+          throw;
+        }
         
-        comp = new ReconfigurableComponent(sName, this->generateController(sScheduler, sName));
+        comp = new ReconfigurableComponent(sName, controller);
         
         this->knownComps.insert(pair<string, AbstractComponent* >(sName, comp));
         this->initConfigurations((ReconfigurableComponent*)comp);
@@ -305,7 +322,12 @@ namespace SystemC_VPC{
       
       }else{
         
-        cerr << "VPCBuilder> Found unknown Component type: name=" << sName << " type=" << sType << endl;
+        string msg("Unknown Component: name=");
+        msg += sName;
+        msg += " type=";
+        msg += sType;
+        throw InvalidArgumentException(msg);
+        //cerr << "VPCBuilder> Found unknown Component type: name=" << sName << " type=" << sType << endl;
         
       }
 
@@ -437,9 +459,16 @@ namespace SystemC_VPC{
     AbstractComponent* innerComp;
     
     // as long as there are inner components defined process them
-    while(node != NULL){
-      innerComp = this->initComponent();
-    
+    for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
+      
+      try{
+        innerComp = this->initComponent();
+      }catch(InvalidArgumentException &e){
+        std::cerr << "VPCBuilder> " << e.what() << std::endl;
+        std::cerr << "VPCBuilder> ignoring specification of component, going on with initialization" << std::endl;
+        continue;
+      }
+      
 #ifdef VPC_DEBUG
       std::cerr << RED("Adding Component=" << innerComp->getName() << " to Configuration=" << conf->getName()) << std::endl;
 #endif //VPC_DEBUG
@@ -450,7 +479,6 @@ namespace SystemC_VPC{
       // register mapping
       this->virtualComp_to_Config.insert(std::pair<std::string, std::string >(innerComp->getName(), conf->getName()));
       
-      node = vpcConfigTreeWalker->nextSibling();
     }
     
     // set back walker to upper node level
@@ -602,7 +630,8 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of VPCBuilder::generateController
    */
-  AbstractController* VPCBuilder::generateController(const char* controllertype, const char* id){
+  AbstractController* VPCBuilder::generateController(const char* controllertype, const char* id)
+    throw(InvalidArgumentException){
     // TODO IMPLEMENT WHEN CONTROLLER IS IMPLEMENTED
     AbstractController* controller;
     
@@ -622,8 +651,10 @@ namespace SystemC_VPC{
       || 0==strncmp(controllertype, STR_EDF, strlen(STR_EDF))){
       controller = new EDFController(id);
     }else{
-      std::cerr << RED("VPCBuilder> Cannot map " << controllertype << " to known controllers -> setting default controller") << std::endl;
-      controller = new FCFSController(id);
+      string msg("Unkown controllertype ");
+      msg += controllertype;
+      msg += ", cannot create instance";
+      throw InvalidArgumentException(msg);
     }
     
     return controller;

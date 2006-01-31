@@ -101,11 +101,6 @@ namespace SystemC_VPC{
 
     virtual ~Director();
 
-
-    /**************************/
-    /*   EXTENSION SECTION    */
-    /**************************/
-
     /**
      * \brief Simulates computation of a given task
      * 
@@ -158,10 +153,6 @@ namespace SystemC_VPC{
     p_struct* generatePCB(const char* name);
     
     void signalTaskEvent(p_struct* pcb);
-    
-    /**************************/
-    /*  END OF EXTENSION      */
-    /**************************/
 
   };
 

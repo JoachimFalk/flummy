@@ -15,7 +15,8 @@ namespace SystemC_VPC{
 
     RoundRobinScheduler(){
       TIMESLICE=10;
-      LASTASSIGN=0;
+      this->lastassign=0;
+      this->remainingSlice=0;
     }
     RoundRobinScheduler(const char *schedulername);
     virtual ~RoundRobinScheduler(){}
@@ -26,10 +27,15 @@ namespace SystemC_VPC{
     scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks);
     void setProperty(char* key, char* value);
     sc_time* schedulingOverhead();
+    
+    void signalPreemption();
+    void signalResume();
+    
   protected:
     deque<int> rr_fifo;
     double TIMESLICE;
-    double LASTASSIGN;
+    double lastassign;
+    double remainingSlice;
   };
 }
 #endif

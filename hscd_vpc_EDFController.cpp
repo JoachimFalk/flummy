@@ -11,6 +11,9 @@ namespace SystemC_VPC{
     
   }
 
+  /**
+   * \brief Deletes instance of EDFController
+   */
   EDFController::~EDFController(){}
     
   /**
@@ -61,7 +64,7 @@ namespace SystemC_VPC{
   /*
    * \brief Implementation of EDFController::getNextConfiguration
    */  
-    Configuration* EDFController::getNextConfiguration(){
+  Configuration* EDFController::getNextConfiguration(){
     
     if(!this->nextConfigurations.empty()){
       Configuration* next = this->nextConfigurations.front().getConfiguration();

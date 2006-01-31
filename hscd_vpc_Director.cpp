@@ -164,10 +164,6 @@ namespace SystemC_VPC{
     }
   }
 
-  /************************/
-  /*  EXTENSION SECTION   */
-  /************************/
-
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
     
 #ifdef VPC_DEBUG
@@ -247,38 +243,38 @@ namespace SystemC_VPC{
     
   }
     
-    /**
-     * \brief Implementation of Director::registerMapping
-     */
-    void Director::registerMapping(const char* taskName, const char* compName){
+  /**
+   * \brief Implementation of Director::registerMapping
+   */
+  void Director::registerMapping(const char* taskName, const char* compName){
       
-      std::map<std::string,AbstractComponent*>::iterator iter;
-      iter = this->component_map_by_name.find(compName);
+    std::map<std::string,AbstractComponent*>::iterator iter;
+    iter = this->component_map_by_name.find(compName);
     //check if component is known
-      if(iter != this->component_map_by_name.end()){
+    if(iter != this->component_map_by_name.end()){
 
 #ifdef VPC_DEBUG
       std::cout << "Director: registering mapping: "<< taskName << " <-> " << compName << endl;
 #endif //VPC_DEBUG
 
       this->mapping_map_by_name.insert(std::pair<std::string, AbstractComponent* >(taskName,iter->second));
-      }
-      
     }
+      
+  }
     
-    /**
-     * \brief Implementation of  Director::generatePCB
-     */
-    p_struct* Director::generatePCB(const char* name){
+  /**
+   * \brief Implementation of  Director::generatePCB
+   */
+  p_struct* Director::generatePCB(const char* name){
       
-      std::map<std::string, p_struct* >::iterator iter;
-      iter = this->p_struct_map_by_name.find(name);
-      if(iter != this->p_struct_map_by_name.end()){
-        return iter->second;  
-      }
+    std::map<std::string, p_struct* >::iterator iter;
+    iter = this->p_struct_map_by_name.find(name);
+    if(iter != this->p_struct_map_by_name.end()){
+      return iter->second;  
+    }
       
-      p_struct* newPCB = new p_struct();
-      newPCB->name = name;
+    p_struct* newPCB = new p_struct();
+    newPCB->name = name;
     newPCB->pid = this->p_struct_map_by_name.size(); // just enumerate to get unique pid
     newPCB->activation_count = 0; //default
     newPCB->state = inaktiv;      //default
@@ -286,23 +282,23 @@ namespace SystemC_VPC{
     newPCB->deadline = DBL_MAX; //default
     newPCB->period = DBL_MAX;   //default
     
-      this->p_struct_map_by_name.insert(std::pair<std::string, p_struct* >(name, newPCB));
+    this->p_struct_map_by_name.insert(std::pair<std::string, p_struct* >(name, newPCB));
       
-      return newPCB;
+    return newPCB;
       
-    }
+  }
     
-    /**
-     * \brief Implementation of Director::notifyTaskEvent
-     */
-    void Director::signalTaskEvent(p_struct* pcb){
+  /**
+   * \brief Implementation of Director::notifyTaskEvent
+   */
+  void Director::signalTaskEvent(p_struct* pcb){
     
 #ifdef VPC_DEBUG
     std::cerr << "Director> got notified from: " << pcb->name << std::endl;
 #endif //VPC_DEBUG
     if(pcb->state != activation_state(aborted)){
 #ifdef VPC_DEBUG
-    std::cerr << "Director> task successful finished: " << pcb->name << std::endl;
+      std::cerr << "Director> task successful finished: " << pcb->name << std::endl;
 #endif //VPC_DEBUG
       pcb->blockEvent->notify();
     }else{
@@ -313,12 +309,7 @@ namespace SystemC_VPC{
       AbstractComponent* comp = mapping_map_by_name.find(pcb->name)->second;
       comp->compute(pcb);
     }
-    }
-    
-
-  /**************************/
-  /*  END OF EXTENSION      */
-  /**************************/
+  } 
 
 }
 

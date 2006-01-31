@@ -34,6 +34,10 @@ namespace SystemC_VPC{
 
   class Director;
 
+  /**
+   * VPCBuilder sets up VPC framework through a given specification file before
+   * simulation start.
+   */
   class VPCBuilder{
     /*
      * SECTION: init tag values for comparison while initializing
@@ -83,16 +87,17 @@ namespace SystemC_VPC{
     // map from all "virtualComponents" to their configs
     std::map<std::string, std::string > virtualComp_to_Config;
     // map from all configs to their components
-      std::map<std::string, std::string > config_to_Comp;
+    std::map<std::string, std::string > config_to_Comp;
     
     // pointer to Director to be initialized
     Director* director;
     
   public:
-      VPCBuilder(Director* director){
-        
-        this->director = director;
-        //init xml
+    
+    VPCBuilder(Director* director){
+      
+      this->director = director;
+      //init xml
       try {
         XMLPlatformUtils::Initialize();
       }
@@ -132,18 +137,18 @@ namespace SystemC_VPC{
       /*
        * END OF SECTION: init tag values for comparison while initializing
        */
-      }
+    }
       
-      ~VPCBuilder(){
-        XMLPlatformUtils::Terminate();
-      }
+    ~VPCBuilder(){
+      XMLPlatformUtils::Terminate();
+    }
       
       
-      void setDirector(Director* director){
-        this->director = director;
-      }
+    void setDirector(Director* director){
+      this->director = director;
+    }
       
-      bool FALLBACKMODE;
+    bool FALLBACKMODE;
       
     /**
      * \brief Initializes VPC Framework using a configuration file
@@ -156,7 +161,7 @@ namespace SystemC_VPC{
      * \brief Initialize a component from the configuration file
      * \return pointer to the initialized component
      */
-    AbstractComponent* initComponent();
+    AbstractComponent* initComponent() throw(InvalidArgumentException);
     
     
     /**
@@ -189,9 +194,15 @@ namespace SystemC_VPC{
      */
     void initSwitchTimesOfComponent(ReconfigurableComponent* comp);
     
+    /**
+     * \brief Initializes mapping between tasks and components
+     */
     void VPCBuilder::initMappingAPStruct();
     
-    AbstractController* generateController(const char* type, const char* id);
+    /**
+     * \brief Generate pcb for internal use in VPC Framework
+     */
+    AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
     
   };
     

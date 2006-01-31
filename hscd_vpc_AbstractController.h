@@ -18,14 +18,7 @@ namespace SystemC_VPC{
   
   class ReconfigurableComponent;
   
-  // not used right now
-  struct my_taskInfo{
-    const char* name;
-    const char* funcname;
-    VPC_Event* end;
-  };
-  
-    /**
+  /**
    * \brief Specification the interface provieded by a controller
    * This abstract class is used to declare a common interface for all controller
    * used within the VPC framework.
@@ -77,38 +70,38 @@ namespace SystemC_VPC{
      * controller. It is used to initialize and set up all necessary data for a new "round" of
      * scheduling. 
      */
-     virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks)=0;
+    virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks)=0;
      
-     /**
-      * \brief Returns next configuration to be loaded
-      * Used to indicate if a new configuration should be loaded by the controller
-      * component.
-      * \return pointer to next configuration to be loaded or NULL if no configuration
-      * is selected up to now.
-      */
-     virtual Configuration* getNextConfiguration()=0;
+    /**
+     * \brief Returns next configuration to be loaded
+     * Used to indicate if a new configuration should be loaded by the controller
+     * component.
+     * \return pointer to next configuration to be loaded or NULL if no configuration
+     * is selected up to now.
+     */
+    virtual Configuration* getNextConfiguration()=0;
       
-     /**
-      * \brief Returns mapped component for a given task
-      * \param task specifies the task to get component for
-      * \return pointer to AbstractComponent refering to mapped component
-      */
-     virtual AbstractComponent* getMappedComponent(p_struct* task)=0;
+    /**
+     * \brief Returns mapped component for a given task
+     * \param task specifies the task to get component for
+     * \return pointer to AbstractComponent refering to mapped component
+     */
+    virtual AbstractComponent* getMappedComponent(p_struct* task)=0;
       
-     /**
-      * \brief Indicates if controller still can forward tasks
-      * \return TRUE if there are still task to be forwarded else FALSE
-      */
-     virtual bool hasTaskToProcess()=0;
+    /**
+     * \brief Indicates if controller still can forward tasks
+     * \return TRUE if there are still task to be forwarded else FALSE
+     */
+    virtual bool hasTaskToProcess()=0;
 
-     /**
-      * \brief Returns next task to be forwarded
-      * This method should only be called after calling hasTaskToProcess
-      * to ensure that there are still existing task to process.
-      * \return pair containing p_struct of task and requested function
-      * to be simulated.
-      */
-     virtual p_struct* getNextTask()=0;
+    /**
+     * \brief Returns next task to be forwarded
+     * This method should only be called after calling hasTaskToProcess
+     * to ensure that there are still existing task to process.
+     * \return pair containing p_struct of task and requested function
+     * to be simulated.
+     */
+    virtual p_struct* getNextTask()=0;
     
     /**
      * \brief Setter to specify if controller should use "kill" by preemption
@@ -124,7 +117,6 @@ namespace SystemC_VPC{
      * \brief Callback Mehtode used to inform Controller about task state
      */
     virtual void signalTaskEvent(p_struct* pcb)=0;
-    
     
     /**
      * \brief Signals to controller that managed component has been preempted.

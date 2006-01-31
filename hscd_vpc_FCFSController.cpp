@@ -12,6 +12,9 @@ namespace SystemC_VPC{
     
   }
 
+  /**
+   * \brief Deletes instance of FCFSController
+   */
   FCFSController::~FCFSController(){}
   
   /**
@@ -144,7 +147,7 @@ namespace SystemC_VPC{
   /*
    * \brief Implementation of FCFSController::getNextConfiguration
    */  
-    Configuration* FCFSController::getNextConfiguration(){
+  Configuration* FCFSController::getNextConfiguration(){
     
     Configuration* next = this->nextConfiguration;
     this->nextConfiguration = NULL;

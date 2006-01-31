@@ -78,7 +78,8 @@ namespace SystemC_VPC{
     assert(actualRemainingDelay.value()>=0);
     
 #ifdef VPC_DEBUG
-    std::cerr << RED("Component " << this->getName() << "> actualRemainingDelay= " << actualRemainingDelay.value()) << std::endl;
+    std::cerr << RED("Component " << this->getName() << "> actualRemainingDelay= " << actualRemainingDelay.value()
+              << " for pid=" << actualRunningPID << " at: " << sc_simulation_time()) << std::endl;
 #endif //VPC_DEBUG
 
     if(actualRemainingDelay.value()==0){
@@ -387,7 +388,7 @@ namespace SystemC_VPC{
 
   }
 
- /**
+  /**
    *
    */
   void Component::compute(p_struct* pcb){ 

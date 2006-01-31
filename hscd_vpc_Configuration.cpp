@@ -17,7 +17,10 @@ namespace SystemC_VPC{
     this->storeTime = sc_time(SC_ZERO_TIME);
     
   }
-    
+
+  /**
+   * \brief Creates instance of Configuration
+   */    
   Configuration::Configuration(const char* name, const char* loadTime, const char* storeTime) 
     : activ(false), stored(false){
       
@@ -27,6 +30,9 @@ namespace SystemC_VPC{
       
   }
   
+  /**
+   * \brief Deletes instance of Configuration
+   */
   Configuration::~Configuration(){
   
     std::map<std::string, AbstractComponent* >::iterator iter;
@@ -116,7 +122,7 @@ namespace SystemC_VPC{
   }
     
   /**
-   * \brief Implementation of Configuration::preemptComponents
+   * \brief Implementation of Configuration::preempt
    */
   void Configuration::preempt(bool kill){
     
@@ -130,14 +136,9 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
           std::cerr << YELLOW("Configuration " << this->getName() 
               << " trying to preempt component: " << iter->first << " with kill=" << kill) << std::endl;
-          std::cerr << "start time= " << sc_simulation_time() << std::endl;
 #endif // VPC_DEBUG
   
           iter->second->preempt(kill);
-
-#ifdef VPC_DEBUG
-          std::cerr << "end time= " << sc_simulation_time() << std::endl;
-#endif
 
       }
       
@@ -147,7 +148,7 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of Configuration::resumeComponents
+   * \brief Implementation of Configuration::resume
    */
   void Configuration::resume(){
     
@@ -169,7 +170,10 @@ namespace SystemC_VPC{
     }
     
   }
-    
+
+  /**
+   * \brief Implementation of Configuration::timeToPreempt
+   */    
   sc_time* Configuration::timeToPreempt(){
     
     sc_time* max = new sc_time(SC_ZERO_TIME);
@@ -204,6 +208,9 @@ namespace SystemC_VPC{
     return max;
   }
 
+  /**
+   * \brief Implementation of Configuration::timeToResume
+   */
   sc_time* Configuration::timeToResume(){
     
     sc_time* max = new sc_time(SC_ZERO_TIME);

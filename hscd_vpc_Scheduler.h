@@ -61,23 +61,27 @@ namespace SystemC_VPC{
      */
     virtual void setProperty(char* key, char* value){}
 
-  /**************************/
-  /*   EXTENSION SECTION    */
-  /**************************/
-  
-  virtual const char* getName(){
-    return this->name;
-  }
-  
-  virtual void setName(const char* name){
-    assert(name != NULL);
-    this->name = name;
-  }
-  
+    /**************************/
+    /*   EXTENSION SECTION    */
+    /**************************/
+    
+    virtual const char* getName(){
+      return this->name;
+    }
+    
+    virtual void setName(const char* name){
+      assert(name != NULL);
+      this->name = name;
+    }
+
+    virtual void signalPreemption(){}
+    
+    virtual void signalResume(){}
+            
   private:
-    const char* name;
-  /**************************/
-  /*  END OF EXTENSION      */
+      const char* name;
+    /**************************/
+    /*  END OF EXTENSION      */
   /**************************/
   };
 

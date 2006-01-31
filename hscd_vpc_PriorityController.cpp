@@ -61,7 +61,7 @@ namespace SystemC_VPC{
   /*
    * \brief Implementation of PriorityController::getNextConfiguration
    */  
-    Configuration* PriorityController::getNextConfiguration(){
+  Configuration* PriorityController::getNextConfiguration(){
     
     if(!this->nextConfigurations.empty()){
       Configuration* next = this->nextConfigurations.front().getConfiguration();
@@ -84,7 +84,7 @@ namespace SystemC_VPC{
    */
   bool PriorityController::hasTaskToProcess(){
   
-     return (this->tasksToProcess.size() > 0);
+    return (this->tasksToProcess.size() > 0);
   
   }
   

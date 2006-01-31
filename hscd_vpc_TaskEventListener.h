@@ -4,16 +4,29 @@
 #include <hscd_vpc_datatypes.h>
 
 namespace SystemC_VPC{
-
-class TaskEventListener{
-
-public:
   
-  virtual void signalTaskEvent(p_struct* pcb)=0;
+  /**
+   * TaskEventListener defines common interface used for communicating task state
+   * through the control hierarchy within VPC framework.
+   */
+  class TaskEventListener{
   
-  virtual void signalStateChanged(){};
-  
-};
+  public:
+    
+    /**
+     * \brief Signals task event to listener
+     * Used by listend instance to notify listener about an
+     * event which happend.
+     * \param pcb points to the task which the notifikation corresponds to
+     */
+    virtual void signalTaskEvent(p_struct* pcb)=0;
+    
+    /**
+     * \note Not used yet
+     */
+    virtual void signalStateChanged(){};
+    
+  };
 
 }
 

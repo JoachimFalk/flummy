@@ -85,12 +85,6 @@ namespace SystemC_VPC{
      * \brief No parameter are set in FallbackComponent.
      */
     virtual void processAndForwardParameter(char *sType,char *sValue){}
-
-  private:
-
-  /**************************/
-  /*   EXTENSION SECTION    */
-  /**************************/
       
   public:
     
@@ -118,10 +112,7 @@ namespace SystemC_VPC{
     virtual void compute( p_struct* pcb){
       this->compute(pcb->name.c_str(), pcb->funcname, pcb->blockEvent);
     }
-    
-  /**************************/
-  /*  END OF EXTENSION      */
-  /**************************/
+
   };
 
   class Component : public AbstractComponent, public sc_module{
@@ -230,11 +221,6 @@ namespace SystemC_VPC{
      */
     virtual void processAndForwardParameter(char *sType,char *sValue);
     
-    
-  /**************************/
-  /*   EXTENSION SECTION    */
-  /**************************/
-
   protected:
        
     // used to indicate preemption request
@@ -268,11 +254,7 @@ namespace SystemC_VPC{
     void killAllTasks();
     
     void setTraceSignalReadyTasks(trace_value value);
-    
-  /**************************/
-  /*  END OF EXTENSION      */
-  /**************************/
-
+  
   };
 
 } 

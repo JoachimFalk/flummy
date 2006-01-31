@@ -102,7 +102,7 @@ namespace SystemC_VPC{
   /*
    * \brief Implementation of RoundRobinController::getNextConfiguration
    */  
-    Configuration* RoundRobinController::getNextConfiguration(){
+  Configuration* RoundRobinController::getNextConfiguration(){
 
     Configuration* nextConfiguration = NULL;
 
@@ -112,10 +112,10 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
     if(this->switchConfig && this->rr_configfifo.size() > 0){
-       // put actual scheduled configuration to the end
-       this->rr_configfifo.push_back(this->rr_configfifo.front());
-       this->rr_configfifo.pop_front();
-       // get configuration
+      // put actual scheduled configuration to the end
+      this->rr_configfifo.push_back(this->rr_configfifo.front());
+      this->rr_configfifo.pop_front();
+      // get configuration
       this->currConfiguration = &(this->rr_configfifo.front());
       nextConfiguration = this->currConfiguration->first;
       
@@ -187,7 +187,10 @@ namespace SystemC_VPC{
       this->managedComponent->wakeUp();
     }
   }
-  
+
+  /**
+   * \brief Implementation of RoundRobinController::signalTaskEvent
+   */  
   void RoundRobinController::updateUsedConfigurations(p_struct* pcb){
     
     std::deque<std::pair<Configuration*, int> >::iterator iter;
@@ -213,6 +216,9 @@ namespace SystemC_VPC{
   
   }
   
+  /**
+   * \brief Implementation of RoundRobinController::signalTaskEvent
+   */
   void RoundRobinController::calculateAssignTime(Configuration* nextConfiguration){
     
     this->lastassign = sc_simulation_time();
@@ -240,11 +246,18 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
   }
   
+  /**
+   * \brief Implementation of RoundRobinController::signalTaskEvent
+   */
   void RoundRobinController::signalPreemption(){
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
   }
-  
+
+  /**
+   * \brief Implementation of RoundRobinController::signalTaskEvent
+   */  
   void RoundRobinController::signalResume(){
     this->lastassign = sc_simulation_time();
   }
+
 } //namespace SystemC_VPC

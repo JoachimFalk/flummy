@@ -50,36 +50,39 @@ namespace SystemC_VPC{
       */
     virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks);
           
-     /**
-      * \brief Returns next configuration to be loaded
-      * Used to indicate if a new configuration should be loaded by the controller
-      * component.
-      * \return pointer to next configuration to be loaded or NULL if no configuration
-      * is selected up to now.
-      */
-     virtual Configuration* getNextConfiguration();
+    /**
+     * \brief Returns next configuration to be loaded
+     * Used to indicate if a new configuration should be loaded by the controller
+     * component.
+     * \return pointer to next configuration to be loaded or NULL if no configuration
+     * is selected up to now.
+     */
+    virtual Configuration* getNextConfiguration();
       
-     /**
-      * \brief Indicates if controller still can forward tasks
-      * \return TRUE if there are still task to be forwarded else FALSE
-      */
-     virtual bool hasTaskToProcess();
+    /**
+     * \brief Indicates if controller still can forward tasks
+     * \return TRUE if there are still task to be forwarded else FALSE
+     */
+    virtual bool hasTaskToProcess();
       
-     /**
-      * \brief Returns next task to be forwarded
-      * This method should only be called after calling hasTaskToProcess
-      * to ensure that there are still existing task to process.
-      * \return pair containing p_struct of task and requested function
-      * to be simulated.
-      */
-     virtual p_struct* getNextTask();
+    /**
+     * \brief Returns next task to be forwarded
+     * This method should only be called after calling hasTaskToProcess
+     * to ensure that there are still existing task to process.
+     * \return pair containing p_struct of task and requested function
+     * to be simulated.
+     */
+    virtual p_struct* getNextTask();
       
-     /**
-      * \brief Signals if a configuration has to be reactived by controlled component
-      * \param config points to configuration which should be reactivated.
-      */ 
-     bool needToReactivateConfiguration(Configuration* config);
-
+    /**
+     * \brief Signals if a configuration has to be reactived by controlled component
+     * \param config points to configuration which should be reactivated.
+     */ 
+    bool needToReactivateConfiguration(Configuration* config);
+    
+    /**
+     * \see TaskEventListener
+     */
     virtual void signalTaskEvent(p_struct* pcb);
     
   };

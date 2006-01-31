@@ -96,7 +96,7 @@ namespace SystemC_VPC{
   /**
     * \brief Implementation of Controller::getMappedComponent
     */
-   AbstractComponent* Controller::getMappedComponent(p_struct* task){
+  AbstractComponent* Controller::getMappedComponent(p_struct* task){
      // determine requied configuration
     std::string configName = this->mapping_map_configs[task->name];
     Configuration* conf = this->managedComponent->getConfiguration(configName.c_str());
