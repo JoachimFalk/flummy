@@ -7,8 +7,8 @@
 #include <list>
 #include <string>
 
-#include <hscd_vpc_AbstractComponent.h>
-#include <hscd_vpc_IPreemptable.h>
+#include "hscd_vpc_AbstractComponent.h"
+#include "hscd_vpc_IPreemptable.h"
 
 namespace SystemC_VPC{
   

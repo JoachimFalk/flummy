@@ -7,10 +7,10 @@
 #include <deque>
 #include <vector>
 
-#include <hscd_vpc_AbstractDirector.h>
-#include <hscd_vpc_Configuration.h>
-#include <hscd_vpc_datatypes.h>
-#include <hscd_vpc_TaskEventListener.h>
+#include "hscd_vpc_AbstractDirector.h"
+#include "hscd_vpc_Configuration.h"
+#include "hscd_vpc_datatypes.h"
+#include "hscd_vpc_TaskEventListener.h"
 
 #include <hscd_vpc_InvalidArgumentException.h>
 

@@ -18,9 +18,9 @@
 #ifndef HSCD_VPC_DIRECTOR_H
 #define HSCD_VPC_DIRECTOR_H
 
-#include <hscd_vpc_AbstractDirector.h>
+#include "hscd_vpc_AbstractDirector.h"
 #include "hscd_vpc_AbstractComponent.h"
-#include <hscd_vpc_TaskEventListener.h>
+#include "hscd_vpc_TaskEventListener.h"
 
 #include <string>
 #include <map.h>

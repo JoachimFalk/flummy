@@ -86,7 +86,7 @@ namespace SystemC_VPC{
    * \brief Implementation of EDFController::hasTaskToProcess()
    */
   bool EDFController::hasTaskToProcess(){
-  
+   
      return (this->tasksToProcess.size() > 0);
   
   }

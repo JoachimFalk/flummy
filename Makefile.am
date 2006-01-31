@@ -59,8 +59,14 @@ pkgincludeprefix=systemcvpc/
 
 lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
+	hscd_vpc_AbstractComponent.h            \
+	hscd_vpc_AbstractController.h           \
+	hscd_vpc_AbstractDirector.h             \
+	hscd_vpc_datatypes.h                    \
+	hscd_vpc_Director.h                     \
+	hscd_vpc_TaskEventListener.h		\
 	hscd_vpc_Director.h			\
-	hscd_vpc_AbstractComponent.h
+	hscd_vpc_IPreemptable.h
 
 #noinst_HEADERS=	oneof.hpp
 
@@ -89,7 +95,6 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_FCFSScheduler.cpp		\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_XmlHelper.cpp			\
-	hscd_vpc_PreemptivController.cpp	\
 	hscd_vpc_Configuration.cpp		\
 	hscd_vpc_Controller.cpp			\
 	hscd_vpc_EDFController.cpp		\

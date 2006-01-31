@@ -17,17 +17,17 @@
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
 
-#include <hscd_vpc_AbstractComponent.h>
-#include <hscd_vpc_Component.h>
-#include <hscd_vpc_ReconfigurableComponent.h>
+#include "hscd_vpc_AbstractComponent.h"
+#include "hscd_vpc_Component.h"
+#include "hscd_vpc_ReconfigurableComponent.h"
 
-#include <hscd_vpc_AbstractController.h>
-#include <hscd_vpc_FCFSController.h>
-#include <hscd_vpc_RoundRobinController.h>
-#include <hscd_vpc_PriorityController.h>
-#include <hscd_vpc_EDFController.h>
+#include "hscd_vpc_AbstractController.h"
+#include "hscd_vpc_FCFSController.h"
+#include "hscd_vpc_RoundRobinController.h"
+#include "hscd_vpc_PriorityController.h"
+#include "hscd_vpc_EDFController.h"
 
-#include <hscd_vpc_Configuration.h>
+#include "hscd_vpc_Configuration.h"
 
 XERCES_CPP_NAMESPACE_USE
 namespace SystemC_VPC{

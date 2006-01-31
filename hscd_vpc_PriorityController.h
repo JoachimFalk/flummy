@@ -8,9 +8,9 @@
 #include <queue>
 
 
-#include <hscd_vpc_Controller.h>
-#include <hscd_vpc_Configuration.h>
-#include <hscd_vpc_Director.h>
+#include "hscd_vpc_Controller.h"
+#include "hscd_vpc_Configuration.h"
+#include "hscd_vpc_Director.h"
 
 namespace SystemC_VPC{
 

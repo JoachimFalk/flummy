@@ -7,11 +7,10 @@
 #include <deque>
 #include <vector>
 
-#include <hscd_vpc_AbstractController.h>
-#include <hscd_vpc_ReconfigurableComponent.h>
-#include <hscd_vpc_Configuration.h>
-
-#include <hscd_vpc_InvalidArgumentException.h>
+#include "hscd_vpc_AbstractController.h"
+#include "hscd_vpc_ReconfigurableComponent.h"
+#include "hscd_vpc_Configuration.h"
+#include "hscd_vpc_InvalidArgumentException.h"
 
 namespace SystemC_VPC{
   

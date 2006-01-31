@@ -1,7 +1,7 @@
 #ifndef HSCD_VPC_TASKEVENTLISTENER_
 #define HSCD_VPC_TASKEVENTLISTENER_
 
-#include <hscd_vpc_datatypes.h>
+#include "hscd_vpc_datatypes.h"
 
 namespace SystemC_VPC{
   

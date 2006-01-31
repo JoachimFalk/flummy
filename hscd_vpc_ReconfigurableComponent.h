@@ -7,10 +7,10 @@
 #include <map>
 #include <deque>
 
-#include <hscd_vpc_datatypes.h>
-#include <hscd_vpc_AbstractController.h>
-#include <hscd_vpc_AbstractComponent.h>
-#include <hscd_vpc_Configuration.h>
+#include "hscd_vpc_datatypes.h"
+#include "hscd_vpc_AbstractController.h"
+#include "hscd_vpc_AbstractComponent.h"
+#include "hscd_vpc_Configuration.h"
 
 namespace SystemC_VPC{
   

@@ -22,9 +22,9 @@
 
 #include <string.h>
 
-#include <hscd_vpc_datatypes.h>
-#include <hscd_vpc_IPreemptable.h>
-#include <hscd_vpc_TaskEventListener.h>
+#include "hscd_vpc_datatypes.h"
+#include "hscd_vpc_IPreemptable.h"
+#include "hscd_vpc_TaskEventListener.h"
 
 namespace SystemC_VPC{
   
