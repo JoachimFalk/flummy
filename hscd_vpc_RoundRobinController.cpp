@@ -202,7 +202,7 @@ namespace SystemC_VPC{
     if(iter != this->rr_configfifo.end()){
       // if this task is last one running on configuration remove conf
       if(iter->second == 1){
-        if(this->scheduledConfiguration == NULL && iter->first == this->scheduledConfiguration->first){
+        if(this->scheduledConfiguration != NULL && iter->first == this->scheduledConfiguration->first){
           this->scheduledConfiguration = NULL;
         }
         this->rr_configfifo.erase(iter);
@@ -224,19 +224,17 @@ namespace SystemC_VPC{
     this->lastassign = sc_simulation_time();
     
     if(nextConfiguration != this->managedComponent->getActivConfiguration()){
-      sc_time* time = NULL;
+      sc_time time;
       if(this->managedComponent->getActivConfiguration() != NULL){
         time = this->managedComponent->getActivConfiguration()->timeToPreempt();
-        this->lastassign += time->to_default_time_units();
-        delete time;
+        this->lastassign += time.to_default_time_units();
         if(!this->preemptByKill()){
           this->lastassign += this->managedComponent->getActivConfiguration()->getStoreTime().to_default_time_units();
         }
       }
       
       time = nextConfiguration->timeToResume();
-      this->lastassign += time->to_default_time_units();
-      delete time;
+      this->lastassign += time.to_default_time_units();
         
       this->lastassign += nextConfiguration->getLoadTime().to_default_time_units();
     }

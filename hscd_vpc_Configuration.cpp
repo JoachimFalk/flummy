@@ -174,10 +174,10 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::timeToPreempt
    */    
-  sc_time* Configuration::timeToPreempt(){
+  sc_time Configuration::timeToPreempt(){
     
-    sc_time* max = new sc_time(SC_ZERO_TIME);
-    sc_time* tmp = NULL;
+    sc_time max(SC_ZERO_TIME);
+    sc_time tmp;
     
     if(this->isActiv()){
       std::map<std::string, AbstractComponent* >::iterator iter;
@@ -191,18 +191,15 @@ namespace SystemC_VPC{
 #endif // VPC_DEBUG
   
           tmp = iter->second->timeToPreempt();
-          if(*tmp > *max){
-            delete max;
+          if(tmp > max){
             max = tmp;
-          }else{
-            delete tmp;
           }
       }
     }
 
 #ifdef VPC_DEBUG
           std::cerr << YELLOW("Configuration " << this->getName() 
-              << " time of preemption: " << *max) << std::endl;
+              << " time of preemption: " << max) << std::endl;
 #endif // VPC_DEBUG
     
     return max;
@@ -211,28 +208,25 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::timeToResume
    */
-  sc_time* Configuration::timeToResume(){
+  sc_time Configuration::timeToResume(){
     
-    sc_time* max = new sc_time(SC_ZERO_TIME);
-    sc_time* tmp = NULL;
+    sc_time max(SC_ZERO_TIME);
+    sc_time tmp;
     
     if(!this->isActiv()){
         
       std::map<std::string, AbstractComponent*>::iterator iter;
       for(iter = this->component_map_by_name.begin(); iter != this->component_map_by_name.end(); iter++){
         tmp = iter->second->timeToResume();
-        if(*tmp > *max){
-          delete max;
+        if(tmp > max){
           max = tmp;
-        }else{
-          delete tmp;
         } 
       }
     }
 
 #ifdef VPC_DEBUG
           std::cerr << YELLOW("Configuration " << this->getName() 
-              << " time of resuming: " << *max) << std::endl;
+              << " time of resuming: " << max) << std::endl;
 #endif // VPC_DEBUG
 
     return max;

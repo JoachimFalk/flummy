@@ -110,20 +110,12 @@ namespace SystemC_VPC{
     /**
      * \see IPreemptable::timeToPreempt
      */
-    virtual sc_time* timeToPreempt();
+    virtual sc_time timeToPreempt();
     
     /**
      * \see IPreemptable::timeToResume
      */
-    virtual sc_time* timeToResume();
-    
-    /**
-     * \brief Determines minimum time till next idle state of component
-     * Used to determine how long it will take till component finishes
-     * currently running tasks.
-     * \return sc_time specifying the time till idle
-     */
-    //virtual sc_time* minTimeToIdle();
+    virtual sc_time timeToResume();
     
     /**
      * \brief Adds new Configuration to the reconfigurable component.

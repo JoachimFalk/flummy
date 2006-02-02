@@ -132,8 +132,8 @@ namespace SystemC_VPC{
      * Default implementation just returns SC_ZERO_TIME
      * \return sc_time with value SC_ZERO_TIME
      */
-    virtual sc_time* timeToPreempt(){
-      return new sc_time(SC_ZERO_TIME);
+    virtual sc_time timeToPreempt(){
+      return sc_time(SC_ZERO_TIME);
     }
     
     /**
@@ -141,8 +141,8 @@ namespace SystemC_VPC{
      * Default implementation just returns SC_ZERO_TIME
      * \return sc_time with value SC_ZERO_TIME
      */  
-    virtual sc_time* timeToResume(){
-      return new sc_time(SC_ZERO_TIME);
+    virtual sc_time timeToResume(){
+      return sc_time(SC_ZERO_TIME);
     }
     
     /**

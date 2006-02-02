@@ -126,14 +126,14 @@ namespace SystemC_VPC{
      * \return time needed if configuration actually is preempted
      * \see IPreemptable::timeToPreempt
      */
-    sc_time* timeToPreempt();
+    sc_time timeToPreempt();
     
     /**
      * \brief Gets time needed to restore all components of configuration after preemption
      * \return time needed for restoring state before preemption
      * \see IPreemptable::timeToResume
      */
-    sc_time* timeToResume();
+    sc_time timeToResume();
     
     /**
      * \brief Determines minimal time of configuration until all components will be idle
@@ -222,6 +222,7 @@ namespace SystemC_VPC{
      * on the configuration
      */
     const double getDeadline();
+
   };
  
 }

@@ -1,7 +1,7 @@
 #include <hscd_vpc_Controller.h>
 
 namespace SystemC_VPC{
-  
+
   /**
    * \brief Implementation of Controller::getName()
    */

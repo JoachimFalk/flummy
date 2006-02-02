@@ -33,7 +33,7 @@ namespace SystemC_VPC{
        * preemptable instance, if restoring after preemption is desired.
        * \return time needed to store actual state of an instance to preempt
        */
-      virtual sc_time* timeToPreempt()=0;
+      virtual sc_time timeToPreempt()=0;
       
       /**
        * \brief Gets time needed to restore a preempted object
@@ -41,7 +41,7 @@ namespace SystemC_VPC{
        * preemptable instance before its preemption.
        * \return time needed to restore actual state of an instance to resume
        */
-      virtual sc_time* timeToResume()=0;
+      virtual sc_time timeToResume()=0;
       
   };
 

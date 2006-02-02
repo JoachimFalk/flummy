@@ -371,19 +371,15 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of ReconfigurableComponent::timeToPreempt
    */  
-  sc_time* ReconfigurableComponent::timeToPreempt(){
-    sc_time* time = NULL;
+  sc_time ReconfigurableComponent::timeToPreempt(){
+    sc_time time(SC_ZERO_TIME);
     
     // only if component is activ we have time for preemption
     if(this->isActiv() && this->activConfiguration != NULL){
       
       time = this->activConfiguration->timeToPreempt();
-      *time += this->activConfiguration->getStoreTime();
+      time += this->activConfiguration->getStoreTime();
       
-    }else{
-      
-      time = new sc_time(SC_ZERO_TIME);
-    
     }
     
     return time;
@@ -392,20 +388,16 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of ReconfigurableComponent::timeToResume
    */  
-  sc_time* ReconfigurableComponent::timeToResume(){
+  sc_time ReconfigurableComponent::timeToResume(){
     
-    sc_time* time = NULL;
+    sc_time time(SC_ZERO_TIME);
     
     // only if component is inactiv we have time to resume
     if(!this->isActiv() && this->activConfiguration != NULL){
       
       time = this->activConfiguration->timeToResume();
-      *time += this->activConfiguration->getLoadTime();
+      time += this->activConfiguration->getLoadTime();
       
-    }else{
-      
-      time = new sc_time(SC_ZERO_TIME);
-    
     }
     
     return time;
@@ -483,9 +475,8 @@ namespace SystemC_VPC{
 
       //update time for reconfiguration if storing is required
       if(!kill){
-        sc_time* time = this->activConfiguration->timeToPreempt();
-        timeToStore += *time;
-        delete time;
+        sc_time time = this->activConfiguration->timeToPreempt();
+        timeToStore += time;
       }
       
       this->activConfiguration->preempt(kill);
@@ -556,13 +547,12 @@ namespace SystemC_VPC{
           
       this->activConfiguration = config;
         
-      sc_time* time = this->activConfiguration->timeToResume();
-      timeToLoad += *time;
+      sc_time time = this->activConfiguration->timeToResume();
+      timeToLoad += time;
           
       this->activConfiguration->resume(); 
       // wait time of resume
-      wait(*time, this->notify_preempt);
-      delete time;    
+      wait(time, this->notify_preempt);
       
       if(reconfigurationInterrupted(loadStart, timeToLoad)){
         return false;
