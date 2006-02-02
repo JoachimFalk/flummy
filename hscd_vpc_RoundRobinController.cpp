@@ -10,7 +10,7 @@ namespace SystemC_VPC{
     strcpy(this->controllerName, name);
     this->lastassign = -1;
     this->TIMESLICE = 1;
-    this->currConfiguration = NULL;
+    this->scheduledConfiguration = NULL;
     
   }
 
@@ -77,7 +77,7 @@ namespace SystemC_VPC{
     this->lastassign = sc_simulation_time();
   
     // configuration has to be switched if timeslice elapsed or no configuration scheduled yet
-    if(this->remainingSlice <= 0 || this->currConfiguration == NULL){
+    if(this->remainingSlice <= 0 || this->scheduledConfiguration == NULL){
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
@@ -88,7 +88,7 @@ namespace SystemC_VPC{
     }
 
     // as long as there are configs to schedule -> initiate awake of component some time later
-    if(this->currConfiguration != NULL){
+    if(this->scheduledConfiguration != NULL){
         
 #ifdef VPC_DEBUG
       std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> timeslice lasts: "
@@ -116,8 +116,8 @@ namespace SystemC_VPC{
       this->rr_configfifo.push_back(this->rr_configfifo.front());
       this->rr_configfifo.pop_front();
       // get configuration
-      this->currConfiguration = &(this->rr_configfifo.front());
-      nextConfiguration = this->currConfiguration->first;
+      this->scheduledConfiguration = &(this->rr_configfifo.front());
+      nextConfiguration = this->scheduledConfiguration->first;
       
       // setup time of last assign
       this->calculateAssignTime(nextConfiguration);
@@ -178,7 +178,7 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
       
     // if there are no running task on configuration wakeUp ReconfigurableComponent
-    if(this->currConfiguration == NULL && this->rr_configfifo.size() > 0){
+    if(this->scheduledConfiguration == NULL && this->rr_configfifo.size() > 0){
 
 #ifdef VPC_DEBUG
       std::cerr << "RoundRobinController> waking up component thread!" << std::endl;
@@ -202,8 +202,8 @@ namespace SystemC_VPC{
     if(iter != this->rr_configfifo.end()){
       // if this task is last one running on configuration remove conf
       if(iter->second == 1){
-        if(iter->first == this->currConfiguration->first){
-          this->currConfiguration = NULL;
+        if(this->scheduledConfiguration == NULL && iter->first == this->scheduledConfiguration->first){
+          this->scheduledConfiguration = NULL;
         }
         this->rr_configfifo.erase(iter);
       }else{

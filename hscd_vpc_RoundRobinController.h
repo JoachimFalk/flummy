@@ -42,7 +42,7 @@ namespace SystemC_VPC{
     std::deque<std::pair<Configuration*, int> > rr_configfifo;
     
     // current scheduled configuration
-    std::pair<Configuration*, int>* currConfiguration;
+    std::pair<Configuration*, int>* scheduledConfiguration;
     
   public:
   
