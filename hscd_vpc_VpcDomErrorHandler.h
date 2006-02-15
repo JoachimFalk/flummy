@@ -31,7 +31,7 @@ using namespace xercesc;
  */
 class VpcDomErrorHandler : public DOMErrorHandler {
 public:
-  VpcDomErrorHandler(){}
+  VpcDomErrorHandler() : failed(false){}
   ~VpcDomErrorHandler(){}
 
   /**
@@ -44,23 +44,34 @@ public:
    */
   bool handleError(const DOMError& domError){
     cerr<< VPC_ERROR << "DOMError";
-    if (domError.getSeverity() == DOMError::DOM_SEVERITY_WARNING)
+    if (domError.getSeverity() == DOMError::DOM_SEVERITY_WARNING){
         cerr << "\nWarning at file ";
-    else if (domError.getSeverity() == DOMError::DOM_SEVERITY_ERROR)
+    }else if (domError.getSeverity() == DOMError::DOM_SEVERITY_ERROR){
+        this->failed = true;
         cerr << "\nError at file ";
-    else
+    }else{
+        this->failed = true;
         cerr << "\nFatal Error at file ";
-
+    }
+    
     cerr << XMLString::transcode( domError.getLocation()->getURI())
          << ", line " << domError.getLocation()->getLineNumber()
          << ", char " << domError.getLocation()->getColumnNumber()
          << "\n  Message: " << XMLString::transcode( domError.getMessage()) <<NORMAL<<endl;
-    return true;
+    
+    return !failed;
+    
   }
-
+  
+  bool parseFailed(){
+    return this->failed;
+  }
+  
   //void resetErrors();
 
 private :
+  bool failed;
+  
   /**
    * Unimplemented constructor
    */

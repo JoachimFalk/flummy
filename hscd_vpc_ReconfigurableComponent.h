@@ -44,9 +44,9 @@ namespace SystemC_VPC{
     sc_event notify_resume;
     
     // start time of reconfiguration
-    sc_time reconfStart;
+    sc_time* storeStartTime;
     // time needed for reconfiguration 
-    sc_time reconfTime;
+    sc_time* remainingStoreTime;
     
   public:
 
@@ -195,6 +195,8 @@ namespace SystemC_VPC{
      * \brief Stores activ configuration
      * Stores currently activ configuration regarding to the passed
      * parameter kill, which indicates if configuration should be stored.
+     * After successful storing activConfiguration is set to NULL.
+     * \param kill specifies if currently loaded configuration has to be stored
      */
     bool storeActivConfiguration(bool kill);
     
@@ -202,6 +204,8 @@ namespace SystemC_VPC{
      * \brief Helper method to determine interruption
      */
     bool reconfigurationInterrupted(sc_time timeStamp, sc_time interval);
+    
+    void ReconfigurableComponent::traceConfigurationState(Configuration* config, trace_value value);
   };
 
 }

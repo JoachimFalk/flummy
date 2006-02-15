@@ -23,15 +23,11 @@ namespace SystemC_VPC{
    */
   class Controller : public AbstractController{
   
-  protected:
+  private: 
+    char controllerName [VPC_MAX_STRING_LENGTH];
   
     // controlled component of instance
     ReconfigurableComponent* managedComponent;
-    // time indicating next request wish
-    sc_time* waitInterval;
-    
-    // maps tasks to their corresponding names of configuration
-    std::map<std::string, std::string > mapping_map_configs;
     
     // maps tasks to their corresponding names of component
     std::map<std::string, std::string > mapping_map_component_ids;
@@ -47,9 +43,19 @@ namespace SystemC_VPC{
     
     // true if controller uses kill to preempt configurations
     bool kill;
+  
+  protected:
+    
+    // time indicating next request wish
+    sc_time* waitInterval;
+    
+    // maps tasks to their corresponding names of configuration
+    std::map<std::string, std::string > mapping_map_configs;
         
   public:
-
+    
+    Controller(const char* name);
+    
     virtual ~Controller(){}
 
     /**

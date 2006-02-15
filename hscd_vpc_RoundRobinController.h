@@ -24,6 +24,60 @@ namespace SystemC_VPC{
   class RoundRobinController : public Controller {
   
   private:
+    
+    /**
+     * Helper class to enable internal management of
+     * configuration sharing time on managed component.
+     */
+    class RRElement{
+    
+    private:
+      
+      Configuration* conf;
+      // number of running tasks on configuration
+      int numOfTasks;
+      
+    public:
+      
+      RRElement(Configuration* conf): conf(conf), numOfTasks(0){
+      }
+      
+      RRElement(Configuration* conf, int numOfTasks): conf(conf), numOfTasks(numOfTasks){
+      }
+      
+      Configuration* getConfiguration(){
+        return conf;
+      }
+      
+      int numberOfTasks(){
+        return this->numOfTasks;
+      }
+      
+      void operator++(int){
+        this->numOfTasks++;
+      }
+      
+      void operator--(int){
+        if(this->numOfTasks > 0){
+          this->numOfTasks--;
+        }
+      }
+      
+      
+      bool operator==(const RRElement& elem){
+        
+        return this->conf == elem.conf;
+        
+      }
+      
+      bool operator==(const int num){
+      
+        return this->numOfTasks == num;
+        
+      }
+      
+    };
+
     // timeslice used for roundrobin
     double TIMESLICE;
     // last time a configuration switch took place
@@ -39,10 +93,10 @@ namespace SystemC_VPC{
     
     // queue containing order of configuration to be loaded in next "rounds"
     // structure contains additional count of tasks running on one configuration
-    std::deque<std::pair<Configuration*, int> > rr_configfifo;
+    std::deque<RRElement> rr_configfifo;
     
     // current scheduled configuration
-    std::pair<Configuration*, int>* scheduledConfiguration;
+    RRElement* scheduledConfiguration;
     
   public:
   
@@ -127,26 +181,5 @@ namespace SystemC_VPC{
     void updateUsedConfigurations(p_struct* pcb);
   };
 
-  /**
-   * Predicate class to enable search of std::pair<Configuration*, int>
-   * within management structure of controller.
-   */
-  class SpecialEqual{
-  
-  private:
-    
-    Configuration* conf;
-    
-  public:
-    
-    SpecialEqual(Configuration* conf): conf(conf){
-    }
-    
-    bool operator()(std::pair<Configuration*, int> p){
-      
-      return conf == p.first;
-      
-    }
-  };
 }
 #endif /*HSCD_VPC_ROUNDROBINCONTROLLER_H_*/

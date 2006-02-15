@@ -27,13 +27,16 @@ namespace SystemC_VPC{
     if(vpc_evaluator_prefix){
       sprintf(vpc_conf_file,"%s%s",vpc_evaluator_prefix,STR_VPC_CONF_FILE);
 #ifdef VPC_DEBUG
-      cout <<"config found "<< vpc_conf_file << endl;
+      cout <<"VPCBuilder> config found! File name is "<< vpc_conf_file << endl;
 #endif //VPC_DEBUG
       cfile = vpc_conf_file;
     }else{
       cfile= getenv("VPCCONFIGURATION");
+#ifdef VPC_DEBUG
+      std::cerr << "VPCBuilder> VPCCONFIGURATION set to " << cfile << std::endl;
+#endif //VPC_DEBUG
     }
-
+    
     if(cfile){
       fconffile=fopen(cfile,"r");
       if( NULL == fconffile ){       // test if file exists
@@ -76,23 +79,31 @@ namespace SystemC_VPC{
         vpcConfigDoc = configParser->parseURI(cfile);
       }
       catch (const XMLException& toCatch) {
-        cerr << "\nError while parsing xml file: '" << cfile << "'\n"
+        std::cerr << "\nVPCBuilder> Error while parsing xml file: '" << cfile << "'\n"
           << "Exception message is:  \n"
           << XMLString::transcode( toCatch.getMessage()) << "\n" << endl;
+          return;
       }
       catch (const DOMException& toCatch) {
         const unsigned int maxChars = 2047;
         XMLCh errText[maxChars + 1];
           
-        cerr << "\nDOM Error while parsing xml file: '" << cfile << "'\n"
+        std::cerr << "\nVPCBuilder> DOM Error while parsing xml file: '" << cfile << "'\n"
           << "DOMException code is:  " << XMLString::transcode( toCatch.msg) << endl;
           
         if (DOMImplementation::loadDOMExceptionMsg(toCatch.code, errText, maxChars))
-        cerr << "Message is: " << XMLString::transcode( errText) << endl;
-        
+        std::cerr << "Message is: " << XMLString::transcode( errText) << endl;
+        return;
       }
       catch (...) {
-        cerr << "\nUnexpected exception while parsing xml file: '" << cfile << "'\n";
+        std::cerr << "\nVPCBuilder> Unexpected exception while parsing xml file: '" << cfile << "'\n";
+        return;
+      }
+      
+      //check if parsing failed
+      if(configErrorh->parseFailed()){
+        std::cerr << RED("VPCBuilder: Parsing of configuration failed, aborting initialization!") << std::endl;
+        return;
       }
       
       // set treewalker to documentroot
@@ -159,22 +170,27 @@ namespace SystemC_VPC{
         }
 
         node = vpcConfigTreeWalker->nextSibling();
-         }
+      }
 
+      // clean up pareser
+      configParser->release();
+      delete configErrorh;
+      
 #ifdef VPC_DEBUG 
-      std::cerr << "finished initialization of components" << std::endl;
+      std::cerr << "VPCBuilder> finished initialization of components" << std::endl;
+      std::cerr << "VPCBuilder> starting parsing of measurefile" << std::endl;
 #endif // VPC_DEBUG
+      
+      char vpc_result_file[VPC_MAX_STRING_LENGTH];
+      sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
+      remove(vpc_result_file);
 
-        char vpc_result_file[VPC_MAX_STRING_LENGTH];
-        sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
-        remove(vpc_result_file);
-  
-        cerr << "measure_file: "<< vpc_measure_file << endl;
-        if(!vpc_measure_file || strcmp(vpc_measure_file, "") == 0){
-          cerr << VPC_ERROR << "No vpc_measure_file"<< NENDL; //<< endl;
-          return;
-        }else{
-        
+      std::cerr << "measure_file: "<< vpc_measure_file << endl;
+      if(!vpc_measure_file || strcmp(vpc_measure_file, "") == 0){
+        std::cerr << VPC_ERROR << "No vpc_measure_file"<< NENDL; //<< endl;
+        return;
+      }else{
+      
         DOMTreeWalker *vpc_measure_TreeWalker;
         DOMDocument *vpc_measure_doc;
         DOMBuilder *parser;
@@ -186,31 +202,40 @@ namespace SystemC_VPC{
         // turn on validation
         parser->setFeature(XMLUni::fgDOMValidation, true);
         parser->setErrorHandler(errorh);
-  
+    
         try {                                                             
           // reset document pool - clear all previous allocated data
           parser->resetDocumentPool();                                    
           vpc_measure_doc = parser->parseURI(vpc_measure_file);
         }
         catch (const XMLException& toCatch) {
-          cerr << "\nError while parsing xml file: '" << vpc_measure_file << "'\n"
+          std::cerr << "\nError while parsing xml file: '" << vpc_measure_file << "'\n"
             << "Exception message is:  \n"
             << XMLString::transcode( toCatch.getMessage()) << "\n" << endl;
+            return;
         }
         catch (const DOMException& toCatch) {
           const unsigned int maxChars = 2047;
           XMLCh errText[maxChars + 1];
           
-          cerr << "\nDOM Error while parsing xml file: '" << vpc_measure_file << "'\n"
+          std::cerr << "\nDOM Error while parsing xml file: '" << vpc_measure_file << "'\n"
             << "DOMException code is:  " << XMLString::transcode( toCatch.msg) << endl;
           
           if (DOMImplementation::loadDOMExceptionMsg(toCatch.code, errText, maxChars))
-            cerr << "Message is: " << XMLString::transcode( errText) << endl;
+            std::cerr << "Message is: " << XMLString::transcode( errText) << endl;
+           
+          return;
         }
         catch (...) {
-          cerr << "\nUnexpected exception while parsing xml file: '" << vpc_measure_file << "'\n";
+          std::cerr << "\nUnexpected exception while parsing xml file: '" << vpc_measure_file << "'\n";
+          return;
         }
         
+        //check if parsing failed
+        if(errorh->parseFailed()){
+          std::cerr << RED("VPCBuilder: Parsing of configuration failed, aborting initialization!") << std::endl;
+          return;
+        }
         // set treewalker to documentroot
         vpc_measure_TreeWalker = vpc_measure_doc->createTreeWalker( (DOMNode*)vpc_measure_doc->getDocumentElement(), DOMNodeFilter::SHOW_ELEMENT, 0, true);
           
@@ -226,7 +251,7 @@ namespace SystemC_VPC{
           xname=n->getNodeName();
           name=XMLString::transcode(xname); // for cerr only
           //cerr << RED(name)<< endl;
-          
+            
           if(n->getNodeType()==DOMNode::ELEMENT_NODE && 
             0==XMLString::compareNString(xname,constraintStr,sizeof(constraintStr))){
               
@@ -246,10 +271,12 @@ namespace SystemC_VPC{
           //vpc_measure_TreeWalker->setCurrentNode( last);
           n = vpc_measure_TreeWalker->nextSibling();
         }
-  
+    
         XMLString::release(&name);
-              
-      } 
+        parser->release();
+        delete errorh;
+             
+      } // vpc_measure_file
     }// else !FALLBACK
 #ifdef VPC_DEBUG    
     std::cerr << "Initializing VPC finished!" << std::endl;
@@ -286,7 +313,7 @@ namespace SystemC_VPC{
       if(0==strncmp(sType, STR_VPC_THREADEDCOMPONENTSTRING, sizeof(STR_VPC_THREADEDCOMPONENTSTRING))){
 
 #ifdef VPC_DEBUG
-        cerr << "VPCBuilder> Found Component name=" << sName << " type=" << sType << endl;
+        std::cerr << "VPCBuilder> Found Component name=" << sName << " type=" << sType << endl;
 #endif //VPC_DEBUG
 
         comp = new Component(sName,sScheduler);
@@ -296,7 +323,7 @@ namespace SystemC_VPC{
       }else if(0==strncmp(sType, STR_VPC_RECONFIGURABLECOMPONENTSTRING, sizeof(STR_VPC_RECONFIGURABLECOMPONENTSTRING))){
 
 #ifdef VPC_DEBUG
-        cerr << "VPCBuilder> Found Component name=" << sName << " type=" << sType << endl;
+        std::cerr << "VPCBuilder> Found Component name=" << sName << " type=" << sType << endl;
 #endif //VPC_DEBUG
         AbstractController* controller;
         try{
@@ -317,7 +344,7 @@ namespace SystemC_VPC{
         this->initCompAttributes(comp);
 
 #ifdef VPC_DEBUG
-        cerr << "VPCBuilder> Initialized Component name=" << sName << " type=" << sType << endl;
+        std::cerr << "VPCBuilder> Initialized Component name=" << sName << " type=" << sType << endl;
 #endif //VPC_DEBUG
       
       }else{
@@ -554,8 +581,8 @@ namespace SystemC_VPC{
                 sscanf(sValue, "%lf", &(p->delay));
               }else{
 #ifdef VPC_DEBUG
-                  cerr << "VPCBuilder> Unknown mapping attribute: type=" << sType << " value=" << sValue << endl; 
-                cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
+                  std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << sType << " value=" << sValue << endl; 
+                std::cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
 #endif //VPC_DEBUG
 
 // <<< here is adding of additional function delay
@@ -564,15 +591,15 @@ namespace SystemC_VPC{
 // ---> changed
 //                  p->functionDelays.insert(pair<string,double>(sType,delay));
 #ifdef VPC_DEBUG
-                  cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
-                cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
+                  std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
+                std::cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
                   std::map<std::string, double> funcDelays = p->compDelays[sTarget];
                   funcDelays.insert(std::pair<std::string, double>(sType, delay));
                   p->compDelays[sTarget]= funcDelays;
                 } else {
 #ifdef VPC_DEBUG
-                  cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
+                  std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
 #endif //VPC_DEBUG
                 }
               }
@@ -621,7 +648,7 @@ namespace SystemC_VPC{
           // this can be removed as we use generated p_struct from Director
           //p_struct_map_by_name.insert(pair<string,p_struct*>(sSource,p));
         }else{
-          cerr << "VPCBuilder> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
+          std::cerr << "VPCBuilder> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
         }
       }
     }

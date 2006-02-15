@@ -5,9 +5,8 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of RoundRobinController
    */
-  RoundRobinController::RoundRobinController(const char* name){
+  RoundRobinController::RoundRobinController(const char* name) : Controller(name) {
 
-    strcpy(this->controllerName, name);
     this->lastassign = -1;
     this->TIMESLICE = 1;
     this->scheduledConfiguration = NULL;
@@ -60,15 +59,15 @@ namespace SystemC_VPC{
       
       // determine if new configuration has to be added to scheduling list
       std::string confid = this->mapping_map_configs[currTask->name];
-      Configuration* reqConf = this->managedComponent->getConfiguration(confid.c_str());
+      Configuration* reqConf = this->getManagedComponent()->getConfiguration(confid.c_str());
     
-      std::deque<std::pair<Configuration*, int> >::iterator  iter;
-      iter = std::find_if(this->rr_configfifo.begin(), this->rr_configfifo.end(), SpecialEqual(reqConf));
+      std::deque<RRElement>::iterator  iter;
+      iter = std::find(this->rr_configfifo.begin(), this->rr_configfifo.end(), RRElement(reqConf));
       // if configuration not added yet do so
       if(iter == this->rr_configfifo.end()){
-        this->rr_configfifo.push_back(std::pair<Configuration*, int>(reqConf, 1));
+        this->rr_configfifo.push_back(RRElement(reqConf, 1));
       }else{ // else increase count of running task on configuration
-        iter->second++;
+        (*iter)++;
       }
     
     }
@@ -117,7 +116,7 @@ namespace SystemC_VPC{
       this->rr_configfifo.pop_front();
       // get configuration
       this->scheduledConfiguration = &(this->rr_configfifo.front());
-      nextConfiguration = this->scheduledConfiguration->first;
+      nextConfiguration = this->scheduledConfiguration->getConfiguration();
       
       // setup time of last assign
       this->calculateAssignTime(nextConfiguration);
@@ -125,8 +124,7 @@ namespace SystemC_VPC{
     }
     
     // reset switchConfig
-    this->switchConfig = false;    
-    
+    this->switchConfig = false;        
     return nextConfiguration;
   }
    
@@ -164,11 +162,11 @@ namespace SystemC_VPC{
     this->updateUsedConfigurations(pcb);
     
     // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->state == activation_state(aborted) && !this->managedComponent->hasBeenKilled()){
+    if(pcb->state == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
       // recompute
-      this->managedComponent->compute(pcb);
+      this->getManagedComponent()->compute(pcb);
     }else{
-      this->managedComponent->notifyParentController(pcb);
+      this->getManagedComponent()->notifyParentController(pcb);
     }
         
 #ifdef VPC_DEBUG
@@ -184,7 +182,7 @@ namespace SystemC_VPC{
       std::cerr << "RoundRobinController> waking up component thread!" << std::endl;
 #endif //VPC_DEBUG
 
-      this->managedComponent->wakeUp();
+      this->getManagedComponent()->wakeUp();
     }
   }
 
@@ -193,22 +191,22 @@ namespace SystemC_VPC{
    */  
   void RoundRobinController::updateUsedConfigurations(p_struct* pcb){
     
-    std::deque<std::pair<Configuration*, int> >::iterator iter;
+    std::deque<RRElement>::iterator iter;
     std::string confid = this->mapping_map_configs[pcb->name];
-    Configuration* conf = this->managedComponent->getConfiguration(confid.c_str());
+    Configuration* conf = this->getManagedComponent()->getConfiguration(confid.c_str());
     
     // update management structure
-    iter = std::find_if(this->rr_configfifo.begin(), this->rr_configfifo.end(), SpecialEqual(conf));
+    iter = std::find(this->rr_configfifo.begin(), this->rr_configfifo.end(), RRElement(conf));
     if(iter != this->rr_configfifo.end()){
       // if this task is last one running on configuration remove conf
-      if(iter->second == 1){
-        if(this->scheduledConfiguration != NULL && iter->first == this->scheduledConfiguration->first){
+      if(*iter == 1){
+        if(this->scheduledConfiguration != NULL && iter->getConfiguration() == this->scheduledConfiguration->getConfiguration()){
           this->scheduledConfiguration = NULL;
         }
         this->rr_configfifo.erase(iter);
       }else{
         // else just decrease count of running task on configuration
-        iter->second--;
+        (*iter)--;
       }
     }else{
       std::cerr << YELLOW("RoundRobinController> configuration to be updated not in managed list!");
@@ -223,13 +221,13 @@ namespace SystemC_VPC{
     
     this->lastassign = sc_simulation_time();
     
-    if(nextConfiguration != this->managedComponent->getActivConfiguration()){
+    if(nextConfiguration != this->getManagedComponent()->getActivConfiguration()){
       sc_time time;
-      if(this->managedComponent->getActivConfiguration() != NULL){
-        time = this->managedComponent->getActivConfiguration()->timeToPreempt();
+      if(this->getManagedComponent()->getActivConfiguration() != NULL){
+        time = this->getManagedComponent()->getActivConfiguration()->timeToPreempt();
         this->lastassign += time.to_default_time_units();
         if(!this->preemptByKill()){
-          this->lastassign += this->managedComponent->getActivConfiguration()->getStoreTime().to_default_time_units();
+          this->lastassign += this->getManagedComponent()->getActivConfiguration()->getStoreTime().to_default_time_units();
         }
       }
       

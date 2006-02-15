@@ -1,7 +1,13 @@
 #include <hscd_vpc_Controller.h>
 
 namespace SystemC_VPC{
-
+  
+  Controller::Controller(const char* name){
+    
+    strcpy(this->controllerName, name);
+  
+  }
+  
   /**
    * \brief Implementation of Controller::getName()
    */
@@ -92,7 +98,7 @@ namespace SystemC_VPC{
     return this->waitInterval;
     
   }
-  
+     
   /**
     * \brief Implementation of Controller::getMappedComponent
     */

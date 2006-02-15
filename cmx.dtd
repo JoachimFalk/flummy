@@ -12,7 +12,7 @@ name CDATA #REQUIRED>
 
 <!ELEMENT component ((configuration*, defaultconfiguration?)?, attribute*)>
 <!ATTLIST component
-name CDATA #REQUIRED
+name ID #REQUIRED
 type CDATA #REQUIRED
 scheduler CDATA #REQUIRED>
 
@@ -23,7 +23,7 @@ value CDATA #REQUIRED>
 
 <!ELEMENT configuration (component)*>
 <!ATTLIST configuration
-name CDATA #REQUIRED
+name ID #REQUIRED
 loadtime CDATA "0 ns"
 storetime CDATA "0 ns">
 
@@ -36,5 +36,5 @@ name CDATA #REQUIRED>
 <!ELEMENT mapping (attribute)*>
 <!ATTLIST mapping
 source CDATA #REQUIRED
-target CDATA #REQUIRED>
+target IDREF #REQUIRED>
 

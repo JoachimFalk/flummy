@@ -38,7 +38,7 @@ namespace SystemC_VPC{
    *
    * Direktor reads allokation and binding from file.
    */
-  class Director : public AbstractDirector, public TaskEventListener{
+  class Director : public AbstractDirector{
   private:
 
     /**
@@ -50,10 +50,11 @@ namespace SystemC_VPC{
      * \brief Reads allokation and binding from file.
      */
     Director();
-    map<std::string,AbstractComponent*> component_map_by_name;
-    //map<int,AbstractComponent*> component_map_by_pid;
-    map<std::string,AbstractComponent*> mapping_map_by_name;
+    
+    map<std::string, AbstractComponent*> component_map_by_name;
+    
     //map<int,AbstractComponent*> mapping_map_by_pid;
+    map<std::string, AbstractComponent*> mapping_map_by_name;
     map<std::string,p_struct*> p_struct_map_by_name;
     //map<int,p_struct> p_struct_map_by_pid;
 

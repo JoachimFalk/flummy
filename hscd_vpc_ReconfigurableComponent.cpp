@@ -140,14 +140,22 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
         
         this->controller->signalPreemption();
-        this->storeActivConfiguration(this->killed);
+        // hold pointer to currentlyloaded configuration
+        Configuration* currConfig;
         if(this->killed){
-          this->activConfiguration = NULL;
+          currConfig = NULL;
+        }else{
+          currConfig = this->activConfiguration;
+        }
+        
+        // check if activ configuration has to be saved
+        if(this->activConfiguration != NULL && !this->activConfiguration->isStored()){
+          this->storeActivConfiguration(this->killed);
         }
         
         wait(this->notify_resume);
         
-        this->loadConfiguration(this->activConfiguration);
+        this->loadConfiguration(currConfig);
         this->controller->signalResume();
         
 #ifdef VPC_DEBUG
@@ -201,18 +209,20 @@ namespace SystemC_VPC{
       
         // perform reconfiguration
         if(this->storeActivConfiguration(this->controller->preemptByKill())){
-          if(!this->loadConfiguration(nextConfig)){
+          // perform loading new configuration if no preemption happend!
+          if(this->isActiv() && !this->loadConfiguration(nextConfig)){
           
 #ifdef VPC_DEBUG
             std::cerr << BLUE("ReconfigurableComponent " << this->getName() << "> failed loading!") << std::endl;
 #endif //VPC_DEBUG
           
-          }
+          }else{
 
 #ifdef VPC_DEBUG
         std::cerr << BLUE("ReconfigurableComponent " << this->getName() << "> new configuration loaded: " << this->activConfiguration->getName()) << std::endl;
 #endif //VPC_DEBUG
-
+          }
+          
         }else{
         
 #ifdef VPC_DEBUG
@@ -232,8 +242,8 @@ namespace SystemC_VPC{
         }
       }
       
-        // check if controller request special interval to be called next time
-        minTimeToWait = this->controller->getWaitInterval();
+      // check if controller request special interval to be called next time
+      minTimeToWait = this->controller->getWaitInterval();
         
     }
   }
@@ -375,11 +385,15 @@ namespace SystemC_VPC{
     sc_time time(SC_ZERO_TIME);
     
     // only if component is activ we have time for preemption
-    if(this->isActiv() && this->activConfiguration != NULL){
-      
-      time = this->activConfiguration->timeToPreempt();
-      time += this->activConfiguration->getStoreTime();
-      
+    if(this->isActiv()){
+      // if component is in storing phase
+      if(this->storeStartTime != NULL && this->remainingStoreTime != NULL){
+        time += *(this->remainingStoreTime) - (sc_time_stamp() - *(this->storeStartTime));
+      }else
+      if(this->activConfiguration != NULL){
+        time = this->activConfiguration->timeToPreempt();
+        time += this->activConfiguration->getStoreTime();
+      }
     }
     
     return time;
@@ -413,7 +427,7 @@ namespace SystemC_VPC{
     p_struct* pcb = Director::getInstance().getProcessControlBlock(name);
     pcb->blockEvent = end;
     this->compute(pcb);
-    
+
   }
       
   /**
@@ -433,7 +447,7 @@ namespace SystemC_VPC{
     this->newTasks.push_back(pcb);
     
     this->notify_schedule_thread.notify();
-    
+  
   }
     
   /**
@@ -462,16 +476,24 @@ namespace SystemC_VPC{
   
   bool ReconfigurableComponent::storeActivConfiguration(bool kill){
             
-    //remember start time of storing
+    // remember start time of storing
     sc_time storeStart = sc_time_stamp();
     sc_time timeToStore = SC_ZERO_TIME;
-      
+    // "mark" loading phase
+    this->storeStartTime = &storeStart;
+    this->remainingStoreTime = &timeToStore;
+    
     // stop currently running components
     if(this->activConfiguration != NULL){
 
 #ifdef VPC_DEBUG
       std::cerr << "ReconfigurableComponent" << this->getName() << "> trying to store config kill=" << kill << std::endl;
 #endif //VPC_DEBUG
+
+
+#ifndef NO_VCD_TRACES
+      this->traceConfigurationState(this->activConfiguration, S_CONFIG);
+#endif //NO_VCD_TRACES
 
       //update time for reconfiguration if storing is required
       if(!kill){
@@ -481,19 +503,6 @@ namespace SystemC_VPC{
       
       this->activConfiguration->preempt(kill);
 
-#ifndef NO_VCD_TRACES
-      if(1==trace_map_by_name.count(this->activConfiguration->getName())){
-        std::map<std::string, sc_signal<trace_value>* >::iterator iter = trace_map_by_name.find(this->activConfiguration->getName());
-        *(iter->second) = S_PASSIV;
-      }
-#endif //NO_VCD_TRACES
-
-      //check if preemption happend not here !!!
-      /*
-      if(this->reconfigurationInterrupted(storeStart, timeToStore)){
-        return false;
-      }
-      */
           
       // Simulate store time if required
       if(!kill){
@@ -501,23 +510,50 @@ namespace SystemC_VPC{
         timeToStore += this->activConfiguration->getStoreTime();
       }
       
-      wait(timeToStore, this->notify_preempt);
-          
-      //check if preemption happend
-      if(this->reconfigurationInterrupted(storeStart, timeToStore)){
+      // perform simulating storing as long as time not elapsed and no preemption by kill happend
+      while(timeToStore > SC_ZERO_TIME){
+        
+        wait(timeToStore, this->notify_preempt);
+        
+        timeToStore -= sc_time_stamp() - storeStart;
+        storeStart = sc_time_stamp();
+        
+        //check if preemption happend with kill!
+        if(this->killed){
 
 #ifdef VPC_DEBUG
-        std::cerr << "ReconfigurableComponent " << this->getName() << "> storing configuration has been interrupted " << std::endl;
+          std::cerr << "ReconfigurableComponent " << this->getName() << "> storing configuration has been interrupted " << std::endl;
 #endif //VPC_DEBUG
             
-        this->activConfiguration->setStored(false);
-        return false;
-            
-      }    
+          this->activConfiguration->setStored(false);
+
+#ifndef NO_VCD_TRACES
+          this->traceConfigurationState(this->activConfiguration, S_PASSIV);
+#endif //NO_VCD_TRACES
+    
+          this->activConfiguration = NULL;
           
+          // "mark" end of loading phase
+          this->storeStartTime = NULL;
+          this->remainingStoreTime = NULL;
+    
+          return false;
+            
+        }    
+      }
+                
       this->activConfiguration->setStored(true);
-                    
+
+#ifndef NO_VCD_TRACES
+      this->traceConfigurationState(this->activConfiguration, S_PASSIV);
+#endif //NO_VCD_TRACES
+
+      this->activConfiguration = NULL;          
     }
+    
+    // "mark" end of loading phase
+    this->storeStartTime = NULL;
+    this->remainingStoreTime = NULL;
     
     return true;
   }
@@ -535,6 +571,10 @@ namespace SystemC_VPC{
       std::cerr << "ReconfigurableComponent " << this->getName() << "> loading configuration config= " << config->getName() << std::endl;
 #endif //VPC_DEBUG
 
+#ifndef NO_VCD_TRACES
+      this->traceConfigurationState(config, S_CONFIG);
+#endif //NO_VCD_TRACES
+
       //simulate loading time
       timeToLoad += config->getLoadTime();
       wait(config->getLoadTime(), this->notify_preempt);
@@ -542,27 +582,40 @@ namespace SystemC_VPC{
       // check if preemption happened
       if(reconfigurationInterrupted(loadStart, timeToLoad)){
         this->activConfiguration = NULL;
+        
+#ifndef NO_VCD_TRACES
+      this->traceConfigurationState(config, S_PASSIV);
+#endif //NO_VCD_TRACES
+
         return false;
       }
-          
-      this->activConfiguration = config;
         
-      sc_time time = this->activConfiguration->timeToResume();
+      sc_time time = config->timeToResume(); //this->activConfiguration->timeToResume();
       timeToLoad += time;
-          
-      this->activConfiguration->resume(); 
+
+      
+      config->resume(); 
       // wait time of resume
       wait(time, this->notify_preempt);
       
+      // check if preemption happened
       if(reconfigurationInterrupted(loadStart, timeToLoad)){
+        // return with unresumed configuration -> should be already preempted again
+        this->activConfiguration = NULL;
+
+#ifndef NO_VCD_TRACES
+      this->traceConfigurationState(config, S_PASSIV);
+#endif //NO_VCD_TRACES
+
         return false;
       }
       
+      // mark configuration as loaded
+      config->setStored(false);    
+      this->activConfiguration = config;
+      
 #ifndef NO_VCD_TRACES
-      if(1==trace_map_by_name.count(config->getName())){
-        std::map<std::string, sc_signal<trace_value>* >::iterator iter = trace_map_by_name.find(config->getName());
-        *(iter->second) = S_ACTIV;
-      }
+      this->traceConfigurationState(config, S_ACTIV);
 #endif //NO_VCD_TRACES
       
     }  
@@ -590,4 +643,13 @@ namespace SystemC_VPC{
     return false;
   }
     
+  void ReconfigurableComponent::traceConfigurationState(Configuration* config, trace_value value){
+
+      if(1==trace_map_by_name.count(config->getName())){
+        std::map<std::string, sc_signal<trace_value>* >::iterator iter = trace_map_by_name.find(config->getName());
+        *(iter->second) = value;
+      }
+  
+  }
+  
 }//namespace SystemC_VPC

@@ -5,9 +5,8 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of FCFSController
    */
-  FCFSController::FCFSController(const char* name){
+  FCFSController::FCFSController(const char* name) : Controller(name){
 
-    strcpy(this->controllerName, name);
     this->nextConfiguration = NULL;
     
   }
@@ -51,7 +50,7 @@ namespace SystemC_VPC{
       // check if mapping exists
       if(iter != this->mapping_map_configs.end()){
           
-          Configuration* reqConf = this->managedComponent->getConfiguration(iter->second.c_str());
+          Configuration* reqConf = this->getManagedComponent()->getConfiguration(iter->second.c_str());
            
          if(reqConf == NULL){
             
@@ -64,11 +63,11 @@ namespace SystemC_VPC{
           }
 
           // check if current activ configuration fits required one
-          if(reqConf == this->managedComponent->getActivConfiguration()){
+          if(reqConf == this->getManagedComponent()->getActivConfiguration()){
 
 #ifdef VPC_DEBUG
           std::cerr << YELLOW("FCFSController "<< this->getName() <<"> current loaded configuration fits required one! ") << sc_simulation_time() << endl;
-          std::cerr << YELLOW("FCFSController "<< this->getName() <<"> activ Configuration is activ? " << this->managedComponent->getActivConfiguration()->isActiv()) << std::endl;
+          std::cerr << YELLOW("FCFSController "<< this->getName() <<"> activ Configuration is activ? " << this->getManagedComponent()->getActivConfiguration()->isActiv()) << std::endl;
 #endif //VPC_DEBUG
                 
             this->tasksToProcess.push(currTask);
@@ -188,11 +187,11 @@ namespace SystemC_VPC{
     this->runningTasks.erase(pcb->pid);
     
     // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->state == activation_state(aborted) && !this->managedComponent->hasBeenKilled()){
+    if(pcb->state == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
       // recompute
-      this->managedComponent->compute(pcb);
+      this->getManagedComponent()->compute(pcb);
     }else{
-      this->managedComponent->notifyParentController(pcb);
+      this->getManagedComponent()->notifyParentController(pcb);
     }
         
 #ifdef VPC_DEBUG
@@ -208,7 +207,7 @@ namespace SystemC_VPC{
       std::cerr << "FCFSController> waking up component thread!" << std::endl;
 #endif //VPC_DEBUG
 
-      this->managedComponent->wakeUp();
+      this->getManagedComponent()->wakeUp();
     }
   }
   

@@ -23,11 +23,7 @@ namespace SystemC_VPC{
    * This abstract class is used to declare a common interface for all controller
    * used within the VPC framework.
    */
-  class AbstractController : public AbstractDirector, public TaskEventListener{
-  
-  protected:
-    
-    char controllerName [VPC_MAX_STRING_LENGTH];
+  class AbstractController : public AbstractDirector{
         
   public:
 

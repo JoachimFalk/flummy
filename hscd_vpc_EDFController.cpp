@@ -5,11 +5,7 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of EDFController
    */
-  EDFController::EDFController(const char* name) : order_count(0){
-
-    strcpy(this->controllerName, name);
-    
-  }
+  EDFController::EDFController(const char* name) : Controller(name), order_count(0){}
 
   /**
    * \brief Deletes instance of EDFController
@@ -39,7 +35,7 @@ namespace SystemC_VPC{
         std::cerr << RED("EDFController " << this->getName() << "> No mapped configuration found for " << pcb->name) << std::endl; 
       }else{
         //get configuration from managed component
-        Configuration* config = this->managedComponent->getConfiguration(iter->second.c_str());
+        Configuration* config = this->getManagedComponent()->getConfiguration(iter->second.c_str());
         config->addDeadline(pcb->deadline);
         
         std::list<EDFListElement>::iterator iter;
@@ -69,7 +65,7 @@ namespace SystemC_VPC{
     if(!this->nextConfigurations.empty()){
       Configuration* next = this->nextConfigurations.front().getConfiguration();
     
-      if(next != this->managedComponent->getActivConfiguration()){
+      if(next != this->getManagedComponent()->getActivConfiguration()){
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("EDFController " << this->getName() << "> next config to load: "
@@ -134,11 +130,11 @@ namespace SystemC_VPC{
     }
      
     // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->state == activation_state(aborted) && !this->managedComponent->hasBeenKilled()){
+    if(pcb->state == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
       // recompute
-      this->managedComponent->compute(pcb);
+      this->getManagedComponent()->compute(pcb);
     }else{
-      this->managedComponent->notifyParentController(pcb);
+      this->getManagedComponent()->notifyParentController(pcb);
     }
         
 #ifdef VPC_DEBUG
@@ -148,14 +144,14 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
       
     // if there are no running task and still ready its time to wakeUp ReconfigurableComponent
-    if(this->managedComponent->getActivConfiguration()->getDeadline() == -1
+    if(this->getManagedComponent()->getActivConfiguration()->getDeadline() == -1
         && this->nextConfigurations.size() > 0){
 
 #ifdef VPC_DEBUG
       std::cerr << "EDFController> waking up component thread!" << std::endl;
 #endif //VPC_DEBUG
 
-      this->managedComponent->wakeUp();
+      this->getManagedComponent()->wakeUp();
     }
   }
   

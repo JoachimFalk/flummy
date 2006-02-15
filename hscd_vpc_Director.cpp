@@ -54,11 +54,9 @@ namespace SystemC_VPC{
    */
   Director::Director(){
     
-    VPCBuilder* builder = new VPCBuilder((Director*)this);
+    VPCBuilder builder((Director*)this);
    
-    builder->buildVPC();
-    
-    delete builder;
+    builder.buildVPC();
 
   }
     
@@ -183,8 +181,9 @@ namespace SystemC_VPC{
 
     if(!FALLBACKMODE){
       
-      if(1!=mapping_map_by_name.count(name))
+      if(1!=mapping_map_by_name.count(name)){
         cerr << "Unknown mapping <"<<name<<"> to ??"<<endl; 
+      }
       
       assert(1==mapping_map_by_name.count(name));
       // replace upper code with this when enablung multple dynamical binding
@@ -200,7 +199,7 @@ namespace SystemC_VPC{
       
       // compute task on found component
       comp->compute(pcb);
-    
+
     }else{
       AbstractComponent* comp = (component_map_by_name["Fallback-Component"]);
       if(comp == NULL){
@@ -248,7 +247,7 @@ namespace SystemC_VPC{
    */
   void Director::registerMapping(const char* taskName, const char* compName){
       
-    std::map<std::string,AbstractComponent*>::iterator iter;
+    std::map<std::string, AbstractComponent*>::iterator iter;
     iter = this->component_map_by_name.find(compName);
     //check if component is known
     if(iter != this->component_map_by_name.end()){
@@ -256,8 +255,9 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
       std::cout << "Director: registering mapping: "<< taskName << " <-> " << compName << endl;
 #endif //VPC_DEBUG
-
-      this->mapping_map_by_name.insert(std::pair<std::string, AbstractComponent* >(taskName,iter->second));
+      
+      this->mapping_map_by_name[taskName]= iter->second;
+      
     }
       
   }
@@ -306,7 +306,7 @@ namespace SystemC_VPC{
     std::cerr << "Director> re-compute: " << pcb->name << std::endl;
 #endif //VPC_DEBUG
       // get Component
-      AbstractComponent* comp = mapping_map_by_name.find(pcb->name)->second;
+      AbstractComponent* comp = mapping_map_by_name[pcb->name];
       comp->compute(pcb);
     }
   } 
