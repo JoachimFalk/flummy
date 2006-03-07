@@ -105,7 +105,7 @@ namespace SystemC_VPC{
     virtual void resume(){
       //TODO IMPLEMENT
     }
-    
+       
     /**
      * \brief An implementation of AbstractComponent::compute(p_struct* , const char *).
      */
@@ -222,39 +222,39 @@ namespace SystemC_VPC{
     virtual void processAndForwardParameter(char *sType,char *sValue);
     
   protected:
-       
+
     // used to indicate preemption request
     sc_event notify_preempt;
     // used to indicate resume request
     sc_event notify_resume;
-        
+
   public:
-    
+
     /**
      * \brief Preempts execution of component
      * Used to preempt the current execution of a component.
      * \sa AbstractComponent::preempt
      */
     virtual void preempt(bool kill);
-    
+
     /**
      * \brief Resumes preempted execution
      * Used to resume execution of preempted component.
      * \sa AbstractComponent
      */
     virtual void resume();
-    
+
     /**
      * \brief An implementation of AbstractComponent::compute(p_struct* , const char *).
      */
     virtual void compute(p_struct* pcb);
-  
+
   private:
-  
+
     void killAllTasks();
-    
+
     void setTraceSignalReadyTasks(trace_value value);
-  
+
   };
 
 } 

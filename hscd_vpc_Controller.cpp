@@ -5,7 +5,31 @@ namespace SystemC_VPC{
   Controller::Controller(const char* name){
     
     strcpy(this->controllerName, name);
-  
+    
+    char rest[VPC_MAX_STRING_LENGTH];
+    int sublength;
+    char *secondindex;
+    char *firstindex=strchr(name,':');    //':' finden -> ':' trennt key-value Paare 
+    while(firstindex!=NULL){
+      secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+      if(secondindex!=NULL)
+        sublength=secondindex-firstindex;          //Länge bestimmen
+      else
+        sublength=strlen(firstindex);              
+      strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
+      rest[sublength-1]='\0';
+      firstindex=secondindex;                     
+
+      char *key, *value;               // key und value trennen und Property setzen
+      value=strstr(rest,"-");
+      if(value!=NULL){
+        value[0]='\0';
+        value++;
+        key=rest;
+        setProperty(key,value);
+      }
+    }
+    
   }
   
   /**

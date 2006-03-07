@@ -39,11 +39,11 @@ namespace SystemC_VPC {
 #define S_CONFIG 'c'
 
 // definition for hiding cosupport as vpc_event
-  typedef CoSupport::SystemC::Event VPC_Event;
-  typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
+typedef CoSupport::SystemC::Event VPC_Event;
+typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
   
 // set for debugging output
-#define VPC_DEBUG true;
+//#define VPC_DEBUG true;
   
   /**************************/
   /*  END OF EXTENSION      */

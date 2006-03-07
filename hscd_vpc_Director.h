@@ -60,16 +60,24 @@ namespace SystemC_VPC{
 
     vector<Constraint*> constraints;
 
+    // output file to write result to
+    std::string vpc_result_file;
+    
+    // time of latest acknowledge simulated task
+    double end;
+  
   public:
     bool FALLBACKMODE;
 
     /**
      * \brief A task (identifikation by name) calling this Funktion gets the 
      * AbstractComponent where he is binded to.
+     * \note Re-added for downward compatibility
      */
     //AbstractComponent& getResource( const char *name );
     //  AbstractComponent& getResource(int process);
-
+     Director& Director::getResource( const char* name);
+     
     /**
      * \brief Get the process controll block used within SystemC-VPC Modell.
      */
@@ -155,6 +163,14 @@ namespace SystemC_VPC{
     
     void signalTaskEvent(p_struct* pcb);
 
+    void setResultFile(std::string vpc_result_file){
+      this->vpc_result_file = vpc_result_file;
+    }
+    
+    string getResultFile(){
+      return this->vpc_result_file;
+    }
+    
   };
 
 }

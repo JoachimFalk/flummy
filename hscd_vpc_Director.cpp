@@ -48,11 +48,14 @@ namespace SystemC_VPC{
   }
   //AbstractComponent& Director::getResource(int process){}
   */
+  Director& Director::getResource( const char* name){
+    return *(this->singleton);
+  }
   
   /**
    *
    */
-  Director::Director(){
+  Director::Director() : end(0){
     
     VPCBuilder builder((Director*)this);
    
@@ -78,31 +81,36 @@ namespace SystemC_VPC{
     char *cons_name;
     double start=-1;
     double end=-1;
-    for(;iter!=constraints.end();iter++){
-      cons_name=(*iter)->getName();
-      if(0==strncmp("start",cons_name,5))
-  start=(*iter)->getSatisfiedTime();
-      else if(0==strncmp("end",cons_name,3))
-  end=(*iter)->getSatisfiedTime();
+    // if there are any constaints to be viewed calculate time
+    if(this->constraints.size() > 0){
+      for(;iter!=constraints.end();iter++){
+        cons_name=(*iter)->getName();
+        if(0==strncmp("start",cons_name,5))
+          start=(*iter)->getSatisfiedTime();
+        else if(0==strncmp("end",cons_name,3))
+          end=(*iter)->getSatisfiedTime();
+      }
+    }else{ // else take total simulation time
+      start = 0;
+      end = this->end;
     }
     //#  ifdef VPC_DEBUG
-    cerr << "start: " << start << " end: " << end << endl;
+    cerr << "start: " << start << " end: " << end  << endl;
     //# endif //VPC_DEBUG
-    if (start!=-1 && end!=-1){
+    if ((start != -1) && (end != -1)){
       cout << "latency: " << end - start << endl;
-      char* vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
-      if(vpc_evaluator_prefix){
-  char vpc_result_file[VPC_MAX_STRING_LENGTH];
-  sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
+      if(0 != this->vpc_result_file.compare("")){
+
 #ifdef VPC_DEBUG
-  cerr << "result_file: "<< vpc_result_file << endl;
+        cerr << "Director> result_file: "<< this->vpc_result_file << endl;
 #endif //VPC_DEBUG
-  FILE *resultFile;
-  resultFile=fopen(vpc_result_file,"w");
-  if(resultFile){
-    fprintf(resultFile,"%lf",end-start);
-  }
-  fclose(resultFile);
+        ofstream resultFile;
+        resultFile.open(this->vpc_result_file.c_str());
+        if(resultFile){
+          resultFile << (end-start);
+        }
+        resultFile.flush();
+        resultFile.close();
       }
     }
   }
@@ -215,7 +223,7 @@ namespace SystemC_VPC{
       delete pcb->blockEvent;
       pcb->blockEvent = NULL;
     }
-  
+     
   }
 
   void Director::compute(const char* name, VPC_Event* end){
@@ -301,6 +309,9 @@ namespace SystemC_VPC{
       std::cerr << "Director> task successful finished: " << pcb->name << std::endl;
 #endif //VPC_DEBUG
       pcb->blockEvent->notify();
+      // remember last acknowledged task time
+      this->end = sc_simulation_time();
+
     }else{
 #ifdef VPC_DEBUG
     std::cerr << "Director> re-compute: " << pcb->name << std::endl;
@@ -309,7 +320,8 @@ namespace SystemC_VPC{
       AbstractComponent* comp = mapping_map_by_name[pcb->name];
       comp->compute(pcb);
     }
+    wait(SC_ZERO_TIME);
   } 
-
+  
 }
 

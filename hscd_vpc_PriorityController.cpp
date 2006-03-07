@@ -6,7 +6,7 @@ namespace SystemC_VPC{
    * \brief Initializes instance of PriorityController
    */
   PriorityController::PriorityController(const char* name) : Controller(name), order_count(0){}
-
+  
   PriorityController::~PriorityController(){}
   
   /**

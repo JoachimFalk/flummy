@@ -25,14 +25,13 @@ namespace SystemC_VPC{
   private:
    
     // queue of waiting tasks to be executed
-    std::queue<p_struct* > readyTasks;
+    std::deque<p_struct* > readyTasks;
     // map of running tasks
     std::map<int, p_struct* > runningTasks;
     // queue of tasks ready to be processed
     std::queue<p_struct* > tasksToProcess;
     
-    // queue containing order of configuration to be loaded in next "rounds"
-    //std::queue<Configuration* > nextConfigurations;
+    // pointer to next configuration to be loaded
     Configuration* nextConfiguration;
     
   public:
@@ -52,7 +51,7 @@ namespace SystemC_VPC{
           
     /**
      * \brief Returns next configuration to be loaded
-     * Used to indicate if a new configuration should be loaded by the controller
+     * Used to indicate if a new configuration should be loaded by the controlled
      * component.
      * \return pointer to next configuration to be loaded or NULL if no configuration
      * is selected up to now.

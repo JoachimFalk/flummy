@@ -1,10 +1,10 @@
 #include <iostream>
 #include <values.h> 
 
-#include <hscd_vpc_VPCBuilder.h>
-#include <hscd_vpc_XmlHelper.h>
-#include <hscd_vpc_VpcDomErrorHandler.h>
-#include <hscd_vpc_datatypes.h>
+#include "hscd_vpc_VPCBuilder.h"
+#include "hscd_vpc_XmlHelper.h"
+#include "hscd_vpc_VpcDomErrorHandler.h"
+#include "hscd_vpc_datatypes.h"
 
 namespace SystemC_VPC{
    
@@ -161,9 +161,16 @@ namespace SystemC_VPC{
         
         // find measure file declaration and store value for later use
         }else if( 0==XMLString::compareNString( xmlName, measurefileStr, sizeof(measurefileStr) ) ){
+           
            DOMNamedNodeMap * atts=node->getAttributes();
             vpc_measure_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+        
         }else if( 0==XMLString::compareNString( xmlName, resultfileStr, sizeof(resultfileStr) ) ){
+           
+           DOMNamedNodeMap * atts=node->getAttributes();
+            std::string vpc_result_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+            this->director->setResultFile(vpc_result_file);
+            remove(vpc_result_file.c_str());
         
         }else{
         
@@ -180,103 +187,106 @@ namespace SystemC_VPC{
       std::cerr << "VPCBuilder> finished initialization of components" << std::endl;
       std::cerr << "VPCBuilder> starting parsing of measurefile" << std::endl;
 #endif // VPC_DEBUG
-      
-      char vpc_result_file[VPC_MAX_STRING_LENGTH];
-      sprintf(vpc_result_file,"%s%s",vpc_evaluator_prefix,STR_VPC_RESULT_FILE);
-      remove(vpc_result_file);
 
       std::cerr << "measure_file: "<< vpc_measure_file << endl;
-      if(!vpc_measure_file || strcmp(vpc_measure_file, "") == 0){
-        std::cerr << VPC_ERROR << "No vpc_measure_file"<< NENDL; //<< endl;
-        return;
+      if(!vpc_measure_file){
+          cerr << VPC_ERROR << "No vpc_measure_file"<< NENDL; //<< endl;
+          return;
       }else{
+        ifstream f;
+        f.open(vpc_measure_file);
+        if(!f) {
+          cerr << "Warning: " << vpc_measure_file << " does not exists!" << endl; 
+         return;
+       }
+       f.close();
+      }
       
-        DOMTreeWalker *vpc_measure_TreeWalker;
-        DOMDocument *vpc_measure_doc;
-        DOMBuilder *parser;
-        //static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
-        DOMImplementation *impl = DOMImplementationRegistry::getDOMImplementation(gLS);
-        // create an error handler and install it
-        VpcDomErrorHandler* errorh=new VpcDomErrorHandler();
-        parser = ((DOMImplementationLS*)impl)->createDOMBuilder(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
-        // turn on validation
-        parser->setFeature(XMLUni::fgDOMValidation, true);
-        parser->setErrorHandler(errorh);
-    
-        try {                                                             
-          // reset document pool - clear all previous allocated data
-          parser->resetDocumentPool();                                    
-          vpc_measure_doc = parser->parseURI(vpc_measure_file);
-        }
-        catch (const XMLException& toCatch) {
-          std::cerr << "\nError while parsing xml file: '" << vpc_measure_file << "'\n"
-            << "Exception message is:  \n"
-            << XMLString::transcode( toCatch.getMessage()) << "\n" << endl;
-            return;
-        }
-        catch (const DOMException& toCatch) {
-          const unsigned int maxChars = 2047;
-          XMLCh errText[maxChars + 1];
-          
-          std::cerr << "\nDOM Error while parsing xml file: '" << vpc_measure_file << "'\n"
-            << "DOMException code is:  " << XMLString::transcode( toCatch.msg) << endl;
-          
-          if (DOMImplementation::loadDOMExceptionMsg(toCatch.code, errText, maxChars))
-            std::cerr << "Message is: " << XMLString::transcode( errText) << endl;
-           
+      DOMTreeWalker *vpc_measure_TreeWalker;
+      DOMDocument *vpc_measure_doc;
+      DOMBuilder *parser;
+      //static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
+      DOMImplementation *impl = DOMImplementationRegistry::getDOMImplementation(gLS);
+      // create an error handler and install it
+      VpcDomErrorHandler* errorh=new VpcDomErrorHandler();
+      parser = ((DOMImplementationLS*)impl)->createDOMBuilder(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
+      // turn on validation
+      parser->setFeature(XMLUni::fgDOMValidation, true);
+      parser->setErrorHandler(errorh);
+  
+      try {                                                             
+        // reset document pool - clear all previous allocated data
+        parser->resetDocumentPool();                                    
+        vpc_measure_doc = parser->parseURI(vpc_measure_file);
+      }
+      catch (const XMLException& toCatch) {
+        std::cerr << "\nError while parsing xml file: '" << vpc_measure_file << "'\n"
+          << "Exception message is:  \n"
+          << XMLString::transcode( toCatch.getMessage()) << "\n" << endl;
           return;
-        }
-        catch (...) {
-          std::cerr << "\nUnexpected exception while parsing xml file: '" << vpc_measure_file << "'\n";
-          return;
-        }
+      }
+      catch (const DOMException& toCatch) {
+        const unsigned int maxChars = 2047;
+        XMLCh errText[maxChars + 1];
         
-        //check if parsing failed
-        if(errorh->parseFailed()){
-          std::cerr << RED("VPCBuilder: Parsing of configuration failed, aborting initialization!") << std::endl;
-          return;
-        }
-        // set treewalker to documentroot
-        vpc_measure_TreeWalker = vpc_measure_doc->createTreeWalker( (DOMNode*)vpc_measure_doc->getDocumentElement(), DOMNodeFilter::SHOW_ELEMENT, 0, true);
+        std::cerr << "\nDOM Error while parsing xml file: '" << vpc_measure_file << "'\n"
+          << "DOMException code is:  " << XMLString::transcode( toCatch.msg) << endl;
+        
+        if (DOMImplementation::loadDOMExceptionMsg(toCatch.code, errText, maxChars))
+          std::cerr << "Message is: " << XMLString::transcode( errText) << endl;
+         
+        return;
+      }
+      catch (...) {
+        std::cerr << "\nUnexpected exception while parsing xml file: '" << vpc_measure_file << "'\n";
+        return;
+      }
+      
+      //check if parsing failed
+      if(errorh->parseFailed()){
+        std::cerr << RED("VPCBuilder> Parsing of measure file " << vpc_measure_file << " failed, aborting initialization!") << std::endl;
+        return;
+      }
+      // set treewalker to documentroot
+      vpc_measure_TreeWalker = vpc_measure_doc->createTreeWalker( (DOMNode*)vpc_measure_doc->getDocumentElement(), DOMNodeFilter::SHOW_ELEMENT, 0, true);
+        
+      vpc_measure_TreeWalker->setCurrentNode( (DOMNode*)vpc_measure_doc->getDocumentElement());
+      
+      DOMNode *n;
+      
+      // moves the Treewalker to the first Child 
+      n = vpc_measure_TreeWalker->firstChild();
+      char *name;
+      const XMLCh *xname;
+      while( n) {
+        xname=n->getNodeName();
+        name=XMLString::transcode(xname); // for cerr only
+        //cerr << RED(name)<< endl;
           
-        vpc_measure_TreeWalker->setCurrentNode( (DOMNode*)vpc_measure_doc->getDocumentElement());
-        
-        DOMNode *n;
-        
-        // moves the Treewalker to the first Child 
-        n = vpc_measure_TreeWalker->firstChild();
-        char *name;
-        const XMLCh *xname;
-        while( n) {
-          xname=n->getNodeName();
-          name=XMLString::transcode(xname); // for cerr only
-          //cerr << RED(name)<< endl;
+        if(n->getNodeType()==DOMNode::ELEMENT_NODE && 
+          0==XMLString::compareNString(xname,constraintStr,sizeof(constraintStr))){
             
-          if(n->getNodeType()==DOMNode::ELEMENT_NODE && 
-            0==XMLString::compareNString(xname,constraintStr,sizeof(constraintStr))){
-              
-            DOMNamedNodeMap * atts=n->getAttributes();
-            //cerr << GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
-            char *sCount,*sDivider,*sName;
-            sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-            sCount=XMLString::transcode(atts->getNamedItem(countAttrStr)->getNodeValue());
-            sDivider=XMLString::transcode(atts->getNamedItem(dividerAttrStr)->getNodeValue());
-              
-            Constraint* cons=new Constraint(sName,sCount,sDivider);
-            XmlHelper::xmlFillConstraint(cons,n->getFirstChild());
-            this->director->addConstraint(cons);
-          }
-          
-          //DOMNode *last = n;
-          //vpc_measure_TreeWalker->setCurrentNode( last);
-          n = vpc_measure_TreeWalker->nextSibling();
+          DOMNamedNodeMap * atts=n->getAttributes();
+          //cerr << GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
+          char *sCount,*sDivider,*sName;
+          sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+          sCount=XMLString::transcode(atts->getNamedItem(countAttrStr)->getNodeValue());
+          sDivider=XMLString::transcode(atts->getNamedItem(dividerAttrStr)->getNodeValue());
+            
+          Constraint* cons=new Constraint(sName,sCount,sDivider);
+          XmlHelper::xmlFillConstraint(cons,n->getFirstChild());
+          this->director->addConstraint(cons);
         }
-    
-        XMLString::release(&name);
-        parser->release();
-        delete errorh;
-             
-      } // vpc_measure_file
+        
+        //DOMNode *last = n;
+        //vpc_measure_TreeWalker->setCurrentNode( last);
+        n = vpc_measure_TreeWalker->nextSibling();
+      }
+  
+      XMLString::release(&name);
+      parser->release();
+      delete errorh;
+      
     }// else !FALLBACK
 #ifdef VPC_DEBUG    
     std::cerr << "Initializing VPC finished!" << std::endl;
@@ -659,7 +669,7 @@ namespace SystemC_VPC{
    */
   AbstractController* VPCBuilder::generateController(const char* controllertype, const char* id)
     throw(InvalidArgumentException){
-    // TODO IMPLEMENT WHEN CONTROLLER IS IMPLEMENTED
+    // TODO UPDATE IMPLEMENTATION WHEN NEW CONTROLLER IS IMPLEMENTED
     AbstractController* controller;
     
     if(0==strncmp(controllertype, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))

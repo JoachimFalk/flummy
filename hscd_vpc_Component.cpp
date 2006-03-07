@@ -30,7 +30,7 @@
 #include <float.h>
 
 namespace SystemC_VPC{
-
+ 
   /**
    *
    */
@@ -79,7 +79,7 @@ namespace SystemC_VPC{
           std::cerr << RED("Component " << this->getName() << "> actualRemainingDelay= " << actualRemainingDelay.value()
                     << " for pid=" << actualRunningPID << " at: " << sc_simulation_time()) << std::endl;
 #endif //VPC_DEBUG
-
+          
           if(actualRemainingDelay.value()==0){
             // all execution time simulated -> BLOCK running task.
             p_struct *task=runningTasks[actualRunningPID];
@@ -92,6 +92,7 @@ namespace SystemC_VPC{
             cerr << this->getName() << " PID: " << actualRunningPID<< " > ";
             cerr << this->getName() << " removed Task: " << task->name << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
+            
             //notify(*(task->blockEvent));
             scheduler->removedTask(task);
 #ifndef NO_VCD_TRACES
@@ -531,10 +532,10 @@ namespace SystemC_VPC{
     }
 
     this->readyTasks.clear();
-    
+ 
     // finally check if also new task have to be removed
     while(newTasks.size()>0){
-      
+ 
       p_struct *newTask;
       newTask = newTasks.front();
       newTasks.pop_front();
@@ -545,7 +546,7 @@ namespace SystemC_VPC{
         cerr << this->getName() << " killed Task: " << newTask->name
         << " activation state set to "<< newTask->state << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
-      
+ 
       //reset pcb
       newTask->delay = 0;
       newTask->remainingDelay = 0;

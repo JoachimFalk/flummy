@@ -28,13 +28,11 @@ namespace SystemC_VPC{
 
     // first of all add tasks to local storage structure
     while(newTasks.size() > 0){
-      this->readyTasks.push(newTasks.front());
+      this->readyTasks.push_back(newTasks.front());
       newTasks.pop_front();  
     }
     
     p_struct* currTask;
-     
-     bool currentConfigUsed = false;
      
     // now check which tasks to pass forward
     while(this->readyTasks.size()){
@@ -50,95 +48,48 @@ namespace SystemC_VPC{
       // check if mapping exists
       if(iter != this->mapping_map_configs.end()){
           
-          Configuration* reqConf = this->getManagedComponent()->getConfiguration(iter->second.c_str());
-           
-         if(reqConf == NULL){
-            
-            // managed component does not support mapped configuration
-            std::cerr << YELLOW("FCFSController "<< this->getName() << "> Configuration not supported by component") << std::endl;
-// FIX ME -->            // until now pop task
-            this->readyTasks.pop();
-            continue;
-              
-          }
+        Configuration* reqConf = this->getManagedComponent()->getConfiguration(iter->second.c_str());
 
-          // check if current activ configuration fits required one
-          if(reqConf == this->getManagedComponent()->getActivConfiguration()){
+        if(reqConf == NULL){
+
+          // managed component does not support mapped configuration
+          std::cerr << YELLOW("FCFSController "<< this->getName() << "> Configuration not supported by component") << std::endl;
+// FIX ME -->            // until now pop task
+          this->readyTasks.pop_front();
+          continue;
+
+        }
+
+        // check if current activ configuration fits required one and no new configuration comes next
+        if(reqConf == this->getManagedComponent()->getActivConfiguration() && this->nextConfiguration == NULL){
 
 #ifdef VPC_DEBUG
           std::cerr << YELLOW("FCFSController "<< this->getName() <<"> current loaded configuration fits required one! ") << sc_simulation_time() << endl;
           std::cerr << YELLOW("FCFSController "<< this->getName() <<"> activ Configuration is activ? " << this->getManagedComponent()->getActivConfiguration()->isActiv()) << std::endl;
 #endif //VPC_DEBUG
-                
-            this->tasksToProcess.push(currTask);
-            this->runningTasks[currTask->pid] = currTask;
-            
-            // remove task that can be passed from waiting queue
-          this->readyTasks.pop();
+
+          this->tasksToProcess.push(currTask);
+          this->runningTasks[currTask->pid] = currTask;
+
+          // remove task that can be passed from waiting queue
+          this->readyTasks.pop_front();
+ 
+        }else  // check current configuration if it can be replaced
+        if(this->runningTasks.size() == 0 || reqConf == this->nextConfiguration){
+
+          this->tasksToProcess.push(currTask);
+          this->runningTasks[currTask->pid] = currTask;
+          // remove task that can be passed from waiting queue
+          this->readyTasks.pop_front();
           
-          currentConfigUsed = true;
-          
-          }else{  // check current configuration if or when it can be replaced
+          // load new configuration
+          //this->nextConfigurations.push(reqConf);
+          this->nextConfiguration = reqConf;
 
-#ifdef VPC_DEBUG
-          std::cerr << YELLOW("FCFSController "<< this->getName() <<"> currently num of running tasks = ") << this->runningTasks.size() << " at: " << sc_simulation_time() << endl;
-#endif //VPC_DEBUG
-
-          if(this->runningTasks.size() == 0 || reqConf == this->nextConfiguration){
-            this->tasksToProcess.push(currTask);
-            this->runningTasks[currTask->pid] = currTask;
-              // remove task that can be passed from waiting queue
-            this->readyTasks.pop();
-            
-              // load new configuration
-                //this->nextConfigurations.push(reqConf);
-                this->nextConfiguration = reqConf;
-                
-          }else{
-            break;
-          }
-          }
-/*
-            sc_time* time = this->managedComponent->minTimeToIdle();
-
-
-#ifdef VPC_DEBUG
-          std::cerr << YELLOW("FCFSController "<< this->getName() <<"> current loaded configuration does not fit requiYELLOW one! ") << sc_simulation_time() << endl;
-          std::cerr << YELLOW("FCFSController "<< this->getName() <<"> check current runtime of component=" << *time) << std::endl;
-#endif //VPC_DEBUG
-
-            // if current activ configuration is idle replace and execute task
-            if(*time == SC_ZERO_TIME && currentConfigUsed == false && this->nextConfigurations.size() <= 0){
-
-#ifdef VPC_DEBUG
-            std::cerr << YELLOW("FCFSController "<< this->getName() <<"> able to load requested configuration: ") << reqConf->getName() << endl;
-#endif //VPC_DEBUG
-                this->tasksToProcess.push(currTask);
-              // remove task that can be passed from waiting queue
-            this->readyTasks.pop();
-            
-              // load new configuration
-                this->nextConfigurations.push(reqConf);
-                this->setLoadTime(this->managedComponent->getActivConfiguration(), reqConf, this->kill);
-                
-                //this->waitInterval = new sc_time(SC_ZERO_TIME);
-                
-              }else{
-                // unable to process following waiting task so stop here
-                // determine minimum time to wait until next request may be successful
-                this->waitInterval = time;
-                  
-#ifdef VPC_DEBUG
-            std::cerr << BLUE("FCFSController "<< this->getName() <<"> Cant delegate task right now!\n"
-                << "Retrying in: " << this->waitInterval->to_default_time_units()) << std::endl;
-#endif //VPC_DEBUG
-                break;
-              }
-              
-          delete time;
-
+        }else{
+          // current task not processable, so leave it and stop processing any further tasks
+          break;
         }
-        */
       }
     }
   }
@@ -181,7 +132,8 @@ namespace SystemC_VPC{
   void FCFSController::signalTaskEvent(p_struct* pcb){
   
 #ifdef VPC_DEBUG
-    std::cerr << "FCFSController " << this->getName() << "> got notified by task: " << pcb->name << std::endl;
+    std::cerr << "FCFSController " << this->getName() << "> got notified by task: " << pcb->name << "::" << pcb->funcname
+              << " with running tasks num= " << this->runningTasks.size() << std::endl;
 #endif //VPC_DEBUG
     
     this->runningTasks.erase(pcb->pid);
@@ -193,13 +145,13 @@ namespace SystemC_VPC{
     }else{
       this->getManagedComponent()->notifyParentController(pcb);
     }
-        
+
 #ifdef VPC_DEBUG
     if(pcb->state == activation_state(aborted)){
       std::cerr << YELLOW("FCFSController> task: " << pcb->name << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
-      
+
     // if there are no running task and still ready its time to wakeUp ReconfigurableComponent
     if(this->runningTasks.size() == 0 && this->readyTasks.size() != 0){
 
@@ -210,5 +162,5 @@ namespace SystemC_VPC{
       this->getManagedComponent()->wakeUp();
     }
   }
-  
+
 } //namespace SystemC_VPC
