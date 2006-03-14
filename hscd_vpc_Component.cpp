@@ -76,7 +76,7 @@ namespace SystemC_VPC{
           assert(actualRemainingDelay.value()>=0);
     
 #ifdef VPC_DEBUG
-          std::cerr << RED("Component " << this->getName() << "> actualRemainingDelay= " << actualRemainingDelay.value()
+          std::cerr << RED("Component " << this->basename() << "> actualRemainingDelay= " << actualRemainingDelay.value()
                     << " for pid=" << actualRunningPID << " at: " << sc_simulation_time()) << std::endl;
 #endif //VPC_DEBUG
           
@@ -89,8 +89,8 @@ namespace SystemC_VPC{
             task->state=inaktiv;
 
 #ifdef VPC_DEBUG
-            cerr << this->getName() << " PID: " << actualRunningPID<< " > ";
-            cerr << this->getName() << " removed Task: " << task->name << " at: " << sc_simulation_time() << endl;
+            cerr << this->basename() << " PID: " << actualRunningPID<< " > ";
+            cerr << this->basename() << " removed Task: " << task->name << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
             
             //notify(*(task->blockEvent));
@@ -118,7 +118,7 @@ namespace SystemC_VPC{
       if(! this->isActiv()){
 
 #ifdef VPC_DEBUG
-        std::cerr << RED( this->getName()  << " deactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
     
         //check if preemption is with kill flag
@@ -149,7 +149,7 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
-        std::cerr << RED( this->getName()  << " reactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << RED( this->basename()  << " reactivated at ") << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
     
       }
@@ -160,7 +160,7 @@ namespace SystemC_VPC{
         newTask=newTasks[0];
         newTasks.pop_front();
 #ifdef VPC_DEBUG
-        cerr << this->getName() << " received new Task: " << newTask->name << " at: " << sc_simulation_time() << endl;
+        cerr << this->basename() << " received new Task: " << newTask->name << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 #ifndef NO_VCD_TRACES
         *(newTask->traceSignal)=S_READY;     
@@ -293,16 +293,16 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
-    if( (actualTask->compDelays[this->getName()]).size()>0 && ( (actualTask->compDelays[this->getName()]).count(funcname) == 0 ) )
+    if( (actualTask->compDelays[this->basename()]).size()>0 && ( (actualTask->compDelays[this->basename()]).count(funcname) == 0 ) )
       cerr << RED("VPC_LOGICAL_ERROR> ") << YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< funcname <<YELLOW(")!") << endl;
 
-      std::cerr << "Component> Check if special delay exist for "<< funcname << " on " << this->getName() << ": " << (actualTask->compDelays[this->getName()]).size() << std::endl;
+      std::cerr << "Component> Check if special delay exist for "<< funcname << " on " << this->basename() << ": " << (actualTask->compDelays[this->basename()]).size() << std::endl;
 #endif // VPC_DEBUG
   
     // reset the execution delay
-    if( (actualTask->compDelays[this->getName()]).size()>0 && ( (actualTask->compDelays[this->getName()]).count(funcname) == 1 ) ){
+    if( (actualTask->compDelays[this->basename()]).size()>0 && ( (actualTask->compDelays[this->basename()]).count(funcname) == 1 ) ){
     // function specific delay
-      actualTask->remainingDelay = ((actualTask->compDelays[this->getName()])[funcname]);
+      actualTask->remainingDelay = ((actualTask->compDelays[this->basename()])[funcname]);
 #ifdef VPC_DEBUG
         cerr << "Using " << actualTask->remainingDelay << " as delay for function " << funcname << "!" << endl;
 #endif // VPC_DEBUG
@@ -408,16 +408,16 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
-    if( (actualTask->compDelays[this->getName()]).size()>0 && ( (actualTask->compDelays[this->getName()]).count(pcb->funcname) == 0 ) )
+    if( (actualTask->compDelays[this->basename()]).size()>0 && ( (actualTask->compDelays[this->basename()]).count(pcb->funcname) == 0 ) )
   cerr << RED("VPC_LOGICAL_ERROR> ") << YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< pcb->funcname <<YELLOW(")!") << endl;
 
-  std::cerr << "Component> Check if special delay exist for "<< pcb->funcname << " on " << this->getName() << ": " << (actualTask->compDelays[this->getName()]).size() << std::endl;
+  std::cerr << "Component> Check if special delay exist for "<< pcb->funcname << " on " << this->basename() << ": " << (actualTask->compDelays[this->basename()]).size() << std::endl;
 #endif // VPC_DEBUG
   
     // reset the execution delay
-    if( (actualTask->compDelays[this->getName()]).size()>0 && ( (actualTask->compDelays[this->getName()]).count(pcb->funcname) == 1 ) ){
+    if( (actualTask->compDelays[this->basename()]).size()>0 && ( (actualTask->compDelays[this->basename()]).count(pcb->funcname) == 1 ) ){
   // function specific delay
-  actualTask->remainingDelay = ((actualTask->compDelays[this->getName()])[pcb->funcname]);
+  actualTask->remainingDelay = ((actualTask->compDelays[this->basename()])[pcb->funcname]);
 #ifdef VPC_DEBUG
   cerr << "Using " << actualTask->remainingDelay << " as delay for function " << pcb->funcname << "!" << endl;
 #endif // VPC_DEBUG
@@ -472,8 +472,8 @@ namespace SystemC_VPC{
       iter->second->state = activation_state(aborted);
       
 #ifdef VPC_DEBUG
-        cerr << this->getName() << " > ";
-        cerr << this->getName() << " killed Task: " << iter->second->name
+        cerr << this->basename() << " > ";
+        cerr << this->basename() << " killed Task: " << iter->second->name
         << " activation state set to "<< iter->second->state << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
@@ -485,8 +485,8 @@ namespace SystemC_VPC{
       iter->second->remainingDelay = 0;
       
 #ifdef VPC_DEBUG
-        cerr << this->getName() << " PID: " <<  iter->second->pid << " > ";
-        cerr << this->getName() << " killed Task: " << iter->second->name << " at: " << sc_simulation_time() << endl;
+        cerr << this->basename() << " PID: " <<  iter->second->pid << " > ";
+        cerr << this->basename() << " killed Task: " << iter->second->name << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
 #ifndef NO_VCD_TRACES
@@ -505,8 +505,8 @@ namespace SystemC_VPC{
       iter->second->state = activation_state(aborted);
 
 #ifdef VPC_DEBUG
-        cerr << this->getName() << " > ";
-        cerr << this->getName() << " killed Task: " << iter->second->name
+        cerr << this->basename() << " > ";
+        cerr << this->basename() << " killed Task: " << iter->second->name
         << " activation state set to "<< iter->second->state << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
       
@@ -519,8 +519,8 @@ namespace SystemC_VPC{
       this->parentControlUnit->signalTaskEvent(iter->second);
 
 #ifdef VPC_DEBUG
-        cerr << this->getName() << " PID: " <<  iter->second->pid << " > ";
-        cerr << this->getName() << " killed Task: " << iter->second->name << " at: " << sc_simulation_time() << endl;
+        cerr << this->basename() << " PID: " <<  iter->second->pid << " > ";
+        cerr << this->basename() << " killed Task: " << iter->second->name << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
 #ifndef NO_VCD_TRACES
@@ -542,8 +542,8 @@ namespace SystemC_VPC{
       newTask->state = activation_state(aborted);
 
 #ifdef VPC_DEBUG
-        cerr << this->getName() << " > ";
-        cerr << this->getName() << " killed Task: " << newTask->name
+        cerr << this->basename() << " > ";
+        cerr << this->basename() << " killed Task: " << newTask->name
         << " activation state set to "<< newTask->state << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
  

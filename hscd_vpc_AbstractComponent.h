@@ -33,7 +33,7 @@ namespace SystemC_VPC{
    * 
    * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
    */
-  class AbstractComponent: public IPreemptable{
+  class AbstractComponent: public sc_module, public IPreemptable{
   
   public:
 
@@ -76,30 +76,18 @@ namespace SystemC_VPC{
     // used to reflect if components execution has been killed
     bool killed;
   
-    // name of component
-    char componentName [VPC_MAX_STRING_LENGTH];
-  
     // points to direct associated controlling instance
     TaskEventListener* parentControlUnit;
   
   public:
   
-    AbstractComponent(){
+    AbstractComponent(sc_module_name name) : sc_module(name){
       
       this->killed = false;
       this->activ = true;
       
     }
     
-    /**
-     * \brief Getter for name of component
-     */
-    char* getName(){
-      
-      return this->componentName;
-      
-    }
-  
     /**
      * \brief Getter to determine if component is set to activ
      */

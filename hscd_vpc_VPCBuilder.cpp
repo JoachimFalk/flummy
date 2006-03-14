@@ -136,7 +136,7 @@ namespace SystemC_VPC{
             }
             
 #ifdef VPC_DEBUG
-            std::cout << "registering component: "<< comp->getName() << " to Director" << endl;
+            std::cout << "registering component: "<< comp->basename() << " to Director" << endl;
 #endif //VPC_DEBUG
             // register "upper-layer" components to Director
             this->director->registerComponent(comp);
@@ -371,7 +371,7 @@ namespace SystemC_VPC{
       /*
        * register component for internal use for parsing wihtin VPCBuilder
        */
-      this->knownComps.insert(std::pair<std::string, AbstractComponent* >(comp->getName(), comp));
+      this->knownComps.insert(std::pair<std::string, AbstractComponent* >(comp->basename(), comp));
       
       return comp;    
     }
@@ -387,7 +387,7 @@ namespace SystemC_VPC{
   void VPCBuilder::initCompAttributes(AbstractComponent* comp){
 
 #ifdef VPC_DEBUG
-        cerr << "VPC> InitAttribute for Component name=" << comp->getName() << endl;
+        cerr << "VPC> InitAttribute for Component name=" << comp->basename() << endl;
 #endif //VPC_DEBUG
 
     DOMNode* node = vpcConfigTreeWalker->firstChild();
@@ -462,7 +462,7 @@ namespace SystemC_VPC{
         // register as known configuration
         this->knownConfigs.insert(std::pair<std::string, Configuration* >(conf->getName(), conf));
         // register relation between configuration and component
-        this->config_to_Comp.insert(std::pair<std::string, std::string>(conf->getName(), comp->getName()));
+        this->config_to_Comp.insert(std::pair<std::string, std::string>(conf->getName(), comp->basename()));
           
         this->initConfiguration(comp, conf);
         
@@ -511,10 +511,10 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
       
       innerComp->setParentController(comp->getController());
-      conf->addComponent(innerComp->getName(), innerComp);
+      conf->addComponent(innerComp->basename(), innerComp);
       
       // register mapping
-      this->virtualComp_to_Config.insert(std::pair<std::string, std::string >(innerComp->getName(), conf->getName()));
+      this->virtualComp_to_Config.insert(std::pair<std::string, std::string >(innerComp->basename(), conf->getName()));
       
     }
     

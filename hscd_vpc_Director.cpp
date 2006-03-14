@@ -94,15 +94,14 @@ namespace SystemC_VPC{
       start = 0;
       end = this->end;
     }
-    //#  ifdef VPC_DEBUG
-    cerr << "start: " << start << " end: " << end  << endl;
-    //# endif //VPC_DEBUG
+#ifdef VPC_DEBUG
+    std::cerr << "start: " << start << " end: " << end  << std::endl;
+#endif //VPC_DEBUG
     if ((start != -1) && (end != -1)){
-      cout << "latency: " << end - start << endl;
       if(0 != this->vpc_result_file.compare("")){
 
 #ifdef VPC_DEBUG
-        cerr << "Director> result_file: "<< this->vpc_result_file << endl;
+        std::cerr << "Director> result_file: "<< this->vpc_result_file << std::endl;
 #endif //VPC_DEBUG
         ofstream resultFile;
         resultFile.open(this->vpc_result_file.c_str());
@@ -111,6 +110,8 @@ namespace SystemC_VPC{
         }
         resultFile.flush();
         resultFile.close();
+      }else{
+        std::cerr << "latency: " << end - start << std::endl;
       }
     }
   }
@@ -202,7 +203,7 @@ namespace SystemC_VPC{
       AbstractComponent* comp = mapping_map_by_name.find(name)->second;
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->getName()) << std::endl;
+      std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
 #endif //VPC_DEBUG      
       
       // compute task on found component
@@ -246,7 +247,7 @@ namespace SystemC_VPC{
    */
   void Director::registerComponent(AbstractComponent* comp){
     
-    this->component_map_by_name.insert(std::pair<std::string, AbstractComponent* >(comp->getName(), comp));
+    this->component_map_by_name.insert(std::pair<std::string, AbstractComponent* >(comp->basename(), comp));
     
   }
     

@@ -75,9 +75,7 @@ namespace SystemC_VPC{
     /**
      * \brief A backward compatible implementation of AbstractComponent.
      */
-    FallbackComponent(const char *name,const char *schedulername){
-      strcpy(this->componentName, "Fallback-Component");  
-    }
+    FallbackComponent(const char *name,const char *schedulername) : AbstractComponent(name){}
     
     virtual ~FallbackComponent(){}
     
@@ -115,7 +113,7 @@ namespace SystemC_VPC{
 
   };
 
-  class Component : public AbstractComponent, public sc_module{
+  class Component : public AbstractComponent{
 
     SC_HAS_PROCESS(Component);
 
@@ -178,16 +176,15 @@ namespace SystemC_VPC{
     /**
      * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
      */
-    Component(sc_module_name name,const char *schedulername):sc_module(name){
+    Component(sc_module_name name,const char *schedulername): AbstractComponent(name){
       SC_THREAD(schedule_thread);
-      strcpy(this->componentName,name);
       setScheduler(schedulername);
       /*    schedulerproxy=new SchedulerProxy(this->componentName);
         schedulerproxy->setScheduler(schedulername);
         schedulerproxy->registerComponent(this);
       */
     #ifndef NO_VCD_TRACES
-          std::string tracefilename=this->componentName;
+          std::string tracefilename=this->basename(); //componentName;
           char tracefilechar[VPC_MAX_STRING_LENGTH];
           char* traceprefix= getenv("VPCTRACEFILEPREFIX");
           if(0!=traceprefix){
@@ -206,7 +203,7 @@ namespace SystemC_VPC{
           /**************************/
       if(!this->activ){
 #ifdef VPC_DEBUG
-        std::cerr << GREEN(this->getName() << "> Activating") << std::endl;
+        std::cerr << GREEN(this->basename() << "> Activating") << std::endl;
 #endif //VPC_DEBUG
         this->setActiv(true);
       }

@@ -14,7 +14,7 @@
 
 namespace SystemC_VPC{
   
-  class ReconfigurableComponent : public AbstractComponent, public sc_module {
+  class ReconfigurableComponent : public AbstractComponent {
 
     //virtual void compute(p_struct *actualTask);
     
