@@ -14,6 +14,9 @@
 
 namespace SystemC_VPC{
   
+  /**
+   * \brief Represents a (re-)configurable Component within the VPC-Framework
+   */ 
   class ReconfigurableComponent : public AbstractComponent {
 
     //virtual void compute(p_struct *actualTask);
@@ -51,14 +54,21 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
+     * \brief Constructor for an instance of ReconfigurableComponent.
+     * An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
+     * \param name specifies the identifying module name of the instance within SystemC
+     * \param controller refers to the associated controller of the instance used to schedule
+     * tasks and configurations.
      */
     ReconfigurableComponent(sc_module_name name, AbstractController* controller);
-        
+    
+    /**
+     * \brief Simple Destructor for clean up
+     */
     virtual ~ReconfigurableComponent();
   
     /**
-     * \brief Executes main task of scheduling and runing task on configurations
+     * \brief Executes main task of scheduling and running tasks on configurations
      * Within this method all scheduling and reconfiguration of
      * the reconfigurable instance is handled. 
      * Runs as SC_THREAD of ReconfigurableComponent
@@ -76,7 +86,9 @@ namespace SystemC_VPC{
     virtual void compute( const char *name, VPC_Event *end=NULL);
     
     /**
-     * \brief An implementation of AbstractComponent::compute(p_struct*, const char *).
+     * \brief An implementation of AbstractComponent::compute(p_struct*).
+     * Main entry point for new task to be simulated on the given instance.
+     * \param pcb refers to the control structure of the task
      */
     virtual void compute(p_struct* pcb);
     

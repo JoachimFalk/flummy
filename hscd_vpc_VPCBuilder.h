@@ -84,10 +84,10 @@ namespace SystemC_VPC{
     std::map<std::string, AbstractComponent* > knownComps;
     // map of all created configs
     std::map<std::string, Configuration* > knownConfigs;
-    // map from all "virtualComponents" to their configs
-    std::map<std::string, std::string > virtualComp_to_Config;
-    // map from all configs to their components
-    std::map<std::string, std::string > config_to_Comp;
+    // map from all subComponents to their configs
+    std::multimap<std::string, std::string > subComp_to_Config;
+    // map from all configs to their parents components
+    std::map<std::string, std::string > config_to_ParentComp;
     
     // pointer to Director to be initialized
     Director* director;

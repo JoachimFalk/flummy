@@ -19,7 +19,7 @@ namespace SystemC_VPC{
   class ReconfigurableComponent;
   
   /**
-   * \brief Specification the interface provieded by a controller
+   * \brief Specifies the interface provided by a controller.
    * This abstract class is used to declare a common interface for all controller
    * used within the VPC framework.
    */
