@@ -126,7 +126,7 @@ namespace SystemC_VPC{
           // pointer to currently initiated component
           AbstractComponent* comp;
           // init all components
-          for(; node!=0; node = vpcConfigTreeWalker->nextSibling()){
+          for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
             try{
               comp = initComponent();
             }catch(InvalidArgumentException &e){
@@ -136,7 +136,7 @@ namespace SystemC_VPC{
             }
             
 #ifdef VPC_DEBUG
-            std::cout << "registering component: "<< comp->basename() << " to Director" << endl;
+            std::cout << "VPCBuilder> registering component: "<< comp->basename() << " to Director" << endl;
 #endif //VPC_DEBUG
             // register "upper-layer" components to Director
             this->director->registerComponent(comp);
@@ -149,6 +149,10 @@ namespace SystemC_VPC{
         // find mappings tag (not mapping)
         }else if( 0==XMLString::compareNString( xmlName, mappingsStr, sizeof(mappingsStr) ) ){
 
+#ifdef VPC_DEBUG
+            std::cout << "VPCBuilder> processing mappings " << endl;
+#endif //VPC_DEBUG
+            
           node = vpcConfigTreeWalker->firstChild();
           
           //foreach mapping of configuration perfom initialization  
@@ -388,7 +392,9 @@ namespace SystemC_VPC{
     }
 
     string msg("Unknown configuration tag: ");
-    msg += *xmlName;
+    char *name = XMLString::transcode(xmlName);
+    msg.append(name, std::strlen (name));
+    XMLString::release(&name);
     throw InvalidArgumentException(msg);
 
   }
@@ -404,27 +410,26 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
     DOMNode* node = vpcConfigTreeWalker->firstChild();
-    
-    // find all attributes
-    while( node != NULL ){
+    if(node != NULL){
+      // find all attributes
+      for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
 
-      const XMLCh* xmlName = node->getNodeName();
-      // check if its an attribute to add
-      if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
-        DOMNamedNodeMap * atts = node->getAttributes();
-        char* sType;
-        char* sValue;
-        sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
-        sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
-        comp->processAndForwardParameter(sType,sValue);
+        const XMLCh* xmlName = node->getNodeName();
+        // check if its an attribute to add
+        if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+          DOMNamedNodeMap * atts = node->getAttributes();
+          char* sType;
+          char* sValue;
+          sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+          sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+          comp->processAndForwardParameter(sType,sValue);
+        }
+
       }
-      node = vpcConfigTreeWalker->nextSibling();
-
+   
+      // set walker back to upper level
+      vpcConfigTreeWalker->parentNode();  
     }
-    
-    // set walker back to upper level
-    vpcConfigTreeWalker->parentNode();  
-    
   }
 
   /**
@@ -440,9 +445,16 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
     DOMNode* node = vpcConfigTreeWalker->firstChild();
+    
+    //check if any subvertices to process
+    if(node == NULL){
+      return;
+    }
+    
     const XMLCh* xmlName;
     
-    while( node != NULL ){
+    for(; node != NULL; node = vpcConfigTreeWalker->nextSibling())
+    {
 
       xmlName = node->getNodeName();
 
@@ -500,8 +512,7 @@ namespace SystemC_VPC{
         comp->setActivConfiguration(sName);
       }
         
-      node = vpcConfigTreeWalker->nextSibling();
-      
+     
     }
     // set walker back to upper node level
     vpcConfigTreeWalker->parentNode();
@@ -517,7 +528,12 @@ namespace SystemC_VPC{
   
     // set hierarchie down for inner components
     DOMNode* node = vpcConfigTreeWalker->firstChild();
-  
+    
+    //check if any subvertices to process
+    if(node == NULL){
+      return;
+    }
+    
     // points to components defined within current configuration
     AbstractComponent* innerComp;
     
@@ -533,7 +549,7 @@ namespace SystemC_VPC{
       }
       
 #ifdef VPC_DEBUG
-      std::cerr << RED("Adding Component=" << innerComp->getName() << " to Configuration=" << conf->getName()) << std::endl;
+      std::cerr << RED("Adding Component=" << innerComp->basename() << " to Configuration=" << conf->getName()) << std::endl;
 #endif //VPC_DEBUG
       
       innerComp->setParentController(comp->getController());
@@ -597,9 +613,9 @@ namespace SystemC_VPC{
             
           //walk down hierarchy to attributes
           node = vpcConfigTreeWalker->firstChild();
-                
+          
           // find all attributes
-          while(node!=0){
+          for(;node!=0; node = vpcConfigTreeWalker->nextSibling()){
 
             xmlName=node->getNodeName();
             if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
@@ -641,7 +657,6 @@ namespace SystemC_VPC{
               }
             }
 
-            node = vpcConfigTreeWalker->nextSibling();
           }
 
           //check if component member of a configuration and iterativly adding mapping info
@@ -649,7 +664,9 @@ namespace SystemC_VPC{
           std::map<std::string, std::string>::iterator iterVCtC;
           // determine existence of mapping to configuration
           iterVCtC = this->subComp_to_Config.find(sTarget);
-          while(iterVCtC != this->subComp_to_Config.end()){
+          for(;iterVCtC != this->subComp_to_Config.end(); 
+              iterVCtC = this->subComp_to_Config.find(sTarget))
+          {
 
 #ifdef VPC_DEBUG
             std::cerr << "VPCBuilder> Mapped component " << sTarget << " is wrapped within Configuration: " 
@@ -670,10 +687,9 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
               std::cerr << "VPCBuilder> Additional mapping between: " << sSource << "<->" << sTarget << std::endl; 
 #endif //VPC_DEBUG
-            }
             
-            sTarget = (iterConftC->second).c_str();
-            iterVCtC = this->subComp_to_Config.find(sTarget);
+              sTarget = (iterConftC->second).c_str(); 
+            }
           }
           
           //finally register mapping to Director

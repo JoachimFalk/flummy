@@ -84,6 +84,13 @@ namespace SystemC_VPC{
      */
     virtual void signalTaskEvent(p_struct* pcb);
     
+    /**
+     * \brief Signals always true as configuration is only switched if all task have finished
+     * or have been aborted
+     */
+    bool preemptByKill(){
+     return true;
+    } 
   };
 
 }

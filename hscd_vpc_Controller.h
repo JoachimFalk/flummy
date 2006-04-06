@@ -119,7 +119,7 @@ namespace SystemC_VPC{
     /**
      * \brief Getter to determine which preemption mode is used
      */
-    bool preemptByKill();  
+    virtual bool preemptByKill();  
   
     /**
      * \brief Signals to controller that managed component has been preempted.
