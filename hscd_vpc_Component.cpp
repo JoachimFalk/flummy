@@ -166,8 +166,8 @@ namespace SystemC_VPC{
         *(newTask->traceSignal)=S_READY;     
 #endif //NO_VCD_TRACES
         //insert new task in read list
-        assert(readyTasks.find(newTask->pid)   == readyTasks.end()   /* An task can call compute only one time! */);
-        assert(runningTasks.find(newTask->pid) == runningTasks.end() /* An task can call compute only one time! */);
+        assert(readyTasks.find(newTask->pid)   == readyTasks.end()   /* A task can call compute only one time! */);
+        assert(runningTasks.find(newTask->pid) == runningTasks.end() /* A task can call compute only one time! */);
         
         readyTasks[newTask->pid]=newTask;
         scheduler->addedNewTask(newTask);
@@ -567,7 +567,7 @@ namespace SystemC_VPC{
       for(iter = this->readyTasks.begin(); iter != this->readyTasks.end(); iter++){
 
         if(iter->second->traceSignal != 0){
-          *(iter->second->traceSignal) = S_KILLED;
+          *(iter->second->traceSignal) = value;
         }     
 
       }
