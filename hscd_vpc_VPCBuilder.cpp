@@ -118,8 +118,22 @@ namespace SystemC_VPC{
       while(node!=0){
         xmlName = node->getNodeName();
         
-        // find resources tag
-        if( 0==XMLString::compareNString( xmlName, resourcesStr, sizeof(resourcesStr) ) ){
+        // found template section tag
+        if( 0==XMLString::compareNString(xmlName, templateSectionStr, sizeof(templateSectionStr))){
+          // walk down hierachy to components
+          node = vpcConfigTreeWalker->firstChild();
+          
+          for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
+            DOMNamedNodeMap* atts = node->getAttributes();
+            char* tid = XMLString::transcode(atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue());
+            this->initTemplateSpecifications(tid, node->getFirstChild());
+            XMLString::release(&tid);
+          }
+
+          node = vpcConfigTreeWalker->parentNode();
+          
+          // find resources tag
+        }else if( 0==XMLString::compareNString( xmlName, resourcesStr, sizeof(resourcesStr) ) ){
         
           // walk down hierachy to components
           node = vpcConfigTreeWalker->firstChild();
@@ -128,7 +142,7 @@ namespace SystemC_VPC{
           // init all components
           for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
             try{
-              comp = initComponent();
+              comp = initComponent(node);
             }catch(InvalidArgumentException &e){
               std::cerr << "VPCBuilder> " << e.what() << std::endl;
               std::cerr << "VPCBuilder> ignoring specification of component, going on with initialization" << std::endl;
@@ -303,9 +317,9 @@ namespace SystemC_VPC{
    * \throws InvalidArgumentException if requested component within
    * configuration file is unkown
    */
-  AbstractComponent* VPCBuilder::initComponent() throw(InvalidArgumentException){
+  AbstractComponent* VPCBuilder::initComponent(DOMNode* node) throw(InvalidArgumentException){
     
-    DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
+    //DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     const XMLCh* xmlName = node->getNodeName(); 
 
     // check for component tag
@@ -341,7 +355,7 @@ namespace SystemC_VPC{
         //}else{
         //  comp = iter->second;
         //}
-        this->initCompAttributes(comp);
+        this->initCompAttributes(comp, node->getFirstChild());
         
       }else // reconfigurable component 
       if(0==strncmp(sType, STR_VPC_RECONFIGURABLECOMPONENTSTRING, sizeof(STR_VPC_RECONFIGURABLECOMPONENTSTRING))){
@@ -370,8 +384,8 @@ namespace SystemC_VPC{
         //  comp = iter->second;
         //}
         
-        this->initConfigurations((ReconfigurableComponent*)comp);
-        this->initCompAttributes(comp);
+        this->initConfigurations((ReconfigurableComponent*)comp, node->getFirstChild());
+        this->initCompAttributes(comp, node->getFirstChild());
 
 #ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> Initialized Component name=" << sName << " type=" << sType << endl;
@@ -398,62 +412,109 @@ namespace SystemC_VPC{
     throw InvalidArgumentException(msg);
 
   }
+ 
+  /**
+   * \brief Implementation of VPCBuilder::initTemplateSpecification
+   */
+  void VPCBuilder::initTemplateSpecifications(char* tid, DOMNode* node){
+      
+    std::vector<std::pair<char*, char* > > attributes;
+    // find all attributes
+    for(; node != NULL; node = node->getNextSibling()){
+      const XMLCh* xmlName = node->getNodeName();
+      // check if its an attribute to add
+      if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+        DOMNamedNodeMap* atts = node->getAttributes();
+        char* sType;
+        char* sValue;
+        sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+        sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+
+        attributes.push_back(std::pair<char*, char* >( sType, sValue));
+
+      }
+
+    }
+    
+    // if any attributes associated with template remember it
+    if(attributes.size() > 0){
+      this->templates.insert(std::pair<std::string, std::vector<std::pair<char*, char* > > >( std::string(tid, strlen(tid)),
+            attributes));
+    }
+  }
+
   
   /**
    * \brief Performs initialization of attribute values for a component
    * \param comp specifies the component to set attributes for
+   * \param node specifies current position within dom tree
    */
-  void VPCBuilder::initCompAttributes(AbstractComponent* comp){
+  void VPCBuilder::initCompAttributes(AbstractComponent* comp, DOMNode* node){
 
 #ifdef VPC_DEBUG
-        cerr << "VPC> InitAttribute for Component name=" << comp->basename() << endl;
+    cerr << "VPC> InitAttribute for Component name=" << comp->basename() << endl;
 #endif //VPC_DEBUG
+    // find all attributes
+    for(; node != NULL; node = node->getNextSibling()){
 
-    DOMNode* node = vpcConfigTreeWalker->firstChild();
-    if(node != NULL){
-      // find all attributes
-      for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
+      const XMLCh* xmlName = node->getNodeName();
+      DOMNamedNodeMap * atts = node->getAttributes();
 
-        const XMLCh* xmlName = node->getNodeName();
-        // check if its an attribute to add
-        if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
-          DOMNamedNodeMap * atts = node->getAttributes();
-          char* sType;
-          char* sValue;
-          sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
-          sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
-          comp->processAndForwardParameter(sType,sValue);
-        }
+      // check if its an attribute to add
+      if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+          
+        char* sType;
+        char* sValue;
+        sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+        sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+        comp->processAndForwardParameter(sType,sValue);
+        XMLString::release(&sType);
+        XMLString::release(&sValue);
+
+        // check if template is referred
+      }else if( 0==XMLString::compareNString( xmlName, refTemplateStr, sizeof(refTemplateStr))){
+          
+        char* sKey;
+        sKey = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+        this->applyTemplateOnComponent(comp, std::string(sKey));
+        XMLString::release(&sKey);
 
       }
-   
-      // set walker back to upper level
-      vpcConfigTreeWalker->parentNode();  
     }
   }
 
+  /**
+   * \brief Implementation of VPCBuilder::applyTemplateOnComponent
+   */
+  void VPCBuilder::applyTemplateOnComponent(AbstractComponent* comp, std::string key){
+    std::map<std::string, std::vector<std::pair<char*, char* > > >::iterator iter;
+    iter = this->templates.find(key);
+    
+    if(iter != this->templates.end()){
+      std::vector<std::pair<char*, char* > >::iterator attiter;
+      for(attiter = iter->second.begin(); attiter != iter->second.end(); attiter++){
+        comp->processAndForwardParameter(attiter->first, attiter->second);
+      }
+    }
+    
+  }
+  
   /**
    * \brief Initializes the Configurations of an ReconfigurableComponent
    * As long as there are defined Configurations, they will be register and
    * added to the given component.
    * \param comp represents the component for which to initialize the configurations
+   * \param node specifies current position within dom tree
    */
-  void VPCBuilder::initConfigurations(ReconfigurableComponent* comp){
+  void VPCBuilder::initConfigurations(ReconfigurableComponent* comp, DOMNode* node){
 
 #ifdef VPC_DEBUG
-      std::cout << "VPCBuilder> entering initConfiguration"<< endl;
+      std::cout << "VPCBuilder> entering initConfigurations"<< endl;
 #endif //VPC_DEBUG
 
-    DOMNode* node = vpcConfigTreeWalker->firstChild();
-    
-    //check if any subvertices to process
-    if(node == NULL){
-      return;
-    }
-    
     const XMLCh* xmlName;
     
-    for(; node != NULL; node = vpcConfigTreeWalker->nextSibling())
+    for(; node != NULL; node = node->getNextSibling())
     {
 
       xmlName = node->getNodeName();
@@ -500,7 +561,7 @@ namespace SystemC_VPC{
         // add configuration to node
         comp->addConfiguration(sName, conf);
          
-        this->initConfiguration(comp, conf);
+        this->initConfiguration(comp, conf, node->getFirstChild());
         
       }else // if default configuration is defined init
       if( 0==XMLString::compareNString( xmlName, VPCBuilder::defaultConfStr, sizeof(VPCBuilder::defaultConfStr))){
@@ -511,12 +572,7 @@ namespace SystemC_VPC{
       
         comp->setActivConfiguration(sName);
       }
-        
-     
     }
-    // set walker back to upper node level
-    vpcConfigTreeWalker->parentNode();
-
   }
 
   /**
@@ -524,24 +580,16 @@ namespace SystemC_VPC{
    * \param comp specifies the associated component of the configuration
    * \param conf specifies the  configuration to initialize
    */
-  void VPCBuilder::initConfiguration(ReconfigurableComponent* comp, Configuration* conf){
+  void VPCBuilder::initConfiguration(ReconfigurableComponent* comp, Configuration* conf, DOMNode* node){
   
-    // set hierarchie down for inner components
-    DOMNode* node = vpcConfigTreeWalker->firstChild();
-    
-    //check if any subvertices to process
-    if(node == NULL){
-      return;
-    }
-    
     // points to components defined within current configuration
     AbstractComponent* innerComp;
     
     // as long as there are inner components defined process them
-    for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
+    for(; node != NULL; node = node->getNextSibling()){
       
       try{
-        innerComp = this->initComponent();
+        innerComp = this->initComponent(node);
       }catch(InvalidArgumentException &e){
         std::cerr << "VPCBuilder> " << e.what() << std::endl;
         std::cerr << "VPCBuilder> ignoring specification of component, going on with initialization" << std::endl;
@@ -559,10 +607,6 @@ namespace SystemC_VPC{
       this->subComp_to_Config.insert(std::pair<std::string, std::string >(innerComp->basename(), conf->getName()));
       
     }
-    
-    // set walker back to upper node level
-    vpcConfigTreeWalker->parentNode();
-
   }
     
   /**
@@ -612,14 +656,16 @@ namespace SystemC_VPC{
           p_struct *p = this->director->generatePCB(sSource);
             
           //walk down hierarchy to attributes
-          node = vpcConfigTreeWalker->firstChild();
+          DOMNode* attnode = node->getFirstChild();
           
           // find all attributes
-          for(;node!=0; node = vpcConfigTreeWalker->nextSibling()){
+          for(; attnode!=NULL; attnode = attnode->getNextSibling()){
 
-            xmlName=node->getNodeName();
+            xmlName=attnode->getNodeName();
+            DOMNamedNodeMap * atts=attnode->getAttributes();
+
             if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
-              DOMNamedNodeMap * atts=node->getAttributes();
+            
               char *sType, *sValue;
               sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
               sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
@@ -655,50 +701,27 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
                 }
               }
+
+              XMLString::release(&sType);
+              XMLString::release(&sValue);
+              
+              // check if reference to template
+            }else if( 0==XMLString::compareNString( xmlName, refTemplateStr, sizeof(refTemplateStr))){
+
+              char* sKey;
+              sKey = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+              this->applyTemplateOnPStruct(p, sTarget, std::string(sKey, strlen(sKey)));
+              XMLString::release(&sKey);
+              
             }
 
           }
 
+          //node = vpcConfigTreeWalker->parentNode();
+          
           //check if component member of a configuration and iterativly adding mapping info
-          //while(std::map<std::string, AbstractComponent* >::iterator iter = this->knownComps.find(sTarget);
-          std::map<std::string, std::string>::iterator iterVCtC;
-          // determine existence of mapping to configuration
-          iterVCtC = this->subComp_to_Config.find(sTarget);
-          for(;iterVCtC != this->subComp_to_Config.end(); 
-              iterVCtC = this->subComp_to_Config.find(sTarget))
-          {
-
-#ifdef VPC_DEBUG
-            std::cerr << "VPCBuilder> Mapped component " << sTarget << " is wrapped within Configuration: " 
-                  << iterVCtC->second << std::endl; 
-#endif //VPC_DEBUG
-            
-            static std::map<std::string, std::string>::iterator iterConftC;
-            // determine associated Component of Configuration
-            iterConftC = this->config_to_ParentComp.find(iterVCtC->second);
-            
-            if(iterConftC != this->config_to_ParentComp.end()){
-              
-              // add mapping to controller of surrounding component
-              ReconfigurableComponent* comp;
-              comp = (ReconfigurableComponent*)this->knownComps[iterConftC->second];
-              comp->getController()->registerMapping(sSource, sTarget);
-              
-#ifdef VPC_DEBUG
-              std::cerr << "VPCBuilder> Additional mapping between: " << sSource << "<->" << sTarget << std::endl; 
-#endif //VPC_DEBUG
-            
-              sTarget = (iterConftC->second).c_str(); 
-            }
-          }
+          this->buildUpBindHierarchy(sSource, sTarget);
           
-          //finally register mapping to Director
-          this->director->registerMapping(sSource, sTarget);
-          
-          node = vpcConfigTreeWalker->parentNode();
-        
-          // this can be removed as we use generated p_struct from Director
-          //p_struct_map_by_name.insert(pair<string,p_struct*>(sSource,p));
         }else{
           std::cerr << "VPCBuilder> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
         }
@@ -706,6 +729,94 @@ namespace SystemC_VPC{
     }
   }
 
+  /**
+   * \brief Implementation of VPCBiulder::buildUpBindHierarchy
+   */
+  void VPCBuilder::buildUpBindHierarchy(const char* source, const char* target){
+    //while(std::map<std::string, AbstractComponent* >::iterator iter = this->knownComps.find(sTarget);
+    std::map<std::string, std::string>::iterator iterVCtC;
+    // determine existence of mapping to configuration
+    iterVCtC = this->subComp_to_Config.find(target);
+    for(;iterVCtC != this->subComp_to_Config.end(); 
+        iterVCtC = this->subComp_to_Config.find(target))
+    {
+
+#ifdef VPC_DEBUG
+      std::cerr << "VPCBuilder> Mapped component " << target << " is wrapped within Configuration: " 
+        << iterVCtC->second << std::endl; 
+#endif //VPC_DEBUG
+
+      static std::map<std::string, std::string>::iterator iterConftC;
+      // determine associated Component of Configuration
+      iterConftC = this->config_to_ParentComp.find(iterVCtC->second);
+
+      if(iterConftC != this->config_to_ParentComp.end()){
+
+        // add mapping to controller of surrounding component
+        ReconfigurableComponent* comp;
+        comp = (ReconfigurableComponent*)this->knownComps[iterConftC->second];
+        comp->getController()->registerMapping(source, target);
+
+#ifdef VPC_DEBUG
+        std::cerr << "VPCBuilder> Additional mapping between: " << source << "<->" << target << std::endl; 
+#endif //VPC_DEBUG
+            
+        target = (iterConftC->second).c_str(); 
+      }
+    }
+          
+    //finally register mapping to Director
+    this->director->registerMapping(source, target);
+
+
+    // this can be removed as we use generated p_struct from Director
+    //p_struct_map_by_name.insert(pair<string,p_struct*>(sSource,p));
+  }
+
+  /**
+   * \brief Implementation of VPCBuilder::applyTemplateOnPStruct
+   */
+  void VPCBuilder::applyTemplateOnPStruct(p_struct* p, const char* target, std::string key){
+    
+    std::map<std::string, std::vector<std::pair<char*, char* > > >::iterator iter;
+    iter = this->templates.find(key);
+    if(iter != this->templates.end()){
+      std::vector<std::pair<char*, char* > >::iterator attiter;
+      
+      for(attiter = iter->second.begin(); attiter != iter->second.end(); attiter++){
+        if( 0 == strncmp(attiter->first, STR_VPC_PRIORITY, sizeof(STR_VPC_PRIORITY) )){
+          sscanf(attiter->second, "%d", &(p->priority));
+        }else if( 0 == strncmp(attiter->first, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
+          sscanf(attiter->second, "%lf", &(p->deadline));
+        }else if( 0 == strncmp(attiter->first, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
+          sscanf(attiter->second, "%lf", &(p->period));
+        }else if( 0 == strncmp(attiter->first, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
+          sscanf(attiter->second, "%lf", &(p->delay));
+        }else{
+#ifdef VPC_DEBUG
+          std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << attiter->first << " value=" << attiter->second << endl; 
+          std::cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
+#endif //VPC_DEBUG
+
+          double delay;
+          if( 1 == sscanf(attiter->second, "%lf", &delay) ){  
+#ifdef VPC_DEBUG
+            std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
+            std::cerr << YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
+#endif //VPC_DEBUG
+            std::map<std::string, double> funcDelays = p->compDelays[target];
+            funcDelays.insert(std::pair<std::string, double>(attiter->first, delay));
+            p->compDelays[target]= funcDelays;
+          } else {
+#ifdef VPC_DEBUG
+            std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
+#endif //VPC_DEBUG
+          }
+        }
+      }
+    }
+  }
+  
   /**
    * \brief Implementation of VPCBuilder::generateController
    * \param controllertype specifies type of controller to instantiate

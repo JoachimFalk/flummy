@@ -17,6 +17,10 @@
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_Component.h"
 #include "hscd_vpc_ReconfigurableComponent.h"
@@ -54,6 +58,9 @@ namespace SystemC_VPC{
     XMLCh* switchtimesStr;
     XMLCh* switchtimeStr;
     XMLCh* defaultConfStr;
+    XMLCh* templateSectionStr;
+    XMLCh* templateStr;
+    XMLCh* refTemplateStr;
     //XMLCh *Str;
     
     XMLCh* nameAttrStr;
@@ -88,6 +95,8 @@ namespace SystemC_VPC{
     std::multimap<std::string, std::string > subComp_to_Config;
     // map from all configs to their parents components
     std::map<std::string, std::string > config_to_ParentComp;
+    // map containing specified templates
+    std::map<std::string, std::vector<std::pair<char*, char* > > > templates;
     
     // pointer to Director to be initialized
     Director* director;
@@ -107,18 +116,21 @@ namespace SystemC_VPC{
       /*
        * SECTION: initialization of init tag values for comparison while initializing
        */
-      constraintStr  = XMLString::transcode("constraint");
+      constraintStr   = XMLString::transcode("constraint");
       measurefileStr  = XMLString::transcode("measurefile");
-      resultfileStr  = XMLString::transcode("resultfile");
-      resourcesStr  = XMLString::transcode("resources");
-      mappingsStr    = XMLString::transcode("mappings");
-      componentStr  = XMLString::transcode("component");
-      mappingStr    = XMLString::transcode("mapping");
-      attributeStr  = XMLString::transcode("attribute");
+      resultfileStr   = XMLString::transcode("resultfile");
+      resourcesStr    = XMLString::transcode("resources");
+      mappingsStr     = XMLString::transcode("mappings");
+      componentStr    = XMLString::transcode("component");
+      mappingStr      = XMLString::transcode("mapping");
+      attributeStr    = XMLString::transcode("attribute");
       configurationStr= XMLString::transcode("configuration");
       switchtimesStr  = XMLString::transcode("switchtimes");
-      switchtimeStr  = XMLString::transcode("switchtime");
+      switchtimeStr   = XMLString::transcode("switchtime");
       defaultConfStr  = XMLString::transcode("defaultconfiguration");
+      templateSectionStr    = XMLString::transcode("templates");
+      templateStr     = XMLString::transcode("template");
+      refTemplateStr  = XMLString::transcode("reftemplate");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");
@@ -131,7 +143,6 @@ namespace SystemC_VPC{
       sourceAttrStr  = XMLString::transcode("source");
       loadTimeAttrStr  = XMLString::transcode("loadtime");
       storeTimeAttrStr= XMLString::transcode("storetime");
-      
       //XMLCh* VPCBuilder::AttrStr   = XMLString::transcode("");
       
       /*
@@ -161,30 +172,38 @@ namespace SystemC_VPC{
      * \brief Initialize a component from the configuration file
      * \return pointer to the initialized component
      */
-    AbstractComponent* initComponent() throw(InvalidArgumentException);
+    AbstractComponent* initComponent(DOMNode* node) throw(InvalidArgumentException);
     
+    /**
+     * \brief initializes specified templates
+     * \param tid specifies the id for an template
+     * \param specifies the current position within dom tree
+     */
+    void initTemplateSpecifications(char* tid, DOMNode* node);
     
     /**
      * \brief Performs initialization of attribute values for a component
      * \param comp specifies the component to set attributes for
      */
-    void initCompAttributes(AbstractComponent* comp);
+    void initCompAttributes(AbstractComponent* comp, DOMNode* node);
     
     /**
      * \brief Initializes the Configurations of an ReconfigurableComponent
      * As long as there are defined Configurations, they will be register and
      * added to the given component.
      * \param comp represents the component for which to initialize the configurations
+     * \param node specifies current position within dom tree
      */
-    void initConfigurations(ReconfigurableComponent* comp);
+    void initConfigurations(ReconfigurableComponent* comp, DOMNode* node);
     
     /**
      * \brief Initializes one Configuration of an ReconfigurableComponent
      * As long as there are defined inner Components, they will be register and
      * added to the given Configuration.
      * \param comp represents the component for which to initialize the configurations
+     * \param node specifies current postion within dom tree
      */
-    void initConfiguration(ReconfigurableComponent* comp, Configuration* conf);
+    void initConfiguration(ReconfigurableComponent* comp, Configuration* conf, DOMNode* node);
     
     /**
      * \brief Initializes the Configuration switch times for a component
@@ -195,9 +214,31 @@ namespace SystemC_VPC{
     void initSwitchTimesOfComponent(ReconfigurableComponent* comp);
     
     /**
+     * \brief Passes attributes of a specified template to a given component instance
+     * \param comp represents the component to apply the attributes on
+     * \param key references the key of the template to apply
+     */
+    void applyTemplateOnComponent(AbstractComponent* comp, std::string key);
+    
+    /**
+     * \brief Interprets template for setting up parameter for a given p_struct
+     * \param p represents the p_struct to be updated
+     * \param target specifies the target of mapping
+     * \param key references the key of the template to apply
+     */
+    void applyTemplateOnPStruct(p_struct* p, const char* target, std::string key);
+    
+    /**
      * \brief Initializes mapping between tasks and components
      */
-    void VPCBuilder::initMappingAPStruct();
+    void initMappingAPStruct();
+
+    /**
+     * \brief Used to build up bind hierarchy within vpc framework
+     * This method is used to add corresponding binding information at each
+     * level within the control hierarchy of vpc
+     */
+    void buildUpBindHierarchy(const char* source, const char* target);
     
     /**
      * \brief Generate pcb for internal use in VPC Framework
