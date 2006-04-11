@@ -16,8 +16,8 @@ namespace SystemC_VPC{
     /**
      * \brief Signals task event to listener
      * Used by listend instance to notify listener about an
-     * event which happend.
-     * \param pcb points to the task which the notifikation corresponds to
+     * event which happened.
+     * \param pcb points to the task which the notification corresponds to
      */
     virtual void signalTaskEvent(p_struct* pcb)=0;
     
