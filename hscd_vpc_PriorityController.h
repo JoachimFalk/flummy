@@ -31,36 +31,111 @@ namespace SystemC_VPC{
      * Helper class to store configurations within priority list of controller.
      * Contains pointer to actual configuration and fifo entry for secundary strategy.
      */
+    template<class C>
     class PriorityListElement{
       
       private:
-        Configuration* config;
-        int fifo_count;
+        C contained;
+        std::list<int> priorities;
+        int fifo_order;
       
       public:
-        PriorityListElement(Configuration* config, int degree) : config(config), fifo_count(degree){}
-        
-        Configuration* getConfiguration(){
-          return this->config;
+        PriorityListElement(C contained, int priority, int degree) : contained(contained), fifo_order(degree){
+          this->priorities.push_back(priority);
+          // finish list with -1
+          this->priorities.push_back(-1);
+        }
+
+        void setContained(C* contained){
+          this->contained = contained;
         }
         
-        bool operator < (const PriorityListElement& pe){
-          if(this->config->getPriority() > pe.config->getPriority()){
-            return true;
-          }else if(this->config->getPriority() == pe.config->getPriority()){
-            return this->fifo_count > pe.fifo_count;
+        C getContained(){
+          return this->contained;
+        }
+ 
+        void setFifoOrder(int degree){
+          this->fifo_order = degree;
+        }
+        
+        int getFifoOrder() const{
+          return this->fifo_order;
+        }
+        
+        void addPriority(int p){
+          
+          std::list<int>::iterator iter;
+
+          // walk through list until priority in list is lesser than current to insert
+          for(iter = this->priorities.begin(); iter != this->priorities.end() && *iter > p; iter++);
+
+          this->priorities.insert(iter, p);
+                   
+        }
+         
+        void removePriority(int p){
+
+          std::list<int>::iterator iter;
+
+          for(iter = this->priorities.begin(); iter != this->priorities.end(); iter++){
+            if(*iter == p){
+              this->priorities.erase(iter);
+              break;
+            }
           }
-          
-          return false;  
+
         }
-        
-        bool operator == (const Configuration* config){
-          
-          return this->config == config;
-          
+
+        int getPriority() const{
+          return this->priorities.front();
+        }
+
+        bool operator == (const C c){
+          return this->contained == c;
+        }
+
+        bool operator > (const PriorityListElement& elem){
+          if(this->getPriority() > elem.getPriority()){
+            return true;
+          }else
+            if(this->getPriority() == elem.getPriority()
+                && this->getFifoOrder() < elem.getFifoOrder()){
+              return true;
+            }
+          return false;
+        }
+
+        bool operator < (const PriorityListElement& elem){
+          if(this->getPriority() < elem.getPriority()){
+            return true;
+          }else
+            if(this->getPriority() == elem.getPriority()
+                && this->getFifoOrder() > elem.getFifoOrder()){
+              return true;
+            }
+          return false;
         }
     };
+ 
+    /**
+     * Functor for comparing PriorityListElements
+     */
+    /*
+    class PriorityComparator : public std::binary_function<PriorityListElement<Configuration* >, PriorityListElement<Configuration* >, bool>{
+      public:
+        bool operator ()(const PriorityListElement<Configuration* > & e1, const PriorityListElement<Configuration *> & e2) const{
+          if(e1.getPriority() < e2.getPriority()){
+            return true;
+          }else
+            if(e1.getPriority() == e2.getPriority()
+                && e1.getFifoOrder() > e2.getFifoOrder()){
+              return true;
+            }
+          return false;
+        }
       
+    };
+    */
     // queue of waiting tasks to be executed
     std::queue<p_struct* > readyTasks;
     // map of running tasks
@@ -69,7 +144,7 @@ namespace SystemC_VPC{
     std::queue<p_struct* > tasksToProcess;
     
     // queue containing order of configuration to be loaded in next "rounds"
-    std::list<PriorityListElement> nextConfigurations;
+    std::list<PriorityListElement<Configuration*> > nextConfigurations;
     
   public:
   

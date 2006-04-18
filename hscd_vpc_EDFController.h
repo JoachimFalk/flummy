@@ -31,35 +31,101 @@ namespace SystemC_VPC{
      * Helper class to store configurations within EDF list of controller.
      * Contains pointer to actual configuration and fifo entry for secundary strategy.
      */
-    class EDFListElement{
-      
-      private:
-        Configuration* config;
-        int fifo_count;
-      
-      public:
-        EDFListElement(Configuration* config, int degree) : config(config), fifo_count(degree){}
-        
-        Configuration* getConfiguration(){
-          return this->config;
-        }
-        
-        bool operator < (const EDFListElement& pe){
-          if(this->config->getDeadline() > pe.config->getDeadline()){
-            return true;
-          }else if(this->config->getDeadline() == pe.config->getDeadline()){
-            return this->fifo_count > pe.fifo_count;
+    template<class C>
+      class EDFListElement{
+
+        private:
+          C contained;
+          std::list<double> deadlines;
+          int fifo_order;
+
+        public:
+          EDFListElement(C contained, double deadline, int degree) : contained(contained), fifo_order(degree){
+            this->deadlines.push_back(deadline);            
           }
+
+          void setContained(C contained){
+            this->contained = contained;
+          }
+
+          C getContained(){
+            return this->contained;
+          }
+
+          void setFifoOrder(int degree){
+            this->fifo_order = degree;
+          }
+
+          int getFifoOrder() const{
+            return this->fifo_order;
+          }
+
+          /**
+           * \brief Adds a deadline to a EDFListElement
+           * Used to add deadline of a running task on a element
+           * to the deadline of the configuration to enable deadline schedule
+           * \param p specifies the deadline to be added
+           */
+          void addDeadline(double d){
+           std::list<double>::iterator iter;
+
+           for(iter = this->deadlines.begin(); iter != this->deadlines.end() && *iter > d; iter++);
+
+           this->deadlines.insert(iter, d);
+
+          }
+
+          /**
+           * \brief Removes a deadline from a EDFListElement
+           * Used to remove deadline of a finished task from the element,
+           * the first occurence of the deadline will be removed.
+           * \param p specifies the deadline value to be removed
+           */
+          void removeDeadline(double d){
+            std::list<double>::iterator iter;
+
+            for(iter = this->deadlines.begin(); iter != this->deadlines.end(); iter++){
+              if(*iter == d){
+                this->deadlines.erase(iter);
+                break;
+              }
+            }
           
-          return false;  
-        }
+          }
+
+          /**
+           * \brief Access to current deadline of a EDFListElement 
+           * Used to access the current deadline of a EDFListElement determined
+           * by the task running on it. If there are no running tasks
+           * a default value is returned.
+           * \return current deadline of configuration or -1 if no task is running
+           * on the configuration
+           */
+          double getDeadline() const{
+            if(this->deadlines.size() != 0){
+              return this->deadlines.front();
+            }else{
+              return -1;
+            }
+          }
+
         
-        bool operator == (const Configuration* config){
-          
-          return this->config == config;
-          
-        }
-    };
+          bool operator < (const EDFListElement& pe){
+            if(this->getDeadline() > pe.getDeadline()){
+              return true;
+            }else if(this->getDeadline() == pe.getDeadline()){
+              return this->getFifoOrder() > pe.getFifoOrder();
+            }
+
+            return false;  
+          }
+
+          bool operator == (const C c){
+
+            return this->contained == c;
+
+          }
+      };
       
     // queue of waiting tasks to be executed
     std::queue<p_struct* > readyTasks;
@@ -69,7 +135,7 @@ namespace SystemC_VPC{
     std::queue<p_struct* > tasksToProcess;
     
     // queue containing order of configuration to be loaded in next "rounds"
-    std::list<EDFListElement> nextConfigurations;
+    std::list<EDFListElement<Configuration* > > nextConfigurations;
     
   public:
   

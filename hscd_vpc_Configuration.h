@@ -28,12 +28,6 @@ namespace SystemC_VPC{
     // map associating AbstractComponents with their identifying names
     std::map<std::string, AbstractComponent* > component_map_by_name;
 
-    // list of priorities
-    std::list<int> priorities;
-    
-    // list of deadlines
-    std::list<double> deadlines;
-    
     // signals if configuration is activ or not
     bool activ;
     
@@ -171,58 +165,6 @@ namespace SystemC_VPC{
      */
     const sc_time& getLoadTime();
     
-    /**
-     * \brief Adds a priority to a configuration
-     * Used to add priority of a running task on a configuration 
-     * to the priority of the configuration to enable priority schedule
-     * \param p specifies the priority to be added
-     */
-    void addPriority(int p);
-    
-    /**
-     * \brief Removes a priority from the configuration
-     * Used to remove priority of a finished task from the configuration,
-     * the first occurence of the priority will be removed.
-     * \param p specifies the priority value to be removed
-     */
-    void removePriority(int p);
-    
-    /**
-     * \brief Access to current priority of the configuration
-     * Used to access the current priority of a configuration determined
-     * by the task running on it. If there are no running tasks
-     * a default value is returned.
-     * \return current priority of configuration or -1 if no task is running
-     * on the configuration
-     */
-    const int getPriority();
-    
-    /**
-     * \brief Adds a deadline to a configuration
-     * Used to add deadline of a running task on a configuration 
-     * to the deadline of the configuration to enable deadline schedule
-     * \param p specifies the deadline to be added
-     */
-    void addDeadline(double d);
-    
-    /**
-     * \brief Removes a deadline from the configuration
-     * Used to remove deadline of a finished task from the configuration,
-     * the first occurence of the deadline will be removed.
-     * \param p specifies the deadline value to be removed
-     */
-    void removeDeadline(double d);
-    
-    /**
-     * \brief Access to current deadline of the configuration
-     * Used to access the current deadline of a configuration determined
-     * by the task running on it. If there are no running tasks
-     * a default value is returned.
-     * \return current deadline of configuration or -1 if no task is running
-     * on the configuration
-     */
-    const double getDeadline();
-
   };
  
 }

@@ -36,14 +36,15 @@ namespace SystemC_VPC{
       }else{
         //get configuration from managed component
         Configuration* config = this->getManagedComponent()->getConfiguration(iter->second.c_str());
-        config->addDeadline(pcb->deadline);
         
-        std::list<EDFListElement>::iterator iter;
+        std::list<EDFListElement<Configuration* > >::iterator iter;
         
         iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
         // if configuration is not in scheduling list add it
         if(iter == this->nextConfigurations.end()){
-          this->nextConfigurations.push_back(EDFListElement(config, order_count++));
+          this->nextConfigurations.push_back(EDFListElement<Configuration* >(config, pcb->deadline, order_count++));
+        }else{
+          iter->addDeadline(pcb->deadline);
         }
         
       }
@@ -63,7 +64,7 @@ namespace SystemC_VPC{
   Configuration* EDFController::getNextConfiguration(){
     
     if(!this->nextConfigurations.empty()){
-      Configuration* next = this->nextConfigurations.front().getConfiguration();
+      Configuration* next = this->nextConfigurations.front().getContained();
     
       if(next != this->getManagedComponent()->getActivConfiguration()){
 
@@ -110,7 +111,6 @@ namespace SystemC_VPC{
     
     //get mapped configuration
     Configuration* config = this->getMappedConfiguration(pcb->name.c_str());
-    config->removeDeadline(pcb->deadline);
 
 #ifdef VPC_DEBUG
     std::cerr << YELLOW("EDFController " << this->getName() << "> deadline of mapped configuration after change is: "
@@ -118,13 +118,14 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
     // if there are still tasks running on configuration equal to (EDF != -1)
-    if(config->getDeadline() != -1){
-      this->nextConfigurations.sort();
-    }else{
-      // remove configuration from EDF list
-      std::list<EDFListElement>::iterator iter;
-      iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
-      if(iter != this->nextConfigurations.end()){
+    std::list<EDFListElement<Configuration* > >::iterator iter;
+    iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
+
+    if(iter != this->nextConfigurations.end()){
+      if(iter->getDeadline() != -1){
+        this->nextConfigurations.sort();
+      }else{
+        // remove configuration from EDF list
         this->nextConfigurations.erase(iter);
       }
     }
@@ -143,9 +144,9 @@ namespace SystemC_VPC{
     }
 #endif //VPC_DEBUG
       
-    // if there are no running task and still ready its time to wakeUp ReconfigurableComponent
-    if(this->getManagedComponent()->getActivConfiguration()->getDeadline() == -1
-        && this->nextConfigurations.size() > 0){
+    // if there are still waiting configurations and actual scheduled isnt determined one its time to wakeUp ReconfigurableComponent
+    if(this->nextConfigurations.size() > 0 &&
+        this->getManagedComponent()->getActivConfiguration() != this->getNextConfiguration()){
 
 #ifdef VPC_DEBUG
       std::cerr << "EDFController> waking up component thread!" << std::endl;
