@@ -19,7 +19,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of PreempetivController::addTasksToSchedule
    */
-  void FCFSController::addTasksToSchedule(std::deque<p_struct* >& newTasks){
+  void FCFSController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
@@ -32,19 +32,19 @@ namespace SystemC_VPC{
       newTasks.pop_front();  
     }
     
-    p_struct* currTask;
+    ProcessControlBlock* currTask;
      
     // now check which tasks to pass forward
     while(this->readyTasks.size()){
       currTask = this->readyTasks.front();
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("FCFSController "<< this->getName() <<"> processing task ") << currTask->name << endl;
+      std::cerr << YELLOW("FCFSController "<< this->getName() <<"> processing task ") << currTask->getName() << endl;
 #endif //VPC_DEBUG
 
       // get mapping for waiting task
       std::map<std::string, std::string >::iterator iter;
-      iter = this->mapping_map_configs.find(currTask->name);
+      iter = this->mapping_map_configs.find(currTask->getName());
       // check if mapping exists
       if(iter != this->mapping_map_configs.end()){
           
@@ -69,7 +69,7 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
           this->tasksToProcess.push(currTask);
-          this->runningTasks[currTask->pid] = currTask;
+          this->runningTasks[currTask->getPID()] = currTask;
 
           // remove task that can be passed from waiting queue
           this->readyTasks.pop_front();
@@ -78,7 +78,7 @@ namespace SystemC_VPC{
         if(this->runningTasks.size() == 0 || reqConf == this->nextConfiguration){
 
           this->tasksToProcess.push(currTask);
-          this->runningTasks[currTask->pid] = currTask;
+          this->runningTasks[currTask->getPID()] = currTask;
           // remove task that can be passed from waiting queue
           this->readyTasks.pop_front();
           
@@ -117,9 +117,9 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSController::getNextTask()
    */
-  p_struct* FCFSController::getNextTask(){
+  ProcessControlBlock* FCFSController::getNextTask(){
      
-     p_struct* task;
+     ProcessControlBlock* task;
      task = this->tasksToProcess.front();
      this->tasksToProcess.pop();
      return task;
@@ -129,17 +129,17 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSController::signalTaskEvent
    */
-  void FCFSController::signalTaskEvent(p_struct* pcb){
+  void FCFSController::signalTaskEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
-    std::cerr << "FCFSController " << this->getName() << "> got notified by task: " << pcb->name << "::" << pcb->funcname
+    std::cerr << "FCFSController " << this->getName() << "> got notified by task: " << pcb->getName() << "::" << pcb->getFuncName()
               << " with running tasks num= " << this->runningTasks.size() << std::endl;
 #endif //VPC_DEBUG
     
-    this->runningTasks.erase(pcb->pid);
+    this->runningTasks.erase(pcb->getPID());
     
     // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->state == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
+    if(pcb->getState() == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
       // recompute
       this->getManagedComponent()->compute(pcb);
     }else{
@@ -147,8 +147,8 @@ namespace SystemC_VPC{
     }
 
 #ifdef VPC_DEBUG
-    if(pcb->state == activation_state(aborted)){
-      std::cerr << YELLOW("FCFSController> task: " << pcb->name << " got killed!")  << std::endl;
+    if(pcb->getState() == activation_state(aborted)){
+      std::cerr << YELLOW("FCFSController> task: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
 

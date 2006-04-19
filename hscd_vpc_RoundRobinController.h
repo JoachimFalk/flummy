@@ -89,7 +89,7 @@ namespace SystemC_VPC{
     bool switchConfig;
       
     // queue of tasks ready to be processed
-    std::queue<p_struct* > tasksToProcess;
+    std::queue<ProcessControlBlock* > tasksToProcess;
     
     // queue containing order of configuration to be loaded in next "rounds"
     // structure contains additional count of tasks running on one configuration
@@ -118,7 +118,7 @@ namespace SystemC_VPC{
       * controller. It is used to initialize and set up all necessary data for a new "round" of
       * scheduling. 
       */
-    virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks);
+    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
           
     /**
      * \brief Returns next configuration to be loaded
@@ -139,10 +139,10 @@ namespace SystemC_VPC{
      * \brief Returns next task to be forwarded
      * This method should only be called after calling hasTaskToProcess
      * to ensure that there are still existing task to process.
-     * \return pair containing p_struct of task and requested function
+     * \return pair containing ProcessControlBlock of task and requested function
      * to be simulated.
      */
-    virtual p_struct* getNextTask();
+    virtual ProcessControlBlock* getNextTask();
       
     /**
      * \brief Signals if a configuration has to be reactived by controlled component
@@ -153,7 +153,7 @@ namespace SystemC_VPC{
     /**
      * \see AbstractController
      */
-    virtual void signalTaskEvent(p_struct* pcb);
+    virtual void signalTaskEvent(ProcessControlBlock* pcb);
     
     /**
      * \see AbstractController
@@ -178,7 +178,7 @@ namespace SystemC_VPC{
     /**
      * \brief Helper method to keep management structure uptodate
      */
-    void updateUsedConfigurations(p_struct* pcb);
+    void updateUsedConfigurations(ProcessControlBlock* pcb);
   };
 
 }

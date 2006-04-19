@@ -18,11 +18,11 @@ namespace SystemC_VPC{
     }
     RateMonotonicScheduler(const char *schedulername);
     virtual ~RateMonotonicScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks);
-    void addedNewTask(p_struct *pcb);
-    void removedTask(p_struct *pcb);
+    bool getSchedulerTimeSlice(sc_time &time,const map<int,ProcessControlBlock*> &ready_tasks,const map<int,ProcessControlBlock*> &running_tasks);
+    void addedNewTask(ProcessControlBlock *pcb);
+    void removedTask(ProcessControlBlock *pcb);
     sc_event& getNotifyEvent();
-    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks);
+    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks);
     void setProperty(char* key, char* value);
     sc_time* schedulingOverhead(){return 0;}//;
   protected:

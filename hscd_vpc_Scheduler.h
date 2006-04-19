@@ -15,7 +15,7 @@ namespace SystemC_VPC{
   /**
    * \brief A callback class called from Component to do Scheduling.
    *
-   * Main part is virtual funktion scheduling_decision schedulingDecision(int&, int&, map<int,p_struct>, map<int,p_struct>)
+   * Main part is virtual funktion scheduling_decision schedulingDecision(int&, int&, map<int,ProcessControlBlock>, map<int,ProcessControlBlock>)
    */
   class Scheduler{
   public:
@@ -25,17 +25,17 @@ namespace SystemC_VPC{
      * /brief Called from Component to determine a "time slice" used as time out.
      * 
      */
-    virtual bool getSchedulerTimeSlice(sc_time &time,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
+    virtual bool getSchedulerTimeSlice(sc_time &time,const map<int,ProcessControlBlock*> &ready_tasks,const map<int,ProcessControlBlock*> &running_tasks)=0;
 
     /**
      * \brief Inform Scheduler about new tasks.
      */
-    virtual void addedNewTask(p_struct *pcb)=0;
+    virtual void addedNewTask(ProcessControlBlock *pcb)=0;
     
     /**
      * \brief Inform Scheduler about removed tasks.
      */
-    virtual void removedTask(p_struct *pcb)=0;
+    virtual void removedTask(ProcessControlBlock *pcb)=0;
 
     /**
      * \brief Call the Scheduler to do a scheduling decision.
@@ -47,7 +47,7 @@ namespace SystemC_VPC{
      * \param [in] running_tasks A map of running tasks! Usualy only one! Component knowes this map.
      * \return Returns a scheduling_decision enum. So Component knows what he has to do.
      */
-    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,p_struct*> &ready_tasks,const map<int,p_struct*> &running_tasks)=0;
+    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,ProcessControlBlock*> &ready_tasks,const map<int,ProcessControlBlock*> &running_tasks)=0;
 
     /**
      *\brief The overhead needed to determine the scheduling descission.

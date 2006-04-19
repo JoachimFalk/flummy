@@ -40,111 +40,111 @@ namespace SystemC_VPC{
    * \brief Term represents a boolean term.
    */
   class Term{
-  public:
-    virtual bool isSatisfied(set<string> excludes)=0;
-    virtual bool stillSatisfiable(set<string> excludes){
-      return (satisfiableCounter>0);
-    }
-  protected:
-    /// counts how often this term is satisfiable
-    int satisfiableCounter;
+    public:
+      virtual bool isSatisfied(set<string> excludes)=0;
+      virtual bool stillSatisfiable(set<string> excludes){
+        return (satisfiableCounter>0);
+      }
+    protected:
+      /// counts how often this term is satisfiable
+      int satisfiableCounter;
 
   };
 
   /**
    * \brief A Literal represents the boolean value of an expression.
    *
-   * An expression contains  the p_struct of a task, the activation count for this task and
+   * An expression contains  the ProcessControlBlock of a task, the activation count for this task and
    * an activation rule. Depending to the rule the expression gets true at start (aktivation)
    * or at end of task execution.  
    */
   class Literal : public Term{
-  public:
-    Literal(p_struct &pcb, operator_type op, int activation,activation_rule rule):
-      task(pcb),operation(op),activation(activation),rule(rule)
+    public:
+      Literal(ProcessControlBlock &pcb, operator_type op, int activation,activation_rule rule):
+        task(pcb),operation(op),activation(activation),rule(rule)
       {
-  satisfiableCounter=1;
+        satisfiableCounter=1;
       }
-    virtual ~Literal(){}
-  private:
-    ///task
-    p_struct task;
+      virtual ~Literal(){}
+    private:
+      ///task
+      ProcessControlBlock task;
 
-    /// opertion in expression
-    operator_type operation;
+      /// opertion in expression
+      operator_type operation;
 
-    ///activation count
-    int activation;
+      ///activation count
+      int activation;
 
-    /// activation rule
-    activation_rule rule;
+      /// activation rule
+      activation_rule rule;
   };
 
-    /**
-     *
-     */
+  /**
+   *
+   */
   class ComplexTerm : public Term{
-  public:
-    virtual bool isSatisfied(set<string> excludes)=0;
-    virtual bool stillSatisfiable()=0;
-    void addTerm(Term *t){
-      terms.push_back(t);
-    }
-    virtual ~ComplexTerm(){}
-  protected:
-    vector<Term*> terms;
-  };
-
-
-    /**
-     *
-     */
-  class Disjunction: public ComplexTerm{
-  public:
-    Disjunction(){
-      satisfiableCounter=1;
-    }
-    bool isSatisfied(set<string> excludes){
-      satisfiableCounter--;
-      vector<Term*>::const_iterator iter=terms.begin();
-      for(;iter!=terms.end();iter++){
-  if((*iter)->isSatisfied(excludes))return true;
+    public:
+      virtual bool isSatisfied(set<string> excludes)=0;
+      virtual bool stillSatisfiable()=0;
+      void addTerm(Term *t){
+        terms.push_back(t);
       }
-      return false;
-    }
+      virtual ~ComplexTerm(){}
+    protected:
+      vector<Term*> terms;
   };
-  
-    /**
-     *
-     */
+
+
+  /**
+   *
+   */
+  class Disjunction: public ComplexTerm{
+    public:
+      Disjunction(){
+        satisfiableCounter=1;
+      }
+      bool isSatisfied(set<string> excludes){
+        satisfiableCounter--;
+        vector<Term*>::const_iterator iter=terms.begin();
+        for(;iter!=terms.end();iter++){
+          if((*iter)->isSatisfied(excludes))return true;
+        }
+        return false;
+      }
+  };
+
+  /**
+   *
+   */
   class AnyTerm : public Term{
-  public:
-    AnyTerm(const char* srule);
-    bool isSatisfied(set<string> excludes);
-  protected:
-    activation_rule rule;
+    public:
+      AnyTerm(const char* srule);
+      bool isSatisfied(set<string> excludes);
+    protected:
+      activation_rule rule;
 
   };
   /**
    *
    */
   class Constraint{
-  private:
-    set<string> excludes;
-    Term *term;
-    char name[VPC_MAX_STRING_LENGTH];
-    int count;
-    int divider;
-    double activationTime;
+    private:
+      set<string> excludes;
+      Term *term;
+      char name[VPC_MAX_STRING_LENGTH];
+      int count;
+      int divider;
+      double activationTime;
 
-  public:
-    Constraint(const char *name,  const char *count,  const char *divider);
-    void addExclude(const char *name);
-    bool isSatisfied();
-    void addAnyTerm(const char *state);
-    void getReport();
-    char* getName();
-    double getSatisfiedTime();
+    public:
+      Constraint(const char *name,  const char *count,  const char *divider);
+      void addExclude(const char *name);
+      bool isSatisfied();
+      void addAnyTerm(const char *state);
+      void getReport();
+      char* getName();
+      double getSatisfiedTime();
   };
 
 }

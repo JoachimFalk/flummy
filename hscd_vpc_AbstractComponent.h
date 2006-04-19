@@ -138,7 +138,7 @@ namespace SystemC_VPC{
        *
        * While this simulation is running SystemC simulation time is consumed.
        */
-    virtual void compute(p_struct* pcb)=0;
+    virtual void compute(ProcessControlBlock* pcb)=0;
     
     /**
      * \brief Sets next controlling instance of component
@@ -159,7 +159,7 @@ namespace SystemC_VPC{
      * finished or killed tasks.
      * \param pcb points to the finished or killed task
      */
-    virtual void notifyParentController(p_struct* pcb){
+    virtual void notifyParentController(ProcessControlBlock* pcb){
       this->parentControlUnit->signalTaskEvent(pcb);
     }
 

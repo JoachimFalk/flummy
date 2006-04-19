@@ -128,11 +128,11 @@ namespace SystemC_VPC{
       };
       
     // queue of waiting tasks to be executed
-    std::queue<p_struct* > readyTasks;
+    std::queue<ProcessControlBlock* > readyTasks;
     // map of running tasks
-    std::map<int, p_struct* > runningTasks;
+    std::map<int, ProcessControlBlock* > runningTasks;
     // queue of tasks ready to be processed
-    std::queue<p_struct* > tasksToProcess;
+    std::queue<ProcessControlBlock* > tasksToProcess;
     
     // queue containing order of configuration to be loaded in next "rounds"
     std::list<EDFListElement<Configuration* > > nextConfigurations;
@@ -150,7 +150,7 @@ namespace SystemC_VPC{
      * controller. It is used to initialize and set up all necessary data for a new "round" of
      * scheduling. 
      */
-    virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks);
+    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
           
     /**
      * \brief Returns next configuration to be loaded
@@ -171,16 +171,16 @@ namespace SystemC_VPC{
      * \brief Returns next task to be forwarded
      * This method should only be called after calling hasTaskToProcess
      * to ensure that there are still existing task to process.
-     * \return pair containing p_struct of task and requested function
+     * \return pair containing ProcessControlBlock of task and requested function
      * to be simulated.
      */
-    virtual p_struct* getNextTask();
+    virtual ProcessControlBlock* getNextTask();
 
     /**
      * \brief Used to signal finished tasks to the controller
      * \see TaskEventListener::signalTaskEvent
      */
-    virtual void signalTaskEvent(p_struct* pcb);
+    virtual void signalTaskEvent(ProcessControlBlock* pcb);
   
   };
 

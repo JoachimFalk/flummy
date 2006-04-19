@@ -16,7 +16,6 @@
  * $log$
  ******************************************************************************/
 #include <iostream>
-#include <float.h> 
 
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_AbstractComponent.h>
@@ -134,39 +133,37 @@ namespace SystemC_VPC{
     
     component_map_by_name.clear();
     
-    //clear p_structs
-    std::map<std::string, p_struct* >::iterator iter;
-    for(iter = this->p_struct_map_by_name.begin(); iter != this->p_struct_map_by_name.end(); iter++){
+    //clear ProcessControlBlocks
+    std::map<std::string, ProcessControlBlock* >::iterator iter;
+    for(iter = this->pcb_map_by_name.begin(); iter != this->pcb_map_by_name.end(); iter++){
       delete iter->second;
     }
     
-    this->p_struct_map_by_name.clear();
+    this->pcb_map_by_name.clear();
     
   }
 
-  p_struct* Director::getProcessControlBlock( const char *name ){
+  ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
     if(!FALLBACKMODE){
-      if(1!=p_struct_map_by_name.count(name)){
-  cerr << "VPC> No p_struct found for task \"" << name << "\"" << endl;
-  exit(0);
+      if(1!=pcb_map_by_name.count(name)){
+        cerr << "VPC> No ProcessControlBlock found for task \"" << name << "\"" << endl;
+        exit(0);
       }
-      return p_struct_map_by_name[name];
+      return pcb_map_by_name[name];
     }else{
-      if(1==p_struct_map_by_name.count(name)){
-  return p_struct_map_by_name[name];
+      if(1==pcb_map_by_name.count(name)){
+        return pcb_map_by_name[name];
       }else{
-  //create fallback pcb
-  p_struct *p=new p_struct;
-  p->name=name;
-  p->priority=p_struct_map_by_name.size(); 
-  p->deadline=1000;
-  p->period=2800.0;
-  p->pid=p_struct_map_by_name.size();//hack to create pid!
+        //create fallback pcb
+        ProcessControlBlock *p=new ProcessControlBlock(name);
+        p->setPriority(pcb_map_by_name.size()); 
+        p->setDeadline(1000);
+        p->setPeriod(2800.0);
+        //p->pid=pcb_map_by_name.size();//hack to create pid!
 
-  p->delay=0;
-  p_struct_map_by_name.insert(pair<string,p_struct*>(name,p));//hack to create pid!
-  assert(1==p_struct_map_by_name.count(name));
-  return p_struct_map_by_name[name]; 
+        pcb_map_by_name.insert(pair<string,ProcessControlBlock*>(name,p));
+        assert(1==pcb_map_by_name.count(name));
+        return pcb_map_by_name[name]; 
       }
     }
   }
@@ -177,15 +174,15 @@ namespace SystemC_VPC{
     std::cerr << YELLOW("Director> compute(") << WHITE(name) << YELLOW(",") << WHITE(funcname) << YELLOW(") at: ") << sc_simulation_time() << std::endl;
 #endif //VPC_DEBUG
     
-    p_struct* pcb = this->getProcessControlBlock(name);
-    pcb->funcname = funcname;
+    ProcessControlBlock* pcb = this->getProcessControlBlock(name);
+    pcb->setFuncName(funcname);
     
     if( end == NULL ){
       // prepare active mode
-      pcb->blockEvent = new VPC_Event();
+      pcb->setBlockEvent(new VPC_Event());
     }else{
       // prepare passiv mode
-      pcb->blockEvent = end;
+      pcb->setBlockEvent(end);
     }
 
     if(!FALLBACKMODE){
@@ -220,9 +217,9 @@ namespace SystemC_VPC{
     
     if( end == NULL){
       // active mode -> returns if simulated delay time has expiYELLOW (blocking compute call)
-      CoSupport::SystemC::wait(*(pcb->blockEvent));
-      delete pcb->blockEvent;
-      pcb->blockEvent = NULL;
+      CoSupport::SystemC::wait(*(pcb->getBlockEvent()));
+      delete pcb->getBlockEvent();
+      pcb->setBlockEvent(NULL);
     }
      
   }
@@ -274,24 +271,17 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of  Director::generatePCB
    */
-  p_struct* Director::generatePCB(const char* name){
+  ProcessControlBlock* Director::generatePCB(const char* name){
       
-    std::map<std::string, p_struct* >::iterator iter;
-    iter = this->p_struct_map_by_name.find(name);
-    if(iter != this->p_struct_map_by_name.end()){
+    std::map<std::string, ProcessControlBlock* >::iterator iter;
+    iter = this->pcb_map_by_name.find(name);
+    if(iter != this->pcb_map_by_name.end()){
       return iter->second;  
     }
       
-    p_struct* newPCB = new p_struct();
-    newPCB->name = name;
-    newPCB->pid = this->p_struct_map_by_name.size(); // just enumerate to get unique pid
-    newPCB->activation_count = 0; //default
-    newPCB->state = inaktiv;      //default
-    newPCB->priority = 0;         //default
-    newPCB->deadline = DBL_MAX; //default
-    newPCB->period = DBL_MAX;   //default
+    ProcessControlBlock* newPCB = new ProcessControlBlock(name);
     
-    this->p_struct_map_by_name.insert(std::pair<std::string, p_struct* >(name, newPCB));
+    this->pcb_map_by_name.insert(std::pair<std::string, ProcessControlBlock* >(name, newPCB));
       
     return newPCB;
       
@@ -300,25 +290,25 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::notifyTaskEvent
    */
-  void Director::signalTaskEvent(p_struct* pcb){
-    
+  void Director::signalTaskEvent(ProcessControlBlock* pcb){
+
 #ifdef VPC_DEBUG
-    std::cerr << "Director> got notified from: " << pcb->name << std::endl;
+    std::cerr << "Director> got notified from: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
-    if(pcb->state != activation_state(aborted)){
+    if(pcb->getState() != activation_state(aborted)){
 #ifdef VPC_DEBUG
-      std::cerr << "Director> task successful finished: " << pcb->name << std::endl;
+      std::cerr << "Director> task successful finished: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
-      pcb->blockEvent->notify();
+      pcb->getBlockEvent()->notify();
       // remember last acknowledged task time
       this->end = sc_simulation_time();
 
     }else{
 #ifdef VPC_DEBUG
-    std::cerr << "Director> re-compute: " << pcb->name << std::endl;
+      std::cerr << "Director> re-compute: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
       // get Component
-      AbstractComponent* comp = mapping_map_by_name[pcb->name];
+      AbstractComponent* comp = mapping_map_by_name[pcb->getName()];
       comp->compute(pcb);
     }
     wait(SC_ZERO_TIME);

@@ -8,6 +8,8 @@
 //#include <cosupport/systemc_support.hpp>
 #include <systemc_support.hpp>
 
+#include "hscd_vpc_ProcessControlBlock.h"
+
 namespace SystemC_VPC {
 #define VPC_MAX_STRING_LENGTH 128
 #define STR_ROUNDROBIN "RoundRobin"
@@ -74,74 +76,25 @@ typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
  
 
   using std::string;
-  
-  enum activation_state {inaktiv, 
-               starting,
-               aktiv,
-               ending,
-               aborted
-               };
 
-  typedef char trace_value;
 #define S_BLOCKED 'b'
 #define S_READY   'w'
 #define S_RUNNING 'R'
 
   //enum trace_value {blocked,ready,running};
 
-
-  struct p_struct {
-    /* p_struct(const p_struct& p){
-      cerr<< VPC_ERROR<< "copy constructor: p_struct(const p_struct& p)"<< NORMAL<<endl;
-      pid=p.pid;
-      name=p.name;
-      interupt=p.interupt;
-      delay=p.delay;
-      remaining_delay =p.remaining_delay;
-      priority=p.priority;
-      period=p.period;
-      deadline=p.deadline;
-      activation_count=p.activation_count;
-      state=p.state;
-    }
-    p_struct(){
-      cerr<< VPC_ERROR<< "constructor: p_struct()"<< NORMAL<<endl;
-      }*/
-    string name;
-    const char* funcname;
-    int pid;
-    sc_event* interupt;
-    CoSupport::SystemC::Event* blockEvent;
-    double delay;
-    double remainingDelay;
-    int priority;
-    double period;
-    double deadline;
-    int activation_count;
-    activation_state state;
-    sc_signal<trace_value> *traceSignal;
-    /*
-     * Replaced by new version to enable multiple
-     * delays for different components on different 
-     * functions
-      map<string,double>  functionDelays;
-    */
-    std::map<std::string, std::map<std::string, double> > compDelays;
-    
-  };
-
-
+/*
   struct p_queue_entry{
     int fifo_order;  // sekund?rstrategie
-    p_struct *pcb;
+    ProcessControlBlock *pcb;
   };
   
   struct p_queue_compare{
     bool operator()(const p_queue_entry& pqe1,
         const p_queue_entry& pqe2) const
     {
-      int p1=pqe1.pcb->priority;
-      int p2=pqe2.pcb->priority;
+      int p1=pqe1.pcb->getPriority();
+      int p2=pqe2.pcb->getPriority();
       if (p1 > p2)
   return true;
       else if(p1 == p2)
@@ -156,8 +109,8 @@ typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
     bool operator()(const p_queue_entry& pqe1,
         const p_queue_entry& pqe2) const
     {
-      double p1=pqe1.pcb->priority/pqe1.pcb->period;
-      double p2=pqe2.pcb->priority/pqe2.pcb->period;
+      double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
+      double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
       if (p1 > p2)
   return true;
       else if(p1 == p2)
@@ -167,19 +120,13 @@ typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
     }
     
   };
-
-
-
+*/
   enum action_command { ASSIGN,RESIGN,BLOCK,READY};
 
   typedef struct{
     int target_pid;
     action_command command;
   }action_struct;
-
-
-
-
 
 } // namespace SystemC_VPC
 #endif

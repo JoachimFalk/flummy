@@ -102,7 +102,7 @@ namespace SystemC_VPC{
      * \param task specifies the task to get component for
      * \return pointer to AbstractComponent refering to mapped component
      */
-    virtual AbstractComponent* getMappedComponent(p_struct* task);
+    virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task);
     
     /**
      * \brief Used to set controller specific values

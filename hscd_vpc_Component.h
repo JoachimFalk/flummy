@@ -105,10 +105,10 @@ namespace SystemC_VPC{
     }
        
     /**
-     * \brief An implementation of AbstractComponent::compute(p_struct* , const char *).
+     * \brief An implementation of AbstractComponent::compute(ProcessControlBlock* , const char *).
      */
-    virtual void compute( p_struct* pcb){
-      this->compute(pcb->name.c_str(), pcb->funcname, pcb->blockEvent);
+    virtual void compute( ProcessControlBlock* pcb){
+      this->compute(pcb->getName().c_str(), pcb->getFuncName(), pcb->getBlockEvent());
     }
 
   };
@@ -119,7 +119,7 @@ namespace SystemC_VPC{
 
   protected:
 
-    //virtual void compute(p_struct *actualTask);
+    //virtual void compute(ProcessControlBlock *actualTask);
     virtual void schedule_thread(); 
 
   private:
@@ -127,9 +127,9 @@ namespace SystemC_VPC{
     sc_trace_file *traceFile;
     map<std::string,sc_signal<trace_value>*> trace_map_by_name;
     Scheduler *scheduler;
-    deque<p_struct*>      newTasks;
+    deque<ProcessControlBlock*>      newTasks;
     //    map<int,action_struct> *open_commands;
-    map<int,p_struct*> readyTasks,runningTasks;
+    map<int,ProcessControlBlock*> readyTasks,runningTasks;
     
     sc_event notify_scheduler_thread;
     //deque<VPC_Event*> events;
@@ -197,19 +197,19 @@ namespace SystemC_VPC{
     #ifndef NO_VCD_TRACES
           sc_trace(this->traceFile,schedulerTrace,schedulername);
     #endif //NO_VCD_TRACES      
-    
-      /**************************/
-        /*  EXTENSION SECTION     */
+
           /**************************/
-      if(!this->activ){
+          /*  EXTENSION SECTION     */
+          /**************************/
+          if(!this->activ){
 #ifdef VPC_DEBUG
-        std::cerr << GREEN(this->basename() << "> Activating") << std::endl;
+            std::cerr << GREEN(this->basename() << "> Activating") << std::endl;
 #endif //VPC_DEBUG
-        this->setActiv(true);
-      }
-      /**************************/
-      /*  END OF EXTENSION      */
-      /**************************/
+            this->setActiv(true);
+          }
+          /**************************/
+          /*  END OF EXTENSION      */
+          /**************************/
     }
       
     virtual ~Component(){}
@@ -242,9 +242,9 @@ namespace SystemC_VPC{
     virtual void resume();
 
     /**
-     * \brief An implementation of AbstractComponent::compute(p_struct* , const char *).
+     * \brief An implementation of AbstractComponent::compute(ProcessControlBlock* , const char *).
      */
-    virtual void compute(p_struct* pcb);
+    virtual void compute(ProcessControlBlock* pcb);
 
   private:
 

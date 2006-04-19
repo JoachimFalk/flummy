@@ -40,14 +40,14 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of PreempetivController::addTasksToSchedule
    */
-  void RoundRobinController::addTasksToSchedule(std::deque<p_struct* >& newTasks){
+  void RoundRobinController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
     
-    p_struct* currTask = NULL;
+    ProcessControlBlock* currTask = NULL;
     
     // add all tasks to running ones and processing list
     while(newTasks.size() > 0){
@@ -58,7 +58,7 @@ namespace SystemC_VPC{
       newTasks.pop_front();
       
       // determine if new configuration has to be added to scheduling list
-      std::string confid = this->mapping_map_configs[currTask->name];
+      std::string confid = this->mapping_map_configs[currTask->getName()];
       Configuration* reqConf = this->getManagedComponent()->getConfiguration(confid.c_str());
     
       std::deque<RRElement>::iterator  iter;
@@ -140,9 +140,9 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of RoundRobinController::getNextTask()
    */
-  p_struct* RoundRobinController::getNextTask(){
+  ProcessControlBlock* RoundRobinController::getNextTask(){
      
-     p_struct* task;
+     ProcessControlBlock* task;
      task = this->tasksToProcess.front();
      this->tasksToProcess.pop();
      return task;
@@ -152,17 +152,17 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of RoundRobinController::signalTaskEvent
    */
-  void RoundRobinController::signalTaskEvent(p_struct* pcb){
+  void RoundRobinController::signalTaskEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
-    std::cerr << "RoundRobinController " << this->getName() << "> got notified by task: " << pcb->name << std::endl;
+    std::cerr << "RoundRobinController " << this->getName() << "> got notified by task: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
     
     // remove running task out of registry
     this->updateUsedConfigurations(pcb);
     
     // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->state == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
+    if(pcb->getState() == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
       // recompute
       this->getManagedComponent()->compute(pcb);
     }else{
@@ -170,8 +170,8 @@ namespace SystemC_VPC{
     }
         
 #ifdef VPC_DEBUG
-    if(pcb->state == activation_state(aborted)){
-      std::cerr << YELLOW("RoundRobinController> task: " << pcb->name << " got killed!")  << std::endl;
+    if(pcb->getState() == activation_state(aborted)){
+      std::cerr << YELLOW("RoundRobinController> task: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
       
@@ -189,10 +189,10 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of RoundRobinController::signalTaskEvent
    */  
-  void RoundRobinController::updateUsedConfigurations(p_struct* pcb){
+  void RoundRobinController::updateUsedConfigurations(ProcessControlBlock* pcb){
     
     std::deque<RRElement>::iterator iter;
-    std::string confid = this->mapping_map_configs[pcb->name];
+    std::string confid = this->mapping_map_configs[pcb->getName()];
     Configuration* conf = this->getManagedComponent()->getConfiguration(confid.c_str());
     
     // update management structure

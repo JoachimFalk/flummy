@@ -40,12 +40,12 @@ namespace SystemC_VPC{
   void PriorityScheduler::setProperty(char* key, char* value){
   }
 
-  bool PriorityScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
+  bool PriorityScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
      return false;
   }
   /**
    *
-   */  void PriorityScheduler::addedNewTask(p_struct *pcb){
+   */  void PriorityScheduler::addedNewTask(ProcessControlBlock *pcb){
     p_queue_entry pqe;
     pqe.fifo_order=order_counter++;
     pqe.pcb=pcb;
@@ -53,39 +53,39 @@ namespace SystemC_VPC{
   }
   /**
    *
-   */  void PriorityScheduler::removedTask(p_struct *pcb){
+   */  void PriorityScheduler::removedTask(ProcessControlBlock *pcb){
   }
 
   /**
    *
    */
-  scheduling_decision PriorityScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,p_struct*> &ready_tasks,const  map<int,p_struct*> &running_tasks){
-    scheduling_decision ret_decision=ONLY_ASSIGN;
-    if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
-    p_queue_entry prior_ready=pqueue.top();  // höchste priorität der ready tasks
-    double d_prior_ready=prior_ready.pcb->priority;  // wert der priorität
-    task_to_assign=prior_ready.pcb->pid;
+   scheduling_decision PriorityScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
+     scheduling_decision ret_decision=ONLY_ASSIGN;
+     if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
+     p_queue_entry prior_ready=pqueue.top();  // höchste priorität der ready tasks
+     double d_prior_ready=prior_ready.pcb->getPriority();  // wert der priorität
+     task_to_assign=prior_ready.pcb->getPID();
 
 
-    if(running_tasks.size()!=0){  // läuft noch einer ?
-      map<int,p_struct*>::const_iterator iter;
-      iter=running_tasks.begin();
-      p_struct *pcb=iter->second;
-      if(pcb->priority <= d_prior_ready){             //laufender mit höherer oder gleicher priorität ->
-  ret_decision=NOCHANGE;                       //nicht verdrängen
-      }else{
-  ret_decision=PREEMPT;                        //verdrängen
-  task_to_resign=pcb->pid; 
-  pqueue.pop();
-  p_queue_entry pqe={0,pcb};
-  pqueue.push(pqe);
-      }
-    }else{
-      pqueue.pop();
-      ret_decision=ONLY_ASSIGN;  
-    }
+     if(running_tasks.size()!=0){  // läuft noch einer ?
+       map<int,ProcessControlBlock*>::const_iterator iter;
+       iter=running_tasks.begin();
+       ProcessControlBlock *pcb=iter->second;
+       if(pcb->getPriority() <= d_prior_ready){             //laufender mit höherer oder gleicher priorität ->
+         ret_decision=NOCHANGE;                       //nicht verdrängen
+       }else{
+         ret_decision=PREEMPT;                        //verdrängen
+         task_to_resign=pcb->getPID(); 
+         pqueue.pop();
+         p_queue_entry pqe={0,pcb};
+         pqueue.push(pqe);
+       }
+     }else{
+       pqueue.pop();
+       ret_decision=ONLY_ASSIGN;  
+     }
 
-   
-    return ret_decision;
-  }
+
+     return ret_decision;
+   }
 }

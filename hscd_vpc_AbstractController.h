@@ -66,7 +66,7 @@ namespace SystemC_VPC{
      * controller. It is used to initialize and set up all necessary data for a new "round" of
      * scheduling. 
      */
-    virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks)=0;
+    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks)=0;
      
     /**
      * \brief Returns next configuration to be loaded
@@ -82,7 +82,7 @@ namespace SystemC_VPC{
      * \param task specifies the task to get component for
      * \return pointer to AbstractComponent refering to mapped component
      */
-    virtual AbstractComponent* getMappedComponent(p_struct* task)=0;
+    virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task)=0;
       
     /**
      * \brief Indicates if controller still can forward tasks
@@ -94,10 +94,10 @@ namespace SystemC_VPC{
      * \brief Returns next task to be forwarded
      * This method should only be called after calling hasTaskToProcess
      * to ensure that there are still existing task to process.
-     * \return pair containing p_struct of task and requested function
+     * \return pair containing ProcessControlBlock of task and requested function
      * to be simulated.
      */
-    virtual p_struct* getNextTask()=0;
+    virtual ProcessControlBlock* getNextTask()=0;
     
     /**
      * \brief Setter to specify if controller should use "kill" by preemption
@@ -112,7 +112,7 @@ namespace SystemC_VPC{
     /**
      * \brief Callback Mehtode used to inform Controller about task state
      */
-    virtual void signalTaskEvent(p_struct* pcb)=0;
+    virtual void signalTaskEvent(ProcessControlBlock* pcb)=0;
     
     /**
      * \brief Signals to controller that managed component has been preempted.

@@ -172,7 +172,7 @@ namespace SystemC_VPC{
       
       // delegate all processable tasks
       // points to currently viewed task to delegate
-      p_struct* currTask;
+      ProcessControlBlock* currTask;
       // points to component to delegate task to
       AbstractComponent* currComp;
       
@@ -181,7 +181,7 @@ namespace SystemC_VPC{
         currTask = this->controller->getNextTask();
         
 #ifdef VPC_DEBUG
-        std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> still task to forward: ") << currTask->name << " at "  << sc_simulation_time() << endl;
+        std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> still task to forward: ") << currTask->getName() << " at "  << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
 
@@ -423,8 +423,8 @@ namespace SystemC_VPC{
   void ReconfigurableComponent::compute( const char* name, const char* funcname, VPC_Event* end){
     
     // send compute request to controller
-    p_struct* pcb = Director::getInstance().getProcessControlBlock(name);
-    pcb->blockEvent = end;
+    ProcessControlBlock* pcb = Director::getInstance().getProcessControlBlock(name);
+    pcb->setBlockEvent(end);
     this->compute(pcb);
 
   }
@@ -439,9 +439,9 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief An implementation of AbstractComponent::compute(p_struct*, const char *).
+   * \brief An implementation of AbstractComponent::compute(ProcessControlBlock*, const char *).
    */
-  void ReconfigurableComponent::compute(p_struct* pcb){
+  void ReconfigurableComponent::compute(ProcessControlBlock* pcb){
     
     this->newTasks.push_back(pcb);
     

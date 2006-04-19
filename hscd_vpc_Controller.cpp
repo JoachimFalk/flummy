@@ -126,12 +126,12 @@ namespace SystemC_VPC{
   /**
     * \brief Implementation of Controller::getMappedComponent
     */
-  AbstractComponent* Controller::getMappedComponent(p_struct* task){
+  AbstractComponent* Controller::getMappedComponent(ProcessControlBlock* task){
      // determine requied configuration
-    std::string configName = this->mapping_map_configs[task->name];
+    std::string configName = this->mapping_map_configs[task->getName()];
     Configuration* conf = this->managedComponent->getConfiguration(configName.c_str());
     // get mapped component from configuration
-    AbstractComponent* comp = conf->getComponent((this->mapping_map_component_ids[task->name]).c_str());
+    AbstractComponent* comp = conf->getComponent((this->mapping_map_component_ids[task->getName()]).c_str());
     
     return comp;
     

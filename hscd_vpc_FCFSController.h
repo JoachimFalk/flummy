@@ -25,11 +25,11 @@ namespace SystemC_VPC{
   private:
    
     // queue of waiting tasks to be executed
-    std::deque<p_struct* > readyTasks;
+    std::deque<ProcessControlBlock* > readyTasks;
     // map of running tasks
-    std::map<int, p_struct* > runningTasks;
+    std::map<int, ProcessControlBlock* > runningTasks;
     // queue of tasks ready to be processed
-    std::queue<p_struct* > tasksToProcess;
+    std::queue<ProcessControlBlock* > tasksToProcess;
     
     // pointer to next configuration to be loaded
     Configuration* nextConfiguration;
@@ -47,7 +47,7 @@ namespace SystemC_VPC{
       * controller. It is used to initialize and set up all necessary data for a new "round" of
       * scheduling. 
       */
-    virtual void addTasksToSchedule(std::deque<p_struct* >& newTasks);
+    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
           
     /**
      * \brief Returns next configuration to be loaded
@@ -68,10 +68,10 @@ namespace SystemC_VPC{
      * \brief Returns next task to be forwarded
      * This method should only be called after calling hasTaskToProcess
      * to ensure that there are still existing task to process.
-     * \return pair containing p_struct of task and requested function
+     * \return pair containing ProcessControlBlock of task and requested function
      * to be simulated.
      */
-    virtual p_struct* getNextTask();
+    virtual ProcessControlBlock* getNextTask();
       
     /**
      * \brief Signals if a configuration has to be reactived by controlled component
@@ -82,7 +82,7 @@ namespace SystemC_VPC{
     /**
      * \see TaskEventListener
      */
-    virtual void signalTaskEvent(p_struct* pcb);
+    virtual void signalTaskEvent(ProcessControlBlock* pcb);
     
     /**
      * \brief Signals always true as configuration is only switched if all task have finished

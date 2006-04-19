@@ -172,20 +172,23 @@ namespace SystemC_VPC{
      * \brief Initialize a component from the configuration file
      * \return pointer to the initialized component
      */
-    AbstractComponent* initComponent(DOMNode* node) throw(InvalidArgumentException);
+    //AbstractComponent* initComponent(DOMNode* node) throw(InvalidArgumentException);
+    AbstractComponent* initComponent() throw(InvalidArgumentException);
     
     /**
      * \brief initializes specified templates
      * \param tid specifies the id for an template
      * \param specifies the current position within dom tree
      */
-    void initTemplateSpecifications(char* tid, DOMNode* node);
+    //void initTemplateSpecifications(char* tid, DOMNode* node);
+    void initTemplateSpecifications(char* tid);
     
     /**
      * \brief Performs initialization of attribute values for a component
      * \param comp specifies the component to set attributes for
      */
-    void initCompAttributes(AbstractComponent* comp, DOMNode* node);
+    //void initCompAttributes(AbstractComponent* comp, DOMNode* node);
+    void initCompAttributes(AbstractComponent* comp);
     
     /**
      * \brief Initializes the Configurations of an ReconfigurableComponent
@@ -194,7 +197,8 @@ namespace SystemC_VPC{
      * \param comp represents the component for which to initialize the configurations
      * \param node specifies current position within dom tree
      */
-    void initConfigurations(ReconfigurableComponent* comp, DOMNode* node);
+    //void initConfigurations(ReconfigurableComponent* comp, DOMNode* node);
+    void initConfigurations(ReconfigurableComponent* comp);
     
     /**
      * \brief Initializes one Configuration of an ReconfigurableComponent
@@ -203,7 +207,8 @@ namespace SystemC_VPC{
      * \param comp represents the component for which to initialize the configurations
      * \param node specifies current postion within dom tree
      */
-    void initConfiguration(ReconfigurableComponent* comp, Configuration* conf, DOMNode* node);
+    //void initConfiguration(ReconfigurableComponent* comp, Configuration* conf, DOMNode* node);
+    void initConfiguration(ReconfigurableComponent* comp, Configuration* conf);
     
     /**
      * \brief Initializes the Configuration switch times for a component
@@ -221,16 +226,17 @@ namespace SystemC_VPC{
     void applyTemplateOnComponent(AbstractComponent* comp, std::string key);
     
     /**
-     * \brief Interprets template for setting up parameter for a given p_struct
-     * \param p represents the p_struct to be updated
+     * \brief Interprets template for setting up parameter for a given ProcessControlBlock
+     * \param p represents the ProcessControlBlock to be updated
      * \param target specifies the target of mapping
      * \param key references the key of the template to apply
      */
-    void applyTemplateOnPStruct(p_struct* p, const char* target, std::string key);
+    void applyTemplateOnPStruct(ProcessControlBlock* p, const char* target, std::string key);
     
     /**
      * \brief Initializes mapping between tasks and components
      */
+    //void initMappingAPStruct(DOMNode* node);
     void initMappingAPStruct();
 
     /**

@@ -66,6 +66,7 @@ pkginclude_HEADERS =				\
 	hscd_vpc_Director.h                     \
 	hscd_vpc_TaskEventListener.h		\
 	hscd_vpc_Director.h			\
+	hscd_vpc_ProcessControlBlock.h		\
 	hscd_vpc_IPreemptable.h
 
 #noinst_HEADERS=	oneof.hpp
@@ -103,7 +104,9 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_RoundRobinController.cpp	\
 	hscd_vpc_ReconfigurableComponent.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
-	hscd_vpc_Term.cpp
+	hscd_vpc_ProcessControlBlock.cpp	\
+	hscd_vpc_Term.cpp			
+#	hscd_vpc_PCBPool.cpp			
 #	hscd_vpc_SchedulerProxy.cpp		
 
 

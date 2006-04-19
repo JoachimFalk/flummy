@@ -29,7 +29,7 @@
 
 namespace SystemC_VPC{
 
-  struct p_struct;
+  class ProcessControlBlock;
   
   class Constraint;
 
@@ -55,8 +55,8 @@ namespace SystemC_VPC{
     
     //map<int,AbstractComponent*> mapping_map_by_pid;
     map<std::string, AbstractComponent*> mapping_map_by_name;
-    map<std::string,p_struct*> p_struct_map_by_name;
-    //map<int,p_struct> p_struct_map_by_pid;
+    map<std::string,ProcessControlBlock*> pcb_map_by_name;
+    //map<int,ProcessControlBlock> pcb_map_by_pid;
 
     vector<Constraint*> constraints;
 
@@ -79,16 +79,16 @@ namespace SystemC_VPC{
      Director& Director::getResource( const char* name);
      
     /**
-     * \brief Get the process controll block used within SystemC-VPC Modell.
+     * \brief Get the process control block used within SystemC-VPC Modell.
      */
-    p_struct* getProcessControlBlock( const char *name );
-    //  p_struct& getProcessControlBlock(int process);
+    ProcessControlBlock* getProcessControlBlock( const char *name );
+    //  ProcessControlBlock& getProcessControlBlock(int process);
 
     /**
      *
      */
-    map<std::string,p_struct*>& getPcbMap(){
-      return p_struct_map_by_name;
+    map<std::string,ProcessControlBlock*>& getPcbMap(){
+      return pcb_map_by_name;
     }
 
     /**
@@ -156,12 +156,12 @@ namespace SystemC_VPC{
      * Generates a new PCB or returns a already registered one
      * form the Director.
      * \param name specifies name of actor/task/process for PCB
-     * \return p_struct representing default initialized 
+     * \return ProcessControlBlock representing default initialized 
      * PCB for given task;
      */
-    p_struct* generatePCB(const char* name);
+    ProcessControlBlock* generatePCB(const char* name);
     
-    void signalTaskEvent(p_struct* pcb);
+    void signalTaskEvent(ProcessControlBlock* pcb);
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;

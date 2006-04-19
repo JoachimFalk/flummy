@@ -19,7 +19,7 @@ namespace SystemC_VPC{
    */ 
   class ReconfigurableComponent : public AbstractComponent {
 
-    //virtual void compute(p_struct *actualTask);
+    //virtual void compute(ProcessControlBlock *actualTask);
     
   private:
     
@@ -37,7 +37,7 @@ namespace SystemC_VPC{
     Configuration* activConfiguration;
     
     // queue containing new task to be added
-    std::deque<p_struct* > newTasks;
+    std::deque<ProcessControlBlock* > newTasks;
     
     // used to notify new tasks to the component
     sc_event notify_schedule_thread;
@@ -86,11 +86,11 @@ namespace SystemC_VPC{
     virtual void compute( const char *name, VPC_Event *end=NULL);
     
     /**
-     * \brief An implementation of AbstractComponent::compute(p_struct*).
+     * \brief An implementation of AbstractComponent::compute(ProcessControlBlock*).
      * Main entry point for new task to be simulated on the given instance.
      * \param pcb refers to the control structure of the task
      */
-    virtual void compute(p_struct* pcb);
+    virtual void compute(ProcessControlBlock* pcb);
     
     /**
      * \brief Used to create the Tracefiles.
