@@ -185,7 +185,13 @@ namespace SystemC_VPC {
       DelayMapper* dmapper;
 
     public:
-
+      
+      /**
+       * \brief Default constructor of an PCB instance
+       * \param name specifies the identifying name of the instance
+       */
+      ProcessControlBlock();
+      
       /**
        * \brief Default constructor of an PCB instance
        * \param name specifies the identifying name of the instance

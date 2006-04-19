@@ -25,6 +25,8 @@
 #include <systemc.h>
 #include <map>
 
+//#include "hscd_vpc_PCBPool.h"
+
 namespace SystemC_VPC{
 
   
@@ -145,12 +147,27 @@ namespace SystemC_VPC{
 
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
     if(!FALLBACKMODE){
+      
+      return this->pcbPool.allocate(name);
+      /*
       if(1!=pcb_map_by_name.count(name)){
         cerr << "VPC> No ProcessControlBlock found for task \"" << name << "\"" << endl;
         exit(0);
       }
       return pcb_map_by_name[name];
+      */
     }else{
+
+      try{
+        return this->pcbPool.allocate(name);
+      }catch(NotAllocatedException& e){
+        ProcessControlBlock& p = this->pcbPool.registerPCB(name);
+        p.setPriority(pcb_map_by_name.size()); 
+        p.setDeadline(1000);
+        p.setPeriod(2800.0);
+        return this->pcbPool.allocate(name);
+      }
+      /*
       if(1==pcb_map_by_name.count(name)){
         return pcb_map_by_name[name];
       }else{
@@ -165,6 +182,7 @@ namespace SystemC_VPC{
         assert(1==pcb_map_by_name.count(name));
         return pcb_map_by_name[name]; 
       }
+      */
     }
   }
 
@@ -176,10 +194,12 @@ namespace SystemC_VPC{
     
     ProcessControlBlock* pcb = this->getProcessControlBlock(name);
     pcb->setFuncName(funcname);
+    int lockid = -1;
     
     if( end == NULL ){
       // prepare active mode
       pcb->setBlockEvent(new VPC_Event());
+      lockid = this->pcbPool.lock(pcb);
     }else{
       // prepare passiv mode
       pcb->setBlockEvent(end);
@@ -220,6 +240,10 @@ namespace SystemC_VPC{
       CoSupport::SystemC::wait(*(pcb->getBlockEvent()));
       delete pcb->getBlockEvent();
       pcb->setBlockEvent(NULL);
+      // as psb has been locked -> unlock it
+      this->pcbPool.unlock(pcb->getName(), lockid);
+      // and free it
+      this->pcbPool.free(pcb);
     }
      
   }
@@ -271,9 +295,13 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of  Director::generatePCB
    */
-  ProcessControlBlock* Director::generatePCB(const char* name){
-      
-    std::map<std::string, ProcessControlBlock* >::iterator iter;
+  
+  ProcessControlBlock& Director::generatePCB(const char* name){
+    
+    ProcessControlBlock& pcb = this->pcbPool.registerPCB(name);
+    pcb.setName(name);
+    return pcb;
+  /*  
     iter = this->pcb_map_by_name.find(name);
     if(iter != this->pcb_map_by_name.end()){
       return iter->second;  
@@ -284,9 +312,15 @@ namespace SystemC_VPC{
     this->pcb_map_by_name.insert(std::pair<std::string, ProcessControlBlock* >(name, newPCB));
       
     return newPCB;
-      
+    */  
   }
-    
+/*
+  void Director::registerPCB(const char* name, ProcessControlBlock* pcb){
+
+    this->pcbPool.registerPCB(name, pcb);
+  
+  }
+  */  
   /**
    * \brief Implementation of Director::notifyTaskEvent
    */
@@ -302,7 +336,9 @@ namespace SystemC_VPC{
       pcb->getBlockEvent()->notify();
       // remember last acknowledged task time
       this->end = sc_simulation_time();
-
+      
+      // free allocated pcb
+      this->pcbPool.free(pcb);
     }else{
 #ifdef VPC_DEBUG
       std::cerr << "Director> re-compute: " << pcb->getName() << std::endl;

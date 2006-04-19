@@ -26,11 +26,12 @@
 #include <map.h>
 #include <vector.h>
 
+#include "hscd_vpc_PCBPool.h"
 
 namespace SystemC_VPC{
 
   class ProcessControlBlock;
-  
+//  class PCBPool;  
   class Constraint;
 
   /**
@@ -57,6 +58,7 @@ namespace SystemC_VPC{
     map<std::string, AbstractComponent*> mapping_map_by_name;
     map<std::string,ProcessControlBlock*> pcb_map_by_name;
     //map<int,ProcessControlBlock> pcb_map_by_pid;
+    PCBPool pcbPool;
 
     vector<Constraint*> constraints;
 
@@ -157,10 +159,12 @@ namespace SystemC_VPC{
      * form the Director.
      * \param name specifies name of actor/task/process for PCB
      * \return ProcessControlBlock representing default initialized 
-     * PCB for given task;
+     * PCB for given task or if PCB already exists the initialized one;
      */
-    ProcessControlBlock* generatePCB(const char* name);
+    ProcessControlBlock& generatePCB(const char* name);
     
+    //void registerPCB(const char* name, ProcessControlBlock* pcb);
+
     void signalTaskEvent(ProcessControlBlock* pcb);
 
     void setResultFile(std::string vpc_result_file){

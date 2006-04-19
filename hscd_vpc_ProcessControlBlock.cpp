@@ -110,6 +110,10 @@ namespace SystemC_VPC{
   }
 
 
+  ProcessControlBlock::ProcessControlBlock(): name("NN"){
+    this->init();
+  }
+  
   ProcessControlBlock::ProcessControlBlock(std::string name): name(name){
     this->init();
   }

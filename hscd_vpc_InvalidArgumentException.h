@@ -10,17 +10,17 @@ namespace SystemC_VPC{
   
   private:
   
-    string msg;
+    std::string msg;
     
   public:
   
-    InvalidArgumentException(const string& message) : msg(message){
+    InvalidArgumentException(const std::string& message) : msg(message){
       
     }
     
     ~InvalidArgumentException() throw(){}
     
-    const string& what(){
+    const std::string& what(){
       
       return this->msg;
       

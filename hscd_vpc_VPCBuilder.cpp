@@ -692,7 +692,7 @@ namespace SystemC_VPC{
           (iterComp->second)->informAboutMapping(sSource);
           
           //generate new ProcessControlBlock or get existing one for initialization
-          ProcessControlBlock *p = this->director->generatePCB(sSource);
+          ProcessControlBlock& p = this->director->generatePCB(sSource);
             
           //walk down hierarchy to attributes
           DOMNode* attnode = node->getFirstChild();
@@ -719,20 +719,20 @@ namespace SystemC_VPC{
               if( 0 == strncmp(sType, STR_VPC_PRIORITY, sizeof(STR_VPC_PRIORITY) )){
                 int priority = 0;
                 sscanf(sValue, "%d", &priority);
-                p->setPriority(priority);
+                p.setPriority(priority);
               }else if( 0 == strncmp(sType, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
                 double deadline = 0;
                 sscanf(sValue, "%lf", &deadline);
-                p->setDeadline(deadline);
+                p.setDeadline(deadline);
               }else if( 0 == strncmp(sType, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
                 double period = 0;
                 sscanf(sValue, "%lf", &period);
-                p->setPeriod(period);
+                p.setPeriod(period);
               }else if( 0 == strncmp(sType, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
                 double delay = 0;
                 sscanf(sValue, "%lf", &delay);
-                p->setDelay(delay);
-                p->addFuncDelay(sTarget, NULL, delay);
+                p.setDelay(delay);
+                p.addFuncDelay(sTarget, NULL, delay);
               }else{
 #ifdef VPC_DEBUG
                 std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << sType << " value=" << sValue << endl; 
@@ -748,7 +748,7 @@ namespace SystemC_VPC{
                   std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
                   std::cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
-                  p->addFuncDelay(sTarget, sType, delay);
+                  p.addFuncDelay(sTarget, sType, delay);
                   /*
                   std::map<std::string, double> funcDelays = p->compDelays[sTarget];
                   funcDelays.insert(std::pair<std::string, double>(sType, delay));
@@ -769,13 +769,13 @@ namespace SystemC_VPC{
 
               char* sKey;
               sKey = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-              this->applyTemplateOnPStruct(p, sTarget, std::string(sKey, strlen(sKey)));
+              this->applyTemplateOnPStruct(&p, sTarget, std::string(sKey, strlen(sKey)));
               XMLString::release(&sKey);
               
             }
 
           }
-
+          
           // node = vpcConfigTreeWalker->parentNode();
           
           //check if component member of a configuration and iterativly adding mapping info
