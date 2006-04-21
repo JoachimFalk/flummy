@@ -98,15 +98,15 @@ namespace SystemC_VPC{
    */
   bool AnyTerm::isSatisfied(set<string> excludes){
     if(satisfiableCounter!=0){
-      map<string,ProcessControlBlock*> pcb_map =  Director::getInstance().getPcbMap();
-      map<string,ProcessControlBlock*>::const_iterator iter;
-      for(iter=pcb_map.begin();iter!=pcb_map.end(); iter++){
-        ProcessControlBlock *pcb=(iter->second);
-        if(0==excludes.count(pcb->getName())){
-          if((rule==start && pcb->getState()==starting)){
+      PCBIterator iter = Director::getInstance().getPCBPool().getPCBIterator();
+
+      while(iter.hasNext()){
+        const ProcessControlBlock& pcb= iter.getNext();
+        if(0==excludes.count(pcb.getName())){
+          if((rule==start && pcb.getState()==starting)){
             satisfiableCounter=0;
             return true;
-          }else if((rule==end && pcb->getState()==ending)){
+          }else if((rule==end && pcb.getState()==ending)){
             return true;
           }
         }

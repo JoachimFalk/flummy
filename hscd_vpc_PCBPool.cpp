@@ -2,6 +2,99 @@
 
 namespace SystemC_VPC {
 
+  PCBPool::TypePool::InstanceIterator::InstanceIterator(PCBPool::TypePool* pool) : pool(pool) {
+  
+    this->pool = pool;
+    
+    if(this->pool->freePCB.size() > 0){
+      this->state = PCBPool::TypePool::InstanceIterator::pos_free;
+      this->iter = pool->freePCB.begin();
+    }else
+      if(this->pool->usedPCB.size() > 0){
+        this->state = PCBPool::TypePool::InstanceIterator::pos_used;
+        this->iter = pool->usedPCB.begin();
+    }else
+      if(this->pool->lockedPCB.size() > 0){
+        this->state = PCBPool::TypePool::InstanceIterator::pos_locked;
+        this->iter = this->pool->lockedPCB.begin();
+    }else{
+      this->state = PCBPool::TypePool::InstanceIterator::pos_end;
+    }
+    
+  }
+  
+  bool PCBPool::TypePool::InstanceIterator::hasNext() {
+    
+    switch(this->state){
+      case PCBPool::TypePool::InstanceIterator::pos_free:
+        if(this->iter != this->pool->freePCB.end()){
+          return true;
+        }else{
+          // go to next set of PCB instances
+          this->state = PCBPool::TypePool::InstanceIterator::pos_used;
+          this->iter = this->pool->usedPCB.begin();
+        }
+      case PCBPool::TypePool::InstanceIterator::pos_used:
+         if(this->iter != this->pool->usedPCB.end()){
+          return true;
+        }else{
+          // go to next set of PCB instances
+          this->state = PCBPool::TypePool::InstanceIterator::pos_locked;
+          this->iter = this->pool->lockedPCB.begin();
+        }
+      case PCBPool::TypePool::InstanceIterator::pos_locked:
+         if(this->iter != this->pool->lockedPCB.end()){
+           return true;
+         }else{
+           // we reached the end so mark it!
+           this->state = PCBPool::TypePool::InstanceIterator::pos_end;
+         }
+      case PCBPool::TypePool::InstanceIterator::pos_end:
+        return false;
+    }
+    
+    return false;
+  }
+  
+  ProcessControlBlock const & PCBPool::TypePool::InstanceIterator::getNext() {
+    
+    ProcessControlBlock* pcb = this->iter->second;
+    this->iter++;
+    return *pcb;
+
+  }
+
+  PCBIterator::PCBIterator(std::map<std::string, PCBPool::TypePool* >* pool) {
+  
+    this->pool = pool;
+    this->typeIter = this->pool->begin();
+    if(this->typeIter != this->pool->end()){
+     this->instanceIter = this->typeIter->second->getInstanceIterator();
+     this->typeIter++;
+    } 
+    
+  }
+
+  bool PCBIterator::hasNext(){
+
+    if(this->instanceIter != NULL){
+      for(; this->typeIter != this->pool->end() && !this->instanceIter->hasNext(); this->typeIter++){
+        delete this->instanceIter;
+        this->instanceIter = NULL;
+        this->instanceIter = this->typeIter->second->getInstanceIterator();
+      }
+      return this->instanceIter->hasNext();
+    }
+    return false;
+
+  }
+
+  ProcessControlBlock const & PCBIterator::getNext(){
+  
+    return this->instanceIter->getNext();
+    
+  }
+  
   ProcessControlBlock* PCBPool::allocate(std::string type) throw(NotAllocatedException){
 
     std::map<std::string, TypePool* >::iterator iter;
@@ -11,6 +104,7 @@ namespace SystemC_VPC {
     }
 
     throw NotAllocatedException();
+  
   }
 
   int PCBPool::lock(ProcessControlBlock* p) throw(AlreadyLockedException, NotAllocatedException){
@@ -54,7 +148,7 @@ namespace SystemC_VPC {
       this->typepools[type] = pool;
       return pool->getBase();
     }else{
-      iter->second->getBase();
+      return iter->second->getBase();
     }
 
   }
@@ -63,6 +157,10 @@ namespace SystemC_VPC {
 
     return (this->typepools.count(type) > 0);
   
+  }
+  
+  PCBIterator PCBPool::getPCBIterator(){
+    return PCBIterator(&(this->typepools));
   }
   
   ProcessControlBlock* PCBPool::TypePool::allocate(){
@@ -133,4 +231,7 @@ namespace SystemC_VPC {
 
   }
 
+  PCBPool::TypePool::InstanceIterator* PCBPool::TypePool::getInstanceIterator(){
+    return new InstanceIterator(this);
+  }
 }

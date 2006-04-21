@@ -25,14 +25,11 @@
 #include <systemc.h>
 #include <map>
 
-//#include "hscd_vpc_PCBPool.h"
-
 namespace SystemC_VPC{
 
   
   std::auto_ptr<Director> Director::singleton(new Director());
  
-
   /**
    *
    */
@@ -52,18 +49,18 @@ namespace SystemC_VPC{
   Director& Director::getResource( const char* name){
     return *(this->singleton);
   }
-  
+ 
   /**
    *
-   */
+   */ 
   Director::Director() : end(0){
-    
+
     VPCBuilder builder((Director*)this);
-   
+
     builder.buildVPC();
 
   }
-    
+  
   /**
    *
    */
@@ -136,13 +133,14 @@ namespace SystemC_VPC{
     component_map_by_name.clear();
     
     //clear ProcessControlBlocks
+    /*
     std::map<std::string, ProcessControlBlock* >::iterator iter;
     for(iter = this->pcb_map_by_name.begin(); iter != this->pcb_map_by_name.end(); iter++){
       delete iter->second;
     }
     
     this->pcb_map_by_name.clear();
-    
+    */
   }
 
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
@@ -162,7 +160,7 @@ namespace SystemC_VPC{
         return this->pcbPool.allocate(name);
       }catch(NotAllocatedException& e){
         ProcessControlBlock& p = this->pcbPool.registerPCB(name);
-        p.setPriority(pcb_map_by_name.size()); 
+        p.setPriority(1); 
         p.setDeadline(1000);
         p.setPeriod(2800.0);
         return this->pcbPool.allocate(name);
@@ -184,6 +182,10 @@ namespace SystemC_VPC{
       }
       */
     }
+  }
+
+  PCBPool& Director::getPCBPool(){
+    return this->pcbPool;
   }
 
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
@@ -210,11 +212,9 @@ namespace SystemC_VPC{
       if(1!=mapping_map_by_name.count(name)){
         cerr << "Unknown mapping <"<<name<<"> to ??"<<endl; 
       }
-      
+       
       assert(1==mapping_map_by_name.count(name));
-      // replace upper code with this when enablung multple dynamical binding
-      // assert(0 < this->mapping_map_by_name.count(name));
-      // and dont forget to add apropiate code fragment after this
+      
       
       // get Component
       AbstractComponent* comp = mapping_map_by_name.find(name)->second;
@@ -276,7 +276,7 @@ namespace SystemC_VPC{
    * \brief Implementation of Director::registerMapping
    */
   void Director::registerMapping(const char* taskName, const char* compName){
-      
+    
     std::map<std::string, AbstractComponent*>::iterator iter;
     iter = this->component_map_by_name.find(compName);
     //check if component is known
@@ -289,7 +289,7 @@ namespace SystemC_VPC{
       this->mapping_map_by_name[taskName]= iter->second;
       
     }
-      
+  
   }
     
   /**

@@ -12,64 +12,68 @@ namespace SystemC_VPC {
   class AlreadyLockedException: public std::exception{
 
     std::string msg;
-    
+
     public:
 
-      AlreadyLockedException() : msg("Already locked"){
-      }
+    AlreadyLockedException() : msg("Already locked"){
+    }
 
-      ~AlreadyLockedException() throw(){}
+    ~AlreadyLockedException() throw(){}
 
-      const std::string& what(){
+    const std::string& what(){
 
-        return msg;
+      return msg;
 
-      }
+    }
 
   };
-   
+
   class NotLockedException: public std::exception{
 
     std::string msg;
-    
+
     public:
 
-      NotLockedException() : msg("Not locked"){
-      }
+    NotLockedException() : msg("Not locked"){
+    }
 
-      ~NotLockedException() throw(){}
+    ~NotLockedException() throw(){}
 
-      const std::string& what(){
+    const std::string& what(){
 
-        return NotLockedException::msg;
+      return NotLockedException::msg;
 
-      }
+    }
 
   }; 
- 
+
   class NotAllocatedException: public std::exception{
-      
+
     std::string msg;
-    
+
     public:
 
-      NotAllocatedException() : msg("Not allocated") {
-      }
+    NotAllocatedException() : msg("Not allocated") {
+    }
 
-      ~NotAllocatedException() throw(){}
+    ~NotAllocatedException() throw(){}
 
-      const std::string& what(){
+    const std::string& what(){
 
-        return NotAllocatedException::msg;
+      return NotAllocatedException::msg;
 
-      }
+    }
 
   }; 
-   
+
+  class PCBIterator;
+
   /**
    * \brief Class used to managed pool of ProcessControlBlocks
    */
   class PCBPool{
+
+
 
     private:
 
@@ -80,51 +84,107 @@ namespace SystemC_VPC {
        */
       class TypePool{
 
+        friend class InstanceIterator;
+        
+        public: 
+        
+        /**
+         * \brief Iterator over all PCB instance within TypePool
+         */
+        class InstanceIterator {
+
+          enum pcbIteratorState {
+            pos_free, 
+            pos_used, 
+            pos_locked, 
+            pos_end
+          };
+
+          private:  
+
+          pcbIteratorState state;
+          TypePool* pool;
+          std::map<int, ProcessControlBlock* >::iterator iter;
+
+          public:
+
+          InstanceIterator(TypePool* pool);
+
+          bool hasNext();
+
+          ProcessControlBlock const & getNext();
+
+        };
+        
         private:
 
-          int lockCount;
-          // references base instance of PCB 
-          ProcessControlBlock* base;
-          // list of currently used PCBs
-          std::map<int, ProcessControlBlock* > usedPCB;
-          // list of currently available PCBs
-          std::map<int, ProcessControlBlock* > freePCB;
-          // list of currently locked PCBs
-          std::map<int, ProcessControlBlock* > lockedPCB;
-          
+        int lockCount;
+        // references base instance of PCB 
+        ProcessControlBlock* base;
+        // list of currently used PCBs
+        std::map<int, ProcessControlBlock* > usedPCB;
+        // list of currently available PCBs
+        std::map<int, ProcessControlBlock* > freePCB;
+        // list of currently locked PCBs
+        std::map<int, ProcessControlBlock* > lockedPCB;
+
         public:
 
-          /**
-           * \brief Default constructor of TypePool
-           * \param pcb specifies the associated PCB to be managed and replicated
-           */
-          TypePool() :  lockCount(0) {
-            base = new ProcessControlBlock();
-          }
+        /**
+         * \brief Default constructor of TypePool
+         * \param pcb specifies the associated PCB to be managed and replicated
+         */
+        TypePool() :  lockCount(0) {
+          base = new ProcessControlBlock();
+        }
 
-          ~TypePool();
-          
-          ProcessControlBlock& getBase(){
-            return *base;
-          }
-          
-          /**
-           * \brief retrieves instance of managed PCB out of the pool
-           * If currently no instance is available a new instance if created
-           * to satify request.
-           */
-          ProcessControlBlock* allocate();
+        ~TypePool();
 
-          int lock(ProcessControlBlock* p) throw(AlreadyLockedException, NotAllocatedException);
-          
-          void unlock(int lockid) throw(NotLockedException);
-          
-          /**
-           * \brief returns instance of managed PCB into the pool
-           */
-          void free(ProcessControlBlock* p);
+        /**
+         * \brief Gets base instance of managed type
+         */ 
+        ProcessControlBlock& getBase(){
+          return *base;
+        }
 
+        /**
+         * \brief retrieves instance of managed PCB out of the pool
+         * If currently no instance is available a new instance if created
+         * to satify request.
+         */
+        ProcessControlBlock* allocate();
+
+        /**
+         * \brief locks an allocated PCB
+         * This method is used to lock an already allocated ProcessControlBlock instance
+         * to ensure noone else than the instance requesting the lock can delete this
+         * instance. Only one lock at time is allowed!
+         * \param p refers to the instance to be locked
+         * \throws AlreadyLockedException if the requested instance is already locked
+         * \throws NotAllocatedException if the requested instance is not allocated before locking
+         * \return locking id used to release lock
+         */
+        int lock(ProcessControlBlock* p) throw(AlreadyLockedException, NotAllocatedException);
+
+        /**
+         * \brief releases locked PCB instance
+         * \param lockid specifies the lock id returned when locking the instance
+         * \throws NotLockedException if given lockid refers to a not locked instance
+         */
+        void unlock(int lockid) throw(NotLockedException);
+
+        /**
+         * \brief returns instance of managed PCB into the pool
+         */
+        void free(ProcessControlBlock* p);
+
+        /**
+         * \brief returns iterator over currently managed instances of TypePool
+         */
+        InstanceIterator* getInstanceIterator();
       };
+
+      friend class PCBIterator;
 
       // used to create unique ids
       int pid_count;
@@ -140,14 +200,36 @@ namespace SystemC_VPC {
       int lock(ProcessControlBlock* p) throw(AlreadyLockedException, NotAllocatedException);
 
       void unlock(std::string type, int lockid) throw(NotLockedException);
-      
+
       void free(ProcessControlBlock* p);
 
       ProcessControlBlock& registerPCB(std::string type);
-      
+
       bool hasPCBType(std::string type);
 
+      PCBIterator getPCBIterator();
+
   };
+
+  /**
+   * \brief Iterator over all PCB instance within PCBPool
+   */
+  class PCBIterator {
+
+    std::map<std::string, PCBPool::TypePool* >* pool;
+    std::map<std::string, PCBPool::TypePool* >::iterator typeIter;
+    PCBPool::TypePool::InstanceIterator* instanceIter;
+
+    public:
+
+    PCBIterator(std::map<std::string, PCBPool::TypePool* >* pool);
+
+    bool hasNext();
+
+    ProcessControlBlock const & getNext();
+
+  };
+
 
 }
 #endif //PSTRUCTPOOL_H_

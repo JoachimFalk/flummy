@@ -56,7 +56,7 @@ namespace SystemC_VPC{
     
     //map<int,AbstractComponent*> mapping_map_by_pid;
     map<std::string, AbstractComponent*> mapping_map_by_name;
-    map<std::string,ProcessControlBlock*> pcb_map_by_name;
+    //map<std::string,ProcessControlBlock*> pcb_map_by_name;
     //map<int,ProcessControlBlock> pcb_map_by_pid;
     PCBPool pcbPool;
 
@@ -89,10 +89,11 @@ namespace SystemC_VPC{
     /**
      *
      */
+    /*
     map<std::string,ProcessControlBlock*>& getPcbMap(){
       return pcb_map_by_name;
     }
-
+    */
     /**
      *
      */
@@ -165,6 +166,8 @@ namespace SystemC_VPC{
     
     //void registerPCB(const char* name, ProcessControlBlock* pcb);
 
+    PCBPool& getPCBPool(); 
+
     void signalTaskEvent(ProcessControlBlock* pcb);
 
     void setResultFile(std::string vpc_result_file){
@@ -174,7 +177,7 @@ namespace SystemC_VPC{
     string getResultFile(){
       return this->vpc_result_file;
     }
-    
+   
   };
 
 }
