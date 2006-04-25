@@ -1,0 +1,161 @@
+#ifndef HSCD_VPC_ABSTRACTBINDER_H_
+#define HSCD_VPC_ABSTRACTBINDER_H_
+
+#include <exception>
+#include <map>
+#include <string>
+
+#include "hscd_vpc_AbstractComponent.h"
+#include "hscd_vpc_Bindings.h"
+
+namespace SystemC_VPC {
+
+  class UnknownBindingException : public std::exception {
+  
+    private:
+
+      std::string msg;
+
+    public:
+
+      UnknownBindingException(const std::string& message){
+        msg = "UnkownBindungException> ";
+        msg.append(message);
+      }
+
+      ~UnknownBindingException() throw(){}
+
+      const std::string& what(){
+
+        return this->msg;
+
+      }
+
+  };
+  
+  class AbstractBinder {
+
+    protected:
+
+      std::map<std::string, AbstractBinding*> bindings;  
+
+      AbstractBinding& getBinding(std::string& task) throw(UnknownBindingException){
+
+        std::map<std::string, AbstractBinding* >::iterator iter;
+        iter = bindings.find(task);
+        if(iter != bindings.end() && iter->second != NULL){
+          return *(iter->second);
+        }
+
+        std::string msg = task + "->?";
+        throw UnknownBindingException(msg);
+
+      }
+
+    public:
+
+      virtual ~AbstractBinder(){
+
+        std::map<std::string, AbstractBinding*>::iterator iter;
+
+        for(iter = bindings.begin(); iter != bindings.end(); iter++){
+          delete iter->second;
+        }
+
+      }
+
+      virtual std::string resolveBinding(std::string task, AbstractComponent* comp) throw(UnknownBindingException) =0;
+
+      virtual void registerBinding(std::string src, std::string target)=0;
+
+      /**
+       * \brief Used to set Binder specific values
+       * \param key specifies the identy of the property
+       * \param value specifies the actual value
+       * \return true if property value has been used else false
+       */
+      virtual bool setProperty(char* key, char* value)=0;
+
+
+  };
+
+  class StaticBinder : public AbstractBinder{
+
+    public:
+
+      virtual ~StaticBinder() {}
+
+      virtual void registerBinding(std::string src, std::string target){
+
+#ifdef VPC_DEBUG
+        std::cerr << "StaticBinder> registerBinding " << src << " <-> " << target << std::endl;
+#endif //VPC_DEBUG
+
+        std::map<std::string, AbstractBinding* >::iterator iter;
+        iter = bindings.find(src);
+        if(iter != bindings.end() && iter->second != NULL) {
+          iter->second->addBinding(target);
+        }else{
+          AbstractBinding* b = new SimpleBinding(src);
+          b->addBinding(target);
+          bindings[b->getSource()] = b;
+        }
+
+      }
+
+      /**
+       * \brief Used to set Binder specific values
+       * Dummy implementation does nothing.
+       * \param key specifies the identy of the property
+       * \param value specifies the actual value
+       * \return true if property value has been used else false
+       * \sa AbstractBinder
+       */
+      virtual bool setProperty(char* key, char* value){ 
+        return false; 
+      }
+
+
+  };
+  
+  class DynamicBinder : public AbstractBinder{
+
+    public:
+    
+    virtual ~DynamicBinder() {}
+
+      virtual void registerBinding(std::string src, std::string target){
+
+#ifdef VPC_DEBUG
+        std::cerr << "DynamicBinder> registerBinding " << src << " <-> " << target << std::endl;
+#endif //VPC_DEBUG
+        
+        std::map<std::string, AbstractBinding* >::iterator iter;
+        iter = bindings.find(src);
+        if(iter != bindings.end() && iter->second != NULL) {
+          iter->second->addBinding(target);
+        }else{
+          AbstractBinding* b = new Binding(src);
+          b->addBinding(target);
+          bindings[b->getSource()] = b;
+        }
+        
+      }
+
+      /**
+       * \brief Used to set Binder specific values
+       * Dummy implementation does nothing.
+       * \param key specifies the identy of the property
+       * \param value specifies the actual value
+       * \return true if property value has been used else false
+       * \sa AbstractBinder
+       */
+      virtual bool setProperty(char* key, char* value){
+        return false;
+      }
+
+  };
+
+}
+
+#endif //HSCD_VPC_ABSTRACTBINDER_H_

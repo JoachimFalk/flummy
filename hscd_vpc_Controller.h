@@ -10,9 +10,12 @@
 #include "hscd_vpc_AbstractController.h"
 #include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_Configuration.h"
+#include "hscd_vpc_AbstractBinder.h"
+#include "hscd_vpc_AbstractConfigurationMapper.h"
+#include "hscd_vpc_AbstractConfigurationScheduler.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
   
   /**
    * \brief Implementation of base methods specified by AbstractController
@@ -23,34 +26,29 @@ namespace SystemC_VPC{
    */
   class Controller : public AbstractController{
   
-  private: 
+  private:
+  
     char controllerName [VPC_MAX_STRING_LENGTH];
   
     // controlled component of instance
     ReconfigurableComponent* managedComponent;
     
-    // maps tasks to their corresponding names of component
-    std::map<std::string, std::string > mapping_map_component_ids;
+    // refers to binder to resolve binding of tasks
+    AbstractBinder* binder;
     
-    /*
-     * map of maps for reconfigration times
-     * first key specifies current configuration
-     * second key specifies next configuration
-     * value specifies the time needed to switch btw first and second
-     */
-    //std::map<std::string, sc_time> loadTime_map;
-    //std::map<std::string, sc_time> storeTime_map;
+    // refers to mapper to resolve "binding" of components to configuration
+    AbstractConfigurationMapper* mapper;
     
-    // true if controller uses kill to preempt configurations
-    bool kill;
-  
+    // refers to configuration scheduler to manage dynamic allocation
+    AbstractConfigurationScheduler* scheduler;
+     
+    // map storing made decisions
+    std::map<int, Decision> decisions;
+      
   protected:
     
     // time indicating next request wish
     sc_time* waitInterval;
-    
-    // maps tasks to their corresponding names of configuration
-    std::map<std::string, std::string > mapping_map_configs;
         
   public:
     
@@ -62,16 +60,57 @@ namespace SystemC_VPC{
      * \brief Getter for controller name
      */
     char* getName();
-      
+    
+    /**
+     * \brief Getter for binder instance
+     */
+    AbstractBinder* getBinder();
+    
+    /**
+     * \brief Sets binder of controller instance
+     */
+    void setBinder(AbstractBinder* binder);
+    
+    /**
+     * \brief Getter for mapper instance
+     */
+    AbstractConfigurationMapper* getConfigurationMapper();
+    
+    /**
+     * \brief Sets configuration mapper of controller instance
+     */
+    void setConfigurationMapper(AbstractConfigurationMapper* mapper);
+    
+    /**
+     * \brief Getter for scheduler instance
+     */
+    AbstractConfigurationScheduler* getConfigurationScheduler();
+    
+    /**
+     * \brief Sets configuration scheduler of controller instance
+     */
+    void setConfigurationScheduler(AbstractConfigurationScheduler* scheduler);
+    
     /**
      * \brief Sets the currently controlled reconfigurable Component of instance
      */
     void setManagedComponent(ReconfigurableComponent* managedComponent);
     
     /**
-     * \brief Gets the currently conrtolled reconfigurable Component of instance
+     * \brief Gets the currently controlled reconfigurable Component of instance
      */
     ReconfigurableComponent* getManagedComponent();
+    
+    /**
+     * \brief Realizes scheduling decision for tasks to be forwarded to configurations
+     * This method is used to perform scheduling decision for tasks and within this context
+     * their corresponding configurationgs depending on the strategie of the different
+     * controller. It is used to initialize and set up all necessary data for a new "round" of
+     * scheduling. 
+     * \param newTasks refers to a queue of pcb to be scheduled
+     * \sa AbstractController
+     */
+    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
     
     /**
      * \brief Returns time to wait until next notification of controller is needed
@@ -104,17 +143,18 @@ namespace SystemC_VPC{
      */
     virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task);
     
+    virtual bool hasTaskToProcess();
+    
+    virtual ProcessControlBlock* getNextTask();
+    
+    virtual unsigned int getNextConfiguration();
+      
     /**
      * \brief Used to set controller specific values
      * \param key specifies the identy of the property
      * \param value specifies the actual value
      */
     virtual void setProperty(char* key, char* value);
-    
-    /**
-     * \brief Setter to specify if controller should use "kill" by preemption
-     */
-    void setPreemptionStrategy(bool kill);
     
     /**
      * \brief Getter to determine which preemption mode is used
@@ -137,14 +177,14 @@ namespace SystemC_VPC{
      */
     virtual void signalResume();
     
-  protected:
-    
     /**
-     * \brief Helper method to enable easy access to mapped coniguration
-     * Intended for internal use within controller realization to have
-     * single point of implementation of this rudimentary functionality
+     * \brief 
+     * \sa AbstractController
      */
-    Configuration* getMappedConfiguration(const char* name);    
+    virtual Decision getDecision(int pid);
+
+    virtual void signalTaskEvent(ProcessControlBlock* pcb);
+    
   };
 
 }

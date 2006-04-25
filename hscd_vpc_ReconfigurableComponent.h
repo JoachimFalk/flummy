@@ -9,8 +9,10 @@
 
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_AbstractController.h"
+#include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_Configuration.h"
+#include "hscd_vpc_ConfigurationPool.h"
 
 namespace SystemC_VPC{
   
@@ -29,10 +31,11 @@ namespace SystemC_VPC{
     sc_trace_file *traceFile;
     map<std::string, sc_signal<trace_value>* > trace_map_by_name;
     
-    // pointer to controller of component
+    // refers to controller of component
     AbstractController* controller;
     // mapping of possible configurations by their name
-    std::map<std::string, Configuration* > config_map_by_name;
+    //std::map<std::string, Configuration* > config_map_by_name;
+    ConfigurationPool confPool;
     // pointer to currently activ Configuration
     Configuration* activConfiguration;
     
@@ -50,6 +53,8 @@ namespace SystemC_VPC{
     sc_time* storeStartTime;
     // time needed for reconfiguration 
     sc_time* remainingStoreTime;
+    
+    bool wakeUpSignalled;
     
   public:
 
@@ -139,15 +144,23 @@ namespace SystemC_VPC{
      * \brief Enables access to known Configurations of component
      * Used to map vector of known Configurations of current instance.
      */
+    /*
     std::map<std::string, Configuration* >& getConfigurations();
+    */
+
+    /**
+     * \brief Enables acces to known Configurations of component
+     * Replaces getConfigurations from older version
+     */
+    ConfigurationPool& getConfigurationPool();
     
     /**
       * \brief Enables access to a single Component by its identifying name
-      * \param name specifies the component to retrieve
-      * \return requested component or NULL if identifier of component
+      * \param id specifies the configuration to retrieve
+      * \return requested configuration or NULL if identifier of configuration
       * is not known.
      */
-    Configuration* getConfiguration(const char* name);
+    Configuration* getConfiguration(unsigned int id);
 
     /**
      * \brief Gets currently loaded Configuration
@@ -159,17 +172,29 @@ namespace SystemC_VPC{
      * \param name specifies the Configuration to be set as activ on
      */
     /**
-     * \brief Sets the currently loaded Configuration
+     * \brief Sets currently loaded Configuration
      * \param identifying name of Configuration to be set loaded
      */
-    void setActivConfiguration(const char* name);
-    
+    void setActivConfiguration(unsigned int name);
+   
     /**
      * \brief Gets associated controller of component
      * \return controller of component
      */  
     AbstractController* getController();
-      
+        
+    /**
+     * \brief Used to enable notification initialized from Controller side
+     * This method is called if controller gets notified of finished or killed
+     * task, which need new scheduling decisions.
+     */
+    inline void wakeUp(){
+      this->notify_schedule_thread.notify();
+      this->wakeUpSignalled = true;
+    }
+    
+  private:
+    
     /**
      * \brief Sets controller for current instance
      * \param controllertype specifies the type of requested controller to be
@@ -183,18 +208,7 @@ namespace SystemC_VPC{
      * associated to the component.
      */
     void setController(AbstractController* controller);
-    
-    /**
-     * \brief Used to enable notification initialized from Controller side
-     * This method is called if controller gets notified of finished or killed
-     * task, which need new scheduling decisions.
-     */
-    inline void wakeUp(){
-      this->notify_schedule_thread.notify();
-    }
-    
-  private:
-  
+
     /**
      * \brief Loads a given configuration
      * Loads a given configuration by simulating loadtime.
@@ -216,7 +230,10 @@ namespace SystemC_VPC{
      * \brief Helper method to determine interruption
      */
     bool reconfigurationInterrupted(sc_time timeStamp, sc_time interval);
-    
+   
+    /**
+     * \brief Used to trace configuration state during simulation
+     */ 
     void ReconfigurableComponent::traceConfigurationState(Configuration* config, trace_value value);
   };
 

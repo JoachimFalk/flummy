@@ -26,11 +26,7 @@
 #include "hscd_vpc_ReconfigurableComponent.h"
 
 #include "hscd_vpc_AbstractController.h"
-#include "hscd_vpc_FCFSController.h"
-#include "hscd_vpc_RoundRobinController.h"
-#include "hscd_vpc_PriorityController.h"
-#include "hscd_vpc_EDFController.h"
-
+#include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_Configuration.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -247,10 +243,12 @@ namespace SystemC_VPC{
     void buildUpBindHierarchy(const char* source, const char* target);
     
     /**
-     * \brief Generate pcb for internal use in VPC Framework
+     * \brief Generates controller instance for Component
+     * \param type specifies type of controller to instantiate
+     * \param id is the id to be set for the controller     
      */
     AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
-    
+  
   };
     
 }

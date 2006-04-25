@@ -6,6 +6,9 @@ namespace SystemC_VPC{
    * IMPLEMENTATION OF Configuration
    */
 
+  // has to start at 1 as 0 is default value for unsigned int!
+  unsigned int Configuration::global_id = 1;
+  
   /**
    * \brief Creates instance of Configuration
    */
@@ -13,6 +16,8 @@ namespace SystemC_VPC{
     : activ(false), stored(false){
       
     strcpy(this->configName,name);
+    this->id = Configuration::global_id++;
+    
     this->loadTime = sc_time(SC_ZERO_TIME);
     this->storeTime = sc_time(SC_ZERO_TIME);
     
@@ -25,6 +30,8 @@ namespace SystemC_VPC{
     : activ(false), stored(false){
       
     strcpy(this->configName,name);
+    this->id = Configuration::global_id++;
+    
     this->setLoadTime(loadTime);
     this->setStoreTime(storeTime);
       
@@ -57,9 +64,18 @@ namespace SystemC_VPC{
   }
 
   /**
+   * \brief Implementation of Configuration::getID
+   */
+  unsigned int const& Configuration::getID() const{
+
+    return this->id;
+
+  }
+  
+  /**
    * \brief Implementation of Configuration::isActiv
    */
-  bool Configuration::isActiv(){
+  bool Configuration::isActiv() const{
 
     return this->activ;
     
@@ -68,7 +84,7 @@ namespace SystemC_VPC{
   /**
    * \brief Getter to check if configuration has been stored
    */
-  bool Configuration::isStored(){
+  bool Configuration::isStored() const{
     
     return this->stored;
 
@@ -107,10 +123,8 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::getComponent
    */
-  AbstractComponent* Configuration::getComponent(const char* name){
+  AbstractComponent* Configuration::getComponent(std::string name){
   
-    assert(name != NULL);
-    
     std::map<std::string, AbstractComponent* >::iterator iter;
     iter = this->component_map_by_name.find(name);
     if(iter != this->component_map_by_name.end()){
@@ -287,4 +301,43 @@ namespace SystemC_VPC{
     return this->loadTime;
   }
 
+  /**
+   * \brief Implementation of Configuration::getComponentIDIterator
+   */
+  Configuration::ComponentIDIterator Configuration::getComponentIDIterator(){
+
+    return ComponentIDIterator(this);
+  
+  }
+
+  /**
+   * \brief Implememtation of  Configuration::ComponentIDIterator::ComponentIDIterator
+   */
+  Configuration::ComponentIDIterator::ComponentIDIterator(Configuration* conf) {
+
+    this->config = conf;
+    this->iter = this->config->component_map_by_name.begin();
+    
+  }
+
+  /**
+   * \brief Implementation of Configuration::ComponentIDIterator::hasNext()
+   */
+  bool Configuration::ComponentIDIterator::hasNext(){
+  
+    return (this->iter != this->config->component_map_by_name.end());
+    
+  }
+
+  /**
+   * \brief Implementaiton of Configuration::ComponentIDIterator::getNext()
+   */
+  const std::string Configuration::ComponentIDIterator::getNext() {
+
+    std::string comp = this->iter->first;
+    this->iter++;
+    return comp;
+    
+  }
+  
 }//namespace SystemC_VPC

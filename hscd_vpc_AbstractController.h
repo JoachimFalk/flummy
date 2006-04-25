@@ -8,6 +8,11 @@
 #include <vector>
 
 #include "hscd_vpc_AbstractDirector.h"
+
+#include "hscd_vpc_AbstractBinder.h"
+#include "hscd_vpc_AbstractConfigurationMapper.h"
+#include "hscd_vpc_AbstractConfigurationScheduler.h"
+
 #include "hscd_vpc_Configuration.h"
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_TaskEventListener.h"
@@ -19,6 +24,15 @@ namespace SystemC_VPC{
   class ReconfigurableComponent;
   
   /**
+   * \brief helper struct to remember current decision for pcb
+   */
+  struct Decision {
+    ProcessControlBlock* pcb;
+    std::string comp;
+    unsigned int conf;
+  };
+    
+  /**
    * \brief Specifies the interface provided by a controller.
    * This abstract class is used to declare a common interface for all controller
    * used within the VPC framework.
@@ -27,20 +41,29 @@ namespace SystemC_VPC{
         
   public:
 
-    virtual ~AbstractController(){}
+    virtual ~AbstractController() {}
     
     /**
      * \brief Getter for controller name
      */
     virtual char* getName()=0;
-      
+    
+    virtual AbstractBinder* getBinder()=0;
+    virtual void setBinder(AbstractBinder* binder)=0;
+    
+    virtual AbstractConfigurationMapper* getConfigurationMapper()=0;
+    virtual void setConfigurationMapper(AbstractConfigurationMapper* mapper)=0;
+    
+    virtual AbstractConfigurationScheduler* getConfigurationScheduler()=0;
+    virtual void setConfigurationScheduler(AbstractConfigurationScheduler* scheduler)=0;
+    
     /**
      * \brief Sets the currently controlled reconfigurable Component of instance
      */
     virtual void setManagedComponent(ReconfigurableComponent* managedComponent)=0;
     
     /**
-     * \brief Gets the currently conrtolled reconfigurable Component of instance
+     * \brief Gets the currently controlled reconfigurable Component of instance
      */
     virtual ReconfigurableComponent* getManagedComponent()=0;
     
@@ -65,17 +88,18 @@ namespace SystemC_VPC{
      * their corresponding configurationgs depending on the strategie of the different
      * controller. It is used to initialize and set up all necessary data for a new "round" of
      * scheduling. 
+     * \param newTasks refers to a queue of pcb to be scheduled
      */
     virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks)=0;
-     
+    
     /**
      * \brief Returns next configuration to be loaded
      * Used to indicate if a new configuration should be loaded by the controller
      * component.
-     * \return pointer to next configuration to be loaded or NULL if no configuration
+     * \return id of next configuration to be loaded or 0 if no configuration
      * is selected up to now.
      */
-    virtual Configuration* getNextConfiguration()=0;
+    virtual unsigned int getNextConfiguration()=0;
       
     /**
      * \brief Returns mapped component for a given task
@@ -100,11 +124,6 @@ namespace SystemC_VPC{
     virtual ProcessControlBlock* getNextTask()=0;
     
     /**
-     * \brief Setter to specify if controller should use "kill" by preemption
-     */
-    virtual void setPreemptionStrategy(bool kill)=0;
-    
-    /**
      * \brief Getter to determine which preemption mode is used
      */
     virtual bool preemptByKill()=0;
@@ -127,6 +146,11 @@ namespace SystemC_VPC{
      * component.
      */
     virtual void signalResume()=0;
+    
+    /**
+     * \brief 
+     */
+    virtual Decision getDecision(int pid)=0;
     
   };
 

@@ -2,6 +2,16 @@
 #include <values.h> 
 
 #include "hscd_vpc_VPCBuilder.h"
+
+#include "hscd_vpc_Controller.h"
+
+#include "hscd_vpc_FCFSController.h"
+#include "hscd_vpc_RoundRobinController.h"
+#include "hscd_vpc_PriorityController.h"
+#include "hscd_vpc_EDFController.h"
+
+#include "hscd_vpc_SimpleBinder.h"
+
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
 #include "hscd_vpc_datatypes.h"
@@ -370,10 +380,11 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> Found Component name=" << sName << " type=" << sType << endl;
 #endif //VPC_DEBUG
-        AbstractController* controller;
+        //initialize controller of component
+        AbstractController* controller = NULL;
         try{
           controller = this->generateController(sScheduler, sName);
-        }catch(InvalidArgumentException &e){
+        }catch(InvalidArgumentException& e){
           std::cerr << "VPCBuilder> Error: " << e.what() << std::endl;
           std::cerr << "VPCBuilder> setting default FCFS for "<< sName << std::endl;
           controller = this->generateController("FCFS", sName);
@@ -381,11 +392,12 @@ namespace SystemC_VPC{
           std::cerr << "VPCBuilder> unkown exception occured while creating controller instance" << std::endl;
           throw;
         }
-        
+      
         // check if component already exists
         //std::map<std::string, AbstractComponent* >::iterator iter = this->knownComps.find(sName);
         //if(iter == this->knownComps.end()){ 
           comp = new ReconfigurableComponent(sName, controller);
+          controller->setConfigurationMapper(&((ReconfigurableComponent*)comp)->getConfigurationPool());
           this->knownComps.insert(pair<string, AbstractComponent* >(sName, comp));
         //}else{
         //  comp = iter->second;
@@ -584,20 +596,24 @@ namespace SystemC_VPC{
 
           //}
 
-          // add configuration to node
-          comp->addConfiguration(sName, conf);
-
           //this->initConfiguration(comp, conf, node->getFirstChild());
           this->initConfiguration(comp, conf);
 
+          // add configuration to node
+          comp->addConfiguration(sName, conf);
+          comp->getController()->getConfigurationMapper()->registerConfiguration(conf);
+          
         }else // if default configuration is defined init
           if( 0==XMLString::compareNString( xmlName, VPCBuilder::defaultConfStr, sizeof(VPCBuilder::defaultConfStr))){
 
             DOMNamedNodeMap* atts=node->getAttributes();
             char* sName;
             sName = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-
-            comp->setActivConfiguration(sName);
+            //retrieve configuration by name
+            Configuration* c = this->knownConfigs[sName];
+            if(c != NULL){
+              comp->setActivConfiguration(c->getID());            
+            }
           }
       }
 
@@ -742,18 +758,11 @@ namespace SystemC_VPC{
 // <<< here is adding of additional function delay
                 double delay;
                 if( 1 == sscanf(sValue, "%lf", &delay) ){  
-// ---> changed
-//                  p->functionDelays.insert(pair<string,double>(sType,delay));
 #ifdef VPC_DEBUG
                   std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
                   std::cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
                   p.addFuncDelay(sTarget, sType, delay);
-                  /*
-                  std::map<std::string, double> funcDelays = p->compDelays[sTarget];
-                  funcDelays.insert(std::pair<std::string, double>(sType, delay));
-                  p->compDelays[sTarget]= funcDelays;
-                  */
                 } else {
 #ifdef VPC_DEBUG
                   std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
@@ -827,9 +836,6 @@ namespace SystemC_VPC{
     //finally register mapping to Director
     this->director->registerMapping(source, target);
 
-
-    // this can be removed as we use generated ProcessControlBlock from Director
-    //ProcessControlBlock_map_by_name.insert(pair<string,ProcessControlBlock*>(sSource,p));
   }
 
   /**
@@ -873,11 +879,6 @@ namespace SystemC_VPC{
             std::cerr << YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
             p->addFuncDelay(target, attiter->first, delay);
-            /*
-            std::map<std::string, double> funcDelays = p->compDelays[target];
-            funcDelays.insert(std::pair<std::string, double>(attiter->first, delay));
-            p->compDelays[target]= funcDelays;
-            */
           } else {
 #ifdef VPC_DEBUG
             std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
@@ -887,40 +888,78 @@ namespace SystemC_VPC{
       }
     }
   }
+
+  AbstractConfigurationScheduler* generateConfigScheduler(const char* type, AbstractController* controller){
+ 
+      AbstractConfigurationScheduler* scheduler = NULL;
+      
+      if(0==strncmp(type, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
+          || 0==strncmp(type, STR_FCFS,strlen(STR_FCFS))){
+        scheduler = new FCFSController(controller);      
+      }else 
+        if(0==strncmp(type, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
+           || 0==strncmp(type, STR_RR, strlen(STR_RR))){
+           scheduler = new RoundRobinController(controller);
+      }else
+        if(0==strncmp(type, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
+           || 0==strncmp(type, STR_PS, strlen(STR_PS))){
+           scheduler = new PriorityController(controller);
+      }else
+        if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
+           || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
+           scheduler = new EDFController(controller);
+      }else{
+        string msg("Unkown controllertype ");
+        msg += type;
+        msg += ", cannot create instance";
+        throw InvalidArgumentException(msg);
+      }
+    
+      return scheduler;
+  }
   
+  /**
+   * \brief Generate Binder associated to a controller
+   * \param bindertype specifies type of binder to instantiate
+   */
+  AbstractBinder* generateBinder(const char* type, AbstractController* controller)
+    throw(InvalidArgumentException){
+      // TODO UPDATE IMPLEMENTATION WHEN NEW BINDER IS IMPLEMENTED
+      AbstractBinder* binder = NULL;
+
+      if(type == NULL){
+        binder = new SimpleBinder();
+      }
+/*
+      if(0==strncmp(type, STR_ROUNDROBIN,strlen(STR_FIRSTCOMEFIRSTSERVE))
+          || 0==strncmp(type, STR_RR,strlen(STR_RR))){
+        binder = new RoundRobinBinder();      
+      }else{
+        string msg("Unkown bindertype ");
+        msg += type;
+        msg += ", cannot create instance";
+        throw InvalidArgumentException(msg);
+      }
+*/
+      return binder;
+    }
+
   /**
    * \brief Implementation of VPCBuilder::generateController
    * \param controllertype specifies type of controller to instantiate
    * \param id is the id to be set for the controller
    */
-  AbstractController* VPCBuilder::generateController(const char* controllertype, const char* id)
+  AbstractController* VPCBuilder::generateController(const char* type, const char* id)
     throw(InvalidArgumentException){
-    // TODO UPDATE IMPLEMENTATION WHEN NEW CONTROLLER IS IMPLEMENTED
-    AbstractController* controller;
-    
-    if(0==strncmp(controllertype, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
-      || 0==strncmp(controllertype, STR_FCFS,strlen(STR_FCFS))){
-      controller = new FCFSController(id);      
-    }else 
-    if(0==strncmp(controllertype, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
-      || 0==strncmp(controllertype, STR_RR, strlen(STR_RR))){
-      controller = new RoundRobinController(id);
-    }else
-    if(0==strncmp(controllertype, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
-      || 0==strncmp(controllertype, STR_PS, strlen(STR_PS))){
-      controller = new PriorityController(id);
-    }else
-    if(0==strncmp(controllertype, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
-      || 0==strncmp(controllertype, STR_EDF, strlen(STR_EDF))){
-      controller = new EDFController(id);
-    }else{
-      string msg("Unkown controllertype ");
-      msg += controllertype;
-      msg += ", cannot create instance";
-      throw InvalidArgumentException(msg);
+      // TODO UPDATE IMPLEMENTATION WHEN NEW CONTROLLER IS IMPLEMENTED
+      AbstractController* controller;
+      controller = new Controller(id);
+           
+      controller->setConfigurationScheduler(generateConfigScheduler(type, controller));
+      controller->setBinder(generateBinder(NULL, controller));
+          
+      return controller;
     }
-    
-    return controller;
-  }
-
+  
+   
 }// namespace SystemC_VPC

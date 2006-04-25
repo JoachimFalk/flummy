@@ -280,7 +280,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component::compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl
+    cerr << RED("Component " << this->basename() << "> compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl
       ;
 #endif
 
@@ -397,7 +397,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component::compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << RED("Component " << this->basename() << "> compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
 #ifndef NO_VCD_TRACES
@@ -496,6 +496,7 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
     
       this->parentControlUnit->signalTaskEvent(iter->second);
+
     }
     
     //clear all entries
@@ -560,7 +561,8 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
                 
       }
-      
+    
+    //wait(SC_ZERO_TIME);    
   }
   
   void Component::setTraceSignalReadyTasks(trace_value value){

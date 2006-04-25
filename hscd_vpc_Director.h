@@ -30,8 +30,8 @@
 
 namespace SystemC_VPC{
 
+  class AbstractBinder;
   class ProcessControlBlock;
-//  class PCBPool;  
   class Constraint;
 
   /**
@@ -56,7 +56,7 @@ namespace SystemC_VPC{
     
     //map<int,AbstractComponent*> mapping_map_by_pid;
     map<std::string, AbstractComponent*> mapping_map_by_name;
-    map<std::string,ProcessControlBlock*> pcb_map_by_name;
+    //map<std::string,ProcessControlBlock*> pcb_map_by_name;
     //map<int,ProcessControlBlock> pcb_map_by_pid;
     PCBPool pcbPool;
 
@@ -67,7 +67,10 @@ namespace SystemC_VPC{
     
     // time of latest acknowledge simulated task
     double end;
-  
+ 
+    // binder instance to resolve bindings
+    AbstractBinder* binder;
+
   public:
     bool FALLBACKMODE;
 
@@ -89,9 +92,10 @@ namespace SystemC_VPC{
     /**
      *
      */
+    /*
     map<std::string,ProcessControlBlock*>& getPcbMap(){
       return pcb_map_by_name;
-    }
+    }*/
 
     /**
      *
@@ -162,7 +166,9 @@ namespace SystemC_VPC{
      * PCB for given task or if PCB already exists the initialized one;
      */
     ProcessControlBlock& generatePCB(const char* name);
-    
+   
+    PCBPool& getPCBPool();
+
     //void registerPCB(const char* name, ProcessControlBlock* pcb);
 
     void signalTaskEvent(ProcessControlBlock* pcb);

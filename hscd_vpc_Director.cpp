@@ -25,7 +25,8 @@
 #include <systemc.h>
 #include <map>
 
-//#include "hscd_vpc_PCBPool.h"
+#include "hscd_vpc_AbstractBinder.h"
+#include "hscd_vpc_SimpleBinder.h"
 
 namespace SystemC_VPC{
 
@@ -59,7 +60,9 @@ namespace SystemC_VPC{
   Director::Director() : end(0){
     
     VPCBuilder builder((Director*)this);
-   
+    
+    this->binder = new SimpleBinder(); 
+ 
     builder.buildVPC();
 
   }
@@ -136,13 +139,14 @@ namespace SystemC_VPC{
     component_map_by_name.clear();
     
     //clear ProcessControlBlocks
+    /*
     std::map<std::string, ProcessControlBlock* >::iterator iter;
     for(iter = this->pcb_map_by_name.begin(); iter != this->pcb_map_by_name.end(); iter++){
       delete iter->second;
     }
     
     this->pcb_map_by_name.clear();
-    
+    */
   }
 
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
@@ -162,7 +166,7 @@ namespace SystemC_VPC{
         return this->pcbPool.allocate(name);
       }catch(NotAllocatedException& e){
         ProcessControlBlock& p = this->pcbPool.registerPCB(name);
-        p.setPriority(pcb_map_by_name.size()); 
+        p.setPriority(1); 
         p.setDeadline(1000);
         p.setPeriod(2800.0);
         return this->pcbPool.allocate(name);
@@ -186,6 +190,10 @@ namespace SystemC_VPC{
     }
   }
 
+  PCBPool& Director::getPCBPool(){
+    return this->pcbPool;
+  }
+
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
     
 #ifdef VPC_DEBUG
@@ -207,24 +215,32 @@ namespace SystemC_VPC{
 
     if(!FALLBACKMODE){
       
-      if(1!=mapping_map_by_name.count(name)){
-        cerr << "Unknown mapping <"<<name<<"> to ??"<<endl; 
-      }
-      
-      assert(1==mapping_map_by_name.count(name));
-      // replace upper code with this when enablung multple dynamical binding
-      // assert(0 < this->mapping_map_by_name.count(name));
-      // and dont forget to add apropiate code fragment after this
-      
-      // get Component
-      AbstractComponent* comp = mapping_map_by_name.find(name)->second;
+      try{
+        // get Component
+        std::string compName = this->binder->resolveBinding(name, NULL);
+        AbstractComponent* comp = this->component_map_by_name.find(compName)->second;
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
+        std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
 #endif //VPC_DEBUG      
-      
-      // compute task on found component
-      comp->compute(pcb);
+
+        // compute task on found component
+        comp->compute(pcb);
+
+      }catch(UnknownBindingException& e){
+        std::cerr << e.what() << std::endl;
+        // clean up
+        if( end == NULL ){
+          delete pcb->getBlockEvent();
+          pcb->setBlockEvent(NULL);
+          this->pcbPool.unlock(pcb->getName(), lockid);
+          this->pcbPool.free(pcb);
+        }else{
+          // TODO: handle asynchron calls notify them ?!?
+        }
+        return;
+        
+      }
 
     }else{
       AbstractComponent* comp = (component_map_by_name["Fallback-Component"]);
@@ -276,7 +292,9 @@ namespace SystemC_VPC{
    * \brief Implementation of Director::registerMapping
    */
   void Director::registerMapping(const char* taskName, const char* compName){
-      
+    
+    this->binder->registerBinding(taskName, compName);
+    /*  
     std::map<std::string, AbstractComponent*>::iterator iter;
     iter = this->component_map_by_name.find(compName);
     //check if component is known
@@ -289,7 +307,7 @@ namespace SystemC_VPC{
       this->mapping_map_by_name[taskName]= iter->second;
       
     }
-      
+      */
   }
     
   /**

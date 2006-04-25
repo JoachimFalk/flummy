@@ -23,6 +23,7 @@
 #include <set>
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_Director.h"
+#include "hscd_vpc_PCBPool.h"
 
 using std::string;
 using std::map;

@@ -2,7 +2,7 @@
 
 namespace SystemC_VPC{
   
-  Controller::Controller(const char* name){
+  Controller::Controller(const char* name) : waitInterval(NULL){
     
     strcpy(this->controllerName, name);
     
@@ -40,6 +40,36 @@ namespace SystemC_VPC{
     return this->controllerName;
     
   }
+  
+  AbstractBinder* Controller::getBinder(){
+    return this->binder;
+  }
+  
+  void Controller::setBinder(AbstractBinder* binder){
+    if(binder != NULL){
+      this->binder = binder;
+    }
+  }
+    
+  AbstractConfigurationMapper* Controller::getConfigurationMapper(){
+    return this->mapper;
+  }
+  
+  void Controller::setConfigurationMapper(AbstractConfigurationMapper* mapper){
+    if(mapper != NULL){
+      this->mapper = mapper;
+    }
+  }
+    
+  AbstractConfigurationScheduler* Controller::getConfigurationScheduler(){
+    return this->scheduler;
+  }
+  
+  void Controller::setConfigurationScheduler(AbstractConfigurationScheduler* scheduler){
+    if(scheduler != NULL){
+      this->scheduler = scheduler;
+    }
+  }
     
   /**
    * \brief Implementation of Controller::setManagedComponent
@@ -72,46 +102,66 @@ namespace SystemC_VPC{
    */
   void Controller::registerMapping(const char* taskName, const char* compName){
     
-    // register direct mapping to component
-    this->mapping_map_component_ids[taskName] = compName;
+#ifdef VPC_DEBUG
+    std::cerr << "Controller> registerMapping(" << taskName << ", " << compName << ")" << std::endl;
+#endif //VPC_DEBUG
+    this->binder->registerBinding(taskName, compName);
     
-    // register mapping to configuration
-    std::map<std::string, Configuration* > configs;
-    configs = this->managedComponent->getConfigurations();
-    std::map<std::string, Configuration* >::iterator iter;
+  }
+  
+  /**
+   * \brief Implementation of  Controller::setProperty
+   */
+  void Controller::setProperty(char* key, char* value){
 
-    // go through all configurations and find right containing component
-    for(iter = configs.begin(); iter != configs.end(); iter++){
-      AbstractComponent* comp = (iter->second)->getComponent(compName);
-      if(comp != NULL){
-        // found component
-        this->mapping_map_configs.insert(std::pair<std::string, std::string>(taskName, (iter->second)->getName()));
-        // exactly one match possible
-        break;
-      }  
+    // just pass agruments on right now
+    if(!this->binder->setProperty(key, value)
+        && !this->mapper->setProperty(key, value)
+        && !this->scheduler->setProperty(key, value)){
+
+      std::cerr << YELLOW("Controller "<< this->getName() << "> Warning: Unkown property tag <" << key << "=" << value << "> , will be ignored! ") << std::endl;
+
     }
   }
   
   /**
-   * \brief Implementation of  EDFController::setProperty
+   * \brief Implementation of Controller::addTasksToSchedule
    */
-  void Controller::setProperty(char* key, char* value){
-
-    if(0 == strcmp(key, "mode")){
-
-#ifdef VPC_DEBUG
-      std::cerr << BLUE("Controller> Found input data for preemption mode = ") << value << std::endl;
-#endif //VPC_DEBUG
-      if(0 == strcmp(value, "kill")){
-        this->setPreemptionStrategy(true);
-      }else
-      if(0 == strcmp(value, "store")){
-        this->setPreemptionStrategy(false);
-      }else{
-        std::cerr << YELLOW("Controller> Unkown preemption mode!") << std::endl;
-      }
+  void Controller::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
+    
+    // process all new tasks
+    while(newTasks.size() > 0){
+      ProcessControlBlock* pcb = newTasks.front();
+      // determine current binding of task
+      std::string comp = this->binder->resolveBinding(pcb->getName(), this->managedComponent);
+      // determine corresponding configuration of bound component
+      unsigned int configID = this->mapper->getConfigForComp(comp);
+      // register task and configuration for scheduling
+      this->scheduler->addTaskToSchedule(pcb, configID);
+      newTasks.pop_front();  
+      
+      // remember decisions for later use
+      Decision d;
+      d.pcb = pcb;
+      d.comp = comp;
+      d.conf = configID;
+      this->decisions[pcb->getPID()] = d;
     }
     
+    this->scheduler->performSchedule(); 
+     
+  }
+
+  bool Controller::hasTaskToProcess(){
+    return this->scheduler->hasTaskToProcess();
+  }
+    
+  ProcessControlBlock* Controller::getNextTask(){
+    return this->scheduler->getNextTask();
+  }
+    
+  unsigned int Controller::getNextConfiguration(){
+    return this->scheduler->getNextConfiguration();
   }
   
   /**
@@ -119,14 +169,23 @@ namespace SystemC_VPC{
    */
   sc_time* Controller::getWaitInterval(){
     
-    return this->waitInterval;
+    return this->scheduler->getWaitInterval();
     
   }
      
   /**
-    * \brief Implementation of Controller::getMappedComponent
-    */
+   * \brief Implementation of Controller::getMappedComponent
+   */
   AbstractComponent* Controller::getMappedComponent(ProcessControlBlock* task){
+    
+    std::map<int, Decision>::iterator iter;
+    iter = this->decisions.find(task->getPID());
+    if(iter != this->decisions.end()){
+      Decision d = iter->second;
+      return this->managedComponent->getConfiguration(d.conf)->getComponent(d.comp);
+    }
+    return NULL;
+    /*
      // determine requied configuration
     std::string configName = this->mapping_map_configs[task->getName()];
     Configuration* conf = this->managedComponent->getConfiguration(configName.c_str());
@@ -134,48 +193,39 @@ namespace SystemC_VPC{
     AbstractComponent* comp = conf->getComponent((this->mapping_map_component_ids[task->getName()]).c_str());
     
     return comp;
-    
-   };
+    */
+   }
   
   /**
     * \brief Dummy implementation of Controller::signalPreemption
     */  
-  void Controller::signalPreemption(){}
+  void Controller::signalPreemption(){
+    this->scheduler->signalPreemption();
+  }
   
   /**
     * \brief Dummy implementation of Controller::signalResume
     */
-  void Controller::signalResume(){}
-  
-  /**
-    * \brief Implementation of Controller::getMappedConfiguration
-    */
-  Configuration* Controller::getMappedConfiguration(const char* name){
-    
-    std::map<std::string, std::string>::iterator iter;
-    iter = this->mapping_map_configs.find(name);
-    if(iter == this->mapping_map_configs.end()){
-      std::cerr << RED("AbstractController " << this->getName() << "> No mapped configuration found for " << name) << std::endl;
-      return NULL;
-    }
-    
-    this->managedComponent->getConfiguration(iter->second.c_str());
-    return this->managedComponent->getConfiguration(iter->second.c_str());
-  }
-  
-  /**
-   * \brief Setter to specify if controller should use "kill" by preemption
-   */
-  void Controller::setPreemptionStrategy(bool kill){
-    this->kill = kill;
+  void Controller::signalResume(){
+    this->scheduler->signalResume();
   }
   
   /**
    * \brief Getter to determine which preemption mode is used
    */
   bool Controller::preemptByKill(){
-    return this->kill;
+    return this->scheduler->preemptByKill();
   }
   
+  /**
+   * \brief 
+   */
+  Decision Controller::getDecision(int pid) {
+    return this->decisions[pid];
+  }
+ 
+  void Controller::signalTaskEvent(ProcessControlBlock* pcb){
+    this->scheduler->signalTaskEvent(pcb);
+  }
   
 }
