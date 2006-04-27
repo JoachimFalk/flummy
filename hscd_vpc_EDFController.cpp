@@ -13,7 +13,7 @@ namespace SystemC_VPC{
   EDFController::~EDFController(){}
     
   /**
-   * \brief Implementation of PreempetivController::addTasksToSchedule
+   * \brief Implementation of PriorityController::addTasksToSchedule
    */
   void EDFController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
     this->waitInterval = NULL;
@@ -43,50 +43,6 @@ namespace SystemC_VPC{
     this->nextConfigurations.sort();
     
   }
-  
-  /*
-  void EDFController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
-    this->waitInterval = NULL;
-
-#ifdef VPC_DEBUG
-        std::cerr << YELLOW("EDFController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
-#endif //VPC_DEBUG
-
-    // add all task to processing list
-    ProcessControlBlock* pcb;
-    bool newElems = newTasks.size() > 0;
-    
-    while(newTasks.size() > 0){
-      pcb = newTasks.front();
-      this->tasksToProcess.push(pcb);
-      // determine configuration and add EDF of task to configuration
-      std::map<std::string, std::string>::iterator iter = this->mapping_map_configs.find(pcb->getName());
-      if(iter == this->mapping_map_configs.end()){
-        std::cerr << RED("EDFController " << this->getName() << "> No mapped configuration found for " << pcb->getName()) << std::endl; 
-      }else{
-        //get configuration from managed component
-        Configuration* config = this->getManagedComponent()->getConfiguration(iter->second.c_str());
-        
-        std::list<EDFListElement<Configuration* > >::iterator iter;
-        
-        iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
-        // if configuration is not in scheduling list add it
-        if(iter == this->nextConfigurations.end()){
-          this->nextConfigurations.push_back(EDFListElement<Configuration* >(config, pcb->getDeadline(), order_count++));
-        }else{
-          iter->addDeadline(pcb->getDeadline());
-        }
-        
-      }
-      
-      newTasks.pop_front();  
-    }
-    
-    if(newElems) {
-      //finally sort EDF list
-      this->nextConfigurations.sort();
-    }
-  }*/
   
   /*
    * \brief Implementation of EDFController::getNextConfiguration

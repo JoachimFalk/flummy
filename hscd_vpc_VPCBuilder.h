@@ -27,6 +27,9 @@
 
 #include "hscd_vpc_AbstractController.h"
 #include "hscd_vpc_AbstractBinder.h"
+#include "hscd_vpc_AbstractConfigurationMapper.h"
+#include "hscd_vpc_AbstractConfigurationScheduler.h"
+
 #include "hscd_vpc_Configuration.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -48,17 +51,21 @@ namespace SystemC_VPC{
     XMLCh* resourcesStr;
     XMLCh* mappingsStr;
     XMLCh* componentStr;
+    XMLCh* recomponentStr;
     XMLCh* mappingStr;
     XMLCh* attributeStr;
     XMLCh* configurationStr;
-    XMLCh* switchtimesStr;
-    XMLCh* switchtimeStr;
     XMLCh* defaultConfStr;
     XMLCh* templateSectionStr;
     XMLCh* templateStr;
     XMLCh* refTemplateStr;
+    XMLCh* controllerStr;
+    XMLCh* binderStr;
+    XMLCh* mapperStr;
+    XMLCh* schedulerStr;
     //XMLCh *Str;
-    
+   
+    // tags for attributes 
     XMLCh* nameAttrStr;
     XMLCh* countAttrStr;
     XMLCh* typeAttrStr;
@@ -118,15 +125,18 @@ namespace SystemC_VPC{
       resourcesStr    = XMLString::transcode("resources");
       mappingsStr     = XMLString::transcode("mappings");
       componentStr    = XMLString::transcode("component");
+      recomponentStr  = XMLString::transcode("recomponent");
       mappingStr      = XMLString::transcode("mapping");
       attributeStr    = XMLString::transcode("attribute");
       configurationStr= XMLString::transcode("configuration");
-      switchtimesStr  = XMLString::transcode("switchtimes");
-      switchtimeStr   = XMLString::transcode("switchtime");
       defaultConfStr  = XMLString::transcode("defaultconfiguration");
       templateSectionStr    = XMLString::transcode("templates");
       templateStr     = XMLString::transcode("template");
       refTemplateStr  = XMLString::transcode("reftemplate");
+      controllerStr   = XMLString::transcode("controller");
+      binderStr       = XMLString::transcode("binder");
+      mapperStr       = XMLString::transcode("mapper");
+      schedulerStr    = XMLString::transcode("scheduler");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");
@@ -244,11 +254,15 @@ namespace SystemC_VPC{
     
     /**
      * \brief Generates controller instance for Component
-     * \param type specifies type of controller to instantiate
      * \param id is the id to be set for the controller     
      */
-    AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
-  
+    //AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
+    AbstractController* generateController(const char* id) throw(InvalidArgumentException);
+    
+    AbstractBinder* generateBinder(const char* type, DOMNode* node)throw(InvalidArgumentException);
+    AbstractConfigurationMapper* generateMapper(const char* type, DOMNode* node)throw(InvalidArgumentException);
+    AbstractConfigurationScheduler* generateConfigScheduler(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
+
   };
     
 }

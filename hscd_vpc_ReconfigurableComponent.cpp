@@ -47,16 +47,6 @@ namespace SystemC_VPC{
 
     delete this->controller;
 
-    /*
-    std::map<std::string, Configuration*>::iterator iter;
-    for(iter = this->config_map_by_name.begin();
-        iter != this->config_map_by_name.end(); iter++){
-
-      delete iter->second;
-    }
-
-    this->config_map_by_name.clear();
-    */
   }
 
   /**
@@ -355,26 +345,9 @@ namespace SystemC_VPC{
       std::cerr << "ReconfigurableComponent> Unable to set activ configuration to " << name << " due to " << e.what() << std::endl;
     }
 
-    std::cerr << "ReconfigurableComponent> new activ Configuration is " << this->activConfiguration->getName() << " with id " << this->activConfiguration->getID() << std::endl;
-    /*
-    std::map<std::string, Configuration* >::iterator newConfig;
-    newConfig = this->config_map_by_name.find(name);
-    
-    //check if request configuration exists
-    if(newConfig != this->config_map_by_name.end()){
-
-      this->activConfiguration = newConfig->second;
-
-      // activate new configration
-      this->activConfiguration->resume();
-
 #ifdef VPC_DEBUG
-      std::cerr << "ReconfigurableComponent> activ Configuration " << this->activConfiguration->getName() << " is activ "
-        << this->activConfiguration->isActiv() << std::endl;
+    std::cerr << "ReconfigurableComponent> new activ Configuration is " << this->activConfiguration->getName() << " with id " << this->activConfiguration->getID() << std::endl;
 #endif //VPC_DEBUG
-
-    }
-    */
   }
 
   /**

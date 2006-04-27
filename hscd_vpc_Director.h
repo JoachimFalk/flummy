@@ -31,6 +31,7 @@
 namespace SystemC_VPC{
 
   class AbstractBinder;
+  class StaticBinder;
   class ProcessControlBlock;
   class Constraint;
 
@@ -69,7 +70,7 @@ namespace SystemC_VPC{
     double end;
  
     // binder instance to resolve bindings
-    AbstractBinder* binder;
+    StaticBinder* binder;
 
   public:
     bool FALLBACKMODE;

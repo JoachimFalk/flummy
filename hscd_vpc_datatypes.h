@@ -11,7 +11,74 @@
 #include "hscd_vpc_ProcessControlBlock.h"
 
 namespace SystemC_VPC {
+
+  using std::string;
+
+  // set for debugging output
+  //#define VPC_DEBUG true;
+
 #define VPC_MAX_STRING_LENGTH 128
+
+  /**********************************
+   * SECTION Tags config file
+   **********************************/
+
+#define STR_VPC_MEASURE_FILE "measure.xml"
+#define STR_VPC_RESULT_FILE "result"
+#define STR_VPC_CONF_FILE "config"
+
+
+  /**********************************
+   * SECTION task states
+   **********************************/
+
+#define S_BLOCKED 'b'
+#define S_READY   'w'
+#define S_RUNNING 'R'
+  // extension definition for tracing task state
+#define S_SUSPENDED 's'
+#define S_KILLED 'k'
+
+  // definition for tracing configurations state
+#define S_ACTIV 'A'
+#define S_PASSIV 'P'
+#define S_CONFIG 'c'
+
+
+  // definition for hiding cosupport as vpc_event
+  typedef CoSupport::SystemC::Event VPC_Event;
+  typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
+
+
+  /***********************************
+   * SECTION component types
+   ***********************************/
+
+#define STR_VPC_THREADEDCOMPONENTSTRING "threaded"
+#define STR_VPC_COMPONENTSTRING "normal"
+#define STR_VPC_RECONFIGURABLECOMPONENTSTRING "reconfigurable"
+
+  /***********************************
+   * SECTION controller types
+   ***********************************/
+
+#define STR_VPC_CONTROLLER  "controller"
+
+  /***********************************
+   * SECTION binder types
+   ***********************************/
+
+  // definition for SimpleBinder instance
+#define STR_VPC_SIMPLEBINDER "SimpleBinder"
+#define STR_VPC_SB           "SB"
+  // definition for RoundRobinBinder instance
+#define STR_VPC_RRBINDER     "RoundRobin"
+#define STR_VPC_RRB          "RR"
+
+  /***********************************
+   * SECTION Scheduler
+   ***********************************/
+
 #define STR_ROUNDROBIN "RoundRobin"
 #define STR_RR "RR"
 #define STR_PRIORITYSCHEDULER "PriorityScheduler"
@@ -20,47 +87,22 @@ namespace SystemC_VPC {
 #define STR_RM "RM"
 #define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServe"
 #define STR_FCFS "FCFS"
-
-  /************************/
-  /*  EXTENSION SECTION   */
-  /************************/
-
+  // definition for EarliestDeadlineFirst scheduler
 #define STR_EARLIESTDEADLINEFIRST "EarliestDeadlineFirst"
 #define STR_EDF "EDF"
 
-// extension definition for tracing task state
-#define S_SUSPENDED 's'
-#define S_KILLED 'k'
+  /***********************************
+   * SECTION attribute values
+   ***********************************/
 
-// definitions for configuration file parsing
-#define STR_VPC_RECONFIGURABLECOMPONENTSTRING "reconfigurable"
-
-// definition for tracing configurations state
-#define S_ACTIV 'A'
-#define S_PASSIV 'P'
-#define S_CONFIG 'c'
-
-// definition for hiding cosupport as vpc_event
-typedef CoSupport::SystemC::Event VPC_Event;
-typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
-  
-// set for debugging output
-//#define VPC_DEBUG true;
-  
-  /**************************/
-  /*  END OF EXTENSION      */
-  /**************************/
-
-#define STR_VPC_MEASURE_FILE "measure.xml"
-#define STR_VPC_RESULT_FILE "result"
-#define STR_VPC_CONF_FILE "config"
-
-#define STR_VPC_THREADEDCOMPONENTSTRING "threaded"
-#define STR_VPC_COMPONENTSTRING "normal"
 #define STR_VPC_DELAY "delay"
 #define STR_VPC_PRIORITY "priority"
 #define STR_VPC_PERIOD "period"
 #define STR_VPC_DEADLINE "deadline"
+
+  /***********************************
+   * SECTION Defs for debugging
+   ***********************************/
 
 #define RED(str) "\e[31;1m" <<str<< "\e[0m"
 #define GREEN(str) "\e[32;1m" <<str<< "\e[0m"
@@ -70,57 +112,16 @@ typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
 #define VPC_ERROR __FILE__<<":"<<__LINE__<<"\e[1;31;40mVPC: ERROR> " 
 #define NORMAL "\e[0m"
 #define NENDL "\e[0m"<<endl;
+
+  /***********************************
+   * SECTION Def for Adaption to Modes
+   ***********************************/
+
 #ifdef MODES_EVALUATOR
 #define  NO_VCD_TRACES
 #endif // MODES_EVALUATOR
- 
 
-  using std::string;
 
-#define S_BLOCKED 'b'
-#define S_READY   'w'
-#define S_RUNNING 'R'
-
-  //enum trace_value {blocked,ready,running};
-
-/*
-  struct p_queue_entry{
-    int fifo_order;  // sekund?rstrategie
-    ProcessControlBlock *pcb;
-  };
-  
-  struct p_queue_compare{
-    bool operator()(const p_queue_entry& pqe1,
-        const p_queue_entry& pqe2) const
-    {
-      int p1=pqe1.pcb->getPriority();
-      int p2=pqe2.pcb->getPriority();
-      if (p1 > p2)
-  return true;
-      else if(p1 == p2)
-  return (pqe1.fifo_order>pqe2.fifo_order);
-      else 
-  return false;
-    }
-    
-  };
-
-  struct rm_queue_compare{
-    bool operator()(const p_queue_entry& pqe1,
-        const p_queue_entry& pqe2) const
-    {
-      double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
-      double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
-      if (p1 > p2)
-  return true;
-      else if(p1 == p2)
-  return (pqe1.fifo_order>pqe2.fifo_order);
-      else 
-  return false;
-    }
-    
-  };
-*/
   enum action_command { ASSIGN,RESIGN,BLOCK,READY};
 
   typedef struct{
@@ -129,4 +130,4 @@ typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
   }action_struct;
 
 } // namespace SystemC_VPC
-#endif
+#endif // HSCD_VPC_P_STRUCT_H

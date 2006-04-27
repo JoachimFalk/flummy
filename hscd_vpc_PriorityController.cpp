@@ -10,7 +10,7 @@ namespace SystemC_VPC{
   PriorityController::~PriorityController(){}
 
   /**
-   * \brief Implementation of PreempetivController::addTasksToSchedule
+   * \brief Implementation of PriorityController::addTasksToSchedule
    */
   void PriorityController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
     this->waitInterval = NULL;
@@ -40,49 +40,6 @@ namespace SystemC_VPC{
     this->nextConfigurations.sort();
 
   }
-
-  /*
-     void PriorityController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
-     this->waitInterval = NULL;
-
-#ifdef VPC_DEBUG
-std::cerr << YELLOW("PriorityController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
-#endif //VPC_DEBUG
-
-  // add all task to processing list
-  ProcessControlBlock* pcb;
-  bool newelems = newTasks.size() > 0;
-
-  while(newTasks.size() > 0){
-  pcb = newTasks.front();
-  this->tasksToProcess.push(pcb);
-  // determine configuration and add priority of task to configuration
-  std::map<std::string, std::string>::iterator iter = this->mapping_map_configs.find(pcb->getName());
-  if(iter == this->mapping_map_configs.end()){
-  std::cerr << RED("PriorityController " << this->getName() << "> No mapped configuration found for " << pcb->getName()) << std::endl; 
-  }else{
-  //get configuration from managed component
-  Configuration* config = this->getManagedComponent()->getConfiguration(iter->second.c_str());
-
-  std::list<PriorityListElement<Configuration* > >::iterator iter;
-
-  iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
-  // if configuration is not in scheduling list add it
-  if(iter == this->nextConfigurations.end()){
-  this->nextConfigurations.push_back(PriorityListElement<Configuration* >(config, pcb->getPriority(), order_count++));
-  }else{
-  iter->addPriority(pcb->getPriority());
-  }
-
-  }
-
-  newTasks.pop_front();  
-  }
-
-  if(newelems){
-  this->nextConfigurations.sort();
-  }
-  }*/
 
   /*
    * \brief Implementation of PriorityController::getNextConfiguration

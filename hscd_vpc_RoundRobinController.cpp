@@ -24,9 +24,9 @@ namespace SystemC_VPC{
 
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
 
-//#ifdef VPC_DEBUG
+#ifdef VPC_DEBUG
       std::cerr << BLUE("RoundRobinController> set property for timeslice = ") << value << std::endl;
-//#endif //VPC_DEBUG
+#endif //VPC_DEBUG
 
       char *domain;
       domain=strstr(value,"ns");
@@ -41,7 +41,7 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of PreempetivController::addTaskToSchedule
+   * \brief Implementation of PriorityController::addTaskToSchedule
    */
   void RoundRobinController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
     this->waitInterval = NULL;
@@ -94,65 +94,7 @@ namespace SystemC_VPC{
       this->waitInterval = new sc_time(this->TIMESLICE-(sc_simulation_time()-this->lastassign), true);
     }
   }
-  /*
-  void RoundRobinController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
-    this->waitInterval = NULL;
-
-#ifdef VPC_DEBUG
-        std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
-#endif //VPC_DEBUG
-    
-    ProcessControlBlock* currTask = NULL;
-    
-    // add all tasks to running ones and processing list
-    while(newTasks.size() > 0){
-      currTask = newTasks.front();
-      // add to internal structures
-      this->tasksToProcess.push(currTask);
-      
-      newTasks.pop_front();
-      
-      // determine if new configuration has to be added to scheduling list
-      std::string confid = this->mapping_map_configs[currTask->getName()];
-      Configuration* reqConf = this->getManagedComponent()->getConfiguration(confid.c_str());
-    
-      std::deque<RRElement>::iterator  iter;
-      iter = std::find(this->rr_configfifo.begin(), this->rr_configfifo.end(), RRElement(reqConf));
-      // if configuration not added yet do so
-      if(iter == this->rr_configfifo.end()){
-        this->rr_configfifo.push_back(RRElement(reqConf, 1));
-      }else{ // else increase count of running task on configuration
-        (*iter)++;
-      }
-    
-    }
-    
-    this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
-    this->lastassign = sc_simulation_time();
-  
-    // configuration has to be switched if timeslice elapsed or no configuration scheduled yet
-    if(this->remainingSlice <= 0 || this->scheduledConfiguration == NULL){
-
-#ifdef VPC_DEBUG
-        std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
-#endif //VPC_DEBUG
-
-      this->switchConfig = true;
-      
-    }
-
-    // as long as there are configs to schedule -> initiate awake of component some time later
-    if(this->scheduledConfiguration != NULL){
-        
-#ifdef VPC_DEBUG
-      std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> timeslice lasts: "
-            << this->TIMESLICE-(sc_simulation_time()-this->lastassign) << " at: ") << sc_simulation_time() << endl;
-#endif //VPC_DEBUG
-  
-      this->waitInterval = new sc_time(this->TIMESLICE-(sc_simulation_time()-this->lastassign), true);
-    }
-  }*/
-   
+     
   /*
    * \brief Implementation of RoundRobinController::getNextConfiguration
    */  
@@ -266,28 +208,6 @@ namespace SystemC_VPC{
       std::cerr << YELLOW("RoundRobinController> configuration to be updated not in managed list!");
     }
     
-    /*
-    std::deque<RRElement>::iterator iter;
-    std::string confid = this->mapping_map_configs[pcb->getName()];
-    Configuration* conf = this->getManagedComponent()->getConfiguration(confid.c_str());
-    
-    // update management structure
-    iter = std::find(this->rr_configfifo.begin(), this->rr_configfifo.end(), RRElement(conf));
-    if(iter != this->rr_configfifo.end()){
-      // if this task is last one running on configuration remove conf
-      if(*iter == 1){
-        if(this->scheduledConfiguration != NULL && iter->getConfiguration() == this->scheduledConfiguration->getConfiguration()){
-          this->scheduledConfiguration = NULL;
-        }
-        this->rr_configfifo.erase(iter);
-      }else{
-        // else just decrease count of running task on configuration
-        (*iter)--;
-      }
-    }else{
-      std::cerr << YELLOW("RoundRobinController> configuration to be updated not in managed list!");
-    }
-    */
   }
   
   /**
@@ -314,26 +234,6 @@ namespace SystemC_VPC{
         
       this->lastassign += nextConfiguration->getLoadTime().to_default_time_units();
     }
- 
-    /*
-    this->lastassign = sc_simulation_time();
-    
-    if(nextConfiguration != this->getManagedComponent()->getActivConfiguration()){
-      sc_time time;
-      if(this->getManagedComponent()->getActivConfiguration() != NULL){
-        time = this->getManagedComponent()->getActivConfiguration()->timeToPreempt();
-        this->lastassign += time.to_default_time_units();
-        if(!this->preemptByKill()){
-          this->lastassign += this->getManagedComponent()->getActivConfiguration()->getStoreTime().to_default_time_units();
-        }
-      }
-      
-      time = nextConfiguration->timeToResume();
-      this->lastassign += time.to_default_time_units();
-        
-      this->lastassign += nextConfiguration->getLoadTime().to_default_time_units();
-    }
-    */
 #ifdef VPC_DEBUG
     std::cerr << YELLOW("RoundRobinController> time of last assignment set to: "<< this->lastassign) << std::endl;
 #endif //VPC_DEBUG

@@ -11,7 +11,7 @@
 namespace SystemC_VPC {
 
   class UnknownBindingException : public std::exception {
-  
+
     private:
 
       std::string msg;
@@ -32,37 +32,19 @@ namespace SystemC_VPC {
       }
 
   };
-  
+
   class AbstractBinder {
 
     protected:
 
-      std::map<std::string, AbstractBinding*> bindings;  
-
-      AbstractBinding& getBinding(std::string& task) throw(UnknownBindingException){
-
-        std::map<std::string, AbstractBinding* >::iterator iter;
-        iter = bindings.find(task);
-        if(iter != bindings.end() && iter->second != NULL){
-          return *(iter->second);
-        }
-
-        std::string msg = task + "->?";
-        throw UnknownBindingException(msg);
-
-      }
-
+      /**
+       * \brief Used internally for accessing managed Bindings
+       */
+      virtual AbstractBinding& getBinding(std::string& task, AbstractComponent* comp)=0;
+    
     public:
 
-      virtual ~AbstractBinder(){
-
-        std::map<std::string, AbstractBinding*>::iterator iter;
-
-        for(iter = bindings.begin(); iter != bindings.end(); iter++){
-          delete iter->second;
-        }
-
-      }
+      virtual ~AbstractBinder(){}
 
       virtual std::string resolveBinding(std::string task, AbstractComponent* comp) throw(UnknownBindingException) =0;
 
@@ -79,8 +61,48 @@ namespace SystemC_VPC {
 
   };
 
-  class StaticBinder : public AbstractBinder{
+  class LocalBinder : public AbstractBinder {
 
+    protected:
+
+      std::map<std::string, AbstractBinding*> bindings;  
+
+      /**
+       * \brief Implementation of getBinding intended to enable access to managed Bindings
+       * As this implementation only covers resolving  binding on single hierarchy the information
+       * of requesting component is neglected and set to NULL by default.
+       */
+      AbstractBinding& getBinding(std::string& task, AbstractComponent* comp=NULL) throw(UnknownBindingException){
+
+        std::map<std::string, AbstractBinding* >::iterator iter;
+        iter = bindings.find(task);
+        if(iter != bindings.end() && iter->second != NULL){
+          return *(iter->second);
+        }
+
+        std::string msg = task + "->?";
+        throw UnknownBindingException(msg);
+
+      }
+    
+    public:
+
+      virtual ~LocalBinder() {
+      
+        std::map<std::string, AbstractBinding*>::iterator iter;
+
+        for(iter = bindings.begin(); iter != bindings.end(); iter++){
+          delete iter->second;
+        }
+
+      }
+  
+  };
+  /**
+   * \brief Base class for all Binder using only one binding possibility to perfom task binding
+   */
+  class StaticBinder : public LocalBinder{
+    
     public:
 
       virtual ~StaticBinder() {}
@@ -117,19 +139,22 @@ namespace SystemC_VPC {
 
 
   };
-  
-  class DynamicBinder : public AbstractBinder{
+
+  /**
+   * \brief Base class for all Binder using multiple binding possibilities to perform task binding
+   */
+  class DynamicBinder : public LocalBinder{
 
     public:
-    
-    virtual ~DynamicBinder() {}
+
+      virtual ~DynamicBinder() {}
 
       virtual void registerBinding(std::string src, std::string target){
 
 #ifdef VPC_DEBUG
         std::cerr << "DynamicBinder> registerBinding " << src << " <-> " << target << std::endl;
 #endif //VPC_DEBUG
-        
+
         std::map<std::string, AbstractBinding* >::iterator iter;
         iter = bindings.find(src);
         if(iter != bindings.end() && iter->second != NULL) {
@@ -139,7 +164,7 @@ namespace SystemC_VPC {
           b->addBinding(target);
           bindings[b->getSource()] = b;
         }
-        
+
       }
 
       /**

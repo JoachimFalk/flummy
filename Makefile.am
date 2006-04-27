@@ -111,6 +111,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_PCBPool.cpp			\
 	hscd_vpc_Bindings.cpp			\
 	hscd_vpc_SimpleBinder.cpp		\
+	hscd_vpc_RRBinder.cpp			\
 	hscd_vpc_ConfigurationPool.cpp		\
 	hscd_vpc_ConfigurationScheduler.cpp	\
 	hscd_vpc_Term.cpp			
