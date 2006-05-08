@@ -109,7 +109,6 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
           wait(*minTimeToWait, this->notify_schedule_thread | this->notify_preempt);
-          delete minTimeToWait;
           minTimeToWait = NULL;
 
         }

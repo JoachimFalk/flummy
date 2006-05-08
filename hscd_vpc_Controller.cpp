@@ -1,4 +1,4 @@
-#include <hscd_vpc_Controller.h>
+#include "hscd_vpc_Controller.h"
 
 namespace SystemC_VPC{
   
@@ -29,7 +29,16 @@ namespace SystemC_VPC{
         setProperty(key,value);
       }
     }
-    
+   
+    this->miMapper = new MIMapper(); 
+  }
+
+  Controller::~Controller(){
+ 
+    delete this->binder;
+    delete this->scheduler;
+    delete this->miMapper;
+
   }
   
   /**
@@ -100,12 +109,14 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Controller::registerMapping
    */
-  void Controller::registerMapping(const char* taskName, const char* compName){
+  void Controller::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo){
     
 #ifdef VPC_DEBUG
     std::cerr << "Controller> registerMapping(" << taskName << ", " << compName << ")" << std::endl;
 #endif //VPC_DEBUG
     this->binder->registerBinding(taskName, compName);
+
+    this->miMapper->addMappingInformation(compName, mInfo);
     
   }
   
@@ -133,7 +144,7 @@ namespace SystemC_VPC{
     while(newTasks.size() > 0){
       ProcessControlBlock* pcb = newTasks.front();
       // determine current binding of task
-      std::string comp = this->binder->resolveBinding(pcb->getName(), this->managedComponent);
+      std::string comp = this->binder->resolveBinding(*pcb, this->managedComponent);
       // determine corresponding configuration of bound component
       unsigned int configID = this->mapper->getConfigForComp(comp);
       // register task and configuration for scheduling
@@ -185,16 +196,8 @@ namespace SystemC_VPC{
       return this->managedComponent->getConfiguration(d.conf)->getComponent(d.comp);
     }
     return NULL;
-    /*
-     // determine requied configuration
-    std::string configName = this->mapping_map_configs[task->getName()];
-    Configuration* conf = this->managedComponent->getConfiguration(configName.c_str());
-    // get mapped component from configuration
-    AbstractComponent* comp = conf->getComponent((this->mapping_map_component_ids[task->getName()]).c_str());
-    
-    return comp;
-    */
-   }
+   
+  }
   
   /**
     * \brief Dummy implementation of Controller::signalPreemption
@@ -223,9 +226,31 @@ namespace SystemC_VPC{
   Decision Controller::getDecision(int pid) {
     return this->decisions[pid];
   }
- 
-  void Controller::signalTaskEvent(ProcessControlBlock* pcb){
-    this->scheduler->signalTaskEvent(pcb);
+
+  MIMapper* Controller::getMIMapper(){
+   return this->miMapper;
   }
+
+  void Controller::signalTaskEvent(ProcessControlBlock* pcb){
+    
+    this->binder->signalTaskEvent(pcb);
+    this->scheduler->signalTaskEvent(pcb);
   
+     
+    // if task has been killed and controlled instance is not killed solve decision here
+    if(pcb->getState() == activation_state(aborted) && !this->managedComponent->hasBeenKilled()){
+      // recompute
+      this->managedComponent->compute(pcb);
+    }else{
+      this->managedComponent->notifyParentController(pcb);
+    }
+        
+#ifdef VPC_DEBUG
+    if(pcb->getState() == activation_state(aborted)){
+      std::cerr << YELLOW("Controller " << this->getName() << "> task: " << pcb->getName() << " got killed!")  << std::endl;
+    }
+#endif //VPC_DEBUG
+ 
+  }
+ 
 }

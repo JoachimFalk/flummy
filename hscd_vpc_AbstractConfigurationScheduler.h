@@ -2,6 +2,7 @@
 #define HSCD_VPC_ABSTRACTCONFIGURATIONSCHEDULER_H_
 
 #include "hscd_vpc_ProcessControlBlock.h"
+#include "hscd_vpc_TaskEventListener.h"
 
 namespace SystemC_VPC {
   
@@ -10,7 +11,7 @@ namespace SystemC_VPC {
   /**
    * \brief Abstract class specify necessary interface of an configuration scheduler
    */
-  class AbstractConfigurationScheduler {
+  class AbstractConfigurationScheduler : public virtual TaskEventListener {
 
     public:
 
@@ -18,7 +19,6 @@ namespace SystemC_VPC {
        * \brief Default constructor
        * \param controller specifies associated controller instance of scheduler
        */
-
       AbstractConfigurationScheduler() {}
 
       virtual ~AbstractConfigurationScheduler() {}
@@ -67,11 +67,6 @@ namespace SystemC_VPC {
        * to be simulated.
        */
       virtual ProcessControlBlock* getNextTask()=0;
-
-      /**
-       * \brief Callback Mehtode used to inform Controller about task state
-       */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb)=0;
 
       virtual sc_time* getWaitInterval()=0;
 

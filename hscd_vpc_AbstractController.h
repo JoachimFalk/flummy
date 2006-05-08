@@ -13,9 +13,10 @@
 #include "hscd_vpc_AbstractConfigurationMapper.h"
 #include "hscd_vpc_AbstractConfigurationScheduler.h"
 
+#include "hscd_vpc_TaskEventListener.h"
+
 #include "hscd_vpc_Configuration.h"
 #include "hscd_vpc_datatypes.h"
-#include "hscd_vpc_TaskEventListener.h"
 
 #include <hscd_vpc_InvalidArgumentException.h>
 
@@ -47,15 +48,19 @@ namespace SystemC_VPC{
      * \brief Getter for controller name
      */
     virtual char* getName()=0;
+
     
     virtual AbstractBinder* getBinder()=0;
+    virtual AbstractConfigurationMapper* getConfigurationMapper()=0;
+    virtual AbstractConfigurationScheduler* getConfigurationScheduler()=0;
+    
+/*
     virtual void setBinder(AbstractBinder* binder)=0;
     
-    virtual AbstractConfigurationMapper* getConfigurationMapper()=0;
     virtual void setConfigurationMapper(AbstractConfigurationMapper* mapper)=0;
     
-    virtual AbstractConfigurationScheduler* getConfigurationScheduler()=0;
     virtual void setConfigurationScheduler(AbstractConfigurationScheduler* scheduler)=0;
+*/
     
     /**
      * \brief Sets the currently controlled reconfigurable Component of instance

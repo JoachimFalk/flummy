@@ -12,6 +12,9 @@
 
 namespace SystemC_VPC {
 
+  // for debugging purposes
+//#define DELETE std::cerr << "delete called in " << __FILE__ << " at line " << __LINE__ << std::endl; delete
+
   using std::string;
 
   // set for debugging output
@@ -74,7 +77,17 @@ namespace SystemC_VPC {
   // definition for RoundRobinBinder instance
 #define STR_VPC_RRBINDER     "RoundRobin"
 #define STR_VPC_RRB          "RR"
+//definition for PriorityBinder using LeastCurrentlyBoundPE
+#define STR_VPC_LCBBINDER    "LeastCurrentlyBoundBinder"
+#define STR_VPC_LCBB         "LCBB"
+ 
+  /***********************************
+   * SECTION Mapper
+   ***********************************/
 
+  //definition yet used as no special mapper is implemented
+#define STR_NONE  "NONE"
+  
   /***********************************
    * SECTION Scheduler
    ***********************************/

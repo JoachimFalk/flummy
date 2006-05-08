@@ -44,7 +44,6 @@ namespace SystemC_VPC{
    * \brief Implementation of PriorityController::addTaskToSchedule
    */
   void RoundRobinController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
-    this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("RoundRobinController "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
@@ -69,6 +68,8 @@ namespace SystemC_VPC{
    */
   void RoundRobinController::performSchedule(){
     
+    delete this->waitInterval; 
+    this->waitInterval = NULL;
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
     this->lastassign = sc_simulation_time();
   
@@ -84,7 +85,7 @@ namespace SystemC_VPC{
     }
 
     // as long as there are configs to schedule -> initiate awake of component some time later
-    if(this->scheduledConfiguration != NULL){
+    if(this->rr_configfifo.size() > 0){ //scheduledConfiguration != NULL){
         
 #ifdef VPC_DEBUG
       std::cerr << YELLOW("RoundRobinController "<< this->getController().getName() <<"> timeslice lasts: "
@@ -158,20 +159,6 @@ namespace SystemC_VPC{
     // remove running task out of registry
     this->updateUsedConfigurations(pcb);
     
-    // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->getState() == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
-      // recompute
-      this->getManagedComponent()->compute(pcb);
-    }else{
-      this->getManagedComponent()->notifyParentController(pcb);
-    }
-        
-#ifdef VPC_DEBUG
-    if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("RoundRobinController> task: " << pcb->getName() << " got killed!")  << std::endl;
-    }
-#endif //VPC_DEBUG
-      
     // if there are no running task on configuration wakeUp ReconfigurableComponent
     if(this->scheduledConfiguration == NULL && this->rr_configfifo.size() > 0){
 

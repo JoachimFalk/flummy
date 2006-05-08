@@ -19,7 +19,7 @@ namespace SystemC_VPC {
       /**
        * \brief Default constructor
        */
-      RRBinder();
+      RRBinder(Controller* controller, MIMapper* miMapper);
 
       ~RRBinder();
       
@@ -29,8 +29,13 @@ namespace SystemC_VPC {
        * \param comp refers to the component requesting resolving, which is ignored in this implementation
        * \sa AbstractBinder
        */
-      virtual std::string resolveBinding(std::string task, AbstractComponent* comp) throw(UnknownBindingException);
-      
+      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException);
+     
+      /**
+       * \brief Implementation of TaskEventListener::signalTaskEvent
+       * Dummy implementation as strategy is independent of task events
+       */
+      void signalTaskEvent(ProcessControlBlock* pcb); 
   };
 
 }

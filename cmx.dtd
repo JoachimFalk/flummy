@@ -33,7 +33,7 @@ type CDATA #REQUIRED>
 
 <!ELEMENT controller (binder, mapper, scheduler)>
 <!ATTLIST controller
-name  CDATA "Controller">
+name  CDATA "controller">
 
 <!ELEMENT binder (attribute)*>
 <!ATTLIST binder

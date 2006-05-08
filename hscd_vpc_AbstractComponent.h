@@ -78,7 +78,7 @@ namespace SystemC_VPC{
   
     // points to direct associated controlling instance
     TaskEventListener* parentControlUnit;
-  
+
   public:
   
     AbstractComponent(sc_module_name name) : sc_module(name){

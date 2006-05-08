@@ -27,12 +27,13 @@
 
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_SimpleBinder.h"
+#include "hscd_vpc_MIMapper.h"
+
 
 namespace SystemC_VPC{
 
   
-  std::auto_ptr<Director> Director::singleton(new Director());
- 
+  std::auto_ptr<Director> Director::singleton(new Director()); 
 
   /**
    *
@@ -57,11 +58,11 @@ namespace SystemC_VPC{
   /**
    *
    */
-  Director::Director() : end(0){
+  Director::Director() : end(0), miMapper(new MIMapper()) {
     
     VPCBuilder builder((Director*)this);
     
-    this->binder = new SimpleBinder(); 
+    this->binder = new SimpleBinder(NULL, this->miMapper); 
  
     builder.buildVPC();
 
@@ -132,11 +133,14 @@ namespace SystemC_VPC{
     map<string,AbstractComponent*>::iterator it = component_map_by_name.begin();
     
     while(it != component_map_by_name.end()){
-    delete it->second;
-    it++;
+      delete it->second;
+      it++;
     }
     
     component_map_by_name.clear();
+   
+    delete this->binder;
+    delete this->miMapper;
     
     //clear ProcessControlBlocks
     /*
@@ -152,14 +156,13 @@ namespace SystemC_VPC{
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
     if(!FALLBACKMODE){
       
-      return this->pcbPool.allocate(name);
-      /*
-      if(1!=pcb_map_by_name.count(name)){
-        cerr << "VPC> No ProcessControlBlock found for task \"" << name << "\"" << endl;
-        exit(0);
+      try{ 
+        return this->pcbPool.allocate(name);
+      }catch(NotAllocatedException& e){
+        std::cerr << "Director> getProcessControlBlock failed due to" << std::endl
+          << e.what() << std::endl;
+        exit(-1);
       }
-      return pcb_map_by_name[name];
-      */
     }else{
 
       try{
@@ -171,27 +174,15 @@ namespace SystemC_VPC{
         p.setPeriod(2800.0);
         return this->pcbPool.allocate(name);
       }
-      /*
-      if(1==pcb_map_by_name.count(name)){
-        return pcb_map_by_name[name];
-      }else{
-        //create fallback pcb
-        ProcessControlBlock *p=new ProcessControlBlock(name);
-        p->setPriority(pcb_map_by_name.size()); 
-        p->setDeadline(1000);
-        p->setPeriod(2800.0);
-        //p->pid=pcb_map_by_name.size();//hack to create pid!
-
-        pcb_map_by_name.insert(pair<string,ProcessControlBlock*>(name,p));
-        assert(1==pcb_map_by_name.count(name));
-        return pcb_map_by_name[name]; 
-      }
-      */
     }
   }
 
   PCBPool& Director::getPCBPool(){
     return this->pcbPool;
+  }
+
+  MIMapper* Director::getMIMapper(){
+    return this->miMapper;
   }
 
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
@@ -217,7 +208,7 @@ namespace SystemC_VPC{
       
       try{
         // get Component
-        std::string compName = this->binder->resolveBinding(name, NULL);
+        std::string compName = this->binder->resolveBinding(*pcb, NULL);
         AbstractComponent* comp = this->component_map_by_name.find(compName)->second;
 
 #ifdef VPC_DEBUG
@@ -291,23 +282,12 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::registerMapping
    */
-  void Director::registerMapping(const char* taskName, const char* compName){
-    
+  void Director::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo){
+   
+    // currently ignore mapping info as dynamic binding is only performed on rc level 
     this->binder->registerBinding(taskName, compName);
-    /*  
-    std::map<std::string, AbstractComponent*>::iterator iter;
-    iter = this->component_map_by_name.find(compName);
-    //check if component is known
-    if(iter != this->component_map_by_name.end()){
-
-#ifdef VPC_DEBUG
-      std::cout << "Director: registering mapping: "<< taskName << " <-> " << compName << endl;
-#endif //VPC_DEBUG
-      
-      this->mapping_map_by_name[taskName]= iter->second;
-      
-    }
-      */
+    
+    this->miMapper->addMappingInformation(compName, mInfo); 
   }
     
   /**

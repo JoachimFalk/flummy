@@ -8,7 +8,9 @@
 
 namespace SystemC_VPC{
 
-  class AbstractDirector : public TaskEventListener{
+  class MappingInformation;
+  
+  class AbstractDirector : public virtual TaskEventListener{
   
   public:
     
@@ -27,8 +29,9 @@ namespace SystemC_VPC{
      * \brief Registers mapping between task and component to Director
      * \param taskName specifies name of task
      * \param compName specifies name of component
+     * \param mInfo specifies additional mapping information
      */
-    virtual void registerMapping(const char* taskName, const char* compName)=0;
+    virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo)=0;
     
   };
   

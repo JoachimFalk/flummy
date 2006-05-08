@@ -24,7 +24,6 @@ namespace SystemC_VPC{
    * \brief Implementation of FCFSController::addTasksToSchedule
    */
   void FCFSController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
-    this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("FCFSController "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
@@ -132,20 +131,6 @@ namespace SystemC_VPC{
     
     this->runningTasks.erase(pcb->getPID());
     
-    // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->getState() == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
-      // recompute
-      this->getManagedComponent()->compute(pcb);
-    }else{
-      this->getManagedComponent()->notifyParentController(pcb);
-    }
-
-#ifdef VPC_DEBUG
-    if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("FCFSController> task: " << pcb->getName() << " got killed!")  << std::endl;
-    }
-#endif //VPC_DEBUG
-
     // if there are no running task and still ready its time to wakeUp ReconfigurableComponent
     if(this->runningTasks.size() == 0 && this->readyTasks.size() != 0){
       // ensure that next configuration is reset

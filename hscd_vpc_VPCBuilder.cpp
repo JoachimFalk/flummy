@@ -12,6 +12,9 @@
 
 #include "hscd_vpc_SimpleBinder.h"
 #include "hscd_vpc_RRBinder.h"
+#include "hscd_vpc_PriorityBinder.h"
+
+#include "hscd_vpc_LeastCurrentlyBoundPE.h"
 
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
@@ -382,7 +385,7 @@ namespace SystemC_VPC{
         sType = XMLString::transcode(atts->getNamedItem(VPCBuilder::typeAttrStr)->getNodeValue());
 
         // standard component
-        if(0==strncmp(sType, STR_VPC_RECONFIGURABLECOMPONENTSTRING, sizeof(STR_VPC_RECONFIGURABLECOMPONENTSTRING))){
+        if(0==strncmp(sType, STR_VPC_COMPONENTSTRING, sizeof(STR_VPC_COMPONENTSTRING))){
 
 #ifdef VPC_DEBUG
           std::cerr << "VPCBuilder> Found ReconfigurableComponent name=" << sName << " type=" << sType << endl;
@@ -402,7 +405,13 @@ namespace SystemC_VPC{
 
           comp = new ReconfigurableComponent(sName, controller);
 // >>>>>>>>>>>>>>> here currently setting of Mapper for Controller just to ConfigurationPool
-          controller->setConfigurationMapper(&((ReconfigurableComponent*)comp)->getConfigurationPool());
+          try{
+            Controller* ctrl = dynamic_cast<Controller* >(controller);
+            ctrl->setConfigurationMapper(&((ReconfigurableComponent*)comp)->getConfigurationPool());
+          }catch(std::bad_cast& e){
+            // ignore
+            std::cerr << "VPCBuilder> Warning: " << e.what() << std::endl;
+          }
           this->knownComps.insert(pair<string, AbstractComponent* >(sName, comp));
 
           //this->initConfigurations((ReconfigurableComponent*)comp, node->getFirstChild());
@@ -713,7 +722,12 @@ namespace SystemC_VPC{
           
           //generate new ProcessControlBlock or get existing one for initialization
           ProcessControlBlock& p = this->director->generatePCB(sSource);
-            
+          
+          std::cerr << "VPCBuilder> Generate PCB for " << sSource << " == " << p.getName() << std::endl;
+          
+          //generate new MappingEntry
+          MappingInformation* mInfo = new MappingInformation();
+          
           //walk down hierarchy to attributes
           DOMNode* attnode = node->getFirstChild();
           
@@ -739,20 +753,19 @@ namespace SystemC_VPC{
               if( 0 == strncmp(sType, STR_VPC_PRIORITY, sizeof(STR_VPC_PRIORITY) )){
                 int priority = 0;
                 sscanf(sValue, "%d", &priority);
-                p.setPriority(priority);
+                mInfo->setPriority(priority);
               }else if( 0 == strncmp(sType, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
                 double deadline = 0;
                 sscanf(sValue, "%lf", &deadline);
-                p.setDeadline(deadline);
+                mInfo->setDeadline(deadline);
               }else if( 0 == strncmp(sType, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
                 double period = 0;
                 sscanf(sValue, "%lf", &period);
-                p.setPeriod(period);
+                mInfo->setPeriod(period);
               }else if( 0 == strncmp(sType, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
                 double delay = 0;
                 sscanf(sValue, "%lf", &delay);
-                p.setDelay(delay);
-                p.addFuncDelay(sTarget, NULL, delay);
+                mInfo->addDelay(NULL, delay);
               }else{
 #ifdef VPC_DEBUG
                 std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << sType << " value=" << sValue << endl; 
@@ -766,7 +779,7 @@ namespace SystemC_VPC{
                   std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
                   std::cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
-                  p.addFuncDelay(sTarget, sType, delay);
+                  mInfo->addDelay(sType, delay);
                 } else {
 #ifdef VPC_DEBUG
                   std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
@@ -782,7 +795,7 @@ namespace SystemC_VPC{
 
               char* sKey;
               sKey = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-              this->applyTemplateOnPStruct(&p, sTarget, std::string(sKey, strlen(sKey)));
+              this->applyTemplateOnMappingInformation(*mInfo, sTarget, std::string(sKey, strlen(sKey)));
               XMLString::release(&sKey);
               
             }
@@ -792,7 +805,10 @@ namespace SystemC_VPC{
           // node = vpcConfigTreeWalker->parentNode();
           
           //check if component member of a configuration and iterativly adding mapping info
-          this->buildUpBindHierarchy(sSource, sTarget);
+          this->buildUpBindHierarchy(sSource, sTarget, mInfo);
+
+          //add mInfo to PCB currently for later clean up
+          p.addMappingInformation(mInfo);
           
         }else{
           std::cerr << "VPCBuilder> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
@@ -804,7 +820,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of VPCBiulder::buildUpBindHierarchy
    */
-  void VPCBuilder::buildUpBindHierarchy(const char* source, const char* target){
+  void VPCBuilder::buildUpBindHierarchy(const char* source, const char* target, MappingInformation* mInfo){
     //while(std::map<std::string, AbstractComponent* >::iterator iter = this->knownComps.find(sTarget);
     std::map<std::string, std::string>::iterator iterVCtC;
     // determine existence of mapping to configuration
@@ -827,7 +843,7 @@ namespace SystemC_VPC{
         // add mapping to controller of surrounding component
         ReconfigurableComponent* comp;
         comp = (ReconfigurableComponent*)this->knownComps[iterConftC->second];
-        comp->getController()->registerMapping(source, target);
+        comp->getController()->registerMapping(source, target, mInfo);
 
 #ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> Additional mapping between: " << source << "<->" << target << std::endl; 
@@ -838,15 +854,16 @@ namespace SystemC_VPC{
     }
           
     //finally register mapping to Director
-    this->director->registerMapping(source, target);
+    this->director->registerMapping(source, target, mInfo);
 
   }
 
   /**
-   * \brief Implementation of VPCBuilder::applyTemplateOnPStruct
+   * \brief Implementation of VPCBuilder::applyTemplateOnMappingInformation
    */
-  void VPCBuilder::applyTemplateOnPStruct(ProcessControlBlock* p, const char* target, std::string key){
+  void VPCBuilder::applyTemplateOnMappingInformation(MappingInformation& mInfo, const char* target, std::string key){
     
+
     std::map<std::string, std::vector<std::pair<char*, char* > > >::iterator iter;
     iter = this->templates.find(key);
     if(iter != this->templates.end()){
@@ -856,20 +873,19 @@ namespace SystemC_VPC{
         if( 0 == strncmp(attiter->first, STR_VPC_PRIORITY, sizeof(STR_VPC_PRIORITY) )){
           int priority = 0;
           sscanf(attiter->second, "%d", &priority);
-          p->setPriority(priority);
+          mInfo.setPriority(priority);
         }else if( 0 == strncmp(attiter->first, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
           double deadline = 0;
           sscanf(attiter->second, "%lf", &deadline);
-          p->setDeadline(deadline);
+          mInfo.setDeadline(deadline);
         }else if( 0 == strncmp(attiter->first, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
           double period = 0;
           sscanf(attiter->second, "%lf", &period);
-          p->setPeriod(period);
+          mInfo.setPeriod(period);
         }else if( 0 == strncmp(attiter->first, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
           double delay = 0;
           sscanf(attiter->second, "%lf", &delay);
-          p->setDelay(delay);
-          p->addFuncDelay(target, NULL, delay);
+          mInfo.addDelay(NULL, delay);
         }else{
 #ifdef VPC_DEBUG
           std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << attiter->first << " value=" << attiter->second << endl; 
@@ -882,7 +898,7 @@ namespace SystemC_VPC{
             std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
             std::cerr << YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
-            p->addFuncDelay(target, attiter->first, delay);
+            mInfo.addDelay(attiter->first, delay);
           } else {
 #ifdef VPC_DEBUG
             std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
@@ -904,7 +920,10 @@ namespace SystemC_VPC{
    * \param node refers to the current parsing position within the DOMTree
    * \param controller refers to the associated controller instance
    */
-  AbstractConfigurationScheduler* VPCBuilder::generateConfigScheduler(const char* type, DOMNode* node, AbstractController* controller) throw(InvalidArgumentException){
+  AbstractConfigurationScheduler* VPCBuilder::generateConfigScheduler(const char* type,
+                                                                      DOMNode* node, 
+                                                                      Controller* controller) 
+    throw(InvalidArgumentException){
  
       // TODO: UPDATE IMPLEMENTATION IF NEW SCHEDULER IS IMPLEMENTED
       AbstractConfigurationScheduler* scheduler = NULL;
@@ -959,7 +978,9 @@ namespace SystemC_VPC{
    * \param type specifies type of binder to instantiate
    * \param node refers to the current parsing position within the DOMTree
    */
-  AbstractBinder* VPCBuilder::generateBinder(const char* type, DOMNode* node)
+  AbstractBinder* VPCBuilder::generateBinder(const char* type, 
+                                             DOMNode* node,
+                                             Controller* controller)
     throw(InvalidArgumentException){
 
       // TODO: UPDATE IMPLEMENTATION IF NEW BINDER IS IMPLEMENTED
@@ -967,11 +988,16 @@ namespace SystemC_VPC{
 
       if(0==strncmp(type, STR_VPC_SIMPLEBINDER, strlen(STR_VPC_SIMPLEBINDER))
           || 0==strncmp(type, STR_VPC_SB, strlen(STR_VPC_SB))){
-        binder = new SimpleBinder();
+        binder = new SimpleBinder(controller, controller->getMIMapper());
       }else 
       if(0==strncmp(type, STR_VPC_RRBINDER,strlen(STR_VPC_RRBINDER))
           || 0==strncmp(type, STR_VPC_RRB,strlen(STR_VPC_RRB))){
-        binder = new RRBinder();      
+        binder = new RRBinder(controller, controller->getMIMapper());  
+      }else
+      if(0==strncmp(type, STR_VPC_LCBBINDER, strlen(STR_VPC_LCBBINDER))
+          || 0==strncmp(type, STR_VPC_LCBB, strlen(STR_VPC_LCBB))){
+        PriorityElementFactory* factory = new LCBPEFactory();
+        binder = new PriorityBinder(controller, controller->getMIMapper(), factory);
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;
@@ -1007,7 +1033,10 @@ namespace SystemC_VPC{
    * \param type specifies requested type of mapper
    * \param node refers to the current parsing position within the DOMTree
    */
-  AbstractConfigurationMapper* VPCBuilder::generateMapper(const char* type, DOMNode* node) throw(InvalidArgumentException){
+  AbstractConfigurationMapper* VPCBuilder::generateMapper(const char* type, 
+                                                          DOMNode* node,
+                                                          Controller* controller) 
+    throw(InvalidArgumentException){
     // TODO: probably implement different kind of mappers
     // currently no other mapper exists than ConfigurationPool
     // which will be associated later to the controller
@@ -1022,7 +1051,7 @@ namespace SystemC_VPC{
   AbstractController* VPCBuilder::generateController(const char* id)
     throw(InvalidArgumentException){
 
-      AbstractController* ctrl = NULL;
+      AbstractController* result = NULL;
       DOMNode* node = this->vpcConfigTreeWalker->firstChild();
 
       if(node != NULL){
@@ -1041,7 +1070,7 @@ namespace SystemC_VPC{
           sName = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
 
           if(0==strncmp(sName, STR_VPC_CONTROLLER, strlen(STR_VPC_CONTROLLER))){
-            ctrl = new Controller(id);
+            Controller* ctrl = new Controller(id);
 
             DOMNode* child = NULL;
 
@@ -1050,23 +1079,18 @@ namespace SystemC_VPC{
               xmlName = child->getNodeName();
  
               atts=child->getAttributes();
-              if(atts == NULL || atts->getLength() < 0){
-                char* name = XMLString::transcode(xmlName);
-                std::cerr << "VPCBuilder> Strange?!? xmlName=" << name << std::endl;
-                XMLString::release(&name);
-                continue;
-              }
-                sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
               
               // init Binder for controller instance
               if( 0==XMLString::compareNString( xmlName, VPCBuilder::binderStr, sizeof(VPCBuilder::binderStr))){
 
+                sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+                
                 try{
-                  ctrl->setBinder(generateBinder(sName, child));
+                  ctrl->setBinder(generateBinder(sName, child, ctrl));
                 }catch(InvalidArgumentException& e){
                   std::cerr << "VPCBuilder> Error: " << e.what() << std::endl;
                   std::cerr << "VPCBuilder> setting default binder for "<< id << std::endl;
-                  ctrl->setBinder(generateBinder(STR_VPC_SB, child));
+                  ctrl->setBinder(generateBinder(STR_VPC_SB, child, ctrl));
                 }catch(...){
                   std::cerr << "VPCBuilder> unknown exception occured while creating controller instance" << std::endl;
                   this->vpcConfigTreeWalker->parentNode();
@@ -1074,34 +1098,37 @@ namespace SystemC_VPC{
                 }
               } // init Mapper for controller instance
               else if( 0==XMLString::compareNString( xmlName, VPCBuilder::mapperStr, sizeof(VPCBuilder::mapperStr))){
-                ctrl->setConfigurationMapper(generateMapper(sName, child));
+                
+                sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+                ctrl->setConfigurationMapper(generateMapper(sName, child, ctrl));
+              
               } // init Scheduler for controller instance
               else if( 0==XMLString::compareNString( xmlName, VPCBuilder::schedulerStr, sizeof(VPCBuilder::schedulerStr))){
 
+                sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+              
                 try{
                   ctrl->setConfigurationScheduler(generateConfigScheduler(sName, child, ctrl));
                 }catch(InvalidArgumentException& e){
                   std::cerr << "VPCBuilder> Error: " << e.what() << std::endl;
                   std::cerr << "VPCBuilder> setting default "<< STR_FCFS << " for " << id << std::endl;
-                  ctrl->setConfigurationScheduler(generateConfigScheduler(STR_FCFS, child, ctrl));
+                  ((Controller*)ctrl)->setConfigurationScheduler(generateConfigScheduler(STR_FCFS, child, ctrl));
                 }catch(...){
                   std::cerr << "VPCBuilder> unknown exception occured while creating controller instance" << std::endl;
                   this->vpcConfigTreeWalker->parentNode();
                   throw;
                 }
 
-              }/*
-                  else{
-                  std::string msg = "Unkown controller type "+ sName;
-                  throw InvalidArgumentException(msg);
-                  }*/
+              }
             }
+
+            result = ctrl;
           }
         }
         // reset treewalker
         this->vpcConfigTreeWalker->parentNode();
 
-        if(ctrl == NULL){
+        if(result == NULL){
           char* name = XMLString::transcode(xmlName);
           std::string msg = "Unkown controller tag ";
           msg.append(name, strlen(name));
@@ -1109,7 +1136,7 @@ namespace SystemC_VPC{
           throw InvalidArgumentException(msg);
         }
 
-        return ctrl;
+        return result;
       }
       
       std::string msg = "Failed to create controller for ";

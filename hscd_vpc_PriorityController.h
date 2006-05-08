@@ -95,7 +95,7 @@ namespace SystemC_VPC{
             }
 
             bool operator > (const PriorityListElement& elem){
-              if(this->getPriority() > elem.getPriority()){
+              if(this->getPriority() < elem.getPriority()){
                 return true;
               }else
                 if(this->getPriority() == elem.getPriority()
@@ -106,7 +106,7 @@ namespace SystemC_VPC{
             }
 
             bool operator < (const PriorityListElement& elem){
-              if(this->getPriority() < elem.getPriority()){
+              if(this->getPriority() > elem.getPriority()){
                 return true;
               }else
                 if(this->getPriority() == elem.getPriority()

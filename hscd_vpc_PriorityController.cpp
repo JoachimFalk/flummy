@@ -13,7 +13,6 @@ namespace SystemC_VPC{
    * \brief Implementation of PriorityController::addTasksToSchedule
    */
   void PriorityController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
-    this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
     std::cerr << YELLOW("PriorityController "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
@@ -112,20 +111,6 @@ namespace SystemC_VPC{
         this->nextConfigurations.sort(); 
       } 
     }
-
-    // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->getState() == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
-      // recompute
-      this->getManagedComponent()->compute(pcb);
-    }else{
-      this->getManagedComponent()->notifyParentController(pcb);
-    }
-
-#ifdef VPC_DEBUG
-    if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("Controller " << this->getController().getName() << "> task: " << pcb->getName() << " got killed!")  << std::endl;
-    }
-#endif //VPC_DEBUG
 
     // if there are still ready configurations and current activ does not fit selected its time to wakeUp ReconfigurableComponent
     if(this->nextConfigurations.size() > 0

@@ -35,81 +35,81 @@ namespace SystemC_VPC{
    * \brief An implementation of AbstractComponent.
    * 
    *  Privides backward compatibility! It does nothing -> No schedling! No delaying!
-  */
+   */
   class FallbackComponent : public AbstractComponent{
 
-  public:
+    public:
 
-    /**
-     * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
-     *
-     * Privides backward compatibility! It does nothing -> No schedling! No delaying!
-     */
-    virtual void compute( const char *name, const char *funcname=NULL, VPC_Event *end=NULL){
+      /**
+       * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
+       *
+       * Privides backward compatibility! It does nothing -> No schedling! No delaying!
+       */
+      virtual void compute( const char *name, const char *funcname=NULL, VPC_Event *end=NULL){
 #ifdef VPC_DEBUG
-      cout << flush;
-      cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << endl;
+        cout << flush;
+        cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" , ")<<WHITE(funcname)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
-      if(NULL!=end) notify(*end);
-    }
+        if(NULL!=end) notify(*end);
+      }
 
-    /**
-     * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
-     *
-     * Privides backward compatibility! It does nothing -> No schedling! No delaying!
-     */
-    virtual void compute( const char *name, VPC_Event *end=NULL){
+      /**
+       * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
+       *
+       * Privides backward compatibility! It does nothing -> No schedling! No delaying!
+       */
+      virtual void compute( const char *name, VPC_Event *end=NULL){
 #ifdef VPC_DEBUG
-      cout << flush;
-      cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
+        cout << flush;
+        cerr << RED("FallBack::compute( ")<<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
-      if(NULL!=end) notify(*end);
-    }
+        if(NULL!=end) notify(*end);
+      }
 
-    /**
-     * No VCD tracing in FallbackComponent needed.
-     */
-    virtual void informAboutMapping(std::string module){};
-    
-    /**
-     * \brief A backward compatible implementation of AbstractComponent.
-     */
-    FallbackComponent(const char *name,const char *schedulername) : AbstractComponent(name){}
-    
-    virtual ~FallbackComponent(){}
-    
-    /**
-     * \brief No parameter are set in FallbackComponent.
-     */
-    virtual void processAndForwardParameter(char *sType,char *sValue){}
-      
-  public:
-    
-    /**
-     * \brief Preempts execution of component
-     * Used to preempt the current execution of a component.
-     * As there is no time consumption tasks are executed at once,
-     * so no effect on completion of running tasks.
-     */
-    virtual void preempt(bool kill){ 
-      //TODO IMPLEMENT
-    }
-    
-    /**
-     * \brief Resumes preempted execution
-     * Used to resume execution of preempted component.
-     */
-    virtual void resume(){
-      //TODO IMPLEMENT
-    }
-       
-    /**
-     * \brief An implementation of AbstractComponent::compute(ProcessControlBlock* , const char *).
-     */
-    virtual void compute( ProcessControlBlock* pcb){
-      this->compute(pcb->getName().c_str(), pcb->getFuncName(), pcb->getBlockEvent());
-    }
+      /**
+       * No VCD tracing in FallbackComponent needed.
+       */
+      virtual void informAboutMapping(std::string module){};
+
+      /**
+       * \brief A backward compatible implementation of AbstractComponent.
+       */
+      FallbackComponent(const char *name,const char *schedulername) : AbstractComponent(name){}
+
+      virtual ~FallbackComponent(){}
+
+      /**
+       * \brief No parameter are set in FallbackComponent.
+       */
+      virtual void processAndForwardParameter(char *sType,char *sValue){}
+
+    public:
+
+      /**
+       * \brief Preempts execution of component
+       * Used to preempt the current execution of a component.
+       * As there is no time consumption tasks are executed at once,
+       * so no effect on completion of running tasks.
+       */
+      virtual void preempt(bool kill){ 
+        //TODO IMPLEMENT
+      }
+
+      /**
+       * \brief Resumes preempted execution
+       * Used to resume execution of preempted component.
+       */
+      virtual void resume(){
+        //TODO IMPLEMENT
+      }
+
+      /**
+       * \brief An implementation of AbstractComponent::compute(ProcessControlBlock* , const char *).
+       */
+      virtual void compute( ProcessControlBlock* pcb){
+        this->compute(pcb->getName().c_str(), pcb->getFuncName(), pcb->getBlockEvent());
+      }
 
   };
 
@@ -117,45 +117,45 @@ namespace SystemC_VPC{
 
     SC_HAS_PROCESS(Component);
 
-  protected:
+    protected:
 
     //virtual void compute(ProcessControlBlock *actualTask);
     virtual void schedule_thread(); 
 
-  private:
-    
+    private:
+
     sc_trace_file *traceFile;
     map<std::string,sc_signal<trace_value>*> trace_map_by_name;
     Scheduler *scheduler;
     deque<ProcessControlBlock*>      newTasks;
     //    map<int,action_struct> *open_commands;
     map<int,ProcessControlBlock*> readyTasks,runningTasks;
-    
+
     sc_event notify_scheduler_thread;
     //deque<VPC_Event*> events;
     sc_signal<trace_value> schedulerTrace;
-    
+
     inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
     inline void Component::assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
-    
+
     // time last task started
     sc_time startTime;
-    
-  public:
-     
+
+    public:
+
     void setScheduler(const char *schedulername);
-    
-    
+
+
     /**
      * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
      */
     virtual void compute( const char *name, const char *funcname=NULL, VPC_Event *end=NULL);
-    
+
     /**
      * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
      */
     virtual void compute( const char *name, VPC_Event *end=NULL);
-    
+
     /**
      * \brief A vector of commandos, so the Scheduler can descide what to do.
      *
@@ -163,7 +163,7 @@ namespace SystemC_VPC{
      * delay-time is delayed the command "block" is generated.
      */
     vector<action_struct> &getNewCommands();
-    
+
     /**
      * \brief Used to create the Tracefiles.
      *
@@ -172,60 +172,58 @@ namespace SystemC_VPC{
      * be created in elaboration phase (before first sc_start).
      */
     virtual void informAboutMapping(std::string module);
-      
+
     /**
      * \brief An implementation of AbstractComponent used together with passive actors and global SMoC v2 Schedulers.
      */
     Component(sc_module_name name,const char *schedulername): AbstractComponent(name){
       SC_THREAD(schedule_thread);
       setScheduler(schedulername);
-      /*    schedulerproxy=new SchedulerProxy(this->componentName);
-        schedulerproxy->setScheduler(schedulername);
-        schedulerproxy->registerComponent(this);
-      */
-    #ifndef NO_VCD_TRACES
-          std::string tracefilename=this->basename(); //componentName;
-          char tracefilechar[VPC_MAX_STRING_LENGTH];
-          char* traceprefix= getenv("VPCTRACEFILEPREFIX");
-          if(0!=traceprefix){
-      tracefilename.insert(0,traceprefix);
-          }
-          strcpy(tracefilechar,tracefilename.c_str());
-          this->traceFile =sc_create_vcd_trace_file (tracefilechar);
-          ((vcd_trace_file*)this->traceFile)->sc_set_vcd_time_unit(-9);
-    #endif //NO_VCD_TRACES
-    #ifndef NO_VCD_TRACES
-          sc_trace(this->traceFile,schedulerTrace,schedulername);
-    #endif //NO_VCD_TRACES      
+#ifndef NO_VCD_TRACES
+      std::string tracefilename=this->basename(); 
+      char tracefilechar[VPC_MAX_STRING_LENGTH];
+      char* traceprefix= getenv("VPCTRACEFILEPREFIX");
+      if(0!=traceprefix){
+        tracefilename.insert(0,traceprefix);
+      }
+      strcpy(tracefilechar,tracefilename.c_str());
+      this->traceFile = sc_create_vcd_trace_file (tracefilechar);
+      ((vcd_trace_file*)this->traceFile)->sc_set_vcd_time_unit(-9);
+#endif //NO_VCD_TRACES
+#ifndef NO_VCD_TRACES
+      sc_trace(this->traceFile,schedulerTrace,schedulername);
+#endif //NO_VCD_TRACES      
 
-          /**************************/
-          /*  EXTENSION SECTION     */
-          /**************************/
-          if(!this->activ){
+      /**************************/
+      /*  EXTENSION SECTION     */
+      /**************************/
+      if(!this->activ){
 #ifdef VPC_DEBUG
-            std::cerr << GREEN(this->basename() << "> Activating") << std::endl;
+        std::cerr << GREEN(this->basename() << "> Activating") << std::endl;
 #endif //VPC_DEBUG
-            this->setActiv(true);
-          }
-          /**************************/
-          /*  END OF EXTENSION      */
-          /**************************/
+        this->setActiv(true);
+      }
+      /**************************/
+      /*  END OF EXTENSION      */
+      /**************************/
     }
-      
-    virtual ~Component(){}
+
+    virtual ~Component(){
+      sc_close_vcd_trace_file(this->traceFile);
+    }
     /**
      * \brief Set parameter for Component and Scheduler.
      */
     virtual void processAndForwardParameter(char *sType,char *sValue);
-    
-  protected:
+
+    protected:
 
     // used to indicate preemption request
     sc_event notify_preempt;
     // used to indicate resume request
     sc_event notify_resume;
 
-  public:
+    public:
 
     /**
      * \brief Preempts execution of component
@@ -246,7 +244,7 @@ namespace SystemC_VPC{
      */
     virtual void compute(ProcessControlBlock* pcb);
 
-  private:
+    private:
 
     void killAllTasks();
 

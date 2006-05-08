@@ -1,13 +1,16 @@
 #include "hscd_vpc_RRBinder.h"
+#include "hscd_vpc_MIMapper.h"
 
 namespace SystemC_VPC {
   
-  RRBinder::RRBinder() {}
+  RRBinder::RRBinder(Controller* controller, MIMapper* miMapper) : DynamicBinder(controller, miMapper) {}
 
   RRBinder::~RRBinder() {}
 
-  std::string RRBinder::resolveBinding(std::string task, AbstractComponent* comp) throw(UnknownBindingException) {
-    AbstractBinding& binding = this->getBinding(task);
+  std::pair<std::string, MappingInformation* > RRBinder::performBinding(ProcessControlBlock& task, AbstractComponent* comp)
+    throw(UnknownBindingException) {
+      
+    AbstractBinding& binding = this->getBinding(task.getName());
 
     // reset binding iterator if end of possibilites reached
     if(!binding.hasNext()){
@@ -16,11 +19,25 @@ namespace SystemC_VPC {
     
     // check if binding possibility exists
     if(binding.hasNext()){
-      return binding.getNext();
+      std::string comp = binding.getNext();
+      MIMapper& mapper = this->getMIMapper();
+      MappingInformationIterator* iter = mapper.getMappingInformationIterator(comp);
+      if(iter->hasNext()){
+        MappingInformation* mInfo = iter->getNext();
+        delete iter;
+        return std::pair<std::string, MappingInformation* >(comp, mInfo);
+      }else{
+        // also free iter
+        delete iter;
+      }
     }
 
-    std::string msg = "No binding possibility given for "+ task +"->?";
+    std::string msg = "No binding possibility given for "+ task.getName() +"->?";
     throw UnknownBindingException(msg);
+  }
+
+  void RRBinder::signalTaskEvent(ProcessControlBlock* pcb){
+    // do nothing
   }
 
 }

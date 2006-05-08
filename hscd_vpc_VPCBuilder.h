@@ -233,11 +233,11 @@ namespace SystemC_VPC{
     
     /**
      * \brief Interprets template for setting up parameter for a given ProcessControlBlock
-     * \param p represents the ProcessControlBlock to be updated
+     * \param mInfo represents the MappingInformation to be updated
      * \param target specifies the target of mapping
      * \param key references the key of the template to apply
      */
-    void applyTemplateOnPStruct(ProcessControlBlock* p, const char* target, std::string key);
+    void applyTemplateOnMappingInformation(MappingInformation& mInfo, const char* target, std::string key);
     
     /**
      * \brief Initializes mapping between tasks and components
@@ -250,7 +250,7 @@ namespace SystemC_VPC{
      * This method is used to add corresponding binding information at each
      * level within the control hierarchy of vpc
      */
-    void buildUpBindHierarchy(const char* source, const char* target);
+    void buildUpBindHierarchy(const char* source, const char* target, MappingInformation* mInfo);
     
     /**
      * \brief Generates controller instance for Component
@@ -259,9 +259,9 @@ namespace SystemC_VPC{
     //AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
     AbstractController* generateController(const char* id) throw(InvalidArgumentException);
     
-    AbstractBinder* generateBinder(const char* type, DOMNode* node)throw(InvalidArgumentException);
-    AbstractConfigurationMapper* generateMapper(const char* type, DOMNode* node)throw(InvalidArgumentException);
-    AbstractConfigurationScheduler* generateConfigScheduler(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
+    AbstractBinder* generateBinder(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
+    AbstractConfigurationMapper* generateMapper(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
+    AbstractConfigurationScheduler* generateConfigScheduler(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
 
   };
     

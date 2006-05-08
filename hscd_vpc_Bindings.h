@@ -10,15 +10,15 @@ namespace SystemC_VPC {
    * \brief Abstract class defining basic properties and methods of an binding
    */
   class AbstractBinding {
-    
+
     private:
 
       std::string source;
-      
+
     public:
-      
+
       AbstractBinding(std::string source);
-      
+
       virtual ~AbstractBinding();
 
       /**
@@ -30,7 +30,7 @@ namespace SystemC_VPC {
        * \brief Sets iterator back to beginning of binding possibilites
        */
       virtual void reset()=0;
-      
+
       /**
        * \brief Indicates if further binding targets are available
        * \return true if further binding possibilites exists else false
@@ -44,16 +44,19 @@ namespace SystemC_VPC {
 
       /**
        * \brief registers additional binding possibility to a Binding
+       * If already a binding for given target exist only the MappingInformation
+       * is added.
        * \param target refers to the additional target
        */
       virtual void addBinding(std::string& target)=0;
+
   };
-  
+
   /**
    * \brief Implementation of AbstractBinding representing a 1-to-1 binding
    */
   class SimpleBinding : public AbstractBinding {
-    
+
     private:
 
       bool hasTarget;
@@ -79,9 +82,9 @@ namespace SystemC_VPC {
        *  \sa AbstractBinding::addBinding
        */
       void addBinding(std::string& target);
-  
+
   };
-  
+
   /**
    * \brief Represents a binding between a task and a set of possible target components.
    */
@@ -91,7 +94,7 @@ namespace SystemC_VPC {
 
       std::set<std::string> targets;
       std::set<std::string>::iterator iter;
-      
+
     public:
 
       /**
@@ -103,12 +106,13 @@ namespace SystemC_VPC {
       virtual ~Binding();
 
       void reset();
-      
+
       bool hasNext();
 
       std::string getNext();
 
       void addBinding(std::string& target);
+
   };
 
 }

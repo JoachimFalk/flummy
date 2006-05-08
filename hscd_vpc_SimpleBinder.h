@@ -2,19 +2,25 @@
 #define HSCD_VPC_SIMPLEBINDER_H_
 
 #include "hscd_vpc_AbstractBinder.h"
+#include "hscd_vpc_Controller.h"
 
 namespace SystemC_VPC {
 
   class SimpleBinder : public StaticBinder {
 
     public:
-
-      SimpleBinder::SimpleBinder();
+       
+      SimpleBinder::SimpleBinder(Controller* controller, MIMapper* miMapper);
 
       SimpleBinder::~SimpleBinder();
 
-      std::string resolveBinding(std::string task, AbstractComponent* comp) throw(UnknownBindingException);
+      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException);
 
+      /**
+       * \brief Implementation of TaskEventListener::signalTaskEvent
+       * Dummy implementation as SimpleBinder is not interested in task events
+       */
+      void signalTaskEvent(ProcessControlBlock* pcb) {}
   };
 
 

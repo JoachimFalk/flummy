@@ -1,104 +1,16 @@
 #include "hscd_vpc_ProcessControlBlock.h"
 
+#include "hscd_vpc_MappingInformation.h"
+#include "hscd_vpc_datatypes.h"
+
 namespace SystemC_VPC{
 
   int ProcessControlBlock::global_pid = 0;
 
-  ProcessControlBlock::ComponentDelay::ComponentDelay(std::string name, double base_delay) : name(name), base_delay(base_delay) {}
-
-  void ProcessControlBlock::ComponentDelay::addDelay(const char* funcname, double delay){
-    if(funcname != NULL){
-      std::string key(funcname, strlen(funcname));
-      this->funcDelays[key] = delay;
-    }
-  }
-
-  double ProcessControlBlock::ComponentDelay::getDelay(const char* funcname){
-    if(funcname == NULL){
-      return this->base_delay;
-    }else{
-      std::map<std::string, double>::iterator iter;
-      std::string key(funcname, strlen(funcname));
-      iter = this->funcDelays.find(key);
-      if(iter != this->funcDelays.end()){
-        return iter->second;
-      }
-    }
-
-    return this->base_delay;
-  }
-
-  bool ProcessControlBlock::ComponentDelay::hasDelay(const char* funcname){
-    if(funcname == NULL){
-      return false;
-    }else{
-      std::string key(funcname, strlen(funcname));
-      return (this->funcDelays.count(key) > 0);
-    }
-  }
-
-  ProcessControlBlock::DelayMapper::~DelayMapper(){
-
-    std::map<std::string, ComponentDelay*>::iterator iter;
-    for(iter = this->compDelays.begin(); iter != this->compDelays.end(); iter++){
-      delete iter->second;
-    }
-    this->compDelays.clear();
-
-  }
-
-  void ProcessControlBlock::DelayMapper::registerDelay(std::string comp, double delay){
-
-    std::map<std::string, ComponentDelay*>::iterator iter;
-    iter = this->compDelays.find(comp);
-    if(iter == this->compDelays.end()){
-      this->compDelays[comp] = new ComponentDelay(comp, delay);
-    }
-
-  }  
-
-  void ProcessControlBlock::DelayMapper::addDelay(std::string comp, const char* funcname, double delay){
+  /**
+   * SECTION ActivationCounter
+   */
     
-    std::map<std::string, ComponentDelay*>::iterator iter;
-    iter = this->compDelays.find(comp);
-    if(iter == this->compDelays.end()){
-      this->registerDelay(comp, delay);
-      iter = this->compDelays.find(comp);
-    }
-    iter->second->addDelay(funcname, delay);
-
-  }
-
-  double ProcessControlBlock::DelayMapper::getDelay(std::string comp, const char* funcname){
-
-    std::map<std::string, ComponentDelay* >::iterator iter;
-    iter = this->compDelays.find(comp);
-    if(iter != compDelays.end()){
-      return iter->second->getDelay(funcname);
-    }else{
-      return 0;
-    }
-
-  }
-
-  bool ProcessControlBlock::DelayMapper::hasDelay(std::string comp, const char* funcname){
-
-    if(this->compDelays.count(comp) > 0){
-      
-      if(funcname != NULL){
-        std::map<std::string, ComponentDelay* >::iterator iter;
-        iter = this->compDelays.find(comp);
-        if(iter != this->compDelays.end()){
-          return iter->second->hasDelay(funcname);
-        }            
-      }else{
-        return true;
-      }
-    }
-    return false;
-  }
-
-
   ProcessControlBlock::ActivationCounter::ActivationCounter() : activation_count(0){}
 
   void ProcessControlBlock::ActivationCounter::increment(){
@@ -110,6 +22,11 @@ namespace SystemC_VPC{
   }
 
 
+  /**
+   * SECTION ProcessControlBlock
+   */
+  
+  
   ProcessControlBlock::ProcessControlBlock(): name("NN"){
     this->init();
   }
@@ -118,24 +35,50 @@ namespace SystemC_VPC{
     this->init();
   }
 
+  ProcessControlBlock::~ProcessControlBlock(){
+    std::cerr << "PCB> num of copies is " << *(this->copyCount) << std::endl;
+    if(*(this->copyCount) == 0){
+      std::cerr << "PCB> Destructor called and delete for " << this->getName() << "::" << this->getPID() << " !" << std::endl;
+      delete this->activationCount;
+
+      std::set<MappingInformation* >::iterator iter;
+      for(iter = this->mInfos->begin(); iter != this->mInfos->end(); iter++){
+        std::cerr << "PCB> Deleting MappingInformation!" << std::endl;
+        delete *iter;
+      }
+      
+      std::cerr << "PCB> Deleting set of MappingInformation!" << std::endl;
+      delete this->mInfos;
+      std::cerr << "PCB> Deleting copyCount instance!" << std::endl;
+      delete this->copyCount;
+      std::cerr << "PCB> Deletion finished" << std::endl;
+    }else{
+      *(this->copyCount)--;
+    }
+  }
+  
   ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb){
 
-    this->name = pcb.getName();
-    this->deadline = pcb.getDeadline();
-    this->period = pcb.getPeriod();
+    this->setName(pcb.getName());
+    this->setDeadline(pcb.getDeadline());
+    this->setPeriod(pcb.getPeriod());
     this->pid = ProcessControlBlock::global_pid++;
-    this->priority = pcb.getPriority();
-
+    this->setPriority(pcb.getPriority());
+    
+   
     this->blockEvent = NULL;
-    this->delay = 0;
-    this->funcname = NULL;
-    this->interrupt = NULL;
-    this->remainingDelay = 0;
-    this->traceSignal = NULL;
+    this->setDelay(0);
+    this->setFuncName(NULL);
+    this->setInterrupt(NULL);
+    this->setRemainingDelay(0);
+    this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
-    this->dmapper = pcb.dmapper;
+    this->mInfos = pcb.mInfos;
 
+    // remember amount of copies for later clean up 
+    this->copyCount = pcb.copyCount;
+    *(this->copyCount)++; 
   }
 
   void ProcessControlBlock::init(){
@@ -153,15 +96,15 @@ namespace SystemC_VPC{
 
 
     this->activationCount = new ActivationCounter();
-    this->dmapper = new DelayMapper();
-
+    this->mInfos = new std::set<MappingInformation* >();
+    this->copyCount = new int(0);
   }
-
+  
   void ProcessControlBlock::setName(std::string name){
     this->name = name;
   }
 
-  std::string ProcessControlBlock::getName() const{
+  std::string const& ProcessControlBlock::getName() const{
     return this->name;
   }
 
@@ -272,44 +215,8 @@ namespace SystemC_VPC{
   sc_signal<trace_value>* ProcessControlBlock::getTraceSignal(){
     return this->traceSignal;
   }
-
-  void ProcessControlBlock::addFuncDelay(std::string comp, const char* funcname, double delay){
-
-#ifdef VPC_DEBUG
-    std::cerr << "ProcessControlBlock> Adding Function Delay for " << comp;
-    if(funcname != NULL){
-      std::cerr << " function " << funcname;
-    }
-    std::cerr << " delay " << delay << std::endl;
-#endif //VPC_DEBUG
-    
-    this->dmapper->addDelay(comp, funcname, delay);
+ 
+  void ProcessControlBlock::addMappingInformation(MappingInformation* mInfo){
+    this->mInfos->insert(mInfo);
   }
-
-  double ProcessControlBlock::getFuncDelay(std::string comp, const char* funcname) const{
-
-#ifdef VPC_DEBUG
-    std::cerr << "ProcessControlBlock> Delay for " << comp;
-    if(funcname != NULL){
-      std::cerr << "->" << funcname;
-    }
-    std::cerr << " is " << this->dmapper->getDelay(comp, funcname) << std::endl;
-#endif //VPC_DEBUG 
-    
-    return this->dmapper->getDelay(comp, funcname);
-  }
-
-  bool ProcessControlBlock::hasDelay(std::string comp, const char* funcname) const{
-
-#ifdef VPC_DEBUG 
-    std::cerr << "ProcessControlBlock> Request for " << comp;
-    if(funcname != NULL){
-      std::cerr << " with function " << funcname;
-    }
-    std::cerr << " has special delay ? " << this->dmapper->hasDelay(comp, funcname) << std::endl;
-#endif //VPC_DEBUG
-    
-    return this->dmapper->hasDelay(comp, funcname);
-  }
-
 }
