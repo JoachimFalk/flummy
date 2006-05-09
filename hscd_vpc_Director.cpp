@@ -144,44 +144,8 @@ namespace SystemC_VPC{
   }
 
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
-    if(!FALLBACKMODE){
-      
-      return this->pcbPool.allocate(name);
-      /*
-      if(1!=pcb_map_by_name.count(name)){
-        cerr << "VPC> No ProcessControlBlock found for task \"" << name << "\"" << endl;
-        exit(0);
-      }
-      return pcb_map_by_name[name];
-      */
-    }else{
-
-      try{
-        return this->pcbPool.allocate(name);
-      }catch(NotAllocatedException& e){
-        ProcessControlBlock& p = this->pcbPool.registerPCB(name);
-        p.setPriority(1); 
-        p.setDeadline(1000);
-        p.setPeriod(2800.0);
-        return this->pcbPool.allocate(name);
-      }
-      /*
-      if(1==pcb_map_by_name.count(name)){
-        return pcb_map_by_name[name];
-      }else{
-        //create fallback pcb
-        ProcessControlBlock *p=new ProcessControlBlock(name);
-        p->setPriority(pcb_map_by_name.size()); 
-        p->setDeadline(1000);
-        p->setPeriod(2800.0);
-        //p->pid=pcb_map_by_name.size();//hack to create pid!
-
-        pcb_map_by_name.insert(pair<string,ProcessControlBlock*>(name,p));
-        assert(1==pcb_map_by_name.count(name));
-        return pcb_map_by_name[name]; 
-      }
-      */
-    }
+    assert(!FALLBACKMODE);
+    return this->pcbPool.allocate(name);
   }
 
   PCBPool& Director::getPCBPool(){
@@ -189,6 +153,24 @@ namespace SystemC_VPC{
   }
 
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
+    if(FALLBACKMODE){
+#ifdef VPC_DEBUG
+      cout << flush;
+      cerr << RED("FallBack::compute( ") << WHITE(name) << RED(" , ") << WHITE(funcname) 
+	   << RED(" ) at time: " << sc_simulation_time()) << endl;
+#endif
+
+      // create Fallback behavior for active and passive mode!
+      if( end != NULL ){
+	// passive mode: notify end
+	end->notify();
+      }
+
+
+      // do nothing, just return
+      return;
+    }
+
     
 #ifdef VPC_DEBUG
     std::cerr << YELLOW("Director> compute(") << WHITE(name) << YELLOW(",") << WHITE(funcname) << YELLOW(") at: ") << sc_simulation_time() << std::endl;
@@ -206,35 +188,24 @@ namespace SystemC_VPC{
       // prepare passiv mode
       pcb->setBlockEvent(end);
     }
-
-    if(!FALLBACKMODE){
-      
-      if(1!=mapping_map_by_name.count(name)){
-        cerr << "Unknown mapping <"<<name<<"> to ??"<<endl; 
-      }
-       
-      assert(1==mapping_map_by_name.count(name));
-      
-      
-      // get Component
-      AbstractComponent* comp = mapping_map_by_name.find(name)->second;
-
-#ifdef VPC_DEBUG
-      std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
-#endif //VPC_DEBUG      
-      
-      // compute task on found component
-      comp->compute(pcb);
-
-    }else{
-      AbstractComponent* comp = (component_map_by_name["Fallback-Component"]);
-      if(comp == NULL){
-        std::cerr << "no Fallback defined!" << std::endl;
-      }
-      comp->compute(pcb);
-      
+    if(1!=mapping_map_by_name.count(name)){
+      cerr << "Unknown mapping <"<<name<<"> to ??"<<endl; 
     }
     
+    assert(1==mapping_map_by_name.count(name));
+    
+    
+    // get Component
+    AbstractComponent* comp = mapping_map_by_name.find(name)->second;
+    
+#ifdef VPC_DEBUG
+    std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
+#endif //VPC_DEBUG      
+    
+    // compute task on found component
+    assert(!FALLBACKMODE);
+    comp->compute(pcb);
+
     if( end == NULL){
       // active mode -> returns if simulated delay time has expiYELLOW (blocking compute call)
       CoSupport::SystemC::wait(*(pcb->getBlockEvent()));
@@ -276,7 +247,8 @@ namespace SystemC_VPC{
    * \brief Implementation of Director::registerMapping
    */
   void Director::registerMapping(const char* taskName, const char* compName){
-    
+    assert(!FALLBACKMODE);
+
     std::map<std::string, AbstractComponent*>::iterator iter;
     iter = this->component_map_by_name.find(compName);
     //check if component is known
@@ -297,6 +269,7 @@ namespace SystemC_VPC{
    */
   
   ProcessControlBlock& Director::generatePCB(const char* name){
+    assert(!FALLBACKMODE);
     
     ProcessControlBlock& pcb = this->pcbPool.registerPCB(name);
     pcb.setName(name);
@@ -325,6 +298,7 @@ namespace SystemC_VPC{
    * \brief Implementation of Director::notifyTaskEvent
    */
   void Director::signalTaskEvent(ProcessControlBlock* pcb){
+    assert(!FALLBACKMODE);
 
 #ifdef VPC_DEBUG
     std::cerr << "Director> got notified from: " << pcb->getName() << std::endl;
