@@ -140,7 +140,7 @@ namespace SystemC_VPC{
 
     public:
 
-      EDFController(AbstractController* controller);
+      EDFController(AbstractController* controller, MIMapper* miMapper);
 
       virtual ~EDFController();
 
@@ -202,6 +202,17 @@ namespace SystemC_VPC{
        */
       virtual void signalTaskEvent(ProcessControlBlock* pcb);
 
+    private:
+
+      /**
+       * \brief Helper method to retrieve deadline
+       * Used to determine earliest deadline out of a set of
+       * mapping possibilities assuming that this constraint has to
+       * be fullfied by scheduling instance.
+       * \param pid specifies the task to determine deadline for
+       * \return earliest deadline
+       */
+      double getEarliestDeadline(int pid);
   };
 
 }

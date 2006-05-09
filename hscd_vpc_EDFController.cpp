@@ -5,7 +5,9 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of EDFController
    */
-  EDFController::EDFController(AbstractController* controller) : ConfigurationScheduler(controller), order_count(0){}
+  EDFController::EDFController(AbstractController* controller, MIMapper* miMapper) 
+    : ConfigurationScheduler(controller, miMapper), 
+      order_count(0) {}
 
   /**
    * \brief Deletes instance of EDFController
@@ -22,7 +24,9 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
-        
+    // set deadline of task to earliest of possible deadlines
+    newTask->setDeadline(this->getEarliestDeadline(newTask->getPID()));
+       
     std::list<EDFListElement<unsigned int > >::iterator iter;
     iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
     // if configuration is not in scheduling list add it
@@ -51,7 +55,8 @@ namespace SystemC_VPC{
     if(!this->nextConfigurations.empty()){
       unsigned int next = this->nextConfigurations.front().getContained();
     
-      if(next != this->getManagedComponent()->getActivConfiguration()->getID()){
+      if(this->getManagedComponent()->getActivConfiguration() == NULL 
+          || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("EDFController " << this->getController().getName() << "> next config to load: "
@@ -128,6 +133,31 @@ namespace SystemC_VPC{
 
       this->getManagedComponent()->wakeUp();
     }
+  }
+
+  /**
+   * \brief Implementation of EDFController::getEarliestDeadline
+   */
+  double EDFController::getEarliestDeadline(int pid){
+    // first of all get controller to retrieve decision for task
+    AbstractController& ctrl = this->getController();
+    Decision d = ctrl.getDecision(pid);
+    // next access mapping information for made decision
+    MIMapper& miMapper = this->getMIMapper();
+    MappingInformationIterator* iter = miMapper.getMappingInformationIterator(d.comp);
+    // now iteratate over possibilities and choose appropriate one
+    double deadline = DBL_MAX;
+    
+    while(iter->hasNext()){
+      MappingInformation* mi = iter->getNext();
+      if(mi->getDeadline() < deadline){
+        deadline = mi->getDeadline();
+      }
+    }
+    
+    //free iterator
+    delete iter;
+    return deadline;
   }
   
 } //namespace SystemC_VPC

@@ -2,9 +2,14 @@
 
 namespace SystemC_VPC{
   
-  ConfigurationScheduler::ConfigurationScheduler(AbstractController* controller) : controller(controller), kill(false), waitInterval(NULL) {}
-  
-  
+  ConfigurationScheduler::ConfigurationScheduler(AbstractController* controller, MIMapper* miMapper) 
+    : controller(controller), 
+      miMapper(miMapper),
+      kill(false), 
+      waitInterval(NULL) {}
+ 
+  ConfigurationScheduler::~ConfigurationScheduler() {}
+
   /**
    * \brief Implementation of  ConfigurationScheduler::setProperty
    */
@@ -40,6 +45,13 @@ namespace SystemC_VPC{
     return *(this->controller);
   }
   
+  /**
+   * \brief Impelementation of ConfigurationScheduler::getMIMapper
+   */
+  MIMapper& ConfigurationScheduler::getMIMapper(){
+    return *(this->miMapper);
+  }
+
   /**
    * \brief Implementation of ConfigurationScheduler::getWaitInterval
    */

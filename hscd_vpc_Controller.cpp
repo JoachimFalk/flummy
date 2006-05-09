@@ -143,20 +143,20 @@ namespace SystemC_VPC{
     // process all new tasks
     while(newTasks.size() > 0){
       ProcessControlBlock* pcb = newTasks.front();
-      // determine current binding of task
-      std::string comp = this->binder->resolveBinding(*pcb, this->managedComponent);
-      // determine corresponding configuration of bound component
-      unsigned int configID = this->mapper->getConfigForComp(comp);
-      // register task and configuration for scheduling
-      this->scheduler->addTaskToSchedule(pcb, configID);
-      newTasks.pop_front();  
-      
       // remember decisions for later use
       Decision d;
       d.pcb = pcb;
-      d.comp = comp;
-      d.conf = configID;
+
+      // determine current binding of task
+      d.comp = this->binder->resolveBinding(*pcb, this->managedComponent);
+      // determine corresponding configuration of bound component
+      d.conf = this->mapper->getConfigForComp(d.comp);
+      // store decision
       this->decisions[pcb->getPID()] = d;
+      // register task and configuration for scheduling
+      this->scheduler->addTaskToSchedule(pcb, d.conf);
+      newTasks.pop_front();  
+
     }
     
     this->scheduler->performSchedule(); 

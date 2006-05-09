@@ -148,7 +148,7 @@ namespace SystemC_VPC{
 
     public:
 
-      PriorityController(AbstractController* controller);
+      PriorityController(AbstractController* controller, MIMapper* miMapper);
 
       virtual ~PriorityController();
 
@@ -211,6 +211,14 @@ namespace SystemC_VPC{
        */
       virtual void signalTaskEvent(ProcessControlBlock* pcb);
 
+    private:
+
+      /**
+       * \brief Retrieve highest priority out of set of mapping possibilites
+       * \param pid specifies the id of the task to determine priority for
+       * \return highest priority
+       */
+      unsigned int getHighestPriority(int pid);
   };
 
 }

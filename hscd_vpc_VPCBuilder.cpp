@@ -937,11 +937,11 @@ namespace SystemC_VPC{
       }else
         if(0==strncmp(type, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
            || 0==strncmp(type, STR_PS, strlen(STR_PS))){
-           scheduler = new PriorityController(controller);
+           scheduler = new PriorityController(controller, controller->getMIMapper());
       }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
-           scheduler = new EDFController(controller);
+           scheduler = new EDFController(controller, controller->getMIMapper());
       }else{
         string msg("Unkown schedulertype ");
         msg += type;

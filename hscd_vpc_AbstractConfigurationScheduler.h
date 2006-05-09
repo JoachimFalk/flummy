@@ -13,7 +13,7 @@ namespace SystemC_VPC {
    */
   class AbstractConfigurationScheduler : public virtual TaskEventListener {
 
-    public:
+    protected:
 
       /**
        * \brief Default constructor
@@ -21,9 +21,9 @@ namespace SystemC_VPC {
        */
       AbstractConfigurationScheduler() {}
 
+    public:
+      
       virtual ~AbstractConfigurationScheduler() {}
-
-      //virtual AbstractController* getController()=0;
 
       /**
        * \brief Updates management structures for performing schedule decisions

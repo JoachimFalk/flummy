@@ -5,9 +5,11 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of PriorityController
    */
-  PriorityController::PriorityController(AbstractController* controller) : ConfigurationScheduler(controller), order_count(0){}
+  PriorityController::PriorityController(AbstractController* controller, MIMapper* miMapper) 
+    : ConfigurationScheduler(controller, miMapper),
+      order_count(0) {}
 
-  PriorityController::~PriorityController(){}
+  PriorityController::~PriorityController() {}
 
   /**
    * \brief Implementation of PriorityController::addTasksToSchedule
@@ -19,7 +21,9 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
-
+    // set priority of task to highest possible at this level of hierarchy
+    newTask->setPriority(this->getHighestPriority(newTask->getPID()));
+    
     std::list<PriorityListElement<unsigned int> >::iterator iter;
 
     iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
@@ -48,7 +52,8 @@ namespace SystemC_VPC{
     if(this->nextConfigurations.size()){
       unsigned int next = this->nextConfigurations.front().getContained();
 
-      if(next != this->getManagedComponent()->getActivConfiguration()->getID()){
+      if(this->getManagedComponent()->getActivConfiguration() == NULL
+          || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("PriorityController " << this->getController().getName() << "> next config to load: "
@@ -124,4 +129,23 @@ namespace SystemC_VPC{
     }
   }
 
+  unsigned int PriorityController::getHighestPriority(int pid){
+    // first of all get Controller to retrieve Decision
+    AbstractController& ctrl = this->getController();
+    Decision d = ctrl.getDecision(pid);
+    // next access binding possibilites of selected comp
+    MappingInformationIterator* iter = this->getMIMapper().getMappingInformationIterator(d.comp);
+    int priority = INT_MAX;
+    while(iter->hasNext()){
+      MappingInformation* mi = iter->getNext();
+      if(mi->getPriority() < priority){
+        priority = mi->getPriority();
+      }
+    }
+    
+    //free iterator
+    delete iter;
+    return priority;
+  }
+  
 } //namespace SystemC_VPC

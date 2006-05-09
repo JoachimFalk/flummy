@@ -5,7 +5,7 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of FCFSController
    */
-  FCFSController::FCFSController(AbstractController* controller) : ConfigurationScheduler(controller){
+  FCFSController::FCFSController(AbstractController* controller) : ConfigurationScheduler(controller, NULL){
 
     this->nextConfiguration = 0;
     

@@ -84,7 +84,7 @@ namespace SystemC_VPC{
     this->remainingDelay = 0;
     this->period = DBL_MAX;
     this->pid = ProcessControlBlock::global_pid++;
-    this->priority = 0;
+    this->priority = INT_MAX;
     this->traceSignal = NULL;
 
 
