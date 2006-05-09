@@ -154,26 +154,14 @@ namespace SystemC_VPC{
   }
 
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
-    if(!FALLBACKMODE){
-      
-      try{ 
-        return this->pcbPool.allocate(name);
-      }catch(NotAllocatedException& e){
-        std::cerr << "Director> getProcessControlBlock failed due to" << std::endl
-          << e.what() << std::endl;
-        exit(-1);
-      }
-    }else{
+    assert(!FALLBACKMODE);
 
-      try{
-        return this->pcbPool.allocate(name);
-      }catch(NotAllocatedException& e){
-        ProcessControlBlock& p = this->pcbPool.registerPCB(name);
-        p.setPriority(1); 
-        p.setDeadline(1000);
-        p.setPeriod(2800.0);
-        return this->pcbPool.allocate(name);
-      }
+    try{ 
+      return this->pcbPool.allocate(name);
+    }catch(NotAllocatedException& e){
+      std::cerr << "Director> getProcessControlBlock failed due to" << std::endl
+		<< e.what() << std::endl;
+      exit(-1);
     }
   }
 
@@ -186,6 +174,24 @@ namespace SystemC_VPC{
   }
 
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
+    if(FALLBACKMODE){
+#ifdef VPC_DEBUG
+      cout << flush;
+      cerr << RED("FallBack::compute( ") << WHITE(name) << RED(" , ") << WHITE(funcname) 
+	   << RED(" ) at time: " << sc_simulation_time()) << endl;
+#endif
+
+      // create Fallback behavior for active and passive mode!
+      if( end != NULL ){
+	// passive mode: notify end
+	end->notify();
+      }
+
+
+      // do nothing, just return
+      return;
+    }
+
     
 #ifdef VPC_DEBUG
     std::cerr << YELLOW("Director> compute(") << WHITE(name) << YELLOW(",") << WHITE(funcname) << YELLOW(") at: ") << sc_simulation_time() << std::endl;
@@ -204,43 +210,34 @@ namespace SystemC_VPC{
       pcb->setBlockEvent(end);
     }
 
-    if(!FALLBACKMODE){
+    try{
+      // get Component
+      std::string compName = this->binder->resolveBinding(*pcb, NULL);
+      AbstractComponent* comp = this->component_map_by_name.find(compName)->second;
       
-      try{
-        // get Component
-        std::string compName = this->binder->resolveBinding(*pcb, NULL);
-        AbstractComponent* comp = this->component_map_by_name.find(compName)->second;
-
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
+      std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
 #endif //VPC_DEBUG      
-
-        // compute task on found component
-        comp->compute(pcb);
-
-      }catch(UnknownBindingException& e){
-        std::cerr << e.what() << std::endl;
-        // clean up
-        if( end == NULL ){
-          delete pcb->getBlockEvent();
-          pcb->setBlockEvent(NULL);
-          this->pcbPool.unlock(pcb->getName(), lockid);
-          this->pcbPool.free(pcb);
-        }else{
-          // TODO: handle asynchron calls notify them ?!?
-        }
-        return;
-        
-      }
-
-    }else{
-      AbstractComponent* comp = (component_map_by_name["Fallback-Component"]);
-      if(comp == NULL){
-        std::cerr << "no Fallback defined!" << std::endl;
-      }
+      
+      // compute task on found component
+      assert(!FALLBACKMODE);
       comp->compute(pcb);
       
+    }catch(UnknownBindingException& e){
+      std::cerr << e.what() << std::endl;
+      // clean up
+      if( end == NULL ){
+	delete pcb->getBlockEvent();
+	pcb->setBlockEvent(NULL);
+	this->pcbPool.unlock(pcb->getName(), lockid);
+	this->pcbPool.free(pcb);
+      }else{
+	// TODO: handle asynchron calls notify them ?!?
+      }
+      return;
+      
     }
+
     
     if( end == NULL){
       // active mode -> returns if simulated delay time has expiYELLOW (blocking compute call)
@@ -295,6 +292,7 @@ namespace SystemC_VPC{
    */
   
   ProcessControlBlock& Director::generatePCB(const char* name){
+    assert(!FALLBACKMODE);
     
     ProcessControlBlock& pcb = this->pcbPool.registerPCB(name);
     pcb.setName(name);
@@ -323,6 +321,7 @@ namespace SystemC_VPC{
    * \brief Implementation of Director::notifyTaskEvent
    */
   void Director::signalTaskEvent(ProcessControlBlock* pcb){
+    assert(!FALLBACKMODE);
 
 #ifdef VPC_DEBUG
     std::cerr << "Director> got notified from: " << pcb->getName() << std::endl;

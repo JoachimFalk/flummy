@@ -69,8 +69,6 @@ namespace SystemC_VPC{
     
     // init vars for parsing
     if(FALLBACKMODE){
-      FallbackComponent* fall=new FallbackComponent("Fallback-Component","FCFS");
-      this->director->registerComponent(fall);
       this->director->FALLBACKMODE = true;
 #ifdef VPC_DEBUG
       std::cout << "running fallbackmode" << std::endl;
