@@ -110,6 +110,11 @@ namespace SystemC_VPC{
   }
 
 
+  /**
+   * SECTION ProcessControlBlock
+   */
+  
+  
   ProcessControlBlock::ProcessControlBlock(): name("NN"){
     this->init();
   }
@@ -118,24 +123,37 @@ namespace SystemC_VPC{
     this->init();
   }
 
+  ProcessControlBlock::~ProcessControlBlock(){
+    if(*(this->copyCount) == 0){
+      delete this->activationCount;
+      delete this->dmapper; 
+    }else{
+      *(this->copyCount)--;
+    }
+  }
+  
   ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb){
 
-    this->name = pcb.getName();
-    this->deadline = pcb.getDeadline();
-    this->period = pcb.getPeriod();
+    this->setName(pcb.getName());
+    this->setDeadline(pcb.getDeadline());
+    this->setPeriod(pcb.getPeriod());
     this->pid = ProcessControlBlock::global_pid++;
-    this->priority = pcb.getPriority();
-
+    this->setPriority(pcb.getPriority());
+    
+   
     this->blockEvent = NULL;
-    this->delay = 0;
-    this->funcname = NULL;
-    this->interrupt = NULL;
-    this->remainingDelay = 0;
-    this->traceSignal = NULL;
+    this->setDelay(0);
+    this->setFuncName(NULL);
+    this->setInterrupt(NULL);
+    this->setRemainingDelay(0);
+    this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
     this->dmapper = pcb.dmapper;
 
+    // remember amount of copies for later clean up 
+    this->copyCount = pcb.copyCount;
+    *(this->copyCount)++; 
   }
 
   void ProcessControlBlock::init(){
@@ -155,13 +173,14 @@ namespace SystemC_VPC{
     this->activationCount = new ActivationCounter();
     this->dmapper = new DelayMapper();
 
+    this->copyCount = new int(0);
   }
 
   void ProcessControlBlock::setName(std::string name){
     this->name = name;
   }
 
-  std::string ProcessControlBlock::getName() const{
+  std::string const& ProcessControlBlock::getName() const{
     return this->name;
   }
 

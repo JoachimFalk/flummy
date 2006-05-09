@@ -183,6 +183,7 @@ namespace SystemC_VPC {
       
       ActivationCounter* activationCount; //activation_count;
       DelayMapper* dmapper;
+      int* copyCount;
 
     public:
       
@@ -198,6 +199,8 @@ namespace SystemC_VPC {
        */
       ProcessControlBlock(std::string name);
 
+      ~ProcessControlBlock();
+
       /**
        * \brief Copy Contstructor
        */
@@ -211,7 +214,7 @@ namespace SystemC_VPC {
       /**
        * \brief Used to access name of PCB
        */
-      std::string getName() const;
+      std::string const& getName() const;
 
       /**
        * \brief Set process id of instance

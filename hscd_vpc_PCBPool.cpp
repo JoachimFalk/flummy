@@ -94,6 +94,17 @@ namespace SystemC_VPC {
     return this->instanceIter->getNext();
     
   }
+ 
+  PCBPool::PCBPool() : pid_count(0) {}
+
+  PCBPool::~PCBPool(){
+
+    std::map<std::string, TypePool* >::iterator iter;
+    for(iter = this->typepools.begin(); iter != this->typepools.end(); iter++){
+      delete iter->second;
+    }
+
+  }
   
   ProcessControlBlock* PCBPool::allocate(std::string type) throw(NotAllocatedException){
 
@@ -103,7 +114,7 @@ namespace SystemC_VPC {
       return iter->second->allocate();
     }
 
-    throw NotAllocatedException();
+    throw NotAllocatedException(type);
   
   }
 
@@ -161,6 +172,23 @@ namespace SystemC_VPC {
   
   PCBIterator PCBPool::getPCBIterator(){
     return PCBIterator(&(this->typepools));
+  }
+
+
+  /**
+   * SECTION TypePool
+   */
+
+  PCBPool::TypePool::~TypePool(){
+ 
+    assert(this->lockedPCB.size() == 0);
+    assert(this->usedPCB.size() == 0);
+
+    std::map<int, ProcessControlBlock* >::iterator iter;
+    for(iter = this->freePCB.begin(); iter != this->freePCB.end(); iter++){
+      delete iter->second;
+    }
+
   }
   
   ProcessControlBlock* PCBPool::TypePool::allocate(){

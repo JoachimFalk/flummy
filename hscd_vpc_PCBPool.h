@@ -56,6 +56,8 @@ namespace SystemC_VPC {
     NotAllocatedException() : msg("Not allocated") {
     }
 
+    NotAllocatedException(std::string msg) : msg(msg +" not allocated") {}
+    
     ~NotAllocatedException() throw(){}
 
     const std::string& what(){
@@ -193,7 +195,9 @@ namespace SystemC_VPC {
 
     public:
 
-      PCBPool() : pid_count(0) {}
+      PCBPool();
+
+      ~PCBPool();
 
       ProcessControlBlock* allocate(std::string type) throw (NotAllocatedException);
 

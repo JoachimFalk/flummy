@@ -41,15 +41,19 @@ namespace SystemC_VPC{
      * \brief Simulate an execution on this "Virtual Component".
      *
      * While this simulation is running SystemC simulation time is consumed.
+     * \deprecated since dynamic allocation has been introduced
      */
-    virtual void compute( const char *name, const char *funcname, VPC_Event* end=NULL)=0;
+    virtual void compute( const char *name, const char *funcname, VPC_Event* end=NULL)
+      __attribute__ ((deprecated)) =0;
 
     /**
      * \brief Simulate an execution on this "Virtual Component".
      *
      * While this simulation is running SystemC simulation time is consumed.
+     * \deprecated since dynamic allocation has been introduced
      */
-    virtual void compute( const char *name, VPC_Event *end=NULL)=0;
+    virtual void compute( const char *name, VPC_Event *end=NULL)
+      __attribute__ ((deprecated)) =0;
     //    virtual void compute(int iprocess)=0;
    
     virtual ~AbstractComponent(){};
