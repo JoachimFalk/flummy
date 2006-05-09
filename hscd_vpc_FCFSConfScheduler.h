@@ -1,5 +1,5 @@
-#ifndef HSCD_VPC_FCFSCONTROLLER_H_
-#define HSCD_VPC_FCFSCONTROLLER_H_
+#ifndef HSCD_VPC_FCFSCONFSCHEDULER_H_
+#define HSCD_VPC_FCFSCONFSCHEDULER_H_
 
 #include <systemc.h>
 
@@ -21,7 +21,7 @@ namespace SystemC_VPC{
    * before other conflicting task, which need another configuration, may be
    * completed.
    */
-  class FCFSController : public ConfigurationScheduler {
+  class FCFSConfScheduler : public ConfigurationScheduler {
 
     private:
 
@@ -37,9 +37,9 @@ namespace SystemC_VPC{
 
     public:
 
-      FCFSController(AbstractController* controller);
+      FCFSConfScheduler(AbstractController* controller);
 
-      virtual ~FCFSController();
+      virtual ~FCFSConfScheduler();
 
       /**
        * \brief Updates management structures for performing schedule decisions
@@ -114,4 +114,4 @@ namespace SystemC_VPC{
   };
 
 }
-#endif /*HSCD_VPC_FCFSCONTROLLER_H_*/
+#endif /*HSCD_VPC_FCFSCONFSCHEDULER_H_*/

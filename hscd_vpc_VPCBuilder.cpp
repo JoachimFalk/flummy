@@ -5,10 +5,10 @@
 
 #include "hscd_vpc_Controller.h"
 
-#include "hscd_vpc_FCFSController.h"
-#include "hscd_vpc_RoundRobinController.h"
-#include "hscd_vpc_PriorityController.h"
-#include "hscd_vpc_EDFController.h"
+#include "hscd_vpc_FCFSConfScheduler.h"
+#include "hscd_vpc_RoundRobinConfScheduler.h"
+#include "hscd_vpc_PriorityConfScheduler.h"
+#include "hscd_vpc_EDFConfScheduler.h"
 
 #include "hscd_vpc_SimpleBinder.h"
 #include "hscd_vpc_RRBinder.h"
@@ -929,19 +929,19 @@ namespace SystemC_VPC{
 
       if(0==strncmp(type, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
           || 0==strncmp(type, STR_FCFS,strlen(STR_FCFS))){
-        scheduler = new FCFSController(controller);      
+        scheduler = new FCFSConfScheduler(controller);      
       }else 
         if(0==strncmp(type, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
            || 0==strncmp(type, STR_RR, strlen(STR_RR))){
-           scheduler = new RoundRobinController(controller);
+           scheduler = new RoundRobinConfScheduler(controller);
       }else
         if(0==strncmp(type, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
            || 0==strncmp(type, STR_PS, strlen(STR_PS))){
-           scheduler = new PriorityController(controller, controller->getMIMapper());
+           scheduler = new PriorityConfScheduler(controller, controller->getMIMapper());
       }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
-           scheduler = new EDFController(controller, controller->getMIMapper());
+           scheduler = new EDFConfScheduler(controller, controller->getMIMapper());
       }else{
         string msg("Unkown schedulertype ");
         msg += type;

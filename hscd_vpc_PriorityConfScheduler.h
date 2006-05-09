@@ -1,5 +1,5 @@
-#ifndef HSCD_VPC_EDFCONTROLLER_H_
-#define HSCD_VPC_EDFCONTROLLER_H_
+#ifndef HSCD_VPC_PRIORITYCONFSCHEDULER_H_
+#define HSCD_VPC_PRIORITYCONFSCHEDULER_H_
 
 #include <systemc.h>
 
@@ -21,30 +21,32 @@ namespace SystemC_VPC{
    * before other conflicting task, which need another configuration, may be
    * completed.
    */
-  class EDFController : public ConfigurationScheduler {
+  class PriorityConfScheduler : public ConfigurationScheduler {
 
     private:
-      // count of insertion order of elements
+
       int order_count;
 
       /**
-       * Helper class to store configurations within EDF list of controller.
+       * Helper class to store configurations within priority list of controller.
        * Contains pointer to actual configuration and fifo entry for secundary strategy.
        */
       template<class C>
-        class EDFListElement{
+        class PriorityListElement{
 
           private:
             C contained;
-            std::list<double> deadlines;
+            std::list<int> priorities;
             int fifo_order;
 
           public:
-            EDFListElement(C contained, double deadline, int degree) : contained(contained), fifo_order(degree){
-              this->deadlines.push_back(deadline);            
+            PriorityListElement(C contained, int priority, int degree) : contained(contained), fifo_order(degree){
+              this->priorities.push_back(priority);
+              // finish list with -1
+              this->priorities.push_back(-1);
             }
 
-            void setContained(C contained){
+            void setContained(C* contained){
               this->contained = contained;
             }
 
@@ -60,73 +62,80 @@ namespace SystemC_VPC{
               return this->fifo_order;
             }
 
-            /**
-             * \brief Adds a deadline to a EDFListElement
-             * Used to add deadline of a running task on a element
-             * to the deadline of the configuration to enable deadline schedule
-             * \param p specifies the deadline to be added
-             */
-            void addDeadline(double d){
-              std::list<double>::iterator iter;
+            void addPriority(int p){
 
-              for(iter = this->deadlines.begin(); iter != this->deadlines.end() && *iter > d; iter++);
+              std::list<int>::iterator iter;
 
-              this->deadlines.insert(iter, d);
+              // walk through list until priority in list is lesser than current to insert
+              for(iter = this->priorities.begin(); iter != this->priorities.end() && *iter > p; iter++);
+
+              this->priorities.insert(iter, p);
 
             }
 
-            /**
-             * \brief Removes a deadline from a EDFListElement
-             * Used to remove deadline of a finished task from the element,
-             * the first occurence of the deadline will be removed.
-             * \param p specifies the deadline value to be removed
-             */
-            void removeDeadline(double d){
-              std::list<double>::iterator iter;
+            void removePriority(int p){
 
-              for(iter = this->deadlines.begin(); iter != this->deadlines.end(); iter++){
-                if(*iter == d){
-                  this->deadlines.erase(iter);
+              std::list<int>::iterator iter;
+
+              for(iter = this->priorities.begin(); iter != this->priorities.end(); iter++){
+                if(*iter == p){
+                  this->priorities.erase(iter);
                   break;
                 }
               }
 
             }
 
-            /**
-             * \brief Access to current deadline of a EDFListElement 
-             * Used to access the current deadline of a EDFListElement determined
-             * by the task running on it. If there are no running tasks
-             * a default value is returned.
-             * \return current deadline of configuration or -1 if no task is running
-             * on the configuration
-             */
-            double getDeadline() const{
-              if(this->deadlines.size() != 0){
-                return this->deadlines.front();
-              }else{
-                return -1;
-              }
-            }
-
-
-            bool operator < (const EDFListElement& pe){
-              if(this->getDeadline() > pe.getDeadline()){
-                return true;
-              }else if(this->getDeadline() == pe.getDeadline()){
-                return this->getFifoOrder() > pe.getFifoOrder();
-              }
-
-              return false;  
+            int getPriority() const{
+              return this->priorities.front();
             }
 
             bool operator == (const C c){
-
               return this->contained == c;
+            }
 
+            bool operator > (const PriorityListElement& elem){
+              if(this->getPriority() < elem.getPriority()){
+                return true;
+              }else
+                if(this->getPriority() == elem.getPriority()
+                    && this->getFifoOrder() < elem.getFifoOrder()){
+                  return true;
+                }
+              return false;
+            }
+
+            bool operator < (const PriorityListElement& elem){
+              if(this->getPriority() > elem.getPriority()){
+                return true;
+              }else
+                if(this->getPriority() == elem.getPriority()
+                    && this->getFifoOrder() > elem.getFifoOrder()){
+                  return true;
+                }
+              return false;
             }
         };
 
+      /**
+       * Functor for comparing PriorityListElements
+       */
+      /*
+         class PriorityComparator : public std::binary_function<PriorityListElement<Configuration* >, PriorityListElement<Configuration* >, bool>{
+         public:
+         bool operator ()(const PriorityListElement<Configuration* > & e1, const PriorityListElement<Configuration *> & e2) const{
+         if(e1.getPriority() < e2.getPriority()){
+         return true;
+         }else
+         if(e1.getPriority() == e2.getPriority()
+         && e1.getFifoOrder() > e2.getFifoOrder()){
+         return true;
+         }
+         return false;
+         }
+
+         };
+         */
       // queue of waiting tasks to be executed
       std::queue<ProcessControlBlock* > readyTasks;
       // map of running tasks
@@ -135,14 +144,13 @@ namespace SystemC_VPC{
       std::queue<ProcessControlBlock* > tasksToProcess;
 
       // queue containing order of configuration to be loaded in next "rounds"
-      //std::list<EDFListElement<Configuration* > > nextConfigurations;
-      std::list<EDFListElement<unsigned int> > nextConfigurations;
+      std::list<PriorityListElement<unsigned int> > nextConfigurations;
 
     public:
 
-      EDFController(AbstractController* controller, MIMapper* miMapper);
+      PriorityConfScheduler(AbstractController* controller, MIMapper* miMapper);
 
-      virtual ~EDFController();
+      virtual ~PriorityConfScheduler();
 
       /**
        * \brief Updates management structures for performing schedule decisions
@@ -163,13 +171,14 @@ namespace SystemC_VPC{
        */
       virtual void performSchedule();
 
+
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
        * This method is used to perform scheduling decision for tasks and within this context
        * their corresponding configurationgs depending on the strategie of the different
        * controller. It is used to initialize and set up all necessary data for a new "round" of
        * scheduling. 
-       */    
+       */
       //    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
 
       /**
@@ -205,15 +214,12 @@ namespace SystemC_VPC{
     private:
 
       /**
-       * \brief Helper method to retrieve deadline
-       * Used to determine earliest deadline out of a set of
-       * mapping possibilities assuming that this constraint has to
-       * be fullfied by scheduling instance.
-       * \param pid specifies the task to determine deadline for
-       * \return earliest deadline
+       * \brief Retrieve highest priority out of set of mapping possibilites
+       * \param pid specifies the id of the task to determine priority for
+       * \return highest priority
        */
-      double getEarliestDeadline(int pid);
+      unsigned int getHighestPriority(int pid);
   };
 
 }
-#endif /*HSCD_VPC_EDFCONTROLLER_H_*/
+#endif /*HSCD_VPC_PRIORITYCONFSCHEDULER_H_*/

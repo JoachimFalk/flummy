@@ -105,10 +105,10 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_XmlHelper.cpp			\
 	hscd_vpc_Configuration.cpp		\
 	hscd_vpc_Controller.cpp			\
-	hscd_vpc_EDFController.cpp		\
-	hscd_vpc_FCFSController.cpp		\
-	hscd_vpc_PriorityController.cpp		\
-	hscd_vpc_RoundRobinController.cpp	\
+	hscd_vpc_EDFConfScheduler.cpp		\
+	hscd_vpc_FCFSConfScheduler.cpp		\
+	hscd_vpc_PriorityConfScheduler.cpp	\
+	hscd_vpc_RoundRobinConfScheduler.cpp	\
 	hscd_vpc_ReconfigurableComponent.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\

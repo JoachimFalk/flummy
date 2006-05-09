@@ -1,23 +1,23 @@
-#include <hscd_vpc_PriorityController.h>
+#include <hscd_vpc_PriorityConfScheduler.h>
 
 namespace SystemC_VPC{
 
   /**
-   * \brief Initializes instance of PriorityController
+   * \brief Initializes instance of PriorityConfScheduler
    */
-  PriorityController::PriorityController(AbstractController* controller, MIMapper* miMapper) 
+  PriorityConfScheduler::PriorityConfScheduler(AbstractController* controller, MIMapper* miMapper) 
     : ConfigurationScheduler(controller, miMapper),
       order_count(0) {}
 
-  PriorityController::~PriorityController() {}
+  PriorityConfScheduler::~PriorityConfScheduler() {}
 
   /**
-   * \brief Implementation of PriorityController::addTasksToSchedule
+   * \brief Implementation of PriorityConfScheduler::addTasksToSchedule
    */
-  void PriorityController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
+  void PriorityConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("PriorityController "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+    std::cerr << YELLOW("PriorityConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
@@ -36,18 +36,18 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityController::performSchedule
+   * \brief Implementation of PriorityConfScheduler::performSchedule
    */
-  void PriorityController::performSchedule(){
+  void PriorityConfScheduler::performSchedule(){
 
     this->nextConfigurations.sort();
 
   }
 
   /*
-   * \brief Implementation of PriorityController::getNextConfiguration
+   * \brief Implementation of PriorityConfScheduler::getNextConfiguration
    */  
-  unsigned int PriorityController::getNextConfiguration(){
+  unsigned int PriorityConfScheduler::getNextConfiguration(){
 
     if(this->nextConfigurations.size()){
       unsigned int next = this->nextConfigurations.front().getContained();
@@ -56,7 +56,7 @@ namespace SystemC_VPC{
           || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("PriorityController " << this->getController().getName() << "> next config to load: "
+        std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> next config to load: "
             << next) << std::endl;
 #endif //VPC_DEBUG
 
@@ -67,18 +67,18 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityController::hasTaskToProcess()
+   * \brief Implementation of PriorityConfScheduler::hasTaskToProcess()
    */
-  bool PriorityController::hasTaskToProcess(){
+  bool PriorityConfScheduler::hasTaskToProcess(){
 
     return (this->tasksToProcess.size() > 0);
 
   }
 
   /**
-   * \brief Implementation of PriorityController::getNextTask()
+   * \brief Implementation of PriorityConfScheduler::getNextTask()
    */
-  ProcessControlBlock* PriorityController::getNextTask(){
+  ProcessControlBlock* PriorityConfScheduler::getNextTask(){
 
     ProcessControlBlock* task;
     task = this->tasksToProcess.front();
@@ -88,12 +88,12 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityController::signalTaskEvent
+   * \brief Implementation of PriorityConfScheduler::signalTaskEvent
    */
-  void PriorityController::signalTaskEvent(ProcessControlBlock* pcb){
+  void PriorityConfScheduler::signalTaskEvent(ProcessControlBlock* pcb){
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("PriorityController " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
 
     //get mapped configuration
@@ -105,7 +105,7 @@ namespace SystemC_VPC{
       iter->removePriority(pcb->getPriority());
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("PriorityController " << this->getController().getName() << "> priority of mapped configuration after change is: "
+      std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> priority of mapped configuration after change is: "
           << iter->getPriority()) << std::endl;
 #endif //VPC_DEBUG
 
@@ -129,7 +129,7 @@ namespace SystemC_VPC{
     }
   }
 
-  unsigned int PriorityController::getHighestPriority(int pid){
+  unsigned int PriorityConfScheduler::getHighestPriority(int pid){
     // first of all get Controller to retrieve Decision
     AbstractController& ctrl = this->getController();
     Decision d = ctrl.getDecision(pid);

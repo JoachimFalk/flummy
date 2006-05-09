@@ -1,5 +1,5 @@
-#ifndef HSCD_VPC_ROUNDROBINCONTROLLER_H_
-#define HSCD_VPC_ROUNDROBINCONTROLLER_H_
+#ifndef HSCD_VPC_ROUNDROBINCONFSCHEDULER_H_
+#define HSCD_VPC_ROUNDROBINCONFSCHEDULER_H_
 
 #include <systemc.h>
 
@@ -21,7 +21,7 @@ namespace SystemC_VPC{
    * before other conflicting task, which need another configuration, may be
    * completed.
    */
-  class RoundRobinController : public ConfigurationScheduler {
+  class RoundRobinConfScheduler : public ConfigurationScheduler {
 
     private:
 
@@ -101,9 +101,9 @@ namespace SystemC_VPC{
 
     public:
 
-      RoundRobinController(AbstractController* controller);
+      RoundRobinConfScheduler(AbstractController* controller);
 
-      virtual ~RoundRobinController();
+      virtual ~RoundRobinConfScheduler();
 
       /**
        * \brief Used to set controller specific values
@@ -205,4 +205,4 @@ namespace SystemC_VPC{
   };
 
 }
-#endif /*HSCD_VPC_ROUNDROBINCONTROLLER_H_*/
+#endif /*HSCD_VPC_ROUNDROBINCONFSCHEDULER_H_*/

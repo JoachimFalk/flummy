@@ -1,26 +1,26 @@
-#include "hscd_vpc_EDFController.h"
+#include "hscd_vpc_EDFConfScheduler.h"
 
 namespace SystemC_VPC{
   
   /**
-   * \brief Initializes instance of EDFController
+   * \brief Initializes instance of EDFConfScheduler
    */
-  EDFController::EDFController(AbstractController* controller, MIMapper* miMapper) 
+  EDFConfScheduler::EDFConfScheduler(AbstractController* controller, MIMapper* miMapper) 
     : ConfigurationScheduler(controller, miMapper), 
       order_count(0) {}
 
   /**
-   * \brief Deletes instance of EDFController
+   * \brief Deletes instance of EDFConfScheduler
    */
-  EDFController::~EDFController(){}
+  EDFConfScheduler::~EDFConfScheduler(){}
     
   /**
-   * \brief Implementation of PriorityController::addTasksToSchedule
+   * \brief Implementation of EDFConfScheduler::addTasksToSchedule
    */
-  void EDFController::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
+  void EDFConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("EDFController "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+    std::cerr << YELLOW("EDFConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
@@ -38,9 +38,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of EDFController::performSchedule
+   * \brief Implementation of EDFConfScheduler::performSchedule
    */
-  void EDFController::performSchedule(){
+  void EDFConfScheduler::performSchedule(){
     
     //finally sort EDF list
     this->nextConfigurations.sort();
@@ -48,9 +48,9 @@ namespace SystemC_VPC{
   }
   
   /*
-   * \brief Implementation of EDFController::getNextConfiguration
+   * \brief Implementation of EDFConfScheduler::getNextConfiguration
    */  
-  unsigned int EDFController::getNextConfiguration(){
+  unsigned int EDFConfScheduler::getNextConfiguration(){
     
     if(!this->nextConfigurations.empty()){
       unsigned int next = this->nextConfigurations.front().getContained();
@@ -59,7 +59,7 @@ namespace SystemC_VPC{
           || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("EDFController " << this->getController().getName() << "> next config to load: "
+        std::cerr << YELLOW("EDFConfScheduler " << this->getController().getName() << "> next config to load: "
               << next) << std::endl;
 #endif //VPC_DEBUG
 
@@ -70,18 +70,18 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of EDFController::hasTaskToProcess()
+   * \brief Implementation of EDFConfScheduler::hasTaskToProcess()
    */
-  bool EDFController::hasTaskToProcess(){
+  bool EDFConfScheduler::hasTaskToProcess(){
    
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of EDFController::getNextTask()
+   * \brief Implementation of EDFConfScheduler::getNextTask()
    */
-  ProcessControlBlock* EDFController::getNextTask(){
+  ProcessControlBlock* EDFConfScheduler::getNextTask(){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();
@@ -91,12 +91,12 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of EDFController::signalTaskEvent
+   * \brief Implementation of EDFConfScheduler::signalTaskEvent
    */
-  void EDFController::signalTaskEvent(ProcessControlBlock* pcb){
+  void EDFConfScheduler::signalTaskEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("EDFController " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << YELLOW("EDFConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
     
     //get made decision for pcb
@@ -111,7 +111,7 @@ namespace SystemC_VPC{
       iter->removeDeadline(pcb->getDeadline());
       
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("EDFController " << this->getController().getName() << "> deadline of mapped configuration after change is: "
+    std::cerr << YELLOW("EDFConfScheduler " << this->getController().getName() << "> deadline of mapped configuration after change is: "
           << iter->getDeadline()) << std::endl;
 #endif //VPC_DEBUG
 
@@ -128,7 +128,7 @@ namespace SystemC_VPC{
         this->getManagedComponent()->getActivConfiguration()->getID() != this->getNextConfiguration()){
 
 #ifdef VPC_DEBUG
-      std::cerr << "EDFController> waking up component thread!" << std::endl;
+      std::cerr << "EDFConfScheduler> waking up component thread!" << std::endl;
 #endif //VPC_DEBUG
 
       this->getManagedComponent()->wakeUp();
@@ -136,9 +136,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of EDFController::getEarliestDeadline
+   * \brief Implementation of EDFConfScheduler::getEarliestDeadline
    */
-  double EDFController::getEarliestDeadline(int pid){
+  double EDFConfScheduler::getEarliestDeadline(int pid){
     // first of all get controller to retrieve decision for task
     AbstractController& ctrl = this->getController();
     Decision d = ctrl.getDecision(pid);
