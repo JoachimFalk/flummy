@@ -1,11 +1,17 @@
-#ifndef HSCD_VPC_LEASTCURRENTLYBOUNDPE_H_
-#define HSCD_VPC_LEASTCURRENTLYBOUNDPE_H_
+#ifndef HSCD_VPC_LEASTFREQUENTLYBOUNDPE_H_
+#define HSCD_VPC_LEASTFREQUENTLYBOUNDPE_H_
 
 #include "hscd_vpc_PriorityBinder.h"
 
 namespace SystemC_VPC {
 
-  class LeastCurrentlyBoundPE : public PriorityElement {
+  /**
+   * \brief Specialized PriorityElement taking into account total_bound_count
+   * This class is used to enable fair share of binding possibilities over time.
+   * It uses Least Frequently Used semantics for priority decision, that means
+   * the least used binding is the most prior one.
+   */
+  class LeastFrequentlyUsedPE : public PriorityElement {
 
     private:
 
@@ -15,12 +21,11 @@ namespace SystemC_VPC {
       unsigned int id;
 
       unsigned int bound_count;
-
     public:
 
-      LeastCurrentlyBoundPE();
+      LeastFrequentlyUsedPE();
       
-      virtual ~LeastCurrentlyBoundPE();
+      virtual ~LeastFrequentlyUsedPE();
 
       /**
        * \brief used to update internal state of PriorityElement
@@ -38,20 +43,20 @@ namespace SystemC_VPC {
 
       unsigned int getID() const;
 
-      unsigned int getBoundCount() const;
+      unsigned int getUsedCount() const;
   };
  
-  class LCBPEFactory : public PriorityElementFactory {
+  class LFUPEFactory : public PriorityElementFactory {
 
     public:
 
-      LCBPEFactory();
+      LFUPEFactory();
 
-      ~LCBPEFactory(); 
+      ~LFUPEFactory(); 
 
       PriorityElement* createInstance();
 
   };
 }
 
-#endif //LEASTCURRENTLYBOUNDPE_H_
+#endif //LEASTFREQUENTLYBOUNDPE_H_

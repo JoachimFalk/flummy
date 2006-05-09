@@ -1,6 +1,8 @@
 #ifndef HSCD_VPC_MAPPINGINFORMATION_H_
 #define HSCD_VPC_MAPPINGINFORMATION_H_
 
+#include <string>
+
 #include "hscd_vpc_DelayMapper.h"
 
 namespace SystemC_VPC {
@@ -8,7 +10,7 @@ namespace SystemC_VPC {
   class MappingInformation  {
 
     private:
-
+      
       int priority;
       double period;
       double deadline;

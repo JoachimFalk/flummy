@@ -10,6 +10,9 @@
 
 namespace SystemC_VPC {
 
+  /**
+   * \brief Basic PriorityElement interface specifying necessary methods for usage with PriorityBinder
+   */
   class PriorityElement {
     
     public:
@@ -28,12 +31,20 @@ namespace SystemC_VPC {
       */
      virtual MappingInformation* addMappingData(MappingInformationIterator& mIter)=0;
 
+     /**
+      * \brief Notifies PriorityElement if task has been removed from associated target
+      * Designed to update internal state of PriorityElement on task "removal" if necessary.
+      * \param mIter enables iteration over possible binding settings
+      */
      virtual void removeMappingData(MappingInformationIterator& mIter)=0; 
     
      virtual bool operator > (const PriorityElement& e)=0;
 
   };
 
+  /**
+   * \brief Factory interface used to instantiate PriortyElement instances
+   */
   class PriorityElementFactory {
 
     public:
@@ -43,7 +54,13 @@ namespace SystemC_VPC {
       virtual PriorityElement* createInstance()=0;
 
   };
-  
+
+  /**
+   * \brief Priority based binder for selection of multiple binding possibilities
+   * This class uses PriorityElements associated with the binding targets to perform
+   * its binding strategies. The actual state of each target priority element is taken
+   * into account and update respectivly to the selected binding.  
+   */
   class PriorityBinder : public DynamicBinder {
 
     private:

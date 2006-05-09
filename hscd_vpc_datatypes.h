@@ -80,6 +80,9 @@ namespace SystemC_VPC {
 //definition for PriorityBinder using LeastCurrentlyBoundPE
 #define STR_VPC_LCBBINDER    "LeastCurrentlyBoundBinder"
 #define STR_VPC_LCBB         "LCBB"
+//definition for PriorityBinder using LeastCurrentlyBoundPE
+#define STR_VPC_LFBBINDER    "LeastFrequentlyUsedBinder"
+#define STR_VPC_LFBB         "LFUB"
  
   /***********************************
    * SECTION Mapper

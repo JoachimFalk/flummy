@@ -118,6 +118,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_RRBinder.cpp			\
 	hscd_vpc_PriorityBinder.cpp		\
 	hscd_vpc_LeastCurrentlyBoundPE.cpp	\
+	hscd_vpc_LeastFrequentlyUsedPE.cpp	\
 	hscd_vpc_ConfigurationPool.cpp		\
 	hscd_vpc_ConfigurationScheduler.cpp	\
 	hscd_vpc_DelayMapper.cpp		\

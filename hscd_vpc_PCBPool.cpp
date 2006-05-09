@@ -182,7 +182,10 @@ namespace SystemC_VPC {
    */
 
   PCBPool::TypePool::~TypePool(){
-  
+ 
+    assert(this->lockedPCB.size() == 0);
+    assert(this->usedPCB.size() == 0);
+
     std::map<int, ProcessControlBlock* >::iterator iter;
     for(iter = this->freePCB.begin(); iter != this->freePCB.end(); iter++){
       delete iter->second;

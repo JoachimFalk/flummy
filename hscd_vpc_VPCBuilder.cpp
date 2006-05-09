@@ -15,6 +15,7 @@
 #include "hscd_vpc_PriorityBinder.h"
 
 #include "hscd_vpc_LeastCurrentlyBoundPE.h"
+#include "hscd_vpc_LeastFrequentlyUsedPE.h"
 
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
@@ -997,6 +998,11 @@ namespace SystemC_VPC{
       if(0==strncmp(type, STR_VPC_LCBBINDER, strlen(STR_VPC_LCBBINDER))
           || 0==strncmp(type, STR_VPC_LCBB, strlen(STR_VPC_LCBB))){
         PriorityElementFactory* factory = new LCBPEFactory();
+        binder = new PriorityBinder(controller, controller->getMIMapper(), factory);
+      }else
+      if(0==strncmp(type, STR_VPC_LFBBINDER, strlen(STR_VPC_LFBBINDER))
+          || 0==strncmp(type, STR_VPC_LFBB, strlen(STR_VPC_LFBB))){
+        PriorityElementFactory* factory = new LFUPEFactory();
         binder = new PriorityBinder(controller, controller->getMIMapper(), factory);
       }else{
         std::string msg("Unkown bindertype ");

@@ -34,6 +34,9 @@ namespace SystemC_VPC {
     // init selection
     if(binding.hasNext()){
       target = binding.getNext();
+#ifdef VPC_DEBUG
+      std::cerr << "PriorityElement> intial target is " << target << std::endl;
+#endif //VPC_DEBUG
       elem = this->pelems[target];
     }else{
       std::string msg = task.getName() +"->?";
@@ -43,11 +46,15 @@ namespace SystemC_VPC {
     PriorityElement* tmpElem=NULL;
     std::string tmpTarget;
 
+    // based on the made decision select highest prior element
     while(binding.hasNext()){
        tmpTarget = binding.getNext();
        tmpElem = this->pelems[tmpTarget];
        // if priority of tmpElem is higher then current select switch
        if(*tmpElem > *elem){
+#ifdef VPC_DEBUG
+         std::cerr << "PriorityBinder> higher prior element found! New target is " << tmpTarget << std::endl;
+#endif //VPC_DEBUG
          target = tmpTarget;
          elem = tmpElem;
        }

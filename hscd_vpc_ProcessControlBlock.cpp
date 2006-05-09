@@ -36,22 +36,15 @@ namespace SystemC_VPC{
   }
 
   ProcessControlBlock::~ProcessControlBlock(){
-    std::cerr << "PCB> num of copies is " << *(this->copyCount) << std::endl;
     if(*(this->copyCount) == 0){
-      std::cerr << "PCB> Destructor called and delete for " << this->getName() << "::" << this->getPID() << " !" << std::endl;
       delete this->activationCount;
 
       std::set<MappingInformation* >::iterator iter;
       for(iter = this->mInfos->begin(); iter != this->mInfos->end(); iter++){
-        std::cerr << "PCB> Deleting MappingInformation!" << std::endl;
         delete *iter;
       }
       
-      std::cerr << "PCB> Deleting set of MappingInformation!" << std::endl;
       delete this->mInfos;
-      std::cerr << "PCB> Deleting copyCount instance!" << std::endl;
-      delete this->copyCount;
-      std::cerr << "PCB> Deletion finished" << std::endl;
     }else{
       *(this->copyCount)--;
     }

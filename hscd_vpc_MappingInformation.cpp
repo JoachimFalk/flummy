@@ -8,9 +8,9 @@ namespace SystemC_VPC {
 
   MappingInformation::MappingInformation()
     : priority(0),
-     period(0),
-    deadline(0),
-    dmapper(0) {}
+      period(0),
+      deadline(0),
+      dmapper(0) {}
 
   MappingInformation::~MappingInformation() {}
 
