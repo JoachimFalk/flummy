@@ -123,7 +123,6 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_DelayMapper.cpp		\
 	hscd_vpc_MappingInformation.cpp		\
 	hscd_vpc_MIMapper.cpp			\
-	hscd_vpc_Attribute.cpp			\
 	hscd_vpc_Term.cpp			
 #	hscd_vpc_SchedulerProxy.cpp		
 
