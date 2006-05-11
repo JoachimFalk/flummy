@@ -106,7 +106,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_ReconfigurableComponent.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
-	hscd_vpc_PCBPool.cpp			\	
+	hscd_vpc_PCBPool.cpp			\
 	hscd_vpc_Term.cpp			
 #	hscd_vpc_SchedulerProxy.cpp		
 
