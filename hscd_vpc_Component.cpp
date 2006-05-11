@@ -275,7 +275,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::compute( const char *name, const char *funcname, VPC_Event *end) { 
+  void Component::_compute( const char *name, const char *funcname, VPC_Event *end) { 
     ProcessControlBlock  *actualTask = Director::getInstance().getProcessControlBlock(name);
 
 #ifdef VPC_DEBUG
@@ -335,13 +335,13 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::compute( const char *name, VPC_Event *end) { 
+  void Component::_compute( const char *name, VPC_Event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
     cerr << RED("Component::compute( ") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
-    compute(name,"",end);
+    _compute(name,"",end);
   }
 
   /**

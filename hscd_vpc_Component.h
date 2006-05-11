@@ -70,16 +70,22 @@ namespace SystemC_VPC{
     void setScheduler(const char *schedulername);
     
     
+  protected:
+
     /**
      * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
      */
-    virtual void compute( const char *name, const char *funcname=NULL, VPC_Event *end=NULL);
+    virtual void _compute( const char *name, const char *funcname=NULL, VPC_Event *end=NULL)
+      __attribute__ ((deprecated));
     
     /**
      * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
      */
-    virtual void compute( const char *name, VPC_Event *end=NULL);
+    virtual void _compute( const char *name, VPC_Event *end=NULL)
+      __attribute__ ((deprecated));
     
+  public:
+
     /**
      * \brief A vector of commandos, so the Scheduler can descide what to do.
      *

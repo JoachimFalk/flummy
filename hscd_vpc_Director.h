@@ -22,6 +22,9 @@
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_TaskEventListener.h"
 
+// provide compatibility with other compilers then gcc, hopefully
+#include <ansidecl.h>
+
 #include <string>
 #include <map.h>
 #include <vector.h>

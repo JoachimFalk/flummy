@@ -420,7 +420,7 @@ namespace SystemC_VPC{
   /**
    * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
    */
-  void ReconfigurableComponent::compute( const char* name, const char* funcname, VPC_Event* end){
+  void ReconfigurableComponent::_compute( const char* name, const char* funcname, VPC_Event* end){
     
     // send compute request to controller
     ProcessControlBlock* pcb = Director::getInstance().getProcessControlBlock(name);
@@ -432,9 +432,9 @@ namespace SystemC_VPC{
   /**
    * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
    */
-  void ReconfigurableComponent::compute( const char *name, VPC_Event *end){
+  void ReconfigurableComponent::_compute( const char *name, VPC_Event *end){
     
-    this->compute(name, "", end);
+    this->_compute(name, "", end);
     
   }
   
