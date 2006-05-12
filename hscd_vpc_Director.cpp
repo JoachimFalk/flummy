@@ -153,6 +153,15 @@ namespace SystemC_VPC{
   }
 
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
+    //HINT: treat mode!!
+    //if (mode) { ....
+    compute(name, funcname, EventPair(end, NULL));
+    //} else{
+    //  compute(name, funcname, EventPair(NULL, end));
+    //}
+  }
+
+  void Director::compute(const char* name, const char* funcname, EventPair endPair){
     if(FALLBACKMODE){
 #ifdef VPC_DEBUG
       cout << flush;
@@ -161,12 +170,9 @@ namespace SystemC_VPC{
 #endif
 
       // create Fallback behavior for active and passive mode!
-      if( end != NULL ){
-	// passive mode: notify end
-	end->notify();
-      }
-
-
+      if( endPair.dii != NULL )	    endPair.dii->notify();      // passive mode: notify end
+      if( endPair.latency != NULL ) endPair.latency->notify();  // passive mode: notify end
+      
       // do nothing, just return
       return;
     }
@@ -180,13 +186,16 @@ namespace SystemC_VPC{
     pcb->setFuncName(funcname);
     int lockid = -1;
     
-    if( end == NULL ){
+    //HINT: also treat mode!!
+    //if( endPair.latency != NULL ) endPair.latency->notify();
+
+    if( endPair.dii == NULL ){
       // prepare active mode
       pcb->setBlockEvent(new VPC_Event());
       lockid = this->pcbPool.lock(pcb);
     }else{
       // prepare passiv mode
-      pcb->setBlockEvent(end);
+      pcb->setBlockEvent(endPair.dii);
     }
     if(1!=mapping_map_by_name.count(name)){
       cerr << "Unknown mapping <"<<name<<"> to ??"<<endl; 
@@ -206,7 +215,7 @@ namespace SystemC_VPC{
     assert(!FALLBACKMODE);
     comp->compute(pcb);
 
-    if( end == NULL){
+    if( endPair.dii == NULL){
       // active mode -> returns if simulated delay time has expiYELLOW (blocking compute call)
       CoSupport::SystemC::wait(*(pcb->getBlockEvent()));
       delete pcb->getBlockEvent();
@@ -217,6 +226,10 @@ namespace SystemC_VPC{
       this->pcbPool.free(pcb);
     }
      
+  }
+
+  void Director::compute(const char *name, EventPair endPair){
+    compute( name, "", endPair);
   }
 
   void Director::compute(const char* name, VPC_Event* end){

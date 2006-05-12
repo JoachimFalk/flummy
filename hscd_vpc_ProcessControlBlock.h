@@ -168,6 +168,7 @@ namespace SystemC_VPC {
       int pid;
       sc_event* interrupt;
       CoSupport::SystemC::Event* blockEvent;
+      CoSupport::SystemC::Event* latencyEvent;
       double delay;
       double remainingDelay;
       int priority;
