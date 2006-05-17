@@ -722,8 +722,6 @@ namespace SystemC_VPC{
           //generate new ProcessControlBlock or get existing one for initialization
           ProcessControlBlock& p = this->director->generatePCB(sSource);
           
-          std::cerr << "VPCBuilder> Generate PCB for " << sSource << " == " << p.getName() << std::endl;
-          
           //generate new MappingEntry
           MappingInformation* mInfo = new MappingInformation();
           

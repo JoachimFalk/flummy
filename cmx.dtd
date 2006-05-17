@@ -47,7 +47,7 @@ name  CDATA #REQUIRED>
 <!ATTLIST scheduler
 name  CDATA #REQUIRED>
 
-<!ELEMENT configuration (component)*>
+<!ELEMENT configuration (component|recomponent)*>
 <!ATTLIST configuration
 name ID #REQUIRED
 loadtime CDATA "0 ns"
