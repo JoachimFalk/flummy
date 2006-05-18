@@ -200,6 +200,7 @@ namespace SystemC_VPC {
       iter = this->freePCB.begin();
       instance = iter->second;
       this->usedPCB[iter->first] = instance;
+      this->freePCB.erase(iter);
     }else{
       instance = new ProcessControlBlock(*(this->base));
       //instance->setPID(PCBPool::pid_count++);
