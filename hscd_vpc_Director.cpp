@@ -191,11 +191,11 @@ namespace SystemC_VPC{
 
     if( endPair.dii == NULL ){
       // prepare active mode
-      pcb->setBlockEvent(new VPC_Event());
+      pcb->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
       lockid = this->pcbPool.lock(pcb);
     }else{
       // prepare passiv mode
-      pcb->setBlockEvent(endPair.dii);
+      pcb->setBlockEvent(endPair);
     }
     if(1!=mapping_map_by_name.count(name)){
       cerr << "Unknown mapping <"<<name<<"> to ??"<<endl; 
@@ -217,9 +217,10 @@ namespace SystemC_VPC{
 
     if( endPair.dii == NULL){
       // active mode -> returns if simulated delay time has expiYELLOW (blocking compute call)
-      CoSupport::SystemC::wait(*(pcb->getBlockEvent()));
-      delete pcb->getBlockEvent();
-      pcb->setBlockEvent(NULL);
+      CoSupport::SystemC::wait(*(pcb->getBlockEvent().dii));
+      delete pcb->getBlockEvent().dii;
+      delete pcb->getBlockEvent().latency;
+      pcb->setBlockEvent(EventPair());
       // as psb has been locked -> unlock it
       this->pcbPool.unlock(pcb->getName(), lockid);
       // and free it
@@ -320,7 +321,8 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
       std::cerr << "Director> task successful finished: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
-      pcb->getBlockEvent()->notify();
+      //if(NULL != pcb->getBlockEvent().latency) 
+      pcb->getBlockEvent().latency->notify();
       // remember last acknowledged task time
       this->end = sc_simulation_time();
       

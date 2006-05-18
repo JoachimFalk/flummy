@@ -37,6 +37,7 @@ namespace SystemC_VPC {
      * Sloth constructor.
      */
     EventPair( CoSupport::SystemC::Event* dii, CoSupport::SystemC::Event* latency ) : dii(dii), latency(latency){}
+    EventPair() : dii(NULL), latency(NULL){}
   };
 
 } // namespace SystemC_VPC

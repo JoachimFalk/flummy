@@ -124,6 +124,28 @@ typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
     
   };
 */
+
+
+  struct timePcbPair{
+    sc_time time;
+    ProcessControlBlock *pcb;
+  };
+
+  struct timeCompare{
+    bool operator()(const timePcbPair& tpp1,
+        const timePcbPair& tpp2) const
+    {
+      sc_time p1=tpp1.time;
+      sc_time p2=tpp2.time;
+      if (p1 >= p2)
+        return true;
+      else
+        return false;
+    }
+
+  };
+
+
   enum action_command { ASSIGN,RESIGN,BLOCK,READY};
 
   typedef struct{

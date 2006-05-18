@@ -73,7 +73,7 @@ pkginclude_HEADERS =				\
 
 #noinst_HEADERS=	oneof.hpp
 
-AM_CPPFLAGS=-Wall
+AM_CPPFLAGS=-Wall -O1 -Wuninitialized
 
 libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)		\

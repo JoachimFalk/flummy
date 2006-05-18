@@ -424,7 +424,7 @@ namespace SystemC_VPC{
     
     // send compute request to controller
     ProcessControlBlock* pcb = Director::getInstance().getProcessControlBlock(name);
-    pcb->setBlockEvent(end);
+    pcb->setBlockEvent(EventPair(end, NULL));
     this->compute(pcb);
 
   }

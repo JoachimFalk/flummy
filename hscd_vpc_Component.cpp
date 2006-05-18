@@ -100,8 +100,10 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
             runningTasks.erase(actualRunningPID);
       
-            this->notifyParentController(task);
-      
+	    //Removed: this will erase the task from VPC, but with pipelining support the erasing should occur later 
+            //this->notifyParentController(task);
+	    task->getBlockEvent().dii->notify();
+	    moveToRemainingPipelineStages(task);
             //wait(SC_ZERO_TIME);
           }else{
        
@@ -316,13 +318,14 @@ namespace SystemC_VPC{
     }
     
 
-    if( actualTask->getBlockEvent() == NULL ){
+    if( actualTask->getBlockEvent().dii == NULL ){
       // active mode -> returns if simulated delay time has expired (blocking compute call)
-      actualTask->setBlockEvent(new VPC_Event());
+      actualTask->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
       compute(actualTask);
-      CoSupport::SystemC::wait(*(actualTask->getBlockEvent()));
-      delete actualTask->getBlockEvent();
-      actualTask->setBlockEvent(NULL);
+      CoSupport::SystemC::wait(*(actualTask->getBlockEvent().dii));
+      delete actualTask->getBlockEvent().dii;
+      delete actualTask->getBlockEvent().latency;
+      actualTask->setBlockEvent(EventPair());
       // return
     } else {
       // passive mode -> return immediatly (no blocking)
@@ -579,5 +582,61 @@ namespace SystemC_VPC{
   /**************************/
   /*  END OF EXTENSION      */
   /**************************/
+
+  
+  /**
+   *
+   */
+  void Component::remainingPipelineStages(){
+    while(1){
+      if(pqueue.size() == 0){
+	wait(remainingPipelineStages_WakeUp);
+      }else{
+	timePcbPair front = pqueue.top();
+
+	//cerr << "Pop from list: " << front.time << " : " << front.pcb->getBlockEvent().latency << endl;
+	sc_time waitFor	= front.time-sc_time_stamp();
+	assert(front.time >= sc_time_stamp());
+	//cerr << "Pipeline> Wait till " << front.time << " (" << waitFor << ") at: " << sc_time_stamp() << endl;
+	wait( waitFor, remainingPipelineStages_WakeUp );
+	//iter = remainingPipelineStagesList.begin();
+	//assert(*iter == front);
+
+	sc_time rest = front.time-sc_time_stamp();
+	assert(rest >= SC_ZERO_TIME);
+	if(rest > SC_ZERO_TIME){
+	  //cerr << "------------------------------" << endl;
+	}else{
+	  assert(rest == SC_ZERO_TIME);
+	  //cerr << "Ready! releasing task (" <<  front.time <<") at: " << sc_time_stamp() << endl;
+	  this->notifyParentController(front.pcb); // Latenzy over -> remove Task
+	  wait(SC_ZERO_TIME);
+	  pqueue.pop();
+	}
+      }
+
+    }
+  }
+
+  /**
+   *
+   */
+  void Component::moveToRemainingPipelineStages(ProcessControlBlock* task){
+    sc_time now                 = sc_time_stamp();
+    sc_time restOfLatency       = sc_time(10, SC_NS); // insert Latency-DII later!!
+    sc_time end                 = now + restOfLatency;
+    if(restOfLatency == SC_ZERO_TIME){
+      //early exit if (Latency-DII) == 0
+      //std::cerr << "Early exit: " << task->getName() << std::endl;
+      this->notifyParentController(task);
+      return;
+    }
+    timePcbPair pair;
+    pair.time = end;
+    pair.pcb  = task;
+    //std::cerr << "Rest of pipeline added: " << task->getName() << " (EndTime: " << pair.time << ") " << std::endl;
+    pqueue.push(pair);
+    remainingPipelineStages_WakeUp.notify();
+  }
 
 } //namespace SystemC_VPC

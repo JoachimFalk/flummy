@@ -141,7 +141,7 @@ namespace SystemC_VPC{
     this->setPriority(pcb.getPriority());
     
    
-    this->blockEvent = NULL;
+    this->blockEvent = EventPair();
     this->setDelay(0);
     this->setFuncName(NULL);
     this->setInterrupt(NULL);
@@ -158,7 +158,7 @@ namespace SystemC_VPC{
 
   void ProcessControlBlock::init(){
 
-    this->blockEvent = NULL;
+    this->blockEvent = EventPair();
     this->deadline = DBL_MAX;
     this->delay = 0;
     this->funcname = NULL;
@@ -208,11 +208,11 @@ namespace SystemC_VPC{
     return this->interrupt;
   }
 
-  void ProcessControlBlock::setBlockEvent(CoSupport::SystemC::Event* blockEvent){
+  void ProcessControlBlock::setBlockEvent(EventPair blockEvent){
     this->blockEvent = blockEvent;
   }
 
-  CoSupport::SystemC::Event* ProcessControlBlock::getBlockEvent() const{
+  EventPair ProcessControlBlock::getBlockEvent() const{
     return this->blockEvent;
   }
 

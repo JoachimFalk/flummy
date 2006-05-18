@@ -8,6 +8,8 @@
 
 #include <systemc_support.hpp>
 
+#include "hscd_vpc_EventPair.h"
+
 namespace SystemC_VPC {
  
   enum activation_state {
@@ -167,8 +169,7 @@ namespace SystemC_VPC {
       const char* funcname;
       int pid;
       sc_event* interrupt;
-      CoSupport::SystemC::Event* blockEvent;
-      CoSupport::SystemC::Event* latencyEvent;
+      EventPair blockEvent;
       double delay;
       double remainingDelay;
       int priority;
@@ -250,12 +251,12 @@ namespace SystemC_VPC {
       /**
        * \brief Sets block event of PCB instance
        */
-      void setBlockEvent(CoSupport::SystemC::Event* blockEvent);
+      void setBlockEvent(EventPair blockEvent);
 
       /**
        * \brief Gets block event of PCB instance
        */
-      CoSupport::SystemC::Event* getBlockEvent() const;
+      EventPair getBlockEvent() const;
 
       /**
        * \brief Sets current associated delay of instance

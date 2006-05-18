@@ -25,6 +25,7 @@
 #include <vector.h>
 #include <map.h>
 #include <deque.h>
+#include <queue.h>
 
 namespace SystemC_VPC{
 
@@ -46,8 +47,13 @@ namespace SystemC_VPC{
     //virtual void compute(ProcessControlBlock *actualTask);
     virtual void schedule_thread(); 
 
+    virtual void remainingPipelineStages(); 
+
   private:
-    
+
+    sc_event remainingPipelineStages_WakeUp;
+    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> pqueue;
+
     sc_trace_file *traceFile;
     map<std::string,sc_signal<trace_value>*> trace_map_by_name;
     Scheduler *scheduler;
@@ -64,6 +70,8 @@ namespace SystemC_VPC{
     
     // time last task started
     sc_time startTime;
+
+    void moveToRemainingPipelineStages(ProcessControlBlock* task);
     
   public:
      
@@ -108,6 +116,7 @@ namespace SystemC_VPC{
      */
     Component(sc_module_name name,const char *schedulername): AbstractComponent(name){
       SC_THREAD(schedule_thread);
+      SC_THREAD(remainingPipelineStages);
       setScheduler(schedulername);
       /*    schedulerproxy=new SchedulerProxy(this->componentName);
         schedulerproxy->setScheduler(schedulername);
