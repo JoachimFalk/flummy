@@ -7,10 +7,10 @@ namespace SystemC_VPC {
 
   RRBinder::~RRBinder() {}
 
-  std::pair<std::string, MappingInformation* > RRBinder::performBinding(ProcessControlBlock& task, AbstractComponent* comp)
+  std::pair<std::string, MappingInformation* > RRBinder::performBinding(ProcessControlBlock& pcb, AbstractComponent* comp)
     throw(UnknownBindingException) {
       
-    AbstractBinding& binding = this->getBinding(task.getName());
+    AbstractBinding& binding = this->getBinding(pcb.getName());
 
     // reset binding iterator if end of possibilites reached
     if(!binding.hasNext()){
@@ -32,7 +32,7 @@ namespace SystemC_VPC {
       }
     }
 
-    std::string msg = "No binding possibility given for "+ task.getName() +"->?";
+    std::string msg = "No binding possibility given for "+ pcb.getName() +"->?";
     throw UnknownBindingException(msg);
   }
 

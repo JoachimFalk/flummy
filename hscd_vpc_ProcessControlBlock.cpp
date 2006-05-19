@@ -46,7 +46,7 @@ namespace SystemC_VPC{
       
       delete this->mInfos;
     }else{
-      *(this->copyCount)--;
+      (*(this->copyCount))--;
     }
   }
   
@@ -71,7 +71,7 @@ namespace SystemC_VPC{
 
     // remember amount of copies for later clean up 
     this->copyCount = pcb.copyCount;
-    *(this->copyCount)++; 
+    (*(this->copyCount))++; 
   }
 
   void ProcessControlBlock::init(){

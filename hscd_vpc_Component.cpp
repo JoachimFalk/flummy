@@ -411,6 +411,9 @@ namespace SystemC_VPC{
     }
 #endif //NO_VCD_TRACES
 
+    /*
+     * REMOVED SECTION AS SETTING UP DELAY IS DONE BY BINDER INSTANCES NOW
+     * 
 #ifdef VPC_DEBUG
     if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
       cerr << RED("VPC_LOGICAL_ERROR> ") << YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<YELLOW(")!") << endl;
@@ -418,9 +421,6 @@ namespace SystemC_VPC{
     std::cerr << "Component> Check if special delay exist for "<< actualTask->getFuncName() << " on " << this->basename() << ": " << (actualTask->hasDelay(basename())) << std::endl;
 #endif // VPC_DEBUG
   
-    /*
-     * REMOVED SECTION AS SETTING UP DELAY IS DONE BY BINDER INSTANCES NOW
-     * 
     // reset the execution delay
     if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
       // function specific delay

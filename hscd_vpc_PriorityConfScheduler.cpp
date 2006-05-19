@@ -102,7 +102,7 @@ namespace SystemC_VPC{
     iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), d.conf);
     // if configuration is in scheduling list process it
     if(iter != this->nextConfigurations.end()){
-      iter->removePriority(pcb->getPriority());
+      iter->removePriority(this->getHighestPriority(pcb->getPID()));
 
 #ifdef VPC_DEBUG
       std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> priority of mapped configuration after change is: "

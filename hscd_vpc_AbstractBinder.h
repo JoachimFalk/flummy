@@ -39,6 +39,9 @@ namespace SystemC_VPC {
 
   };
 
+  /**
+   * \brief Basic binder class specifying interface for all realized binder sub-classes
+   */
   class AbstractBinder : public virtual TaskEventListener {
     
     protected:
@@ -82,6 +85,11 @@ namespace SystemC_VPC {
 
   };
 
+  /**
+   * \brief Binder class used as superclass for binder using strategies based on local view
+   * This class provides basic implementation for all binder using localized strategies for
+   * determing proper binding.
+   */
   class LocalBinder : public AbstractBinder {
 
     private:

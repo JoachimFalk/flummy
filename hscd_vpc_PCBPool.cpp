@@ -97,7 +97,7 @@ namespace SystemC_VPC {
     
   }
  
-  PCBPool::PCBPool() : pid_count(0) {}
+  PCBPool::PCBPool() {}
 
   PCBPool::~PCBPool(){
 

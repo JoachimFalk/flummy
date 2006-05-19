@@ -9,6 +9,9 @@
 
 namespace SystemC_VPC {
 
+  /**
+   * \brief Indicates failed lock request due to locked instance
+   */
   class AlreadyLockedException: public std::exception{
 
     std::string msg;
@@ -28,6 +31,9 @@ namespace SystemC_VPC {
 
   };
 
+  /**
+   * \brief Indicates failed unlock request due to not locked instance
+   */
   class NotLockedException: public std::exception{
 
     std::string msg;
@@ -47,6 +53,9 @@ namespace SystemC_VPC {
 
   }; 
 
+  /**
+   * \brief Indicates failed free request due to unallocated instance
+   */
   class NotAllocatedException: public std::exception{
 
     std::string msg;
@@ -73,8 +82,6 @@ namespace SystemC_VPC {
    * \brief Class used to managed pool of ProcessControlBlocks
    */
   class PCBPool{
-
-
 
     private:
 
@@ -187,8 +194,6 @@ namespace SystemC_VPC {
 
       friend class PCBIterator;
 
-      // used to create unique ids
-      int pid_count;
       // contains managed typepools
       std::map<std::string, TypePool* > typepools;
 

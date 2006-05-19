@@ -115,6 +115,8 @@ namespace SystemC_VPC{
           << iter->getDeadline()) << std::endl;
 #endif //VPC_DEBUG
 
+     iter->removeDeadline(this->getEarliestDeadline(pcb->getPID()));
+     
      if(iter->getDeadline() != -1){
         this->nextConfigurations.sort();
       }else{
