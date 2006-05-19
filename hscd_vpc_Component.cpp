@@ -115,7 +115,8 @@ namespace SystemC_VPC{
       }
 
       // before making any scheduling decision check if component is preempted
-      if(! this->isActiv()){
+      // and remain in this state as long as component is deactivated
+      while(! this->isActiv()){
 
 #ifdef VPC_DEBUG
         std::cerr << RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
@@ -136,10 +137,12 @@ namespace SystemC_VPC{
       
         }
     
-        //this->wait(SC_ZERO_TIME);
-        // wait until resume is signalled
-        this->wait(notify_resume);
-
+        // wait until resume is signalled or another preempt happend
+        this->wait(this->notify_preempt | this->notify_resume);
+        
+        // if component still inactiv just jump to beginning of loop
+        if(!this->isActiv())  continue;
+        
 #ifndef NO_VCD_TRACES
         this->setTraceSignalReadyTasks(S_READY);
     
@@ -364,7 +367,8 @@ namespace SystemC_VPC{
   void Component::preempt(bool kill){
 
     // preempt only activ component
-    if(this->isActiv()){
+    // or additional preempt if component not killed
+    if(this->isActiv() || (kill = true && this->killed == false)){
       this->setActiv(false);
       this->killed = kill;
       this->notify_preempt.notify();

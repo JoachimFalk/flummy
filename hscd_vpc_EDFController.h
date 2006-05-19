@@ -61,10 +61,6 @@ namespace SystemC_VPC{
         }
     };
       
-    // queue of waiting tasks to be executed
-    std::queue<p_struct* > readyTasks;
-    // map of running tasks
-    std::map<int, p_struct* > runningTasks;
     // queue of tasks ready to be processed
     std::queue<p_struct* > tasksToProcess;
     
