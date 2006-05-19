@@ -44,7 +44,7 @@ namespace SystemC_VPC{
       delete iter->second;
     }
     this->compDelays.clear();
-
+  
   }
 
   void ProcessControlBlock::DelayMapper::registerDelay(std::string comp, double delay){
@@ -126,9 +126,10 @@ namespace SystemC_VPC{
   ProcessControlBlock::~ProcessControlBlock(){
     if(*(this->copyCount) == 0){
       delete this->activationCount;
-      delete this->dmapper; 
+      delete this->dmapper;
+      delete this->copyCount; 
     }else{
-      *(this->copyCount)--;
+      (*(this->copyCount))--;
     }
   }
   
@@ -153,7 +154,7 @@ namespace SystemC_VPC{
 
     // remember amount of copies for later clean up 
     this->copyCount = pcb.copyCount;
-    *(this->copyCount)++; 
+    (*(this->copyCount))++;
   }
 
   void ProcessControlBlock::init(){
