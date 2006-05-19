@@ -224,7 +224,7 @@ namespace SystemC_VPC {
     }
     //perform error detection
     iter = this->lockedPCB.find(p->getPID());
-    if(iter != this->freePCB.end()){
+    if(iter != this->lockedPCB.end()){
       throw AlreadyLockedException();
     }else{
       throw NotAllocatedException();
@@ -257,7 +257,7 @@ namespace SystemC_VPC {
         this->freePCB[p->getPID()] = p;
       }
     }
-
+  
   }
 
   PCBPool::TypePool::InstanceIterator* PCBPool::TypePool::getInstanceIterator(){

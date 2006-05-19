@@ -90,7 +90,17 @@ namespace SystemC_VPC{
      */
     bool preemptByKill(){
      return true;
-    } 
+    }
+
+    /**
+     * \brief Used to indicate preemption to controller
+     * This method is used in cases when preemption from higher hierarchy happens.
+     * Only preemption with kill influences behaviour of controller as
+     * all still waiting task have to be signalled upward to be aborted.
+     * \see AbstractController
+     */
+    void signalPreemption(bool kill);
+
   };
 
 }

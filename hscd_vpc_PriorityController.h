@@ -136,10 +136,7 @@ namespace SystemC_VPC{
       
     };
     */
-    // queue of waiting tasks to be executed
-    std::queue<ProcessControlBlock* > readyTasks;
-    // map of running tasks
-    std::map<int, ProcessControlBlock* > runningTasks;
+    
     // queue of tasks ready to be processed
     std::queue<ProcessControlBlock* > tasksToProcess;
     

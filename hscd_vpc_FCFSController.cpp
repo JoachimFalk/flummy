@@ -163,4 +163,24 @@ namespace SystemC_VPC{
     }
   }
 
+  /**
+   * \brief Implementation of FCFSController::signalPreemption
+   */
+  void FCFSController::signalPreemption(bool kill){
+    // only interested in Preemption with KILL
+    if(kill){
+
+      ProcessControlBlock* currTask;
+
+      //for all waiting task signal their abortion
+      while(this->readyTasks.size()){
+        currTask = this->readyTasks.front();
+        this->readyTasks.pop_front();
+        currTask->setState(activation_state(aborted));
+        this->getManagedComponent()->notifyParentController(currTask);
+      }
+
+    }
+  }
+  
 } //namespace SystemC_VPC

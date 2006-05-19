@@ -245,7 +245,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of RoundRobinController::signalTaskEvent
    */
-  void RoundRobinController::signalPreemption(){
+  void RoundRobinController::signalPreemption(bool kill){
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
   }
 

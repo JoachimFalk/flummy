@@ -118,8 +118,9 @@ namespace SystemC_VPC{
      * \brief Signals to controller that managed component has been preempted.
      * Used within controller to adapt scheduling to preemption of managed
      * component.
+     * \param kill indicates if preemption used kill as parameter
      */
-    virtual void signalPreemption()=0;
+    virtual void signalPreemption(bool kill)=0;
     
     /**
      * \brief Signals to controller that managed component has been resumed.

@@ -158,7 +158,7 @@ namespace SystemC_VPC{
     /**
      * \see AbstractController
      */
-    virtual void signalPreemption();
+    virtual void signalPreemption(bool kill);
     
     /**
      * \see AbstractController
