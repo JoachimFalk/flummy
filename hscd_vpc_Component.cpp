@@ -47,7 +47,7 @@ namespace SystemC_VPC{
     /////////////////////////////////////
     sc_time timeslice;
     sc_time actualRemainingDelay;
-    sc_time *overhead;
+    sc_time *overhead = new sc_time( SC_ZERO_TIME );
     int actualRunningPID;
     bool newTaskDuringOverhead=false;
     //wait(SC_ZERO_TIME);
