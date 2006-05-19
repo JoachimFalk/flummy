@@ -140,7 +140,7 @@ namespace SystemC_VPC{
   /**
     * \brief Dummy implementation of Controller::signalPreemption
     */  
-  void Controller::signalPreemption(){}
+  void Controller::signalPreemption(bool kill){}
   
   /**
     * \brief Dummy implementation of Controller::signalResume

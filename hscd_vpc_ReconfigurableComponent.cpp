@@ -138,7 +138,7 @@ namespace SystemC_VPC{
         std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> not activ going to sleep at time: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
         
-        this->controller->signalPreemption();
+        this->controller->signalPreemption(this->killed);
         // hold pointer to currentlyloaded configuration
         Configuration* currConfig;
         if(this->killed){
@@ -535,7 +535,10 @@ namespace SystemC_VPC{
           // "mark" end of loading phase
           this->storeStartTime = NULL;
           this->remainingStoreTime = NULL;
-    
+          
+          // signal preemption to controller instance
+          this->controller->signalPreemption(this->killed);
+          
           return false;
             
         }    
@@ -583,16 +586,15 @@ namespace SystemC_VPC{
         this->activConfiguration = NULL;
         
 #ifndef NO_VCD_TRACES
-      this->traceConfigurationState(config, S_PASSIV);
+        this->traceConfigurationState(config, S_PASSIV);
 #endif //NO_VCD_TRACES
 
         return false;
       }
         
-      sc_time time = config->timeToResume(); //this->activConfiguration->timeToResume();
+      sc_time time = config->timeToResume(); 
       timeToLoad += time;
 
-      
       config->resume(); 
       // wait time of resume
       wait(time, this->notify_preempt);
@@ -602,8 +604,11 @@ namespace SystemC_VPC{
         // return with unresumed configuration -> should be already preempted again
         this->activConfiguration = NULL;
 
+        // signal preemption to controller instance
+        this->controller->signalPreemption(this->killed);
+        
 #ifndef NO_VCD_TRACES
-      this->traceConfigurationState(config, S_PASSIV);
+        this->traceConfigurationState(config, S_PASSIV);
 #endif //NO_VCD_TRACES
 
         return false;
