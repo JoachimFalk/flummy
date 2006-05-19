@@ -321,8 +321,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
       std::cerr << "Director> task successful finished: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
-      //if(NULL != pcb->getBlockEvent().latency) 
-      pcb->getBlockEvent().latency->notify();
+      if(NULL != pcb->getBlockEvent().latency) pcb->getBlockEvent().latency->notify();
       // remember last acknowledged task time
       this->end = sc_simulation_time();
       
