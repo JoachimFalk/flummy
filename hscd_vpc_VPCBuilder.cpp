@@ -1,5 +1,9 @@
 #include <iostream>
 #include <values.h> 
+#include <sstream>
+#include <algorithm>
+#include <cctype>
+#include <string>
 
 #include "hscd_vpc_VPCBuilder.h"
 #include "hscd_vpc_XmlHelper.h"
@@ -719,16 +723,11 @@ namespace SystemC_VPC{
                 sscanf(sValue, "%d", &priority);
                 p.setPriority(priority);
               }else if( 0 == strncmp(sType, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
-                double deadline = 0;
-                sscanf(sValue, "%lf", &deadline);
-                p.setDeadline(deadline);
+                p.setDeadline(createSC_Time(sValue));
               }else if( 0 == strncmp(sType, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
-                double period = 0;
-                sscanf(sValue, "%lf", &period);
-                p.setPeriod(period);
+                p.setPeriod(createSC_Time(sValue));
               }else if( 0 == strncmp(sType, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
-                double delay = 0;
-                sscanf(sValue, "%lf", &delay);
+		sc_time delay = createSC_Time(sValue);
                 p.setDelay(delay);
                 p.addFuncDelay(sTarget, NULL, delay);
               }else{
@@ -737,11 +736,8 @@ namespace SystemC_VPC{
                 std::cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
 #endif //VPC_DEBUG
 
-// <<< here is adding of additional function delay
-                double delay;
-                if( 1 == sscanf(sValue, "%lf", &delay) ){  
-// ---> changed
-//                  p->functionDelays.insert(pair<string,double>(sType,delay));
+		try{  
+		  sc_time delay = createSC_Time(sValue);
 #ifdef VPC_DEBUG
                   std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
                   std::cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
@@ -752,7 +748,7 @@ namespace SystemC_VPC{
                   funcDelays.insert(std::pair<std::string, double>(sType, delay));
                   p->compDelays[sTarget]= funcDelays;
                   */
-                } else {
+                } catch(const InvalidArgumentException& ex) {
 #ifdef VPC_DEBUG
                   std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
 #endif //VPC_DEBUG
@@ -846,16 +842,11 @@ namespace SystemC_VPC{
           sscanf(attiter->second, "%d", &priority);
           p->setPriority(priority);
         }else if( 0 == strncmp(attiter->first, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
-          double deadline = 0;
-          sscanf(attiter->second, "%lf", &deadline);
-          p->setDeadline(deadline);
+          p->setDeadline(createSC_Time(attiter->second));
         }else if( 0 == strncmp(attiter->first, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
-          double period = 0;
-          sscanf(attiter->second, "%lf", &period);
-          p->setPeriod(period);
+          p->setPeriod(createSC_Time(attiter->second));
         }else if( 0 == strncmp(attiter->first, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
-          double delay = 0;
-          sscanf(attiter->second, "%lf", &delay);
+	  sc_time delay = createSC_Time(attiter->second);
           p->setDelay(delay);
           p->addFuncDelay(target, NULL, delay);
         }else{
@@ -864,8 +855,9 @@ namespace SystemC_VPC{
           std::cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
 #endif //VPC_DEBUG
 
-          double delay;
-          if( 1 == sscanf(attiter->second, "%lf", &delay) ){  
+          //if( 1 == sscanf(attiter->second, "%lf", &delay) ){  
+	  try{
+	    sc_time delay = createSC_Time(attiter->second);
 #ifdef VPC_DEBUG
             std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
             std::cerr << YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
@@ -876,7 +868,8 @@ namespace SystemC_VPC{
             funcDelays.insert(std::pair<std::string, double>(attiter->first, delay));
             p->compDelays[target]= funcDelays;
             */
-          } else {
+          } catch(const InvalidArgumentException& ex) {
+
 #ifdef VPC_DEBUG
             std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
 #endif //VPC_DEBUG
@@ -919,6 +912,50 @@ namespace SystemC_VPC{
     }
     
     return controller;
+  }
+
+  sc_time VPCBuilder::createSC_Time(char* timeString) throw(InvalidArgumentException){
+    assert(timeString != NULL);
+    double value = -1;
+    string unit;
+
+    sc_time_unit scUnit = SC_NS;
+
+    stringstream data(timeString);
+    int oldPos = data.tellg();
+    if(data.good()){
+      data >> value;
+    }else{
+      string msg("Parsing Error: Unknown argument: <");
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if( data.fail() ){
+      string msg("Parsing Error: Unknown argument: <");
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if(data.good()){
+      data >> unit;
+      if(data.fail()){
+#ifdef VPC_DEBUG
+	std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!" << std::endl;
+#endif //VPC_DEBUG
+	scUnit = SC_NS;
+      }else{
+	std::transform (unit.begin(),unit.end(), unit.begin(), (int(*)(int))tolower);
+	if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
+	else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
+	else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
+	else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
+	else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
+	else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
+      }
+    }
+
+    return sc_time(value, scUnit);
   }
 
 }// namespace SystemC_VPC

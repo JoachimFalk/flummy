@@ -36,11 +36,11 @@ namespace SystemC_VPC{
 
         private:
           C contained;
-          std::list<double> deadlines;
+          std::list<sc_time> deadlines;
           int fifo_order;
 
         public:
-          EDFListElement(C contained, double deadline, int degree) : contained(contained), fifo_order(degree){
+          EDFListElement(C contained, sc_time deadline, int degree) : contained(contained), fifo_order(degree){
             this->deadlines.push_back(deadline);            
           }
 
@@ -66,8 +66,8 @@ namespace SystemC_VPC{
            * to the deadline of the configuration to enable deadline schedule
            * \param p specifies the deadline to be added
            */
-          void addDeadline(double d){
-           std::list<double>::iterator iter;
+          void addDeadline(sc_time d){
+           std::list<sc_time>::iterator iter;
 
            for(iter = this->deadlines.begin(); iter != this->deadlines.end() && *iter > d; iter++);
 
@@ -81,8 +81,8 @@ namespace SystemC_VPC{
            * the first occurence of the deadline will be removed.
            * \param p specifies the deadline value to be removed
            */
-          void removeDeadline(double d){
-            std::list<double>::iterator iter;
+          void removeDeadline(sc_time d){
+            std::list<sc_time>::iterator iter;
 
             for(iter = this->deadlines.begin(); iter != this->deadlines.end(); iter++){
               if(*iter == d){
@@ -101,16 +101,25 @@ namespace SystemC_VPC{
            * \return current deadline of configuration or -1 if no task is running
            * on the configuration
            */
-          double getDeadline() const{
-            if(this->deadlines.size() != 0){
-              return this->deadlines.front();
-            }else{
-              return -1;
-            }
+          sc_time getDeadline() const{
+            assert(this->deadlines.size() != 0);
+	    return this->deadlines.front();
           }
-
+	  
+	  /**
+	   * \brief Tests if there is at minimum one deadline stored.
+	   */
+	  bool hasDeadline() const {
+	    return (this->deadlines.size() > 0);
+	  }
         
           bool operator < (const EDFListElement& pe){
+	    //check if there is any deadline available
+	    //reconstruction of behaviour if default return value is -1
+	    if( !(this->hasDeadline()) && !(pe.hasDeadline()) ) return this->getFifoOrder() > pe.getFifoOrder();
+	    if( !(this->hasDeadline()) ) return false;
+	    if(      !pe.hasDeadline() ) return true;
+	    
             if(this->getDeadline() > pe.getDeadline()){
               return true;
             }else if(this->getDeadline() == pe.getDeadline()){

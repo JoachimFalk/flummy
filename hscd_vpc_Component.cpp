@@ -108,7 +108,7 @@ namespace SystemC_VPC{
           }else{
        
             // store remainingDela within ProcessControlBlock
-            runningTasks[actualRunningPID]->setRemainingDelay(actualRemainingDelay.to_default_time_units());
+            runningTasks[actualRunningPID]->setRemainingDelay(actualRemainingDelay);
       
           }
         }
@@ -189,7 +189,7 @@ namespace SystemC_VPC{
         readyTasks[taskToResign]=runningTasks[taskToResign];
         runningTasks.erase(taskToResign);
         actualRunningPID=-1;
-        readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay.to_default_time_units());
+        readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
 #ifndef NO_VCD_TRACES
         if(readyTasks[taskToResign]->getTraceSignal()!=0) *(readyTasks[taskToResign]->getTraceSignal())=S_READY;     
 #endif //NO_VCD_TRACES
@@ -240,7 +240,7 @@ namespace SystemC_VPC{
         cerr << "PID: " << taskToAssign;
         cerr << "> remaining delay for " << runningTasks[taskToAssign]->getName();
 #endif // VPCDEBUG
-        actualRemainingDelay=sc_time(runningTasks[taskToAssign]->getRemainingDelay(),SC_NS);
+        actualRemainingDelay=sc_time(runningTasks[taskToAssign]->getRemainingDelay());
 #ifdef VPC_DEBUG
         cerr<< " is " << runningTasks[taskToAssign]->getRemainingDelay() << endl;
 #endif // VPCDEBUG
@@ -488,8 +488,8 @@ namespace SystemC_VPC{
       scheduler->removedTask(iter->second);
       
       // reset actualTask  
-      iter->second->setDelay(0);
-      iter->second->setRemainingDelay(0);
+      iter->second->setDelay(SC_ZERO_TIME);
+      iter->second->setRemainingDelay(SC_ZERO_TIME);
       
 #ifdef VPC_DEBUG
         cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
@@ -521,8 +521,8 @@ namespace SystemC_VPC{
       scheduler->removedTask(iter->second);
       
       // reset actualTask  
-      iter->second->setDelay(0);
-      iter->second->setRemainingDelay(0);
+      iter->second->setDelay(SC_ZERO_TIME);
+      iter->second->setRemainingDelay(SC_ZERO_TIME);
       
 #ifdef VPC_DEBUG
         cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
@@ -555,8 +555,8 @@ namespace SystemC_VPC{
 #endif // VPCDEBUG
  
       //reset actualTask
-      newTask->setDelay(0);
-      newTask->setRemainingDelay(0);
+      newTask->setDelay(SC_ZERO_TIME);
+      newTask->setRemainingDelay(SC_ZERO_TIME);
       
       this->parentControlUnit->signalTaskEvent(newTask);
       

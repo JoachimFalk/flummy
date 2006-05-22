@@ -43,9 +43,9 @@ namespace SystemC_VPC {
           // name of the associated component 
           std::string name;
           // base delay used for task running on this component
-          double base_delay;
+          sc_time base_delay;
           // map of possible special delay depending on functions
-          std::map<std::string, double> funcDelays;
+          std::map<std::string, sc_time> funcDelays;
 
         public:
 
@@ -54,14 +54,14 @@ namespace SystemC_VPC {
            * \param name specifies the name of the associated component
            * \param base_delay specifies the standard delay used for execution simulation
            */
-          ComponentDelay(std::string name, double base_delay);
+          ComponentDelay(std::string name, sc_time base_delay);
 
           /**
            * \brief Adds a new function delay to the instance
            * \param funcname specifies the associated function
            * \param delay is the corresponding delay for the function execution
            */
-          void addDelay(const char* funcname, double delay);
+          void addDelay(const char* funcname, sc_time delay);
           
           /**
            * \brief Used to access delay
@@ -70,7 +70,7 @@ namespace SystemC_VPC {
            * of the process. If no function name is given or there is no corresponding 
            * entry registered the default delay is returned.
            */
-          double getDelay(const char* funcname=NULL);
+          sc_time getDelay(const char* funcname=NULL);
 
           /**
            * \brief Tests if an specific function delay exisits
@@ -105,7 +105,7 @@ namespace SystemC_VPC {
          * \param delay is the standard delay of the component corresponding to
          * the PCB
          */
-        void registerDelay(std::string comp, double delay);
+        void registerDelay(std::string comp, sc_time delay);
         
         /**
          * \brief Registers new special function delay to the mapping instance
@@ -116,7 +116,7 @@ namespace SystemC_VPC {
          * \param funcname represents the function name
          * \param delay is the given function delay
          */
-        void addDelay(std::string comp, const char* funcname, double delay);
+        void addDelay(std::string comp, const char* funcname, sc_time delay);
 
         /**
          * \brief Used to access the delay
@@ -125,7 +125,7 @@ namespace SystemC_VPC {
          * \return delay for a requested component and the optionally given function name.
          * If there is no value found 0 is returned as default.
          */
-        double getDelay(std::string comp, const char* funcname=NULL);
+        sc_time getDelay(std::string comp, const char* funcname=NULL);
         
         /**
          * \brief Test if delay for an given component and optional given function exists
@@ -170,11 +170,11 @@ namespace SystemC_VPC {
       int pid;
       sc_event* interrupt;
       EventPair blockEvent;
-      double delay;
-      double remainingDelay;
+      sc_time delay;
+      sc_time remainingDelay;
       int priority;
-      double period;
-      double deadline;
+      sc_time period;
+      sc_time deadline;
       activation_state state;
       sc_signal<trace_value>* traceSignal;
 
@@ -261,34 +261,34 @@ namespace SystemC_VPC {
       /**
        * \brief Sets current associated delay of instance
        */
-      void setDelay(double delay);
+      void setDelay(sc_time delay);
 
       /**
        * \brief Gets currently associated delay of PCB instance
        */
-      double getDelay() const;
+      sc_time getDelay() const;
 
       /**
        * \brief Sets currently remaining delay of PCB instance
        */
-      void setRemainingDelay(double delay);
+      void setRemainingDelay(sc_time delay);
 
       /**
        * \brief Gets currently remaining delay of PCB instance
        */
-      double getRemainingDelay() const;
+      sc_time getRemainingDelay() const;
       
-      void setPeriod(double period);
+      void setPeriod(sc_time period);
 
-      double getPeriod() const;
+      sc_time getPeriod() const;
       
       void setPriority(int priority);
 
       int getPriority() const;
 
-      void setDeadline(double deadline);
+      void setDeadline(sc_time deadline);
 
-      double getDeadline() const;
+      sc_time getDeadline() const;
 
       /**
        * \brief Used to increment activation count of this PCB instance
@@ -313,14 +313,14 @@ namespace SystemC_VPC {
        * \param delay represents the execution delay needed for execution  on
        * specified component
        */
-      void addFuncDelay(std::string comp, const char* funcname, double delay);
+      void addFuncDelay(std::string comp, const char* funcname, sc_time delay);
 
       /**
        * \brief Used to access delay of a PCB instance on a given component
        * \param comp specifies the associated component
        * \param funcname refers to an optional function name
        */
-      double getFuncDelay(std::string comp, const char* funcname=NULL) const;
+      sc_time getFuncDelay(std::string comp, const char* funcname=NULL) const;
 
       /**
        * \brief Test if an delay is specified for a given component
@@ -364,8 +364,10 @@ namespace SystemC_VPC {
     bool operator()(const p_queue_entry& pqe1,
         const p_queue_entry& pqe2) const
     {
-      double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
-      double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
+      double p1 = sc_time(1,SC_NS)/pqe1.pcb->getPeriod();
+      double p2 = sc_time(1,SC_NS)/pqe2.pcb->getPeriod();
+      //double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
+      //double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
       if (p1 > p2)
         return true;
       else if(p1 == p2)

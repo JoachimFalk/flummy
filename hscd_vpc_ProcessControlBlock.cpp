@@ -4,20 +4,20 @@ namespace SystemC_VPC{
 
   int ProcessControlBlock::global_pid = 0;
 
-  ProcessControlBlock::ComponentDelay::ComponentDelay(std::string name, double base_delay) : name(name), base_delay(base_delay) {}
+  ProcessControlBlock::ComponentDelay::ComponentDelay(std::string name, sc_time base_delay) : name(name), base_delay(base_delay) {}
 
-  void ProcessControlBlock::ComponentDelay::addDelay(const char* funcname, double delay){
+  void ProcessControlBlock::ComponentDelay::addDelay(const char* funcname, sc_time delay){
     if(funcname != NULL){
       std::string key(funcname, strlen(funcname));
       this->funcDelays[key] = delay;
     }
   }
 
-  double ProcessControlBlock::ComponentDelay::getDelay(const char* funcname){
+  sc_time ProcessControlBlock::ComponentDelay::getDelay(const char* funcname){
     if(funcname == NULL){
       return this->base_delay;
     }else{
-      std::map<std::string, double>::iterator iter;
+      std::map<std::string, sc_time>::iterator iter;
       std::string key(funcname, strlen(funcname));
       iter = this->funcDelays.find(key);
       if(iter != this->funcDelays.end()){
@@ -47,7 +47,7 @@ namespace SystemC_VPC{
   
   }
 
-  void ProcessControlBlock::DelayMapper::registerDelay(std::string comp, double delay){
+  void ProcessControlBlock::DelayMapper::registerDelay(std::string comp, sc_time delay){
 
     std::map<std::string, ComponentDelay*>::iterator iter;
     iter = this->compDelays.find(comp);
@@ -57,7 +57,7 @@ namespace SystemC_VPC{
 
   }  
 
-  void ProcessControlBlock::DelayMapper::addDelay(std::string comp, const char* funcname, double delay){
+  void ProcessControlBlock::DelayMapper::addDelay(std::string comp, const char* funcname, sc_time delay){
     
     std::map<std::string, ComponentDelay*>::iterator iter;
     iter = this->compDelays.find(comp);
@@ -69,14 +69,14 @@ namespace SystemC_VPC{
 
   }
 
-  double ProcessControlBlock::DelayMapper::getDelay(std::string comp, const char* funcname){
+  sc_time ProcessControlBlock::DelayMapper::getDelay(std::string comp, const char* funcname){
 
     std::map<std::string, ComponentDelay* >::iterator iter;
     iter = this->compDelays.find(comp);
     if(iter != compDelays.end()){
       return iter->second->getDelay(funcname);
     }else{
-      return 0;
+      return SC_ZERO_TIME;
     }
 
   }
@@ -143,10 +143,10 @@ namespace SystemC_VPC{
     
    
     this->blockEvent = EventPair();
-    this->setDelay(0);
+    this->setDelay(SC_ZERO_TIME);
     this->setFuncName(NULL);
     this->setInterrupt(NULL);
-    this->setRemainingDelay(0);
+    this->setRemainingDelay(SC_ZERO_TIME);
     this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
@@ -160,12 +160,12 @@ namespace SystemC_VPC{
   void ProcessControlBlock::init(){
 
     this->blockEvent = EventPair();
-    this->deadline = DBL_MAX;
-    this->delay = 0;
+    this->deadline = sc_time(DBL_MAX, SC_SEC);
+    this->delay = SC_ZERO_TIME;
     this->funcname = NULL;
     this->interrupt = NULL;
-    this->remainingDelay = 0;
-    this->period = DBL_MAX;
+    this->remainingDelay = SC_ZERO_TIME;
+    this->period = sc_time(DBL_MAX, SC_SEC);
     this->pid = ProcessControlBlock::global_pid++;
     this->priority = 0;
     this->traceSignal = NULL;
@@ -217,35 +217,27 @@ namespace SystemC_VPC{
     return this->blockEvent;
   }
 
-  void ProcessControlBlock::setDelay(double delay){
-    if(delay > 0){
-      this->delay = delay;
-    }else{
-      this->delay = 0;
-    }
+  void ProcessControlBlock::setDelay(sc_time delay){
+    this->delay = delay;
   }
 
-  double ProcessControlBlock::getDelay() const{
+  sc_time ProcessControlBlock::getDelay() const{
     return this->delay;
   }
 
-  void ProcessControlBlock::setRemainingDelay(double delay){
-    if(delay > 0){
-      this->remainingDelay = delay;
-    }else{
-      this->remainingDelay = 0;
-    }
+  void ProcessControlBlock::setRemainingDelay(sc_time delay){
+    this->remainingDelay = delay;
   }
 
-  double ProcessControlBlock::getRemainingDelay() const{
+  sc_time ProcessControlBlock::getRemainingDelay() const{
     return this->remainingDelay;
   }
 
-  void ProcessControlBlock::setPeriod(double period){
+  void ProcessControlBlock::setPeriod(sc_time period){
     this->period = period;
   }
 
-  double ProcessControlBlock::getPeriod() const{
+  sc_time ProcessControlBlock::getPeriod() const{
     return this->period;
   }
 
@@ -257,15 +249,15 @@ namespace SystemC_VPC{
     return this->priority;
   }
 
-  void ProcessControlBlock::setDeadline(double deadline){
-    if(deadline > 0){
+  void ProcessControlBlock::setDeadline(sc_time deadline){
+    if(deadline > SC_ZERO_TIME){
       this->deadline = deadline;
     }else{
-      this->deadline = 0;
+      this->deadline = SC_ZERO_TIME;
     }
   }
 
-  double ProcessControlBlock::getDeadline() const{
+  sc_time ProcessControlBlock::getDeadline() const{
     return this->deadline;
   }
 
@@ -293,7 +285,7 @@ namespace SystemC_VPC{
     return this->traceSignal;
   }
 
-  void ProcessControlBlock::addFuncDelay(std::string comp, const char* funcname, double delay){
+  void ProcessControlBlock::addFuncDelay(std::string comp, const char* funcname, sc_time delay){
 
 #ifdef VPC_DEBUG
     std::cerr << "ProcessControlBlock> Adding Function Delay for " << comp;
@@ -306,7 +298,7 @@ namespace SystemC_VPC{
     this->dmapper->addDelay(comp, funcname, delay);
   }
 
-  double ProcessControlBlock::getFuncDelay(std::string comp, const char* funcname) const{
+  sc_time ProcessControlBlock::getFuncDelay(std::string comp, const char* funcname) const{
 
 #ifdef VPC_DEBUG
     std::cerr << "ProcessControlBlock> Delay for " << comp;

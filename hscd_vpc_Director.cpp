@@ -54,11 +54,17 @@ namespace SystemC_VPC{
    *
    */ 
   Director::Director() : end(0){
+    try{
+      VPCBuilder builder((Director*)this);
 
-    VPCBuilder builder((Director*)this);
-
-    builder.buildVPC();
-
+      builder.buildVPC();
+    }catch(InvalidArgumentException& e){
+      std::cerr << "Director> Got exception while setting up VPC:\n" << e.what() << std::endl;
+      exit(-1);
+    }catch(const std::exception& e){
+      std::cerr << "Director> Got exception while setting up VPC:\n" << e.what() << std::endl;
+      exit(-1);
+    }
   }
   
   /**

@@ -119,13 +119,15 @@ namespace SystemC_VPC{
     if(iter != this->nextConfigurations.end()){
  
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("EDFController " << this->getName() << "> deadline of mapped configuration after change is: "
-          << iter->getDeadline()) << std::endl;
+      std::cerr << YELLOW("EDFController " << this->getName() << "> deadline of mapped configuration after change is: ");
+      if( iter->hasDeadline() ) std::cerr << YELLOW(iter->getDeadline());
+      else                      std::cerr << YELLOW( "-1" );
+      std::cerr << std::endl;
 #endif //VPC_DEBUG
 
      iter->removeDeadline(pcb->getDeadline());
      
-     if(iter->getDeadline() != -1){
+     if(iter->hasDeadline()){
         this->nextConfigurations.sort();
       }else{
         // remove configuration from EDF list
