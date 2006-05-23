@@ -202,8 +202,8 @@ namespace SystemC_VPC{
   /**
     * \brief Dummy implementation of Controller::signalPreemption
     */  
-  void Controller::signalPreemption(){
-    this->scheduler->signalPreemption();
+  void Controller::signalPreemption(bool kill){
+    this->scheduler->signalPreemption(kill);
   }
   
   /**

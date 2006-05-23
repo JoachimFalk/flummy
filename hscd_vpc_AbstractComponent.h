@@ -35,6 +35,26 @@ namespace SystemC_VPC{
    */
   class AbstractComponent: public sc_module, public IPreemptable{
   
+  protected:
+
+    /**
+     * \brief Simulate an execution on this "Virtual Component".
+     *
+     * While this simulation is running SystemC simulation time is consumed.
+     * \deprecated since dynamic allocation has been introduced
+     */
+    virtual void _compute( const char *name, const char *funcname, VPC_Event* end=NULL)
+      __attribute__ ((deprecated)) =0;
+
+    /**
+     * \brief Simulate an execution on this "Virtual Component".
+     *
+     * While this simulation is running SystemC simulation time is consumed.
+     * \deprecated since dynamic allocation has been introduced
+     */
+    virtual void _compute( const char *name, VPC_Event *end=NULL)
+      __attribute__ ((deprecated)) =0;
+   
   public:
 
     /**
@@ -43,8 +63,9 @@ namespace SystemC_VPC{
      * While this simulation is running SystemC simulation time is consumed.
      * \deprecated since dynamic allocation has been introduced
      */
-    virtual void compute( const char *name, const char *funcname, VPC_Event* end=NULL)
-      __attribute__ ((deprecated)) =0;
+    void __attribute__ ((deprecated)) compute( const char *name, const char *funcname, VPC_Event* end=NULL){
+      _compute( name, funcname, end);
+    }
 
     /**
      * \brief Simulate an execution on this "Virtual Component".
@@ -52,10 +73,10 @@ namespace SystemC_VPC{
      * While this simulation is running SystemC simulation time is consumed.
      * \deprecated since dynamic allocation has been introduced
      */
-    virtual void compute( const char *name, VPC_Event *end=NULL)
-      __attribute__ ((deprecated)) =0;
-    //    virtual void compute(int iprocess)=0;
-   
+    void __attribute__ ((deprecated)) compute( const char *name, VPC_Event *end=NULL){
+      _compute( name, end);
+    }
+
     virtual ~AbstractComponent(){};
 
     /**

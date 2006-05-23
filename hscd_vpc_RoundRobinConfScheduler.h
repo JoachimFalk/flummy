@@ -179,9 +179,9 @@ namespace SystemC_VPC{
       virtual void signalTaskEvent(ProcessControlBlock* pcb);
 
       /**
-       * \see AbstractController
+       * \see AbstractConfigurationScheduler
        */
-      virtual void signalPreemption();
+      virtual void signalPreemption(bool kill);
 
       /**
        * \see AbstractController

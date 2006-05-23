@@ -74,7 +74,7 @@ namespace SystemC_VPC {
        * component.
        * \note Does nothing intended for controllers not interested in preemption
        */
-      virtual void signalPreemption();
+      virtual void signalPreemption(bool kill);
 
       /**
        * \brief Signals to controller that managed component has been resumed.

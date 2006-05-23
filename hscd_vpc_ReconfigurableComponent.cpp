@@ -137,7 +137,7 @@ namespace SystemC_VPC{
         std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> not activ going to sleep at time: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
-        this->controller->signalPreemption();
+        this->controller->signalPreemption(this->killed);
         // hold pointer to currentlyloaded configuration
         Configuration* currConfig;
         if(this->killed){
@@ -444,9 +444,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
+   * \brief An implementation of AbstractComponent::_compute(const char *, const char *, VPC_Event).
    */
-  void ReconfigurableComponent::compute( const char* name, const char* funcname, VPC_Event* end){
+  void ReconfigurableComponent::_compute( const char* name, const char* funcname, VPC_Event* end){
 
     // send compute request to controller
     ProcessControlBlock* pcb = Director::getInstance().getProcessControlBlock(name);
@@ -456,11 +456,11 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
+   * \brief An implementation of AbstractComponent::_compute(const char *, VPC_Event).
    */
-  void ReconfigurableComponent::compute( const char *name, VPC_Event *end){
+  void ReconfigurableComponent::_compute( const char *name, VPC_Event *end){
 
-    this->compute(name, "", end);
+    this->_compute(name, "", end);
 
   }
 
@@ -562,6 +562,9 @@ namespace SystemC_VPC{
           this->storeStartTime = NULL;
           this->remainingStoreTime = NULL;
 
+          // signal preemption to controller instance
+          this->controller->signalPreemption(this->killed);
+          
           return false;
 
         }    
@@ -615,7 +618,7 @@ namespace SystemC_VPC{
         return false;
       }
 
-      sc_time time = config->timeToResume(); //this->activConfiguration->timeToResume();
+      sc_time time = config->timeToResume(); 
       timeToLoad += time;
 
 
@@ -628,6 +631,9 @@ namespace SystemC_VPC{
         // return with unresumed configuration -> should be already preempted again
         this->activConfiguration = NULL;
 
+        // signal preemption to controller instance
+        this->controller->signalPreemption(this->killed);
+        
 #ifndef NO_VCD_TRACES
         this->traceConfigurationState(config, S_PASSIV);
 #endif //NO_VCD_TRACES

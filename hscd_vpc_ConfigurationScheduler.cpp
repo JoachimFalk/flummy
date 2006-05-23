@@ -64,7 +64,7 @@ namespace SystemC_VPC{
   /**
     * \brief Dummy implementation of ConfigurationScheduler::signalPreemption
     */  
-  void ConfigurationScheduler::signalPreemption(){}
+  void ConfigurationScheduler::signalPreemption(bool kill){}
   
   /**
     * \brief Dummy implementation of ConfigurationScheduler::signalResume

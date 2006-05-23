@@ -33,7 +33,7 @@ namespace SystemC_VPC{
     char* cfile;
     char* vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
     char vpc_conf_file[VPC_MAX_STRING_LENGTH];
-    char* vpc_measure_file;
+    char* vpc_measure_file = NULL;
     
     FALLBACKMODE=false;
     

@@ -105,6 +105,12 @@ namespace SystemC_VPC{
       virtual void signalTaskEvent(ProcessControlBlock* pcb);
 
       /**
+       * \brief Implementation of AbstractConfigurationScheduler::signalPreemption
+       * \see AbstractConfigurationScheduler
+       */
+      void signalPreemption(bool kill);
+
+      /**
        * \brief Signals always true as configuration is only switched if all task have finished
        * or have been aborted
        */

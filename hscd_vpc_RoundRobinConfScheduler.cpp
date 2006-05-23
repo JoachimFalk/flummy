@@ -229,7 +229,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
    */
-  void RoundRobinConfScheduler::signalPreemption(){
+  void RoundRobinConfScheduler::signalPreemption(bool kill){
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
   }
 

@@ -143,4 +143,26 @@ namespace SystemC_VPC{
     }
   }
 
+  /**
+   * \brief Implementation of FCFSConfScheudler::signalPreemption
+   */
+  void FCFSConfScheduler::signalPreemption(bool kill){
+    // only interested in Preemption with KILL
+    if(kill){
+      
+      std::pair<ProcessControlBlock*, unsigned int> p;
+      ProcessControlBlock* currTask;
+
+      //for all waiting task signal their abortion
+      while(this->readyTasks.size()){
+        p = this->readyTasks.front();
+        currTask = p.first;
+        this->readyTasks.pop_front();
+        currTask->setState(activation_state(aborted));
+        this->getManagedComponent()->notifyParentController(currTask);
+      }
+
+    }
+  }
+  
 } //namespace SystemC_VPC

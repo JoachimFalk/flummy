@@ -80,16 +80,22 @@ namespace SystemC_VPC{
      */
     void ReconfigurableComponent::schedule_thread();
 
+protected:
+
     /**
      * \brief An implementation of AbstractComponent::compute(const char *, const char *, VPC_Event).
      */
-    virtual void compute( const char *name, const char *funcname, VPC_Event *end=NULL);
+    virtual void _compute( const char *name, const char *funcname, VPC_Event *end=NULL)
+      __attribute__ ((deprecated));
     
     /**
      * \brief An implementation of AbstractComponent::compute(const char *, VPC_Event).
      */
-    virtual void compute( const char *name, VPC_Event *end=NULL);
+    virtual void _compute( const char *name, VPC_Event *end=NULL)
+      __attribute__ ((deprecated));
     
+  public:
+
     /**
      * \brief An implementation of AbstractComponent::compute(ProcessControlBlock*).
      * Main entry point for new task to be simulated on the given instance.
