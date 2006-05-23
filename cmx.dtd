@@ -10,7 +10,7 @@ name CDATA #REQUIRED>
 
 <!ELEMENT templates (template+)>
 
-<!ELEMENT template (attribute*)>
+<!ELEMENT template ((attribute|timing)*)>
 <!ATTLIST template
   name ID #REQUIRED>
 
@@ -44,8 +44,15 @@ name CDATA #REQUIRED>
 
 <!ELEMENT mappings (mapping)*>
 
-<!ELEMENT mapping (attribute|reftemplate)*>
+<!ELEMENT mapping (attribute|reftemplate|timing)*>
 <!ATTLIST mapping
 source CDATA #REQUIRED
 target IDREF #REQUIRED>
+
+<!ELEMENT timing EMPTY>
+<!ATTLIST timing
+delay   CDATA #IMPLIED
+dii     CDATA #IMPLIED
+latency CDATA #IMPLIED
+fname   CDATA #IMPLIED>
 

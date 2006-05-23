@@ -61,6 +61,7 @@ typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
 #define STR_VPC_THREADEDCOMPONENTSTRING "threaded"
 #define STR_VPC_COMPONENTSTRING "normal"
 #define STR_VPC_DELAY "delay"
+#define STR_VPC_LATENCY "latency"
 #define STR_VPC_PRIORITY "priority"
 #define STR_VPC_PERIOD "period"
 #define STR_VPC_DEADLINE "deadline"

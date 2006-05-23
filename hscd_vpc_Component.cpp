@@ -309,14 +309,20 @@ namespace SystemC_VPC{
     if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
       // function specific delay
       actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
+      actualTask->setDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
+      actualTask->setLatency(actualTask->getFuncLatency(this->basename(), actualTask->getFuncName()));
 #ifdef VPC_DEBUG
       cerr << "Using " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "And using " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG
     } else {
       // general delay for actor
       actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->setDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->setLatency(actualTask->getFuncLatency(this->basename()));
 #ifdef VPC_DEBUG
       cerr << "Using standard delay " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "Using standard latency " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG
     }
     
@@ -426,14 +432,20 @@ namespace SystemC_VPC{
     if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
       // function specific delay
       actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
+      actualTask->setDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
+      actualTask->setLatency(actualTask->getFuncLatency(this->basename(), actualTask->getFuncName()));
 #ifdef VPC_DEBUG
       cerr << "Using " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "And " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG
     } else {
       // general delay for actor
       actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->setDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->setLatency(actualTask->getFuncLatency(this->basename()));
 #ifdef VPC_DEBUG
       cerr << "Using standard delay " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "Using standard latency " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG  
     }
   
@@ -627,9 +639,9 @@ namespace SystemC_VPC{
    */
   void Component::moveToRemainingPipelineStages(ProcessControlBlock* task){
     sc_time now                 = sc_time_stamp();
-    sc_time restOfLatency       = sc_time(10, SC_NS); // insert Latency-DII later!!
+    sc_time restOfLatency       = task->getLatency() - task->getDelay();
     sc_time end                 = now + restOfLatency;
-    if(restOfLatency == SC_ZERO_TIME){
+    if(restOfLatency <= SC_ZERO_TIME){
       //early exit if (Latency-DII) == 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
       this->notifyParentController(task);

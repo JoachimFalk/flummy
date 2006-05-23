@@ -433,6 +433,7 @@ namespace SystemC_VPC{
     
     if(node != NULL){
       std::vector<std::pair<char*, char* > > attributes;
+      std::vector<VPCBuilder::Timing > timings;
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){ //node->getNextSibling()){
         const XMLCh* xmlName = node->getNodeName();
@@ -440,9 +441,42 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> init template " << tid << std::endl;
 #endif //VPC_DEBUG
-        
+
+        if( 0==XMLString::compareNString( xmlName, timingStr, sizeof(timingStr))){
+	  char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
+	  VPCBuilder::Timing t;
+	  t.delay   = SC_ZERO_TIME;
+	  t.latency = SC_ZERO_TIME;
+	  t.fname   = fname;
+	  
+	  DOMNamedNodeMap* atts = node->getAttributes();
+	  for(unsigned int i=0; i<atts->getLength(); i++){
+	    DOMNode* a=atts->item(i);
+	    if(0==XMLString::compareNString( a->getNodeName(), delayAttrStr, sizeof(delayAttrStr))){
+	      delay = XMLString::transcode(a->getNodeValue());
+	    }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
+	      latency = XMLString::transcode(a->getNodeValue());
+	    }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
+	      delay = XMLString::transcode(a->getNodeValue());
+	    }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
+	      fname = XMLString::transcode(a->getNodeValue());
+	    }
+	  }
+	  t.fname   = fname;
+	  if(latency != NULL){
+	    t.latency = createSC_Time(latency);
+	  }
+	  if(delay != NULL){
+	    t.delay   = createSC_Time(delay);
+	  }
+	  // use dii only when having a latency or having no delay -> then dii overides delay
+	  if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
+	    t.delay = createSC_Time(dii);
+	  }
+	  timings.push_back(t);
+	  
         // check if its an attribute to add
-        if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+	}else if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
           DOMNamedNodeMap* atts = node->getAttributes();
           char* sType;
           char* sValue;
@@ -459,6 +493,9 @@ namespace SystemC_VPC{
       if(attributes.size() > 0){
         this->templates.insert(std::pair<std::string, std::vector<std::pair<char*, char* > > >( std::string(tid, strlen(tid)),
               attributes));
+      }
+      if(timings.size() > 0){
+	timingTemplates[std::string(tid, strlen(tid))] = timings;
       }
 
       this->vpcConfigTreeWalker->parentNode();
@@ -705,7 +742,37 @@ namespace SystemC_VPC{
             xmlName=attnode->getNodeName();
             DOMNamedNodeMap * atts=attnode->getAttributes();
 
-            if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+	    if( 0==XMLString::compareNString( xmlName, timingStr, sizeof(timingStr))){
+	      char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
+	      for(unsigned int i=0; i<atts->getLength(); i++){
+		DOMNode* a=atts->item(i);
+		if(0==XMLString::compareNString( a->getNodeName(), delayAttrStr, sizeof(delayAttrStr))){
+		  delay = XMLString::transcode(a->getNodeValue());
+		}else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
+		  latency = XMLString::transcode(a->getNodeValue());
+		}else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
+		  delay = XMLString::transcode(a->getNodeValue());
+		}else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
+		  fname = XMLString::transcode(a->getNodeValue());
+		}
+	      }
+	      if(latency != NULL){
+		sc_time sc_latency = createSC_Time(latency);
+                p.setLatency(sc_latency);
+                p.addFuncLatency(sTarget, fname, sc_latency);
+	      }
+	      if(delay != NULL){
+		sc_time sc_delay = createSC_Time(delay);
+                p.setDelay(sc_delay);
+                p.addFuncDelay(sTarget, fname, sc_delay);
+	      }
+	      // use dii only when having a latency or having no delay -> then dii overides delay
+	      if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
+		sc_time sc_dii = createSC_Time(dii);
+                p.setDelay(sc_dii);
+                p.addFuncDelay(sTarget, fname, sc_dii);
+	      }
+	    }else if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
               char *sType, *sValue;
               sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
               sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
@@ -730,6 +797,10 @@ namespace SystemC_VPC{
 		sc_time delay = createSC_Time(sValue);
                 p.setDelay(delay);
                 p.addFuncDelay(sTarget, NULL, delay);
+              }else if( 0 == strncmp(sType, STR_VPC_LATENCY, sizeof(STR_VPC_LATENCY) )){
+		sc_time latency = createSC_Time(sValue);
+                p.setLatency(latency);
+                p.addFuncLatency(sTarget, NULL, latency);
               }else{
 #ifdef VPC_DEBUG
                 std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << sType << " value=" << sValue << endl; 
@@ -849,7 +920,11 @@ namespace SystemC_VPC{
 	  sc_time delay = createSC_Time(attiter->second);
           p->setDelay(delay);
           p->addFuncDelay(target, NULL, delay);
-        }else{
+        }else if( 0 == strncmp(attiter->first, STR_VPC_LATENCY, sizeof(STR_VPC_LATENCY) )){
+	  sc_time latency = createSC_Time(attiter->second);
+	  p->setLatency(latency);
+	  p->addFuncLatency(target, NULL, latency);
+	}else{
 #ifdef VPC_DEBUG
           std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << attiter->first << " value=" << attiter->second << endl; 
           std::cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
@@ -877,6 +952,19 @@ namespace SystemC_VPC{
         }
       }
     }
+    std::map<std::string, std::vector<VPCBuilder::Timing> >::iterator timingIter = 
+      timingTemplates.find(key);
+    if(timingIter != timingTemplates.end()){
+      for(std::vector<VPCBuilder::Timing>::iterator timings = timingTemplates[key].begin();
+	  timings != timingTemplates[key].end(); timings++){
+	VPCBuilder::Timing t = *timings;
+	p->setDelay( t.delay );
+	p->setLatency(t.latency );
+	p->addFuncDelay(   target, t.fname, t.delay   );
+	p->addFuncLatency( target, t.fname, t.latency );
+      }
+    }
+    
   }
   
   /**
@@ -922,7 +1010,6 @@ namespace SystemC_VPC{
     sc_time_unit scUnit = SC_NS;
 
     stringstream data(timeString);
-    int oldPos = data.tellg();
     if(data.good()){
       data >> value;
     }else{

@@ -4,13 +4,17 @@ namespace SystemC_VPC{
 
   int ProcessControlBlock::global_pid = 0;
 
-  ProcessControlBlock::ComponentDelay::ComponentDelay(std::string name, sc_time base_delay) : name(name), base_delay(base_delay) {}
+  ProcessControlBlock::ComponentDelay::ComponentDelay(std::string name)
+    : name(name), base_delay(SC_ZERO_TIME), base_latency(SC_ZERO_TIME) {}
 
   void ProcessControlBlock::ComponentDelay::addDelay(const char* funcname, sc_time delay){
     if(funcname != NULL){
       std::string key(funcname, strlen(funcname));
       this->funcDelays[key] = delay;
+    }else{
+      this->base_delay = delay;
     }
+
   }
 
   sc_time ProcessControlBlock::ComponentDelay::getDelay(const char* funcname){
@@ -37,6 +41,39 @@ namespace SystemC_VPC{
     }
   }
 
+  void ProcessControlBlock::ComponentDelay::addLatency(const char* funcname, sc_time latency){
+    if(funcname != NULL){
+      std::string key(funcname, strlen(funcname));
+      this->funcLatencies[key] = latency;
+    }else{
+      this->base_latency = latency;
+    }
+  }
+
+  sc_time ProcessControlBlock::ComponentDelay::getLatency(const char* funcname){
+    if(funcname == NULL){
+      return this->base_latency;
+    }else{
+      std::map<std::string, sc_time>::iterator iter;
+      std::string key(funcname, strlen(funcname));
+      iter = this->funcLatencies.find(key);
+      if(iter != this->funcLatencies.end()){
+        return iter->second;
+      }
+    }
+
+    return this->base_latency;
+  }
+
+  bool ProcessControlBlock::ComponentDelay::hasLatency(const char* funcname){
+    if(funcname == NULL){
+      return false;
+    }else{
+      std::string key(funcname, strlen(funcname));
+      return (this->funcLatencies.count(key) > 0);
+    }
+  }
+
   ProcessControlBlock::DelayMapper::~DelayMapper(){
 
     std::map<std::string, ComponentDelay*>::iterator iter;
@@ -47,22 +84,12 @@ namespace SystemC_VPC{
   
   }
 
-  void ProcessControlBlock::DelayMapper::registerDelay(std::string comp, sc_time delay){
-
-    std::map<std::string, ComponentDelay*>::iterator iter;
-    iter = this->compDelays.find(comp);
-    if(iter == this->compDelays.end()){
-      this->compDelays[comp] = new ComponentDelay(comp, delay);
-    }
-
-  }  
-
   void ProcessControlBlock::DelayMapper::addDelay(std::string comp, const char* funcname, sc_time delay){
     
     std::map<std::string, ComponentDelay*>::iterator iter;
     iter = this->compDelays.find(comp);
     if(iter == this->compDelays.end()){
-      this->registerDelay(comp, delay);
+      this->compDelays[comp] = new ComponentDelay(comp);
       iter = this->compDelays.find(comp);
     }
     iter->second->addDelay(funcname, delay);
@@ -90,6 +117,47 @@ namespace SystemC_VPC{
         iter = this->compDelays.find(comp);
         if(iter != this->compDelays.end()){
           return iter->second->hasDelay(funcname);
+        }            
+      }else{
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void ProcessControlBlock::DelayMapper::addLatency(std::string comp, const char* funcname, sc_time latency){
+    
+    std::map<std::string, ComponentDelay*>::iterator iter;
+    iter = this->compDelays.find(comp);
+    if(iter == this->compDelays.end()){
+      this->compDelays[comp] = new ComponentDelay(comp);
+      iter = this->compDelays.find(comp);
+    }
+    iter->second->addLatency(funcname, latency);
+
+  }
+
+  sc_time ProcessControlBlock::DelayMapper::getLatency(std::string comp, const char* funcname){
+
+    std::map<std::string, ComponentDelay* >::iterator iter;
+    iter = this->compDelays.find(comp);
+    if(iter != compDelays.end()){
+      return iter->second->getLatency(funcname);
+    }else{
+      return SC_ZERO_TIME;
+    }
+
+  }
+
+  bool ProcessControlBlock::DelayMapper::hasLatency(std::string comp, const char* funcname){
+
+    if(this->compDelays.count(comp) > 0){
+      
+      if(funcname != NULL){
+        std::map<std::string, ComponentDelay* >::iterator iter;
+        iter = this->compDelays.find(comp);
+        if(iter != this->compDelays.end()){
+          return iter->second->hasLatency(funcname);
         }            
       }else{
         return true;
@@ -144,6 +212,7 @@ namespace SystemC_VPC{
    
     this->blockEvent = EventPair();
     this->setDelay(SC_ZERO_TIME);
+    this->setLatency(SC_ZERO_TIME);
     this->setFuncName(NULL);
     this->setInterrupt(NULL);
     this->setRemainingDelay(SC_ZERO_TIME);
@@ -162,6 +231,7 @@ namespace SystemC_VPC{
     this->blockEvent = EventPair();
     this->deadline = sc_time(DBL_MAX, SC_SEC);
     this->delay = SC_ZERO_TIME;
+    this->latency = SC_ZERO_TIME;
     this->funcname = NULL;
     this->interrupt = NULL;
     this->remainingDelay = SC_ZERO_TIME;
@@ -223,6 +293,14 @@ namespace SystemC_VPC{
 
   sc_time ProcessControlBlock::getDelay() const{
     return this->delay;
+  }
+
+  void ProcessControlBlock::setLatency(sc_time latency){
+    this->latency = latency;
+  }
+
+  sc_time ProcessControlBlock::getLatency() const{
+    return this->latency;
   }
 
   void ProcessControlBlock::setRemainingDelay(sc_time delay){
@@ -322,6 +400,45 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
     
     return this->dmapper->hasDelay(comp, funcname);
+  }
+
+  void ProcessControlBlock::addFuncLatency(std::string comp, const char* funcname, sc_time delay){
+
+#ifdef VPC_DEBUG
+    std::cerr << "ProcessControlBlock> Adding Function Latency for " << comp;
+    if(funcname != NULL){
+      std::cerr << " function " << funcname;
+    }
+    std::cerr << " delay " << delay << std::endl;
+#endif //VPC_DEBUG
+    
+    this->dmapper->addLatency(comp, funcname, delay);
+  }
+
+  sc_time ProcessControlBlock::getFuncLatency(std::string comp, const char* funcname) const{
+
+#ifdef VPC_DEBUG
+    std::cerr << "ProcessControlBlock> Latency for " << comp;
+    if(funcname != NULL){
+      std::cerr << "->" << funcname;
+    }
+    std::cerr << " is " << this->dmapper->getLatency(comp, funcname) << std::endl;
+#endif //VPC_DEBUG 
+    
+    return this->dmapper->getLatency(comp, funcname);
+  }
+
+  bool ProcessControlBlock::hasLatency(std::string comp, const char* funcname) const{
+
+#ifdef VPC_DEBUG 
+    std::cerr << "ProcessControlBlock> Request for " << comp;
+    if(funcname != NULL){
+      std::cerr << " with function " << funcname;
+    }
+    std::cerr << " has special latency ? " << this->dmapper->hasLatency(comp, funcname) << std::endl;
+#endif //VPC_DEBUG
+    
+    return this->dmapper->hasLatency(comp, funcname);
   }
 
 }
