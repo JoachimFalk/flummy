@@ -14,7 +14,12 @@ namespace SystemC_VPC{
    */
   ReconfigurableComponent::ReconfigurableComponent(sc_module_name name, 
                                                     AbstractController* controller)
-    : AbstractComponent(name), wakeUpSignalled(false) {
+    : AbstractComponent(name), 
+      controller(NULL),
+      activConfiguration(NULL),
+      storeStartTime(NULL),
+      remainingStoreTime(NULL),
+      wakeUpSignalled(false) {
 
     SC_THREAD(schedule_thread);
     this->setController(controller);
