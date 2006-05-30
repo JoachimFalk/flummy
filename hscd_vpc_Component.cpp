@@ -383,6 +383,7 @@ namespace SystemC_VPC{
       this->setActiv(false);
       this->killed = kill;
       this->notify_preempt.notify();
+      interuptPipeline(kill);
       //wait(SC_ZERO_TIME);
     }
    
@@ -398,6 +399,7 @@ namespace SystemC_VPC{
       this->setActiv(true);
       this->killed = false;
       this->notify_resume.notify();
+      resumePipeline();
       //wait(SC_ZERO_TIME);
     }
 
@@ -605,7 +607,7 @@ namespace SystemC_VPC{
    */
   void Component::remainingPipelineStages(){
     while(1){
-      if(pqueue.size() == 0){
+      if( (!this->isActiv()) || (pqueue.size() == 0) ){
 	wait(remainingPipelineStages_WakeUp);
       }else{
 	timePcbPair front = pqueue.top();
@@ -615,8 +617,10 @@ namespace SystemC_VPC{
 	assert(front.time >= sc_time_stamp());
 	//cerr << "Pipeline> Wait till " << front.time << " (" << waitFor << ") at: " << sc_time_stamp() << endl;
 	wait( waitFor, remainingPipelineStages_WakeUp );
-	//iter = remainingPipelineStagesList.begin();
-	//assert(*iter == front);
+
+	//DISABLED: if a task completes at same time (but not necessarily in same delta cycle)
+	//          then this task is completed nonetheless
+	//if( !this->isActiv() ) continue;
 
 	sc_time rest = front.time-sc_time_stamp();
 	assert(rest >= SC_ZERO_TIME);
@@ -652,6 +656,41 @@ namespace SystemC_VPC{
     pair.pcb  = task;
     //std::cerr << "Rest of pipeline added: " << task->getName() << " (EndTime: " << pair.time << ") " << std::endl;
     pqueue.push(pair);
+    remainingPipelineStages_WakeUp.notify();
+  }
+
+  /**
+   *
+   */
+  void Component::interuptPipeline(bool kill){
+
+    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> temp;
+    if(kill){
+      pqueue = temp;
+      assert(pqueue.empty());
+    }else{
+      //making absolute timing to relative timings (deduct actual time stamp)
+      while(pqueue.size()>0){
+	timePcbPair top = pqueue.top();
+	top.time -= sc_time_stamp();
+      }
+      pqueue = temp;
+    }
+    remainingPipelineStages_WakeUp.notify();
+  }
+
+  /**
+   *
+   */
+  void Component::resumePipeline(){
+    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> temp;
+    //making relative timings to absolute timings (add actual time stamp)
+    while(pqueue.size()>0){
+      timePcbPair top = pqueue.top();
+      top.time += sc_time_stamp();
+    }
+    pqueue = temp;
+ 
     remainingPipelineStages_WakeUp.notify();
   }
 

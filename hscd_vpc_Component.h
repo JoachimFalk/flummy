@@ -186,6 +186,10 @@ namespace SystemC_VPC{
     virtual void compute(ProcessControlBlock* pcb);
 
   private:
+    
+    void interuptPipeline(bool);
+
+    void resumePipeline();
 
     void killAllTasks();
 
