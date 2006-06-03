@@ -61,22 +61,26 @@ namespace SystemC_VPC {
    * \brief Implementation of RRConfElement::
    */
   void RREConfElement::removeTask(ProcessControlBlock* pcb){
+    
     // first check if pcb is contained in running tasks
     std::deque<ProcessControlBlock* >::iterator iter;
     iter = std::find(this->runningTasks.begin(), this->runningTasks.end(), pcb);
     if(iter != this->runningTasks.end()){
+      ProcessControlBlock* pcb = *iter;
       this->runningTasks.erase(iter);
-      assert(std::find(this->waitingTasks.begin(), this->waitingTasks.end(), *iter) == this->waitingTasks.end());
-      assert(std::find(this->runningTasks.begin(), this->runningTasks.end(), *iter) == this->runningTasks.end());
+      assert(std::find(this->waitingTasks.begin(), this->waitingTasks.end(), pcb) == this->waitingTasks.end());
+      assert(std::find(this->runningTasks.begin(), this->runningTasks.end(), pcb) == this->runningTasks.end());
       return;
     }
     // next check if in waiting tasks pcb is located, should be here if not in running tasks!!!
     iter = std::find(this->waitingTasks.begin(), this->waitingTasks.end(), pcb);
     if(iter != this->waitingTasks.end()){
-      this->waitingTasks.erase(iter);
+      ProcessControlBlock* pcb = *iter;
+      this->runningTasks.erase(iter);
+      assert(std::find(this->waitingTasks.begin(), this->waitingTasks.end(), pcb) == this->waitingTasks.end());
+      assert(std::find(this->runningTasks.begin(), this->runningTasks.end(), pcb) == this->runningTasks.end());
     }
-    assert(std::find(this->waitingTasks.begin(), this->waitingTasks.end(), *iter) == this->waitingTasks.end());
-    assert(std::find(this->runningTasks.begin(), this->runningTasks.end(), *iter) == this->runningTasks.end());
+  
   }
 
   /**
