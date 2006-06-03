@@ -48,7 +48,7 @@ namespace SystemC_VPC{
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config);
+      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc);
 
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -58,7 +58,7 @@ namespace SystemC_VPC{
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void performSchedule();
+      virtual void performSchedule(ReconfigurableComponent* rc);
 
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -76,13 +76,13 @@ namespace SystemC_VPC{
        * \return id of next configuration to be loaded or 0 if no configuration
        * is selected up to now.
        */
-      virtual unsigned int getNextConfiguration();
+      virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc);
 
       /**
        * \brief Indicates if controller still can forward tasks
        * \return TRUE if there are still task to be forwarded else FALSE
        */
-      virtual bool hasTaskToProcess();
+      virtual bool hasTaskToProcess(ReconfigurableComponent* rc);
 
       /**
        * \brief Returns next task to be forwarded
@@ -91,24 +91,24 @@ namespace SystemC_VPC{
        * \return pair containing ProcessControlBlock of task and requested function
        * to be simulated.
        */
-      virtual ProcessControlBlock* getNextTask();
+      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc);
 
       /**
        * \brief Signals if a configuration has to be reactived by controlled component
        * \param config points to configuration which should be reactivated.
        */ 
-      bool needToReactivateConfiguration(Configuration* config);
+      bool needToReactivateConfiguration(Configuration* config, ReconfigurableComponent* rc);
 
       /**
        * \see TaskEventListener
        */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb);
+      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
       /**
        * \brief Implementation of AbstractConfigurationScheduler::signalPreemption
        * \see AbstractConfigurationScheduler
        */
-      void signalPreemption(bool kill);
+      void signalPreemption(bool kill, ReconfigurableComponent* rc);
 
       /**
        * \brief Signals always true as configuration is only switched if all task have finished

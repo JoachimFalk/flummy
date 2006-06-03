@@ -147,7 +147,7 @@ namespace SystemC_VPC{
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config);
+      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc);
 
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -157,7 +157,7 @@ namespace SystemC_VPC{
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void performSchedule();
+      virtual void performSchedule(ReconfigurableComponent* rc);
 
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -175,13 +175,13 @@ namespace SystemC_VPC{
        * \return id of next configuration to be loaded or 0 if no configuration
        * is selected up to now.
        */
-      virtual unsigned int getNextConfiguration();
+      virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc);
 
       /**
        * \brief Indicates if controller still can forward tasks
        * \return TRUE if there are still task to be forwarded else FALSE
        */
-      virtual bool hasTaskToProcess();
+      virtual bool hasTaskToProcess(ReconfigurableComponent* rc);
 
       /**
        * \brief Returns next task to be forwarded
@@ -190,13 +190,13 @@ namespace SystemC_VPC{
        * \return pair containing ProcessControlBlock of task and requested function
        * to be simulated.
        */
-      virtual ProcessControlBlock* getNextTask();
+      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc);
 
       /**
        * \brief Used to signal finished tasks to the controller
        * \see TaskEventListener::signalTaskEvent
        */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb);
+      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
     private:
 
@@ -208,7 +208,7 @@ namespace SystemC_VPC{
        * \param pid specifies the task to determine deadline for
        * \return earliest deadline
        */
-      double getEarliestDeadline(int pid);
+      double getEarliestDeadline(int pid, ReconfigurableComponent* rc);
   };
 
 }

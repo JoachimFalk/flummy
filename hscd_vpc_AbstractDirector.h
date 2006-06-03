@@ -31,7 +31,7 @@ namespace SystemC_VPC{
      * \param compName specifies name of component
      * \param mInfo specifies additional mapping information
      */
-    virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo)=0;
+    virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* comp)=0;
     
   };
   

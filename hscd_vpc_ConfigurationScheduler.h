@@ -47,7 +47,7 @@ namespace SystemC_VPC {
        * next time.
        * \return time interval to wait or NULL if no time interval required
        */
-      sc_time* getWaitInterval();
+      sc_time* getWaitInterval(ReconfigurableComponent* rc);
 
       /**
        * \brief Used to set Scheduler specific values
@@ -74,7 +74,7 @@ namespace SystemC_VPC {
        * component.
        * \note Does nothing intended for controllers not interested in preemption
        */
-      virtual void signalPreemption(bool kill);
+      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc);
 
       /**
        * \brief Signals to controller that managed component has been resumed.
@@ -82,7 +82,7 @@ namespace SystemC_VPC {
        * component.
        * \note Does nothing intended for controllers not interested in resume
        */
-      virtual void signalResume();
+      virtual void signalResume(ReconfigurableComponent* rc);
 
     protected:
 

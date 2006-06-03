@@ -7,6 +7,7 @@
 namespace SystemC_VPC {
   
   class AbstractController;
+  class ReconfigurableComponent;
 
   /**
    * \brief Abstract class specify necessary interface of an configuration scheduler
@@ -32,7 +33,7 @@ namespace SystemC_VPC {
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config)=0; 
+      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc)=0; 
     
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -42,7 +43,7 @@ namespace SystemC_VPC {
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */ 
-      virtual void performSchedule()=0;
+      virtual void performSchedule(ReconfigurableComponent* rc)=0;
       
       /**
        * \brief Returns next configuration to be loaded
@@ -51,13 +52,13 @@ namespace SystemC_VPC {
        * \return id of next configuration to be loaded or 0 if no configuration
        * is selected up to now.
        */
-      virtual unsigned int getNextConfiguration()=0;
+      virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc)=0;
 
       /**
        * \brief Indicates if controller still can forward tasks
        * \return TRUE if there are still task to be forwarded else FALSE
        */
-      virtual bool hasTaskToProcess()=0;
+      virtual bool hasTaskToProcess(ReconfigurableComponent* rc)=0;
 
       /**
        * \brief Returns next task to be forwarded
@@ -66,9 +67,9 @@ namespace SystemC_VPC {
        * \return pair containing ProcessControlBlock of task and requested function
        * to be simulated.
        */
-      virtual ProcessControlBlock* getNextTask()=0;
+      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc)=0;
 
-      virtual sc_time* getWaitInterval()=0;
+      virtual sc_time* getWaitInterval(ReconfigurableComponent* rc)=0;
 
       /**
        * \brief Used to set Scheduler specific values
@@ -94,14 +95,14 @@ namespace SystemC_VPC {
        * component.
        * \param kill indicates if preemption happend with kill flag
        */
-      virtual void signalPreemption(bool kill)=0;
+      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc)=0;
 
       /**
        * \brief Signals to controller that managed component has been resumed.
        * Used within controller to adapt scheduling to resuming of managed
        * component.
        */
-      virtual void signalResume()=0;
+      virtual void signalResume(ReconfigurableComponent* rc)=0;
   };
 
 }

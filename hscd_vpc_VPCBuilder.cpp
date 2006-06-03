@@ -9,6 +9,7 @@
 #include "hscd_vpc_RoundRobinConfScheduler.h"
 #include "hscd_vpc_PriorityConfScheduler.h"
 #include "hscd_vpc_EDFConfScheduler.h"
+#include "hscd_vpc_RREConfScheduler.h"
 
 #include "hscd_vpc_SimpleBinder.h"
 #include "hscd_vpc_RRBinder.h"
@@ -840,7 +841,7 @@ namespace SystemC_VPC{
         // add mapping to controller of surrounding component
         ReconfigurableComponent* comp;
         comp = (ReconfigurableComponent*)this->knownComps[iterConftC->second];
-        comp->getController()->registerMapping(source, target, mInfo);
+        comp->getController()->registerMapping(source, target, mInfo, comp);
 
 #ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> Additional mapping between: " << source << "<->" << target << std::endl; 
@@ -851,7 +852,7 @@ namespace SystemC_VPC{
     }
           
     //finally register mapping to Director
-    this->director->registerMapping(source, target, mInfo);
+    this->director->registerMapping(source, target, mInfo, NULL);
 
   }
 
@@ -928,6 +929,10 @@ namespace SystemC_VPC{
       if(0==strncmp(type, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
           || 0==strncmp(type, STR_FCFS,strlen(STR_FCFS))){
         scheduler = new FCFSConfScheduler(controller);      
+      }else
+        if(0==strncmp(type, STR_ROUNDROBINEXTENDED, strlen(STR_ROUNDROBINEXTENDED))
+           || 0==strncmp(type, STR_RRE, strlen(STR_RRE))){
+           scheduler = new RREConfScheduler(controller, controller->getMIMapper());
       }else 
         if(0==strncmp(type, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
            || 0==strncmp(type, STR_RR, strlen(STR_RR))){

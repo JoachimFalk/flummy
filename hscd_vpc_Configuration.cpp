@@ -1,5 +1,7 @@
 #include <hscd_vpc_Configuration.h>
 
+#include <sstream>
+
 namespace SystemC_VPC{
 
   /**
@@ -26,7 +28,7 @@ namespace SystemC_VPC{
   /**
    * \brief Creates instance of Configuration
    */    
-  Configuration::Configuration(const char* name, const char* loadTime, const char* storeTime) 
+  Configuration::Configuration(const char* name, char* loadTime, char* storeTime) 
     : activ(false), stored(false){
       
     strcpy(this->configName,name);
@@ -34,8 +36,13 @@ namespace SystemC_VPC{
     
     this->setLoadTime(loadTime);
     this->setStoreTime(storeTime);
-      
-  }
+
+#ifdef VPC_DEBUG
+    std::cerr << "Configuration " << this->getName() <<"> loadtime set to " << this->getLoadTime() << std::endl;
+    std::cerr << "Configuration " << this->getName() <<"> storetime set to " << this->getStoreTime() << std::endl;    
+#endif //VPC_DEBUG
+
+    }
   
   /**
    * \brief Deletes instance of Configuration
@@ -249,17 +256,19 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::setStoreTime
    */
-  void Configuration::setStoreTime(const char* time){
+  void Configuration::setStoreTime(char* time){
       
-    double timeVal = atof(time);
-
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> setting store time: " 
         << YELLOW("time = " << time) << std::endl;
 #endif //VPC_DEBUG
     
-    this->storeTime = sc_time(timeVal, SC_NS);
-    
+    try{
+      this->storeTime = this->createSC_Time(time);
+    }catch(InvalidArgumentException& e){
+      double timeVal = atof(time);
+      this->storeTime = sc_time(timeVal, SC_NS);
+    }
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> store time set to: " 
         << YELLOW( this->storeTime) << std::endl;
@@ -276,17 +285,20 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::setLoadTime
    */
-  void Configuration::setLoadTime(const char* time){
+  void Configuration::setLoadTime(char* time){
       
-    double timeVal = atof(time);
-
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> setting load time: " 
         << YELLOW("time = " << time) << std::endl;
 #endif //VPC_DEBUG
     
-    this->loadTime = sc_time(timeVal, SC_NS);
-
+    try{
+      this->loadTime = this->createSC_Time(time);
+    }catch(InvalidArgumentException& e){
+      double timeVal = atof(time);
+      this->loadTime = sc_time(timeVal, SC_NS);
+    }
+    
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> load time set to: " 
         << YELLOW(this->loadTime) << std::endl;
@@ -294,6 +306,51 @@ namespace SystemC_VPC{
 
   }    
 
+  sc_time Configuration::createSC_Time(char* timeString) throw(InvalidArgumentException){
+    assert(timeString != NULL);
+    double value = -1;
+    string unit;
+
+    sc_time_unit scUnit = SC_NS;
+
+    std::stringstream data(timeString);
+    int oldPos = data.tellg();
+    if(data.good()){
+      data >> value;
+    }else{
+      string msg("Parsing Error: Unknown argument: <");
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if( data.fail() ){
+      string msg("Parsing Error: Unknown argument: <");
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if(data.good()){
+      data >> unit;
+      if(data.fail()){
+#ifdef VPC_DEBUG
+        std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!" << std::endl;
+#endif //VPC_DEBUG
+        scUnit = SC_NS;
+      }else{
+        std::transform (unit.begin(),unit.end(), unit.begin(), (int(*)(int))tolower);
+        if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
+        else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
+        else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
+        else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
+        else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
+        else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
+      }
+    }
+
+    return sc_time(value, scUnit);
+  }
+
+  
   /**
    * \brief Implementation of Configuration::getLoadTime
    */

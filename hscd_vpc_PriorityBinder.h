@@ -83,7 +83,7 @@ namespace SystemC_VPC {
       /**
        * \brief Implementation of TaskEventListener::signalTaskEvent
        */
-      void signalTaskEvent(ProcessControlBlock* pcb);
+      void signalTaskEvent(ProcessControlBlock* pcb, std::string CompID);
   };
   
 }

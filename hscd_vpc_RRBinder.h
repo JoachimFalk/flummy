@@ -35,7 +35,7 @@ namespace SystemC_VPC {
        * \brief Implementation of TaskEventListener::signalTaskEvent
        * Dummy implementation as strategy is independent of task events
        */
-      void signalTaskEvent(ProcessControlBlock* pcb); 
+      void signalTaskEvent(ProcessControlBlock* pcb, std::string CompID); 
   };
 
 }

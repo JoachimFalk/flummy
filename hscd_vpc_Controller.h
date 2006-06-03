@@ -116,7 +116,7 @@ namespace SystemC_VPC {
        * \param newTasks refers to a queue of pcb to be scheduled
        * \sa AbstractController
        */
-      virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
+      virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc);
 
       /**
        * \brief Returns time to wait until next notification of controller is needed
@@ -124,7 +124,7 @@ namespace SystemC_VPC {
        * next time.
        * \return time interval to wait or NULL if no time interval required
        */
-      sc_time* getWaitInterval();
+      sc_time* getWaitInterval(ReconfigurableComponent* rc);
 
       /**
        * \brief Register component to Director
@@ -141,20 +141,20 @@ namespace SystemC_VPC {
        * \param compName specifies name of component
        * \param mInfo specifies associated mapping information
        */
-      virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo);
+      virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* c);
 
       /**
        * \brief Returns mapped component for a given task
        * \param task specifies the task to get component for
        * \return pointer to AbstractComponent refering to mapped component
        */
-      virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task);
+      virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task, ReconfigurableComponent* rc);
 
-      virtual bool hasTaskToProcess();
+      virtual bool hasTaskToProcess(ReconfigurableComponent* rc);
 
-      virtual ProcessControlBlock* getNextTask();
+      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc);
 
-      virtual unsigned int getNextConfiguration();
+      virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc);
 
       /**
        * \brief Used to set controller specific values
@@ -175,7 +175,7 @@ namespace SystemC_VPC {
        * \param kill indicates if preemption happend with kill flag
        * \note Does nothing intended for controllers not interested in preemption
        */
-      virtual void signalPreemption(bool kill);
+      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc);
 
       /**
        * \brief Signals to controller that managed component has been resumed.
@@ -183,17 +183,17 @@ namespace SystemC_VPC {
        * component.
        * \note Does nothing intended for controllers not interested in resume
        */
-      virtual void signalResume();
+      virtual void signalResume(ReconfigurableComponent* rc);
 
       /**
        * \brief 
        * \sa AbstractController
        */
-      virtual Decision getDecision(int pid);
+      virtual Decision getDecision(int pid, ReconfigurableComponent* rc);
 
       MIMapper* getMIMapper();
 
-      virtual void signalTaskEvent(ProcessControlBlock* pcb);
+      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
   };
 

@@ -121,7 +121,7 @@ namespace SystemC_VPC{
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config);
+      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc);
 
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -131,7 +131,7 @@ namespace SystemC_VPC{
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void performSchedule();
+      virtual void performSchedule(ReconfigurableComponent* rc);
 
 
       /**
@@ -150,13 +150,13 @@ namespace SystemC_VPC{
        * \return  id of next configuration to be loaded or NULL if no configuration
        * is selected up to now.
        */
-      virtual unsigned int getNextConfiguration();
+      virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc);
 
       /**
        * \brief Indicates if controller still can forward tasks
        * \return TRUE if there are still task to be forwarded else FALSE
        */
-      virtual bool hasTaskToProcess();
+      virtual bool hasTaskToProcess(ReconfigurableComponent* rc);
 
       /**
        * \brief Returns next task to be forwarded
@@ -165,7 +165,7 @@ namespace SystemC_VPC{
        * \return pair containing ProcessControlBlock of task and requested function
        * to be simulated.
        */
-      virtual ProcessControlBlock* getNextTask();
+      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc);
 
       /**
        * \brief Signals if a configuration has to be reactived by controlled component
@@ -176,17 +176,17 @@ namespace SystemC_VPC{
       /**
        * \see AbstractController
        */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb);
+      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
       /**
        * \see AbstractConfigurationScheduler
        */
-      virtual void signalPreemption(bool kill);
+      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc);
 
       /**
        * \see AbstractController
        */
-      virtual void signalResume();
+      virtual void signalResume(ReconfigurableComponent* rc);
 
     private:
 
@@ -196,12 +196,12 @@ namespace SystemC_VPC{
        * configuration will be activ, to enable roundrobin to
        * determine when the given timeslice is elapsed.
        */ 
-      void calculateAssignTime(unsigned int nextConfiguration);
+      void calculateAssignTime(unsigned int nextConfiguration, ReconfigurableComponent* rc );
 
       /**
        * \brief Helper method to keep management structure uptodate
        */
-      void updateUsedConfigurations(ProcessControlBlock* pcb);
+      void updateUsedConfigurations(ProcessControlBlock* pcb, ReconfigurableComponent* rc);
   };
 
 }

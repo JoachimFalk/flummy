@@ -9,6 +9,7 @@
 
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_IPreemptable.h"
+#include "hscd_vpc_InvalidArgumentException.h"
 
 namespace SystemC_VPC{
   
@@ -77,7 +78,7 @@ namespace SystemC_VPC{
        */
       Configuration(const char* name);
 
-      Configuration(const char* name, const char* loadTime, const char* storeTime);
+      Configuration(const char* name, char* loadTime, char* storeTime);
 
       virtual ~Configuration();
 
@@ -175,7 +176,7 @@ namespace SystemC_VPC{
        * \brief Sets store time for a configuration
        * \param time specifies the corresponding store time
        */
-      void setStoreTime(const char* time);
+      void setStoreTime(char* time);
 
       /**
        * \brief Getter to access store time of configuration
@@ -189,7 +190,7 @@ namespace SystemC_VPC{
        * \brief Sets store time for a configuration
        * \param time specifies the corresponding store time
        */
-      void setLoadTime(const char* time);
+      void setLoadTime(char* time);
 
       /**
        * \brief Getter to acces load time of configuration
@@ -204,6 +205,10 @@ namespace SystemC_VPC{
        * \return const iterator to access ids of contained components
        */
       ComponentIDIterator getComponentIDIterator(); 
+
+    private:
+
+      sc_time createSC_Time(char* timeString) throw(InvalidArgumentException);
 
   };
  

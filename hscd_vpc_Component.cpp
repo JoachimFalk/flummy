@@ -507,7 +507,7 @@ namespace SystemC_VPC{
         }     
 #endif //NO_VCD_TRACES
     
-      this->parentControlUnit->signalTaskEvent(iter->second);
+      this->parentControlUnit->signalTaskEvent(iter->second, this->basename());
 
     }
     
@@ -541,7 +541,7 @@ namespace SystemC_VPC{
         }     
 #endif //NO_VCD_TRACES
 
-      this->parentControlUnit->signalTaskEvent(iter->second);
+      this->parentControlUnit->signalTaskEvent(iter->second, this->basename());
     }
 
     this->readyTasks.clear();
@@ -564,7 +564,7 @@ namespace SystemC_VPC{
       newTask->setDelay(0);
       newTask->setRemainingDelay(0);
       
-      this->parentControlUnit->signalTaskEvent(newTask);
+      this->parentControlUnit->signalTaskEvent(newTask, this->basename());
       
 #ifndef NO_VCD_TRACES
       if(newTask->getTraceSignal() != 0){

@@ -23,7 +23,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSConfScheduler::addTasksToSchedule
    */
-  void FCFSConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config){
+  void FCFSConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
@@ -39,7 +39,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSConfScheduler::performSchedule
    */
-  void FCFSConfScheduler::performSchedule(){
+  void FCFSConfScheduler::performSchedule(ReconfigurableComponent* rc){
 
     ProcessControlBlock* currTask;
     unsigned int reqConfig = 0;
@@ -90,7 +90,7 @@ namespace SystemC_VPC{
   /*
    * \brief Implementation of FCFSConfScheduler::getNextConfiguration
    */  
-  unsigned int FCFSConfScheduler::getNextConfiguration(){
+  unsigned int FCFSConfScheduler::getNextConfiguration(ReconfigurableComponent* rc){
     
     unsigned int next = this->nextConfiguration;
     this->nextConfiguration = 0;
@@ -101,7 +101,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSConfScheduler::hasTaskToProcess()
    */
-  bool FCFSConfScheduler::hasTaskToProcess(){
+  bool FCFSConfScheduler::hasTaskToProcess(ReconfigurableComponent* rc){
   
      return (this->tasksToProcess.size() > 0);
   
@@ -110,7 +110,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSConfScheduler::getNextTask()
    */
-  ProcessControlBlock* FCFSConfScheduler::getNextTask(){
+  ProcessControlBlock* FCFSConfScheduler::getNextTask(ReconfigurableComponent* rc){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();
@@ -122,7 +122,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSConfScheduler::signalTaskEvent
    */
-  void FCFSConfScheduler::signalTaskEvent(ProcessControlBlock* pcb){
+  void FCFSConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
   
 #ifdef VPC_DEBUG
     std::cerr << "FCFSConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName() << "::" << pcb->getFuncName()
@@ -146,7 +146,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSConfScheudler::signalPreemption
    */
-  void FCFSConfScheduler::signalPreemption(bool kill){
+  void FCFSConfScheduler::signalPreemption(bool kill, ReconfigurableComponent* rc){
     // only interested in Preemption with KILL
     if(kill){
       

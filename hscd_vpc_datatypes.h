@@ -109,6 +109,8 @@ namespace SystemC_VPC {
   // definition for EarliestDeadlineFirst scheduler
 #define STR_EARLIESTDEADLINEFIRST "EarliestDeadlineFirst"
 #define STR_EDF "EDF"
+#define STR_ROUNDROBINEXTENDED "RoundRobinExtended"
+#define STR_RRE "RRE"
 
   /***********************************
    * SECTION attribute values

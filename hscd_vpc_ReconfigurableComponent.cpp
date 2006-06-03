@@ -137,7 +137,7 @@ namespace SystemC_VPC{
         std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> not activ going to sleep at time: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
-        this->controller->signalPreemption(this->killed);
+        this->controller->signalPreemption(this->killed, this);
         // hold pointer to currentlyloaded configuration
         Configuration* currConfig;
         if(this->killed){
@@ -154,16 +154,20 @@ namespace SystemC_VPC{
         wait(this->notify_resume);
 
         this->loadConfiguration(currConfig);
-        this->controller->signalResume();
+        this->controller->signalResume(this);
 
 #ifdef VPC_DEBUG
         std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> awoke at time: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
       }
-
-      // inform controller about new tasks
-      this->controller->addTasksToSchedule(this->newTasks);
+      
+      do{
+        // inform controller about new tasks
+        this->controller->addTasksToSchedule(this->newTasks, this);
+        // panik insure to get all tasks!
+        wait(SC_ZERO_TIME);
+      }while(this->newTasks.size() > 0);
 
 #ifdef VPC_DEBUG
       std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> finished delegation to controller !") << sc_simulation_time() << endl;
@@ -175,16 +179,16 @@ namespace SystemC_VPC{
       // points to component to delegate task to
       AbstractComponent* currComp;
 
-      while(this->controller->hasTaskToProcess()){
+      while(this->controller->hasTaskToProcess(this)){
 
-        currTask = this->controller->getNextTask();
+        currTask = this->controller->getNextTask(this);
 
 #ifdef VPC_DEBUG
         std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> still task to forward: ") << currTask->getName() << " at "  << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
 
-        currComp = this->controller->getMappedComponent(currTask);
+        currComp = this->controller->getMappedComponent(currTask, this);
         currComp->compute(currTask);
 
       }
@@ -197,7 +201,7 @@ namespace SystemC_VPC{
       // check if new configuration has to be loaded
       // points to required configuration for a given task
       Configuration* nextConfig = NULL;
-      unsigned int confID = this->controller->getNextConfiguration();
+      unsigned int confID = this->controller->getNextConfiguration(this);
       try{
         // if confID == 0 we have no new configuration
         if(confID != 0){
@@ -252,7 +256,7 @@ namespace SystemC_VPC{
       }
       
       // check if controller request special interval to be called next time
-      minTimeToWait = this->controller->getWaitInterval();
+      minTimeToWait = this->controller->getWaitInterval(this);
 
     }
   }
@@ -563,7 +567,7 @@ namespace SystemC_VPC{
           this->remainingStoreTime = NULL;
 
           // signal preemption to controller instance
-          this->controller->signalPreemption(this->killed);
+          this->controller->signalPreemption(this->killed, this);
           
           return false;
 
@@ -632,7 +636,7 @@ namespace SystemC_VPC{
         this->activConfiguration = NULL;
 
         // signal preemption to controller instance
-        this->controller->signalPreemption(this->killed);
+        this->controller->signalPreemption(this->killed, this);
         
 #ifndef NO_VCD_TRACES
         this->traceConfigurationState(config, S_PASSIV);

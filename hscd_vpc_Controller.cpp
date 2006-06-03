@@ -109,7 +109,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Controller::registerMapping
    */
-  void Controller::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo){
+  void Controller::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* rc){
     
 #ifdef VPC_DEBUG
     std::cerr << "Controller> registerMapping(" << taskName << ", " << compName << ")" << std::endl;
@@ -138,7 +138,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Controller::addTasksToSchedule
    */
-  void Controller::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
+  void Controller::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc){
     
     // process all new tasks
     while(newTasks.size() > 0){
@@ -148,46 +148,46 @@ namespace SystemC_VPC{
       d.pcb = pcb;
 
       // determine current binding of task
-      d.comp = this->binder->resolveBinding(*pcb, this->managedComponent);
+      d.comp = this->binder->resolveBinding(*pcb, rc);
       // determine corresponding configuration of bound component
       d.conf = this->mapper->getConfigForComp(d.comp);
       // store decision
       this->decisions[pcb->getPID()] = d;
       // register task and configuration for scheduling
-      this->scheduler->addTaskToSchedule(pcb, d.conf);
+      this->scheduler->addTaskToSchedule(pcb, d.conf, rc);
       newTasks.pop_front();  
 
     }
     
-    this->scheduler->performSchedule(); 
+    this->scheduler->performSchedule(rc); 
      
   }
 
-  bool Controller::hasTaskToProcess(){
-    return this->scheduler->hasTaskToProcess();
+  bool Controller::hasTaskToProcess(ReconfigurableComponent* rc){
+    return this->scheduler->hasTaskToProcess(rc);
   }
     
-  ProcessControlBlock* Controller::getNextTask(){
-    return this->scheduler->getNextTask();
+  ProcessControlBlock* Controller::getNextTask(ReconfigurableComponent* rc){
+    return this->scheduler->getNextTask(rc);
   }
     
-  unsigned int Controller::getNextConfiguration(){
-    return this->scheduler->getNextConfiguration();
+  unsigned int Controller::getNextConfiguration(ReconfigurableComponent* rc){
+    return this->scheduler->getNextConfiguration(rc);
   }
   
   /**
    * \brief Implementation of Controller::getWaitInterval
    */
-  sc_time* Controller::getWaitInterval(){
+  sc_time* Controller::getWaitInterval(ReconfigurableComponent* rc){
     
-    return this->scheduler->getWaitInterval();
+    return this->scheduler->getWaitInterval(rc);
     
   }
      
   /**
    * \brief Implementation of Controller::getMappedComponent
    */
-  AbstractComponent* Controller::getMappedComponent(ProcessControlBlock* task){
+  AbstractComponent* Controller::getMappedComponent(ProcessControlBlock* task, ReconfigurableComponent* rc){
     
     std::map<int, Decision>::iterator iter;
     iter = this->decisions.find(task->getPID());
@@ -202,15 +202,15 @@ namespace SystemC_VPC{
   /**
     * \brief Dummy implementation of Controller::signalPreemption
     */  
-  void Controller::signalPreemption(bool kill){
-    this->scheduler->signalPreemption(kill);
+  void Controller::signalPreemption(bool kill, ReconfigurableComponent* rc){
+    this->scheduler->signalPreemption(kill, rc);
   }
   
   /**
     * \brief Dummy implementation of Controller::signalResume
     */
-  void Controller::signalResume(){
-    this->scheduler->signalResume();
+  void Controller::signalResume(ReconfigurableComponent* rc){
+    this->scheduler->signalResume(rc);
   }
   
   /**
@@ -223,7 +223,7 @@ namespace SystemC_VPC{
   /**
    * \brief 
    */
-  Decision Controller::getDecision(int pid) {
+  Decision Controller::getDecision(int pid, ReconfigurableComponent* rc) {
     return this->decisions[pid];
   }
 
@@ -231,10 +231,10 @@ namespace SystemC_VPC{
    return this->miMapper;
   }
 
-  void Controller::signalTaskEvent(ProcessControlBlock* pcb){
+  void Controller::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
     
-    this->binder->signalTaskEvent(pcb);
-    this->scheduler->signalTaskEvent(pcb);
+    this->binder->signalTaskEvent(pcb, compID);
+    this->scheduler->signalTaskEvent(pcb, compID);
   
      
     // if task has been killed and controlled instance is not killed solve decision here

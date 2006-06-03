@@ -55,7 +55,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of ConfigurationScheduler::getWaitInterval
    */
-  sc_time* ConfigurationScheduler::getWaitInterval(){
+  sc_time* ConfigurationScheduler::getWaitInterval(ReconfigurableComponent* rc){
     
     return this->waitInterval;
     
@@ -64,12 +64,12 @@ namespace SystemC_VPC{
   /**
     * \brief Dummy implementation of ConfigurationScheduler::signalPreemption
     */  
-  void ConfigurationScheduler::signalPreemption(bool kill){}
+  void ConfigurationScheduler::signalPreemption(bool kill, ReconfigurableComponent* rc){}
   
   /**
     * \brief Dummy implementation of ConfigurationScheduler::signalResume
     */
-  void ConfigurationScheduler::signalResume(){}
+  void ConfigurationScheduler::signalResume(ReconfigurableComponent* rc){}
   
   /**
    * \brief Setter to specify if ConfigurationScheduler should use "kill" by preemption

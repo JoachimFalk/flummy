@@ -1,11 +1,13 @@
 #ifndef HSCD_VPC_TASKEVENTLISTENER_
 #define HSCD_VPC_TASKEVENTLISTENER_
 
+#include <string>
 #include "hscd_vpc_datatypes.h"
 
 namespace SystemC_VPC{
 
   class ProcessControlBlock;
+  class AbstractComponent;
 
   /**
    * TaskEventListener defines common interface used for communicating task state
@@ -21,7 +23,7 @@ namespace SystemC_VPC{
      * event which happened.
      * \param pcb points to the task which the notification corresponds to
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb)=0;
+    virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID)=0;
     
     /**
      * \note Not used yet

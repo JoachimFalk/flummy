@@ -20,7 +20,7 @@ namespace SystemC_VPC {
        * \brief Implementation of TaskEventListener::signalTaskEvent
        * Dummy implementation as SimpleBinder is not interested in task events
        */
-      void signalTaskEvent(ProcessControlBlock* pcb) {}
+      void signalTaskEvent(ProcessControlBlock* pcb, std::string compID) {}
   };
 
 

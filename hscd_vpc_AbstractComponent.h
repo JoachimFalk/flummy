@@ -185,7 +185,7 @@ namespace SystemC_VPC{
      * \param pcb points to the finished or killed task
      */
     virtual void notifyParentController(ProcessControlBlock* pcb){
-      this->parentControlUnit->signalTaskEvent(pcb);
+      this->parentControlUnit->signalTaskEvent(pcb, this->basename());
     }
 
   };

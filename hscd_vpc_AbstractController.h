@@ -78,7 +78,7 @@ namespace SystemC_VPC{
      * next time.
      * \return time interval to wait or NULL if no time interval required
      */
-    virtual sc_time* getWaitInterval()=0;
+    virtual sc_time* getWaitInterval(ReconfigurableComponent* rc)=0;
     
     /**
      * \brief Used to set controller specific values
@@ -95,7 +95,7 @@ namespace SystemC_VPC{
      * scheduling. 
      * \param newTasks refers to a queue of pcb to be scheduled
      */
-    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks)=0;
+    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc)=0;
     
     /**
      * \brief Returns next configuration to be loaded
@@ -104,20 +104,20 @@ namespace SystemC_VPC{
      * \return id of next configuration to be loaded or 0 if no configuration
      * is selected up to now.
      */
-    virtual unsigned int getNextConfiguration()=0;
+    virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc)=0;
       
     /**
      * \brief Returns mapped component for a given task
      * \param task specifies the task to get component for
      * \return pointer to AbstractComponent refering to mapped component
      */
-    virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task)=0;
+    virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task, ReconfigurableComponent* rc)=0;
       
     /**
      * \brief Indicates if controller still can forward tasks
      * \return TRUE if there are still task to be forwarded else FALSE
      */
-    virtual bool hasTaskToProcess()=0;
+    virtual bool hasTaskToProcess(ReconfigurableComponent* rc)=0;
 
     /**
      * \brief Returns next task to be forwarded
@@ -126,7 +126,7 @@ namespace SystemC_VPC{
      * \return pair containing ProcessControlBlock of task and requested function
      * to be simulated.
      */
-    virtual ProcessControlBlock* getNextTask()=0;
+    virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc)=0;
     
     /**
      * \brief Getter to determine which preemption mode is used
@@ -136,7 +136,7 @@ namespace SystemC_VPC{
     /**
      * \brief Callback Mehtode used to inform Controller about task state
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb)=0;
+    virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID)=0;
     
     /**
      * \brief Signals to controller that managed component has been preempted.
@@ -144,19 +144,19 @@ namespace SystemC_VPC{
      * component.
      * \param kill indicates if preemption used kill as parameter
      */
-    virtual void signalPreemption(bool kill)=0;
+    virtual void signalPreemption(bool kill, ReconfigurableComponent* rc)=0;
     
     /**
      * \brief Signals to controller that managed component has been resumed.
      * Used within controller to adapt scheduling to resuming of managed
      * component.
      */
-    virtual void signalResume()=0;
+    virtual void signalResume(ReconfigurableComponent* rc)=0;
     
     /**
      * \brief 
      */
-    virtual Decision getDecision(int pid)=0;
+    virtual Decision getDecision(int pid, ReconfigurableComponent* rc)=0;
     
   };
 

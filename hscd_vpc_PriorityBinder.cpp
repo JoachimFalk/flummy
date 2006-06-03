@@ -83,9 +83,9 @@ namespace SystemC_VPC {
 
   }
 
-  void PriorityBinder::signalTaskEvent(ProcessControlBlock* pcb){
+  void PriorityBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
 
-    Decision d = this->getController().getDecision(pcb->getPID());
+    Decision d = this->getController().getDecision(pcb->getPID(), this->getController().getManagedComponent());
     MIMapper& mapper = this->getMIMapper();
     MappingInformationIterator* mIter = mapper.getMappingInformationIterator(d.comp);
     PriorityElement* elem = this->pelems[d.comp];

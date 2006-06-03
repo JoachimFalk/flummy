@@ -162,7 +162,7 @@ namespace SystemC_VPC{
      * \param mInfo specifies additional mapping information
      * \sa AbstractDirector
      */
-    void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo);
+    void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* comp);
     
     /**
      * \brief Generates and registers new PCB to Director
@@ -180,7 +180,7 @@ namespace SystemC_VPC{
 
     //void registerPCB(const char* name, ProcessControlBlock* pcb);
 
-    void signalTaskEvent(ProcessControlBlock* pcb);
+    void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;

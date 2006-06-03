@@ -279,7 +279,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::registerMapping
    */
-  void Director::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo){
+  void Director::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* comp){
    
     // currently ignore mapping info as dynamic binding is only performed on rc level 
     this->binder->registerBinding(taskName, compName);
@@ -320,7 +320,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::notifyTaskEvent
    */
-  void Director::signalTaskEvent(ProcessControlBlock* pcb){
+  void Director::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
     assert(!FALLBACKMODE);
 
 #ifdef VPC_DEBUG
