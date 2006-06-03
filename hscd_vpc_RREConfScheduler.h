@@ -80,6 +80,10 @@ namespace SystemC_VPC {
        */
       int getAssignedTaskCount();
 
+      /**
+       * \brief determine execution time of all associated running tasks
+       */
+      double RREConfElement::getExecutionSum();
   };
   
   /**
@@ -186,7 +190,7 @@ namespace SystemC_VPC {
        * is killed by displacement
        * \return true if kill should be used
        */
-      bool killConfiguration();
+      bool killConfiguration(RREConfElement* elem, ReconfigurableComponent* rc);
 
       /**
        * \brief update internal attributes

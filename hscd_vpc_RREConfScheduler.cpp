@@ -104,6 +104,18 @@ namespace SystemC_VPC {
     return (this->waitingTasks.size() + this->runningTasks.size());
   }
 
+  double RREConfElement::getExecutionSum(){
+
+    double sum = 0;
+    
+    std::deque<ProcessControlBlock* >::iterator iter;
+    for(iter = this->runningTasks.begin(); iter != this->runningTasks.end(); iter++){
+      sum += ((*iter)->getDelay() - (*iter)->getRemainingDelay());
+    }
+    
+    return sum;
+  }
+  
   /**
    * SECTION Implementation of RREConfScheduler
    */
@@ -182,34 +194,7 @@ namespace SystemC_VPC {
       }
 
       this->setUpInitialParams(next, rc);
-/*      
-      //set up initial parameters
-      this->selected = next;
-      this->activTime = SC_ZERO_TIME;
-      // add time to store and load if configurations of rc and selected are differing
-      sc_time add_time = SC_ZERO_TIME;
-      if(rc->getActivConfiguration() != NULL && rc->getActivConfiguration()->getID() != this->selected->getID()){
 
-        add_time += rc->getActivConfiguration()->getStoreTime();
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding storetime =" << add_time << std::endl;
-        add_time += rc->getConfiguration(this->selected->getID())->getLoadTime();
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime =" << add_time << std::endl;
-
-      }else
-        if(rc->getActivConfiguration() == NULL){
-
-          add_time += rc->getConfiguration(this->selected->getID())->getLoadTime();
-//          std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime (no activ configuration!)=" << add_time << std::endl;
-
-        }
-
-      this->lastassign = sc_time_stamp() + add_time;
-//      std::cerr << "RREConfScheduler " << rc->basename() << "> lastassign set to=" << this->lastassign << std::endl;
-
-      Configuration* c = rc->getConfiguration(this->selected->getID());
-
-      this->waitInterval = new sc_time( (this->alpha * 2 * (c->getLoadTime() + c->getStoreTime()) + add_time) );  
-*/
     }else{ // already scheduled configuration exists!
 
 //      std::cerr << "RREConfScheduler " << rc->basename() << "> currently scheduled configuration=" << this->selected->getID() 
@@ -282,62 +267,38 @@ namespace SystemC_VPC {
 
       this->setUpInitialParams(next, rc);
     }
-/*
-      //set up initial parameters
-      this->selected = next;
-      this->activTime = SC_ZERO_TIME;
 
-      // add time to store and load if configurations of rc and selected are differing
-      sc_time add_time = SC_ZERO_TIME;
-      if(rc->getActivConfiguration() != NULL && rc->getActivConfiguration()->getID() != this->selected->getID()){
-
-        add_time += rc->getActivConfiguration()->getStoreTime();
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding storetime =" << add_time << std::endl;
-        add_time += rc->getConfiguration(this->selected->getID())->getLoadTime();
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime =" << add_time << std::endl;
-
-      }else
-        if(rc->getActivConfiguration() == NULL){
-
-          add_time += rc->getConfiguration(this->selected->getID())->getLoadTime();
-//          std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime (no activ configuration!)=" << add_time << std::endl;
-
-        }
-
-      this->lastassign = sc_time_stamp() + add_time;
-//      std::cerr << "RREConfScheduler " << rc->basename() << "> lastassign set to=" << this->lastassign << std::endl;
-
-      c = rc->getConfiguration(this->selected->getID());
-
-      this->waitInterval = new sc_time( (this->alpha * 2 * (c->getLoadTime() + c->getStoreTime()) + add_time) );  
-    }
-    */
   }
 
   void RREConfScheduler::setUpInitialParams(RREConfElement* next, ReconfigurableComponent* rc){
 
     //set up initial parameters
-    this->selected = next;
     this->activTime = SC_ZERO_TIME;
     // add time to store and load if configurations of rc and selected are differing
     sc_time add_time = SC_ZERO_TIME;
-    if(rc->getActivConfiguration() != NULL && rc->getActivConfiguration()->getID() != this->selected->getID()){
+    if(rc->getActivConfiguration() != NULL && rc->getActivConfiguration()->getID() != next->getID()){
 
-      add_time += rc->getActivConfiguration()->getStoreTime();
-      //std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding storetime =" << add_time << std::endl;
-      add_time += rc->getConfiguration(this->selected->getID())->getLoadTime();
+      if(!this->killConfiguration(next, rc)){
+        add_time += rc->getActivConfiguration()->getStoreTime();
+        //std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding storetime =" << add_time << std::endl;
+      }
+      
+      add_time += rc->getConfiguration(next->getID())->getLoadTime();
       //std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime =" << add_time << std::endl;
 
     }else
       if(rc->getActivConfiguration() == NULL){
 
-        add_time += rc->getConfiguration(this->selected->getID())->getLoadTime();
+        add_time += rc->getConfiguration(next->getID())->getLoadTime();
         //std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime (no activ configuration!)=" << add_time << std::endl;
 
       }
 
     this->lastassign = sc_time_stamp() + add_time;
     //std::cerr << "RREConfScheduler " << rc->basename() << "> lastassign set to=" << this->lastassign << std::endl;
+
+    this->selected = next;
+
 
     Configuration* c = rc->getConfiguration(this->selected->getID());
 
@@ -442,15 +403,31 @@ namespace SystemC_VPC {
         this->getManagedComponent()->wakeUp();
       }
 
-      if(this->taskCount <= 0)
-        std::cerr << RED("RREConfScheduler " << compID << "> No more actually tasks! at " << sc_time_stamp() ) << std::endl;
+//      if(this->taskCount <= 0)
+//        std::cerr << RED("RREConfScheduler " << compID << "> No more actually tasks! at " << sc_time_stamp() ) << std::endl;
       
     }
 
   }
 
-  bool RREConfScheduler::killConfiguration(){
-    return this->preemptByKill();
+  bool RREConfScheduler::killConfiguration(RREConfElement* elem, ReconfigurableComponent* rc){
+    bool killConf = true;
+    // only if there is already scheduled configuration!
+    // else there should be no running task and so no need to store!
+    if(elem != NULL){
+      //determine if we can throw away calculation overhead
+      //currently use fixed value beta
+      double beta = 0.5;
+      //sum up current execution times of each task on configuration
+      sc_time execTime = sc_time(elem->getExecutionSum(), SC_NS);
+      Configuration* c = rc->getActivConfiguration();
+      sc_time reconfTime = (c->getLoadTime() + c->getStoreTime());
+
+      killConf = ((execTime / reconfTime) < beta);
+      this->setPreemptionStrategy(killConf);
+    }
+    return killConf;
+
   }
 
 }
