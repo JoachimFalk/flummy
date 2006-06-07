@@ -21,7 +21,7 @@ namespace SystemC_VPC {
     if(binding.hasNext()){
       std::string comp = binding.getNext();
       MIMapper& mapper = this->getMIMapper();
-      MappingInformationIterator* iter = mapper.getMappingInformationIterator(comp);
+      MappingInformationIterator* iter = mapper.getMappingInformationIterator(pcb.getName(), comp);
       if(iter->hasNext()){
         MappingInformation* mInfo = iter->getNext();
         delete iter;

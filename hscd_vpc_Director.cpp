@@ -183,8 +183,8 @@ namespace SystemC_VPC{
 
       // create Fallback behavior for active and passive mode!
       if( end != NULL ){
-	// passive mode: notify end
-	end->notify();
+        // passive mode: notify end
+        end->notify();
       }
 
 
@@ -227,12 +227,12 @@ namespace SystemC_VPC{
       std::cerr << e.what() << std::endl;
       // clean up
       if( end == NULL ){
-	delete pcb->getBlockEvent();
-	pcb->setBlockEvent(NULL);
-	this->pcbPool.unlock(pcb->getName(), lockid);
-	this->pcbPool.free(pcb);
+        delete pcb->getBlockEvent();
+        pcb->setBlockEvent(NULL);
+        this->pcbPool.unlock(pcb->getName(), lockid);
+        this->pcbPool.free(pcb);
       }else{
-	// TODO: handle asynchron calls notify them ?!?
+        // TODO: handle asynchron calls notify them ?!?
       }
       return;
       
@@ -284,7 +284,7 @@ namespace SystemC_VPC{
     // currently ignore mapping info as dynamic binding is only performed on rc level 
     this->binder->registerBinding(taskName, compName);
     
-    this->miMapper->addMappingInformation(compName, mInfo); 
+    this->miMapper->addMappingInformation(taskName, compName, mInfo); 
   }
     
   /**
@@ -324,7 +324,7 @@ namespace SystemC_VPC{
     assert(!FALLBACKMODE);
 
 #ifdef VPC_DEBUG
-    std::cerr << "Director> got notified from: " << pcb->getName() << std::endl;
+    std::cerr << "Director> got notified from: " << pcb->getName() << ":" << pcb->getFuncName() << " at " << sc_simulation_time() << std::endl;
 #endif //VPC_DEBUG
     if(pcb->getState() != activation_state(aborted)){
 #ifdef VPC_DEBUG

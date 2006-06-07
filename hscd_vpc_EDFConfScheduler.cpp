@@ -25,7 +25,7 @@ namespace SystemC_VPC{
 
     this->tasksToProcess.push(newTask);
     // set deadline of task to earliest of possible deadlines
-    newTask->setDeadline(this->getEarliestDeadline(newTask->getPID(), rc));
+    newTask->setDeadline(this->getEarliestDeadline(newTask, rc));
        
     std::list<EDFListElement<unsigned int > >::iterator iter;
     iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
@@ -115,7 +115,7 @@ namespace SystemC_VPC{
           << iter->getDeadline()) << std::endl;
 #endif //VPC_DEBUG
 
-      iter->removeDeadline(this->getEarliestDeadline(pcb->getPID(), this->getManagedComponent()));
+      iter->removeDeadline(this->getEarliestDeadline(pcb, this->getManagedComponent()));
 
       if(iter->getDeadline() != -1){
         this->nextConfigurations.sort();
@@ -140,13 +140,13 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of EDFConfScheduler::getEarliestDeadline
    */
-  double EDFConfScheduler::getEarliestDeadline(int pid, ReconfigurableComponent* rc){
+  double EDFConfScheduler::getEarliestDeadline(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
     // first of all get controller to retrieve decision for task
     AbstractController& ctrl = this->getController();
-    Decision d = ctrl.getDecision(pid, rc);
+    Decision d = ctrl.getDecision(pcb->getPID(), rc);
     // next access mapping information for made decision
     MIMapper& miMapper = this->getMIMapper();
-    MappingInformationIterator* iter = miMapper.getMappingInformationIterator(d.comp);
+    MappingInformationIterator* iter = miMapper.getMappingInformationIterator(pcb->getName(), d.comp);
     // now iteratate over possibilities and choose appropriate one
     double deadline = DBL_MAX;
     

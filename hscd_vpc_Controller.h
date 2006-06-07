@@ -118,6 +118,8 @@ namespace SystemC_VPC {
        */
       virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc);
 
+      virtual void performSchedule(ReconfigurableComponent* rc);
+
       /**
        * \brief Returns time to wait until next notification of controller is needed
        * Returns time interval indicating when controlled component should invoke controller

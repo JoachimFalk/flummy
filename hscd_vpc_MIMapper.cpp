@@ -8,30 +8,33 @@ namespace SystemC_VPC {
 
   MIMapper::~MIMapper() {}
 
-  void MIMapper::addMappingInformation(std::string key, MappingInformation* mInfo){
+  void MIMapper::addMappingInformation(std::string taskName, std::string compName, MappingInformation* mInfo){
 
-    std::map<std::string, std::set<MappingInformation* > >::iterator iter;
+    std::map<std::string, CompMapping* >::iterator iter;
 
-    iter = this->mInfos.find(key);
+    iter = this->mInfos.find(taskName);
     if(iter != this->mInfos.end()){
-      iter->second.insert(mInfo);
+      //iter->second.insert(mInfo);
+      (iter->second->cMap[compName]).insert(mInfo);
     }else{
+      CompMapping* cM = new CompMapping();
       std::set<MappingInformation* > info;
       info.insert(mInfo);
-      this->mInfos[key] = info;
+      cM->cMap[compName] = info;
+      this->mInfos[taskName] = cM;
     }
 
   }
 
-  MappingInformationIterator* MIMapper::getMappingInformationIterator(std::string& key){
+  MappingInformationIterator* MIMapper::getMappingInformationIterator(const std::string& taskName, const std::string& compName){
 
-    std::map<std::string, std::set<MappingInformation* > >::iterator iter;
-    iter = this->mInfos.find(key);
+    std::map<std::string, CompMapping* >::iterator iter;
+    iter = this->mInfos.find(taskName);
     if(iter != this->mInfos.end()){
-      return new MappingInformationIterator(&(iter->second));
+      return new MappingInformationIterator(&((iter->second)->cMap[compName]));
     }
     
-    throw InvalidArgumentException("No mapping information for "+ key);
+    throw InvalidArgumentException("No mapping information for "+ taskName +" & "+ compName);
 
   }
 

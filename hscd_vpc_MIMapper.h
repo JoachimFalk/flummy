@@ -9,6 +9,10 @@
 
 namespace SystemC_VPC {
 
+  struct CompMapping {
+    std::map<std::string, std::set<MappingInformation* > > cMap;
+  };
+  
   /**
    * \brief Enables access to MappingInformations associated with a target component
    */
@@ -51,8 +55,8 @@ namespace SystemC_VPC {
   class MIMapper {
 
     private:
-
-      std::map<std::string, std::set<MappingInformation* > > mInfos;
+      // task -> comp -> mapping infos
+      std::map<std::string, CompMapping* > mInfos; //std::map<std::string, std::set<MappingInformation* > > > mInfos;
 
     public:
 
@@ -60,13 +64,13 @@ namespace SystemC_VPC {
 
       ~MIMapper();
 
-      void addMappingInformation(std::string key, MappingInformation* mInfo);
+      void addMappingInformation(std::string taskName, std::string compName, MappingInformation* mInfo);
 
       /**
        * \brief Gets iterator over all MappingInformations associated with component of Binding
        * \param key specifies the successing component to get information for
        */
-      MappingInformationIterator* getMappingInformationIterator(std::string& key);
+      MappingInformationIterator* getMappingInformationIterator(const std::string& taskName,const std::string& compName);
 
   };
 

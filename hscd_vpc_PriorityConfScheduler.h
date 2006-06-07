@@ -211,10 +211,10 @@ namespace SystemC_VPC{
 
       /**
        * \brief Retrieve highest priority out of set of mapping possibilites
-       * \param pid specifies the id of the task to determine priority for
+       * \param pcb specifies the task to determine priority for
        * \return highest priority
        */
-      unsigned int getHighestPriority(int pid, ReconfigurableComponent* rc);
+      unsigned int getHighestPriority(ProcessControlBlock* pcb, ReconfigurableComponent* rc);
   };
 
 }

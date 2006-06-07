@@ -22,7 +22,7 @@ namespace SystemC_VPC{
 
     this->tasksToProcess.push(newTask);
     // set priority of task to highest possible at this level of hierarchy
-    newTask->setPriority(this->getHighestPriority(newTask->getPID(), rc));
+    newTask->setPriority(this->getHighestPriority(newTask, rc));
     
     std::list<PriorityListElement<unsigned int> >::iterator iter;
 
@@ -102,7 +102,7 @@ namespace SystemC_VPC{
     iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), d.conf);
     // if configuration is in scheduling list process it
     if(iter != this->nextConfigurations.end()){
-      iter->removePriority(this->getHighestPriority(pcb->getPID(), this->getManagedComponent()));
+      iter->removePriority(this->getHighestPriority(pcb, this->getManagedComponent()));
 
 #ifdef VPC_DEBUG
       std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> priority of mapped configuration after change is: "
@@ -129,12 +129,12 @@ namespace SystemC_VPC{
     }
   }
 
-  unsigned int PriorityConfScheduler::getHighestPriority(int pid, ReconfigurableComponent* rc){
+  unsigned int PriorityConfScheduler::getHighestPriority(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
     // first of all get Controller to retrieve Decision
     AbstractController& ctrl = this->getController();
-    Decision d = ctrl.getDecision(pid, rc);
+    Decision d = ctrl.getDecision(pcb->getPID(), rc);
     // next access binding possibilites of selected comp
-    MappingInformationIterator* iter = this->getMIMapper().getMappingInformationIterator(d.comp);
+    MappingInformationIterator* iter = this->getMIMapper().getMappingInformationIterator(pcb->getName(), d.comp);
     int priority = INT_MAX;
     while(iter->hasNext()){
       MappingInformation* mi = iter->getNext();

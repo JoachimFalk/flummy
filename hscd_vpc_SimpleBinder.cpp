@@ -13,7 +13,7 @@ namespace SystemC_VPC {
     if(b.hasNext()){
       std::string comp = b.getNext();
       MIMapper& mapper = this->getMIMapper();
-      MappingInformationIterator* iter = mapper.getMappingInformationIterator(comp);
+      MappingInformationIterator* iter = mapper.getMappingInformationIterator(task.getName(), comp);
       if(iter->hasNext()){
         MappingInformation* mInfo = iter->getNext();
         delete iter;

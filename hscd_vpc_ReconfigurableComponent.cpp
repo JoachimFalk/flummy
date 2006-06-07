@@ -169,6 +169,8 @@ namespace SystemC_VPC{
         wait(SC_ZERO_TIME);
       }while(this->newTasks.size() > 0);
 
+      this->controller->performSchedule(this);
+
 #ifdef VPC_DEBUG
       std::cerr << RED("ReconfigurableComponent "<< this->basename() <<"> finished delegation to controller !") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
@@ -473,6 +475,7 @@ namespace SystemC_VPC{
    */
   void ReconfigurableComponent::compute(ProcessControlBlock* pcb){
 
+    //std::cerr << "ReconfigurableComponent " << this->basename() << "> compute(" << pcb->getName() << ":" << pcb->getFuncName() << " at " << sc_simulation_time() << std::endl;
     this->newTasks.push_back(pcb);
 
     this->notify_schedule_thread.notify();

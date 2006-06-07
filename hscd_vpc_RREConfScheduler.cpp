@@ -148,8 +148,7 @@ namespace SystemC_VPC {
    */
   void RREConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
-//    std::cerr << "RREConfScheduler " << rc->basename() << "> addTaskToSchedule(" << newTask->getName() << ":" << newTask->getPID() 
-//      << " with requested conf=" << config << " from " << rc->basename() << std::endl;
+//    std::cerr << "RREConfScheduler " << rc->basename() << "> addTaskToSchedule(" << newTask->getName() << ":" << newTask->getFuncName() << "::" << newTask->getPID() << " with requested conf=" << config << " at " << sc_simulation_time() << std::endl;
     
     RREConfElement* elem = NULL;
 
@@ -266,6 +265,8 @@ namespace SystemC_VPC {
       assert(next->getID() != this->selected->getID());
 
       this->setUpInitialParams(next, rc);
+
+//      std::cerr << GREEN("RREConfScheduler> next = " << this->selected->getID() << " at " << sc_simulation_time() ) << std::endl;
     }
 
   }
@@ -299,7 +300,6 @@ namespace SystemC_VPC {
 
     this->selected = next;
 
-
     Configuration* c = rc->getConfiguration(this->selected->getID());
 
     this->waitInterval = new sc_time( (this->alpha * 2 * (c->getLoadTime() + c->getStoreTime()) + add_time) );  
@@ -310,11 +310,8 @@ namespace SystemC_VPC {
    * \brief Implementation of RRConfScheduler::
    */
   unsigned int RREConfScheduler::getNextConfiguration(ReconfigurableComponent* rc){
-    if(this->selected != NULL){
-      return this->selected->getID();
-    }else{
-      return 0;
-    }
+//    std::cerr << GREEN("RREConfScheduler> nextConfiguration = " << this->selected->getID() << " at ") << sc_simulation_time() << std::endl;
+    return this->selected->getID();
   }
 
   /**

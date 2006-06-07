@@ -38,7 +38,7 @@ namespace SystemC_VPC{
     delete this->binder;
     delete this->scheduler;
     delete this->miMapper;
-
+    
   }
   
   /**
@@ -116,7 +116,7 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
     this->binder->registerBinding(taskName, compName);
 
-    this->miMapper->addMappingInformation(compName, mInfo);
+    this->miMapper->addMappingInformation(taskName, compName, mInfo);
     
   }
   
@@ -158,7 +158,9 @@ namespace SystemC_VPC{
       newTasks.pop_front();  
 
     }
-    
+  }
+
+  void Controller::performSchedule(ReconfigurableComponent* rc){ 
     this->scheduler->performSchedule(rc); 
      
   }

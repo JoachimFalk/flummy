@@ -61,7 +61,7 @@ namespace SystemC_VPC {
     }
     
     // update priority element by offering selectable mapping infos of binding
-    MappingInformationIterator* iter = mapper.getMappingInformationIterator(target);
+    MappingInformationIterator* iter = mapper.getMappingInformationIterator(task.getName(), target);
     MappingInformation* mInfo = elem->addMappingData(*iter);
     delete iter;
     
@@ -87,7 +87,7 @@ namespace SystemC_VPC {
 
     Decision d = this->getController().getDecision(pcb->getPID(), this->getController().getManagedComponent());
     MIMapper& mapper = this->getMIMapper();
-    MappingInformationIterator* mIter = mapper.getMappingInformationIterator(d.comp);
+    MappingInformationIterator* mIter = mapper.getMappingInformationIterator(pcb->getName(), d.comp);
     PriorityElement* elem = this->pelems[d.comp];
     
     elem->removeMappingData(*mIter);

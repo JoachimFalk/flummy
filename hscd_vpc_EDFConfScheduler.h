@@ -208,7 +208,7 @@ namespace SystemC_VPC{
        * \param pid specifies the task to determine deadline for
        * \return earliest deadline
        */
-      double getEarliestDeadline(int pid, ReconfigurableComponent* rc);
+      double getEarliestDeadline(ProcessControlBlock* pcb, ReconfigurableComponent* rc);
   };
 
 }

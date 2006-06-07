@@ -28,7 +28,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
           << "For task " << newTask->getName() << " with required configuration id " << config << " at " << sc_simulation_time() << endl;
-        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+//        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // first of all add task to local storage structure
@@ -62,9 +62,10 @@ namespace SystemC_VPC{
       std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> next configuration is set to ") << this->nextConfiguration << endl;
 #endif //VPC_DEBUG
 
-      // check if 
+      // check if
       if((this->getManagedComponent()->getActivConfiguration() == NULL && this->nextConfiguration == 0) // no activ and no next conf selected
           || (this->runningTasks.size() == 0 && this->nextConfiguration == 0) // or no running tasks and no next conf selected
+          || (this->nextConfiguration == 0 && reqConfig == this->getManagedComponent()->getActivConfiguration()->getID()) // or no selected conf but actual one fits!
           || reqConfig == this->nextConfiguration){ // or required conf fits already selected one
 
 #ifdef VPC_DEBUG
@@ -85,6 +86,7 @@ namespace SystemC_VPC{
         break;
       }
     }
+
   }
   
   /*

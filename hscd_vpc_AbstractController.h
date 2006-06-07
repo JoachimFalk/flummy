@@ -96,7 +96,9 @@ namespace SystemC_VPC{
      * \param newTasks refers to a queue of pcb to be scheduled
      */
     virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc)=0;
-    
+
+    virtual void performSchedule(ReconfigurableComponent* rc) =0;
+
     /**
      * \brief Returns next configuration to be loaded
      * Used to indicate if a new configuration should be loaded by the controller
