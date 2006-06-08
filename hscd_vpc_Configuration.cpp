@@ -134,7 +134,7 @@ namespace SystemC_VPC{
         iter != this->component_map_by_name.end(); iter++){
   
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " trying to preempt component: " << iter->first << " with kill=" << kill) << std::endl;
 #endif // VPC_DEBUG
   
@@ -159,7 +159,7 @@ namespace SystemC_VPC{
         iter != this->component_map_by_name.end(); iter++){
 
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " trying to resume component: " << iter->first) << std::endl;
 #endif // VPC_DEBUG
   
@@ -186,7 +186,7 @@ namespace SystemC_VPC{
         iter != this->component_map_by_name.end(); iter++){
   
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " caculate time to preempt component: " << iter->first) << std::endl;
 #endif // VPC_DEBUG
   
@@ -198,7 +198,7 @@ namespace SystemC_VPC{
     }
 
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " time of preemption: " << max) << std::endl;
 #endif // VPC_DEBUG
     
@@ -225,7 +225,7 @@ namespace SystemC_VPC{
     }
 
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " time of resuming: " << max) << std::endl;
 #endif // VPC_DEBUG
 
@@ -241,14 +241,14 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> setting store time: " 
-        << YELLOW("time = " << time) << std::endl;
+        << VPC_YELLOW("time = " << time) << std::endl;
 #endif //VPC_DEBUG
     
     this->storeTime = sc_time(timeVal, SC_NS);
     
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> store time set to: " 
-        << YELLOW( this->storeTime) << std::endl;
+        << VPC_YELLOW( this->storeTime) << std::endl;
 #endif //VPC_DEBUG
   }    
 
@@ -268,14 +268,14 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> setting load time: " 
-        << YELLOW("time = " << time) << std::endl;
+        << VPC_YELLOW("time = " << time) << std::endl;
 #endif //VPC_DEBUG
     
     this->loadTime = sc_time(timeVal, SC_NS);
 
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> load time set to: " 
-        << YELLOW(this->loadTime) << std::endl;
+        << VPC_YELLOW(this->loadTime) << std::endl;
 #endif //VPC_DEBUG
 
   }    

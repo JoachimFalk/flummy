@@ -23,7 +23,7 @@ namespace SystemC_VPC{
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("FCFSController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("FCFSController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // first of all add tasks to local storage structure
@@ -39,7 +39,7 @@ namespace SystemC_VPC{
       currTask = this->readyTasks.front();
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("FCFSController "<< this->getName() <<"> processing task ") << currTask->getName() << endl;
+      std::cerr << VPC_YELLOW("FCFSController "<< this->getName() <<"> processing task ") << currTask->getName() << endl;
 #endif //VPC_DEBUG
 
       // get mapping for waiting task
@@ -53,7 +53,7 @@ namespace SystemC_VPC{
         if(reqConf == NULL){
 
           // managed component does not support mapped configuration
-          std::cerr << YELLOW("FCFSController "<< this->getName() << "> Configuration not supported by component") << std::endl;
+          std::cerr << VPC_YELLOW("FCFSController "<< this->getName() << "> Configuration not supported by component") << std::endl;
 // FIX ME -->            // until now pop task
           this->readyTasks.pop_front();
           continue;
@@ -64,8 +64,8 @@ namespace SystemC_VPC{
         if(reqConf == this->getManagedComponent()->getActivConfiguration() && this->nextConfiguration == NULL){
 
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("FCFSController "<< this->getName() <<"> current loaded configuration fits required one! ") << sc_simulation_time() << endl;
-          std::cerr << YELLOW("FCFSController "<< this->getName() <<"> activ Configuration is activ? " << this->getManagedComponent()->getActivConfiguration()->isActiv()) << std::endl;
+          std::cerr << VPC_YELLOW("FCFSController "<< this->getName() <<"> current loaded configuration fits required one! ") << sc_simulation_time() << endl;
+          std::cerr << VPC_YELLOW("FCFSController "<< this->getName() <<"> activ Configuration is activ? " << this->getManagedComponent()->getActivConfiguration()->isActiv()) << std::endl;
 #endif //VPC_DEBUG
 
           this->tasksToProcess.push(currTask);
@@ -148,7 +148,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("FCFSController> task: " << pcb->getName() << " got killed!")  << std::endl;
+      std::cerr << VPC_YELLOW("FCFSController> task: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
 

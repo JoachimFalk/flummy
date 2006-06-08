@@ -76,7 +76,7 @@ namespace SystemC_VPC{
           assert(actualRemainingDelay.value()>=0);
     
 #ifdef VPC_DEBUG
-          std::cerr << RED("Component " << this->basename() << "> actualRemainingDelay= " << actualRemainingDelay.value()
+          std::cerr << VPC_RED("Component " << this->basename() << "> actualRemainingDelay= " << actualRemainingDelay.value()
                     << " for pid=" << actualRunningPID << " at: " << sc_simulation_time()) << std::endl;
 #endif //VPC_DEBUG
           
@@ -121,7 +121,7 @@ namespace SystemC_VPC{
       while(! this->isActiv()){
 
 #ifdef VPC_DEBUG
-        std::cerr << RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << VPC_RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
     
         //check if preemption is with kill flag
@@ -154,7 +154,7 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
-        std::cerr << RED( this->basename()  << " reactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << VPC_RED( this->basename()  << " reactivated at ") << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
     
       }
@@ -285,7 +285,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component::compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl
+    cerr << VPC_RED("Component::compute( ") <<VPC_WHITE(actualTask->getName())<<VPC_RED(" , ")<<VPC_WHITE(actualTask->getFuncName())<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl
       ;
 #endif
 
@@ -299,7 +299,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << RED("VPC_LOGICAL_ERROR> ") << YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<YELLOW(")!")
+      cerr << VPC_RED("VPC_LOGICAL_ERROR> ") << VPC_YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<VPC_YELLOW(")!")
         << endl;
 
     std::cerr << "Component> Check if special delay exist for "<< actualTask->getFuncName() << " on " << this->basename() << ": " << (actualTask->hasDelay(this->basename(), actualTask->getFuncName())) << std::endl;
@@ -350,7 +350,7 @@ namespace SystemC_VPC{
   void Component::_compute( const char *name, VPC_Event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component::compute( ") <<WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << VPC_RED("Component::compute( ") <<VPC_WHITE(name)<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
     _compute(name,"",end);
@@ -412,7 +412,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component::compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << VPC_RED("Component::compute( ") <<VPC_WHITE(actualTask->getName())<<VPC_RED(" , ")<<VPC_WHITE(actualTask->getFuncName())<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
 #ifndef NO_VCD_TRACES
@@ -425,7 +425,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << RED("VPC_LOGICAL_ERROR> ") << YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<YELLOW(")!") << endl;
+      cerr << VPC_RED("VPC_LOGICAL_ERROR> ") << VPC_YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<VPC_YELLOW(")!") << endl;
 
     std::cerr << "Component> Check if special delay exist for "<< actualTask->getFuncName() << " on " << this->basename() << ": " << (actualTask->hasDelay(basename())) << std::endl;
 #endif // VPC_DEBUG

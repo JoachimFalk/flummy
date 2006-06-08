@@ -100,7 +100,7 @@ namespace SystemC_VPC{
     if(0 == strcmp(key, "mode")){
 
 #ifdef VPC_DEBUG
-      std::cerr << BLUE("Controller> Found input data for preemption mode = ") << value << std::endl;
+      std::cerr << VPC_BLUE("Controller> Found input data for preemption mode = ") << value << std::endl;
 #endif //VPC_DEBUG
       if(0 == strcmp(value, "kill")){
         this->setPreemptionStrategy(true);
@@ -108,7 +108,7 @@ namespace SystemC_VPC{
       if(0 == strcmp(value, "store")){
         this->setPreemptionStrategy(false);
       }else{
-        std::cerr << YELLOW("Controller> Unkown preemption mode!") << std::endl;
+        std::cerr << VPC_YELLOW("Controller> Unkown preemption mode!") << std::endl;
       }
     }
     
@@ -155,7 +155,7 @@ namespace SystemC_VPC{
     std::map<std::string, std::string>::iterator iter;
     iter = this->mapping_map_configs.find(name);
     if(iter == this->mapping_map_configs.end()){
-      std::cerr << RED("AbstractController " << this->getName() << "> No mapped configuration found for " << name) << std::endl;
+      std::cerr << VPC_RED("AbstractController " << this->getName() << "> No mapped configuration found for " << name) << std::endl;
       return NULL;
     }
     

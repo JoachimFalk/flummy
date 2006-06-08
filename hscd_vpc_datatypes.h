@@ -67,13 +67,13 @@ typedef CoSupport::SystemC::Event         VPC_Event;
 #define STR_VPC_PERIOD "period"
 #define STR_VPC_DEADLINE "deadline"
 
-#define RED(str) "\e[31;1m" <<str<< "\e[0m"
-#define GREEN(str) "\e[32;1m" <<str<< "\e[0m"
-#define YELLOW(str) "\e[33;1m" <<str<< "\e[0m" 
-#define BLUE(str) "\e[34;1m" <<str<< "\e[0m"
-#define WHITE(str) "\e[37;40m" <<str<< "\e[0m"
+#define VPC_RED(str) "\e[31;1m" <<str<< "\e[0m"
+#define VPC_GREEN(str) "\e[32;1m" <<str<< "\e[0m"
+#define VPC_YELLOW(str) "\e[33;1m" <<str<< "\e[0m" 
+#define VPC_BLUE(str) "\e[34;1m" <<str<< "\e[0m"
+#define VPC_WHITE(str) "\e[37;40m" <<str<< "\e[0m"
 #define VPC_ERROR __FILE__<<":"<<__LINE__<<"\e[1;31;40mVPC: ERROR> " 
-#define NORMAL "\e[0m"
+#define VPC_NORMAL "\e[0m"
 #define NENDL "\e[0m"<<endl;
 #ifdef MODES_EVALUATOR
 #define  NO_VCD_TRACES

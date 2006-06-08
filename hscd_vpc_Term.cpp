@@ -40,7 +40,7 @@ namespace SystemC_VPC{
     assert(sscanf(sdivider,"%d",&divider));
     strncpy(name,sname,VPC_MAX_STRING_LENGTH);
     activationTime=-1;
-    //cerr << GREEN("created Constraint: name="<<name<<" count="<<count<<" divider="<<divider)<<NENDL;
+    //cerr << VPC_GREEN("created Constraint: name="<<name<<" count="<<count<<" divider="<<divider)<<NENDL;
   }
 
   /**
@@ -63,13 +63,13 @@ namespace SystemC_VPC{
    *
    */
   bool Constraint::isSatisfied(){
-    // cerr << YELLOW("Constraint: "<<name<<" isSatisfied()?  ");
+    // cerr << VPC_YELLOW("Constraint: "<<name<<" isSatisfied()?  ");
     if(term->isSatisfied(excludes)){
       activationTime=sc_simulation_time();
-      //cerr << GREEN("YES "<< sc_simulation_time())<<NENDL;
+      //cerr << VPC_GREEN("YES "<< sc_simulation_time())<<NENDL;
       return true;
     }else{
-      //cerr << RED("NO "<< sc_simulation_time())<<NENDL;
+      //cerr << VPC_RED("NO "<< sc_simulation_time())<<NENDL;
     }
     return false;
   }
@@ -78,7 +78,7 @@ namespace SystemC_VPC{
    *
    */
   void Constraint::getReport(){
-    cerr << YELLOW("Constraint: "<<name<<" valid activation: " <<activationTime)<<NENDL;
+    cerr << VPC_YELLOW("Constraint: "<<name<<" valid activation: " <<activationTime)<<NENDL;
   }
   
   /**

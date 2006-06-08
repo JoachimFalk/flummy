@@ -19,7 +19,7 @@ namespace SystemC_VPC{
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("EDFController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("EDFController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // add all task to processing list
@@ -32,7 +32,7 @@ namespace SystemC_VPC{
       // determine configuration and add EDF of task to configuration
       std::map<std::string, std::string>::iterator iter = this->mapping_map_configs.find(pcb->getName());
       if(iter == this->mapping_map_configs.end()){
-        std::cerr << RED("EDFController " << this->getName() << "> No mapped configuration found for " << pcb->getName()) << std::endl; 
+        std::cerr << VPC_RED("EDFController " << this->getName() << "> No mapped configuration found for " << pcb->getName()) << std::endl; 
       }else{
         //get configuration from managed component
         Configuration* config = this->getManagedComponent()->getConfiguration(iter->second.c_str());
@@ -69,7 +69,7 @@ namespace SystemC_VPC{
       if(next != this->getManagedComponent()->getActivConfiguration()){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("EDFController " << this->getName() << "> next config to load: "
+        std::cerr << VPC_YELLOW("EDFController " << this->getName() << "> next config to load: "
               << next->getName()) << std::endl;
 #endif //VPC_DEBUG
 
@@ -106,7 +106,7 @@ namespace SystemC_VPC{
   void EDFController::signalTaskEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("EDFController " << this->getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << VPC_YELLOW("EDFController " << this->getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
     
     //get mapped configuration
@@ -119,9 +119,9 @@ namespace SystemC_VPC{
     if(iter != this->nextConfigurations.end()){
  
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("EDFController " << this->getName() << "> deadline of mapped configuration after change is: ");
-      if( iter->hasDeadline() ) std::cerr << YELLOW(iter->getDeadline());
-      else                      std::cerr << YELLOW( "-1" );
+      std::cerr << VPC_YELLOW("EDFController " << this->getName() << "> deadline of mapped configuration after change is: ");
+      if( iter->hasDeadline() ) std::cerr << VPC_YELLOW(iter->getDeadline());
+      else                      std::cerr << VPC_YELLOW( "-1" );
       std::cerr << std::endl;
 #endif //VPC_DEBUG
 
@@ -145,7 +145,7 @@ namespace SystemC_VPC{
         
 #ifdef VPC_DEBUG
     if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("EDFController> task: " << pcb->getName() << " got killed!")  << std::endl;
+      std::cerr << VPC_YELLOW("EDFController> task: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
       

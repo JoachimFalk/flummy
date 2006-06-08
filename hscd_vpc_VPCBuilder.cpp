@@ -104,7 +104,7 @@ namespace SystemC_VPC{
       
       //check if parsing failed
       if(configErrorh->parseFailed()){
-        std::cerr << RED("VPCBuilder: Parsing of configuration failed, aborting initialization!") << std::endl;
+        std::cerr << VPC_RED("VPCBuilder: Parsing of configuration failed, aborting initialization!") << std::endl;
         return;
       }
       
@@ -269,7 +269,7 @@ namespace SystemC_VPC{
       
       //check if parsing failed
       if(errorh->parseFailed()){
-        std::cerr << RED("VPCBuilder> Parsing of measure file " << vpc_measure_file << " failed, aborting initialization!") << std::endl;
+        std::cerr << VPC_RED("VPCBuilder> Parsing of measure file " << vpc_measure_file << " failed, aborting initialization!") << std::endl;
         return;
       }
       // set treewalker to documentroot
@@ -286,13 +286,13 @@ namespace SystemC_VPC{
       while( n) {
         xname=n->getNodeName();
         name=XMLString::transcode(xname); // for cerr only
-        //cerr << RED(name)<< endl;
+        //cerr << VPC_RED(name)<< endl;
           
         if(n->getNodeType()==DOMNode::ELEMENT_NODE && 
           0==XMLString::compareNString(xname,constraintStr,sizeof(constraintStr))){
             
           DOMNamedNodeMap * atts=n->getAttributes();
-          //cerr << GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
+          //cerr << VPC_GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
           char *sCount,*sDivider,*sName;
           sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
           sCount=XMLString::transcode(atts->getNamedItem(countAttrStr)->getNodeValue());
@@ -671,7 +671,7 @@ namespace SystemC_VPC{
         }
 
 #ifdef VPC_DEBUG
-        std::cerr << RED("Adding Component=" << innerComp->basename() << " to Configuration=" << conf->getName()) << std::endl;
+        std::cerr << VPC_RED("Adding Component=" << innerComp->basename() << " to Configuration=" << conf->getName()) << std::endl;
 #endif //VPC_DEBUG
 
         innerComp->setParentController(comp->getController());
@@ -810,8 +810,8 @@ namespace SystemC_VPC{
 		try{  
 		  sc_time delay = createSC_Time(sValue);
 #ifdef VPC_DEBUG
-                  std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
-                  std::cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
+                  std::cerr << VPC_YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
+                  std::cerr << VPC_YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
                   p.addFuncDelay(sTarget, sType, delay);
                   /*
@@ -934,8 +934,8 @@ namespace SystemC_VPC{
 	  try{
 	    sc_time delay = createSC_Time(attiter->second);
 #ifdef VPC_DEBUG
-            std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
-            std::cerr << YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
+            std::cerr << VPC_YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
+            std::cerr << VPC_YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
             p->addFuncDelay(target, attiter->first, delay);
             /*

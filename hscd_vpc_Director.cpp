@@ -171,8 +171,8 @@ namespace SystemC_VPC{
     if(FALLBACKMODE){
 #ifdef VPC_DEBUG
       cout << flush;
-      cerr << RED("FallBack::compute( ") << WHITE(name) << RED(" , ") << WHITE(funcname) 
-	   << RED(" ) at time: " << sc_simulation_time()) << endl;
+      cerr << VPC_RED("FallBack::compute( ") << VPC_WHITE(name) << VPC_RED(" , ") << VPC_WHITE(funcname) 
+	   << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
       // create Fallback behavior for active and passive mode!
@@ -185,7 +185,7 @@ namespace SystemC_VPC{
 
     
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("Director> compute(") << WHITE(name) << YELLOW(",") << WHITE(funcname) << YELLOW(") at: ") << sc_simulation_time() << std::endl;
+    std::cerr << VPC_YELLOW("Director> compute(") << VPC_WHITE(name) << VPC_YELLOW(",") << VPC_WHITE(funcname) << VPC_YELLOW(") at: ") << sc_simulation_time() << std::endl;
 #endif //VPC_DEBUG
     
     ProcessControlBlock* pcb = this->getProcessControlBlock(name);
@@ -214,7 +214,7 @@ namespace SystemC_VPC{
     AbstractComponent* comp = mapping_map_by_name.find(name)->second;
     
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
+    std::cerr << VPC_YELLOW("Director> delegating to ") << VPC_WHITE(comp->basename()) << std::endl;
 #endif //VPC_DEBUG      
     
     // compute task on found component

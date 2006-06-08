@@ -16,7 +16,7 @@ namespace SystemC_VPC{
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("PriorityController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("PriorityController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // add all task to processing list
@@ -29,7 +29,7 @@ namespace SystemC_VPC{
       // determine configuration and add priority of task to configuration
       std::map<std::string, std::string>::iterator iter = this->mapping_map_configs.find(pcb->getName());
       if(iter == this->mapping_map_configs.end()){
-        std::cerr << RED("PriorityController " << this->getName() << "> No mapped configuration found for " << pcb->getName()) << std::endl; 
+        std::cerr << VPC_RED("PriorityController " << this->getName() << "> No mapped configuration found for " << pcb->getName()) << std::endl; 
       }else{
         //get configuration from managed component
         Configuration* config = this->getManagedComponent()->getConfiguration(iter->second.c_str());
@@ -65,7 +65,7 @@ namespace SystemC_VPC{
       if(next != this->getManagedComponent()->getActivConfiguration()){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("PriorityController " << this->getName() << "> next config to load: "
+        std::cerr << VPC_YELLOW("PriorityController " << this->getName() << "> next config to load: "
               << next->getName()) << std::endl;
 #endif //VPC_DEBUG
 
@@ -102,7 +102,7 @@ namespace SystemC_VPC{
   void PriorityController::signalTaskEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("PriorityController " << this->getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << VPC_YELLOW("PriorityController " << this->getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
     
     //get mapped configuration
@@ -115,7 +115,7 @@ namespace SystemC_VPC{
       iter->removePriority(pcb->getPriority());
       
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("PriorityController " << this->getName() << "> priority of mapped configuration after change is: "
+      std::cerr << VPC_YELLOW("PriorityController " << this->getName() << "> priority of mapped configuration after change is: "
           << iter->getPriority()) << std::endl;
 #endif //VPC_DEBUG
     
@@ -137,7 +137,7 @@ namespace SystemC_VPC{
         
 #ifdef VPC_DEBUG
     if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("PriorityController> task: " << pcb->getName() << " got killed!")  << std::endl;
+      std::cerr << VPC_YELLOW("PriorityController> task: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
       

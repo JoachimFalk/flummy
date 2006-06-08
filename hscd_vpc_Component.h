@@ -142,7 +142,7 @@ namespace SystemC_VPC{
           /**************************/
           if(!this->activ){
 #ifdef VPC_DEBUG
-            std::cerr << GREEN(this->basename() << "> Activating") << std::endl;
+            std::cerr << VPC_GREEN(this->basename() << "> Activating") << std::endl;
 #endif //VPC_DEBUG
             this->setActiv(true);
           }

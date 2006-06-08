@@ -25,7 +25,7 @@ namespace SystemC_VPC{
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
       
 #ifdef VPC_DEBUG
-      std::cerr << BLUE("RoundRobinController> set property for timeslice = ") << value << std::endl;
+      std::cerr << VPC_BLUE("RoundRobinController> set property for timeslice = ") << value << std::endl;
 #endif //VPC_DEBUG
       
           char *domain;
@@ -44,7 +44,7 @@ namespace SystemC_VPC{
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
     
     ProcessControlBlock* currTask = NULL;
@@ -79,7 +79,7 @@ namespace SystemC_VPC{
     if(this->remainingSlice <= 0 || this->scheduledConfiguration == NULL){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
       this->switchConfig = true;
@@ -90,7 +90,7 @@ namespace SystemC_VPC{
     if(this->scheduledConfiguration != NULL){
         
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("RoundRobinController "<< this->getName() <<"> timeslice lasts: "
+      std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName() <<"> timeslice lasts: "
             << this->TIMESLICE-(sc_simulation_time()-this->lastassign) << " at: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
   
@@ -106,7 +106,7 @@ namespace SystemC_VPC{
     Configuration* nextConfiguration = NULL;
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("RoundRobinController " << this->getName() <<"> getNextConfiguration: switchConfig= " << this->switchConfig
+    std::cerr << VPC_YELLOW("RoundRobinController " << this->getName() <<"> getNextConfiguration: switchConfig= " << this->switchConfig
           << " fifo size= " << this->rr_configfifo.size() << "!") << std::endl;
 #endif //VPC_DEBUG
 
@@ -171,7 +171,7 @@ namespace SystemC_VPC{
         
 #ifdef VPC_DEBUG
     if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("RoundRobinController> task: " << pcb->getName() << " got killed!")  << std::endl;
+      std::cerr << VPC_YELLOW("RoundRobinController> task: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
       
@@ -209,7 +209,7 @@ namespace SystemC_VPC{
         (*iter)--;
       }
     }else{
-      std::cerr << YELLOW("RoundRobinController> configuration to be updated not in managed list!");
+      std::cerr << VPC_YELLOW("RoundRobinController> configuration to be updated not in managed list!");
     }
   
   }
@@ -238,7 +238,7 @@ namespace SystemC_VPC{
     }
     
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("RoundRobinController> time of last assignment set to: "<< this->lastassign) << std::endl;
+    std::cerr << VPC_YELLOW("RoundRobinController> time of last assignment set to: "<< this->lastassign) << std::endl;
 #endif //VPC_DEBUG
   }
   
