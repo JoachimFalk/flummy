@@ -630,7 +630,7 @@ namespace SystemC_VPC{
 	  assert(rest == SC_ZERO_TIME);
 	  //cerr << "Ready! releasing task (" <<  front.time <<") at: " << sc_time_stamp() << endl;
 	  this->notifyParentController(front.pcb); // Latenzy over -> remove Task
-	  wait(SC_ZERO_TIME);
+	  //wait(SC_ZERO_TIME);
 	  pqueue.pop();
 	}
       }
@@ -645,8 +645,8 @@ namespace SystemC_VPC{
     sc_time now                 = sc_time_stamp();
     sc_time restOfLatency       = task->getLatency() - task->getDelay();
     sc_time end                 = now + restOfLatency;
-    if(restOfLatency <= SC_ZERO_TIME){
-      //early exit if (Latency-DII) == 0
+    if(end <= now){
+      //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
       this->notifyParentController(task);
       return;
@@ -666,13 +666,26 @@ namespace SystemC_VPC{
 
     priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> temp;
     if(kill){
-      pqueue = temp;
+      while(pqueue.size()>0){
+	timePcbPair top = pqueue.top();
+	top.pcb->setState(activation_state(aborted));
+	scheduler->removedTask(top.pcb);
+#ifndef NO_VCD_TRACES
+        if(top.pcb->getTraceSignal() != 0) *(top.pcb->getTraceSignal()) = S_KILLED;
+#endif //NO_VCD_TRACES
+	this->parentControlUnit->signalTaskEvent(top.pcb);
+
+	pqueue.pop();
+      }
+      //pqueue = priority_queue<timePcbPair, vector<timePcbPair>,timeCompare>();
       assert(pqueue.empty());
     }else{
       //making absolute timing to relative timings (deduct actual time stamp)
       while(pqueue.size()>0){
 	timePcbPair top = pqueue.top();
+	pqueue.pop();
 	top.time -= sc_time_stamp();
+	temp.push(top);
       }
       pqueue = temp;
     }
@@ -688,6 +701,8 @@ namespace SystemC_VPC{
     while(pqueue.size()>0){
       timePcbPair top = pqueue.top();
       top.time += sc_time_stamp();
+      temp.push(top);
+      pqueue.pop();
     }
     pqueue = temp;
  
