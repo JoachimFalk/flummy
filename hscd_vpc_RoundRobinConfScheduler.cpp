@@ -70,6 +70,7 @@ namespace SystemC_VPC{
     
     delete this->waitInterval; 
     this->waitInterval = NULL;
+    assert(sc_simulation_time() > this->lastassign);
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
     this->lastassign = sc_simulation_time();
   
@@ -230,7 +231,9 @@ namespace SystemC_VPC{
    * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
    */
   void RoundRobinConfScheduler::signalPreemption(bool kill, ReconfigurableComponent* rc){
-    this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
+    if(sc_simulation_time() > this->lastassign){
+      this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
+    }
   }
 
   /**
