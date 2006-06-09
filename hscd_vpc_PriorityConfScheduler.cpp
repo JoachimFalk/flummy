@@ -17,7 +17,7 @@ namespace SystemC_VPC{
   void PriorityConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("PriorityConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+    std::cerr << VPC_YELLOW("PriorityConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
@@ -56,7 +56,7 @@ namespace SystemC_VPC{
           || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> next config to load: "
+        std::cerr << VPC_YELLOW("PriorityConfScheduler " << this->getController().getName() << "> next config to load: "
             << next) << std::endl;
 #endif //VPC_DEBUG
 
@@ -93,7 +93,7 @@ namespace SystemC_VPC{
   void PriorityConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << VPC_YELLOW("PriorityConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
 
     //get mapped configuration
@@ -105,7 +105,7 @@ namespace SystemC_VPC{
       iter->removePriority(this->getHighestPriority(pcb, this->getManagedComponent()));
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("PriorityConfScheduler " << this->getController().getName() << "> priority of mapped configuration after change is: "
+      std::cerr << VPC_YELLOW("PriorityConfScheduler " << this->getController().getName() << "> priority of mapped configuration after change is: "
           << iter->getPriority()) << std::endl;
 #endif //VPC_DEBUG
 

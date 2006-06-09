@@ -25,7 +25,7 @@ namespace SystemC_VPC{
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
 
 #ifdef VPC_DEBUG
-      std::cerr << BLUE("RoundRobinConfScheduler> set property for timeslice = ") << value << std::endl;
+      std::cerr << VPC_BLUE("RoundRobinConfScheduler> set property for timeslice = ") << value << std::endl;
 #endif //VPC_DEBUG
 
       char *domain;
@@ -46,7 +46,7 @@ namespace SystemC_VPC{
   void RoundRobinConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
     
     // add to internal structures
@@ -70,7 +70,7 @@ namespace SystemC_VPC{
     
     delete this->waitInterval; 
     this->waitInterval = NULL;
-    assert(sc_simulation_time() > this->lastassign);
+    assert(sc_simulation_time() >= this->lastassign);
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
     this->lastassign = sc_simulation_time();
   
@@ -78,7 +78,7 @@ namespace SystemC_VPC{
     if(this->remainingSlice <= 0 || this->scheduledConfiguration == NULL){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
       this->switchConfig = true;
@@ -89,7 +89,7 @@ namespace SystemC_VPC{
     if(this->rr_configfifo.size() > 0){ //scheduledConfiguration != NULL){
         
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> timeslice lasts: "
+      std::cerr << VPC_YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> timeslice lasts: "
             << this->TIMESLICE-(sc_simulation_time()-this->lastassign) << " at: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
   
@@ -105,7 +105,7 @@ namespace SystemC_VPC{
     unsigned int nextConfiguration = 0;
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("RoundRobinConfScheduler " << this->getController().getName() <<"> getNextConfiguration: switchConfig= " << this->switchConfig
+    std::cerr << VPC_YELLOW("RoundRobinConfScheduler " << this->getController().getName() <<"> getNextConfiguration: switchConfig= " << this->switchConfig
           << " fifo size= " << this->rr_configfifo.size() << "!") << std::endl;
 #endif //VPC_DEBUG
 
@@ -193,7 +193,7 @@ namespace SystemC_VPC{
         (*iter)--;
       }
     }else{
-      std::cerr << YELLOW("RoundRobinConfScheduler> configuration to be updated not in managed list!");
+      std::cerr << VPC_YELLOW("RoundRobinConfScheduler> configuration to be updated not in managed list!");
     }
     
   }
@@ -223,7 +223,7 @@ namespace SystemC_VPC{
       this->lastassign += nextConfiguration->getLoadTime().to_default_time_units();
     }
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("RoundRobinConfScheduler> time of last assignment set to: "<< this->lastassign) << std::endl;
+    std::cerr << VPC_YELLOW("RoundRobinConfScheduler> time of last assignment set to: "<< this->lastassign) << std::endl;
 #endif //VPC_DEBUG
   }
   

@@ -69,6 +69,10 @@ namespace SystemC_VPC {
        */
       virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc)=0;
 
+      /**
+       * \brief Used as indicator for controlled component when to awake next
+       * \return sc_time indicating time to wake up or NULL if no wake up delay is required
+       */
       virtual sc_time* getWaitInterval(ReconfigurableComponent* rc)=0;
 
       /**

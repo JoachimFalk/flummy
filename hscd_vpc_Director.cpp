@@ -58,13 +58,19 @@ namespace SystemC_VPC{
   /**
    *
    */
-  Director::Director() : end(0), miMapper(new MIMapper()) {
-    
-    VPCBuilder builder((Director*)this);
-    
-    this->binder = new SimpleBinder(NULL, this->miMapper); 
- 
-    builder.buildVPC();
+  Director::Director() : FALLBACKMODE(false), end(0), miMapper(new MIMapper()) {
+
+    try{
+      VPCBuilder builder((Director*)this);
+      this->binder = new SimpleBinder(NULL, this->miMapper); 
+      builder.buildVPC();
+    }catch(InvalidArgumentException& e){
+      std::cerr << "Director> Got exception while setting up VPC:\n" << e.what() << std::endl;
+      exit(-1);
+    }catch(const std::exception& e){
+      std::cerr << "Director> Got exception while setting up VPC:\n" << e.what() << std::endl;
+      exit(-1);
+    }
 
   }
     
@@ -142,15 +148,6 @@ namespace SystemC_VPC{
     delete this->binder;
     delete this->miMapper;
     
-    //clear ProcessControlBlocks
-    /*
-    std::map<std::string, ProcessControlBlock* >::iterator iter;
-    for(iter = this->pcb_map_by_name.begin(); iter != this->pcb_map_by_name.end(); iter++){
-      delete iter->second;
-    }
-    
-    this->pcb_map_by_name.clear();
-    */
   }
 
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
@@ -161,6 +158,7 @@ namespace SystemC_VPC{
     }catch(NotAllocatedException& e){
       std::cerr << "Director> getProcessControlBlock failed due to" << std::endl
 		<< e.what() << std::endl;
+      std::cerr << "HINT: probably actor binding not specified in configuration file!" << std::endl;
       exit(-1);
     }
   }
@@ -174,40 +172,49 @@ namespace SystemC_VPC{
   }
 
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
+    //HINT: treat mode!!
+    //if (mode) { ....
+    compute(name, funcname, EventPair(end, NULL));
+    //} else{
+    //  compute(name, funcname, EventPair(NULL, end));
+    //}
+  }
+
+  void Director::compute(const char* name, const char* funcname, EventPair endPair){
     if(FALLBACKMODE){
 #ifdef VPC_DEBUG
       cout << flush;
-      cerr << RED("FallBack::compute( ") << WHITE(name) << RED(" , ") << WHITE(funcname) 
-	   << RED(" ) at time: " << sc_simulation_time()) << endl;
+      cerr << VPC_RED("FallBack::compute( ") << VPC_WHITE(name) << VPC_RED(" , ") << VPC_WHITE(funcname) 
+	   << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
       // create Fallback behavior for active and passive mode!
-      if( end != NULL ){
-        // passive mode: notify end
-        end->notify();
-      }
-
-
+      if( endPair.dii != NULL )           endPair.dii->notify();      // passive mode: notify end
+      if( endPair.latency != NULL ) endPair.latency->notify();  // passive mode: notify end
+      
       // do nothing, just return
       return;
     }
 
     
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("Director> compute(") << WHITE(name) << YELLOW(",") << WHITE(funcname) << YELLOW(") at: ") << sc_simulation_time() << std::endl;
+    std::cerr << VPC_YELLOW("Director> compute(") << VPC_WHITE(name) << VPC_YELLOW(",") << VPC_WHITE(funcname) << VPC_YELLOW(") at: ") << sc_simulation_time() << std::endl;
 #endif //VPC_DEBUG
     
     ProcessControlBlock* pcb = this->getProcessControlBlock(name);
     pcb->setFuncName(funcname);
     int lockid = -1;
     
-    if( end == NULL ){
+    //HINT: also treat mode!!
+    //if( endPair.latency != NULL ) endPair.latency->notify();
+
+    if( endPair.dii == NULL ){
       // prepare active mode
-      pcb->setBlockEvent(new VPC_Event());
+      pcb->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
       lockid = this->pcbPool.lock(pcb);
     }else{
       // prepare passiv mode
-      pcb->setBlockEvent(end);
+      pcb->setBlockEvent(endPair);
     }
 
     try{
@@ -216,7 +223,7 @@ namespace SystemC_VPC{
       AbstractComponent* comp = this->component_map_by_name.find(compName)->second;
       
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("Director> delegating to ") << WHITE(comp->basename()) << std::endl;
+      std::cerr << VPC_YELLOW("Director> delegating to ") << VPC_WHITE(comp->basename()) << std::endl;
 #endif //VPC_DEBUG      
       
       // compute task on found component
@@ -225,25 +232,29 @@ namespace SystemC_VPC{
       
     }catch(UnknownBindingException& e){
       std::cerr << e.what() << std::endl;
+
       // clean up
-      if( end == NULL ){
-        delete pcb->getBlockEvent();
-        pcb->setBlockEvent(NULL);
+      if( endPair.dii == NULL ){
+        delete pcb->getBlockEvent().dii;
+        delete pcb->getBlockEvent().latency;
+
+        pcb->setBlockEvent(EventPair());
         this->pcbPool.unlock(pcb->getName(), lockid);
         this->pcbPool.free(pcb);
       }else{
         // TODO: handle asynchron calls notify them ?!?
       }
       return;
-      
+
     }
 
-    
-    if( end == NULL){
-      // active mode -> returns if simulated delay time has expiYELLOW (blocking compute call)
-      CoSupport::SystemC::wait(*(pcb->getBlockEvent()));
-      delete pcb->getBlockEvent();
-      pcb->setBlockEvent(NULL);
+    if( endPair.dii == NULL){
+      // active mode -> returns if simulated delay time has expired (blocking compute call)
+      CoSupport::SystemC::wait(*(pcb->getBlockEvent().dii));
+      delete pcb->getBlockEvent().dii;
+      delete pcb->getBlockEvent().latency;
+      pcb->setBlockEvent(EventPair());
+
       // as psb has been locked -> unlock it
       this->pcbPool.unlock(pcb->getName(), lockid);
       // and free it
@@ -252,10 +263,14 @@ namespace SystemC_VPC{
      
   }
 
+  void Director::compute(const char *name, EventPair endPair){
+    compute( name, "", endPair);
+  }
+
   void Director::compute(const char* name, VPC_Event* end){
-  
-    this->compute(name, "", end);
-  
+
+    this->compute(name, "", end); 
+      
   }
     
   /**
@@ -280,7 +295,7 @@ namespace SystemC_VPC{
    * \brief Implementation of Director::registerMapping
    */
   void Director::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* comp){
-   
+  
     // currently ignore mapping info as dynamic binding is only performed on rc level 
     this->binder->registerBinding(taskName, compName);
     
@@ -297,26 +312,8 @@ namespace SystemC_VPC{
     ProcessControlBlock& pcb = this->pcbPool.registerPCB(name);
     pcb.setName(name);
     return pcb;
-  /*  
-    iter = this->pcb_map_by_name.find(name);
-    if(iter != this->pcb_map_by_name.end()){
-      return iter->second;  
-    }
-      
-    ProcessControlBlock* newPCB = new ProcessControlBlock(name);
-    
-    this->pcb_map_by_name.insert(std::pair<std::string, ProcessControlBlock* >(name, newPCB));
-      
-    return newPCB;
-    */  
   }
-/*
-  void Director::registerPCB(const char* name, ProcessControlBlock* pcb){
-
-    this->pcbPool.registerPCB(name, pcb);
   
-  }
-  */  
   /**
    * \brief Implementation of Director::notifyTaskEvent
    */
@@ -330,7 +327,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
       std::cerr << "Director> task successful finished: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
-      pcb->getBlockEvent()->notify();
+      if(NULL != pcb->getBlockEvent().latency) pcb->getBlockEvent().latency->notify();
       // remember last acknowledged task time
       this->end = sc_simulation_time();
       

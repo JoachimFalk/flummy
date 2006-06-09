@@ -83,7 +83,7 @@ namespace SystemC_VPC {
       /**
        * \brief determine execution time of all associated running tasks
        */
-      double RREConfElement::getExecutionSum();
+      sc_time RREConfElement::getExecutionSum();
   };
   
   /**

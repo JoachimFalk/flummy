@@ -57,7 +57,7 @@ public:
     cerr << XMLString::transcode( domError.getLocation()->getURI())
          << ", line " << domError.getLocation()->getLineNumber()
          << ", char " << domError.getLocation()->getColumnNumber()
-         << "\n  Message: " << XMLString::transcode( domError.getMessage()) <<NORMAL<<endl;
+         << "\n  Message: " << XMLString::transcode( domError.getMessage()) <<VPC_NORMAL<<endl;
     
     return !failed;
     

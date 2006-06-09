@@ -63,6 +63,7 @@ namespace SystemC_VPC{
     XMLCh* binderStr;
     XMLCh* mapperStr;
     XMLCh* schedulerStr;
+    XMLCh* timingStr;
     //XMLCh *Str;
    
     // tags for attributes 
@@ -76,6 +77,10 @@ namespace SystemC_VPC{
     XMLCh* sourceAttrStr;
     XMLCh* loadTimeAttrStr;
     XMLCh* storeTimeAttrStr;
+    XMLCh *delayAttrStr;
+    XMLCh *diiAttrStr;
+    XMLCh *latencyAttrStr;
+    XMLCh *fnameAttrStr;
     //XMLCh *AttrStr;
     
     /*
@@ -100,7 +105,16 @@ namespace SystemC_VPC{
     std::map<std::string, std::string > config_to_ParentComp;
     // map containing specified templates
     std::map<std::string, std::vector<std::pair<char*, char* > > > templates;
-    
+
+    //helper struct
+    struct Timing{
+      sc_time delay;
+      sc_time latency;
+      char*   fname;
+    };
+    // map containing template Timings
+    std::map<std::string, std::vector<Timing> > timingTemplates;
+
     // pointer to Director to be initialized
     Director* director;
     
@@ -133,6 +147,7 @@ namespace SystemC_VPC{
       templateSectionStr    = XMLString::transcode("templates");
       templateStr     = XMLString::transcode("template");
       refTemplateStr  = XMLString::transcode("reftemplate");
+      timingStr       = XMLString::transcode("timing");
       controllerStr   = XMLString::transcode("controller");
       binderStr       = XMLString::transcode("binder");
       mapperStr       = XMLString::transcode("mapper");
@@ -149,6 +164,10 @@ namespace SystemC_VPC{
       sourceAttrStr  = XMLString::transcode("source");
       loadTimeAttrStr  = XMLString::transcode("loadtime");
       storeTimeAttrStr= XMLString::transcode("storetime");
+      delayAttrStr        = XMLString::transcode("delay");
+      diiAttrStr          = XMLString::transcode("dii");
+      latencyAttrStr      = XMLString::transcode("latency");
+      fnameAttrStr        = XMLString::transcode("fname");
       //XMLCh* VPCBuilder::AttrStr   = XMLString::transcode("");
       
       /*
@@ -258,10 +277,29 @@ namespace SystemC_VPC{
      */
     //AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
     AbstractController* generateController(const char* id) throw(InvalidArgumentException);
-    
+   
+    /**
+     * \brief Generates controller instance for Component
+     * \param id is the id to be set for the controller     
+     */
     AbstractBinder* generateBinder(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
+    
+    /**
+     * \brief Generates controller instance for Component
+     * \param id is the id to be set for the controller     
+     */
     AbstractConfigurationMapper* generateMapper(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
+    
+    /**
+     * \brief Generates controller instance for Component
+     * \param id is the id to be set for the controller     
+     */
     AbstractConfigurationScheduler* generateConfigScheduler(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
+
+    /**
+     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
+     */
+    sc_time createSC_Time(char* timeString) throw(InvalidArgumentException);
 
   };
     

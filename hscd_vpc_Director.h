@@ -21,6 +21,7 @@
 #include "hscd_vpc_AbstractDirector.h"
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_EventPair.h"
 
 // provide compatibility with other compilers then gcc, hopefully
 #include <ansidecl.h>
@@ -86,7 +87,8 @@ namespace SystemC_VPC{
      */
     //AbstractComponent& getResource( const char *name );
     //  AbstractComponent& getResource(int process);
-     Director& Director::getResource( const char* name);
+     Director& Director::getResource( const char* name)
+       __attribute__((deprecated));
      
     /**
      * \brief Get the process control block used within SystemC-VPC Modell.
@@ -124,12 +126,38 @@ namespace SystemC_VPC{
     /**
      * \brief Simulates computation of a given task
      * 
+     * Determines the component for a given task and delegates it for execution time simulation.
+     * Supports pipelining!
+     * \param name Name of task to execute.
+     * \param funcname Name of executed function within task.
+     * \param endPair EventPair to signal finishing of data introduction intervall (dii) and lateny.
+     * If dii == latency no pipelinig is assumed and both events are notified at same time!
+     * \sa EventPair
+     */
+    void compute(const char* name, const char* funcname, EventPair endPair = EventPair(NULL, NULL));
+   
+    /**
+     * \brief Simulates computation of a given task
+     *
+     * Determines the component for a given task and delegates it for execution time simulation.
+     * Supports pipelining!
+     * \param name Name of task to execute.
+     * \param endPair EventPair to signal finishing of data introduction intervall (dii) and lateny.
+     * If dii == latency no pipelinig is assumed and both events are notified at same time!
+     * \sa EventPair
+     */
+    void compute(const char *name, EventPair endPair = EventPair(NULL, NULL));
+
+    /**
+     * \brief Simulates computation of a given task
+     * 
      * Determines for a given task the component to run on and delegates it.
      * \param name of task
      * \param name of function
      * \param event to signal finished request
      */
-    virtual void compute(const char* name, const char* funcname, VPC_Event* end=NULL);
+    void compute(const char* name, const char* funcname, VPC_Event* end) 
+      __attribute__((__deprecated__));
    
     /**
      * \brief Simulates computation of a given task
@@ -138,7 +166,8 @@ namespace SystemC_VPC{
      * \param name of task
      * \param event to signal finished request
      */
-    virtual void compute(const char *name, VPC_Event *end=NULL);
+    void compute(const char *name, VPC_Event *end)
+      __attribute__((__deprecated__));
  
     /**
      * \brief Adds new constraint to Director

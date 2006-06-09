@@ -1,5 +1,9 @@
 #include <iostream>
 #include <values.h> 
+#include <sstream>
+#include <algorithm>
+#include <cctype>
+#include <string>
 
 #include "hscd_vpc_VPCBuilder.h"
 
@@ -116,7 +120,7 @@ namespace SystemC_VPC{
       
       //check if parsing failed
       if(configErrorh->parseFailed()){
-        std::cerr << RED("VPCBuilder: Parsing of configuration failed, aborting initialization!") << std::endl;
+        std::cerr << VPC_RED("VPCBuilder: Parsing of configuration failed, aborting initialization!") << std::endl;
         return;
       }
       
@@ -281,7 +285,7 @@ namespace SystemC_VPC{
       
       //check if parsing failed
       if(errorh->parseFailed()){
-        std::cerr << RED("VPCBuilder> Parsing of measure file " << vpc_measure_file << " failed, aborting initialization!") << std::endl;
+        std::cerr << VPC_RED("VPCBuilder> Parsing of measure file " << vpc_measure_file << " failed, aborting initialization!") << std::endl;
         return;
       }
       // set treewalker to documentroot
@@ -298,13 +302,13 @@ namespace SystemC_VPC{
       while( n) {
         xname=n->getNodeName();
         name=XMLString::transcode(xname); // for cerr only
-        //cerr << RED(name)<< endl;
+        //cerr << VPC_RED(name)<< endl;
           
         if(n->getNodeType()==DOMNode::ELEMENT_NODE && 
           0==XMLString::compareNString(xname,constraintStr,sizeof(constraintStr))){
             
           DOMNamedNodeMap * atts=n->getAttributes();
-          //cerr << GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
+          //cerr << VPC_GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
           char *sCount,*sDivider,*sName;
           sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
           sCount=XMLString::transcode(atts->getNamedItem(countAttrStr)->getNodeValue());
@@ -371,9 +375,9 @@ namespace SystemC_VPC{
       {
 
         string msg("Unknown Component: name=");
-        msg += sName;
-        msg += " type=";
-        msg += sType;
+        msg = sName;
+        msg = " type=";
+        msg = sType;
         throw InvalidArgumentException(msg);
 
       }
@@ -427,9 +431,9 @@ namespace SystemC_VPC{
         {
 
           string msg("Unknown Component: name=");
-          msg += sName;
-          msg += " type=";
-          msg += sType;
+          msg = sName;
+          msg = " type=";
+          msg = sType;
           throw InvalidArgumentException(msg);
 
         }
@@ -456,6 +460,7 @@ namespace SystemC_VPC{
     
     if(node != NULL){
       std::vector<std::pair<char*, char* > > attributes;
+      std::vector<VPCBuilder::Timing > timings;
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){ //node->getNextSibling())
         const XMLCh* xmlName = node->getNodeName();
@@ -463,9 +468,42 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> init template " << tid << std::endl;
 #endif //VPC_DEBUG
-        
+
+        if( 0==XMLString::compareNString( xmlName, timingStr, sizeof(timingStr))){
+	  char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
+	  VPCBuilder::Timing t;
+	  t.delay   = SC_ZERO_TIME;
+	  t.latency = SC_ZERO_TIME;
+	  t.fname   = fname;
+	  
+	  DOMNamedNodeMap* atts = node->getAttributes();
+	  for(unsigned int i=0; i<atts->getLength(); i++){
+	    DOMNode* a=atts->item(i);
+	    if(0==XMLString::compareNString( a->getNodeName(), delayAttrStr, sizeof(delayAttrStr))){
+	      delay = XMLString::transcode(a->getNodeValue());
+	    }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
+	      latency = XMLString::transcode(a->getNodeValue());
+	    }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
+	      delay = XMLString::transcode(a->getNodeValue());
+	    }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
+	      fname = XMLString::transcode(a->getNodeValue());
+	    }
+	  }
+	  t.fname   = fname;
+	  if(latency != NULL){
+	    t.latency = createSC_Time(latency);
+	  }
+	  if(delay != NULL){
+	    t.delay   = createSC_Time(delay);
+	  }
+	  // use dii only when having a latency or having no delay -> then dii overides delay
+	  if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
+	    t.delay = createSC_Time(dii);
+	  }
+	  timings.push_back(t);
+	  
         // check if its an attribute to add
-        if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+	}else if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
           DOMNamedNodeMap* atts = node->getAttributes();
           char* sType;
           char* sValue;
@@ -482,6 +520,9 @@ namespace SystemC_VPC{
       if(attributes.size() > 0){
         this->templates.insert(std::pair<std::string, std::vector<std::pair<char*, char* > > >( std::string(tid, strlen(tid)),
               attributes));
+      }
+      if(timings.size() > 0){
+	timingTemplates[std::string(tid, strlen(tid))] = timings;
       }
 
       this->vpcConfigTreeWalker->parentNode();
@@ -593,8 +634,25 @@ namespace SystemC_VPC{
           // std::map<std::string, Configuration*>::iterator iter;
           //iter = this->knownConfigs.find(sName);
           //if(iter == this->knownConfigs.end()){
-
-          conf = new Configuration(sName, sLoadTime, sStoreTime);
+          sc_time loadTime = SC_ZERO_TIME;
+          sc_time storeTime = SC_ZERO_TIME;
+          
+          try{
+            loadTime = this->createSC_Time(sLoadTime);
+          }catch(InvalidArgumentException& e){
+            std::cerr << "VPCBuilder> Failed to create loadTime for " << sName << "! " << e.what() 
+              << "\n Setting loadTime to " << loadTime;
+          }
+          
+          try{
+            storeTime = this->createSC_Time(sStoreTime);
+          }catch(InvalidArgumentException& e){
+            std::cerr << "VPCBuilder> Failed to create storeTime for " << sName << "! " << e.what() 
+              << "\n Setting loadTime to " << storeTime;
+          }
+          
+          conf = new Configuration(sName, loadTime, storeTime);
+          
           /*
            * register configuration for inner parsing purposes
            */
@@ -661,7 +719,7 @@ namespace SystemC_VPC{
         }
 
 #ifdef VPC_DEBUG
-        std::cerr << RED("Adding Component=" << innerComp->basename() << " to Configuration=" << conf->getName()) << std::endl;
+        std::cerr << VPC_RED("Adding Component=" << innerComp->basename() << " to Configuration=" << conf->getName()) << std::endl;
 #endif //VPC_DEBUG
 
         innerComp->setParentController(comp->getController());
@@ -686,7 +744,7 @@ namespace SystemC_VPC{
     const XMLCh* xmlName=node->getNodeName();
 
 #ifdef VPC_DEBUG
-      std::cerr << "VPCBuilder> entering initMappingAPStruct"<< std::endl;
+    std::cerr << "VPCBuilder> entering initMappingAPStruct"<< std::endl;
 #endif //VPC_DEBUG    
    
     // find mapping tag (not mappings)
@@ -698,12 +756,12 @@ namespace SystemC_VPC{
       sSource=XMLString::transcode(atts->getNamedItem(sourceAttrStr)->getNodeValue());
 
 #ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Found mapping attribute: source=" << sSource << " target=" << sTarget << endl; 
+      std::cerr << "VPCBuilder> Found mapping attribute: source=" << sSource << " target=" << sTarget << endl; 
 #endif //VPC_DEBUG
 
       // check if component exists
       if(this->knownComps.count(sTarget)==1){
-        
+
 #ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> Target of Mapping: " << sTarget << " exists!" << std::endl; 
 #endif //VPC_DEBUG
@@ -715,27 +773,54 @@ namespace SystemC_VPC{
         if(iterComp != this->knownComps.end()){
 
 #ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Configure mapping: " << sSource << "<->" << sTarget << std::endl; 
+          std::cerr << "VPCBuilder> Configure mapping: " << sSource << "<->" << sTarget << std::endl; 
 #endif //VPC_DEBUG
 
           (iterComp->second)->informAboutMapping(sSource);
-          
+
           //generate new ProcessControlBlock or get existing one for initialization
           ProcessControlBlock& p = this->director->generatePCB(sSource);
-          
+
           //generate new MappingEntry
           MappingInformation* mInfo = new MappingInformation();
-          
+
           //walk down hierarchy to attributes
           DOMNode* attnode = node->getFirstChild();
-          
+
           // find all attributes
           for(; attnode!=NULL; attnode = attnode->getNextSibling()){
 
             xmlName=attnode->getNodeName();
             DOMNamedNodeMap * atts=attnode->getAttributes();
 
-            if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+            if( 0==XMLString::compareNString( xmlName, timingStr, sizeof(timingStr))){
+              char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
+              for(unsigned int i=0; i<atts->getLength(); i++){
+                DOMNode* a=atts->item(i);
+                if(0==XMLString::compareNString( a->getNodeName(), delayAttrStr, sizeof(delayAttrStr))){
+                  delay = XMLString::transcode(a->getNodeValue());
+                }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
+                  latency = XMLString::transcode(a->getNodeValue());
+                }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
+                  delay = XMLString::transcode(a->getNodeValue());
+                }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
+                  fname = XMLString::transcode(a->getNodeValue());
+                }
+              }
+              if(latency != NULL){
+                sc_time sc_latency = createSC_Time(latency);
+                mInfo->addFuncLatency(fname, sc_latency);
+              }
+              if(delay != NULL){
+                sc_time sc_delay = createSC_Time(delay);
+                mInfo->addDelay(fname, sc_delay);
+              }
+              // use dii only when having a latency or having no delay -> then dii overides delay
+              if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
+                sc_time sc_dii = createSC_Time(dii);
+                mInfo->addDelay(fname, sc_dii);
+              }
+            }else if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
               char *sType, *sValue;
               sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
               sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
@@ -743,77 +828,86 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
               std::string msg = "attribute values are: ";
               msg.append(sType, strlen(sType));
-              msg += " and ";
+              msg = " and ";
               msg.append(sValue, strlen(sValue));
               std::cerr << msg << std::endl;
 #endif   
-          
+
               if( 0 == strncmp(sType, STR_VPC_PRIORITY, sizeof(STR_VPC_PRIORITY) )){
                 int priority = 0;
                 sscanf(sValue, "%d", &priority);
                 mInfo->setPriority(priority);
               }else if( 0 == strncmp(sType, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
-                double deadline = 0;
-                sscanf(sValue, "%lf", &deadline);
-                mInfo->setDeadline(deadline);
+                //double deadline = 0;
+                //sscanf(sValue, "%lf", &deadline);
+                //mInfo->setDeadline(deadline);
+                mInfo->setDeadline(createSC_Time(sValue));
               }else if( 0 == strncmp(sType, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
-                double period = 0;
-                sscanf(sValue, "%lf", &period);
-                mInfo->setPeriod(period);
+                //double period = 0;
+                //sscanf(sValue, "%lf", &period);
+                //mInfo->setPeriod(period);
+                mInfo->setPeriod(createSC_Time(sValue));
               }else if( 0 == strncmp(sType, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
-                double delay = 0;
-                sscanf(sValue, "%lf", &delay);
+                sc_time delay = createSC_Time(sValue);
+                // double delay = 0;
+                // sscanf(sValue, "%lf", &delay);
                 mInfo->addDelay(NULL, delay);
+              }else if( 0 == strncmp(sType, STR_VPC_LATENCY, sizeof(STR_VPC_LATENCY) )){
+                sc_time latency = createSC_Time(sValue);
+                mInfo->addFuncLatency(NULL, latency);
               }else{
 #ifdef VPC_DEBUG
                 std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << sType << " value=" << sValue << endl; 
                 std::cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
 #endif //VPC_DEBUG
 
-// <<< here is adding of additional function delay
-                double delay;
-                if( 1 == sscanf(sValue, "%lf", &delay) ){  
+                // <<< here is adding of additional function delay
+                try{
+                  sc_time delay = createSC_Time(sValue);
+                  //double delay;
+                  //if( 1 == sscanf(sValue, "%lf", &delay) ){  
 #ifdef VPC_DEBUG
-                  std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
-                  std::cerr << YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
+                  std::cerr << VPC_YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
+                  std::cerr << VPC_YELLOW("VPCBuilder> Register delay to: " << sTarget << "; " << sType << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
                   mInfo->addDelay(sType, delay);
-                } else {
+                } catch(const InvalidArgumentException& ex) {
+                  //} else {
 #ifdef VPC_DEBUG
-                  std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
+                std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
 #endif //VPC_DEBUG
                 }
+                }
+
+                XMLString::release(&sType);
+                XMLString::release(&sValue);
+
+                // check if reference to template
+              }else if( 0==XMLString::compareNString( xmlName, refTemplateStr, sizeof(refTemplateStr))){
+
+                char* sKey;
+                sKey = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+                this->applyTemplateOnMappingInformation(*mInfo, sTarget, std::string(sKey, strlen(sKey)));
+                XMLString::release(&sKey);
+
               }
 
-              XMLString::release(&sType);
-              XMLString::release(&sValue);
-              
-              // check if reference to template
-            }else if( 0==XMLString::compareNString( xmlName, refTemplateStr, sizeof(refTemplateStr))){
-
-              char* sKey;
-              sKey = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-              this->applyTemplateOnMappingInformation(*mInfo, sTarget, std::string(sKey, strlen(sKey)));
-              XMLString::release(&sKey);
-              
             }
 
-          }
-          
-          // node = vpcConfigTreeWalker->parentNode();
-          
-          //check if component member of a configuration and iterativly adding mapping info
-          this->buildUpBindHierarchy(sSource, sTarget, mInfo);
+            // node = vpcConfigTreeWalker->parentNode();
 
-          //add mInfo to PCB currently for later clean up
-          p.addMappingInformation(mInfo);
-          
-        }else{
-          std::cerr << "VPCBuilder> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
+            //check if component member of a configuration and iterativly adding mapping info
+            this->buildUpBindHierarchy(sSource, sTarget, mInfo);
+
+            //add mInfo to PCB currently for later clean up
+            p.addMappingInformation(mInfo);
+
+          }else{
+            std::cerr << "VPCBuilder> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
+          }
         }
       }
     }
-  }
 
   /**
    * \brief Implementation of VPCBiulder::buildUpBindHierarchy
@@ -873,31 +967,39 @@ namespace SystemC_VPC{
           sscanf(attiter->second, "%d", &priority);
           mInfo.setPriority(priority);
         }else if( 0 == strncmp(attiter->first, STR_VPC_DEADLINE, sizeof(STR_VPC_DEADLINE) )){
-          double deadline = 0;
-          sscanf(attiter->second, "%lf", &deadline);
-          mInfo.setDeadline(deadline);
+          //double deadline = 0;
+          //sscanf(attiter->second, "%lf", &deadline);
+          //mInfo.setDeadline(deadline);
+          mInfo.setDeadline(createSC_Time(attiter->second));
         }else if( 0 == strncmp(attiter->first, STR_VPC_PERIOD, sizeof(STR_VPC_PERIOD) )){
-          double period = 0;
-          sscanf(attiter->second, "%lf", &period);
-          mInfo.setPeriod(period);
+          //double period = 0;
+          //sscanf(attiter->second, "%lf", &period);
+          //mInfo.setPeriod(period);
+          mInfo.setPeriod(createSC_Time(attiter->second));
         }else if( 0 == strncmp(attiter->first, STR_VPC_DELAY, sizeof(STR_VPC_DELAY) )){
-          double delay = 0;
-          sscanf(attiter->second, "%lf", &delay);
-          mInfo.addDelay(NULL, delay);
+          //double delay = 0;
+          //sscanf(attiter->second, "%lf", &delay);
+          //mInfo.addDelay(NULL, delay);
+          mInfo.addDelay(NULL, createSC_Time(attiter->second));
+        }else if( 0 == strncmp(attiter->first, STR_VPC_LATENCY, sizeof(STR_VPC_LATENCY) )){
+          sc_time latency = createSC_Time(attiter->second);
+          mInfo.addFuncLatency(NULL, latency);
         }else{
 #ifdef VPC_DEBUG
           std::cerr << "VPCBuilder> Unknown mapping attribute: type=" << attiter->first << " value=" << attiter->second << endl; 
           std::cerr << "VPCBuilder> Try to interpret as function specific delay!!" << endl;
 #endif //VPC_DEBUG
 
-          double delay;
-          if( 1 == sscanf(attiter->second, "%lf", &delay) ){  
+          //if( 1 == sscanf(attiter->second, "%lf", &delay) ){  
+	        try{
+	          sc_time delay = createSC_Time(attiter->second);
 #ifdef VPC_DEBUG
-            std::cerr << YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
-            std::cerr << YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
+            std::cerr << VPC_YELLOW("VPCBuilder> Try to interpret as function specific delay!!") << endl;
+            std::cerr << VPC_YELLOW("VPCBuilder> Register delay to: " << target << "; " << attiter->second << ", " << delay) << std::endl;
 #endif //VPC_DEBUG
             mInfo.addDelay(attiter->first, delay);
-          } else {
+          //} else {
+          } catch(const InvalidArgumentException& ex) {
 #ifdef VPC_DEBUG
             std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
 #endif //VPC_DEBUG
@@ -905,6 +1007,17 @@ namespace SystemC_VPC{
         }
       }
     }
+    std::map<std::string, std::vector<VPCBuilder::Timing> >::iterator timingIter = 
+      timingTemplates.find(key);
+    if(timingIter != timingTemplates.end()){
+      for(std::vector<VPCBuilder::Timing>::iterator timings = timingTemplates[key].begin();
+          timings != timingTemplates[key].end(); timings++){
+        VPCBuilder::Timing t = *timings;
+        mInfo.addDelay( t.fname, t.delay   );
+        mInfo.addFuncLatency( t.fname, t.latency );
+      }
+    }
+    
   }
 
 /**************************************************************************************************
@@ -947,8 +1060,8 @@ namespace SystemC_VPC{
            scheduler = new EDFConfScheduler(controller, controller->getMIMapper());
       }else{
         string msg("Unkown schedulertype ");
-        msg += type;
-        msg += ", cannot create instance";
+        msg = type;
+        msg = ", cannot create instance";
         throw InvalidArgumentException(msg);
       }
  
@@ -964,7 +1077,7 @@ namespace SystemC_VPC{
           sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
 
           if(!scheduler->setProperty(sType, sValue)){
-            std::cerr << YELLOW("VPCBuilder> Warning: Unused scheduler attribute " << sType << "=" << sValue) << std::endl;
+            std::cerr << VPC_YELLOW("VPCBuilder> Warning: Unused scheduler attribute " << sType << "=" << sValue) << std::endl;
           }
 
           XMLString::release(&sType);
@@ -1007,8 +1120,8 @@ namespace SystemC_VPC{
         binder = new PriorityBinder(controller, controller->getMIMapper(), factory);
       }else{
         std::string msg("Unkown bindertype ");
-        msg += type;
-        msg += ", cannot create instance";
+        msg = type;
+        msg = ", cannot create instance";
         throw InvalidArgumentException(msg);
       }
 
@@ -1024,7 +1137,7 @@ namespace SystemC_VPC{
           sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
 
           if(!binder->setProperty(sType, sValue)){
-            std::cerr << YELLOW("VPCBuilder> Warning: Unused binder attribute " << sType << "=" << sValue) << std::endl;
+            std::cerr << VPC_YELLOW("VPCBuilder> Warning: Unused binder attribute " << sType << "=" << sValue) << std::endl;
           }
 
           XMLString::release(&sType);
@@ -1084,14 +1197,14 @@ namespace SystemC_VPC{
             // init sub-instance of controller
             for(child = node->getFirstChild(); child != NULL; child = child->getNextSibling()){
               xmlName = child->getNodeName();
- 
+
               atts=child->getAttributes();
-              
+
               // init Binder for controller instance
               if( 0==XMLString::compareNString( xmlName, VPCBuilder::binderStr, sizeof(VPCBuilder::binderStr))){
 
                 sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-                
+
                 try{
                   ctrl->setBinder(generateBinder(sName, child, ctrl));
                 }catch(InvalidArgumentException& e){
@@ -1105,15 +1218,15 @@ namespace SystemC_VPC{
                 }
               } // init Mapper for controller instance
               else if( 0==XMLString::compareNString( xmlName, VPCBuilder::mapperStr, sizeof(VPCBuilder::mapperStr))){
-                
+
                 sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
                 ctrl->setConfigurationMapper(generateMapper(sName, child, ctrl));
-              
+
               } // init Scheduler for controller instance
               else if( 0==XMLString::compareNString( xmlName, VPCBuilder::schedulerStr, sizeof(VPCBuilder::schedulerStr))){
 
                 sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-              
+
                 try{
                   ctrl->setConfigurationScheduler(generateConfigScheduler(sName, child, ctrl));
                 }catch(InvalidArgumentException& e){
@@ -1145,11 +1258,56 @@ namespace SystemC_VPC{
 
         return result;
       }
-      
+
       std::string msg = "Failed to create controller for ";
       msg.append(id, strlen(id));
       throw InvalidArgumentException(msg);
 
     } 
-   
+
+
+  sc_time VPCBuilder::createSC_Time(char* timeString) throw(InvalidArgumentException){
+    assert(timeString != NULL);
+    double value = -1;
+    string unit;
+
+    sc_time_unit scUnit = SC_NS;
+
+    stringstream data(timeString);
+    if(data.good()){
+      data >> value;
+    }else{
+      string msg("Parsing Error: Unknown argument: <");
+      msg = timeString;
+      msg = "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if( data.fail() ){
+      string msg("Parsing Error: Unknown argument: <");
+      msg = timeString;
+      msg = "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if(data.good()){
+      data >> unit;
+      if(data.fail()){
+#ifdef VPC_DEBUG
+        std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!" << std::endl;
+#endif //VPC_DEBUG
+        scUnit = SC_NS;
+      }else{
+        std::transform (unit.begin(),unit.end(), unit.begin(), (int(*)(int))tolower);
+        if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
+        else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
+        else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
+        else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
+        else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
+        else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
+      }
+    }
+
+    return sc_time(value, scUnit);
+  }
+                 
+  
 }// namespace SystemC_VPC

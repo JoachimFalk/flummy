@@ -78,7 +78,7 @@ namespace SystemC_VPC{
        */
       Configuration(const char* name);
 
-      Configuration(const char* name, char* loadTime, char* storeTime);
+      Configuration(const char* name, sc_time loadTime, sc_time storeTime);
 
       virtual ~Configuration();
 
@@ -176,7 +176,7 @@ namespace SystemC_VPC{
        * \brief Sets store time for a configuration
        * \param time specifies the corresponding store time
        */
-      void setStoreTime(char* time);
+      void setStoreTime(sc_time time);
 
       /**
        * \brief Getter to access store time of configuration
@@ -190,7 +190,7 @@ namespace SystemC_VPC{
        * \brief Sets store time for a configuration
        * \param time specifies the corresponding store time
        */
-      void setLoadTime(char* time);
+      void setLoadTime(sc_time time);
 
       /**
        * \brief Getter to acces load time of configuration
@@ -205,10 +205,6 @@ namespace SystemC_VPC{
        * \return const iterator to access ids of contained components
        */
       ComponentIDIterator getComponentIDIterator(); 
-
-    private:
-
-      sc_time createSC_Time(char* timeString) throw(InvalidArgumentException);
 
   };
  

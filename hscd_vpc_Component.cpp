@@ -76,7 +76,7 @@ namespace SystemC_VPC{
           assert(actualRemainingDelay.value()>=0);
     
 #ifdef VPC_DEBUG
-          std::cerr << RED("Component " << this->basename() << "> actualRemainingDelay= " << actualRemainingDelay.value()
+          std::cerr << VPC_RED("Component " << this->basename() << "> actualRemainingDelay= " << actualRemainingDelay.value()
                     << " for pid=" << actualRunningPID << " at: " << sc_simulation_time()) << std::endl;
 #endif //VPC_DEBUG
           
@@ -100,13 +100,15 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
             runningTasks.erase(actualRunningPID);
       
-            this->notifyParentController(task);
-      
+	    //Removed: this will erase the task from VPC, but with pipelining support the erasing should occur later 
+            //this->notifyParentController(task);
+	    task->getBlockEvent().dii->notify();
+	    moveToRemainingPipelineStages(task);
             //wait(SC_ZERO_TIME);
           }else{
        
             // store remainingDela within ProcessControlBlock
-            runningTasks[actualRunningPID]->setRemainingDelay(actualRemainingDelay.to_default_time_units());
+            runningTasks[actualRunningPID]->setRemainingDelay(actualRemainingDelay);
       
           }
         }
@@ -119,7 +121,7 @@ namespace SystemC_VPC{
       while(! this->isActiv()){
 
 #ifdef VPC_DEBUG
-        std::cerr << RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << VPC_RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
     
         //check if preemption is with kill flag
@@ -152,7 +154,7 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
-        std::cerr << RED( this->basename()  << " reactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << VPC_RED( this->basename()  << " reactivated at ") << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
     
       }
@@ -187,7 +189,7 @@ namespace SystemC_VPC{
         readyTasks[taskToResign]=runningTasks[taskToResign];
         runningTasks.erase(taskToResign);
         actualRunningPID=-1;
-        readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay.to_default_time_units());
+        readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
 #ifndef NO_VCD_TRACES
         if(readyTasks[taskToResign]->getTraceSignal()!=0) *(readyTasks[taskToResign]->getTraceSignal())=S_READY;     
 #endif //NO_VCD_TRACES
@@ -238,7 +240,7 @@ namespace SystemC_VPC{
         cerr << "PID: " << taskToAssign;
         cerr << "> remaining delay for " << runningTasks[taskToAssign]->getName();
 #endif // VPCDEBUG
-        actualRemainingDelay=sc_time(runningTasks[taskToAssign]->getRemainingDelay(),SC_NS);
+        actualRemainingDelay=sc_time(runningTasks[taskToAssign]->getRemainingDelay());
 #ifdef VPC_DEBUG
         cerr<< " is " << runningTasks[taskToAssign]->getRemainingDelay() << endl;
 #endif // VPCDEBUG
@@ -283,7 +285,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component " << this->basename() << "> compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl
+    cerr << VPC_RED("Component " << this->basename() << "> compute( ") <<VPC_WHITE(actualTask->getName())<<VPC_RED(" , ")<<VPC_WHITE(actualTask->getFuncName())<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl
       ;
 #endif
 
@@ -300,7 +302,7 @@ namespace SystemC_VPC{
      * 
 #ifdef VPC_DEBUG
     if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << RED("VPC_LOGICAL_ERROR> ") << YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<YELLOW(")!")
+      cerr << VPC_RED("VPC_LOGICAL_ERROR> ") << VPC_YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<VPC_YELLOW(")!")
         << endl;
 
     std::cerr << "Component> Check if special delay exist for "<< actualTask->getFuncName() << " on " << this->basename() << ": " << (actualTask->hasDelay(this->basename(), actualTask->getFuncName())) << std::endl;
@@ -310,25 +312,32 @@ namespace SystemC_VPC{
     if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
       // function specific delay
       actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
+      actualTask->setDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
+      actualTask->setLatency(actualTask->getFuncLatency(this->basename(), actualTask->getFuncName()));
 #ifdef VPC_DEBUG
       cerr << "Using " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "And using " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG
     } else {
       // general delay for actor
       actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->setDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->setLatency(actualTask->getFuncLatency(this->basename()));
 #ifdef VPC_DEBUG
       cerr << "Using standard delay " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "Using standard latency " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG
     }
     */
 
-    if( actualTask->getBlockEvent() == NULL ){
+    if( actualTask->getBlockEvent().dii == NULL ){
       // active mode -> returns if simulated delay time has expired (blocking compute call)
-      actualTask->setBlockEvent(new VPC_Event());
+      actualTask->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
       compute(actualTask);
-      CoSupport::SystemC::wait(*(actualTask->getBlockEvent()));
-      delete actualTask->getBlockEvent();
-      actualTask->setBlockEvent(NULL);
+      CoSupport::SystemC::wait(*(actualTask->getBlockEvent().dii));
+      delete actualTask->getBlockEvent().dii;
+      delete actualTask->getBlockEvent().latency;
+      actualTask->setBlockEvent(EventPair());
       // return
     } else {
       // passive mode -> return immediatly (no blocking)
@@ -344,7 +353,7 @@ namespace SystemC_VPC{
   void Component::_compute( const char *name, VPC_Event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component::compute( ") << WHITE(name)<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << VPC_RED("Component::compute( ") << VPC_WHITE(name)<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
     _compute(name,"",end);
@@ -377,6 +386,7 @@ namespace SystemC_VPC{
       this->setActiv(false);
       this->killed = kill;
       this->notify_preempt.notify();
+      interuptPipeline(kill);
       //wait(SC_ZERO_TIME);
     }
    
@@ -392,6 +402,7 @@ namespace SystemC_VPC{
       this->setActiv(true);
       this->killed = false;
       this->notify_resume.notify();
+      resumePipeline();
       //wait(SC_ZERO_TIME);
     }
 
@@ -404,7 +415,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << RED("Component " << this->basename() << "> compute( ") <<WHITE(actualTask->getName())<<RED(" , ")<<WHITE(actualTask->getFuncName())<<RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << VPC_RED("Component " << this->basename() << "> compute( ") <<VPC_WHITE(actualTask->getName())<<VPC_RED(" , ")<<VPC_WHITE(actualTask->getFuncName())<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
 #ifndef NO_VCD_TRACES
@@ -420,7 +431,7 @@ namespace SystemC_VPC{
      * 
 #ifdef VPC_DEBUG
     if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << RED("VPC_LOGICAL_ERROR> ") << YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<YELLOW(")!") << endl;
+      cerr << VPC_RED("VPC_LOGICAL_ERROR> ") << VPC_YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<VPC_YELLOW(")!") << endl;
 
     std::cerr << "Component> Check if special delay exist for "<< actualTask->getFuncName() << " on " << this->basename() << ": " << (actualTask->hasDelay(basename())) << std::endl;
 #endif // VPC_DEBUG
@@ -493,8 +504,8 @@ namespace SystemC_VPC{
       scheduler->removedTask(iter->second);
       
       // reset actualTask  
-      iter->second->setDelay(0);
-      iter->second->setRemainingDelay(0);
+      iter->second->setDelay(SC_ZERO_TIME);
+      iter->second->setRemainingDelay(SC_ZERO_TIME);
       
 #ifdef VPC_DEBUG
         cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
@@ -527,8 +538,8 @@ namespace SystemC_VPC{
       scheduler->removedTask(iter->second);
       
       // reset actualTask  
-      iter->second->setDelay(0);
-      iter->second->setRemainingDelay(0);
+      iter->second->setDelay(SC_ZERO_TIME);
+      iter->second->setRemainingDelay(SC_ZERO_TIME);
       
 #ifdef VPC_DEBUG
         cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
@@ -561,8 +572,8 @@ namespace SystemC_VPC{
 #endif // VPCDEBUG
  
       //reset actualTask
-      newTask->setDelay(0);
-      newTask->setRemainingDelay(0);
+      newTask->setDelay(SC_ZERO_TIME);
+      newTask->setRemainingDelay(SC_ZERO_TIME);
       
       this->parentControlUnit->signalTaskEvent(newTask, this->basename());
       
@@ -594,4 +605,111 @@ namespace SystemC_VPC{
   /*  END OF EXTENSION      */
   /**************************/
 
+  
+  /**
+   *
+   */
+  void Component::remainingPipelineStages(){
+    while(1){
+      if( (!this->isActiv()) || (pqueue.size() == 0) ){
+        wait(remainingPipelineStages_WakeUp);
+      }else{
+        timePcbPair front = pqueue.top();
+
+        //cerr << "Pop from list: " << front.time << " : " << front.pcb->getBlockEvent().latency << endl;
+        sc_time waitFor	= front.time-sc_time_stamp();
+        assert(front.time >= sc_time_stamp());
+        //cerr << "Pipeline> Wait till " << front.time << " (" << waitFor << ") at: " << sc_time_stamp() << endl;
+        wait( waitFor, remainingPipelineStages_WakeUp );
+  
+        //DISABLED: if a task completes at same time (but not necessarily in same delta cycle)
+        //          then this task is completed nonetheless
+        //if( !this->isActiv() ) continue;
+
+        sc_time rest = front.time-sc_time_stamp();
+        assert(rest >= SC_ZERO_TIME);
+        if(rest > SC_ZERO_TIME){
+          //cerr << "------------------------------" << endl;
+        }else{
+          assert(rest == SC_ZERO_TIME);
+          //cerr << "Ready! releasing task (" <<  front.time <<") at: " << sc_time_stamp() << endl;
+          this->notifyParentController(front.pcb); // Latenzy over -> remove Task
+          pqueue.pop();
+        }
+      }
+
+    }
+  }
+
+  /**
+   *
+   */
+  void Component::moveToRemainingPipelineStages(ProcessControlBlock* task){
+    sc_time now                 = sc_time_stamp();
+    sc_time restOfLatency       = task->getLatency() - task->getDelay();
+    sc_time end                 = now + restOfLatency;
+    if(end <= now){
+      //early exit if (Latency-DII) <= 0
+      //std::cerr << "Early exit: " << task->getName() << std::endl;
+      this->notifyParentController(task);
+      return;
+    }
+    timePcbPair pair;
+    pair.time = end;
+    pair.pcb  = task;
+    //std::cerr << "Rest of pipeline added: " << task->getName() << " (EndTime: " << pair.time << ") " << std::endl;
+    pqueue.push(pair);
+    remainingPipelineStages_WakeUp.notify();
+  }
+
+  /**
+   *
+   */
+  void Component::interuptPipeline(bool kill){
+
+    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> temp;
+    if(kill){
+      while(pqueue.size()>0){
+        timePcbPair top = pqueue.top();
+        top.pcb->setState(activation_state(aborted));
+        scheduler->removedTask(top.pcb);
+#ifndef NO_VCD_TRACES
+        if(top.pcb->getTraceSignal() != 0) *(top.pcb->getTraceSignal()) = S_KILLED;
+#endif //NO_VCD_TRACES
+        this->parentControlUnit->signalTaskEvent(top.pcb, this->basename());
+
+        pqueue.pop();
+      }
+      //pqueue = priority_queue<timePcbPair, vector<timePcbPair>,timeCompare>();
+      assert(pqueue.empty());
+    }else{
+      //making absolute timing to relative timings (deduct actual time stamp)
+      while(pqueue.size()>0){
+        timePcbPair top = pqueue.top();
+        pqueue.pop();
+        top.time -= sc_time_stamp();
+        temp.push(top);
+      }
+      pqueue = temp;
+    }
+    remainingPipelineStages_WakeUp.notify();
+  }
+  
+  /**
+   *
+   */
+  void Component::resumePipeline(){
+    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> temp;
+    //making relative timings to absolute timings (add actual time stamp)
+    while(pqueue.size()>0){
+      timePcbPair top = pqueue.top();
+      top.time += sc_time_stamp();
+      temp.push(top);
+      pqueue.pop();
+    }
+    pqueue = temp;
+
+    remainingPipelineStages_WakeUp.notify();
+  }
+  
 } //namespace SystemC_VPC

@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+#include <systemc.h>
+
 namespace SystemC_VPC {
 
   /**
@@ -11,22 +13,27 @@ namespace SystemC_VPC {
    * PCB can run on.
    */
   class DelayMapper{
-   
+
     private:
 
       // base delay used for task running on this component
-      double base_delay;
+      sc_time base_delay;
       // map of possible special delay depending on functions
-      std::map<std::string, double> funcDelays;
+      std::map<std::string, sc_time> funcDelays;
+      // base latency used for tasks running on this component
+      sc_time base_latency;
+      // map of possible function specific latencies
+      std::map<std::string, sc_time> funcLatencies;
 
     public:
-    
+
       /**
        * \brief Default constructor
        * \param base defines standard delay for mapping
        */
-      DelayMapper(double base);
-      
+      DelayMapper();
+      DelayMapper(sc_time base);
+
       ~DelayMapper();
 
       /**
@@ -38,7 +45,7 @@ namespace SystemC_VPC {
        * \param funcname optional specifies the associated function else base delay is changed
        * \param delay is the corresponding delay for the function execution
        */
-      void addDelay(const char* funcname, double delay);
+      void addDelay(const char* funcname, sc_time delay);
 
       /**
        * \brief Used to access delay
@@ -47,7 +54,7 @@ namespace SystemC_VPC {
        * of the process. If no function name is given or there is no corresponding
        * entry registered the default delay is returned.
        */
-      double getDelay(const char* funcname=NULL) const;
+      sc_time getDelay(const char* funcname=NULL) const;
 
       /**
        * \brief Tests if an specific function delay exisits
@@ -56,6 +63,28 @@ namespace SystemC_VPC {
        * else false
        */
       bool hasDelay(const char* funcname) const;
+
+      /**
+       * \brief Used to register component specific latency to PCB instance
+       * \param funcname refers to an function name or may be null for common
+       * association only to a component
+       * \param latency represents the execution latency needed for execution  on
+       * specified component
+       */
+      void addFuncLatency(const char* funcname, sc_time latency);
+
+      /**
+       * \brief Used to access latency of a PCB instance on a given component
+       * \param funcname refers to an optional function name
+       */
+      sc_time getFuncLatency(const char* funcname=NULL) const;
+
+      /**
+       * \brief Test if a latency is specified for a given component
+       * \param funcname refers to an optional function name
+       * \return true if a delay is registered else false
+       */
+      bool hasLatency(const char* funcname=NULL) const;
 
   }; 
 }

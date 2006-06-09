@@ -52,8 +52,9 @@ namespace SystemC_VPC {
 
 
   // definition for hiding cosupport as vpc_event
-  typedef CoSupport::SystemC::Event VPC_Event;
-  typedef CoSupport::SystemC::EventOrList VPC_EventOrList;
+  typedef CoSupport::SystemC::Event         VPC_Event;
+  //typedef CoSupport::SystemC::EventOrList
+  //     <CoSupport::SystemC::EventWaiter>       VPC_EventOrList;
 
 
   /***********************************
@@ -117,6 +118,7 @@ namespace SystemC_VPC {
    ***********************************/
 
 #define STR_VPC_DELAY "delay"
+#define STR_VPC_LATENCY "latency"
 #define STR_VPC_PRIORITY "priority"
 #define STR_VPC_PERIOD "period"
 #define STR_VPC_DEADLINE "deadline"
@@ -125,13 +127,13 @@ namespace SystemC_VPC {
    * SECTION Defs for debugging
    ***********************************/
 
-#define RED(str) "\e[31;1m" <<str<< "\e[0m"
-#define GREEN(str) "\e[32;1m" <<str<< "\e[0m"
-#define YELLOW(str) "\e[33;1m" <<str<< "\e[0m" 
-#define BLUE(str) "\e[34;1m" <<str<< "\e[0m"
-#define WHITE(str) "\e[37;40m" <<str<< "\e[0m"
+#define VPC_RED(str) "\e[31;1m" <<str<< "\e[0m"
+#define VPC_GREEN(str) "\e[32;1m" <<str<< "\e[0m"
+#define VPC_YELLOW(str) "\e[33;1m" <<str<< "\e[0m" 
+#define VPC_BLUE(str) "\e[34;1m" <<str<< "\e[0m"
+#define VPC_WHITE(str) "\e[37;40m" <<str<< "\e[0m"
 #define VPC_ERROR __FILE__<<":"<<__LINE__<<"\e[1;31;40mVPC: ERROR> " 
-#define NORMAL "\e[0m"
+#define VPC_NORMAL "\e[0m"
 #define NENDL "\e[0m"<<endl;
 
   /***********************************
@@ -142,6 +144,25 @@ namespace SystemC_VPC {
 #define  NO_VCD_TRACES
 #endif // MODES_EVALUATOR
 
+  struct timePcbPair{
+    sc_time time;
+    ProcessControlBlock *pcb;
+  };
+    
+  struct timeCompare{
+    bool operator()(const timePcbPair& tpp1,
+        const timePcbPair& tpp2) const
+    {
+      sc_time p1=tpp1.time;
+      sc_time p2=tpp2.time;
+      if (p1 >= p2)
+        return true;
+      else
+        return false;
+    }
+
+  };
+  
 
   enum action_command { ASSIGN,RESIGN,BLOCK,READY};
 

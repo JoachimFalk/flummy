@@ -130,7 +130,7 @@ namespace SystemC_VPC{
         && !this->mapper->setProperty(key, value)
         && !this->scheduler->setProperty(key, value)){
 
-      std::cerr << YELLOW("Controller "<< this->getName() << "> Warning: Unkown property tag <" << key << "=" << value << "> , will be ignored! ") << std::endl;
+      std::cerr << VPC_YELLOW("Controller "<< this->getName() << "> Warning: Unkown property tag <" << key << "=" << value << "> , will be ignored! ") << std::endl;
 
     }
   }
@@ -249,7 +249,7 @@ namespace SystemC_VPC{
         
 #ifdef VPC_DEBUG
     if(pcb->getState() == activation_state(aborted)){
-      std::cerr << YELLOW("Controller " << this->getName() << "> task: " << pcb->getName() << " got killed!")  << std::endl;
+      std::cerr << VPC_YELLOW("Controller " << this->getName() << "> task: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
  

@@ -74,11 +74,12 @@ pkginclude_HEADERS =				\
 	hscd_vpc_Bindings.h			\
 	hscd_vpc_MappingInformation.h		\
 	hscd_vpc_DelayMapper.h			\
-	hscd_vpc_IPreemptable.h			
+	hscd_vpc_IPreemptable.h			\
+	hscd_vpc_EventPair.h	
 
 #noinst_HEADERS=	oneof.hpp
 
-AM_CPPFLAGS=-Wall
+AM_CPPFLAGS=-Wall -O1 -Wuninitialized
 
 libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)		\

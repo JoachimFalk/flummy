@@ -71,8 +71,17 @@ namespace SystemC_VPC {
 
       virtual ~AbstractBinder(){}
 
+      /**
+       * \brief Resolves bindings possibility for a given task on an given component
+       * Uses specialized binding strategy to resolve binding for one task out of a set of possiblities.
+       */
       virtual std::string resolveBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException) =0;
 
+      /**
+       * \brief Register additional binding possibility to Binder instance
+       * \param src specifies the task (source) of the binding
+       * \param target specifies one possible mapped component for execution
+       */
       virtual void registerBinding(std::string src, std::string target)=0;
 
       /**
@@ -109,6 +118,7 @@ namespace SystemC_VPC {
         pcb.setPriority(mapping->getPriority());
 
         pcb.setDelay(mapping->getDelay(pcb.getFuncName()));
+        pcb.setLatency(mapping->getFuncLatency(pcb.getFuncName()));
         pcb.setRemainingDelay(pcb.getDelay());
 
       }
@@ -160,7 +170,7 @@ namespace SystemC_VPC {
        * Generic implementation of required method:
        *  - perform binding strategy depending on subclasses
        *  - update PCB to made decision
-       *  \sa AbstractBinder::resolveBinding
+       * \sa AbstractBinder::resolveBinding
        */
       std::string resolveBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException){
 
@@ -184,6 +194,10 @@ namespace SystemC_VPC {
 
       virtual ~StaticBinder() {}
 
+      /**
+       * \brief Base implementation of AbstractBinder::registerBinding
+       * Registers a binding possiblity to binder instance.
+       */
       virtual void registerBinding(std::string src, std::string target){
 
 #ifdef VPC_DEBUG
@@ -227,6 +241,10 @@ namespace SystemC_VPC {
 
       virtual ~DynamicBinder() {}
 
+      /**
+       * \brief Base implementation of AbstractBinder::registerBinding
+       * Registers a binding possiblity to binder instance.
+       */
       virtual void registerBinding(std::string src, std::string target){
 
 #ifdef VPC_DEBUG

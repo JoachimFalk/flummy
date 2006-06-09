@@ -8,20 +8,20 @@ namespace SystemC_VPC {
 
   MappingInformation::MappingInformation()
     : priority(0),
-      period(0),
-      deadline(0),
-      dmapper(0) {}
+      period(SC_ZERO_TIME),
+      deadline(SC_ZERO_TIME),
+      dmapper() {}
 
   MappingInformation::~MappingInformation() {}
 
   /**
    * \brief Gets period of instance
    */
-  void MappingInformation::setPeriod(double period){
+  void MappingInformation::setPeriod(sc_time period){
     this->period = period;
   }
 
-  double MappingInformation::getPeriod() const{
+  sc_time MappingInformation::getPeriod() const{
     return this->period;
   }
 
@@ -33,11 +33,11 @@ namespace SystemC_VPC {
     return this->priority;
   }
 
-  void MappingInformation::setDeadline(double deadline){
+  void MappingInformation::setDeadline(sc_time deadline){
     this->deadline = deadline;
   }
 
-  double MappingInformation::getDeadline() const{
+  sc_time MappingInformation::getDeadline() const{
     return this->deadline;
   }
 
@@ -48,7 +48,7 @@ namespace SystemC_VPC {
    * \param delay represents the execution delay needed for execution  on
    * specified component
    */
-  void MappingInformation::addDelay(const char* funcname, double delay){
+  void MappingInformation::addDelay(const char* funcname, sc_time delay){
 
 #ifdef VPC_DEBUG
     std::cerr << "MappingInformation> Adding Function Delay ";
@@ -65,7 +65,7 @@ namespace SystemC_VPC {
    * \brief Used to access delay of a PCB instance on a given component
    * \param funcname refers to an optional function name
    */
-  double MappingInformation::getDelay(const char* funcname) const{
+  sc_time MappingInformation::getDelay(const char* funcname) const{
 
 #ifdef VPC_DEBUG
     std::cerr << "MappingInformation> Delay ";
@@ -96,5 +96,44 @@ namespace SystemC_VPC {
     return this->dmapper.hasDelay(funcname);
   }
 
+  void MappingInformation::addFuncLatency(const char* funcname, sc_time delay){
+
+#ifdef VPC_DEBUG
+    std::cerr << "MappingInformation> Adding Function Latency";
+    if(funcname != NULL){
+      std::cerr << " function " << funcname;
+    }
+    std::cerr << " delay " << delay << std::endl;
+#endif //VPC_DEBUG
+
+    this->dmapper.addFuncLatency(funcname, delay);
+  }
+        
+  sc_time MappingInformation::getFuncLatency(const char* funcname) const{
+
+#ifdef VPC_DEBUG
+    std::cerr << "MappingInformation> Latency";
+    if(funcname != NULL){
+      std::cerr << "->" << funcname;
+    }
+    std::cerr << " is " << this->dmapper->getLatency(comp, funcname) << std::endl;
+#endif //VPC_DEBUG
+
+    return this->dmapper.getFuncLatency(funcname);
+  }
+              
+  bool MappingInformation::hasLatency(const char* funcname) const{
+
+#ifdef VPC_DEBUG
+    std::cerr << "MappingInformation> Request";
+    if(funcname != NULL){
+      std::cerr << " with function " << funcname;
+    }
+    std::cerr << " has special latency ? " << this->dmapper->hasLatency(comp, funcname) << std::endl;
+#endif //VPC_DEBUG
+
+    return this->dmapper.hasLatency(funcname);
+  }
+                    
 }
 

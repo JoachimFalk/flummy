@@ -104,9 +104,9 @@ namespace SystemC_VPC {
     return (this->waitingTasks.size() + this->runningTasks.size());
   }
 
-  double RREConfElement::getExecutionSum(){
+  sc_time RREConfElement::getExecutionSum(){
 
-    double sum = 0;
+    sc_time sum = SC_ZERO_TIME;
     
     std::deque<ProcessControlBlock* >::iterator iter;
     for(iter = this->runningTasks.begin(); iter != this->runningTasks.end(); iter++){
@@ -416,11 +416,11 @@ namespace SystemC_VPC {
       //currently use fixed value beta
       double beta = 0.5;
       //sum up current execution times of each task on configuration
-      sc_time execTime = sc_time(elem->getExecutionSum(), SC_NS);
+      sc_time execTime = elem->getExecutionSum(); //sc_time(elem->getExecutionSum(), SC_NS);
       Configuration* c = rc->getActivConfiguration();
-      sc_time reconfTime = (c->getLoadTime() + c->getStoreTime());
+      //sc_time reconfTime = (c->getLoadTime() + c->getStoreTime());
 
-      killConf = ((execTime / reconfTime) < beta);
+      killConf = ((execTime / c->getStoreTime()) < beta); //((execTime / reconfTime) < beta);
       this->setPreemptionStrategy(killConf);
     }
     return killConf;

@@ -28,7 +28,7 @@ namespace SystemC_VPC{
   /**
    * \brief Creates instance of Configuration
    */    
-  Configuration::Configuration(const char* name, char* loadTime, char* storeTime) 
+  Configuration::Configuration(const char* name, sc_time loadTime, sc_time storeTime) 
     : activ(false), stored(false){
       
     strcpy(this->configName,name);
@@ -155,7 +155,7 @@ namespace SystemC_VPC{
         iter != this->component_map_by_name.end(); iter++){
   
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " trying to preempt component: " << iter->first << " with kill=" << kill) << std::endl;
 #endif // VPC_DEBUG
   
@@ -180,7 +180,7 @@ namespace SystemC_VPC{
         iter != this->component_map_by_name.end(); iter++){
 
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " trying to resume component: " << iter->first) << std::endl;
 #endif // VPC_DEBUG
   
@@ -207,7 +207,7 @@ namespace SystemC_VPC{
         iter != this->component_map_by_name.end(); iter++){
   
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " caculate time to preempt component: " << iter->first) << std::endl;
 #endif // VPC_DEBUG
   
@@ -219,7 +219,7 @@ namespace SystemC_VPC{
     }
 
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " time of preemption: " << max) << std::endl;
 #endif // VPC_DEBUG
     
@@ -246,7 +246,7 @@ namespace SystemC_VPC{
     }
 
 #ifdef VPC_DEBUG
-          std::cerr << YELLOW("Configuration " << this->getName() 
+          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
               << " time of resuming: " << max) << std::endl;
 #endif // VPC_DEBUG
 
@@ -256,22 +256,22 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::setStoreTime
    */
-  void Configuration::setStoreTime(char* time){
+  void Configuration::setStoreTime(sc_time time){
       
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> setting store time: " 
-        << YELLOW("time = " << time) << std::endl;
+        << VPC_YELLOW("time = " << time) << std::endl;
 #endif //VPC_DEBUG
     
-    try{
-      this->storeTime = this->createSC_Time(time);
-    }catch(InvalidArgumentException& e){
-      double timeVal = atof(time);
-      this->storeTime = sc_time(timeVal, SC_NS);
+    if(time >= SC_ZERO_TIME){
+      this->storeTime = time;
+    }else{
+      this->storeTime = SC_ZERO_TIME;
     }
+    
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> store time set to: " 
-        << YELLOW( this->storeTime) << std::endl;
+        << VPC_YELLOW( this->storeTime) << std::endl;
 #endif //VPC_DEBUG
   }    
 
@@ -285,71 +285,25 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::setLoadTime
    */
-  void Configuration::setLoadTime(char* time){
+  void Configuration::setLoadTime(sc_time time){
       
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> setting load time: " 
-        << YELLOW("time = " << time) << std::endl;
+        << VPC_YELLOW("time = " << time) << std::endl;
 #endif //VPC_DEBUG
     
-    try{
-      this->loadTime = this->createSC_Time(time);
-    }catch(InvalidArgumentException& e){
-      double timeVal = atof(time);
-      this->loadTime = sc_time(timeVal, SC_NS);
+    if(time >= SC_ZERO_TIME){
+      this->loadTime = time;
+    }else{
+      this->loadTime = SC_ZERO_TIME;
     }
     
 #ifdef VPC_DEBUG
     std::cerr << "Configuration> load time set to: " 
-        << YELLOW(this->loadTime) << std::endl;
+        << VPC_YELLOW(this->loadTime) << std::endl;
 #endif //VPC_DEBUG
 
   }    
-
-  sc_time Configuration::createSC_Time(char* timeString) throw(InvalidArgumentException){
-    assert(timeString != NULL);
-    double value = -1;
-    string unit;
-
-    sc_time_unit scUnit = SC_NS;
-
-    std::stringstream data(timeString);
-    int oldPos = data.tellg();
-    if(data.good()){
-      data >> value;
-    }else{
-      string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
-      throw InvalidArgumentException(msg);
-    }
-    if( data.fail() ){
-      string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
-      throw InvalidArgumentException(msg);
-    }
-    if(data.good()){
-      data >> unit;
-      if(data.fail()){
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!" << std::endl;
-#endif //VPC_DEBUG
-        scUnit = SC_NS;
-      }else{
-        std::transform (unit.begin(),unit.end(), unit.begin(), (int(*)(int))tolower);
-        if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
-        else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
-        else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
-        else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
-        else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
-        else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
-      }
-    }
-
-    return sc_time(value, scUnit);
-  }
-
   
   /**
    * \brief Implementation of Configuration::getLoadTime

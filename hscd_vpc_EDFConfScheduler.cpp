@@ -20,7 +20,7 @@ namespace SystemC_VPC{
   void EDFConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("EDFConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+    std::cerr << VPC_YELLOW("EDFConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
@@ -59,7 +59,7 @@ namespace SystemC_VPC{
           || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("EDFConfScheduler " << this->getController().getName() << "> next config to load: "
+        std::cerr << VPC_YELLOW("EDFConfScheduler " << this->getController().getName() << "> next config to load: "
               << next) << std::endl;
 #endif //VPC_DEBUG
 
@@ -96,7 +96,7 @@ namespace SystemC_VPC{
   void EDFConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
 
 #ifdef VPC_DEBUG
-    std::cerr << YELLOW("EDFConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << VPC_YELLOW("EDFConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
 
     //get made decision for pcb
@@ -111,13 +111,15 @@ namespace SystemC_VPC{
       iter->removeDeadline(pcb->getDeadline());
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("EDFConfScheduler " << this->getController().getName() << "> deadline of mapped configuration after change is: "
-          << iter->getDeadline()) << std::endl;
+      std::cerr << VPC_YELLOW("EDFController " << this->getController().getName() << "> deadline of mapped configuration after change is: ");
+      if( iter->hasDeadline() ) std::cerr << VPC_YELLOW(iter->getDeadline());
+      else                      std::cerr << VPC_YELLOW( "-1" );
+      std::cerr << std::endl;
 #endif //VPC_DEBUG
 
       iter->removeDeadline(this->getEarliestDeadline(pcb, this->getManagedComponent()));
 
-      if(iter->getDeadline() != -1){
+      if(iter->hasDeadline()){
         this->nextConfigurations.sort();
       }else{
         // remove configuration from EDF list
@@ -140,7 +142,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of EDFConfScheduler::getEarliestDeadline
    */
-  double EDFConfScheduler::getEarliestDeadline(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
+  sc_time EDFConfScheduler::getEarliestDeadline(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
     // first of all get controller to retrieve decision for task
     AbstractController& ctrl = this->getController();
     Decision d = ctrl.getDecision(pcb->getPID(), rc);
@@ -148,7 +150,10 @@ namespace SystemC_VPC{
     MIMapper& miMapper = this->getMIMapper();
     MappingInformationIterator* iter = miMapper.getMappingInformationIterator(pcb->getName(), d.comp);
     // now iteratate over possibilities and choose appropriate one
-    double deadline = DBL_MAX;
+    sc_time deadline = SC_ZERO_TIME;
+    if(iter->hasNext()){
+      deadline = iter->getNext()->getDeadline();
+    }
     
     while(iter->hasNext()){
       MappingInformation* mi = iter->getNext();

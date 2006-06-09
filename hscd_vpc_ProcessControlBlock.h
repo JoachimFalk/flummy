@@ -11,6 +11,8 @@
 
 //#include "hscd_vpc_MappingInformation.h"
 
+#include "hscd_vpc_EventPair.h"
+
 namespace SystemC_VPC {
  
   class MappingInformation;
@@ -66,12 +68,19 @@ namespace SystemC_VPC {
       const char* funcname;
       int pid;
       sc_event* interrupt;
-      CoSupport::SystemC::Event* blockEvent;
-      double delay;
-      double remainingDelay;
+      EventPair blockEvent;
+      sc_time delay;
+      
+      /**
+       * \brief For pipelining usage!
+       * This is not exact the latency, but it is "real_latency - delay", in fact.
+       * While real_latency is given within configuration file.
+       */
+      sc_time latency;
+      sc_time remainingDelay;
       int priority;
-      double period;
-      double deadline;
+      sc_time period;
+      sc_time deadline;
       activation_state state;
       sc_signal<trace_value>* traceSignal;
 
@@ -147,44 +156,54 @@ namespace SystemC_VPC {
       /**
        * \brief Sets block event of PCB instance
        */
-      void setBlockEvent(CoSupport::SystemC::Event* blockEvent);
+      void setBlockEvent(EventPair blockEvent);
 
       /**
        * \brief Gets block event of PCB instance
        */
-      CoSupport::SystemC::Event* getBlockEvent() const;
+      EventPair getBlockEvent() const;
 
       /**
        * \brief Sets current associated delay of instance
        */
-      void setDelay(double delay);
+      void setDelay(sc_time delay);
 
       /**
        * \brief Gets currently associated delay of PCB instance
        */
-      double getDelay() const;
+      sc_time getDelay() const;
+
+      /**
+       * \brief Sets current associated latency of instance
+       */
+      void setLatency(sc_time latency);
+
+      /**
+       * \brief Gets currently associated latency of PCB instance
+       */
+      sc_time getLatency() const;
 
       /**
        * \brief Sets currently remaining delay of PCB instance
        */
-      void setRemainingDelay(double delay);
+      void setRemainingDelay(sc_time delay);
 
       /**
        * \brief Gets currently remaining delay of PCB instance
        */
-      double getRemainingDelay() const;
+      sc_time getRemainingDelay() const;
       
-      void setPeriod(double period);
+      void setPeriod(sc_time period);
 
-      double getPeriod() const;
+      sc_time getPeriod() const;
       
       void setPriority(int priority);
 
       int getPriority() const;
 
-      void setDeadline(double deadline);
+      void setDeadline(sc_time deadline);
 
-      double getDeadline() const;
+      sc_time getDeadline() const;
 
       /**
        * \brief Used to increment activation count of this PCB instance
@@ -237,8 +256,10 @@ namespace SystemC_VPC {
     bool operator()(const p_queue_entry& pqe1,
         const p_queue_entry& pqe2) const
     {
-      double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
-      double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
+      double p1 = sc_time(1,SC_NS)/pqe1.pcb->getPeriod();
+      double p2 = sc_time(1,SC_NS)/pqe2.pcb->getPeriod();
+      //double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
+      //double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
       if (p1 > p2)
         return true;
       else if(p1 == p2)

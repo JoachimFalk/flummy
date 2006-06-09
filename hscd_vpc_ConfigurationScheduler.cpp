@@ -20,7 +20,7 @@ namespace SystemC_VPC{
     if(0 == strcmp(key, "mode")){
 
 #ifdef VPC_DEBUG
-      std::cerr << BLUE("ConfigurationScheduler> Found input data for preemption mode = ") << value << std::endl;
+      std::cerr << VPC_BLUE("ConfigurationScheduler> Found input data for preemption mode = ") << value << std::endl;
 #endif //VPC_DEBUG
       if(0 == strcmp(value, "kill")){
         this->setPreemptionStrategy(true);

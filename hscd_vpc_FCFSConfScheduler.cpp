@@ -26,9 +26,9 @@ namespace SystemC_VPC{
   void FCFSConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
+        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
           << "For task " << newTask->getName() << " with required configuration id " << config << " at " << sc_simulation_time() << endl;
-//        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+//        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // first of all add task to local storage structure
@@ -49,17 +49,17 @@ namespace SystemC_VPC{
       reqConfig = this->readyTasks.front().second;
 
 #ifdef VPC_DEBUG
-      std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> processing task ") << currTask->getName()
+      std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> processing task ") << currTask->getName()
         << " with required configuration id " << reqConfig << endl;
       if(this->getManagedComponent()->getActivConfiguration() == NULL){
-        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> no activ configuration for managed component ") << endl;
+        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> no activ configuration for managed component ") << endl;
       }else{
-        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> activ configuration for managed component is ") 
+        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> activ configuration for managed component is ") 
           << this->getManagedComponent()->getActivConfiguration()->getName() << " with id " 
           << this->getManagedComponent()->getActivConfiguration()->getID() << endl;
-        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> currently running num of tasks on conf ") << this->runningTasks.size() << endl;
+        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> currently running num of tasks on conf ") << this->runningTasks.size() << endl;
       }
-      std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> next configuration is set to ") << this->nextConfiguration << endl;
+      std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> next configuration is set to ") << this->nextConfiguration << endl;
 #endif //VPC_DEBUG
 
       // check if
@@ -69,7 +69,7 @@ namespace SystemC_VPC{
           || reqConfig == this->nextConfiguration){ // or required conf fits already selected one
 
 #ifdef VPC_DEBUG
-        std::cerr << YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> can process task ") << currTask->getName() 
+        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> can process task ") << currTask->getName() 
           << " with required configuration " << reqConfig << endl;
 #endif //VPC_DEBUG
 

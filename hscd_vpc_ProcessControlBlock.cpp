@@ -49,7 +49,7 @@ namespace SystemC_VPC{
       (*(this->copyCount))--;
     }
   }
-  
+ 
   ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb){
 
     this->setName(pcb.getName());
@@ -59,11 +59,12 @@ namespace SystemC_VPC{
     this->setPriority(pcb.getPriority());
     
    
-    this->blockEvent = NULL;
-    this->setDelay(0);
+    this->blockEvent = EventPair();
+    this->setDelay(SC_ZERO_TIME);
+    this->setLatency(SC_ZERO_TIME);
     this->setFuncName(NULL);
     this->setInterrupt(NULL);
-    this->setRemainingDelay(0);
+    this->setRemainingDelay(SC_ZERO_TIME);
     this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
@@ -72,17 +73,22 @@ namespace SystemC_VPC{
     // remember amount of copies for later clean up 
     this->copyCount = pcb.copyCount;
     (*(this->copyCount))++; 
-  }
 
+    this->activationCount = new ActivationCounter();
+    this->mInfos = new std::set<MappingInformation* >();
+    this->copyCount = new int(0);
+  }
+ 
   void ProcessControlBlock::init(){
 
-    this->blockEvent = NULL;
-    this->deadline = DBL_MAX;
-    this->delay = 0;
+    this->blockEvent = EventPair();
+    this->deadline = sc_time(DBL_MAX, SC_SEC);
+    this->delay = SC_ZERO_TIME;
+    this->latency = SC_ZERO_TIME;
     this->funcname = NULL;
     this->interrupt = NULL;
-    this->remainingDelay = 0;
-    this->period = DBL_MAX;
+    this->remainingDelay = SC_ZERO_TIME;
+    this->period = sc_time(DBL_MAX, SC_SEC);
     this->pid = ProcessControlBlock::global_pid++;
     this->priority = INT_MAX;
     this->traceSignal = NULL;
@@ -91,7 +97,8 @@ namespace SystemC_VPC{
     this->activationCount = new ActivationCounter();
     this->mInfos = new std::set<MappingInformation* >();
     this->copyCount = new int(0);
-  }
+
+  } 
   
   void ProcessControlBlock::setName(std::string name){
     this->name = name;
@@ -125,43 +132,43 @@ namespace SystemC_VPC{
     return this->interrupt;
   }
 
-  void ProcessControlBlock::setBlockEvent(CoSupport::SystemC::Event* blockEvent){
+  void ProcessControlBlock::setBlockEvent(EventPair blockEvent){
     this->blockEvent = blockEvent;
   }
 
-  CoSupport::SystemC::Event* ProcessControlBlock::getBlockEvent() const{
+  EventPair ProcessControlBlock::getBlockEvent() const{
     return this->blockEvent;
   }
 
-  void ProcessControlBlock::setDelay(double delay){
-    if(delay > 0){
-      this->delay = delay;
-    }else{
-      this->delay = 0;
-    }
+  void ProcessControlBlock::setDelay(sc_time delay){
+    this->delay = delay;
   }
 
-  double ProcessControlBlock::getDelay() const{
+  sc_time ProcessControlBlock::getDelay() const{
     return this->delay;
   }
 
-  void ProcessControlBlock::setRemainingDelay(double delay){
-    if(delay > 0){
-      this->remainingDelay = delay;
-    }else{
-      this->remainingDelay = 0;
-    }
+  void ProcessControlBlock::setLatency(sc_time latency){
+    this->latency = latency;
   }
 
-  double ProcessControlBlock::getRemainingDelay() const{
+  sc_time ProcessControlBlock::getLatency() const{
+    return this->latency;
+  }
+
+  void ProcessControlBlock::setRemainingDelay(sc_time delay){
+    this->remainingDelay = delay;
+  }
+
+  sc_time ProcessControlBlock::getRemainingDelay() const{
     return this->remainingDelay;
   }
 
-  void ProcessControlBlock::setPeriod(double period){
+  void ProcessControlBlock::setPeriod(sc_time period){
     this->period = period;
   }
 
-  double ProcessControlBlock::getPeriod() const{
+  sc_time ProcessControlBlock::getPeriod() const{
     return this->period;
   }
 
@@ -173,15 +180,15 @@ namespace SystemC_VPC{
     return this->priority;
   }
 
-  void ProcessControlBlock::setDeadline(double deadline){
-    if(deadline > 0){
+  void ProcessControlBlock::setDeadline(sc_time deadline){
+    if(deadline > SC_ZERO_TIME){
       this->deadline = deadline;
     }else{
-      this->deadline = 0;
+      this->deadline = SC_ZERO_TIME;
     }
   }
 
-  double ProcessControlBlock::getDeadline() const{
+  sc_time ProcessControlBlock::getDeadline() const{
     return this->deadline;
   }
 
