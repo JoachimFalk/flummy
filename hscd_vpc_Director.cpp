@@ -150,8 +150,18 @@ namespace SystemC_VPC{
   }
 
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
+
     assert(!FALLBACKMODE);
-    return this->pcbPool.allocate(name);
+
+    try{ 
+      return this->pcbPool.allocate(name);
+    }catch(NotAllocatedException& e){
+      std::cerr << "Director> getProcessControlBlock failed due to" << std::endl
+        << e.what() << std::endl;
+      std::cerr << "HINT: probably actor binding not specified in configuration file!" << std::endl;
+      exit(-1);
+    }
+    
   }
 
   PCBPool& Director::getPCBPool(){
