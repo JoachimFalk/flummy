@@ -7,7 +7,7 @@ namespace SystemC_VPC {
 
   RRBinder::~RRBinder() {}
 
-  std::pair<std::string, MappingInformation* > RRBinder::performBinding(ProcessControlBlock& pcb, AbstractComponent* comp)
+  std::pair<std::string, MappingInformation* > RRBinder::performBinding(ProcessControlBlock& pcb, ReconfigurableComponent* comp)
     throw(UnknownBindingException) {
       
     AbstractBinding& binding = this->getBinding(pcb.getName());

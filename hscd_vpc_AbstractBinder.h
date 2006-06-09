@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 
-#include "hscd_vpc_AbstractComponent.h"
+//#include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_Bindings.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "hscd_vpc_MappingInformation.h"
@@ -15,7 +15,8 @@ namespace SystemC_VPC {
 
   class Controller;
   class MIMapper;
-
+  class ReconfigurableComponent;
+  
   class UnknownBindingException : public std::exception {
 
     private:
@@ -62,12 +63,13 @@ namespace SystemC_VPC {
         return *miMapper;
       }
 
+    public:
+
       /**
        * \brief Used internally for accessing managed Bindings
        */
-      virtual AbstractBinding& getBinding(std::string const& task, AbstractComponent* comp)=0;
+      virtual AbstractBinding& getBinding(std::string const& task, ReconfigurableComponent* comp)=0;
 
-    public:
 
       virtual ~AbstractBinder(){}
 
@@ -75,7 +77,7 @@ namespace SystemC_VPC {
        * \brief Resolves bindings possibility for a given task on an given component
        * Uses specialized binding strategy to resolve binding for one task out of a set of possiblities.
        */
-      virtual std::string resolveBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException) =0;
+      virtual std::string resolveBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException) =0;
 
       /**
        * \brief Register additional binding possibility to Binder instance
@@ -127,12 +129,14 @@ namespace SystemC_VPC {
 
       std::map<std::string, AbstractBinding*> bindings;  
 
+    public:
+      
       /**
        * \brief Implementation of getBinding intended to enable access to managed Bindings
        * As this implementation only covers resolving  binding on single hierarchy the information
        * of requesting component is neglected and set to NULL by default.
        */
-      AbstractBinding& getBinding(std::string const& task, AbstractComponent* comp=NULL) throw(UnknownBindingException){
+      AbstractBinding& getBinding(std::string const& task, ReconfigurableComponent* comp=NULL) throw(UnknownBindingException){
 
         std::map<std::string, AbstractBinding* >::iterator iter;
         iter = bindings.find(task);
@@ -145,10 +149,12 @@ namespace SystemC_VPC {
 
       }
 
+    protected:
+      
       /**
        * \brief Internal required method for performing binding strategy
        */
-      virtual std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& pcb, AbstractComponent* comp) 
+      virtual std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& pcb, ReconfigurableComponent* comp) 
         throw(UnknownBindingException) =0;
 
       LocalBinder(Controller* controller, MIMapper* miMapper) : AbstractBinder(controller, miMapper) {}
@@ -172,7 +178,7 @@ namespace SystemC_VPC {
        *  - update PCB to made decision
        * \sa AbstractBinder::resolveBinding
        */
-      std::string resolveBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException){
+      std::string resolveBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException){
 
         std::pair<std::string, MappingInformation*> decision;
         decision = performBinding(task, comp);

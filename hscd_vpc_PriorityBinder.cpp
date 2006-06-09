@@ -18,7 +18,7 @@ namespace SystemC_VPC {
     
   }
 
-  std::pair<std::string, MappingInformation* > PriorityBinder::performBinding(ProcessControlBlock& task, AbstractComponent* comp) 
+  std::pair<std::string, MappingInformation* > PriorityBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) 
     throw(UnknownBindingException){
     
     AbstractBinding& binding = this->getBinding(task.getName());

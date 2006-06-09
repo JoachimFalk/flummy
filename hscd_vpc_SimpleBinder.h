@@ -14,7 +14,7 @@ namespace SystemC_VPC {
 
       SimpleBinder::~SimpleBinder();
 
-      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException);
+      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
 
       /**
        * \brief Implementation of TaskEventListener::signalTaskEvent

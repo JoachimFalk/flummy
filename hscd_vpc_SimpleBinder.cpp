@@ -6,7 +6,7 @@ namespace SystemC_VPC {
 
   SimpleBinder::~SimpleBinder() {}
 
-  std::pair<std::string, MappingInformation* > SimpleBinder::performBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException){
+  std::pair<std::string, MappingInformation* > SimpleBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException){
     AbstractBinding& b = this->getBinding(task.getName());
     
     b.reset();

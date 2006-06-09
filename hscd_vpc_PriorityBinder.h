@@ -76,7 +76,7 @@ namespace SystemC_VPC {
 
       ~PriorityBinder();
 
-      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, AbstractComponent* comp) throw(UnknownBindingException);
+      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
 
       virtual void registerBinding(std::string src, std::string target);
 

@@ -29,7 +29,7 @@ namespace SystemC_VPC {
        * \param comp refers to the component requesting resolving, which is ignored in this implementation
        * \sa AbstractBinder
        */
-      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& pcb, AbstractComponent* comp) throw(UnknownBindingException);
+      std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& pcb, ReconfigurableComponent* comp) throw(UnknownBindingException);
      
       /**
        * \brief Implementation of TaskEventListener::signalTaskEvent

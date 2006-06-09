@@ -81,13 +81,16 @@ namespace SystemC_VPC {
   // definition for RoundRobinBinder instance
 #define STR_VPC_RRBINDER     "RoundRobin"
 #define STR_VPC_RRB          "RR"
-//definition for PriorityBinder using LeastCurrentlyBoundPE
+  //definition for PriorityBinder using LeastCurrentlyBoundPE
 #define STR_VPC_LCBBINDER    "LeastCurrentlyBoundBinder"
 #define STR_VPC_LCBB         "LCBB"
-//definition for PriorityBinder using LeastCurrentlyBoundPE
+  //definition for PriorityBinder using LeastCurrentlyBoundPE
 #define STR_VPC_LFBBINDER    "LeastFrequentlyUsedBinder"
 #define STR_VPC_LFBB         "LFUB"
- 
+  //definition for ARBinder
+#define STR_VPC_ARBINDER     "AvoidReconfigurationBinder"
+#define STR_VPC_ARB          "ARB"
+  
   /***********************************
    * SECTION Mapper
    ***********************************/

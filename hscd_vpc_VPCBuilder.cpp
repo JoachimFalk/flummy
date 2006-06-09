@@ -15,10 +15,10 @@
 #include "hscd_vpc_EDFConfScheduler.h"
 #include "hscd_vpc_RREConfScheduler.h"
 
+#include "hscd_vpc_ARBinder.h"
 #include "hscd_vpc_SimpleBinder.h"
 #include "hscd_vpc_RRBinder.h"
 #include "hscd_vpc_PriorityBinder.h"
-
 #include "hscd_vpc_LeastCurrentlyBoundPE.h"
 #include "hscd_vpc_LeastFrequentlyUsedPE.h"
 
@@ -1101,6 +1101,10 @@ namespace SystemC_VPC{
       // TODO: UPDATE IMPLEMENTATION IF NEW BINDER IS IMPLEMENTED
       AbstractBinder* binder = NULL;
 
+      if(0==strncmp(type, STR_VPC_ARBINDER, strlen(STR_VPC_ARBINDER))
+          || 0==strncmp(type, STR_VPC_ARB, strlen(STR_VPC_ARB))){
+        binder = new ARBinder(controller, controller->getMIMapper());
+      }else 
       if(0==strncmp(type, STR_VPC_SIMPLEBINDER, strlen(STR_VPC_SIMPLEBINDER))
           || 0==strncmp(type, STR_VPC_SB, strlen(STR_VPC_SB))){
         binder = new SimpleBinder(controller, controller->getMIMapper());
