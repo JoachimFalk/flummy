@@ -1,10 +1,11 @@
 #include "hscd_vpc_PriorityBinder.h"
-#include "hscd_vpc_Controller.h"
+
+#include "hscd_vpc_ReconfigurableComponent.h"
 
 namespace SystemC_VPC {
 
-  PriorityBinder::PriorityBinder(Controller* controller, MIMapper* miMapper, PriorityElementFactory* factory) 
-    : DynamicBinder(controller, miMapper), factory(factory) {}
+  PriorityBinder::PriorityBinder(PriorityElementFactory* factory) 
+    : DynamicBinder(), factory(factory) {}
 
   PriorityBinder::~PriorityBinder() {
     
@@ -20,24 +21,27 @@ namespace SystemC_VPC {
 
   std::pair<std::string, MappingInformation* > PriorityBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) 
     throw(UnknownBindingException){
-    
-    AbstractBinding& binding = this->getBinding(task.getName());
-    MIMapper& mapper = this->getMIMapper();
-    
-    // reset iterator to the begining
-    binding.reset();
+     
+    Binding* binding = NULL;
+    if(comp == NULL){
+      binding = task.getBindingGraph().getRoot();
+    }else{
+      binding = task.getBindingGraph().getBinding(comp->basename());
+    }
+
+   	ChildIterator* bIter = binding->getChildIterator(); 
     
     //determine best current selectable binding
     PriorityElement* elem=NULL;
     std::string target = "";
     
     // init selection
-    if(binding.hasNext()){
-      target = binding.getNext();
+    if(bIter->hasNext()){
+      target = bIter->getNext()->getID();
 #ifdef VPC_DEBUG
       std::cerr << "PriorityElement> intial target is " << target << std::endl;
 #endif //VPC_DEBUG
-      elem = this->pelems[target];
+      elem = this->getPElem(target);
     }else{
       std::string msg = task.getName() +"->?";
       throw UnknownBindingException(msg);
@@ -47,9 +51,9 @@ namespace SystemC_VPC {
     std::string tmpTarget;
 
     // based on the made decision select highest prior element
-    while(binding.hasNext()){
-       tmpTarget = binding.getNext();
-       tmpElem = this->pelems[tmpTarget];
+    while(bIter->hasNext()){
+       tmpTarget = bIter->getNext()->getID();
+       tmpElem = this->getPElem(tmpTarget);
        // if priority of tmpElem is higher then current select switch
        if(*tmpElem > *elem){
 #ifdef VPC_DEBUG
@@ -61,34 +65,33 @@ namespace SystemC_VPC {
     }
     
     // update priority element by offering selectable mapping infos of binding
-    MappingInformationIterator* iter = mapper.getMappingInformationIterator(task.getName(), target);
+    MappingInformationIterator* iter = task.getBindingGraph().getBinding(target)->getMappingInformationIterator(); //mapper.getMappingInformationIterator(task.getName(), target);
     MappingInformation* mInfo = elem->addMappingData(*iter);
     delete iter;
     
     return std::pair<std::string, MappingInformation*>(target, mInfo);
   }
 
-  void PriorityBinder::registerBinding(std::string src, std::string target){
-
-    DynamicBinder::registerBinding(src, target);
+  PriorityElement* PriorityBinder::getPElem(std::string target){
     
     // initialize additional management structures
     std::map<std::string, PriorityElement* >::iterator iter;
     iter = this->pelems.find(target);
     // check if no a PriorityElement already exists
     if(iter == this->pelems.end()){
-      PriorityElement* elem = this->factory->createInstance();
-      this->pelems[target] = elem;
-    }
-
+      PriorityElement* tmp = this->factory->createInstance();
+      this->pelems[target] = tmp;
+      return tmp;
+    }else{
+			return (iter->second);
+		}
+    
   }
 
   void PriorityBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
 
-    Decision d = this->getController().getDecision(pcb->getPID(), this->getController().getManagedComponent());
-    MIMapper& mapper = this->getMIMapper();
-    MappingInformationIterator* mIter = mapper.getMappingInformationIterator(pcb->getName(), d.comp);
-    PriorityElement* elem = this->pelems[d.comp];
+    MappingInformationIterator* mIter = pcb->getBindingGraph().getBinding(compID)->getMappingInformationIterator();
+    PriorityElement* elem = this->getPElem(compID);
     
     elem->removeMappingData(*mIter);
 

@@ -64,6 +64,7 @@ namespace SystemC_VPC{
     XMLCh* mapperStr;
     XMLCh* schedulerStr;
     XMLCh* timingStr;
+    XMLCh* directorStr;
     //XMLCh *Str;
    
     // tags for attributes 
@@ -152,6 +153,7 @@ namespace SystemC_VPC{
       binderStr       = XMLString::transcode("binder");
       mapperStr       = XMLString::transcode("mapper");
       schedulerStr    = XMLString::transcode("scheduler");
+      directorStr     = XMLString::transcode("director");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");
@@ -269,7 +271,8 @@ namespace SystemC_VPC{
      * This method is used to add corresponding binding information at each
      * level within the control hierarchy of vpc
      */
-    void buildUpBindHierarchy(const char* source, const char* target, MappingInformation* mInfo);
+    //void buildUpBindHierarchy(const char* source, const char* target, MappingInformation* mInfo);
+    void buildUpBindHierarchy(ProcessControlBlock& p, const char* target, MappingInformation* mInfo);
     
     /**
      * \brief Generates controller instance for Component
@@ -282,20 +285,19 @@ namespace SystemC_VPC{
      * \brief Generates controller instance for Component
      * \param id is the id to be set for the controller     
      */
-    AbstractBinder* generateBinder(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
+    AbstractBinder* generateBinder(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
     
     /**
      * \brief Generates controller instance for Component
      * \param id is the id to be set for the controller     
      */
-    AbstractConfigurationMapper* generateMapper(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
+    AbstractConfigurationMapper* generateMapper(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
     
     /**
      * \brief Generates controller instance for Component
      * \param id is the id to be set for the controller     
      */
-    AbstractConfigurationScheduler* generateConfigScheduler(const char* type, DOMNode* node, Controller* controller)throw(InvalidArgumentException);
-
+    AbstractConfigurationScheduler* generateConfigScheduler(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
      */

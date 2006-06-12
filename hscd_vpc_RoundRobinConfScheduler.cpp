@@ -5,7 +5,7 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of RoundRobinConfScheduler
    */
-  RoundRobinConfScheduler::RoundRobinConfScheduler(AbstractController* controller) : ConfigurationScheduler(controller, NULL) {
+  RoundRobinConfScheduler::RoundRobinConfScheduler(AbstractController* controller) : ConfigurationScheduler(controller) {
 
     this->lastassign = -1;
     this->TIMESLICE = 1;

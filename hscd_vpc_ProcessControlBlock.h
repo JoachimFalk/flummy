@@ -9,13 +9,11 @@
 
 #include <systemc_support.hpp>
 
-//#include "hscd_vpc_MappingInformation.h"
-
 #include "hscd_vpc_EventPair.h"
 
 namespace SystemC_VPC {
  
-  class MappingInformation;
+  class BindingGraph; //MappingInformation;
 
   enum activation_state {
     inaktiv,
@@ -90,7 +88,7 @@ namespace SystemC_VPC {
        */
       
       ActivationCounter* activationCount; 
-      std::set<MappingInformation* >* mInfos;
+			BindingGraph* bGraph;
       int* copyCount;
 
     public:
@@ -220,7 +218,7 @@ namespace SystemC_VPC {
 
       sc_signal<trace_value>* getTraceSignal();
 
-      void addMappingInformation(MappingInformation* mInfo);
+			BindingGraph& getBindingGraph();
 
     private:
 

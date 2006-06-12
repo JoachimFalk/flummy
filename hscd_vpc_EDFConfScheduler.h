@@ -147,7 +147,7 @@ namespace SystemC_VPC{
 
     public:
 
-      EDFConfScheduler(AbstractController* controller, MIMapper* miMapper);
+      EDFConfScheduler(AbstractController* controller);
 
       virtual ~EDFConfScheduler();
 

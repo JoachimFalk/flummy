@@ -9,6 +9,8 @@
 
 #include "hscd_vpc_Controller.h"
 
+#include "hscd_vpc_BindingGraph.h"
+
 #include "hscd_vpc_FCFSConfScheduler.h"
 #include "hscd_vpc_RoundRobinConfScheduler.h"
 #include "hscd_vpc_PriorityConfScheduler.h"
@@ -213,6 +215,30 @@ namespace SystemC_VPC{
             this->director->setResultFile(vpc_result_file);
             remove(vpc_result_file.c_str());
         
+        // found section for director settings
+        }else if( 0==XMLString::compareNString( xmlName, directorStr, sizeof( directorStr) ) ){
+          
+#ifdef VPC_DEBUG
+          std::cout << "VPCBuilder> processing director settings " << endl;
+#endif //VPC_DEBUG
+            
+          node = vpcConfigTreeWalker->firstChild();
+          if(node != NULL){ 
+            //foreach setting for director set value of director <-- currently only BINDER  
+            for(; node!=0; node = this->vpcConfigTreeWalker->nextSibling()){
+          
+              DOMNamedNodeMap * atts=node->getAttributes();
+              
+              if( 0==XMLString::compareNString( xmlName, binderStr, sizeof(binderStr) ) ){
+              
+                char* sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());    
+                //this->director->setBinder(this->generateBinder(sName, node, this->director));
+                
+              }
+            }
+        
+            node = vpcConfigTreeWalker->parentNode();
+          }         
         }else{
         
         }
@@ -780,7 +806,7 @@ namespace SystemC_VPC{
 
           //generate new ProcessControlBlock or get existing one for initialization
           ProcessControlBlock& p = this->director->generatePCB(sSource);
-
+          
           //generate new MappingEntry
           MappingInformation* mInfo = new MappingInformation();
 
@@ -897,10 +923,9 @@ namespace SystemC_VPC{
             // node = vpcConfigTreeWalker->parentNode();
 
             //check if component member of a configuration and iterativly adding mapping info
-            this->buildUpBindHierarchy(sSource, sTarget, mInfo);
+            //this->buildUpBindHierarchy(sSource, sTarget, mInfo);
+            this->buildUpBindHierarchy(p, sTarget, mInfo);
 
-            //add mInfo to PCB currently for later clean up
-            p.addMappingInformation(mInfo);
 
           }else{
             std::cerr << "VPCBuilder> No valid component found for mapping: source=" << sSource << " target=" << sTarget<< endl;
@@ -912,13 +937,16 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of VPCBiulder::buildUpBindHierarchy
    */
-  void VPCBuilder::buildUpBindHierarchy(const char* source, const char* target, MappingInformation* mInfo){
-    //while(std::map<std::string, AbstractComponent* >::iterator iter = this->knownComps.find(sTarget);
-    std::map<std::string, std::string>::iterator iterVCtC;
+  //void VPCBuilder::buildUpBindHierarchy(const char* source, const char* target, MappingInformation* mInfo){
+  void VPCBuilder::buildUpBindHierarchy(ProcessControlBlock& pcb, const char* target, MappingInformation* mInfo){
+    Binding* succB = pcb.getBindingGraph().createBinding(target);
+		succB->addMappingInformation(mInfo);
+		
+		std::map<std::string, std::string>::iterator iterVCtC;
     // determine existence of mapping to configuration
     iterVCtC = this->subComp_to_Config.find(target);
     for(;iterVCtC != this->subComp_to_Config.end(); 
-        iterVCtC = this->subComp_to_Config.find(target))
+        iterVCtC = this->subComp_to_Config.find(succB->getID()))
     {
 
 #ifdef VPC_DEBUG
@@ -932,22 +960,24 @@ namespace SystemC_VPC{
 
       if(iterConftC != this->config_to_ParentComp.end()){
 
-        // add mapping to controller of surrounding component
-        ReconfigurableComponent* comp;
-        comp = (ReconfigurableComponent*)this->knownComps[iterConftC->second];
-        comp->getController()->registerMapping(source, target, mInfo, comp);
-
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Additional mapping between: " << source << "<->" << target << std::endl; 
-#endif //VPC_DEBUG
-            
-        target = (iterConftC->second).c_str(); 
+        // add mapping to binding graph of pcb
+				AbstractComponent* comp = this->knownComps[iterConftC->second];
+				Binding* predB = pcb.getBindingGraph().createBinding(comp->basename());
+				predB->addBinding(succB);
+      
+        //#ifdef VPC_DEBUG
+        std::cerr << "VPCBuilder> Additional mapping between: " << predB->getID() << "<->" << succB->getID() << std::endl; 
+//#endif //VPC_DEBUG
+ 		
+        succB = predB;
+			  	
       }
     }
-          
-    //finally register mapping to Director
-    this->director->registerMapping(source, target, mInfo, NULL);
-
+  
+    std::cerr << "VPCBuilder> final add " << pcb.getBindingGraph().getRoot()->getID() << "->" << succB->getID() << std::endl;    
+    //finally register mapping to top level
+		pcb.getBindingGraph().getRoot()->addBinding(succB);
+		
   }
 
   /**
@@ -1033,7 +1063,7 @@ namespace SystemC_VPC{
    */
   AbstractConfigurationScheduler* VPCBuilder::generateConfigScheduler(const char* type,
                                                                       DOMNode* node, 
-                                                                      Controller* controller) 
+                                                                      AbstractController* controller) 
     throw(InvalidArgumentException){
  
       // TODO: UPDATE IMPLEMENTATION IF NEW SCHEDULER IS IMPLEMENTED
@@ -1045,7 +1075,7 @@ namespace SystemC_VPC{
       }else
         if(0==strncmp(type, STR_ROUNDROBINEXTENDED, strlen(STR_ROUNDROBINEXTENDED))
            || 0==strncmp(type, STR_RRE, strlen(STR_RRE))){
-           scheduler = new RREConfScheduler(controller, controller->getMIMapper());
+           scheduler = new RREConfScheduler(controller);
       }else 
         if(0==strncmp(type, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
            || 0==strncmp(type, STR_RR, strlen(STR_RR))){
@@ -1053,11 +1083,11 @@ namespace SystemC_VPC{
       }else
         if(0==strncmp(type, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
            || 0==strncmp(type, STR_PS, strlen(STR_PS))){
-           scheduler = new PriorityConfScheduler(controller, controller->getMIMapper());
+           scheduler = new PriorityConfScheduler(controller);
       }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
-           scheduler = new EDFConfScheduler(controller, controller->getMIMapper());
+           scheduler = new EDFConfScheduler(controller);
       }else{
         string msg("Unkown schedulertype ");
         msg = type;
@@ -1095,7 +1125,7 @@ namespace SystemC_VPC{
    */
   AbstractBinder* VPCBuilder::generateBinder(const char* type, 
                                              DOMNode* node,
-                                             Controller* controller)
+                                             AbstractController* controller)
     throw(InvalidArgumentException){
 
       // TODO: UPDATE IMPLEMENTATION IF NEW BINDER IS IMPLEMENTED
@@ -1103,25 +1133,25 @@ namespace SystemC_VPC{
 
       if(0==strncmp(type, STR_VPC_ARBINDER, strlen(STR_VPC_ARBINDER))
           || 0==strncmp(type, STR_VPC_ARB, strlen(STR_VPC_ARB))){
-        binder = new ARBinder(controller, controller->getMIMapper());
+        binder = new ARBinder();
       }else 
       if(0==strncmp(type, STR_VPC_SIMPLEBINDER, strlen(STR_VPC_SIMPLEBINDER))
           || 0==strncmp(type, STR_VPC_SB, strlen(STR_VPC_SB))){
-        binder = new SimpleBinder(controller, controller->getMIMapper());
+        binder = new SimpleBinder();
       }else 
       if(0==strncmp(type, STR_VPC_RRBINDER,strlen(STR_VPC_RRBINDER))
           || 0==strncmp(type, STR_VPC_RRB,strlen(STR_VPC_RRB))){
-        binder = new RRBinder(controller, controller->getMIMapper());  
+        binder = new RRBinder();  
       }else
       if(0==strncmp(type, STR_VPC_LCBBINDER, strlen(STR_VPC_LCBBINDER))
           || 0==strncmp(type, STR_VPC_LCBB, strlen(STR_VPC_LCBB))){
         PriorityElementFactory* factory = new LCBPEFactory();
-        binder = new PriorityBinder(controller, controller->getMIMapper(), factory);
+        binder = new PriorityBinder(factory);
       }else
       if(0==strncmp(type, STR_VPC_LFBBINDER, strlen(STR_VPC_LFBBINDER))
           || 0==strncmp(type, STR_VPC_LFBB, strlen(STR_VPC_LFBB))){
         PriorityElementFactory* factory = new LFUPEFactory();
-        binder = new PriorityBinder(controller, controller->getMIMapper(), factory);
+        binder = new PriorityBinder(factory);
       }else{
         std::string msg("Unkown bindertype ");
         msg = type;
@@ -1159,7 +1189,7 @@ namespace SystemC_VPC{
    */
   AbstractConfigurationMapper* VPCBuilder::generateMapper(const char* type, 
                                                           DOMNode* node,
-                                                          Controller* controller) 
+                                                          AbstractController* controller) 
     throw(InvalidArgumentException){
     // TODO: probably implement different kind of mappers
     // currently no other mapper exists than ConfigurationPool

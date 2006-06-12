@@ -30,14 +30,12 @@ namespace SystemC_VPC{
       }
     }
    
-    this->miMapper = new MIMapper(); 
   }
 
   Controller::~Controller(){
  
     delete this->binder;
     delete this->scheduler;
-    delete this->miMapper;
     
   }
   
@@ -109,6 +107,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Controller::registerMapping
    */
+  /*
   void Controller::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* rc){
     
 #ifdef VPC_DEBUG
@@ -116,9 +115,7 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
     this->binder->registerBinding(taskName, compName);
 
-    this->miMapper->addMappingInformation(taskName, compName, mInfo);
-    
-  }
+  }*/
   
   /**
    * \brief Implementation of  Controller::setProperty
@@ -227,10 +224,6 @@ namespace SystemC_VPC{
    */
   Decision Controller::getDecision(int pid, ReconfigurableComponent* rc) {
     return this->decisions[pid];
-  }
-
-  MIMapper* Controller::getMIMapper(){
-   return this->miMapper;
   }
 
   void Controller::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){

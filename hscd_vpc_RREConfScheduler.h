@@ -109,7 +109,7 @@ namespace SystemC_VPC {
 
     public:
 
-      RREConfScheduler(AbstractController* ctrl, MIMapper* miMapper, double alpah=0.5);
+      RREConfScheduler(AbstractController* ctrl, double alpah=0.5);
 
       ~RREConfScheduler();
 

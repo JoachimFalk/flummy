@@ -35,8 +35,6 @@
 namespace SystemC_VPC{
 
   class AbstractBinder;
-  class StaticBinder;
-  class MIMapper;
   class ProcessControlBlock;
   class Constraint;
 
@@ -72,10 +70,7 @@ namespace SystemC_VPC{
     double end;
  
     // binder instance to resolve bindings
-    StaticBinder* binder;
-
-    // mapper for MappingInformation
-    MIMapper* miMapper;
+    AbstractBinder* binder;
     
   public:
     bool FALLBACKMODE;
@@ -191,7 +186,7 @@ namespace SystemC_VPC{
      * \param mInfo specifies additional mapping information
      * \sa AbstractDirector
      */
-    void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* comp);
+    //void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* comp);
     
     /**
      * \brief Generates and registers new PCB to Director
@@ -205,8 +200,9 @@ namespace SystemC_VPC{
    
     PCBPool& getPCBPool();
 
-    MIMapper* getMIMapper();
-
+    void setBinder(AbstractBinder* b);
+    AbstractBinder* getBinder();
+    
     //void registerPCB(const char* name, ProcessControlBlock* pcb);
 
     void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);

@@ -1,23 +1,31 @@
 #include "hscd_vpc_SimpleBinder.h"
 
+#include "hscd_vpc_ReconfigurableComponent.h"
+
 namespace SystemC_VPC {
 
-  SimpleBinder::SimpleBinder(Controller* controller, MIMapper* miMapper) : StaticBinder(controller, miMapper) {}
+  SimpleBinder::SimpleBinder() : StaticBinder() {}
 
   SimpleBinder::~SimpleBinder() {}
 
   std::pair<std::string, MappingInformation* > SimpleBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException){
-    AbstractBinding& b = this->getBinding(task.getName());
-    
-    b.reset();
-    if(b.hasNext()){
-      std::string comp = b.getNext();
-      MIMapper& mapper = this->getMIMapper();
-      MappingInformationIterator* iter = mapper.getMappingInformationIterator(task.getName(), comp);
+    Binding* b = NULL;
+    if(comp == NULL){
+      b = task.getBindingGraph().getRoot();
+    }else{
+      b = task.getBindingGraph().getBinding(comp->basename());
+    }
+
+    ChildIterator* bIter = b->getChildIterator();
+    if(bIter->hasNext()){
+			// just take first alternativ
+      b = bIter->getNext();
+			delete bIter;
+      MappingInformationIterator* iter = b->getMappingInformationIterator();
       if(iter->hasNext()){
         MappingInformation* mInfo = iter->getNext();
         delete iter;
-        return std::pair<std::string, MappingInformation*>(comp, mInfo);
+        return std::pair<std::string, MappingInformation*>(b->getID(), mInfo);
       }else{
         // also free iterator
         delete iter;
@@ -28,4 +36,5 @@ namespace SystemC_VPC {
     throw UnknownBindingException(msg);
   }
 
+	void SimpleBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string compID) {}
 }

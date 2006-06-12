@@ -1,91 +1,55 @@
 #ifndef HSCD_VPC_ABSTRACTBINDER_H_
 #define HSCD_VPC_ABSTRACTBINDER_H_
 
-#include <exception>
 #include <map>
 #include <string>
 
 //#include "hscd_vpc_ReconfigurableComponent.h"
-#include "hscd_vpc_Bindings.h"
+#include "hscd_vpc_BindingGraph.h"
+#include "hscd_vpc_Binding.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "hscd_vpc_MappingInformation.h"
 #include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_InvalidArgumentException.h"
 
 namespace SystemC_VPC {
 
-  class Controller;
-  class MIMapper;
   class ReconfigurableComponent;
-  
-  class UnknownBindingException : public std::exception {
-
-    private:
-
-      std::string msg;
-
-    public:
-
-      UnknownBindingException(const std::string& message){
-        msg = "UnkownBindungException> ";
-        msg.append(message);
-      }
-
-      ~UnknownBindingException() throw(){}
-
-      const std::string& what(){
-
-        return this->msg;
-
-      }
-
-  };
+  class AbstractController;
 
   /**
    * \brief Basic binder class specifying interface for all realized binder sub-classes
    */
   class AbstractBinder : public virtual TaskEventListener {
-    
+		
     protected:
 
-      // refers to associated
-      Controller* controller;
-
-      // refers to instance managing MappingInformation
-      MIMapper* miMapper;
-
-      AbstractBinder(Controller* controller, MIMapper* miMapper) : controller(controller), miMapper(miMapper) {}
+      AbstractBinder() {}
     
-      Controller& getController(){
-        return *controller;
-      }
-
-      MIMapper& getMIMapper() {
-        return *miMapper;
-      }
-
+			/**
+			 * \brief Used to get controlling instance for associated component ID
+			 * In localized case this method just returns singel aussociated controller
+			 * for an associated component ID, in global case this method may return different
+			 * controllers depending on key entry.
+			 * \throws InvalidArgumentException if specified component ID is unknown.
+			 */
+			virtual AbstractController& getController(std::string c) throw(InvalidArgumentException) =0;
+			
     public:
 
-      /**
-       * \brief Used internally for accessing managed Bindings
-       */
-      virtual AbstractBinding& getBinding(std::string const& task, ReconfigurableComponent* comp)=0;
-
-
       virtual ~AbstractBinder(){}
-
+      
       /**
        * \brief Resolves bindings possibility for a given task on an given component
        * Uses specialized binding strategy to resolve binding for one task out of a set of possiblities.
        */
       virtual std::string resolveBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException) =0;
 
-      /**
-       * \brief Register additional binding possibility to Binder instance
-       * \param src specifies the task (source) of the binding
-       * \param target specifies one possible mapped component for execution
-       */
-      virtual void registerBinding(std::string src, std::string target)=0;
-
+			/**
+			 * \brief Register additional controlling instance with associated component ID
+			 */
+			virtual void registerCompToCtrl(std::string c, AbstractController* ctrl)=0;
+			
       /**
        * \brief Used to set Binder specific values
        * \param key specifies the identy of the property
@@ -113,64 +77,40 @@ namespace SystemC_VPC {
        * \param pcb specifies the PCB to update
        * \param mapping refers to the selected MappingInformation to apply
        */
-      void updatePCBData(ProcessControlBlock& pcb, MappingInformation* mapping){
+      void updatePCBData(ProcessControlBlock& pcb, MappingInformation* mapping);
 
-        pcb.setDeadline(mapping->getDeadline());
-        pcb.setPeriod(mapping->getPeriod());
-        pcb.setPriority(mapping->getPriority());
-
-        pcb.setDelay(mapping->getDelay(pcb.getFuncName()));
-        pcb.setLatency(mapping->getFuncLatency(pcb.getFuncName()));
-        pcb.setRemainingDelay(pcb.getDelay());
-
-      }
+			// map containing associated controlling instances
+			std::map<std::string, AbstractController* > ctrls;
 
     protected:
 
-      std::map<std::string, AbstractBinding*> bindings;  
-
-    public:
+      // map of binding decisions pid -> target
+      std::map<int, std::string> bindDecisions;
       
-      /**
-       * \brief Implementation of getBinding intended to enable access to managed Bindings
-       * As this implementation only covers resolving  binding on single hierarchy the information
-       * of requesting component is neglected and set to NULL by default.
-       */
-      AbstractBinding& getBinding(std::string const& task, ReconfigurableComponent* comp=NULL) throw(UnknownBindingException){
+			/**
+			 * \brief Used to get controlling instance for associated component ID
+			 * In localized case this method just returns singel aussociated controller
+			 * for an associated component ID, in global case this method may return different
+			 * controllers depending on key entry.
+			 * \throws InvalidArgumentException if specified component ID is unknown.
+			 */
+			AbstractController& getController(std::string c) throw(InvalidArgumentException);
 
-        std::map<std::string, AbstractBinding* >::iterator iter;
-        iter = bindings.find(task);
-        if(iter != bindings.end() && iter->second != NULL){
-          return *(iter->second);
-        }
-
-        std::string msg = task + "->?";
-        throw UnknownBindingException(msg);
-
-      }
-
-    protected:
+      LocalBinder() {}
       
-      /**
+			/**
        * \brief Internal required method for performing binding strategy
        */
       virtual std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& pcb, ReconfigurableComponent* comp) 
         throw(UnknownBindingException) =0;
 
-      LocalBinder(Controller* controller, MIMapper* miMapper) : AbstractBinder(controller, miMapper) {}
     
     public:
 
-      virtual ~LocalBinder() {
+      virtual ~LocalBinder() {}
 
-        std::map<std::string, AbstractBinding* >::iterator iter;
-
-        for(iter = bindings.begin(); iter != bindings.end(); iter++){
-          delete iter->second;
-        }
-
-      }
-
+			virtual void registerCompToCtrl(std::string c, AbstractController* ctrl) throw(InvalidArgumentException);
+			
       /**
        * \brief Implementation of AbstractBinder::resolveBinding
        * Generic implementation of required method:
@@ -178,14 +118,7 @@ namespace SystemC_VPC {
        *  - update PCB to made decision
        * \sa AbstractBinder::resolveBinding
        */
-      std::string resolveBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException){
-
-        std::pair<std::string, MappingInformation*> decision;
-        decision = performBinding(task, comp);
-        updatePCBData(task, decision.second);
-        return decision.first;
-
-      }
+      std::string resolveBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
 
   };
 
@@ -196,31 +129,9 @@ namespace SystemC_VPC {
 
     public:
 
-      StaticBinder(Controller* controller, MIMapper* miMapper) : LocalBinder(controller, miMapper) {}
+      StaticBinder(); // {}
 
-      virtual ~StaticBinder() {}
-
-      /**
-       * \brief Base implementation of AbstractBinder::registerBinding
-       * Registers a binding possiblity to binder instance.
-       */
-      virtual void registerBinding(std::string src, std::string target){
-
-#ifdef VPC_DEBUG
-        std::cerr << "StaticBinder> registerBinding " << src << " <-> " << target << std::endl;
-#endif //VPC_DEBUG
-
-        std::map<std::string, AbstractBinding* >::iterator iter;
-        iter = bindings.find(src);
-        if(iter != bindings.end() && iter->second != NULL) {
-          iter->second->addBinding(target);
-        }else{
-          AbstractBinding* b = new SimpleBinding(src);
-          b->addBinding(target);
-          bindings[b->getSource()] = b;
-        }
-
-      }
+      virtual ~StaticBinder(); // {}
 
       /**
        * \brief Used to set Binder specific values
@@ -230,9 +141,7 @@ namespace SystemC_VPC {
        * \return true if property value has been used else false
        * \sa AbstractBinder
        */
-      virtual bool setProperty(char* key, char* value){ 
-        return false; 
-      }
+      virtual bool setProperty(char* key, char* value);
 
   };
 
@@ -243,31 +152,9 @@ namespace SystemC_VPC {
 
     public:
 
-      DynamicBinder(Controller* controller, MIMapper* miMapper) : LocalBinder(controller, miMapper) {}
+      DynamicBinder(); // {}
 
-      virtual ~DynamicBinder() {}
-
-      /**
-       * \brief Base implementation of AbstractBinder::registerBinding
-       * Registers a binding possiblity to binder instance.
-       */
-      virtual void registerBinding(std::string src, std::string target){
-
-#ifdef VPC_DEBUG
-        std::cerr << "DynamicBinder> registerBinding " << src << " <-> " << target << std::endl;
-#endif //VPC_DEBUG
-
-        std::map<std::string, AbstractBinding* >::iterator iter;
-        iter = bindings.find(src);
-        if(iter != bindings.end() && iter->second != NULL) {
-          iter->second->addBinding(target);
-        }else{
-          AbstractBinding* b = new Binding(src);
-          b->addBinding(target);
-          bindings[b->getSource()] = b;
-        }
-
-      }
+      virtual ~DynamicBinder(); // {}
 
       /**
        * \brief Used to set Binder specific values
@@ -277,9 +164,7 @@ namespace SystemC_VPC {
        * \return true if property value has been used else false
        * \sa AbstractBinder
        */
-      virtual bool setProperty(char* key, char* value){
-        return false;
-      }
+      virtual bool setProperty(char* key, char* value);
 
   };
 

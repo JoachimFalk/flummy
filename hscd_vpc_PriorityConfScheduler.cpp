@@ -1,12 +1,14 @@
 #include <hscd_vpc_PriorityConfScheduler.h>
 
+#include "hscd_vpc_BindingGraph.h"
+
 namespace SystemC_VPC{
 
   /**
    * \brief Initializes instance of PriorityConfScheduler
    */
-  PriorityConfScheduler::PriorityConfScheduler(AbstractController* controller, MIMapper* miMapper) 
-    : ConfigurationScheduler(controller, miMapper),
+  PriorityConfScheduler::PriorityConfScheduler(AbstractController* controller) 
+    : ConfigurationScheduler(controller),
       order_count(0) {}
 
   PriorityConfScheduler::~PriorityConfScheduler() {}
@@ -134,8 +136,8 @@ namespace SystemC_VPC{
     AbstractController& ctrl = this->getController();
     Decision d = ctrl.getDecision(pcb->getPID(), rc);
     // next access binding possibilites of selected comp
-    MappingInformationIterator* iter = this->getMIMapper().getMappingInformationIterator(pcb->getName(), d.comp);
-    int priority = INT_MAX;
+    MappingInformationIterator* iter = pcb->getBindingGraph().getBinding(d.comp)->getMappingInformationIterator(); 
+		int priority = INT_MAX;
     while(iter->hasNext()){
       MappingInformation* mi = iter->getNext();
       if(mi->getPriority() < priority){

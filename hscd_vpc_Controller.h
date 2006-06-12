@@ -16,7 +16,6 @@
 
 #include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_InvalidArgumentException.h"
-#include "hscd_vpc_MIMapper.h"
 
 namespace SystemC_VPC {
 
@@ -48,9 +47,6 @@ namespace SystemC_VPC {
       // map storing made decisions
       std::map<int, Decision> decisions;
 
-      // mapper for MappingInformations
-      MIMapper* miMapper;
-      
     protected:
 
       // time indicating next request wish
@@ -143,7 +139,7 @@ namespace SystemC_VPC {
        * \param compName specifies name of component
        * \param mInfo specifies associated mapping information
        */
-      virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* c);
+      //virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* c);
 
       /**
        * \brief Returns mapped component for a given task
@@ -192,8 +188,6 @@ namespace SystemC_VPC {
        * \sa AbstractController
        */
       virtual Decision getDecision(int pid, ReconfigurableComponent* rc);
-
-      MIMapper* getMIMapper();
 
       virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 

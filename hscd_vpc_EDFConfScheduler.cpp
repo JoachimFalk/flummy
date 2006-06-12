@@ -1,12 +1,14 @@
 #include "hscd_vpc_EDFConfScheduler.h"
 
+#include "hscd_vpc_BindingGraph.h"
+
 namespace SystemC_VPC{
   
   /**
    * \brief Initializes instance of EDFConfScheduler
    */
-  EDFConfScheduler::EDFConfScheduler(AbstractController* controller, MIMapper* miMapper) 
-    : ConfigurationScheduler(controller, miMapper), 
+  EDFConfScheduler::EDFConfScheduler(AbstractController* controller) 
+    : ConfigurationScheduler(controller), 
       order_count(0) {}
 
   /**
@@ -147,8 +149,7 @@ namespace SystemC_VPC{
     AbstractController& ctrl = this->getController();
     Decision d = ctrl.getDecision(pcb->getPID(), rc);
     // next access mapping information for made decision
-    MIMapper& miMapper = this->getMIMapper();
-    MappingInformationIterator* iter = miMapper.getMappingInformationIterator(pcb->getName(), d.comp);
+    MappingInformationIterator* iter = pcb->getBindingGraph().getBinding(d.comp)->getMappingInformationIterator();
     // now iteratate over possibilities and choose appropriate one
     sc_time deadline = SC_ZERO_TIME;
     if(iter->hasNext()){

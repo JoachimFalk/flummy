@@ -5,7 +5,6 @@
 
 #include "hscd_vpc_AbstractConfigurationScheduler.h"
 #include "hscd_vpc_AbstractController.h"
-#include "hscd_vpc_MIMapper.h"
 #include "hscd_vpc_ReconfigurableComponent.h"
 
 namespace SystemC_VPC {
@@ -24,9 +23,6 @@ namespace SystemC_VPC {
       // associated controller instance
       AbstractController* controller;
 
-      // associated MIMapper
-      MIMapper* miMapper;
-
       // true if controller uses kill to preempt configurations
       bool kill;
 
@@ -35,7 +31,7 @@ namespace SystemC_VPC {
       // time indicating next request wish
       sc_time* waitInterval;
 
-      ConfigurationScheduler(AbstractController* controller, MIMapper* miMapper);
+      ConfigurationScheduler(AbstractController* controller);
 
     public:
 
@@ -87,8 +83,6 @@ namespace SystemC_VPC {
     protected:
 
       AbstractController& getController();
-
-      MIMapper& getMIMapper();
 
       /**
        * \brief Gets the currently conrtolled reconfigurable Component of instance

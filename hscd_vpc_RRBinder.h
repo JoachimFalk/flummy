@@ -1,6 +1,7 @@
 #ifndef HSCD_VPC_RRBINDER_H_
 #define HSCD_VPC_RRBINDER_H_
 
+#include <map>
 
 #include "hscd_vpc_AbstractBinder.h"
 
@@ -13,13 +14,17 @@ namespace SystemC_VPC {
    * binding over more than one hierarchy
    */
   class RRBinder : public DynamicBinder {
-  
+
+		private:
+			
+			std::map<std::string, ChildIterator* > possibilities;
+
     public:
 
       /**
        * \brief Default constructor
        */
-      RRBinder(Controller* controller, MIMapper* miMapper);
+      RRBinder();
 
       ~RRBinder();
       

@@ -1,40 +1,56 @@
 #include "hscd_vpc_RRBinder.h"
-#include "hscd_vpc_MIMapper.h"
+
+#include "hscd_vpc_ReconfigurableComponent.h"
 
 namespace SystemC_VPC {
   
-  RRBinder::RRBinder(Controller* controller, MIMapper* miMapper) : DynamicBinder(controller, miMapper) {}
+  RRBinder::RRBinder() : DynamicBinder() {}
 
   RRBinder::~RRBinder() {}
 
-  std::pair<std::string, MappingInformation* > RRBinder::performBinding(ProcessControlBlock& pcb, ReconfigurableComponent* comp)
-    throw(UnknownBindingException) {
-      
-    AbstractBinding& binding = this->getBinding(pcb.getName());
+  std::pair<std::string, MappingInformation* > RRBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp)
+		throw(UnknownBindingException) {
 
-    // reset binding iterator if end of possibilites reached
-    if(!binding.hasNext()){
-      binding.reset();
-    }
-    
-    // check if binding possibility exists
-    if(binding.hasNext()){
-      std::string comp = binding.getNext();
-      MIMapper& mapper = this->getMIMapper();
-      MappingInformationIterator* iter = mapper.getMappingInformationIterator(pcb.getName(), comp);
-      if(iter->hasNext()){
-        MappingInformation* mInfo = iter->getNext();
-        delete iter;
-        return std::pair<std::string, MappingInformation* >(comp, mInfo);
-      }else{
-        // also free iter
-        delete iter;
-      }
-    }
+			ChildIterator* bIter = NULL;
+			//check if binding iter already exists
+			std::map<std::string, ChildIterator* >::iterator iter;
+			iter = this->possibilities.find(task.getName());
+			if(iter == this->possibilities.end()){
+				Binding* binding = NULL;
+        if(comp == NULL){
+          binding = task.getBindingGraph().getRoot();
+        }else{
+          binding = task.getBindingGraph().getBinding(comp->basename());
+        }
 
-    std::string msg = "No binding possibility given for "+ pcb.getName() +"->?";
-    throw UnknownBindingException(msg);
-  }
+				bIter = binding->getChildIterator();
+				this->possibilities[task.getName()] = bIter;
+			}else{
+				bIter = (iter->second);
+			}
+			
+			// reset binding iterator if end of possibilites reached
+			if(!bIter->hasNext()){
+				bIter->reset();
+			}
+
+			// check if binding possibility exists
+			if(bIter->hasNext()){
+				Binding* b = bIter->getNext();
+				MappingInformationIterator* iter = b->getMappingInformationIterator();
+				if(iter->hasNext()){
+					MappingInformation* mInfo = iter->getNext();
+					delete iter;
+					return std::pair<std::string, MappingInformation* >(b->getID(), mInfo);
+				}else{
+					// also free iter
+					delete iter;
+				}
+			}
+
+			std::string msg = "No binding possibility given for "+ task.getName() +"->?";
+			throw UnknownBindingException(msg);
+		}
 
   void RRBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string CompID){
     // do nothing

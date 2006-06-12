@@ -157,7 +157,7 @@ namespace SystemC_VPC {
     std::map<std::string, TypePool*>::iterator iter;
     iter = this->typepools.find(type);
     if(iter == this->typepools.end()){
-      TypePool* pool = new TypePool();
+      TypePool* pool = new TypePool(type);
       this->typepools[type] = pool;
       return pool->getBase();
     }else{

@@ -5,7 +5,7 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of FCFSConfScheduler
    */
-  FCFSConfScheduler::FCFSConfScheduler(AbstractController* controller) : ConfigurationScheduler(controller, NULL){
+  FCFSConfScheduler::FCFSConfScheduler(AbstractController* controller) : ConfigurationScheduler(controller){
 
     this->nextConfiguration = 0;
     

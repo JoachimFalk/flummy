@@ -124,8 +124,8 @@ namespace SystemC_VPC {
   /**
    * \brief Implementation of RRConfScheduler::
    */
-  RREConfScheduler::RREConfScheduler(AbstractController* ctrl, MIMapper* miMapper, double alpha) 
-    : ConfigurationScheduler(ctrl, miMapper),
+  RREConfScheduler::RREConfScheduler(AbstractController* ctrl, double alpha) 
+    : ConfigurationScheduler(ctrl),
       taskCount(0),
       lastassign(SC_ZERO_TIME),
       activTime(SC_ZERO_TIME),

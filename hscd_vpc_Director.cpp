@@ -27,7 +27,6 @@
 
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_SimpleBinder.h"
-#include "hscd_vpc_MIMapper.h"
 
 
 namespace SystemC_VPC{
@@ -58,11 +57,11 @@ namespace SystemC_VPC{
   /**
    *
    */
-  Director::Director() : FALLBACKMODE(false), end(0), miMapper(new MIMapper()) {
+  Director::Director() : FALLBACKMODE(false), end(0) {
 
     try{
       VPCBuilder builder((Director*)this);
-      this->binder = new SimpleBinder(NULL, this->miMapper); 
+      this->binder = new SimpleBinder(); 
       builder.buildVPC();
     }catch(InvalidArgumentException& e){
       std::cerr << "Director> Got exception while setting up VPC:\n" << e.what() << std::endl;
@@ -131,7 +130,7 @@ namespace SystemC_VPC{
    *
    */
   Director::~Director(){
-    cerr << "~Director()" <<endl;
+    //cerr << "~Director()" <<endl;
     
     getReport();
     
@@ -146,7 +145,6 @@ namespace SystemC_VPC{
     component_map_by_name.clear();
    
     delete this->binder;
-    delete this->miMapper;
     
   }
 
@@ -167,8 +165,14 @@ namespace SystemC_VPC{
     return this->pcbPool;
   }
 
-  MIMapper* Director::getMIMapper(){
-    return this->miMapper;
+  void Director::setBinder(AbstractBinder* b){
+    if(b != NULL){
+      this->binder = b;
+    }
+  }
+
+  AbstractBinder* Director::getBinder(){
+    return this->binder;
   }
 
   void Director::compute(const char* name, const char* funcname, VPC_Event* end){
@@ -289,17 +293,6 @@ namespace SystemC_VPC{
     
     this->component_map_by_name.insert(std::pair<std::string, AbstractComponent* >(comp->basename(), comp));
     
-  }
-    
-  /**
-   * \brief Implementation of Director::registerMapping
-   */
-  void Director::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* comp){
-  
-    // currently ignore mapping info as dynamic binding is only performed on rc level 
-    this->binder->registerBinding(taskName, compName);
-    
-    this->miMapper->addMappingInformation(taskName, compName, mInfo); 
   }
     
   /**

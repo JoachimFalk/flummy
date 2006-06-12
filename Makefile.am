@@ -71,7 +71,7 @@ pkginclude_HEADERS =				\
 	hscd_vpc_ProcessControlBlock.h		\
 	hscd_vpc_PCBPool.h			\
 	hscd_vpc_AbstractBinder.h		\
-	hscd_vpc_Bindings.h			\
+	hscd_vpc_Binding.h			\
 	hscd_vpc_MappingInformation.h		\
 	hscd_vpc_DelayMapper.h			\
 	hscd_vpc_IPreemptable.h			\
@@ -114,7 +114,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
 	hscd_vpc_PCBPool.cpp			\
-	hscd_vpc_Bindings.cpp			\
+	hscd_vpc_Binding.cpp			\
 	hscd_vpc_SimpleBinder.cpp		\
 	hscd_vpc_RRBinder.cpp			\
 	hscd_vpc_PriorityBinder.cpp		\
@@ -125,8 +125,9 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_RREConfScheduler.cpp		\
 	hscd_vpc_DelayMapper.cpp		\
 	hscd_vpc_MappingInformation.cpp		\
-	hscd_vpc_MIMapper.cpp			\
 	hscd_vpc_ARBinder.cpp			\
+	hscd_vpc_BindingGraph.cpp		\
+	hscd_vpc_AbstractBinder.cpp		\
 	hscd_vpc_Term.cpp			
 #	hscd_vpc_SchedulerProxy.cpp		
 

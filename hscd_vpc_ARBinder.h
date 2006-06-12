@@ -26,7 +26,7 @@ namespace SystemC_VPC {
 
     public:
       
-      ARBinder(Controller* controller, MIMapper* miMapper);
+      ARBinder();
 
       ~ARBinder();
 

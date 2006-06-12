@@ -1,20 +1,26 @@
 #include "hscd_vpc_ARBinder.h"
-#include <iterator>
+
+#include "hscd_vpc_ReconfigurableComponent.h"
 
 namespace SystemC_VPC {
 
-  ARBinder::ARBinder(Controller* controller, MIMapper* miMapper) : DynamicBinder(controller, miMapper) {}
+  ARBinder::ARBinder() : DynamicBinder() {}
 
   ARBinder::~ARBinder(){}
 
   std::pair<std::string, MappingInformation* > ARBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp)
     throw(UnknownBindingException){
 
-      AbstractBinding& b = this->getBinding(task.getName(), comp);
-      // reset binding
-      b.reset();
+      Binding* b = NULL;
+      if(comp == NULL){
+        b = task.getBindingGraph().getRoot();
+      }else{
+        b = task.getBindingGraph().getBinding(comp->basename());
+      }
+      
+      ChildIterator* bIter = b->getChildIterator();
 			
-			if(!b.hasNext()){
+			if(!bIter->hasNext()){
 
 				std::string msg = "No binding possibility given for "+ task.getName() +"->?";
 				throw UnknownBindingException(msg);
@@ -40,9 +46,9 @@ namespace SystemC_VPC {
 				std::queue<std::string > reconf; //<< contains targets with reconf required
 				
 				// check all possibilities
-				while(b.hasNext()){
+				while(bIter->hasNext()){
 
-					std::string tmp = b.getNext();
+					std::string tmp = bIter->getNext()->getID();
 					if(this->reconfRequired(task, tmp, comp)){
 						noReconf.push(tmp);
 					}else{
@@ -105,9 +111,11 @@ namespace SystemC_VPC {
 			if(p.first == p.second){
 				this->boundTo.insert(std::pair<std::string, std::pair<std::string, int> >(target, std::pair<std::string, int>(task.getName(), 1)));
 			}
+			// free allocated binding iterator
+			delete bIter;
 			
 			// no we should have a target ... next just select first mappinginfo for task
-			MappingInformationIterator* mIter = this->miMapper->getMappingInformationIterator(task.getName(), target);
+			MappingInformationIterator* mIter = b->getMappingInformationIterator(); //this->miMapper->getMappingInformationIterator(task.getName(), target);
 			if(mIter->hasNext()){
 				MappingInformation* mInfo = mIter->getNext();
 				delete mIter;
@@ -130,16 +138,16 @@ namespace SystemC_VPC {
 #endif //VPC_DEBUG
     
 		if(c != NULL 
-				&& c->getID() == this->getController().getConfigurationMapper()->getConfigForComp(target)){
+				&& c->getID() == comp->getController()->getConfigurationMapper()->getConfigForComp(target)){
       //check if sub-comp is reconfigurable component
 			ReconfigurableComponent* rc = dynamic_cast<ReconfigurableComponent* >(c->getComponent(target));
 			// if != NULL we have a rc
 			if(rc != NULL){
 				// check for binding fitting activ configuration of rc
-				AbstractBinding& b = rc->getController()->getBinder()->getBinding(task.getName(), rc);
-				b.reset();
-				while(b.hasNext()){
-          std::string t = b.getNext();
+				Binding* b = task.getBindingGraph().getBinding(target); //rc->getController()->getBinder()->getBinding(task.getName(), rc);
+				ChildIterator* bIter = b->getChildIterator(); //b.reset();
+				while(bIter->hasNext()){
+          std::string t = bIter->getNext()->getID();
 					if(rc->getActivConfiguration() != NULL
 							&& rc->getActivConfiguration()->getID() == rc->getController()->getConfigurationMapper()->getConfigForComp(t)){
 						return true;

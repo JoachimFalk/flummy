@@ -2,7 +2,6 @@
 #define HSCD_VPC_SIMPLEBINDER_H_
 
 #include "hscd_vpc_AbstractBinder.h"
-#include "hscd_vpc_Controller.h"
 
 namespace SystemC_VPC {
 
@@ -10,7 +9,7 @@ namespace SystemC_VPC {
 
     public:
        
-      SimpleBinder::SimpleBinder(Controller* controller, MIMapper* miMapper);
+      SimpleBinder::SimpleBinder();
 
       SimpleBinder::~SimpleBinder();
 
@@ -20,7 +19,7 @@ namespace SystemC_VPC {
        * \brief Implementation of TaskEventListener::signalTaskEvent
        * Dummy implementation as SimpleBinder is not interested in task events
        */
-      void signalTaskEvent(ProcessControlBlock* pcb, std::string compID) {}
+      void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
   };
 
 

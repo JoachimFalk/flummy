@@ -19,8 +19,6 @@ namespace SystemC_VPC {
 
      virtual ~PriorityElement() {};
 
-     
-     
      /**
       * \brief Updates PriorityElement by selecting one possibilty out of the mapping informations
       * This method is used to update internal state of the PriorityElement.
@@ -72,18 +70,23 @@ namespace SystemC_VPC {
 
     public:
 
-      PriorityBinder(Controller* controller, MIMapper* miMapper, PriorityElementFactory* factory);
+      PriorityBinder(PriorityElementFactory* factory);
 
       ~PriorityBinder();
 
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
 
-      virtual void registerBinding(std::string src, std::string target);
+      //virtual void registerBinding(std::string src, std::string target);
 
       /**
        * \brief Implementation of TaskEventListener::signalTaskEvent
        */
       void signalTaskEvent(ProcessControlBlock* pcb, std::string CompID);
+
+    private:
+
+      PriorityElement* getPElem(std::string target);
+
   };
   
 }

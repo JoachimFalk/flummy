@@ -144,7 +144,7 @@ namespace SystemC_VPC{
 
     public:
 
-      PriorityConfScheduler(AbstractController* controller, MIMapper* miMapper);
+      PriorityConfScheduler(AbstractController* controller);
 
       virtual ~PriorityConfScheduler();
 

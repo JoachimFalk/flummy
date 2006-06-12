@@ -146,6 +146,10 @@ namespace SystemC_VPC {
           base = new ProcessControlBlock();
         }
 
+        TypePool(std::string name) :  lockCount(0) {
+          base = new ProcessControlBlock(name);
+        }
+        
         ~TypePool();
 
         /**

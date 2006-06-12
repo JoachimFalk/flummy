@@ -1,6 +1,6 @@
 #include "hscd_vpc_ProcessControlBlock.h"
 
-#include "hscd_vpc_MappingInformation.h"
+#include "hscd_vpc_BindingGraph.h"
 #include "hscd_vpc_datatypes.h"
 
 namespace SystemC_VPC{
@@ -26,7 +26,6 @@ namespace SystemC_VPC{
    * SECTION ProcessControlBlock
    */
   
-  
   ProcessControlBlock::ProcessControlBlock(): name("NN"){
     this->init();
   }
@@ -39,12 +38,9 @@ namespace SystemC_VPC{
     if(*(this->copyCount) == 0){
       delete this->activationCount;
 
-      std::set<MappingInformation* >::iterator iter;
-      for(iter = this->mInfos->begin(); iter != this->mInfos->end(); iter++){
-        delete *iter;
-      }
-      
-      delete this->mInfos;
+			delete this->bGraph;
+			delete (this->copyCount);
+
     }else{
       (*(this->copyCount))--;
     }
@@ -68,15 +64,12 @@ namespace SystemC_VPC{
     this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
-    this->mInfos = pcb.mInfos;
-
-    // remember amount of copies for later clean up 
+    this->bGraph = pcb.bGraph;
+    
+		// remember amount of copies for later clean up 
     this->copyCount = pcb.copyCount;
     (*(this->copyCount))++; 
 
-    this->activationCount = new ActivationCounter();
-    this->mInfos = new std::set<MappingInformation* >();
-    this->copyCount = new int(0);
   }
  
   void ProcessControlBlock::init(){
@@ -95,7 +88,7 @@ namespace SystemC_VPC{
 
 
     this->activationCount = new ActivationCounter();
-    this->mInfos = new std::set<MappingInformation* >();
+    this->bGraph = new BindingGraph(this->name); 
     this->copyCount = new int(0);
 
   } 
@@ -215,8 +208,9 @@ namespace SystemC_VPC{
   sc_signal<trace_value>* ProcessControlBlock::getTraceSignal(){
     return this->traceSignal;
   }
- 
-  void ProcessControlBlock::addMappingInformation(MappingInformation* mInfo){
-    this->mInfos->insert(mInfo);
-  }
+
+	BindingGraph& ProcessControlBlock::getBindingGraph(){
+		return *(this->bGraph);
+	}
+
 }
