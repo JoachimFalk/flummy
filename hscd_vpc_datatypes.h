@@ -6,7 +6,7 @@
 #include <ansidecl.h>
 
 #include <string>
-#include <map.h>
+#include <map>
 
 //#include <cosupport/systemc_support.hpp>
 #include <systemc_support.hpp>
