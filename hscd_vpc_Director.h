@@ -58,7 +58,6 @@ namespace SystemC_VPC{
     
     map<std::string, AbstractComponent*> component_map_by_name;
     
-    map<std::string, AbstractComponent*> mapping_map_by_name;
     PCBPool pcbPool;
 
     vector<Constraint*> constraints;
@@ -200,11 +199,17 @@ namespace SystemC_VPC{
    
     PCBPool& getPCBPool();
 
+    /**
+     * \brief Sets referred binder of Director
+     * Used to enable different binding strategies on top level
+     */
     void setBinder(AbstractBinder* b);
+    
+    /**
+     * \brief Getter of Binder associated to Director
+     */
     AbstractBinder* getBinder();
     
-    //void registerPCB(const char* name, ProcessControlBlock* pcb);
-
     void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
     void setResultFile(std::string vpc_result_file){
@@ -214,6 +219,10 @@ namespace SystemC_VPC{
     string getResultFile(){
       return this->vpc_result_file;
     }
+
+  private:
+
+    void compute(ProcessControlBlock* pcb, EventPair endPair);
     
   };
 

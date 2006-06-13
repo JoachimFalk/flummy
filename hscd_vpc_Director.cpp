@@ -26,8 +26,8 @@
 #include <map>
 
 #include "hscd_vpc_AbstractBinder.h"
-#include "hscd_vpc_SimpleBinder.h"
-
+#include "hscd_vpc_PriorityBinder.h"
+#include "hscd_vpc_LeastCurrentlyBoundPE.h"
 
 namespace SystemC_VPC{
 
@@ -57,11 +57,15 @@ namespace SystemC_VPC{
   /**
    *
    */
-  Director::Director() : FALLBACKMODE(false), end(0) {
+  Director::Director() : end(0), FALLBACKMODE(false), binder(NULL) {
 
     try{
       VPCBuilder builder((Director*)this);
-      this->binder = new SimpleBinder(); 
+      
+      // set default binder
+      PriorityElementFactory* factory = new LCBPEFactory();
+      this->binder = new PriorityBinder(factory);
+              
       builder.buildVPC();
     }catch(InvalidArgumentException& e){
       std::cerr << "Director> Got exception while setting up VPC:\n" << e.what() << std::endl;
@@ -167,6 +171,10 @@ namespace SystemC_VPC{
 
   void Director::setBinder(AbstractBinder* b){
     if(b != NULL){
+      //free old binder
+      if(this->binder != NULL){
+        delete this->binder;
+      }
       this->binder = b;
     }
   }
@@ -312,7 +320,10 @@ namespace SystemC_VPC{
    */
   void Director::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
     assert(!FALLBACKMODE);
-
+    
+    // inform binder about task event
+    this->binder->signalTaskEvent(pcb, compID);
+    
 #ifdef VPC_DEBUG
     std::cerr << "Director> got notified from: " << pcb->getName() << ":" << pcb->getFuncName() << " at " << sc_simulation_time() << std::endl;
 #endif //VPC_DEBUG
@@ -330,9 +341,24 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
       std::cerr << "Director> re-compute: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
-      // get Component
-      AbstractComponent* comp = mapping_map_by_name[pcb->getName()];
-      comp->compute(pcb);
+      // resolve binding again
+      try{
+        // get Component
+        std::string compName = this->binder->resolveBinding(*pcb, NULL);
+        AbstractComponent* comp = this->component_map_by_name.find(compName)->second;
+
+#ifdef VPC_DEBUG
+        std::cerr << VPC_YELLOW("Director> re-delegating to ") << VPC_WHITE(comp->basename()) << std::endl;
+#endif //VPC_DEBUG      
+
+        // compute task on found component
+        assert(!FALLBACKMODE);
+        comp->compute(pcb);
+
+      }catch(UnknownBindingException& e){
+        std::cerr << "Director> re-computer failed: " << e.what() << std::endl;
+        return;
+      }
     }
     wait(SC_ZERO_TIME);
   } 

@@ -147,7 +147,6 @@ namespace SystemC_VPC{
             for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
               DOMNamedNodeMap* atts = node->getAttributes();
               char* tid = XMLString::transcode(atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue());
-              //this->initTemplateSpecifications(tid, node->getFirstChild());
               this->initTemplateSpecifications(tid);
               XMLString::release(&tid);
             }
@@ -204,39 +203,45 @@ namespace SystemC_VPC{
 
         // find measure file declaration and store value for later use
         }else if( 0==XMLString::compareNString( xmlName, measurefileStr, sizeof(measurefileStr) ) ){
-           
-           DOMNamedNodeMap * atts=node->getAttributes();
-            vpc_measure_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-        
+
+          DOMNamedNodeMap * atts=node->getAttributes();
+          vpc_measure_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+
         }else if( 0==XMLString::compareNString( xmlName, resultfileStr, sizeof(resultfileStr) ) ){
-           
-           DOMNamedNodeMap * atts=node->getAttributes();
-            std::string vpc_result_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-            this->director->setResultFile(vpc_result_file);
-            remove(vpc_result_file.c_str());
-        
-        // found section for director settings
+
+          DOMNamedNodeMap * atts=node->getAttributes();
+          std::string vpc_result_file = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+          this->director->setResultFile(vpc_result_file);
+          remove(vpc_result_file.c_str());
+
+          // found section for director settings
         }else if( 0==XMLString::compareNString( xmlName, directorStr, sizeof( directorStr) ) ){
-          
+
 #ifdef VPC_DEBUG
           std::cout << "VPCBuilder> processing director settings " << endl;
 #endif //VPC_DEBUG
-            
+
           node = vpcConfigTreeWalker->firstChild();
           if(node != NULL){ 
             //foreach setting for director set value of director <-- currently only BINDER  
             for(; node!=0; node = this->vpcConfigTreeWalker->nextSibling()){
-          
+              
+              xmlName = node->getNodeName();
               DOMNamedNodeMap * atts=node->getAttributes();
               
               if( 0==XMLString::compareNString( xmlName, binderStr, sizeof(binderStr) ) ){
-              
+        
                 char* sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());    
-                //this->director->setBinder(this->generateBinder(sName, node, this->director));
-                
+                try{
+                  this->director->setBinder(this->generateBinder(sName, node, NULL));
+                }catch(InvalidArgumentException& e){
+                  std::cerr << "VPCBuilder> failed to create requested binder!\n" << e.what() 
+                    << "\nLeaving default binder!" << std::endl;
+                }
+
               }
             }
-        
+
             node = vpcConfigTreeWalker->parentNode();
           }         
         }else{
@@ -272,7 +277,6 @@ namespace SystemC_VPC{
       DOMTreeWalker *vpc_measure_TreeWalker;
       DOMDocument *vpc_measure_doc;
       DOMBuilder *parser;
-      //static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
       DOMImplementation *impl = DOMImplementationRegistry::getDOMImplementation(gLS);
       // create an error handler and install it
       VpcDomErrorHandler* errorh=new VpcDomErrorHandler();
@@ -328,13 +332,11 @@ namespace SystemC_VPC{
       while( n) {
         xname=n->getNodeName();
         name=XMLString::transcode(xname); // for cerr only
-        //cerr << VPC_RED(name)<< endl;
           
         if(n->getNodeType()==DOMNode::ELEMENT_NODE && 
           0==XMLString::compareNString(xname,constraintStr,sizeof(constraintStr))){
             
           DOMNamedNodeMap * atts=n->getAttributes();
-          //cerr << VPC_GREEN(XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue()) ) << NENDL;
           char *sCount,*sDivider,*sName;
           sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
           sCount=XMLString::transcode(atts->getNamedItem(countAttrStr)->getNodeValue());
@@ -345,8 +347,6 @@ namespace SystemC_VPC{
           this->director->addConstraint(cons);
         }
         
-        //DOMNode *last = n;
-        //vpc_measure_TreeWalker->setCurrentNode( last);
         n = vpc_measure_TreeWalker->nextSibling();
       }
   
@@ -366,7 +366,6 @@ namespace SystemC_VPC{
    * \throws InvalidArgumentException if requested component within
    * configuration file is unknown
    */
-  //AbstractComponent* VPCBuilder::initComponent(DOMNode* node) throw(InvalidArgumentException)
   AbstractComponent* VPCBuilder::initComponent() throw(InvalidArgumentException){
 
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
@@ -434,6 +433,8 @@ namespace SystemC_VPC{
           }
 
           comp = new ReconfigurableComponent(sName, controller);
+
+          // TODO: modify if dynamic association should be supported
 // >>>>>>>>>>>>>>> here currently setting of Mapper for Controller just to ConfigurationPool
           try{
             Controller* ctrl = dynamic_cast<Controller* >(controller);
@@ -444,9 +445,7 @@ namespace SystemC_VPC{
           }
           this->knownComps.insert(pair<string, AbstractComponent* >(sName, comp));
 
-          //this->initConfigurations((ReconfigurableComponent*)comp, node->getFirstChild());
           this->initConfigurations((ReconfigurableComponent*)comp);
-          //this->initCompAttributes(comp, node->getFirstChild());
           this->initCompAttributes(comp);
 
 #ifdef VPC_DEBUG
@@ -496,40 +495,40 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
         if( 0==XMLString::compareNString( xmlName, timingStr, sizeof(timingStr))){
-	  char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
-	  VPCBuilder::Timing t;
-	  t.delay   = SC_ZERO_TIME;
-	  t.latency = SC_ZERO_TIME;
-	  t.fname   = fname;
-	  
-	  DOMNamedNodeMap* atts = node->getAttributes();
-	  for(unsigned int i=0; i<atts->getLength(); i++){
-	    DOMNode* a=atts->item(i);
-	    if(0==XMLString::compareNString( a->getNodeName(), delayAttrStr, sizeof(delayAttrStr))){
-	      delay = XMLString::transcode(a->getNodeValue());
-	    }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
-	      latency = XMLString::transcode(a->getNodeValue());
-	    }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
-	      delay = XMLString::transcode(a->getNodeValue());
-	    }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
-	      fname = XMLString::transcode(a->getNodeValue());
-	    }
-	  }
-	  t.fname   = fname;
-	  if(latency != NULL){
-	    t.latency = createSC_Time(latency);
-	  }
-	  if(delay != NULL){
-	    t.delay   = createSC_Time(delay);
-	  }
-	  // use dii only when having a latency or having no delay -> then dii overides delay
-	  if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
-	    t.delay = createSC_Time(dii);
-	  }
-	  timings.push_back(t);
-	  
-        // check if its an attribute to add
-	}else if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
+          char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
+          VPCBuilder::Timing t;
+          t.delay   = SC_ZERO_TIME;
+          t.latency = SC_ZERO_TIME;
+          t.fname   = fname;
+
+          DOMNamedNodeMap* atts = node->getAttributes();
+          for(unsigned int i=0; i<atts->getLength(); i++){
+            DOMNode* a=atts->item(i);
+            if(0==XMLString::compareNString( a->getNodeName(), delayAttrStr, sizeof(delayAttrStr))){
+              delay = XMLString::transcode(a->getNodeValue());
+            }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
+              latency = XMLString::transcode(a->getNodeValue());
+            }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
+              delay = XMLString::transcode(a->getNodeValue());
+            }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
+              fname = XMLString::transcode(a->getNodeValue());
+            }
+          }
+          t.fname   = fname;
+          if(latency != NULL){
+            t.latency = createSC_Time(latency);
+          }
+          if(delay != NULL){
+            t.delay   = createSC_Time(delay);
+          }
+          // use dii only when having a latency or having no delay -> then dii overides delay
+          if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
+            t.delay = createSC_Time(dii);
+          }
+          timings.push_back(t);
+
+          // check if its an attribute to add
+        }else if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
           DOMNamedNodeMap* atts = node->getAttributes();
           char* sType;
           char* sValue;
@@ -548,7 +547,7 @@ namespace SystemC_VPC{
               attributes));
       }
       if(timings.size() > 0){
-	timingTemplates[std::string(tid, strlen(tid))] = timings;
+        timingTemplates[std::string(tid, strlen(tid))] = timings;
       }
 
       this->vpcConfigTreeWalker->parentNode();
@@ -965,16 +964,15 @@ namespace SystemC_VPC{
 				Binding* predB = pcb.getBindingGraph().createBinding(comp->basename());
 				predB->addBinding(succB);
       
-        //#ifdef VPC_DEBUG
+#ifdef VPC_DEBUG
         std::cerr << "VPCBuilder> Additional mapping between: " << predB->getID() << "<->" << succB->getID() << std::endl; 
-//#endif //VPC_DEBUG
+#endif //VPC_DEBUG
  		
         succB = predB;
 			  	
       }
     }
   
-    std::cerr << "VPCBuilder> final add " << pcb.getBindingGraph().getRoot()->getID() << "->" << succB->getID() << std::endl;    
     //finally register mapping to top level
 		pcb.getBindingGraph().getRoot()->addBinding(succB);
 		

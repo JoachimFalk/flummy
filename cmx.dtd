@@ -1,4 +1,4 @@
-<!ELEMENT vpcconfiguration (resultfile?,measurefile?,templates?, director,resources,mappings)>
+<!ELEMENT vpcconfiguration (resultfile?,measurefile?,templates?, director?,resources,mappings)>
 
 <!ELEMENT resultfile EMPTY>
 <!ATTLIST resultfile
