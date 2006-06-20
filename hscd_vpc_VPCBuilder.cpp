@@ -723,19 +723,19 @@ namespace SystemC_VPC{
    
     if(0==strncmp(controllertype, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
       || 0==strncmp(controllertype, STR_FCFS,strlen(STR_FCFS))){
-      controller = new FCFSController(id);      
+      controller = new FCFSController(cID.c_str());      
     }else 
     if(0==strncmp(controllertype, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
       || 0==strncmp(controllertype, STR_RR, strlen(STR_RR))){
-      controller = new RoundRobinController(id);
+      controller = new RoundRobinController(cID.c_str());
     }else
     if(0==strncmp(controllertype, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
       || 0==strncmp(controllertype, STR_PS, strlen(STR_PS))){
-      controller = new PriorityController(id);
+      controller = new PriorityController(cID.c_str());
     }else
     if(0==strncmp(controllertype, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
       || 0==strncmp(controllertype, STR_EDF, strlen(STR_EDF))){
-      controller = new EDFController(id);
+      controller = new EDFController(cID.c_str());
     }else{
       string msg("Unkown controllertype ");
       msg += controllertype;
