@@ -12,7 +12,7 @@
 
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_AbstractConfigurationMapper.h"
-#include "hscd_vpc_AbstractConfigurationScheduler.h"
+#include "hscd_vpc_AbstractAllocator.h"
 
 #include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_InvalidArgumentException.h"
@@ -42,7 +42,7 @@ namespace SystemC_VPC {
       AbstractConfigurationMapper* mapper;
 
       // refers to configuration scheduler to manage dynamic allocation
-      AbstractConfigurationScheduler* scheduler;
+      AbstractAllocator* scheduler;
 
       // map storing made decisions
       std::map<int, Decision> decisions;
@@ -86,12 +86,12 @@ namespace SystemC_VPC {
       /**
        * \brief Getter for scheduler instance
        */
-      AbstractConfigurationScheduler* getConfigurationScheduler();
+      AbstractAllocator* getConfigurationScheduler();
 
       /**
        * \brief Sets configuration scheduler of controller instance
        */
-      void setConfigurationScheduler(AbstractConfigurationScheduler* scheduler);
+      void setConfigurationScheduler(AbstractAllocator* scheduler);
 
       /**
        * \brief Sets the currently controlled reconfigurable Component of instance

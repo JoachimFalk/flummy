@@ -28,7 +28,7 @@
 #include "hscd_vpc_AbstractController.h"
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_AbstractConfigurationMapper.h"
-#include "hscd_vpc_AbstractConfigurationScheduler.h"
+#include "hscd_vpc_AbstractAllocator.h"
 
 #include "hscd_vpc_Configuration.h"
 
@@ -297,7 +297,7 @@ namespace SystemC_VPC{
      * \brief Generates controller instance for Component
      * \param id is the id to be set for the controller     
      */
-    AbstractConfigurationScheduler* generateConfigScheduler(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
+    AbstractAllocator* generateConfigScheduler(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
      */

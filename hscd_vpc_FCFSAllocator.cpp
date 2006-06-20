@@ -1,34 +1,34 @@
-#include <hscd_vpc_FCFSConfScheduler.h>
+#include <hscd_vpc_FCFSAllocator.h>
 
 namespace SystemC_VPC{
   
   /**
-   * \brief Initializes instance of FCFSConfScheduler
+   * \brief Initializes instance of FCFSAllocator
    */
-  FCFSConfScheduler::FCFSConfScheduler(AbstractController* controller) : ConfigurationScheduler(controller){
+  FCFSAllocator::FCFSAllocator(AbstractController* controller) : Allocator(controller){
 
     this->nextConfiguration = 0;
     
   }
 
   /**
-   * \brief Deletes instance of FCFSConfScheduler
+   * \brief Deletes instance of FCFSAllocator
    */
-  FCFSConfScheduler::~FCFSConfScheduler(){
+  FCFSAllocator::~FCFSAllocator(){
     assert(this->readyTasks.size() == 0);
     assert(this->runningTasks.size() == 0);
     assert(this->tasksToProcess.size() == 0);
   }
   
   /**
-   * \brief Implementation of FCFSConfScheduler::addTasksToSchedule
+   * \brief Implementation of FCFSAllocator::addTasksToSchedule
    */
-  void FCFSConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void FCFSAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
+        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
           << "For task " << newTask->getName() << " with required configuration id " << config << " at " << sc_simulation_time() << endl;
-//        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+//        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // first of all add task to local storage structure
@@ -37,9 +37,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of FCFSConfScheduler::performSchedule
+   * \brief Implementation of FCFSAllocator::performSchedule
    */
-  void FCFSConfScheduler::performSchedule(ReconfigurableComponent* rc){
+  void FCFSAllocator::performSchedule(ReconfigurableComponent* rc){
 
     ProcessControlBlock* currTask;
     unsigned int reqConfig = 0;
@@ -49,17 +49,17 @@ namespace SystemC_VPC{
       reqConfig = this->readyTasks.front().second;
 
 #ifdef VPC_DEBUG
-      std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> processing task ") << currTask->getName()
+      std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> processing task ") << currTask->getName()
         << " with required configuration id " << reqConfig << endl;
       if(this->getManagedComponent()->getActivConfiguration() == NULL){
-        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> no activ configuration for managed component ") << endl;
+        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> no activ configuration for managed component ") << endl;
       }else{
-        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> activ configuration for managed component is ") 
+        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> activ configuration for managed component is ") 
           << this->getManagedComponent()->getActivConfiguration()->getName() << " with id " 
           << this->getManagedComponent()->getActivConfiguration()->getID() << endl;
-        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> currently running num of tasks on conf ") << this->runningTasks.size() << endl;
+        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> currently running num of tasks on conf ") << this->runningTasks.size() << endl;
       }
-      std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> next configuration is set to ") << this->nextConfiguration << endl;
+      std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> next configuration is set to ") << this->nextConfiguration << endl;
 #endif //VPC_DEBUG
 
       // check if
@@ -69,7 +69,7 @@ namespace SystemC_VPC{
           || reqConfig == this->nextConfiguration){ // or required conf fits already selected one
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("FCFSConfScheduler "<< this->getController().getName() <<"> can process task ") << currTask->getName() 
+        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> can process task ") << currTask->getName() 
           << " with required configuration " << reqConfig << endl;
 #endif //VPC_DEBUG
 
@@ -90,9 +90,9 @@ namespace SystemC_VPC{
   }
   
   /*
-   * \brief Implementation of FCFSConfScheduler::getNextConfiguration
+   * \brief Implementation of FCFSAllocator::getNextConfiguration
    */  
-  unsigned int FCFSConfScheduler::getNextConfiguration(ReconfigurableComponent* rc){
+  unsigned int FCFSAllocator::getNextConfiguration(ReconfigurableComponent* rc){
     
     unsigned int next = this->nextConfiguration;
     this->nextConfiguration = 0;
@@ -101,18 +101,18 @@ namespace SystemC_VPC{
   }
    
   /**
-   * \brief Implementation of FCFSConfScheduler::hasTaskToProcess()
+   * \brief Implementation of FCFSAllocator::hasTaskToProcess()
    */
-  bool FCFSConfScheduler::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool FCFSAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
   
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of FCFSConfScheduler::getNextTask()
+   * \brief Implementation of FCFSAllocator::getNextTask()
    */
-  ProcessControlBlock* FCFSConfScheduler::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* FCFSAllocator::getNextTask(ReconfigurableComponent* rc){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();
@@ -122,12 +122,12 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of FCFSConfScheduler::signalTaskEvent
+   * \brief Implementation of FCFSAllocator::signalTaskEvent
    */
-  void FCFSConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void FCFSAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
   
 #ifdef VPC_DEBUG
-    std::cerr << "FCFSConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName() << "::" << pcb->getFuncName()
+    std::cerr << "FCFSAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName() << "::" << pcb->getFuncName()
               << " with running tasks num= " << this->runningTasks.size() << std::endl;
 #endif //VPC_DEBUG
     
@@ -138,7 +138,7 @@ namespace SystemC_VPC{
       // ensure that next configuration is reset
       this->nextConfiguration = 0;
 #ifdef VPC_DEBUG
-      std::cerr << "FCFSConfScheduler> waking up component thread!" << std::endl;
+      std::cerr << "FCFSAllocator> waking up component thread!" << std::endl;
 #endif //VPC_DEBUG
 
       this->getManagedComponent()->wakeUp();
@@ -148,7 +148,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of FCFSConfScheudler::signalPreemption
    */
-  void FCFSConfScheduler::signalPreemption(bool kill, ReconfigurableComponent* rc){
+  void FCFSAllocator::signalPreemption(bool kill, ReconfigurableComponent* rc){
     // only interested in Preemption with KILL
     if(kill){
       

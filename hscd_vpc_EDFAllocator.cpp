@@ -1,28 +1,28 @@
-#include "hscd_vpc_EDFConfScheduler.h"
+#include "hscd_vpc_EDFAllocator.h"
 
 #include "hscd_vpc_BindingGraph.h"
 
 namespace SystemC_VPC{
   
   /**
-   * \brief Initializes instance of EDFConfScheduler
+   * \brief Initializes instance of EDFAllocator
    */
-  EDFConfScheduler::EDFConfScheduler(AbstractController* controller) 
-    : ConfigurationScheduler(controller), 
+  EDFAllocator::EDFAllocator(AbstractController* controller) 
+    : Allocator(controller), 
       order_count(0) {}
 
   /**
-   * \brief Deletes instance of EDFConfScheduler
+   * \brief Deletes instance of EDFAllocator
    */
-  EDFConfScheduler::~EDFConfScheduler(){}
+  EDFAllocator::~EDFAllocator(){}
     
   /**
-   * \brief Implementation of EDFConfScheduler::addTasksToSchedule
+   * \brief Implementation of EDFAllocator::addTasksToSchedule
    */
-  void EDFConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void EDFAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("EDFConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+    std::cerr << VPC_YELLOW("EDFAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
@@ -40,9 +40,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of EDFConfScheduler::performSchedule
+   * \brief Implementation of EDFAllocator::performSchedule
    */
-  void EDFConfScheduler::performSchedule(ReconfigurableComponent* rc){
+  void EDFAllocator::performSchedule(ReconfigurableComponent* rc){
     
     //finally sort EDF list
     this->nextConfigurations.sort();
@@ -50,9 +50,9 @@ namespace SystemC_VPC{
   }
   
   /*
-   * \brief Implementation of EDFConfScheduler::getNextConfiguration
+   * \brief Implementation of EDFAllocator::getNextConfiguration
    */  
-  unsigned int EDFConfScheduler::getNextConfiguration(ReconfigurableComponent* rc){
+  unsigned int EDFAllocator::getNextConfiguration(ReconfigurableComponent* rc){
     
     if(!this->nextConfigurations.empty()){
       unsigned int next = this->nextConfigurations.front().getContained();
@@ -61,7 +61,7 @@ namespace SystemC_VPC{
           || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("EDFConfScheduler " << this->getController().getName() << "> next config to load: "
+        std::cerr << VPC_YELLOW("EDFAllocator " << this->getController().getName() << "> next config to load: "
               << next) << std::endl;
 #endif //VPC_DEBUG
 
@@ -72,18 +72,18 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of EDFConfScheduler::hasTaskToProcess()
+   * \brief Implementation of EDFAllocator::hasTaskToProcess()
    */
-  bool EDFConfScheduler::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool EDFAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
    
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of EDFConfScheduler::getNextTask()
+   * \brief Implementation of EDFAllocator::getNextTask()
    */
-  ProcessControlBlock* EDFConfScheduler::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* EDFAllocator::getNextTask(ReconfigurableComponent* rc){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();
@@ -93,12 +93,12 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of EDFConfScheduler::signalTaskEvent
+   * \brief Implementation of EDFAllocator::signalTaskEvent
    */
-  void EDFConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void EDFAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
 
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("EDFConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << VPC_YELLOW("EDFAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
 
     //get made decision for pcb
@@ -134,7 +134,7 @@ namespace SystemC_VPC{
         this->getManagedComponent()->getActivConfiguration()->getID() != this->getNextConfiguration(this->getManagedComponent())){
 
 #ifdef VPC_DEBUG
-      std::cerr << "EDFConfScheduler> waking up component thread!" << std::endl;
+      std::cerr << "EDFAllocator> waking up component thread!" << std::endl;
 #endif //VPC_DEBUG
 
       this->getManagedComponent()->wakeUp();
@@ -142,9 +142,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of EDFConfScheduler::getEarliestDeadline
+   * \brief Implementation of EDFAllocator::getEarliestDeadline
    */
-  sc_time EDFConfScheduler::getEarliestDeadline(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
+  sc_time EDFAllocator::getEarliestDeadline(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
     // first of all get controller to retrieve decision for task
     AbstractController& ctrl = this->getController();
     Decision d = ctrl.getDecision(pcb->getPID(), rc);

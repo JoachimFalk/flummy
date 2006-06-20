@@ -74,11 +74,11 @@ namespace SystemC_VPC{
     }
   }
     
-  AbstractConfigurationScheduler* Controller::getConfigurationScheduler(){
+  AbstractAllocator* Controller::getConfigurationScheduler(){
     return this->scheduler;
   }
   
-  void Controller::setConfigurationScheduler(AbstractConfigurationScheduler* scheduler){
+  void Controller::setConfigurationScheduler(AbstractAllocator* scheduler){
     if(scheduler != NULL){
       this->scheduler = scheduler;
     }

@@ -11,11 +11,11 @@
 
 #include "hscd_vpc_BindingGraph.h"
 
-#include "hscd_vpc_FCFSConfScheduler.h"
-#include "hscd_vpc_RoundRobinConfScheduler.h"
-#include "hscd_vpc_PriorityConfScheduler.h"
-#include "hscd_vpc_EDFConfScheduler.h"
-#include "hscd_vpc_RREConfScheduler.h"
+#include "hscd_vpc_FCFSAllocator.h"
+#include "hscd_vpc_RoundRobinAllocator.h"
+#include "hscd_vpc_PriorityAllocator.h"
+#include "hscd_vpc_EDFAllocator.h"
+#include "hscd_vpc_RREAllocator.h"
 
 #include "hscd_vpc_ARBinder.h"
 #include "hscd_vpc_SimpleBinder.h"
@@ -1059,33 +1059,33 @@ namespace SystemC_VPC{
    * \param node refers to the current parsing position within the DOMTree
    * \param controller refers to the associated controller instance
    */
-  AbstractConfigurationScheduler* VPCBuilder::generateConfigScheduler(const char* type,
+  AbstractAllocator* VPCBuilder::generateConfigScheduler(const char* type,
                                                                       DOMNode* node, 
                                                                       AbstractController* controller) 
     throw(InvalidArgumentException){
  
       // TODO: UPDATE IMPLEMENTATION IF NEW SCHEDULER IS IMPLEMENTED
-      AbstractConfigurationScheduler* scheduler = NULL;
+      AbstractAllocator* scheduler = NULL;
 
       if(0==strncmp(type, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
           || 0==strncmp(type, STR_FCFS,strlen(STR_FCFS))){
-        scheduler = new FCFSConfScheduler(controller);      
+        scheduler = new FCFSAllocator(controller);      
       }else
         if(0==strncmp(type, STR_ROUNDROBINEXTENDED, strlen(STR_ROUNDROBINEXTENDED))
            || 0==strncmp(type, STR_RRE, strlen(STR_RRE))){
-           scheduler = new RREConfScheduler(controller);
+           scheduler = new RREAllocator(controller);
       }else 
         if(0==strncmp(type, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
            || 0==strncmp(type, STR_RR, strlen(STR_RR))){
-           scheduler = new RoundRobinConfScheduler(controller);
+           scheduler = new RoundRobinAllocator(controller);
       }else
         if(0==strncmp(type, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
            || 0==strncmp(type, STR_PS, strlen(STR_PS))){
-           scheduler = new PriorityConfScheduler(controller);
+           scheduler = new PriorityAllocator(controller);
       }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
-           scheduler = new EDFConfScheduler(controller);
+           scheduler = new EDFAllocator(controller);
       }else{
         string msg("Unkown schedulertype ");
         msg = type;

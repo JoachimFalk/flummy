@@ -8,7 +8,7 @@
 #include <queue>
 #include <vector>
 
-#include "hscd_vpc_ConfigurationScheduler.h"
+#include "hscd_vpc_Allocator.h"
 #include "hscd_vpc_Configuration.h"
 #include "hscd_vpc_Director.h"
 
@@ -21,7 +21,7 @@ namespace SystemC_VPC{
    * before other conflicting task, which need another configuration, may be
    * completed.
    */
-  class RoundRobinConfScheduler : public ConfigurationScheduler {
+  class RoundRobinAllocator : public Allocator {
 
     private:
 
@@ -101,16 +101,16 @@ namespace SystemC_VPC{
 
     public:
 
-      RoundRobinConfScheduler(AbstractController* controller);
+      RoundRobinAllocator(AbstractController* controller);
 
-      virtual ~RoundRobinConfScheduler();
+      virtual ~RoundRobinAllocator();
 
       /**
        * \brief Used to set controller specific values
        * \param key specifies the identy of the property
        * \param value specifies the actual value
        * \return true if value has been used else false
-       * \sa ConfigurationScheduler
+       * \sa Allocator
        */
       bool setProperty(char* key, char* value);
 
@@ -179,7 +179,7 @@ namespace SystemC_VPC{
       virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
       /**
-       * \see AbstractConfigurationScheduler
+       * \see AbstractAllocator
        */
       virtual void signalPreemption(bool kill, ReconfigurableComponent* rc);
 

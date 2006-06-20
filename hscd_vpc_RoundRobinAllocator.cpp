@@ -1,11 +1,11 @@
-#include "hscd_vpc_RoundRobinConfScheduler.h"
+#include "hscd_vpc_RoundRobinAllocator.h"
 
 namespace SystemC_VPC{
   
   /**
-   * \brief Initializes instance of RoundRobinConfScheduler
+   * \brief Initializes instance of RoundRobinAllocator
    */
-  RoundRobinConfScheduler::RoundRobinConfScheduler(AbstractController* controller) : ConfigurationScheduler(controller) {
+  RoundRobinAllocator::RoundRobinAllocator(AbstractController* controller) : Allocator(controller) {
 
     this->lastassign = -1;
     this->TIMESLICE = 1;
@@ -13,14 +13,14 @@ namespace SystemC_VPC{
     
   }
 
-  RoundRobinConfScheduler::~RoundRobinConfScheduler(){}
+  RoundRobinAllocator::~RoundRobinAllocator(){}
 
   /**
-   * \brief Implementation of  RoundRobinConfScheduler::setProperty
+   * \brief Implementation of  RoundRobinAllocator::setProperty
    */
-  bool RoundRobinConfScheduler::setProperty(char* key, char* value){
+  bool RoundRobinAllocator::setProperty(char* key, char* value){
 
-    bool used = ConfigurationScheduler::setProperty(key, value);
+    bool used = Allocator::setProperty(key, value);
 
      // check if property relevant for allocator
     if(0 != std::strncmp(key, ALLOCATORPREFIX, strlen(ALLOCATORPREFIX))){
@@ -32,7 +32,7 @@ namespace SystemC_VPC{
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
 
 #ifdef VPC_DEBUG
-      std::cerr << VPC_BLUE("RoundRobinConfScheduler> set property for timeslice = ") << value << std::endl;
+      std::cerr << VPC_BLUE("RoundRobinAllocator> set property for timeslice = ") << value << std::endl;
 #endif //VPC_DEBUG
 
       char *domain;
@@ -48,12 +48,12 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of RoundRobinConfScheduler::addTaskToSchedule
+   * \brief Implementation of RoundRobinAllocator::addTaskToSchedule
    */
-  void RoundRobinConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void RoundRobinAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("RoundRobinAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
     
     // add to internal structures
@@ -71,9 +71,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of RoundRobinConfScheduler::performSchedule
+   * \brief Implementation of RoundRobinAllocator::performSchedule
    */
-  void RoundRobinConfScheduler::performSchedule(ReconfigurableComponent* rc){
+  void RoundRobinAllocator::performSchedule(ReconfigurableComponent* rc){
     
     delete this->waitInterval; 
     this->waitInterval = NULL;
@@ -85,7 +85,7 @@ namespace SystemC_VPC{
     if(this->remainingSlice <= 0 || this->scheduledConfiguration == NULL){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("RoundRobinAllocator "<< this->getController().getName() <<"> timeslice elapsed at: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
       this->switchConfig = true;
@@ -96,7 +96,7 @@ namespace SystemC_VPC{
     if(this->rr_configfifo.size() > 0){ //scheduledConfiguration != NULL){
         
 #ifdef VPC_DEBUG
-      std::cerr << VPC_YELLOW("RoundRobinConfScheduler "<< this->getController().getName() <<"> timeslice lasts: "
+      std::cerr << VPC_YELLOW("RoundRobinAllocator "<< this->getController().getName() <<"> timeslice lasts: "
             << this->TIMESLICE-(sc_simulation_time()-this->lastassign) << " at: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
   
@@ -105,14 +105,14 @@ namespace SystemC_VPC{
   }
      
   /*
-   * \brief Implementation of RoundRobinConfScheduler::getNextConfiguration
+   * \brief Implementation of RoundRobinAllocator::getNextConfiguration
    */  
-  unsigned int RoundRobinConfScheduler::getNextConfiguration(ReconfigurableComponent* rc){
+  unsigned int RoundRobinAllocator::getNextConfiguration(ReconfigurableComponent* rc){
 
     unsigned int nextConfiguration = 0;
 
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("RoundRobinConfScheduler " << this->getController().getName() <<"> getNextConfiguration: switchConfig= " << this->switchConfig
+    std::cerr << VPC_YELLOW("RoundRobinAllocator " << this->getController().getName() <<"> getNextConfiguration: switchConfig= " << this->switchConfig
           << " fifo size= " << this->rr_configfifo.size() << "!") << std::endl;
 #endif //VPC_DEBUG
 
@@ -135,18 +135,18 @@ namespace SystemC_VPC{
   }
    
   /**
-   * \brief Implementation of RoundRobinConfScheduler::hasTaskToProcess()
+   * \brief Implementation of RoundRobinAllocator::hasTaskToProcess()
    */
-  bool RoundRobinConfScheduler::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool RoundRobinAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
   
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of RoundRobinConfScheduler::getNextTask()
+   * \brief Implementation of RoundRobinAllocator::getNextTask()
    */
-  ProcessControlBlock* RoundRobinConfScheduler::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* RoundRobinAllocator::getNextTask(ReconfigurableComponent* rc){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();
@@ -156,12 +156,12 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
    */
-  void RoundRobinConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void RoundRobinAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
   
 #ifdef VPC_DEBUG
-    std::cerr << "RoundRobinConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName() << std::endl;
+    std::cerr << "RoundRobinAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
     
     // remove running task out of registry
@@ -171,7 +171,7 @@ namespace SystemC_VPC{
     if(this->scheduledConfiguration == NULL && this->rr_configfifo.size() > 0){
 
 #ifdef VPC_DEBUG
-      std::cerr << "RoundRobinConfScheduler> waking up component thread!" << std::endl;
+      std::cerr << "RoundRobinAllocator> waking up component thread!" << std::endl;
 #endif //VPC_DEBUG
 
       this->getManagedComponent()->wakeUp();
@@ -179,9 +179,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
    */  
-  void RoundRobinConfScheduler::updateUsedConfigurations(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
+  void RoundRobinAllocator::updateUsedConfigurations(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
     
     Decision d = this->getController().getDecision(pcb->getPID(), rc);
     
@@ -200,15 +200,15 @@ namespace SystemC_VPC{
         (*iter)--;
       }
     }else{
-      std::cerr << VPC_YELLOW("RoundRobinConfScheduler> configuration to be updated not in managed list!");
+      std::cerr << VPC_YELLOW("RoundRobinAllocator> configuration to be updated not in managed list!");
     }
     
   }
   
   /**
-   * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
    */
-  void RoundRobinConfScheduler::calculateAssignTime(unsigned int config, ReconfigurableComponent* rc){
+  void RoundRobinAllocator::calculateAssignTime(unsigned int config, ReconfigurableComponent* rc){
     
     
     Configuration* nextConfiguration =  this->getManagedComponent()->getConfiguration(config);
@@ -230,23 +230,23 @@ namespace SystemC_VPC{
       this->lastassign += nextConfiguration->getLoadTime().to_default_time_units();
     }
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("RoundRobinConfScheduler> time of last assignment set to: "<< this->lastassign) << std::endl;
+    std::cerr << VPC_YELLOW("RoundRobinAllocator> time of last assignment set to: "<< this->lastassign) << std::endl;
 #endif //VPC_DEBUG
   }
   
   /**
-   * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
    */
-  void RoundRobinConfScheduler::signalPreemption(bool kill, ReconfigurableComponent* rc){
+  void RoundRobinAllocator::signalPreemption(bool kill, ReconfigurableComponent* rc){
     if(sc_simulation_time() > this->lastassign){
       this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
     }
   }
 
   /**
-   * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
    */  
-  void RoundRobinConfScheduler::signalResume(ReconfigurableComponent* rc){
+  void RoundRobinAllocator::signalResume(ReconfigurableComponent* rc){
     this->lastassign = sc_simulation_time();
   }
 

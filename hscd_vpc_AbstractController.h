@@ -11,7 +11,7 @@
 
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_AbstractConfigurationMapper.h"
-#include "hscd_vpc_AbstractConfigurationScheduler.h"
+#include "hscd_vpc_AbstractAllocator.h"
 
 #include "hscd_vpc_TaskEventListener.h"
 
@@ -52,7 +52,7 @@ namespace SystemC_VPC{
     
     virtual AbstractBinder* getBinder()=0;
     virtual AbstractConfigurationMapper* getConfigurationMapper()=0;
-    virtual AbstractConfigurationScheduler* getConfigurationScheduler()=0;
+    virtual AbstractAllocator* getConfigurationScheduler()=0;
     
 /*
     virtual void setBinder(AbstractBinder* binder)=0;

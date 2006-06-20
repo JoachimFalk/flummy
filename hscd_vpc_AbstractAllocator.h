@@ -14,7 +14,7 @@ namespace SystemC_VPC {
   /**
    * \brief Abstract class specify necessary interface of an configuration scheduler
    */
-  class AbstractConfigurationScheduler : public virtual TaskEventListener {
+  class AbstractAllocator : public virtual TaskEventListener {
 
     protected:
 
@@ -22,11 +22,11 @@ namespace SystemC_VPC {
        * \brief Default constructor
        * \param controller specifies associated controller instance of scheduler
        */
-      AbstractConfigurationScheduler() {}
+      AbstractAllocator() {}
 
     public:
       
-      virtual ~AbstractConfigurationScheduler() {}
+      virtual ~AbstractAllocator() {}
 
       /**
        * \brief Updates management structures for performing schedule decisions

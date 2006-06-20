@@ -1,4 +1,4 @@
-#include "hscd_vpc_RREConfScheduler.h"
+#include "hscd_vpc_RREAllocator.h"
 
 namespace SystemC_VPC {
 
@@ -117,24 +117,24 @@ namespace SystemC_VPC {
   }
   
   /**
-   * SECTION Implementation of RREConfScheduler
+   * SECTION Implementation of RREAllocator
    */
 
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  RREConfScheduler::RREConfScheduler(AbstractController* ctrl, double alpha) 
-    : ConfigurationScheduler(ctrl),
+  RREAllocator::RREAllocator(AbstractController* ctrl, double alpha) 
+    : Allocator(ctrl),
       taskCount(0),
       lastassign(SC_ZERO_TIME),
       activTime(SC_ZERO_TIME),
       selected(NULL) {}
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  RREConfScheduler::~RREConfScheduler(){
+  RREAllocator::~RREAllocator(){
 
     std::map<int, RREConfElement* >::iterator iter;
     for(iter = this->elems.begin(); iter != this->elems.end(); iter++){
@@ -144,11 +144,11 @@ namespace SystemC_VPC {
   }
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  void RREConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void RREAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
-//    std::cerr << "RREConfScheduler " << rc->basename() << "> addTaskToSchedule(" << newTask->getName() << ":" << newTask->getFuncName() << "::" << newTask->getPID() << " with requested conf=" << config << " at " << sc_simulation_time() << std::endl;
+//    std::cerr << "RREAllocator " << rc->basename() << "> addTaskToSchedule(" << newTask->getName() << ":" << newTask->getFuncName() << "::" << newTask->getPID() << " with requested conf=" << config << " at " << sc_simulation_time() << std::endl;
     
     RREConfElement* elem = NULL;
 
@@ -161,7 +161,7 @@ namespace SystemC_VPC {
     }else{
       elem = new RREConfElement(config);
       this->elems.insert(std::pair<int, RREConfElement* >(config, elem));
-//      std::cerr << "RREConfScheduler " << rc->basename() << "> addTaskToScheduler new management element added " << elem->getID() << std::endl;
+//      std::cerr << "RREAllocator " << rc->basename() << "> addTaskToScheduler new management element added " << elem->getID() << std::endl;
     }
 
     // add it to waiting queue of configuration
@@ -172,13 +172,13 @@ namespace SystemC_VPC {
   }
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  void RREConfScheduler::performSchedule(ReconfigurableComponent* rc){
+  void RREAllocator::performSchedule(ReconfigurableComponent* rc){
 
     // if no configuration has been scheduled yet! first run!
     if(this->selected == NULL){
-//      std::cerr << "RREConfScheduler " << rc->basename() << "> no configuration selected yet!" << std::endl;
+//      std::cerr << "RREAllocator " << rc->basename() << "> no configuration selected yet!" << std::endl;
 
       // find configuration to allocate
       RREConfElement* next = NULL;
@@ -196,15 +196,15 @@ namespace SystemC_VPC {
 
     }else{ // already scheduled configuration exists!
 
-//      std::cerr << "RREConfScheduler " << rc->basename() << "> currently scheduled configuration=" << this->selected->getID() 
+//      std::cerr << "RREAllocator " << rc->basename() << "> currently scheduled configuration=" << this->selected->getID() 
 //        << " at " << sc_time_stamp() << std::endl;
 
       // update time variables
       // configuration was some considerable time already activ
       if(sc_time_stamp() > this->lastassign){
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> activTime before update=" << this->activTime << std::endl;
+//        std::cerr << "RREAllocator " << rc->basename() << "> activTime before update=" << this->activTime << std::endl;
         this->activTime += (sc_time_stamp() - this->lastassign);
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> activTime updated to=" << this->activTime << " lastassign was=" << this->lastassign << " current timestamp= " << sc_time_stamp() << std::endl;
+//        std::cerr << "RREAllocator " << rc->basename() << "> activTime updated to=" << this->activTime << " lastassign was=" << this->lastassign << " current timestamp= " << sc_time_stamp() << std::endl;
         this->lastassign = sc_time_stamp();
       }
 
@@ -214,7 +214,7 @@ namespace SystemC_VPC {
       // check if any alternatives exist if not keep configuration
       if(this->selected->getAssignedTaskCount() == this->taskCount){
         // not so leave
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> no alternativ configuration have assigned tasks!" << std::endl;
+//        std::cerr << "RREAllocator " << rc->basename() << "> no alternativ configuration have assigned tasks!" << std::endl;
         sc_time totalTimeToRun = (this->alpha * 2 * (c->getLoadTime() + c->getStoreTime()));
 
         if(totalTimeToRun > this->activTime){
@@ -230,7 +230,7 @@ namespace SystemC_VPC {
       double proportion = (this->activTime / (2*(c->getLoadTime() + c->getStoreTime())));
       if(proportion < this->alpha && this->selected->getAssignedTaskCount() > 0){
         // needed proportion not reached, but still tasks to process
-//        std::cerr << "RREConfScheduler " << rc->basename() << "> proportion=" << proportion << " and assigned tasks=" << this->selected->getAssignedTaskCount() << std::endl;
+//        std::cerr << "RREAllocator " << rc->basename() << "> proportion=" << proportion << " and assigned tasks=" << this->selected->getAssignedTaskCount() << std::endl;
         sc_time totalTimeToRun = (this->alpha * 2 * (c->getLoadTime() + c->getStoreTime()));
 
         if(totalTimeToRun > this->activTime){
@@ -266,12 +266,12 @@ namespace SystemC_VPC {
 
       this->setUpInitialParams(next, rc);
 
-//      std::cerr << GREEN("RREConfScheduler> next = " << this->selected->getID() << " at " << sc_simulation_time() ) << std::endl;
+//      std::cerr << GREEN("RREAllocator> next = " << this->selected->getID() << " at " << sc_simulation_time() ) << std::endl;
     }
 
   }
 
-  void RREConfScheduler::setUpInitialParams(RREConfElement* next, ReconfigurableComponent* rc){
+  void RREAllocator::setUpInitialParams(RREConfElement* next, ReconfigurableComponent* rc){
 
     //set up initial parameters
     this->activTime = SC_ZERO_TIME;
@@ -281,22 +281,22 @@ namespace SystemC_VPC {
 
       if(!this->killConfiguration(next, rc)){
         add_time += rc->getActivConfiguration()->getStoreTime();
-        //std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding storetime =" << add_time << std::endl;
+        //std::cerr << "RREAllocator " << rc->basename() << "> add_time after adding storetime =" << add_time << std::endl;
       }
       
       add_time += rc->getConfiguration(next->getID())->getLoadTime();
-      //std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime =" << add_time << std::endl;
+      //std::cerr << "RREAllocator " << rc->basename() << "> add_time after adding loadtime =" << add_time << std::endl;
 
     }else
       if(rc->getActivConfiguration() == NULL){
 
         add_time += rc->getConfiguration(next->getID())->getLoadTime();
-        //std::cerr << "RREConfScheduler " << rc->basename() << "> add_time after adding loadtime (no activ configuration!)=" << add_time << std::endl;
+        //std::cerr << "RREAllocator " << rc->basename() << "> add_time after adding loadtime (no activ configuration!)=" << add_time << std::endl;
 
       }
 
     this->lastassign = sc_time_stamp() + add_time;
-    //std::cerr << "RREConfScheduler " << rc->basename() << "> lastassign set to=" << this->lastassign << std::endl;
+    //std::cerr << "RREAllocator " << rc->basename() << "> lastassign set to=" << this->lastassign << std::endl;
 
     this->selected = next;
 
@@ -307,17 +307,17 @@ namespace SystemC_VPC {
   }
   
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  unsigned int RREConfScheduler::getNextConfiguration(ReconfigurableComponent* rc){
-//    std::cerr << GREEN("RREConfScheduler> nextConfiguration = " << this->selected->getID() << " at ") << sc_simulation_time() << std::endl;
+  unsigned int RREAllocator::getNextConfiguration(ReconfigurableComponent* rc){
+//    std::cerr << GREEN("RREAllocator> nextConfiguration = " << this->selected->getID() << " at ") << sc_simulation_time() << std::endl;
     return this->selected->getID();
   }
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  bool RREConfScheduler::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool RREAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
     if(selected != NULL){
       return this->selected->hasWaitingTasks();
     }else{
@@ -326,17 +326,17 @@ namespace SystemC_VPC {
   }
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  ProcessControlBlock* RREConfScheduler::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* RREAllocator::getNextTask(ReconfigurableComponent* rc){
     return this->selected->processTask();
   }
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  bool RREConfScheduler::setProperty(char* key, char* value){
-    bool used = ConfigurationScheduler::setProperty(key, value);
+  bool RREAllocator::setProperty(char* key, char* value){
+    bool used = Allocator::setProperty(key, value);
 
     if(0 != std::strncmp(key, ALLOCATORPREFIX, strlen(ALLOCATORPREFIX))){
       std::cerr << ALLOCATORPREFIX << " != " << key << std::endl;
@@ -356,9 +356,9 @@ namespace SystemC_VPC {
   }
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  void RREConfScheduler::signalPreemption(bool kill, ReconfigurableComponent* rc){
+  void RREAllocator::signalPreemption(bool kill, ReconfigurableComponent* rc){
     // only on kill we have to abort all waiting tasks!
     if(kill){
 
@@ -382,42 +382,42 @@ namespace SystemC_VPC {
   }
 
   /**
-   * \brief Implementation of RRConfScheduler::
+   * \brief Implementation of RRAllocator::
    */
-  void RREConfScheduler::signalResume(ReconfigurableComponent* rc){
+  void RREAllocator::signalResume(ReconfigurableComponent* rc){
     this->lastassign = sc_time_stamp();
   }
 
   /**
-   * \brief Implementation of RoundRobinConfScheduler::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
    */
-  void RREConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void RREAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
 
-//    std::cerr << "RREConfScheduler> got notified by task " << pcb->getName() << ":" << pcb->getPID() << " from " << compID << std::endl;
+//    std::cerr << "RREAllocator> got notified by task " << pcb->getName() << ":" << pcb->getPID() << " from " << compID << std::endl;
     
     Decision d = this->getController().getDecision(pcb->getPID(), this->getManagedComponent());
     std::map<int, RREConfElement* >::iterator iter;
     iter = this->elems.find(d.conf);
     if(iter != this->elems.end()){
-//      std::cerr << "RREConfScheduler> found corresponding element!" << std::endl;
+//      std::cerr << "RREAllocator> found corresponding element!" << std::endl;
       iter->second->removeTask(pcb);
       (this->taskCount)--;
       
-//      std::cerr << "RREConfScheduler> selected/scheduled conf=" << this->selected->getID() << " rc activ config=" << this->getManagedComponent()->getActivConfiguration()->getID() << std::endl;
-//      std::cerr << "RREConfScheduler> current assigend tasks " << iter->second->getAssignedTaskCount() << " for conf=" << iter->second->getID() << std::endl;
+//      std::cerr << "RREAllocator> selected/scheduled conf=" << this->selected->getID() << " rc activ config=" << this->getManagedComponent()->getActivConfiguration()->getID() << std::endl;
+//      std::cerr << "RREAllocator> current assigend tasks " << iter->second->getAssignedTaskCount() << " for conf=" << iter->second->getID() << std::endl;
       if(iter->second->getAssignedTaskCount() <= 0 && this->taskCount > 0){
-//        std::cerr << "RREConfScheduler> waking up component!" << std::endl;
+//        std::cerr << "RREAllocator> waking up component!" << std::endl;
         this->getManagedComponent()->wakeUp();
       }
 
 //      if(this->taskCount <= 0)
-//        std::cerr << RED("RREConfScheduler " << compID << "> No more actually tasks! at " << sc_time_stamp() ) << std::endl;
+//        std::cerr << RED("RREAllocator " << compID << "> No more actually tasks! at " << sc_time_stamp() ) << std::endl;
       
     }
 
   }
 
-  bool RREConfScheduler::killConfiguration(RREConfElement* elem, ReconfigurableComponent* rc){
+  bool RREAllocator::killConfiguration(RREConfElement* elem, ReconfigurableComponent* rc){
     bool killConf = true;
     // only if there is already scheduled configuration!
     // else there should be no running task and so no need to store!

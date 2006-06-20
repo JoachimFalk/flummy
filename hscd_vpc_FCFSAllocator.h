@@ -8,7 +8,7 @@
 #include <queue>
 #include <vector>
 
-#include "hscd_vpc_ConfigurationScheduler.h"
+#include "hscd_vpc_Allocator.h"
 #include "hscd_vpc_Director.h"
 
 
@@ -21,7 +21,7 @@ namespace SystemC_VPC{
    * before other conflicting task, which need another configuration, may be
    * completed.
    */
-  class FCFSConfScheduler : public ConfigurationScheduler {
+  class FCFSAllocator : public Allocator {
 
     private:
 
@@ -37,9 +37,9 @@ namespace SystemC_VPC{
 
     public:
 
-      FCFSConfScheduler(AbstractController* controller);
+      FCFSAllocator(AbstractController* controller);
 
-      virtual ~FCFSConfScheduler();
+      virtual ~FCFSAllocator();
 
       /**
        * \brief Updates management structures for performing schedule decisions
@@ -105,8 +105,8 @@ namespace SystemC_VPC{
       virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
       /**
-       * \brief Implementation of AbstractConfigurationScheduler::signalPreemption
-       * \see AbstractConfigurationScheduler
+       * \brief Implementation of AbstractAllocator::signalPreemption
+       * \see AbstractAllocator
        */
       void signalPreemption(bool kill, ReconfigurableComponent* rc);
 

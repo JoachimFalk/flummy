@@ -5,7 +5,7 @@
 #include <map>
 
 #include "hscd_vpc_Configuration.h"
-#include "hscd_vpc_ConfigurationScheduler.h"
+#include "hscd_vpc_Allocator.h"
 
 namespace SystemC_VPC {
 
@@ -94,7 +94,7 @@ namespace SystemC_VPC {
    * take place although timeslice may not be elapsed!
    * \note Allocation-Strategy is based on local view
    */
-  class RREConfScheduler : public ConfigurationScheduler {
+  class RREAllocator : public Allocator {
 
     private:
 
@@ -109,9 +109,9 @@ namespace SystemC_VPC {
 
     public:
 
-      RREConfScheduler(AbstractController* ctrl, double alpah=0.5);
+      RREAllocator(AbstractController* ctrl, double alpah=0.5);
 
-      ~RREConfScheduler();
+      ~RREAllocator();
 
       /**
        * \brief Updates management structures for performing schedule decisions

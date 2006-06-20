@@ -3,20 +3,20 @@
 
 #include <systemc.h>
 
-#include "hscd_vpc_AbstractConfigurationScheduler.h"
+#include "hscd_vpc_AbstractAllocator.h"
 #include "hscd_vpc_AbstractController.h"
 #include "hscd_vpc_ReconfigurableComponent.h"
 
 namespace SystemC_VPC {
 
   /**
-   * \brief Implementation of base methods specified by AbstractConfigurationScheduler
-   * This class realizes basic function declared by AbstractConfigurationScheduler, which
+   * \brief Implementation of base methods specified by AbstractAllocator
+   * This class realizes basic function declared by AbstractAllocator, which
    * are used by all subclasses. If different behaviour is required, the specific
    * methods can be overloaded by the subclasses..
-   * \see AbstractConfigurationScheduler
+   * \see AbstractAllocator
    */
-  class ConfigurationScheduler : public AbstractConfigurationScheduler{
+  class Allocator : public AbstractAllocator{
 
     private: 
 
@@ -31,11 +31,11 @@ namespace SystemC_VPC {
       // time indicating next request wish
       sc_time* waitInterval;
 
-      ConfigurationScheduler(AbstractController* controller);
+      Allocator(AbstractController* controller);
 
     public:
 
-      virtual ~ConfigurationScheduler();
+      virtual ~Allocator();
 
       /**
        * \brief Returns time to wait until next notification of controller is needed
@@ -50,7 +50,7 @@ namespace SystemC_VPC {
        * \param key specifies the identy of the property
        * \param value specifies the actual value
        * \return true if property value has been used else false
-       * \sa AbstractConfigurationScheduler
+       * \sa AbstractAllocator
        */
       virtual bool setProperty(char* key, char* value);
 

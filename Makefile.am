@@ -106,10 +106,10 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_XmlHelper.cpp			\
 	hscd_vpc_Configuration.cpp		\
 	hscd_vpc_Controller.cpp			\
-	hscd_vpc_EDFConfScheduler.cpp		\
-	hscd_vpc_FCFSConfScheduler.cpp		\
-	hscd_vpc_PriorityConfScheduler.cpp	\
-	hscd_vpc_RoundRobinConfScheduler.cpp	\
+	hscd_vpc_EDFAllocator.cpp		\
+	hscd_vpc_FCFSAllocator.cpp		\
+	hscd_vpc_PriorityAllocator.cpp		\
+	hscd_vpc_RoundRobinAllocator.cpp	\
 	hscd_vpc_ReconfigurableComponent.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
@@ -121,8 +121,8 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_LeastCurrentlyBoundPE.cpp	\
 	hscd_vpc_LeastFrequentlyUsedPE.cpp	\
 	hscd_vpc_ConfigurationPool.cpp		\
-	hscd_vpc_ConfigurationScheduler.cpp	\
-	hscd_vpc_RREConfScheduler.cpp		\
+	hscd_vpc_Allocator.cpp			\
+	hscd_vpc_RREAllocator.cpp		\
 	hscd_vpc_DelayMapper.cpp		\
 	hscd_vpc_MappingInformation.cpp		\
 	hscd_vpc_ARBinder.cpp			\

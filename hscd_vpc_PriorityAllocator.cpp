@@ -1,25 +1,25 @@
-#include <hscd_vpc_PriorityConfScheduler.h>
+#include <hscd_vpc_PriorityAllocator.h>
 
 #include "hscd_vpc_BindingGraph.h"
 
 namespace SystemC_VPC{
 
   /**
-   * \brief Initializes instance of PriorityConfScheduler
+   * \brief Initializes instance of PriorityAllocator
    */
-  PriorityConfScheduler::PriorityConfScheduler(AbstractController* controller) 
-    : ConfigurationScheduler(controller),
+  PriorityAllocator::PriorityAllocator(AbstractController* controller) 
+    : Allocator(controller),
       order_count(0) {}
 
-  PriorityConfScheduler::~PriorityConfScheduler() {}
+  PriorityAllocator::~PriorityAllocator() {}
 
   /**
-   * \brief Implementation of PriorityConfScheduler::addTasksToSchedule
+   * \brief Implementation of PriorityAllocator::addTasksToSchedule
    */
-  void PriorityConfScheduler::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void PriorityAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("PriorityConfScheduler "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+    std::cerr << VPC_YELLOW("PriorityAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
@@ -38,18 +38,18 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityConfScheduler::performSchedule
+   * \brief Implementation of PriorityAllocator::performSchedule
    */
-  void PriorityConfScheduler::performSchedule(ReconfigurableComponent* rc){
+  void PriorityAllocator::performSchedule(ReconfigurableComponent* rc){
 
     this->nextConfigurations.sort();
 
   }
 
   /*
-   * \brief Implementation of PriorityConfScheduler::getNextConfiguration
+   * \brief Implementation of PriorityAllocator::getNextConfiguration
    */  
-  unsigned int PriorityConfScheduler::getNextConfiguration(ReconfigurableComponent* rc){
+  unsigned int PriorityAllocator::getNextConfiguration(ReconfigurableComponent* rc){
 
     if(this->nextConfigurations.size()){
       unsigned int next = this->nextConfigurations.front().getContained();
@@ -58,7 +58,7 @@ namespace SystemC_VPC{
           || next != this->getManagedComponent()->getActivConfiguration()->getID()){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("PriorityConfScheduler " << this->getController().getName() << "> next config to load: "
+        std::cerr << VPC_YELLOW("PriorityAllocator " << this->getController().getName() << "> next config to load: "
             << next) << std::endl;
 #endif //VPC_DEBUG
 
@@ -69,18 +69,18 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityConfScheduler::hasTaskToProcess()
+   * \brief Implementation of PriorityAllocator::hasTaskToProcess()
    */
-  bool PriorityConfScheduler::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool PriorityAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
 
     return (this->tasksToProcess.size() > 0);
 
   }
 
   /**
-   * \brief Implementation of PriorityConfScheduler::getNextTask()
+   * \brief Implementation of PriorityAllocator::getNextTask()
    */
-  ProcessControlBlock* PriorityConfScheduler::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* PriorityAllocator::getNextTask(ReconfigurableComponent* rc){
 
     ProcessControlBlock* task;
     task = this->tasksToProcess.front();
@@ -90,12 +90,12 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityConfScheduler::signalTaskEvent
+   * \brief Implementation of PriorityAllocator::signalTaskEvent
    */
-  void PriorityConfScheduler::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void PriorityAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
 
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("PriorityConfScheduler " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << VPC_YELLOW("PriorityAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
 
     //get mapped configuration
@@ -107,7 +107,7 @@ namespace SystemC_VPC{
       iter->removePriority(this->getHighestPriority(pcb, this->getManagedComponent()));
 
 #ifdef VPC_DEBUG
-      std::cerr << VPC_YELLOW("PriorityConfScheduler " << this->getController().getName() << "> priority of mapped configuration after change is: "
+      std::cerr << VPC_YELLOW("PriorityAllocator " << this->getController().getName() << "> priority of mapped configuration after change is: "
           << iter->getPriority()) << std::endl;
 #endif //VPC_DEBUG
 
@@ -131,7 +131,7 @@ namespace SystemC_VPC{
     }
   }
 
-  unsigned int PriorityConfScheduler::getHighestPriority(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
+  unsigned int PriorityAllocator::getHighestPriority(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
     // first of all get Controller to retrieve Decision
     AbstractController& ctrl = this->getController();
     Decision d = ctrl.getDecision(pcb->getPID(), rc);
