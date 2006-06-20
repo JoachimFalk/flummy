@@ -15,7 +15,14 @@ namespace SystemC_VPC{
   bool ConfigurationScheduler::setProperty(char* key, char* value){
 
     bool used = false;
-    
+
+    // check if property relevant for allocator
+    if(0 != std::strncmp(key, ALLOCATORPREFIX, strlen(ALLOCATORPREFIX))){
+      return used;
+    }else{
+      key += strlen(ALLOCATORPREFIX);
+    }
+   
     if(0 == strcmp(key, "mode")){
 
 #ifdef VPC_DEBUG

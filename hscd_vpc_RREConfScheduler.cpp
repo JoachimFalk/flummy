@@ -337,8 +337,18 @@ namespace SystemC_VPC {
    */
   bool RREConfScheduler::setProperty(char* key, char* value){
     bool used = ConfigurationScheduler::setProperty(key, value);
+
+    if(0 != std::strncmp(key, ALLOCATORPREFIX, strlen(ALLOCATORPREFIX))){
+      std::cerr << ALLOCATORPREFIX << " != " << key << std::endl;
+      return used;
+    }else{
+      key += strlen(ALLOCATORPREFIX);
+    }
+    
+    std::cerr << "setProperty> " << key << " = " << value << std::endl;
+    
     // we should do sth here for alpha;
-    if(0==strncmp(key,"alpha",strlen("alpha"))){
+    if(0==std::strncmp(key,"alpha",strlen("alpha"))){
       sscanf(value,"%lf",&alpha);
       used = true;
     }

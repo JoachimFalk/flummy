@@ -1205,7 +1205,7 @@ namespace SystemC_VPC{
 
       AbstractController* result = NULL;
       DOMNode* node = this->vpcConfigTreeWalker->firstChild();
-
+   
       if(node != NULL){
         const XMLCh* xmlName;
         xmlName = node->getNodeName();
@@ -1220,7 +1220,7 @@ namespace SystemC_VPC{
           char* sName;
           // read values
           sName = XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-
+          
           if(0==strncmp(sName, STR_VPC_CONTROLLER, strlen(STR_VPC_CONTROLLER))){
             Controller* ctrl = new Controller(id);
 
@@ -1271,6 +1271,31 @@ namespace SystemC_VPC{
                   throw;
                 }
 
+              }
+            }
+
+            // ensure compatibilty to sgEdit by parsing name of controller
+            char rest[VPC_MAX_STRING_LENGTH];
+            int sublength;
+            char *secondindex;
+            char *firstindex=strchr(sName,':');    //':' finden -> ':' trennt key-value Paare
+            while(firstindex!=NULL){
+              secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+              if(secondindex!=NULL)
+                sublength=secondindex-firstindex;          //Länge bestimmen
+              else
+                sublength=strlen(firstindex);
+              strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
+              rest[sublength-1]='\0';
+              firstindex=secondindex;
+
+              char *key, *value;               // key und value trennen und Property setzen
+              value=strstr(rest,"-");
+              if(value!=NULL){
+                value[0]='\0';
+                value++;
+                key=rest;
+                ctrl->setProperty(key,value);
               }
             }
 

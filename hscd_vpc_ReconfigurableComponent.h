@@ -27,7 +27,7 @@ namespace SystemC_VPC{
 
       // used to create vcd tracefiles for configurations
       sc_trace_file *traceFile;
-      map<std::string, sc_signal<trace_value>* > trace_map_by_name;
+      std::map<std::string, sc_signal<trace_value>* > trace_map_by_name;
 
       // refers to controller of component
       AbstractController* controller;

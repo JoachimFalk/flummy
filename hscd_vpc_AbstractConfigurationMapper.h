@@ -1,6 +1,8 @@
 #ifndef HSCD_VPC_ABSTRACTCONFIGURATIONMAPPER_H_
 #define HSCD_VPC_ABSTRACTCONFIGURATIONMAPPER_H_
 
+#define MAPPERPREFIX "mapper_"
+
 #include <map>
 #include <string>
 

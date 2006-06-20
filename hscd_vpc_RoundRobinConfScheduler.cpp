@@ -22,6 +22,13 @@ namespace SystemC_VPC{
 
     bool used = ConfigurationScheduler::setProperty(key, value);
 
+     // check if property relevant for allocator
+    if(0 != std::strncmp(key, ALLOCATORPREFIX, strlen(ALLOCATORPREFIX))){
+      return used;
+    }else{
+      key += strlen(ALLOCATORPREFIX);
+    }
+    
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
 
 #ifdef VPC_DEBUG

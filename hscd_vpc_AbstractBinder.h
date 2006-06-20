@@ -1,6 +1,8 @@
 #ifndef HSCD_VPC_ABSTRACTBINDER_H_
 #define HSCD_VPC_ABSTRACTBINDER_H_
 
+#define BINDERPREFIX "binder_"
+
 #include <map>
 #include <string>
 

@@ -3,13 +3,19 @@
 namespace SystemC_VPC{
   
   Controller::Controller(const char* name) : waitInterval(NULL){
+
+    char *firstindex=strchr(name,':');    //':' finden -> ':' trennt key-value Paare 
+    int sublength;
     
-    strcpy(this->controllerName, name);
+    if(firstindex != NULL){ 
+      sublength = firstindex-name;
+      strncpy(this->controllerName, name, sublength);
+    }else{
+      strcpy(this->controllerName, name);
+    }
     
     char rest[VPC_MAX_STRING_LENGTH];
-    int sublength;
     char *secondindex;
-    char *firstindex=strchr(name,':');    //':' finden -> ':' trennt key-value Paare 
     while(firstindex!=NULL){
       secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
       if(secondindex!=NULL)

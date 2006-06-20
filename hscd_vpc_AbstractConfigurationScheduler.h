@@ -1,6 +1,8 @@
 #ifndef HSCD_VPC_ABSTRACTCONFIGURATIONSCHEDULER_H_
 #define HSCD_VPC_ABSTRACTCONFIGURATIONSCHEDULER_H_
 
+#define ALLOCATORPREFIX "alloc_"
+
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "hscd_vpc_TaskEventListener.h"
 
