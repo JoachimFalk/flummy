@@ -709,13 +709,18 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of VPCBuilder::generateController
    * \param controllertype specifies type of controller to instantiate
-   * \param id is the id to be set for the controller
+   * \param id is part of the id to be set for the controller
    */
   AbstractController* VPCBuilder::generateController(const char* controllertype, const char* id)
     throw(InvalidArgumentException){
     // TODO UPDATE IMPLEMENTATION WHEN NEW CONTROLLER IS IMPLEMENTED
     AbstractController* controller;
     
+    // create correct ID for sgEdit compatibility
+    std::string cID = string(id);
+    cID.append("-");
+    cID.append(controllertype);
+   
     if(0==strncmp(controllertype, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
       || 0==strncmp(controllertype, STR_FCFS,strlen(STR_FCFS))){
       controller = new FCFSController(id);      
