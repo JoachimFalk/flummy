@@ -41,7 +41,7 @@ namespace SystemC_VPC{
   Controller::~Controller(){
  
     delete this->binder;
-    delete this->scheduler;
+    delete this->allocator;
     
   }
   
@@ -74,13 +74,13 @@ namespace SystemC_VPC{
     }
   }
     
-  AbstractAllocator* Controller::getConfigurationScheduler(){
-    return this->scheduler;
+  AbstractAllocator* Controller::getAllocator(){
+    return this->allocator;
   }
   
-  void Controller::setConfigurationScheduler(AbstractAllocator* scheduler){
-    if(scheduler != NULL){
-      this->scheduler = scheduler;
+  void Controller::setAllocator(AbstractAllocator* allocator){
+    if(allocator != NULL){
+      this->allocator = allocator;
     }
   }
     
@@ -131,7 +131,7 @@ namespace SystemC_VPC{
     // just pass agruments on right now
     if(!this->binder->setProperty(key, value)
         && !this->mapper->setProperty(key, value)
-        && !this->scheduler->setProperty(key, value)){
+        && !this->allocator->setProperty(key, value)){
 
       std::cerr << VPC_YELLOW("Controller "<< this->getName() << "> Warning: Unkown property tag <" << key << "=" << value << "> , will be ignored! ") << std::endl;
 
@@ -157,27 +157,27 @@ namespace SystemC_VPC{
       // store decision
       this->decisions[pcb->getPID()] = d;
       // register task and configuration for scheduling
-      this->scheduler->addTaskToSchedule(pcb, d.conf, rc);
+      this->allocator->addTaskToSchedule(pcb, d.conf, rc);
       newTasks.pop_front();  
 
     }
   }
 
   void Controller::performSchedule(ReconfigurableComponent* rc){ 
-    this->scheduler->performSchedule(rc); 
+    this->allocator->performSchedule(rc); 
      
   }
 
   bool Controller::hasTaskToProcess(ReconfigurableComponent* rc){
-    return this->scheduler->hasTaskToProcess(rc);
+    return this->allocator->hasTaskToProcess(rc);
   }
     
   ProcessControlBlock* Controller::getNextTask(ReconfigurableComponent* rc){
-    return this->scheduler->getNextTask(rc);
+    return this->allocator->getNextTask(rc);
   }
     
   unsigned int Controller::getNextConfiguration(ReconfigurableComponent* rc){
-    return this->scheduler->getNextConfiguration(rc);
+    return this->allocator->getNextConfiguration(rc);
   }
   
   /**
@@ -185,7 +185,7 @@ namespace SystemC_VPC{
    */
   sc_time* Controller::getWaitInterval(ReconfigurableComponent* rc){
     
-    return this->scheduler->getWaitInterval(rc);
+    return this->allocator->getWaitInterval(rc);
     
   }
      
@@ -208,21 +208,21 @@ namespace SystemC_VPC{
     * \brief Dummy implementation of Controller::signalPreemption
     */  
   void Controller::signalPreemption(bool kill, ReconfigurableComponent* rc){
-    this->scheduler->signalPreemption(kill, rc);
+    this->allocator->signalPreemption(kill, rc);
   }
   
   /**
     * \brief Dummy implementation of Controller::signalResume
     */
   void Controller::signalResume(ReconfigurableComponent* rc){
-    this->scheduler->signalResume(rc);
+    this->allocator->signalResume(rc);
   }
   
   /**
    * \brief Getter to determine which preemption mode is used
    */
   bool Controller::preemptByKill(){
-    return this->scheduler->preemptByKill();
+    return this->allocator->preemptByKill();
   }
   
   /**
@@ -235,7 +235,7 @@ namespace SystemC_VPC{
   void Controller::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
     
     this->binder->signalTaskEvent(pcb, compID);
-    this->scheduler->signalTaskEvent(pcb, compID);
+    this->allocator->signalTaskEvent(pcb, compID);
   
      
     // if task has been killed and controlled instance is not killed solve decision here

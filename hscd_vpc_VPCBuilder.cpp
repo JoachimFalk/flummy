@@ -1059,41 +1059,41 @@ namespace SystemC_VPC{
    * \param node refers to the current parsing position within the DOMTree
    * \param controller refers to the associated controller instance
    */
-  AbstractAllocator* VPCBuilder::generateConfigScheduler(const char* type,
-                                                                      DOMNode* node, 
-                                                                      AbstractController* controller) 
+  AbstractAllocator* VPCBuilder::generateAllocator(const char* type,
+                                                   DOMNode* node, 
+                                                   AbstractController* controller) 
     throw(InvalidArgumentException){
  
       // TODO: UPDATE IMPLEMENTATION IF NEW SCHEDULER IS IMPLEMENTED
-      AbstractAllocator* scheduler = NULL;
+      AbstractAllocator* allocator = NULL;
 
       if(0==strncmp(type, STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE))
           || 0==strncmp(type, STR_FCFS,strlen(STR_FCFS))){
-        scheduler = new FCFSAllocator(controller);      
+        allocator = new FCFSAllocator(controller);      
       }else
         if(0==strncmp(type, STR_ROUNDROBINEXTENDED, strlen(STR_ROUNDROBINEXTENDED))
            || 0==strncmp(type, STR_RRE, strlen(STR_RRE))){
-           scheduler = new RREAllocator(controller);
+           allocator = new RREAllocator(controller);
       }else 
         if(0==strncmp(type, STR_ROUNDROBIN, strlen(STR_ROUNDROBIN))
            || 0==strncmp(type, STR_RR, strlen(STR_RR))){
-           scheduler = new RoundRobinAllocator(controller);
+           allocator = new RoundRobinAllocator(controller);
       }else
         if(0==strncmp(type, STR_PRIORITYSCHEDULER, strlen(STR_PRIORITYSCHEDULER))
            || 0==strncmp(type, STR_PS, strlen(STR_PS))){
-           scheduler = new PriorityAllocator(controller);
+           allocator = new PriorityAllocator(controller);
       }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
-           scheduler = new EDFAllocator(controller);
+           allocator = new EDFAllocator(controller);
       }else{
-        string msg("Unkown schedulertype ");
+        string msg("Unkown allocatortype ");
         msg = type;
         msg = ", cannot create instance";
         throw InvalidArgumentException(msg);
       }
  
-      // set special attributes for scheduler
+      // set special attributes for allocator
       for(DOMNode* attnode = node->getFirstChild(); attnode!=NULL; attnode = attnode->getNextSibling()){
 
         const XMLCh* xmlName=attnode->getNodeName();
@@ -1104,8 +1104,8 @@ namespace SystemC_VPC{
           sType=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
           sValue=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
 
-          if(!scheduler->setProperty(sType, sValue)){
-            std::cerr << VPC_YELLOW("VPCBuilder> Warning: Unused scheduler attribute " << sType << "=" << sValue) << std::endl;
+          if(!allocator->setProperty(sType, sValue)){
+            std::cerr << VPC_YELLOW("VPCBuilder> Warning: Unused allocator attribute " << sType << "=" << sValue) << std::endl;
           }
 
           XMLString::release(&sType);
@@ -1113,7 +1113,7 @@ namespace SystemC_VPC{
         }
       }
     
-      return scheduler;
+      return allocator;
   }
   
   /**
@@ -1255,16 +1255,16 @@ namespace SystemC_VPC{
                 ctrl->setConfigurationMapper(generateMapper(sName, child, ctrl));
 
               } // init Scheduler for controller instance
-              else if( 0==XMLString::compareNString( xmlName, VPCBuilder::schedulerStr, sizeof(VPCBuilder::schedulerStr))){
+              else if( 0==XMLString::compareNString( xmlName, VPCBuilder::allocatorStr, sizeof(VPCBuilder::allocatorStr))){
 
                 sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
 
                 try{
-                  ctrl->setConfigurationScheduler(generateConfigScheduler(sName, child, ctrl));
+                  ctrl->setAllocator(generateAllocator(sName, child, ctrl));
                 }catch(InvalidArgumentException& e){
                   std::cerr << "VPCBuilder> Error: " << e.what() << std::endl;
                   std::cerr << "VPCBuilder> setting default "<< STR_FCFS << " for " << id << std::endl;
-                  ((Controller*)ctrl)->setConfigurationScheduler(generateConfigScheduler(STR_FCFS, child, ctrl));
+                  ((Controller*)ctrl)->setAllocator(generateAllocator(STR_FCFS, child, ctrl));
                 }catch(...){
                   std::cerr << "VPCBuilder> unknown exception occured while creating controller instance" << std::endl;
                   this->vpcConfigTreeWalker->parentNode();

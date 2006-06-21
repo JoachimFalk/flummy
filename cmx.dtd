@@ -33,7 +33,7 @@ scheduler CDATA #REQUIRED>
 name ID #REQUIRED
 type CDATA #REQUIRED>
 
-<!ELEMENT controller (binder, mapper, scheduler)>
+<!ELEMENT controller (binder, mapper, allocator)>
 <!ATTLIST controller
 name  CDATA "controller">
 
@@ -43,6 +43,10 @@ name  CDATA #REQUIRED>
 
 <!ELEMENT mapper (attribute)*>
 <!ATTLIST mapper
+name  CDATA #REQUIRED>
+
+<!ELEMENT allocator (attribute)*>
+<!ATTLIST allocator
 name  CDATA #REQUIRED>
 
 <!ELEMENT scheduler (attribute)*>

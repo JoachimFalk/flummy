@@ -41,8 +41,8 @@ namespace SystemC_VPC {
       // refers to mapper to resolve "binding" of components to configuration
       AbstractConfigurationMapper* mapper;
 
-      // refers to configuration scheduler to manage dynamic allocation
-      AbstractAllocator* scheduler;
+      // refers to allocator to manage dynamic allocation
+      AbstractAllocator* allocator;
 
       // map storing made decisions
       std::map<int, Decision> decisions;
@@ -84,14 +84,14 @@ namespace SystemC_VPC {
       void setConfigurationMapper(AbstractConfigurationMapper* mapper);
 
       /**
-       * \brief Getter for scheduler instance
+       * \brief Getter for allocator instance
        */
-      AbstractAllocator* getConfigurationScheduler();
+      AbstractAllocator* getAllocator();
 
       /**
-       * \brief Sets configuration scheduler of controller instance
+       * \brief Sets configuration allocator of controller instance
        */
-      void setConfigurationScheduler(AbstractAllocator* scheduler);
+      void setAllocator(AbstractAllocator* allocator);
 
       /**
        * \brief Sets the currently controlled reconfigurable Component of instance

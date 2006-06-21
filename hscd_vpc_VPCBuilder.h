@@ -62,6 +62,7 @@ namespace SystemC_VPC{
     XMLCh* controllerStr;
     XMLCh* binderStr;
     XMLCh* mapperStr;
+    XMLCh* allocatorStr;
     XMLCh* schedulerStr;
     XMLCh* timingStr;
     XMLCh* directorStr;
@@ -152,6 +153,7 @@ namespace SystemC_VPC{
       controllerStr   = XMLString::transcode("controller");
       binderStr       = XMLString::transcode("binder");
       mapperStr       = XMLString::transcode("mapper");
+      allocatorStr    = XMLString::transcode("allocator");
       schedulerStr    = XMLString::transcode("scheduler");
       directorStr     = XMLString::transcode("director");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
@@ -297,7 +299,7 @@ namespace SystemC_VPC{
      * \brief Generates controller instance for Component
      * \param id is the id to be set for the controller     
      */
-    AbstractAllocator* generateConfigScheduler(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
+    AbstractAllocator* generateAllocator(const char* type, DOMNode* node, AbstractController* controller)throw(InvalidArgumentException);
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
      */

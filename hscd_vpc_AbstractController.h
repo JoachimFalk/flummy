@@ -52,14 +52,14 @@ namespace SystemC_VPC{
     
     virtual AbstractBinder* getBinder()=0;
     virtual AbstractConfigurationMapper* getConfigurationMapper()=0;
-    virtual AbstractAllocator* getConfigurationScheduler()=0;
+    virtual AbstractAllocator* getAllocator()=0;
     
 /*
     virtual void setBinder(AbstractBinder* binder)=0;
     
     virtual void setConfigurationMapper(AbstractConfigurationMapper* mapper)=0;
     
-    virtual void setConfigurationScheduler(AbstractConfigurationScheduler* scheduler)=0;
+    virtual void setAllocator(AbstractAllocator* allocator)=0;
 */
     
     /**
