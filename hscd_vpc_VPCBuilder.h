@@ -105,7 +105,7 @@ namespace SystemC_VPC{
 
     //helper struct
     struct Timing{
-      sc_time delay;
+      sc_time dii;
       sc_time latency;
       char*   fname;
     };
