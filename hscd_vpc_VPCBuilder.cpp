@@ -454,7 +454,7 @@ namespace SystemC_VPC{
 	    }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
 	      latency = XMLString::transcode(a->getNodeValue());
 	    }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
-	      delay = XMLString::transcode(a->getNodeValue());
+	      dii   = XMLString::transcode(a->getNodeValue());
 	    }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
 	      fname = XMLString::transcode(a->getNodeValue());
 	    }
@@ -757,7 +757,7 @@ namespace SystemC_VPC{
 		}else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
 		  latency = XMLString::transcode(a->getNodeValue());
 		}else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
-		  delay = XMLString::transcode(a->getNodeValue());
+		  dii   = XMLString::transcode(a->getNodeValue());
 		}else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
 		  fname = XMLString::transcode(a->getNodeValue());
 		}
