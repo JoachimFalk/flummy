@@ -82,10 +82,6 @@ typedef CoSupport::SystemC::Event         VPC_Event;
 
   using std::string;
 
-#define S_BLOCKED 'b'
-#define S_READY   'w'
-#define S_RUNNING 'R'
-
   //enum trace_value {blocked,ready,running};
 
 /*

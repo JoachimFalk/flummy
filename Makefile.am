@@ -59,6 +59,7 @@ pkgincludeprefix=systemcvpc/
 
 lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
+	hscd_vpc_Tracing.h			\
 	hscd_vpc_AbstractComponent.h            \
 	hscd_vpc_AbstractController.h           \
 	hscd_vpc_AbstractDirector.h             \
