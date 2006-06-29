@@ -148,7 +148,10 @@ namespace SystemC_VPC{
 
         // check if activ configuration has to be saved
         if(this->activConfiguration != NULL && !this->activConfiguration->isStored()){
-          this->storeActivConfiguration(this->killed);
+          if(!this->storeActivConfiguration(this->killed)){
+            currConfig = NULL;
+          }
+
         }
 
         wait(this->notify_resume);

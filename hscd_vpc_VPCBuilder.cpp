@@ -29,7 +29,8 @@
 #include "hscd_vpc_datatypes.h"
 
 namespace SystemC_VPC{
-   
+#define MAX(x,y) ((x > y) ? x : y)
+
   /**
    * \brief sets ups VPC Framework
    */
@@ -496,10 +497,6 @@ namespace SystemC_VPC{
 
         if( 0==XMLString::compareNString( xmlName, timingStr, sizeof(timingStr))){
           char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
-          VPCBuilder::Timing t;
-          t.delay   = SC_ZERO_TIME;
-          t.latency = SC_ZERO_TIME;
-          t.fname   = fname;
 
           DOMNamedNodeMap* atts = node->getAttributes();
           for(unsigned int i=0; i<atts->getLength(); i++){
@@ -509,22 +506,31 @@ namespace SystemC_VPC{
             }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
               latency = XMLString::transcode(a->getNodeValue());
             }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
-              delay = XMLString::transcode(a->getNodeValue());
+              dii = XMLString::transcode(a->getNodeValue());
             }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
               fname = XMLString::transcode(a->getNodeValue());
             }
           }
+
+          VPCBuilder::Timing t;
+          sc_time sc_latency = SC_ZERO_TIME;
+          sc_time sc_dii     = SC_ZERO_TIME;
+
+          if(latency != NULL) sc_latency = createSC_Time(latency);
+          if(dii != NULL) sc_dii = createSC_Time(dii);
+          { // latency and delay are synonym -> take maximum if they differ
+            sc_time sc_delay = SC_ZERO_TIME;
+            if(delay != NULL) sc_delay = createSC_Time(delay);
+            sc_latency = MAX(sc_latency,sc_delay);
+          }
           t.fname   = fname;
-          if(latency != NULL){
-            t.latency = createSC_Time(latency);
+          //per default latency is used as vpc-delay as well as vpc-latency (vpc-delay == dii)
+          t.latency = sc_latency;
+          t.dii   = sc_latency;
+          if( dii != NULL ){
+            t.dii   = sc_latency;
           }
-          if(delay != NULL){
-            t.delay   = createSC_Time(delay);
-          }
-          // use dii only when having a latency or having no delay -> then dii overides delay
-          if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
-            t.delay = createSC_Time(dii);
-          }
+
           timings.push_back(t);
 
           // check if its an attribute to add
@@ -827,22 +833,29 @@ namespace SystemC_VPC{
                 }else if(0==XMLString::compareNString( a->getNodeName(), latencyAttrStr, sizeof(latencyAttrStr))){
                   latency = XMLString::transcode(a->getNodeValue());
                 }else if(0==XMLString::compareNString( a->getNodeName(), diiAttrStr, sizeof(diiAttrStr))){
-                  delay = XMLString::transcode(a->getNodeValue());
+                  dii = XMLString::transcode(a->getNodeValue());
                 }else if(0==XMLString::compareNString( a->getNodeName(), fnameAttrStr, sizeof(fnameAttrStr))){
                   fname = XMLString::transcode(a->getNodeValue());
                 }
               }
-              if(latency != NULL){
-                sc_time sc_latency = createSC_Time(latency);
-                mInfo->addFuncLatency(fname, sc_latency);
+   
+              sc_time sc_latency = SC_ZERO_TIME;
+              sc_time sc_dii     = SC_ZERO_TIME;
+               
+              if(latency != NULL) sc_latency = createSC_Time(latency);
+              if(dii != NULL) sc_dii = createSC_Time(dii);
+              { // latency and delay are synonym -> take maximum if they differ
+                sc_time sc_delay = SC_ZERO_TIME;
+                if(delay != NULL) sc_delay = createSC_Time(delay);
+                sc_latency = MAX(sc_latency,sc_delay);
               }
-              if(delay != NULL){
-                sc_time sc_delay = createSC_Time(delay);
-                mInfo->addDelay(fname, sc_delay);
-              }
-              // use dii only when having a latency or having no delay -> then dii overides delay
-              if( (dii != NULL) && ((latency != NULL) || (delay == NULL)) ){
-                sc_time sc_dii = createSC_Time(dii);
+
+              //per default latency is used as vpc-delay as well as vpc-latency (vpc-delay == dii)
+              mInfo->addFuncLatency(fname, sc_latency);
+              mInfo->addDelay(fname, sc_latency);
+
+              // if having a  then dii overides delay
+              if( dii != NULL ){
                 mInfo->addDelay(fname, sc_dii);
               }
             }else if( 0==XMLString::compareNString( xmlName, attributeStr, sizeof(attributeStr))){
@@ -1041,7 +1054,7 @@ namespace SystemC_VPC{
       for(std::vector<VPCBuilder::Timing>::iterator timings = timingTemplates[key].begin();
           timings != timingTemplates[key].end(); timings++){
         VPCBuilder::Timing t = *timings;
-        mInfo.addDelay( t.fname, t.delay   );
+        mInfo.addDelay( t.fname, t.dii   );
         mInfo.addFuncLatency( t.fname, t.latency );
       }
     }
