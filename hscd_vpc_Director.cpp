@@ -124,7 +124,7 @@ namespace SystemC_VPC{
    *
    */
   Director::~Director(){
-    cerr << "~Director()" <<endl;
+    //cerr << "~Director()" <<endl;
     
     getReport();
     
