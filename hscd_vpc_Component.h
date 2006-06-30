@@ -57,7 +57,7 @@ namespace SystemC_VPC{
       priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> pqueue;
 
       sc_trace_file *traceFile;
-      map<std::string,sc_signal<trace_value>*> trace_map_by_name;
+      map<std::string, Tracing* > trace_map_by_name;
       Scheduler *scheduler;
       deque<ProcessControlBlock*>      newTasks;
       //    map<int,action_struct> *open_commands;
@@ -131,7 +131,7 @@ namespace SystemC_VPC{
         ((vcd_trace_file*)this->traceFile)->sc_set_vcd_time_unit(-9);
 #endif //NO_VCD_TRACES
 #ifndef NO_VCD_TRACES
-        sc_trace(this->traceFile,schedulerTrace,schedulername);
+        //sc_trace(this->traceFile,schedulerTrace,schedulername);
 #endif //NO_VCD_TRACES      
 
         /**************************/

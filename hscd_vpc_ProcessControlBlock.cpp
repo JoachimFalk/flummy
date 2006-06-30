@@ -201,11 +201,11 @@ namespace SystemC_VPC{
     return this->state;
   }
 
-  void ProcessControlBlock::setTraceSignal(sc_signal<trace_value>* signal){
+  void ProcessControlBlock::setTraceSignal(Tracing* signal){
     this->traceSignal = signal;
   }
 
-  sc_signal<trace_value>* ProcessControlBlock::getTraceSignal(){
+  Tracing* ProcessControlBlock::getTraceSignal(){
     return this->traceSignal;
   }
 

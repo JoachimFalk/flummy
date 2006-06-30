@@ -183,8 +183,14 @@ namespace SystemC_VPC {
 
   PCBPool::TypePool::~TypePool(){
  
-    assert(this->lockedPCB.size() == 0);
-    assert(this->usedPCB.size() == 0);
+    if(this->lockedPCB.size() != 0){
+      std::cerr << "WARNING: TypePool for " << this->base->getName() << " still locked instances exist!" << std::endl 
+        << "Assuming interruption by sc_stop happend. Cleaning up all instances of " << this->base->getName() << std::endl;
+    }
+    if(this->usedPCB.size() != 0){
+       std::cerr << "WARNING: TypePool for " << this->base->getName() << " still used instances exist!" << std::endl 
+        << "Assuming interruption by sc_stop happend. Cleaning up all instances of " << this->base->getName() << std::endl;
+    }
 
     std::map<int, ProcessControlBlock* >::iterator iter;
     for(iter = this->freePCB.begin(); iter != this->freePCB.end(); iter++){

@@ -38,9 +38,6 @@ namespace SystemC_VPC {
    * SECTION task states
    **********************************/
 
-#define S_BLOCKED 'b'
-#define S_READY   'w'
-#define S_RUNNING 'R'
   // extension definition for tracing task state
 #define S_SUSPENDED 's'
 #define S_KILLED 'k'

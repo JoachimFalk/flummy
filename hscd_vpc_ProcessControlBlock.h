@@ -10,6 +10,7 @@
 #include <systemc_support.hpp>
 
 #include "hscd_vpc_EventPair.h"
+#include "hscd_vpc_Tracing.h"
 
 namespace SystemC_VPC {
  
@@ -23,9 +24,6 @@ namespace SystemC_VPC {
     aborted
   };
 
-  typedef char trace_value;
-
- 
  /**
   * This class represents all necessary data of a simulated process within VPC
   * and provides necessary access methods for its data.
@@ -80,7 +78,7 @@ namespace SystemC_VPC {
       sc_time period;
       sc_time deadline;
       activation_state state;
-      sc_signal<trace_value>* traceSignal;
+      Tracing * traceSignal;
 
 
       /**
@@ -214,9 +212,9 @@ namespace SystemC_VPC {
 
       activation_state getState() const;
       
-      void setTraceSignal(sc_signal<trace_value>* signal);
+      void setTraceSignal(Tracing* signal);
 
-      sc_signal<trace_value>* getTraceSignal();
+      Tracing* getTraceSignal();
 
 			BindingGraph& getBindingGraph();
 

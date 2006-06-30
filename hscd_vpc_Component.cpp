@@ -96,7 +96,7 @@ namespace SystemC_VPC{
             //notify(*(task->blockEvent));
             scheduler->removedTask(task);
 #ifndef NO_VCD_TRACES
-            if(task->getTraceSignal()!=0) *(task->getTraceSignal())=S_BLOCKED;     
+            if(task->getTraceSignal()!=0) task->getTraceSignal()->value(S_BLOCKED);     
 #endif //NO_VCD_TRACES
             runningTasks.erase(actualRunningPID);
       
@@ -133,7 +133,7 @@ namespace SystemC_VPC{
           this->setTraceSignalReadyTasks(S_SUSPENDED);
         
           if(this->runningTasks.size() > 0 && runningTasks[actualRunningPID]->getTraceSignal() != NULL){
-            *(runningTasks[actualRunningPID]->getTraceSignal())=S_SUSPENDED;
+            runningTasks[actualRunningPID]->getTraceSignal()->value(S_SUSPENDED);
           }     
 #endif //NO_VCD_TRACES
       
@@ -149,7 +149,7 @@ namespace SystemC_VPC{
         this->setTraceSignalReadyTasks(S_READY);
     
         if(this->runningTasks.size() > 0 && runningTasks[actualRunningPID]->getTraceSignal() != NULL){
-           *(runningTasks[actualRunningPID]->getTraceSignal())=S_RUNNING;
+           runningTasks[actualRunningPID]->getTraceSignal()->value(S_RUNNING);
         }     
 #endif //NO_VCD_TRACES
 
@@ -168,7 +168,7 @@ namespace SystemC_VPC{
         cerr << this->basename() << " received new Task: " << newTask->getName() << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 #ifndef NO_VCD_TRACES
-        *(newTask->getTraceSignal())=S_READY;     
+        if(newTask->getTraceSignal()!=0) newTask->getTraceSignal()->value(S_READY);     
 #endif //NO_VCD_TRACES
         //insert new task in read list
         assert(readyTasks.find(newTask->getPID())   == readyTasks.end()   /* A task can call compute only one time! */);
@@ -191,7 +191,7 @@ namespace SystemC_VPC{
         actualRunningPID=-1;
         readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
 #ifndef NO_VCD_TRACES
-        if(readyTasks[taskToResign]->getTraceSignal()!=0) *(readyTasks[taskToResign]->getTraceSignal())=S_READY;     
+        if(readyTasks[taskToResign]->getTraceSignal()!=0) readyTasks[taskToResign]->getTraceSignal()->value(S_READY);     
 #endif //NO_VCD_TRACES
       }
   
@@ -245,7 +245,7 @@ namespace SystemC_VPC{
         cerr<< " is " << runningTasks[taskToAssign]->getRemainingDelay() << endl;
 #endif // VPCDEBUG
 #ifndef NO_VCD_TRACES
-        if(runningTasks[taskToAssign]->getTraceSignal()!=0) *(runningTasks[taskToAssign]->getTraceSignal())=S_RUNNING;     
+        if(runningTasks[taskToAssign]->getTraceSignal()!=0) runningTasks[taskToAssign]->getTraceSignal()->value(S_RUNNING);     
 #endif //NO_VCD_TRACES
       }
     }
@@ -290,9 +290,9 @@ namespace SystemC_VPC{
 #endif
 
 #ifndef NO_VCD_TRACES
-    sc_signal<trace_value> *trace_signal=0;
+    Tracing * trace_signal;
     if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->getName());
+      map<string, Tracing* >::iterator iter = trace_map_by_name.find(actualTask->getName());
       trace_signal=(iter->second);
     }
 #endif //NO_VCD_TRACES
@@ -364,9 +364,9 @@ namespace SystemC_VPC{
    */
   void Component::informAboutMapping(string module){
 #ifndef NO_VCD_TRACES
-    sc_signal<trace_value> *newsignal=new sc_signal<trace_value>();
-    trace_map_by_name.insert(pair<string,sc_signal<trace_value>*>(module,newsignal));
-    sc_trace(this->traceFile,*newsignal,module.c_str());
+    Tracing *newsignal = new Tracing();
+    trace_map_by_name.insert(pair<string,Tracing* >(module, newsignal));
+    sc_trace(this->traceFile, *newsignal->traceSignal, module.c_str());
 #endif //NO_VCD_TRACES
 
   }
@@ -419,9 +419,9 @@ namespace SystemC_VPC{
 #endif
 
 #ifndef NO_VCD_TRACES
-    sc_signal<trace_value> *trace_signal=0;
+    Tracing *trace_signal;
     if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->getName());
+      map<string,Tracing* >::iterator iter = trace_map_by_name.find(actualTask->getName());
       trace_signal=(iter->second);
     }
 #endif //NO_VCD_TRACES
@@ -460,7 +460,7 @@ namespace SystemC_VPC{
   
   #ifndef NO_VCD_TRACES
     if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string,sc_signal<trace_value>*>::iterator iter = trace_map_by_name.find(actualTask->getName());
+      map<string, Tracing* >::iterator iter = trace_map_by_name.find(actualTask->getName());
       actualTask->setTraceSignal(iter->second);
     }
   #endif //NO_VCD_TRACES
@@ -514,8 +514,8 @@ namespace SystemC_VPC{
 
 #ifndef NO_VCD_TRACES
         if(iter->second->getTraceSignal() != 0){
-          *(iter->second->getTraceSignal()) = S_KILLED;
-        }     
+	  iter->second->getTraceSignal()->value(S_KILLED);
+        }
 #endif //NO_VCD_TRACES
     
       this->parentControlUnit->signalTaskEvent(iter->second, this->basename());
@@ -548,8 +548,8 @@ namespace SystemC_VPC{
 
 #ifndef NO_VCD_TRACES
         if(iter->second->getTraceSignal() != 0){
-          *(iter->second->getTraceSignal()) = S_KILLED;
-        }     
+	  iter->second->getTraceSignal()->value(S_KILLED);
+        }
 #endif //NO_VCD_TRACES
 
       this->parentControlUnit->signalTaskEvent(iter->second, this->basename());
@@ -578,9 +578,9 @@ namespace SystemC_VPC{
       this->parentControlUnit->signalTaskEvent(newTask, this->basename());
       
 #ifndef NO_VCD_TRACES
-      if(newTask->getTraceSignal() != 0){
-        *(newTask->getTraceSignal())=S_KILLED; 
-      }    
+      if(newTask->getTraceSignal() !=0 ){
+	newTask->getTraceSignal()->value(S_KILLED); 
+      }
 #endif //NO_VCD_TRACES
                 
       }
@@ -593,9 +593,9 @@ namespace SystemC_VPC{
       std::map<int, ProcessControlBlock* >::iterator iter;
       for(iter = this->readyTasks.begin(); iter != this->readyTasks.end(); iter++){
 
-        if(iter->second->getTraceSignal() != 0){
-          *(iter->second->getTraceSignal()) = value;
-        }     
+        if(iter->second->getTraceSignal() !=0 ){
+	  iter->second->getTraceSignal()->value(value);
+	}
 
       }
       
@@ -674,7 +674,7 @@ namespace SystemC_VPC{
         top.pcb->setState(activation_state(aborted));
         scheduler->removedTask(top.pcb);
 #ifndef NO_VCD_TRACES
-        if(top.pcb->getTraceSignal() != 0) *(top.pcb->getTraceSignal()) = S_KILLED;
+        if(top.pcb->getTraceSignal()!=0) top.pcb->getTraceSignal()->value(S_KILLED);
 #endif //NO_VCD_TRACES
         this->parentControlUnit->signalTaskEvent(top.pcb, this->basename());
 
