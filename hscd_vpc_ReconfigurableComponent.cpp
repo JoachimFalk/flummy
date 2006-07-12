@@ -89,6 +89,7 @@ namespace SystemC_VPC{
      *******************************************/
 
     sc_time* minTimeToWait = NULL;
+    sc_time overhead = SC_ZERO_TIME;
     bool newTasksDuringLoad = false;
 
     while(true){
@@ -164,7 +165,8 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
       }
-      
+    
+        
       do{
         // inform controller about new tasks
         this->controller->addTasksToSchedule(this->newTasks, this);
@@ -174,6 +176,14 @@ namespace SystemC_VPC{
 
       this->controller->performSchedule(this);
 
+      // check if overhead during schedule occured
+      overhead = this->controller->getSchedulingOverhead();
+      if(overhead != SC_ZERO_TIME){
+        // TODO: apply implementation if overhead of scheduling should be modeled!
+        // wait(overhead ...
+        overhead = SC_ZERO_TIME;
+      }
+      
 #ifdef VPC_DEBUG
       std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename() <<"> finished delegation to controller !") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG

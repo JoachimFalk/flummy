@@ -90,5 +90,9 @@ namespace SystemC_VPC{
   ReconfigurableComponent* Allocator::getManagedComponent(){
     return this->controller->getManagedComponent();
   }
-  
+
+  sc_time Allocator::getSchedulingOverhead(){
+    return SC_ZERO_TIME;
+  }
+
 }

@@ -60,6 +60,7 @@ namespace SystemC_VPC {
        */
       virtual bool setProperty(char* key, char* value)=0;
 
+      virtual sc_time getBindingOverhead()=0;
   };
 
   /**
@@ -121,7 +122,8 @@ namespace SystemC_VPC {
        * \sa AbstractBinder::resolveBinding
        */
       std::string resolveBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
-
+  
+      virtual sc_time getBindingOverhead();
   };
 
   /**

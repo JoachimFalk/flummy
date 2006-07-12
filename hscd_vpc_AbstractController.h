@@ -159,7 +159,8 @@ namespace SystemC_VPC{
      * \brief 
      */
     virtual Decision getDecision(int pid, ReconfigurableComponent* rc)=0;
-    
+
+    virtual sc_time getSchedulingOverhead()=0;    
   };
 
 }

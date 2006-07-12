@@ -191,6 +191,8 @@ namespace SystemC_VPC {
 
       virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
 
+      virtual sc_time getSchedulingOverhead();
+
   };
 
 }

@@ -253,5 +253,12 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
  
   }
- 
+
+  sc_time Controller::getSchedulingOverhead(){
+    sc_time t = SC_ZERO_TIME;
+    t += this->binder->getBindingOverhead();
+    t += this->allocator->getSchedulingOverhead();
+    return t;
+  }
+  
 }

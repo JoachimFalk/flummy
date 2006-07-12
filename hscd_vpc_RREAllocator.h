@@ -106,7 +106,8 @@ namespace SystemC_VPC {
       sc_time activTime;
       std::map<int, RREConfElement* > elems;
       RREConfElement* selected;
-
+      bool killMode;
+      
     public:
 
       RREAllocator(AbstractController* ctrl, double alpah=0.5);

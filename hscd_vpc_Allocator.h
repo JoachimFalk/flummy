@@ -80,6 +80,8 @@ namespace SystemC_VPC {
        */
       virtual void signalResume(ReconfigurableComponent* rc);
 
+      virtual sc_time getSchedulingOverhead();
+
     protected:
 
       AbstractController& getController();

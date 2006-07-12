@@ -109,6 +109,8 @@ namespace SystemC_VPC {
        * component.
        */
       virtual void signalResume(ReconfigurableComponent* rc)=0;
+
+      virtual sc_time getSchedulingOverhead()=0;
   };
 
 }

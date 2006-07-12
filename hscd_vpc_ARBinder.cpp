@@ -36,11 +36,6 @@ namespace SystemC_VPC {
 				target = iter->second;
 			}else{// else determine fitting target
 				
-				unsigned int activConfID = 0;
-				if(comp->getActivConfiguration() != NULL){
-					activConfID = comp->getActivConfiguration()->getID();
-				}
-				
 				// build up helper structs
 				std::queue<std::string > noReconf; //<< contains targets with no reconf needed
 				std::queue<std::string > reconf; //<< contains targets with reconf required
@@ -49,7 +44,7 @@ namespace SystemC_VPC {
 				while(bIter->hasNext()){
 
 					std::string tmp = bIter->getNext()->getID();
-					if(this->reconfRequired(task, tmp, comp)){
+					if(!this->reconfRequired(task, tmp, comp)){
 						noReconf.push(tmp);
 					}else{
 						reconf.push(tmp);
@@ -131,14 +126,19 @@ namespace SystemC_VPC {
     }
 
 	bool ARBinder::reconfRequired(ProcessControlBlock& task, std::string target, ReconfigurableComponent* comp){
-		Configuration* c = comp->getActivConfiguration();
-
+		Configuration* c = NULL;
+    // ensure we have component given!
+    if(comp != NULL){
+      c = comp->getActivConfiguration();
+    }
+    
 #ifdef VPC_DEBUG
     std::cerr << "ARBinder> reconfRequired called for " << task.getName() << " to " << target << std::endl;
 #endif //VPC_DEBUG
     
-		if(c != NULL 
-				&& c->getID() == comp->getController()->getConfigurationMapper()->getConfigForComp(target)){
+		if(c != NULL && c->getID() != comp->getController()->getConfigurationMapper()->getConfigForComp(target)){
+      return true;
+    }else{
       //check if sub-comp is reconfigurable component
 			ReconfigurableComponent* rc = dynamic_cast<ReconfigurableComponent* >(c->getComponent(target));
 			// if != NULL we have a rc
@@ -150,15 +150,15 @@ namespace SystemC_VPC {
           std::string t = bIter->getNext()->getID();
 					if(rc->getActivConfiguration() != NULL
 							&& rc->getActivConfiguration()->getID() == rc->getController()->getConfigurationMapper()->getConfigForComp(t)){
-						return true;
+						return false;
 					}
 				}
 			}else{// else simple component that fits to current configuration
-				return true;
+				return false; 
 			}
 		}
 
-		return false;
+		return true;
 	}
 	
 	void ARBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string compID) {

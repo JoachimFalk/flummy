@@ -129,7 +129,8 @@ namespace SystemC_VPC {
       taskCount(0),
       lastassign(SC_ZERO_TIME),
       activTime(SC_ZERO_TIME),
-      selected(NULL) {}
+      selected(NULL),
+      killMode(false) {}
 
   /**
    * \brief Implementation of RRAllocator::
@@ -345,13 +346,24 @@ namespace SystemC_VPC {
       key += strlen(ALLOCATORPREFIX);
     }
     
-    std::cerr << "setProperty> " << key << " = " << value << std::endl;
-    
     // we should do sth here for alpha;
     if(0==std::strncmp(key,"alpha",strlen("alpha"))){
       sscanf(value,"%lf",&alpha);
       used = true;
+    }else if(0 == strcmp(key, "mode")){
+
+      if(0 == strcmp(value, "kill")){
+        this->killMode = true;
+        used = true;
+      }else
+      if(0 == strcmp(value, "store")){
+        this->killMode = false;
+        used = true;
+      }else{
+        std::cerr << "RREAllocator> unkown mode value=" << value << std::endl;
+      }
     }
+ 
     return used;
   }
 
@@ -418,6 +430,11 @@ namespace SystemC_VPC {
   }
 
   bool RREAllocator::killConfiguration(RREConfElement* elem, ReconfigurableComponent* rc){
+    // if we are only able to kill just do so!
+    if(this->killMode){
+      return true;
+    }
+    
     bool killConf = true;
     // only if there is already scheduled configuration!
     // else there should be no running task and so no need to store!

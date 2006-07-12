@@ -39,6 +39,9 @@ namespace SystemC_VPC {
 
     private:
 
+      /**
+       * \brief Used to indicate if candidate target requires reconfiguration for processing task
+       */
       bool reconfRequired(ProcessControlBlock& task, std::string target, ReconfigurableComponent* comp);
 
   };

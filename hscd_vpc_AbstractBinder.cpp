@@ -79,6 +79,10 @@ namespace SystemC_VPC {
   }
 
 
+  sc_time LocalBinder::getBindingOverhead(){
+    return SC_ZERO_TIME;
+  }
+
   StaticBinder::StaticBinder() {}
 
   StaticBinder::~StaticBinder() {}
