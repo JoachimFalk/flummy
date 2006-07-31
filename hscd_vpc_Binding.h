@@ -9,7 +9,10 @@
 namespace SystemC_VPC {
 
   class Binding;
-
+  
+  /**
+   * \brief Enables iteration over successors of Binding
+   */
   class ChildIterator {
   
     private:
@@ -54,6 +57,9 @@ namespace SystemC_VPC {
 	};
 		
 	
+  /**
+   * \brief Represents vertex within BindingGraph
+   */
   class Binding {
 
     private:
@@ -83,6 +89,9 @@ namespace SystemC_VPC {
        */
       virtual void addBinding(Binding* target);
 
+      /**
+       * \brief adds additional MappingInformation to vertex
+       */
       void addMappingInformation(MappingInformation* mI);
 
 			/**
