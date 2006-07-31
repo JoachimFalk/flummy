@@ -138,14 +138,14 @@ namespace SystemC_VPC{
    };
   
   /**
-    * \brief Dummy implementation of Controller::signalPreemption
+    * \brief Dummy implementation of Controller::signalDeallocation
     */  
-  void Controller::signalPreemption(bool kill){}
+  void Controller::signalDeallocation(bool kill){}
   
   /**
-    * \brief Dummy implementation of Controller::signalResume
+    * \brief Dummy implementation of Controller::signalAllocation
     */
-  void Controller::signalResume(){}
+  void Controller::signalAllocation(){}
   
   /**
     * \brief Implementation of Controller::getMappedConfiguration
@@ -173,7 +173,7 @@ namespace SystemC_VPC{
   /**
    * \brief Getter to determine which preemption mode is used
    */
-  bool Controller::preemptByKill(){
+  bool Controller::deallocateByKill(){
     return this->kill;
   }
   

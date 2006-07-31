@@ -153,17 +153,17 @@ namespace SystemC_VPC{
     /**
      * \see AbstractController
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb);
+    virtual void signalProcessEvent(ProcessControlBlock* pcb);
     
     /**
      * \see AbstractController
      */
-    virtual void signalPreemption(bool kill);
+    virtual void signalDeallocation(bool kill);
     
     /**
      * \see AbstractController
      */
-    virtual void signalResume();
+    virtual void signalAllocation();
     
   private:
   

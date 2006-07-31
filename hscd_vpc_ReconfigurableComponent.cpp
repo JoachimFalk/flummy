@@ -106,7 +106,7 @@ namespace SystemC_VPC{
           std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename() <<"> waiting for new tasks.") << endl;
 #endif //VPC_DEBUG
 
-          wait(this->notify_schedule_thread | this->notify_preempt);
+          wait(this->notify_schedule_thread | this->notify_deallocate);
         
         }else{
         
@@ -114,7 +114,7 @@ namespace SystemC_VPC{
           std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename() <<"> waiting for redelegation in: ") << minTimeToWait->to_default_time_units() << endl;
 #endif //VPC_DEBUG
   
-          wait(*minTimeToWait, this->notify_schedule_thread | this->notify_preempt);
+          wait(*minTimeToWait, this->notify_schedule_thread | this->notify_deallocate);
           delete minTimeToWait;
           minTimeToWait = NULL;
           
@@ -131,14 +131,14 @@ namespace SystemC_VPC{
             << " with num of new tasks= " << this->newTasks.size()) << endl;
 #endif //VPC_DEBUG
 
-      // if component is preempted wait till resume
+      // if component is deallocated wait till allocate
       if( !this->isActiv() ){
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename() <<"> not activ going to sleep at time: ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
         
-        this->controller->signalPreemption(this->killed);
+        this->controller->signalDeallocation(this->killed);
         // hold pointer to currentlyloaded configuration
         Configuration* currConfig;
         if(this->killed){
@@ -152,10 +152,10 @@ namespace SystemC_VPC{
           this->storeActivConfiguration(this->killed);
         }
         
-        wait(this->notify_resume);
+        wait(this->notify_allocate);
         
         this->loadConfiguration(currConfig);
-        this->controller->signalResume();
+        this->controller->signalAllocation();
         
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename() <<"> awoke at time: ") << sc_simulation_time() << endl;
@@ -207,8 +207,8 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
       
         // perform reconfiguration
-        if(this->storeActivConfiguration(this->controller->preemptByKill())){
-          // perform loading new configuration if no preemption happend!
+        if(this->storeActivConfiguration(this->controller->deallocateByKill())){
+          // perform loading new configuration if no deallocation happend!
           if(this->isActiv() && !this->loadConfiguration(nextConfig)){
           
 #ifdef VPC_DEBUG
@@ -317,7 +317,7 @@ namespace SystemC_VPC{
       this->activConfiguration = newConfig->second;
       
       // activate new configration
-      this->activConfiguration->resume();
+      this->activConfiguration->allocate();
       
 #ifdef VPC_DEBUG
       std::cerr << "ReconfigurableComponent> activ Configuration " << this->activConfiguration->getName() << " is activ "
@@ -350,47 +350,47 @@ namespace SystemC_VPC{
   } 
 
   /**
-   * \brief Implementation of ReconfigurableComponent::preempt
+   * \brief Implementation of ReconfigurableComponent::deallocate
    */
-  void ReconfigurableComponent::preempt(bool kill){
+  void ReconfigurableComponent::deallocate(bool kill){
       
-    // only preempt activ component
+    // only deallocate activ component
     if(this->isActiv()){
       this->killed = kill;
       this->setActiv(false);
-      this->notify_preempt.notify();   
+      this->notify_deallocate.notify();   
     }
 
   }
   
   /**
-   * \brief Implementation of ReconfigurableComponent::resume
+   * \brief Implementation of ReconfigurableComponent::allocate
    */
-  void ReconfigurableComponent::resume(){
+  void ReconfigurableComponent::allocate(){
             
-    // only resume preempted component
+    // only allocate deallocated component
     if(!this->isActiv()){
       this->killed = false;
       this->setActiv(true);
-      this->notify_resume.notify();  
+      this->notify_allocate.notify();  
     }
     
   }
 
   /**
-   * \brief Implementation of ReconfigurableComponent::timeToPreempt
+   * \brief Implementation of ReconfigurableComponent::timeToDeallocate
    */  
-  sc_time ReconfigurableComponent::timeToPreempt(){
+  sc_time ReconfigurableComponent::timeToDeallocate(){
     sc_time time(SC_ZERO_TIME);
     
-    // only if component is activ we have time for preemption
+    // only if component is activ we have time for deallocateion
     if(this->isActiv()){
       // if component is in storing phase
       if(this->storeStartTime != NULL && this->remainingStoreTime != NULL){
         time += *(this->remainingStoreTime) - (sc_time_stamp() - *(this->storeStartTime));
       }else
       if(this->activConfiguration != NULL){
-        time = this->activConfiguration->timeToPreempt();
+        time = this->activConfiguration->timeToDeallocate();
         time += this->activConfiguration->getStoreTime();
       }
     }
@@ -399,16 +399,16 @@ namespace SystemC_VPC{
   }
     
   /**
-   * \brief Implementation of ReconfigurableComponent::timeToResume
+   * \brief Implementation of ReconfigurableComponent::timeToAllocate
    */  
-  sc_time ReconfigurableComponent::timeToResume(){
+  sc_time ReconfigurableComponent::timeToAllocate(){
     
     sc_time time(SC_ZERO_TIME);
     
-    // only if component is inactiv we have time to resume
+    // only if component is inactiv we have time to allocate
     if(!this->isActiv() && this->activConfiguration != NULL){
       
-      time = this->activConfiguration->timeToResume();
+      time = this->activConfiguration->timeToAllocate();
       time += this->activConfiguration->getLoadTime();
       
     }
@@ -496,11 +496,11 @@ namespace SystemC_VPC{
 
       //update time for reconfiguration if storing is required
       if(!kill){
-        sc_time time = this->activConfiguration->timeToPreempt();
+        sc_time time = this->activConfiguration->timeToDeallocate();
         timeToStore += time;
       }
       
-      this->activConfiguration->preempt(kill);
+      this->activConfiguration->deallocate(kill);
 
           
       // Simulate store time if required
@@ -509,15 +509,15 @@ namespace SystemC_VPC{
         timeToStore += this->activConfiguration->getStoreTime();
       }
       
-      // perform simulating storing as long as time not elapsed and no preemption by kill happend
+      // perform simulating storing as long as time not elapsed and no deallocation by kill happend
       while(timeToStore > SC_ZERO_TIME){
         
-        wait(timeToStore, this->notify_preempt);
+        wait(timeToStore, this->notify_deallocate);
         
         timeToStore -= sc_time_stamp() - storeStart;
         storeStart = sc_time_stamp();
         
-        //check if preemption happend with kill!
+        //check if deallocation happend with kill!
         if(this->killed){
 
 #ifdef VPC_DEBUG
@@ -536,8 +536,8 @@ namespace SystemC_VPC{
           this->storeStartTime = NULL;
           this->remainingStoreTime = NULL;
           
-          // signal preemption to controller instance
-          this->controller->signalPreemption(this->killed);
+          // signal deallocation to controller instance
+          this->controller->signalDeallocation(this->killed);
           
           return false;
             
@@ -579,9 +579,9 @@ namespace SystemC_VPC{
 
       //simulate loading time
       timeToLoad += config->getLoadTime();
-      wait(config->getLoadTime(), this->notify_preempt);
+      wait(config->getLoadTime(), this->notify_deallocate);
       
-      // check if preemption happened
+      // check if deallocation happened
       if(reconfigurationInterrupted(loadStart, timeToLoad)){
         this->activConfiguration = NULL;
         
@@ -592,20 +592,20 @@ namespace SystemC_VPC{
         return false;
       }
         
-      sc_time time = config->timeToResume(); 
+      sc_time time = config->timeToAllocate(); 
       timeToLoad += time;
 
-      config->resume(); 
-      // wait time of resume
-      wait(time, this->notify_preempt);
+      config->allocate(); 
+      // wait time of allocate
+      wait(time, this->notify_deallocate);
       
-      // check if preemption happened
+      // check if deallocation happened
       if(reconfigurationInterrupted(loadStart, timeToLoad)){
-        // return with unresumed configuration -> should be already preempted again
+        // return with not allocated configuration -> should be already deallocated again
         this->activConfiguration = NULL;
 
-        // signal preemption to controller instance
-        this->controller->signalPreemption(this->killed);
+        // signal deallocation to controller instance
+        this->controller->signalDeallocation(this->killed);
         
 #ifndef NO_VCD_TRACES
         this->traceConfigurationState(config, S_PASSIV);
@@ -629,7 +629,7 @@ namespace SystemC_VPC{
   
   bool ReconfigurableComponent::reconfigurationInterrupted(sc_time timeStamp, sc_time interval){
     
-    //check if preemption happend
+    //check if deallocation happend
     sc_time elapsedTime = sc_time_stamp() - timeStamp;
     
     if(elapsedTime.value() < interval.value()){

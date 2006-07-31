@@ -327,7 +327,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::notifyTaskEvent
    */
-  void Director::signalTaskEvent(ProcessControlBlock* pcb){
+  void Director::signalProcessEvent(ProcessControlBlock* pcb){
     assert(!FALLBACKMODE);
 
 #ifdef VPC_DEBUG

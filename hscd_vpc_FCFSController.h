@@ -80,26 +80,26 @@ namespace SystemC_VPC{
     bool needToReactivateConfiguration(Configuration* config);
     
     /**
-     * \see TaskEventListener
+     * \see ProcessEventListener
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb);
+    virtual void signalProcessEvent(ProcessControlBlock* pcb);
     
     /**
      * \brief Signals always true as configuration is only switched if all task have finished
      * or have been aborted
      */
-    bool preemptByKill(){
+    bool deallocateByKill(){
      return true;
     }
 
     /**
-     * \brief Used to indicate preemption to controller
+     * \brief Used to indicate deallocation to controller
      * This method is used in cases when preemption from higher hierarchy happens.
-     * Only preemption with kill influences behaviour of controller as
+     * Only deallocation with kill influences behaviour of controller as
      * all still waiting task have to be signalled upward to be aborted.
      * \see AbstractController
      */
-    void signalPreemption(bool kill);
+    void signalDeallocation(bool kill);
 
   };
 

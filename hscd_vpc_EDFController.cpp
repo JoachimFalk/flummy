@@ -101,9 +101,9 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of EDFController::signalTaskEvent
+   * \brief Implementation of EDFController::signalProcessEvent
    */
-  void EDFController::signalTaskEvent(ProcessControlBlock* pcb){
+  void EDFController::signalProcessEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
     std::cerr << VPC_YELLOW("EDFController " << this->getName() << "> got notified by task: " << pcb->getName()) << std::endl;

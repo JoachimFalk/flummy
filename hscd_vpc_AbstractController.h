@@ -10,7 +10,7 @@
 #include "hscd_vpc_AbstractDirector.h"
 #include "hscd_vpc_Configuration.h"
 #include "hscd_vpc_datatypes.h"
-#include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_ProcessEventListener.h"
 
 #include <hscd_vpc_InvalidArgumentException.h>
 
@@ -107,27 +107,27 @@ namespace SystemC_VPC{
     /**
      * \brief Getter to determine which preemption mode is used
      */
-    virtual bool preemptByKill()=0;
+    virtual bool deallocateByKill()=0;
         
     /**
      * \brief Callback Mehtode used to inform Controller about task state
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb)=0;
+    virtual void signalProcessEvent(ProcessControlBlock* pcb)=0;
     
     /**
-     * \brief Signals to controller that managed component has been preempted.
-     * Used within controller to adapt scheduling to preemption of managed
+     * \brief Signals to controller that managed component has been deallocated.
+     * Used within controller to adapt scheduling to deallocation of managed
      * component.
      * \param kill indicates if preemption used kill as parameter
      */
-    virtual void signalPreemption(bool kill)=0;
+    virtual void signalDeallocation(bool kill)=0;
     
     /**
-     * \brief Signals to controller that managed component has been resumed.
-     * Used within controller to adapt scheduling to resuming of managed
+     * \brief Signals to controller that managed component has been reallocated.
+     * Used within controller to adapt scheduling to reallocation of managed
      * component.
      */
-    virtual void signalResume()=0;
+    virtual void signalAllocation()=0;
     
   };
 

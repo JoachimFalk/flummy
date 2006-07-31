@@ -20,7 +20,7 @@
 
 #include "hscd_vpc_AbstractDirector.h"
 #include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_EventPair.h"
 
 // provide compatibility with other compilers then gcc, hopefully
@@ -200,7 +200,7 @@ namespace SystemC_VPC{
 
     PCBPool& getPCBPool(); 
 
-    void signalTaskEvent(ProcessControlBlock* pcb);
+    void signalProcessEvent(ProcessControlBlock* pcb);
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;

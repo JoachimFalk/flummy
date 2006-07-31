@@ -74,15 +74,15 @@ namespace SystemC_VPC{
       this->name = name;
     }
 
-    virtual void signalPreemption(){}
+    virtual void signalDeallocation(){}
     
-    virtual void signalResume(){}
+    virtual void signalAllocation(){}
             
   private:
       const char* name;
     /**************************/
     /*  END OF EXTENSION      */
-  /**************************/
+    /**************************/
   };
 
 }

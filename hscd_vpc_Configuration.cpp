@@ -99,7 +99,7 @@ namespace SystemC_VPC{
       
     this->component_map_by_name[name] = comp;
     // deactivate component by standard
-    comp->preempt(true); //setActiv(false);
+    comp->deallocate(true); //setActiv(false);
     return true;
     
   }
@@ -122,9 +122,9 @@ namespace SystemC_VPC{
   }
     
   /**
-   * \brief Implementation of Configuration::preempt
+   * \brief Implementation of Configuration::deallocate
    */
-  void Configuration::preempt(bool kill){
+  void Configuration::deallocate(bool kill){
     
     if(this->isActiv()){
       
@@ -135,10 +135,10 @@ namespace SystemC_VPC{
   
 #ifdef VPC_DEBUG
           std::cerr << VPC_YELLOW("Configuration " << this->getName() 
-              << " trying to preempt component: " << iter->first << " with kill=" << kill) << std::endl;
+              << " trying to deallocate component: " << iter->first << " with kill=" << kill) << std::endl;
 #endif // VPC_DEBUG
   
-          iter->second->preempt(kill);
+          iter->second->deallocate(kill);
 
       }
       
@@ -148,9 +148,9 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of Configuration::resume
+   * \brief Implementation of Configuration::allocate
    */
-  void Configuration::resume(){
+  void Configuration::allocate(){
     
     if(!this->isActiv()){  
       
@@ -160,10 +160,10 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
           std::cerr << VPC_YELLOW("Configuration " << this->getName() 
-              << " trying to resume component: " << iter->first) << std::endl;
+              << " trying to allocate component: " << iter->first) << std::endl;
 #endif // VPC_DEBUG
   
-        iter->second->resume(); 
+        iter->second->allocate(); 
       }
       
       this->activ = true;
@@ -172,9 +172,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of Configuration::timeToPreempt
+   * \brief Implementation of Configuration::timeToDeallocate
    */    
-  sc_time Configuration::timeToPreempt(){
+  sc_time Configuration::timeToDeallocate(){
     
     sc_time max(SC_ZERO_TIME);
     sc_time tmp;
@@ -187,10 +187,10 @@ namespace SystemC_VPC{
   
 #ifdef VPC_DEBUG
           std::cerr << VPC_YELLOW("Configuration " << this->getName() 
-              << " caculate time to preempt component: " << iter->first) << std::endl;
+              << " caculate time to deallocate component: " << iter->first) << std::endl;
 #endif // VPC_DEBUG
   
-          tmp = iter->second->timeToPreempt();
+          tmp = iter->second->timeToDeallocate();
           if(tmp > max){
             max = tmp;
           }
@@ -199,16 +199,16 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
           std::cerr << VPC_YELLOW("Configuration " << this->getName() 
-              << " time of preemption: " << max) << std::endl;
+              << " time of deallocation: " << max) << std::endl;
 #endif // VPC_DEBUG
     
     return max;
   }
 
   /**
-   * \brief Implementation of Configuration::timeToResume
+   * \brief Implementation of Configuration::timeToAllocate
    */
-  sc_time Configuration::timeToResume(){
+  sc_time Configuration::timeToAllocate(){
     
     sc_time max(SC_ZERO_TIME);
     sc_time tmp;
@@ -217,7 +217,7 @@ namespace SystemC_VPC{
         
       std::map<std::string, AbstractComponent*>::iterator iter;
       for(iter = this->component_map_by_name.begin(); iter != this->component_map_by_name.end(); iter++){
-        tmp = iter->second->timeToResume();
+        tmp = iter->second->timeToAllocate();
         if(tmp > max){
           max = tmp;
         } 

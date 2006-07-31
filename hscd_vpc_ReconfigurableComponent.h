@@ -41,10 +41,10 @@ namespace SystemC_VPC{
     
     // used to notify new tasks to the component
     sc_event notify_schedule_thread;
-    // used to indicate preemption
-    sc_event notify_preempt;
-    // used to indicate resume after preemption
-    sc_event notify_resume;
+    // used to indicate deallocation
+    sc_event notify_deallocate;
+    // used to indicate allocate after deallocation
+    sc_event notify_allocate;
     
     // start time of reconfiguration
     sc_time* storeStartTime;
@@ -114,26 +114,26 @@ protected:
     
     /**
      * \brief Preempts execution of component
-     * Used to preempt the current execution of a component.
+     * Used to deallocate the current execution of a component.
      * \sa AbstractComponent
      */
-    virtual void preempt(bool kill);
+    virtual void deallocate(bool kill);
     
     /**
-     * \brief Resumes preempted execution
-     * Used to resume execution of preempted component.
+     * \brief Resumes deallocated execution
+     * Used to allocate execution of deallocated component.
      */
-    virtual void resume();
+    virtual void allocate();
     
     /**
-     * \see IPreemptable::timeToPreempt
+     * \see IDeallocatable::timeToDeallocate
      */
-    virtual sc_time timeToPreempt();
+    virtual sc_time timeToDeallocate();
     
     /**
-     * \see IPreemptable::timeToResume
+     * \see IDeallocatable::timeToAllocate
      */
-    virtual sc_time timeToResume();
+    virtual sc_time timeToAllocate();
     
     /**
      * \brief Adds new Configuration to the reconfigurable component.

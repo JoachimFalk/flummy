@@ -65,11 +65,11 @@ pkginclude_HEADERS =				\
 	hscd_vpc_AbstractDirector.h             \
 	hscd_vpc_datatypes.h                    \
 	hscd_vpc_Director.h                     \
-	hscd_vpc_TaskEventListener.h		\
+	hscd_vpc_ProcessEventListener.h		\
 	hscd_vpc_Director.h			\
 	hscd_vpc_ProcessControlBlock.h		\
 	hscd_vpc_PCBPool.h			\
-	hscd_vpc_IPreemptable.h			\
+	hscd_vpc_IDeallocatable.h		\
 	hscd_vpc_EventPair.h
 
 #noinst_HEADERS=	oneof.hpp

@@ -32,15 +32,6 @@ namespace SystemC_VPC{
     // maps tasks to their corresponding names of component
     std::map<std::string, std::string > mapping_map_component_ids;
     
-    /*
-     * map of maps for reconfigration times
-     * first key specifies current configuration
-     * second key specifies next configuration
-     * value specifies the time needed to switch btw first and second
-     */
-    //std::map<std::string, sc_time> loadTime_map;
-    //std::map<std::string, sc_time> storeTime_map;
-    
     // true if controller uses kill to preempt configurations
     bool kill;
   
@@ -119,24 +110,24 @@ namespace SystemC_VPC{
     /**
      * \brief Getter to determine which preemption mode is used
      */
-    virtual bool preemptByKill();  
+    virtual bool deallocateByKill();  
   
     /**
-     * \brief Signals to controller that managed component has been preempted.
-     * Used within controller to adapt scheduling to preemption of managed
+     * \brief Signals to controller that managed component has been deallocated.
+     * Used within controller to adapt scheduling to deallocation of managed
      * component.
      * \param kill indicates if preemption happend with kill flag
-     * \note Does nothing intended for controllers not interested in preemption
+     * \note Does nothing intended for controllers not interested in deallocation
      */
-    virtual void signalPreemption(bool kill);
+    virtual void signalDeallocation(bool kill);
     
     /**
-     * \brief Signals to controller that managed component has been resumed.
-     * Used within controller to adapt scheduling to resuming of managed
+     * \brief Signals to controller that managed component has been reallocated.
+     * Used within controller to adapt scheduling to reallocation of managed
      * component.
      * \note Does nothing intended for controllers not interested in resume
      */
-    virtual void signalResume();
+    virtual void signalAllocation();
     
   protected:
     

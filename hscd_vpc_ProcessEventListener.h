@@ -1,5 +1,5 @@
-#ifndef HSCD_VPC_TASKEVENTLISTENER_
-#define HSCD_VPC_TASKEVENTLISTENER_
+#ifndef HSCD_VPC_PROCESSEVENTLISTENER_
+#define HSCD_VPC_PROCESSEVENTLISTENER_
 
 #include "hscd_vpc_datatypes.h"
 
@@ -8,10 +8,10 @@ namespace SystemC_VPC{
   class ProcessControlBlock;
 
   /**
-   * TaskEventListener defines common interface used for communicating task state
+   * ProcessEventListener defines common interface used for communicating task state
    * through the control hierarchy within VPC framework.
    */
-  class TaskEventListener{
+  class ProcessEventListener{
   
   public:
     
@@ -21,7 +21,7 @@ namespace SystemC_VPC{
      * event which happened.
      * \param pcb points to the task which the notification corresponds to
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb)=0;
+    virtual void signalProcessEvent(ProcessControlBlock* pcb)=0;
     
     /**
      * \note Not used yet
@@ -32,4 +32,4 @@ namespace SystemC_VPC{
 
 }
 
-#endif /*HSCD_VPC_TASKEVENTLISTENER_*/
+#endif /*HSCD_VPC_PROCESSEVENTLISTENER_*/

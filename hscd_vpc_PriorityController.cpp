@@ -97,9 +97,9 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of PriorityController::signalTaskEvent
+   * \brief Implementation of PriorityController::signalProcessEvent
    */
-  void PriorityController::signalTaskEvent(ProcessControlBlock* pcb){
+  void PriorityController::signalProcessEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
     std::cerr << VPC_YELLOW("PriorityController " << this->getName() << "> got notified by task: " << pcb->getName()) << std::endl;

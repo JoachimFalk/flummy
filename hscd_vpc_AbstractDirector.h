@@ -8,7 +8,7 @@
 
 namespace SystemC_VPC{
 
-  class AbstractDirector : public TaskEventListener{
+  class AbstractDirector : public ProcessEventListener{
   
   public:
     
