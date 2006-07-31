@@ -10,13 +10,13 @@ namespace SystemC_VPC{
   PriorityController::~PriorityController(){}
   
   /**
-   * \brief Implementation of PreempetivController::addTasksToSchedule
+   * \brief Implementation of PreempetivController::addProcessToSchedule
    */
-  void PriorityController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
+  void PriorityController::addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks){
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("PriorityController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("PriorityController "<< this->getName() <<"> addProcessToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // add all task to processing list
@@ -76,18 +76,18 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of PriorityController::hasTaskToProcess()
+   * \brief Implementation of PriorityController::hasProcessToDispatch()
    */
-  bool PriorityController::hasTaskToProcess(){
+  bool PriorityController::hasProcessToDispatch(){
   
     return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of PriorityController::getNextTask()
+   * \brief Implementation of PriorityController::getNextProcess()
    */
-  ProcessControlBlock* PriorityController::getNextTask(){
+  ProcessControlBlock* PriorityController::getNextProcess(){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();

@@ -38,13 +38,13 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of PreempetivController::addTasksToSchedule
+   * \brief Implementation of PreempetivController::addProcessToSchedule
    */
-  void RoundRobinController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
+  void RoundRobinController::addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks){
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName() <<"> addProcessToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
     
     ProcessControlBlock* currTask = NULL;
@@ -129,18 +129,18 @@ namespace SystemC_VPC{
   }
    
   /**
-   * \brief Implementation of RoundRobinController::hasTaskToProcess()
+   * \brief Implementation of RoundRobinController::hasProcessToDispatch()
    */
-  bool RoundRobinController::hasTaskToProcess(){
+  bool RoundRobinController::hasProcessToDispatch(){
   
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of RoundRobinController::getNextTask()
+   * \brief Implementation of RoundRobinController::getNextProcess()
    */
-  ProcessControlBlock* RoundRobinController::getNextTask(){
+  ProcessControlBlock* RoundRobinController::getNextProcess(){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();

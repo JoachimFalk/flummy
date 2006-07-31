@@ -17,13 +17,13 @@ namespace SystemC_VPC{
   FCFSController::~FCFSController(){}
   
   /**
-   * \brief Implementation of PreempetivController::addTasksToSchedule
+   * \brief Implementation of PreempetivController::addProcessToSchedule
    */
-  void FCFSController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
+  void FCFSController::addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks){
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("FCFSController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("FCFSController "<< this->getName() <<"> addProcessToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // first of all add tasks to local storage structure
@@ -106,18 +106,18 @@ namespace SystemC_VPC{
   }
    
   /**
-   * \brief Implementation of FCFSController::hasTaskToProcess()
+   * \brief Implementation of FCFSController::hasProcessToDispatch()
    */
-  bool FCFSController::hasTaskToProcess(){
+  bool FCFSController::hasProcessToDispatch(){
   
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of FCFSController::getNextTask()
+   * \brief Implementation of FCFSController::getNextProcess()
    */
-  ProcessControlBlock* FCFSController::getNextTask(){
+  ProcessControlBlock* FCFSController::getNextProcess(){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();

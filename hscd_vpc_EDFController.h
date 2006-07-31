@@ -17,8 +17,8 @@ namespace SystemC_VPC{
   /**
    * Implementation of AbstactController which runs FIFO strategy without preempting or killing 
    * running configuraitons.
-   * This means that task are served in their arriving order and completed
-   * before other conflicting task, which need another configuration, may be
+   * This means that process are served in their arriving order and completed
+   * before other conflicting process, which need another configuration, may be
    * completed.
    */
   class EDFController : public Controller {
@@ -62,7 +62,7 @@ namespace SystemC_VPC{
 
           /**
            * \brief Adds a deadline to a EDFListElement
-           * Used to add deadline of a running task on a element
+           * Used to add deadline of a running process on a element
            * to the deadline of the configuration to enable deadline schedule
            * \param p specifies the deadline to be added
            */
@@ -77,7 +77,7 @@ namespace SystemC_VPC{
 
           /**
            * \brief Removes a deadline from a EDFListElement
-           * Used to remove deadline of a finished task from the element,
+           * Used to remove deadline of a finished process from the element,
            * the first occurence of the deadline will be removed.
            * \param p specifies the deadline value to be removed
            */
@@ -96,9 +96,9 @@ namespace SystemC_VPC{
           /**
            * \brief Access to current deadline of a EDFListElement 
            * Used to access the current deadline of a EDFListElement determined
-           * by the task running on it. If there are no running tasks
+           * by the process running on it. If there are no running processes
            * a default value is returned.
-           * \return current deadline of configuration or -1 if no task is running
+           * \return current deadline of configuration or -1 if no process is running
            * on the configuration
            */
           sc_time getDeadline() const{
@@ -136,7 +136,7 @@ namespace SystemC_VPC{
           }
       };
       
-    // queue of tasks ready to be processed
+    // queue of processes ready to be processed
     std::queue<ProcessControlBlock* > tasksToProcess;
     
     // queue containing order of configuration to be loaded in next "rounds"
@@ -149,13 +149,13 @@ namespace SystemC_VPC{
     virtual ~EDFController();
     
     /**
-     * \brief Realizes scheduling decision for tasks to be forwarded to configurations
-     * This method is used to perform scheduling decision for tasks and within this context
+     * \brief Realizes scheduling decision for processes to be forwarded to configurations
+     * This method is used to perform scheduling decision for processes and within this context
      * their corresponding configurationgs depending on the strategie of the different
      * controller. It is used to initialize and set up all necessary data for a new "round" of
      * scheduling. 
      */
-    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
+    virtual void addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks);
           
     /**
      * \brief Returns next configuration to be loaded
@@ -167,22 +167,22 @@ namespace SystemC_VPC{
     virtual Configuration* getNextConfiguration();
          
     /**
-     * \brief Indicates if controller still can forward tasks
-     * \return TRUE if there are still task to be forwarded else FALSE
+     * \brief Indicates if controller still can forward processes
+     * \return TRUE if there are still process to be forwarded else FALSE
      */
-    virtual bool hasTaskToProcess();
+    virtual bool hasProcessToDispatch();
      
     /**
-     * \brief Returns next task to be forwarded
-     * This method should only be called after calling hasTaskToProcess
-     * to ensure that there are still existing task to process.
-     * \return pair containing ProcessControlBlock of task and requested function
+     * \brief Returns next process to be forwarded
+     * This method should only be called after calling hasProcessToDispatch
+     * to ensure that there are still existing process to process.
+     * \return pair containing ProcessControlBlock of process and requested function
      * to be simulated.
      */
-    virtual ProcessControlBlock* getNextTask();
+    virtual ProcessControlBlock* getNextProcess();
 
     /**
-     * \brief Used to signal finished tasks to the controller
+     * \brief Used to signal finished processes to the controller
      * \see ProcessEventListener::signalProcessEvent
      */
     virtual void signalProcessEvent(ProcessControlBlock* pcb);

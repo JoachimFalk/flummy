@@ -13,13 +13,13 @@ namespace SystemC_VPC{
   EDFController::~EDFController(){}
     
   /**
-   * \brief Implementation of PreempetivController::addTasksToSchedule
+   * \brief Implementation of PreempetivController::addProcessToSchedule
    */
-  void EDFController::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks){
+  void EDFController::addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks){
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("EDFController "<< this->getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("EDFController "<< this->getName() <<"> addProcessToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     // add all task to processing list
@@ -80,18 +80,18 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of EDFController::hasTaskToProcess()
+   * \brief Implementation of EDFController::hasProcessToDispatch()
    */
-  bool EDFController::hasTaskToProcess(){
+  bool EDFController::hasProcessToDispatch(){
    
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of EDFController::getNextTask()
+   * \brief Implementation of EDFController::getNextProcess()
    */
-  ProcessControlBlock* EDFController::getNextTask(){
+  ProcessControlBlock* EDFController::getNextProcess(){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();

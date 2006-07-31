@@ -17,8 +17,8 @@ namespace SystemC_VPC{
   /**
    * Implementation of AbstactController which runs FIFO strategy without preempting or killing 
    * running configuraitons.
-   * This means that task are served in their arriving order and completed
-   * before other conflicting task, which need another configuration, may be
+   * This means that process are served in their arriving order and completed
+   * before other conflicting process, which need another configuration, may be
    * completed.
    */
   class RoundRobinController : public Controller {
@@ -34,7 +34,7 @@ namespace SystemC_VPC{
     private:
       
       Configuration* conf;
-      // number of running tasks on configuration
+      // number of running processes on configuration
       int numOfTasks;
       
     public:
@@ -88,11 +88,11 @@ namespace SystemC_VPC{
     // indicates if switch should take place
     bool switchConfig;
       
-    // queue of tasks ready to be processed
+    // queue of processes ready to be processed
     std::queue<ProcessControlBlock* > tasksToProcess;
     
     // queue containing order of configuration to be loaded in next "rounds"
-    // structure contains additional count of tasks running on one configuration
+    // structure contains additional count of processes running on one configuration
     std::deque<RRElement> rr_configfifo;
     
     // current scheduled configuration
@@ -112,13 +112,13 @@ namespace SystemC_VPC{
     void setProperty(char* key, char* value);
     
     /**
-      * \brief Realizes scheduling decision for tasks to be forwarded to configurations
-      * This method is used to perform scheduling decision for tasks and within this context
+      * \brief Realizes scheduling decision for processes to be forwarded to configurations
+      * This method is used to perform scheduling decision for processes and within this context
       * their corresponding configurationgs depending on the strategie of the different
       * controller. It is used to initialize and set up all necessary data for a new "round" of
       * scheduling. 
       */
-    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
+    virtual void addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks);
           
     /**
      * \brief Returns next configuration to be loaded
@@ -130,19 +130,19 @@ namespace SystemC_VPC{
     virtual Configuration* getNextConfiguration();
   
     /**
-     * \brief Indicates if controller still can forward tasks
-     * \return TRUE if there are still task to be forwarded else FALSE
+     * \brief Indicates if controller still can forward processes
+     * \return TRUE if there are still process to be forwarded else FALSE
      */
-    virtual bool hasTaskToProcess();
+    virtual bool hasProcessToDispatch();
       
     /**
-     * \brief Returns next task to be forwarded
-     * This method should only be called after calling hasTaskToProcess
-     * to ensure that there are still existing task to process.
-     * \return pair containing ProcessControlBlock of task and requested function
+     * \brief Returns next process to be forwarded
+     * This method should only be called after calling hasProcessToDispatch
+     * to ensure that there are still existing process to process.
+     * \return pair containing ProcessControlBlock of process and requested function
      * to be simulated.
      */
-    virtual ProcessControlBlock* getNextTask();
+    virtual ProcessControlBlock* getNextProcess();
       
     /**
      * \brief Signals if a configuration has to be reactived by controlled component

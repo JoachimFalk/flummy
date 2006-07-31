@@ -60,13 +60,13 @@ namespace SystemC_VPC{
     virtual void setProperty(char* key, char* value)=0;
     
     /**
-     * \brief Realizes scheduling decision for tasks to be forwarded to configurations
-     * This method is used to perform scheduling decision for tasks and within this context
+     * \brief Realizes scheduling decision for processes to be forwarded to configurations
+     * This method is used to perform scheduling decision for processes and within this context
      * their corresponding configurationgs depending on the strategie of the different
      * controller. It is used to initialize and set up all necessary data for a new "round" of
      * scheduling. 
      */
-    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks)=0;
+    virtual void addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks)=0;
      
     /**
      * \brief Returns next configuration to be loaded
@@ -88,16 +88,16 @@ namespace SystemC_VPC{
      * \brief Indicates if controller still can forward tasks
      * \return TRUE if there are still task to be forwarded else FALSE
      */
-    virtual bool hasTaskToProcess()=0;
+    virtual bool hasProcessToDispatch()=0;
 
     /**
      * \brief Returns next task to be forwarded
-     * This method should only be called after calling hasTaskToProcess
+     * This method should only be called after calling hasProcessToDispatch
      * to ensure that there are still existing task to process.
      * \return pair containing ProcessControlBlock of task and requested function
      * to be simulated.
      */
-    virtual ProcessControlBlock* getNextTask()=0;
+    virtual ProcessControlBlock* getNextProcess()=0;
     
     /**
      * \brief Setter to specify if controller should use "kill" by preemption
