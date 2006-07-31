@@ -35,7 +35,7 @@ namespace SystemC_VPC {
       // controlled component of instance
       ReconfigurableComponent* managedComponent;
 
-      // refers to binder to resolve binding of tasks
+      // refers to binder to resolve binding of processes
       AbstractBinder* binder;
 
       // refers to mapper to resolve "binding" of components to configuration
@@ -104,15 +104,15 @@ namespace SystemC_VPC {
       ReconfigurableComponent* getManagedComponent();
 
       /**
-       * \brief Realizes scheduling decision for tasks to be forwarded to configurations
-       * This method is used to perform scheduling decision for tasks and within this context
+       * \brief Realizes scheduling decision for processes to be forwarded to configurations
+       * This method is used to perform scheduling decision for processes and within this context
        * their corresponding configurationgs depending on the strategie of the different
        * controller. It is used to initialize and set up all necessary data for a new "round" of
        * scheduling. 
        * \param newTasks refers to a queue of pcb to be scheduled
        * \sa AbstractController
        */
-      virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc);
+      virtual void addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc);
 
       virtual void performSchedule(ReconfigurableComponent* rc);
 
@@ -127,30 +127,22 @@ namespace SystemC_VPC {
       /**
        * \brief Register component to Director
        * Used to register a component to the Director for
-       * later computation of task on it. The components name
+       * later computation of process on it. The components name
        * is used as identifier for it.
        * \param comp points to component instance to be registered
        */
       virtual void registerComponent(AbstractComponent* comp);
 
       /**
-       * \brief Registers mapping between task and component to Director
-       * \param taskName specifies name of task
-       * \param compName specifies name of component
-       * \param mInfo specifies associated mapping information
-       */
-      //virtual void registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* c);
-
-      /**
-       * \brief Returns mapped component for a given task
-       * \param task specifies the task to get component for
+       * \brief Returns mapped component for a given process
+       * \param process specifies the process to get component for
        * \return pointer to AbstractComponent refering to mapped component
        */
-      virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task, ReconfigurableComponent* rc);
+      virtual AbstractComponent* getMappedComponent(ProcessControlBlock* process, ReconfigurableComponent* rc);
 
-      virtual bool hasTaskToProcess(ReconfigurableComponent* rc);
+      virtual bool hasProcessToDispatch(ReconfigurableComponent* rc);
 
-      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc);
+      virtual ProcessControlBlock* getNextProcess(ReconfigurableComponent* rc);
 
       virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc);
 

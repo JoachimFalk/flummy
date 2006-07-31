@@ -17,12 +17,12 @@ namespace SystemC_VPC{
   EDFAllocator::~EDFAllocator(){}
     
   /**
-   * \brief Implementation of EDFAllocator::addTasksToSchedule
+   * \brief Implementation of EDFAllocator::addProcessToSchedule
    */
-  void EDFAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void EDFAllocator::addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("EDFAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
+    std::cerr << VPC_YELLOW("EDFAllocator "<< this->getController().getName() <<"> addProcessToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
 
     this->tasksToProcess.push(newTask);
@@ -72,18 +72,18 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of EDFAllocator::hasTaskToProcess()
+   * \brief Implementation of EDFAllocator::hasProcessToDispatch()
    */
-  bool EDFAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool EDFAllocator::hasProcessToDispatch(ReconfigurableComponent* rc){
    
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of EDFAllocator::getNextTask()
+   * \brief Implementation of EDFAllocator::getNextProcess()
    */
-  ProcessControlBlock* EDFAllocator::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* EDFAllocator::getNextProcess(ReconfigurableComponent* rc){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();

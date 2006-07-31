@@ -109,19 +109,6 @@ namespace SystemC_VPC{
   void Controller::registerComponent(AbstractComponent* comp){
     // do nothing right now
   }
-      
-  /**
-   * \brief Implementation of Controller::registerMapping
-   */
-  /*
-  void Controller::registerMapping(const char* taskName, const char* compName, MappingInformation* mInfo, AbstractComponent* rc){
-    
-#ifdef VPC_DEBUG
-    std::cerr << "Controller> registerMapping(" << taskName << ", " << compName << ")" << std::endl;
-#endif //VPC_DEBUG
-    this->binder->registerBinding(taskName, compName);
-
-  }*/
   
   /**
    * \brief Implementation of  Controller::setProperty
@@ -139,25 +126,25 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of Controller::addTasksToSchedule
+   * \brief Implementation of Controller::addProcessToSchedule
    */
-  void Controller::addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc){
+  void Controller::addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc){
     
-    // process all new tasks
+    // process all new processes
     while(newTasks.size() > 0){
       ProcessControlBlock* pcb = newTasks.front();
       // remember decisions for later use
       Decision d;
       d.pcb = pcb;
 
-      // determine current binding of task
+      // determine current binding of process
       d.comp = this->binder->resolveBinding(*pcb, rc);
       // determine corresponding configuration of bound component
       d.conf = this->mapper->getConfigForComp(d.comp);
       // store decision
       this->decisions[pcb->getPID()] = d;
-      // register task and configuration for scheduling
-      this->allocator->addTaskToSchedule(pcb, d.conf, rc);
+      // register process and configuration for scheduling
+      this->allocator->addProcessToSchedule(pcb, d.conf, rc);
       newTasks.pop_front();  
 
     }
@@ -168,12 +155,12 @@ namespace SystemC_VPC{
      
   }
 
-  bool Controller::hasTaskToProcess(ReconfigurableComponent* rc){
-    return this->allocator->hasTaskToProcess(rc);
+  bool Controller::hasProcessToDispatch(ReconfigurableComponent* rc){
+    return this->allocator->hasProcessToDispatch(rc);
   }
     
-  ProcessControlBlock* Controller::getNextTask(ReconfigurableComponent* rc){
-    return this->allocator->getNextTask(rc);
+  ProcessControlBlock* Controller::getNextProcess(ReconfigurableComponent* rc){
+    return this->allocator->getNextProcess(rc);
   }
     
   unsigned int Controller::getNextConfiguration(ReconfigurableComponent* rc){
@@ -192,10 +179,10 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Controller::getMappedComponent
    */
-  AbstractComponent* Controller::getMappedComponent(ProcessControlBlock* task, ReconfigurableComponent* rc){
+  AbstractComponent* Controller::getMappedComponent(ProcessControlBlock* process, ReconfigurableComponent* rc){
     
     std::map<int, Decision>::iterator iter;
-    iter = this->decisions.find(task->getPID());
+    iter = this->decisions.find(process->getPID());
     if(iter != this->decisions.end()){
       Decision d = iter->second;
       return this->managedComponent->getConfiguration(d.conf)->getComponent(d.comp);
@@ -236,7 +223,7 @@ namespace SystemC_VPC{
     
     this->binder->signalProcessEvent(pcb, compID);
      
-    // if task has been killed and controlled instance is not killed solve decision here
+    // if process has been killed and controlled instance is not killed solve decision here
     if(pcb->getState() == activation_state(aborted) && !this->managedComponent->hasBeenKilled()){
       // recompute
       this->managedComponent->compute(pcb);
@@ -246,7 +233,7 @@ namespace SystemC_VPC{
         
 #ifdef VPC_DEBUG
     if(pcb->getState() == activation_state(aborted)){
-      std::cerr << VPC_YELLOW("Controller " << this->getName() << "> task: " << pcb->getName() << " got killed!")  << std::endl;
+      std::cerr << VPC_YELLOW("Controller " << this->getName() << "> process: " << pcb->getName() << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
  

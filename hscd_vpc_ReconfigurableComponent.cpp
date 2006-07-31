@@ -169,7 +169,7 @@ namespace SystemC_VPC{
         
       do{
         // inform controller about new tasks
-        this->controller->addTasksToSchedule(this->newTasks, this);
+        this->controller->addProcessToSchedule(this->newTasks, this);
         // panik insure to get all tasks!
         wait(SC_ZERO_TIME);
       }while(this->newTasks.size() > 0);
@@ -194,9 +194,9 @@ namespace SystemC_VPC{
       // points to component to delegate task to
       AbstractComponent* currComp;
 
-      while(this->controller->hasTaskToProcess(this)){
+      while(this->controller->hasProcessToDispatch(this)){
 
-        currTask = this->controller->getNextTask(this);
+        currTask = this->controller->getNextProcess(this);
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename() <<"> still task to forward: ") << currTask->getName() << " at "  << sc_simulation_time() << endl;

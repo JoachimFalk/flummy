@@ -147,7 +147,7 @@ namespace SystemC_VPC {
   /**
    * \brief Implementation of RRAllocator::
    */
-  void RREAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void RREAllocator::addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
     
     RREConfElement* elem = NULL;
 
@@ -298,7 +298,7 @@ namespace SystemC_VPC {
   /**
    * \brief Implementation of RRAllocator::
    */
-  bool RREAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool RREAllocator::hasProcessToDispatch(ReconfigurableComponent* rc){
     if(selected != NULL){
       return this->selected->hasWaitingTasks();
     }else{
@@ -309,7 +309,7 @@ namespace SystemC_VPC {
   /**
    * \brief Implementation of RRAllocator::
    */
-  ProcessControlBlock* RREAllocator::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* RREAllocator::getNextProcess(ReconfigurableComponent* rc){
     return this->selected->processTask();
   }
 

@@ -158,7 +158,7 @@ namespace SystemC_VPC{
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc);
+      virtual void addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc);
 
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -177,7 +177,7 @@ namespace SystemC_VPC{
        * controller. It is used to initialize and set up all necessary data for a new "round" of
        * scheduling. 
        */    
-      //    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
+      //    virtual void addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks);
 
       /**
        * \brief Returns next configuration to be loaded
@@ -192,16 +192,16 @@ namespace SystemC_VPC{
        * \brief Indicates if controller still can forward tasks
        * \return TRUE if there are still task to be forwarded else FALSE
        */
-      virtual bool hasTaskToProcess(ReconfigurableComponent* rc);
+      virtual bool hasProcessToDispatch(ReconfigurableComponent* rc);
 
       /**
        * \brief Returns next task to be forwarded
-       * This method should only be called after calling hasTaskToProcess
+       * This method should only be called after calling hasProcessToDispatch
        * to ensure that there are still existing task to process.
        * \return pair containing ProcessControlBlock of task and requested function
        * to be simulated.
        */
-      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc);
+      virtual ProcessControlBlock* getNextProcess(ReconfigurableComponent* rc);
 
       /**
        * \brief Used to signal finished tasks to the controller

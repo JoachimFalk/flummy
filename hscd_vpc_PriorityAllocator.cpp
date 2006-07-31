@@ -16,7 +16,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of PriorityAllocator::addTasksToSchedule
    */
-  void PriorityAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void PriorityAllocator::addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
     std::cerr << VPC_YELLOW("PriorityAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
@@ -69,18 +69,18 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityAllocator::hasTaskToProcess()
+   * \brief Implementation of PriorityAllocator::hasProcessToDispatch()
    */
-  bool PriorityAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool PriorityAllocator::hasProcessToDispatch(ReconfigurableComponent* rc){
 
     return (this->tasksToProcess.size() > 0);
 
   }
 
   /**
-   * \brief Implementation of PriorityAllocator::getNextTask()
+   * \brief Implementation of PriorityAllocator::getNextProcess()
    */
-  ProcessControlBlock* PriorityAllocator::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* PriorityAllocator::getNextProcess(ReconfigurableComponent* rc){
 
     ProcessControlBlock* task;
     task = this->tasksToProcess.front();

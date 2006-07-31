@@ -32,17 +32,17 @@ namespace SystemC_VPC {
        * \brief Updates management structures for performing schedule decisions
        * This method is used to initialize and set up all necessary data for a new "round" of
        * scheduling. 
-       * \param newTasks refers to new task to be scheduled
+       * \param newTasks refers to new process to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      virtual void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc)=0; 
+      virtual void addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc)=0; 
     
       /**
-       * \brief Realizes scheduling decision for tasks to be forwarded to configurations
-       * This method is used to perform scheduling decision for tasks and within this context
+       * \brief Realizes scheduling decision for processes to be forwarded to configurations
+       * This method is used to perform scheduling decision for processes and within this context
        * their corresponding configurationgs depending on the strategie of the different
        * controller.
-       * \param newTasks refers to new task to be scheduled
+       * \param newTasks refers to new process to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */ 
       virtual void performSchedule(ReconfigurableComponent* rc)=0;
@@ -57,19 +57,19 @@ namespace SystemC_VPC {
       virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc)=0;
 
       /**
-       * \brief Indicates if controller still can forward tasks
-       * \return TRUE if there are still task to be forwarded else FALSE
+       * \brief Indicates if controller still can forward processes
+       * \return TRUE if there are still process to be forwarded else FALSE
        */
-      virtual bool hasTaskToProcess(ReconfigurableComponent* rc)=0;
+      virtual bool hasProcessToDispatch(ReconfigurableComponent* rc)=0;
 
       /**
-       * \brief Returns next task to be forwarded
-       * This method should only be called after calling hasTaskToProcess
-       * to ensure that there are still existing task to process.
-       * \return pair containing ProcessControlBlock of task and requested function
+       * \brief Returns next process to be forwarded
+       * This method should only be called after calling hasProcessToDispatch
+       * to ensure that there are still existing process to process.
+       * \return pair containing ProcessControlBlock of process and requested function
        * to be simulated.
        */
-      virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc)=0;
+      virtual ProcessControlBlock* getNextProcess(ReconfigurableComponent* rc)=0;
 
       /**
        * \brief Used as indicator for controlled component when to awake next

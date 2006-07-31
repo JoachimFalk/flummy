@@ -80,14 +80,14 @@ namespace SystemC_VPC{
     virtual void setProperty(char* key, char* value)=0;
     
     /**
-     * \brief Realizes scheduling decision for tasks to be forwarded to configurations
-     * This method is used to perform scheduling decision for tasks and within this context
+     * \brief Realizes scheduling decision for processes to be forwarded to configurations
+     * This method is used to perform scheduling decision for processes and within this context
      * their corresponding configurationgs depending on the strategie of the different
      * controller. It is used to initialize and set up all necessary data for a new "round" of
      * scheduling. 
      * \param newTasks refers to a queue of pcb to be scheduled
      */
-    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc)=0;
+    virtual void addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks, ReconfigurableComponent* rc)=0;
 
     virtual void performSchedule(ReconfigurableComponent* rc) =0;
 
@@ -101,26 +101,26 @@ namespace SystemC_VPC{
     virtual unsigned int getNextConfiguration(ReconfigurableComponent* rc)=0;
       
     /**
-     * \brief Returns mapped component for a given task
-     * \param task specifies the task to get component for
+     * \brief Returns mapped component for a given process
+     * \param process specifies the process to get component for
      * \return pointer to AbstractComponent refering to mapped component
      */
-    virtual AbstractComponent* getMappedComponent(ProcessControlBlock* task, ReconfigurableComponent* rc)=0;
+    virtual AbstractComponent* getMappedComponent(ProcessControlBlock* process, ReconfigurableComponent* rc)=0;
       
     /**
-     * \brief Indicates if controller still can forward tasks
-     * \return TRUE if there are still task to be forwarded else FALSE
+     * \brief Indicates if controller still can forward processes
+     * \return TRUE if there are still process to be forwarded else FALSE
      */
-    virtual bool hasTaskToProcess(ReconfigurableComponent* rc)=0;
+    virtual bool hasProcessToDispatch(ReconfigurableComponent* rc)=0;
 
     /**
-     * \brief Returns next task to be forwarded
-     * This method should only be called after calling hasTaskToProcess
-     * to ensure that there are still existing task to process.
-     * \return pair containing ProcessControlBlock of task and requested function
+     * \brief Returns next process to be forwarded
+     * This method should only be called after calling hasProcessToDispatch
+     * to ensure that there are still existing process to process.
+     * \return pair containing ProcessControlBlock of process and requested function
      * to be simulated.
      */
-    virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc)=0;
+    virtual ProcessControlBlock* getNextProcess(ReconfigurableComponent* rc)=0;
     
     /**
      * \brief Getter to determine which deallocation mode is used
@@ -128,7 +128,7 @@ namespace SystemC_VPC{
     virtual bool deallocateByKill()=0;
         
     /**
-     * \brief Callback Mehtode used to inform Controller about task state
+     * \brief Callback Mehtode used to inform Controller about process state
      */
     virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID)=0;
     

@@ -121,7 +121,7 @@ namespace SystemC_VPC {
        * \param newTasks refers to new task to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
-      void addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc); 
+      void addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc); 
 
       /**
        * \brief Realizes scheduling decision for tasks to be forwarded to configurations
@@ -146,16 +146,16 @@ namespace SystemC_VPC {
        * \brief Indicates if controller still can forward tasks
        * \return TRUE if there are still task to be forwarded else FALSE
        */
-      bool hasTaskToProcess(ReconfigurableComponent* rc);
+      bool hasProcessToDispatch(ReconfigurableComponent* rc);
 
       /**
        * \brief Returns next task to be forwarded
-       * This method should only be called after calling hasTaskToProcess
+       * This method should only be called after calling hasProcessToDispatch
        * to ensure that there are still existing task to process.
        * \return pair containing ProcessControlBlock of task and requested function
        * to be simulated.
        */
-      ProcessControlBlock* getNextTask(ReconfigurableComponent* rc);
+      ProcessControlBlock* getNextProcess(ReconfigurableComponent* rc);
 
       /**
        * \brief Used to set Scheduler specific values

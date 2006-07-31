@@ -48,9 +48,9 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of RoundRobinAllocator::addTaskToSchedule
+   * \brief Implementation of RoundRobinAllocator::addProcessToSchedule
    */
-  void RoundRobinAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void RoundRobinAllocator::addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_YELLOW("RoundRobinAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
@@ -135,18 +135,18 @@ namespace SystemC_VPC{
   }
    
   /**
-   * \brief Implementation of RoundRobinAllocator::hasTaskToProcess()
+   * \brief Implementation of RoundRobinAllocator::hasProcessToDispatch()
    */
-  bool RoundRobinAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool RoundRobinAllocator::hasProcessToDispatch(ReconfigurableComponent* rc){
   
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of RoundRobinAllocator::getNextTask()
+   * \brief Implementation of RoundRobinAllocator::getNextProcess()
    */
-  ProcessControlBlock* RoundRobinAllocator::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* RoundRobinAllocator::getNextProcess(ReconfigurableComponent* rc){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();

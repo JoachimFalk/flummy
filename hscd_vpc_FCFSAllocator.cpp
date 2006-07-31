@@ -21,12 +21,12 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of FCFSAllocator::addTasksToSchedule
+   * \brief Implementation of FCFSAllocator::addProcessToSchedule
    */
-  void FCFSAllocator::addTaskToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
+  void FCFSAllocator::addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") 
+        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> addProcessToSchedule called! ") 
           << "For task " << newTask->getName() << " with required configuration id " << config << " at " << sc_simulation_time() << endl;
 //        std::cerr << VPC_YELLOW("FCFSAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
@@ -101,18 +101,18 @@ namespace SystemC_VPC{
   }
    
   /**
-   * \brief Implementation of FCFSAllocator::hasTaskToProcess()
+   * \brief Implementation of FCFSAllocator::hasProcessToDispatch()
    */
-  bool FCFSAllocator::hasTaskToProcess(ReconfigurableComponent* rc){
+  bool FCFSAllocator::hasProcessToDispatch(ReconfigurableComponent* rc){
   
      return (this->tasksToProcess.size() > 0);
   
   }
   
   /**
-   * \brief Implementation of FCFSAllocator::getNextTask()
+   * \brief Implementation of FCFSAllocator::getNextProcess()
    */
-  ProcessControlBlock* FCFSAllocator::getNextTask(ReconfigurableComponent* rc){
+  ProcessControlBlock* FCFSAllocator::getNextProcess(ReconfigurableComponent* rc){
      
      ProcessControlBlock* task;
      task = this->tasksToProcess.front();
