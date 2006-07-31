@@ -62,23 +62,23 @@ namespace SystemC_VPC {
       /**
        * \brief Getter to determine which preemption mode is used
        */
-      virtual bool preemptByKill();  
+      virtual bool deallocateByKill();  
 
       /**
-       * \brief Signals to controller that managed component has been preempted.
+       * \brief Signals to controller that managed component has been deallocated.
        * Used within controller to adapt scheduling to preemption of managed
        * component.
        * \note Does nothing intended for controllers not interested in preemption
        */
-      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc);
+      virtual void signalDeallocation(bool kill, ReconfigurableComponent* rc);
 
       /**
-       * \brief Signals to controller that managed component has been resumed.
+       * \brief Signals to controller that managed component has been reallocated.
        * Used within controller to adapt scheduling to resuming of managed
        * component.
        * \note Does nothing intended for controllers not interested in resume
        */
-      virtual void signalResume(ReconfigurableComponent* rc);
+      virtual void signalAllocation(ReconfigurableComponent* rc);
 
       virtual sc_time getSchedulingOverhead();
 

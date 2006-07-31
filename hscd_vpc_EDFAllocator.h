@@ -205,9 +205,9 @@ namespace SystemC_VPC{
 
       /**
        * \brief Used to signal finished tasks to the controller
-       * \see TaskEventListener::signalTaskEvent
+       * \see ProcessEventListener::signalProcessEvent
        */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
+      virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID);
 
     private:
 

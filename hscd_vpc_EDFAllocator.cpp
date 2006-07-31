@@ -93,9 +93,9 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of EDFAllocator::signalTaskEvent
+   * \brief Implementation of EDFAllocator::signalProcessEvent
    */
-  void EDFAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void EDFAllocator::signalProcessEvent(ProcessControlBlock* pcb, std::string compID){
 
 #ifdef VPC_DEBUG
     std::cerr << VPC_YELLOW("EDFAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;

@@ -1,11 +1,11 @@
-#ifndef IPREEMPTABLE_
-#define IPREEMPTABLE_
+#ifndef HSCD_VPC_IDEALLOCATABLE_
+#define HSCD_VPC_IDEALLOCATABLE_
 
 #include <systemc.h>
 
 namespace SystemC_VPC{
   
-  class IPreemptable{
+  class IDeallocatable{
   
     public:
       
@@ -18,32 +18,32 @@ namespace SystemC_VPC{
        * and currently registered task are killed without restoring
        * \return pointer to sc_time specifying time need for preemption
        */
-      virtual void preempt(bool kill)=0;
+      virtual void deallocate(bool kill)=0;
         
       /**
        * \brief Resumes preempted execution
-       * Used to resume execution of preempted component.
+       * Used to resume execution of deallocated component.
        * \return pointer to sc_time specifying time need for resuming
        */
-      virtual void resume()=0;
+      virtual void allocate()=0;
       
       /**
-       * \brief Gets time needed to preempt a preemptable object
+       * \brief Gets time needed to preempt a deallocatable object
        * Used to determine time needed to store current state of an
-       * preemptable instance, if restoring after preemption is desired.
-       * \return time needed to store actual state of an instance to preempt
+       * deallocatable instance, if restoring after deallocation is desired.
+       * \return time needed to store actual state of an instance to deallocate
        */
-      virtual sc_time timeToPreempt()=0;
+      virtual sc_time timeToDeallocate()=0;
       
       /**
-       * \brief Gets time needed to restore a preempted object
+       * \brief Gets time needed to restore a deallocated object
        * Used to determine time needed to restore the state of an
-       * preemptable instance before its preemption.
+       * deallocatable instance before its deallocation.
        * \return time needed to restore actual state of an instance to resume
        */
-      virtual sc_time timeToResume()=0;
+      virtual sc_time timeToAllocate()=0;
       
   };
 
 }
-#endif /*IPREEMPTABLE_*/
+#endif /*HSCD_VPC_IDEALLOCATABLE_*/

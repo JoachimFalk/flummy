@@ -4,7 +4,7 @@
 #define ALLOCATORPREFIX "alloc_"
 
 #include "hscd_vpc_ProcessControlBlock.h"
-#include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_ProcessEventListener.h"
 
 namespace SystemC_VPC {
   
@@ -14,7 +14,7 @@ namespace SystemC_VPC {
   /**
    * \brief Abstract class specify necessary interface of an configuration scheduler
    */
-  class AbstractAllocator : public virtual TaskEventListener {
+  class AbstractAllocator : public virtual ProcessEventListener {
 
     protected:
 
@@ -93,22 +93,22 @@ namespace SystemC_VPC {
       /**
        * \brief Getter to determine which preemption mode is used
        */
-      virtual bool preemptByKill()=0;
+      virtual bool deallocateByKill()=0;
 
       /**
-       * \brief Signals to controller that managed component has been preempted.
-       * Used within controller to adapt scheduling to preemption of managed
+       * \brief Signals to controller that managed component has been deallocated.
+       * Used within controller to adapt scheduling to deallocation of managed
        * component.
-       * \param kill indicates if preemption happend with kill flag
+       * \param kill indicates if deallocation happend with kill flag
        */
-      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc)=0;
+      virtual void signalDeallocation(bool kill, ReconfigurableComponent* rc)=0;
 
       /**
-       * \brief Signals to controller that managed component has been resumed.
-       * Used within controller to adapt scheduling to resuming of managed
+       * \brief Signals to controller that managed component has been reallocated.
+       * Used within controller to adapt scheduling to reallocation of managed
        * component.
        */
-      virtual void signalResume(ReconfigurableComponent* rc)=0;
+      virtual void signalAllocation(ReconfigurableComponent* rc)=0;
 
       virtual sc_time getSchedulingOverhead()=0;
   };

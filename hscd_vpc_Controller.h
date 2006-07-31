@@ -164,24 +164,26 @@ namespace SystemC_VPC {
       /**
        * \brief Getter to determine which preemption mode is used
        */
-      virtual bool preemptByKill();  
+      virtual bool deallocateByKill();  
 
       /**
-       * \brief Signals to controller that managed component has been preempted.
-       * Used within controller to adapt scheduling to preemption of managed
+       * \brief Signals to controller that managed component has been deallocated.
+       * Used within controller to adapt scheduling to deallocation of managed
        * component.
-       * \param kill indicates if preemption happend with kill flag
-       * \note Does nothing intended for controllers not interested in preemption
+       * \param kill indicates if deallocation happend with kill flag
+       * \note Does nothing: intended for controllers not interested in preemption
+       * \sa AbstractController
        */
-      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc);
+      virtual void signalDeallocation(bool kill, ReconfigurableComponent* rc);
 
       /**
-       * \brief Signals to controller that managed component has been resumed.
-       * Used within controller to adapt scheduling to resuming of managed
+       * \brief Signals to controller that managed component has been reallocated.
+       * Used within controller to adapt scheduling to reallocation of managed
        * component.
-       * \note Does nothing intended for controllers not interested in resume
+       * \note Does nothing: intended for controllers not interested in resume
+       * \sa AbstractController
        */
-      virtual void signalResume(ReconfigurableComponent* rc);
+      virtual void signalAllocation(ReconfigurableComponent* rc);
 
       /**
        * \brief 
@@ -189,7 +191,7 @@ namespace SystemC_VPC {
        */
       virtual Decision getDecision(int pid, ReconfigurableComponent* rc);
 
-      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
+      virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID);
 
       virtual sc_time getSchedulingOverhead();
 

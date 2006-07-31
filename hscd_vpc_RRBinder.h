@@ -37,10 +37,11 @@ namespace SystemC_VPC {
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& pcb, ReconfigurableComponent* comp) throw(UnknownBindingException);
      
       /**
-       * \brief Implementation of TaskEventListener::signalTaskEvent
+       * \brief Implementation of ProcessEventListener::signalProcessEvent
        * Dummy implementation as strategy is independent of task events
+       * \sa ProcessEventListener
        */
-      void signalTaskEvent(ProcessControlBlock* pcb, std::string CompID); 
+      void signalProcessEvent(ProcessControlBlock* pcb, std::string CompID); 
   };
 
 }

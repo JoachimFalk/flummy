@@ -52,7 +52,7 @@ namespace SystemC_VPC {
 			throw UnknownBindingException(msg);
 		}
 
-  void RRBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string CompID){
+  void RRBinder::signalProcessEvent(ProcessControlBlock* pcb, std::string CompID){
     // do nothing
   }
 

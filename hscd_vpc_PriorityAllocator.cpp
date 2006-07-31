@@ -90,9 +90,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of PriorityAllocator::signalTaskEvent
+   * \brief Implementation of PriorityAllocator::signalProcessEvent
    */
-  void PriorityAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void PriorityAllocator::signalProcessEvent(ProcessControlBlock* pcb, std::string compID){
 
 #ifdef VPC_DEBUG
     std::cerr << VPC_YELLOW("PriorityAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName()) << std::endl;

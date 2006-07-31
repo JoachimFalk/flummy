@@ -176,17 +176,17 @@ namespace SystemC_VPC{
       /**
        * \see AbstractController
        */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
+      virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID);
 
       /**
        * \see AbstractAllocator
        */
-      virtual void signalPreemption(bool kill, ReconfigurableComponent* rc);
+      virtual void signalDeallocation(bool kill, ReconfigurableComponent* rc);
 
       /**
        * \see AbstractController
        */
-      virtual void signalResume(ReconfigurableComponent* rc);
+      virtual void signalAllocation(ReconfigurableComponent* rc);
 
     private:
 

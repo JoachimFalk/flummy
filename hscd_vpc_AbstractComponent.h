@@ -23,8 +23,8 @@
 #include <string.h>
 
 #include "hscd_vpc_datatypes.h"
-#include "hscd_vpc_IPreemptable.h"
-#include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_IDeallocatable.h"
+#include "hscd_vpc_ProcessEventListener.h"
 
 namespace SystemC_VPC{
   
@@ -33,7 +33,7 @@ namespace SystemC_VPC{
    * 
    * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
    */
-  class AbstractComponent: public sc_module, public IPreemptable{
+  class AbstractComponent: public sc_module, public IDeallocatable{
   
   protected:
 
@@ -102,7 +102,7 @@ namespace SystemC_VPC{
     bool killed;
   
     // points to direct associated controlling instance
-    TaskEventListener* parentControlUnit;
+    ProcessEventListener* parentControlUnit;
 
   public:
   
@@ -141,20 +141,20 @@ namespace SystemC_VPC{
     }
     
     /**
-     * \brief Default implementation of IPreemptable::timeToPreempt
+     * \brief Default implementation of IDeallocatable::timeToDeallocate
      * Default implementation just returns SC_ZERO_TIME
      * \return sc_time with value SC_ZERO_TIME
      */
-    virtual sc_time timeToPreempt(){
+    virtual sc_time timeToDeallocate(){
       return sc_time(SC_ZERO_TIME);
     }
     
     /**
-     * \brief Default implementation of IPreemptable::timeToResume
+     * \brief Default implementation of IDeallocatable::timeToAllocate
      * Default implementation just returns SC_ZERO_TIME
      * \return sc_time with value SC_ZERO_TIME
      */  
-    virtual sc_time timeToResume(){
+    virtual sc_time timeToAllocate(){
       return sc_time(SC_ZERO_TIME);
     }
     
@@ -172,7 +172,7 @@ namespace SystemC_VPC{
      * \param controller points to controlling instance which is
      * responsible for component.
      */
-    virtual void setParentController(TaskEventListener* controller){
+    virtual void setParentController(ProcessEventListener* controller){
     
       this->parentControlUnit = controller;
     
@@ -185,7 +185,7 @@ namespace SystemC_VPC{
      * \param pcb points to the finished or killed task
      */
     virtual void notifyParentController(ProcessControlBlock* pcb){
-      this->parentControlUnit->signalTaskEvent(pcb, this->basename());
+      this->parentControlUnit->signalProcessEvent(pcb, this->basename());
     }
 
   };

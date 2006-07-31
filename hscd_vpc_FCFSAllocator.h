@@ -100,21 +100,22 @@ namespace SystemC_VPC{
       bool needToReactivateConfiguration(Configuration* config, ReconfigurableComponent* rc);
 
       /**
-       * \see TaskEventListener
+       * \see ProcessEventListener
        */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
+      virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID);
 
       /**
-       * \brief Implementation of AbstractAllocator::signalPreemption
+       * \brief Implementation of AbstractAllocator::signalDeallocation
        * \see AbstractAllocator
        */
-      void signalPreemption(bool kill, ReconfigurableComponent* rc);
+      void signalDeallocation(bool kill, ReconfigurableComponent* rc);
 
       /**
        * \brief Signals always true as configuration is only switched if all task have finished
        * or have been aborted
+       * So this may seem strange as FCFS is non preemptiv, but as it takes care that no more processes running, this behaviour is OK.
        */
-      bool preemptByKill(){
+      bool deallocateByKill(){
         return true;
       } 
   };

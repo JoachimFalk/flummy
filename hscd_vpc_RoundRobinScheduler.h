@@ -28,8 +28,8 @@ namespace SystemC_VPC{
     void setProperty(char* key, char* value);
     sc_time* schedulingOverhead();
     
-    void signalPreemption();
-    void signalResume();
+    void signalDeallocation();
+    void signalAllocation();
     
   protected:
     deque<int> rr_fifo;

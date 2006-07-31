@@ -58,7 +58,7 @@ namespace SystemC_VPC{
    *
    */
   Director::Director() : end(0), FALLBACKMODE(false), binder(NULL) {
-
+    
     try{
       VPCBuilder builder((Director*)this);
       
@@ -74,7 +74,7 @@ namespace SystemC_VPC{
       std::cerr << "Director> Got exception while setting up VPC:\n" << e.what() << std::endl;
       exit(-1);
     }
-
+    
   }
     
   /**
@@ -318,11 +318,11 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::notifyTaskEvent
    */
-  void Director::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void Director::signalProcessEvent(ProcessControlBlock* pcb, std::string compID){
     assert(!FALLBACKMODE);
     
     // inform binder about task event
-    this->binder->signalTaskEvent(pcb, compID);
+    this->binder->signalProcessEvent(pcb, compID);
     
 #ifdef VPC_DEBUG
     std::cerr << "Director> got notified from: " << pcb->getName() << ":" << pcb->getFuncName() << " at " << sc_simulation_time() << std::endl;

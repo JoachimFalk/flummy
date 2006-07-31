@@ -59,15 +59,15 @@ namespace SystemC_VPC{
       if(!newTaskDuringOverhead && this->isActiv()){ 
         if(runningTasks.size()<=0){                    // no running task
           if(hasTimeSlice){                           
-            wait(timeslice - (*overhead), notify_scheduler_thread | notify_preempt); 
+            wait(timeslice - (*overhead), notify_scheduler_thread | notify_deallocate); 
           }else{
-            wait(notify_scheduler_thread | notify_preempt);
+            wait(notify_scheduler_thread | notify_deallocate);
           }
         }else{                                        // a task allready runs
           if(hasTimeSlice && (timeslice - (*overhead)) < actualRemainingDelay){ 
-            wait(timeslice - (*overhead), notify_scheduler_thread | notify_preempt);
+            wait(timeslice - (*overhead), notify_scheduler_thread | notify_deallocate);
           }else{
-            wait(actualRemainingDelay, notify_scheduler_thread | notify_preempt);
+            wait(actualRemainingDelay, notify_scheduler_thread | notify_deallocate);
           }
           sc_time runTime=sc_time_stamp()-startTime;
           assert(runTime.value()>=0);
@@ -116,7 +116,7 @@ namespace SystemC_VPC{
         newTaskDuringOverhead=false;
       }
 
-      // before making any scheduling decision check if component is preempted
+      // before making any scheduling decision check if component is deallocated
       // and remain in this state as long as component is deactivated
       while(! this->isActiv()){
 
@@ -124,7 +124,7 @@ namespace SystemC_VPC{
         std::cerr << VPC_RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
     
-        //check if preemption is with kill flag
+        //check if deallocation is with kill flag
         if(this->killed){
           this->killAllTasks();
         }else{
@@ -139,8 +139,8 @@ namespace SystemC_VPC{
       
         }
     
-        // wait until resume is signalled or another preempt happend
-        this->wait(this->notify_preempt | this->notify_resume);
+        // wait until allocate is signalled or another deallocate happend
+        this->wait(this->notify_deallocate | this->notify_allocate);
         
         // if component still inactiv just jump to beginning of loop
         if(!this->isActiv())  continue;
@@ -205,7 +205,7 @@ namespace SystemC_VPC{
         while( (sc_time_stamp() < timestamp + (*overhead))
             && this->isActiv() ){ 
           
-          wait((timestamp+(*overhead))-sc_time_stamp(), notify_scheduler_thread | notify_preempt);
+          wait((timestamp+(*overhead))-sc_time_stamp(), notify_scheduler_thread | notify_deallocate);
       
         }
 
@@ -214,7 +214,7 @@ namespace SystemC_VPC{
         /************************/
   
         if(! this->isActiv()){
-          // just jump to begining of loop to process preemption
+          // just jump to begining of loop to process deallocation
           continue;
         }
     
@@ -376,16 +376,16 @@ namespace SystemC_VPC{
   /************************/
   
   /**
-   * \brief Implementation of Component::preempt
+   * \brief Implementation of Component::deallocate
    */
-  void Component::preempt(bool kill){
+  void Component::deallocate(bool kill){
 
-    // preempt only activ component
-    // or additional preempt if component not killed
+    // deallocate only activ component
+    // or additional deallocate if component not killed
     if(this->isActiv() || (kill = true && this->killed == false)){
       this->setActiv(false);
       this->killed = kill;
-      this->notify_preempt.notify();
+      this->notify_deallocate.notify();
       interuptPipeline(kill);
       //wait(SC_ZERO_TIME);
     }
@@ -393,15 +393,15 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of Component::resume
+   * \brief Implementation of Component::allocate
    */
-  void Component::resume(){
+  void Component::allocate(){
       
-    // resume only preempted component
+    // allocate only deallocated component
     if(!this->isActiv()){
       this->setActiv(true);
       this->killed = false;
-      this->notify_resume.notify();
+      this->notify_allocate.notify();
       resumePipeline();
       //wait(SC_ZERO_TIME);
     }
@@ -518,7 +518,7 @@ namespace SystemC_VPC{
         }
 #endif //NO_VCD_TRACES
     
-      this->parentControlUnit->signalTaskEvent(iter->second, this->basename());
+      this->parentControlUnit->signalProcessEvent(iter->second, this->basename());
 
     }
     
@@ -552,7 +552,7 @@ namespace SystemC_VPC{
         }
 #endif //NO_VCD_TRACES
 
-      this->parentControlUnit->signalTaskEvent(iter->second, this->basename());
+      this->parentControlUnit->signalProcessEvent(iter->second, this->basename());
     }
 
     this->readyTasks.clear();
@@ -575,7 +575,7 @@ namespace SystemC_VPC{
       newTask->setDelay(SC_ZERO_TIME);
       newTask->setRemainingDelay(SC_ZERO_TIME);
       
-      this->parentControlUnit->signalTaskEvent(newTask, this->basename());
+      this->parentControlUnit->signalProcessEvent(newTask, this->basename());
       
 #ifndef NO_VCD_TRACES
       if(newTask->getTraceSignal() !=0 ){
@@ -589,16 +589,16 @@ namespace SystemC_VPC{
   }
   
   void Component::setTraceSignalReadyTasks(trace_value value){
-      
-      std::map<int, ProcessControlBlock* >::iterator iter;
-      for(iter = this->readyTasks.begin(); iter != this->readyTasks.end(); iter++){
 
-        if(iter->second->getTraceSignal() !=0 ){
-	  iter->second->getTraceSignal()->value(value);
-	}
+    std::map<int, ProcessControlBlock* >::iterator iter;
+    for(iter = this->readyTasks.begin(); iter != this->readyTasks.end(); iter++){
 
+      if(iter->second->getTraceSignal() !=0 ){
+        iter->second->getTraceSignal()->value(value);
       }
-      
+
+    }
+
   }
   
   /**************************/
@@ -676,7 +676,7 @@ namespace SystemC_VPC{
 #ifndef NO_VCD_TRACES
         if(top.pcb->getTraceSignal()!=0) top.pcb->getTraceSignal()->value(S_KILLED);
 #endif //NO_VCD_TRACES
-        this->parentControlUnit->signalTaskEvent(top.pcb, this->basename());
+        this->parentControlUnit->signalProcessEvent(top.pcb, this->basename());
 
         pqueue.pop();
       }

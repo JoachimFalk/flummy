@@ -156,9 +156,9 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalProcessEvent
    */
-  void RoundRobinAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void RoundRobinAllocator::signalProcessEvent(ProcessControlBlock* pcb, std::string compID){
   
 #ifdef VPC_DEBUG
     std::cerr << "RoundRobinAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName() << std::endl;
@@ -179,7 +179,7 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::updateUsedConfigurations
    */  
   void RoundRobinAllocator::updateUsedConfigurations(ProcessControlBlock* pcb, ReconfigurableComponent* rc){
     
@@ -206,7 +206,7 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::calculateAssignTime
    */
   void RoundRobinAllocator::calculateAssignTime(unsigned int config, ReconfigurableComponent* rc){
     
@@ -218,13 +218,13 @@ namespace SystemC_VPC{
         && nextConfiguration != this->getManagedComponent()->getActivConfiguration()){
       
       sc_time time;
-      time = this->getManagedComponent()->getActivConfiguration()->timeToPreempt();
+      time = this->getManagedComponent()->getActivConfiguration()->timeToDeallocate();
       this->lastassign += time.to_default_time_units();
-      if(!this->preemptByKill()){
+      if(!this->deallocateByKill()){
         this->lastassign += this->getManagedComponent()->getActivConfiguration()->getStoreTime().to_default_time_units();
       }
             
-      time = nextConfiguration->timeToResume();
+      time = nextConfiguration->timeToAllocate();
       this->lastassign += time.to_default_time_units();
         
       this->lastassign += nextConfiguration->getLoadTime().to_default_time_units();
@@ -235,18 +235,18 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalDeallocation
    */
-  void RoundRobinAllocator::signalPreemption(bool kill, ReconfigurableComponent* rc){
+  void RoundRobinAllocator::signalDeallocation(bool kill, ReconfigurableComponent* rc){
     if(sc_simulation_time() > this->lastassign){
       this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
     }
   }
 
   /**
-   * \brief Implementation of RoundRobinAllocator::signalTaskEvent
+   * \brief Implementation of RoundRobinAllocator::signalAllocation
    */  
-  void RoundRobinAllocator::signalResume(ReconfigurableComponent* rc){
+  void RoundRobinAllocator::signalAllocation(ReconfigurableComponent* rc){
     this->lastassign = sc_simulation_time();
   }
 

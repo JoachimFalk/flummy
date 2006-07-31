@@ -61,14 +61,15 @@ namespace SystemC_VPC{
   }
      
   /**
-    * \brief Dummy implementation of Allocator::signalPreemption
+    * \brief Dummy implementation of Allocator::signalDeallocation
+    * \sa AbstractAllocator
     */  
-  void Allocator::signalPreemption(bool kill, ReconfigurableComponent* rc){}
+  void Allocator::signalDeallocation(bool kill, ReconfigurableComponent* rc){}
   
   /**
-    * \brief Dummy implementation of Allocator::signalResume
+    * \brief Dummy implementation of Allocator::signalAllocation
     */
-  void Allocator::signalResume(ReconfigurableComponent* rc){}
+  void Allocator::signalAllocation(ReconfigurableComponent* rc){}
   
   /**
    * \brief Setter to specify if Allocator should use "kill" by preemption
@@ -78,9 +79,9 @@ namespace SystemC_VPC{
   }
   
   /**
-   * \brief Getter to determine which preemption mode is used
+   * \brief Getter to determine which deallocation mode is used
    */
-  bool Allocator::preemptByKill(){
+  bool Allocator::deallocateByKill(){
     return this->kill;
   }
   

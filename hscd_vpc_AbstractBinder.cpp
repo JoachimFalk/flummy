@@ -4,7 +4,7 @@
 #include "hscd_vpc_Binding.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "hscd_vpc_MappingInformation.h"
-#include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
 namespace SystemC_VPC {
@@ -88,29 +88,6 @@ namespace SystemC_VPC {
   StaticBinder::~StaticBinder() {}
 
   /**
-   * \brief Base implementation of AbstractBinder::registerBinding
-   * Registers a binding possiblity to binder instance.
-   */
-  /*
-  void StaticBinder::registerBinding(std::string src, std::string target){
-
-#ifdef VPC_DEBUG
-    std::cerr << "StaticBinder> registerBinding " << src << " <-> " << target << std::endl;
-#endif //VPC_DEBUG
-
-    std::map<std::string, Binding* >::iterator iter;
-    iter = bindings.find(src);
-    if(iter != bindings.end() && iter->second != NULL) {
-      iter->second->addBinding(target);
-    }else{
-      Binding* b = new SimpleBinding(src);
-      b->addBinding(target);
-      bindings[b->getSource()] = b;
-    }
-
-  }*/
-
-  /**
    * \brief Used to set Binder specific values
    * Dummy implementation does nothing.
    * \param key specifies the identy of the property
@@ -132,29 +109,6 @@ namespace SystemC_VPC {
   DynamicBinder::DynamicBinder() {}
 
   DynamicBinder::~DynamicBinder() {}
-
-  /**
-   * \brief Base implementation of AbstractBinder::registerBinding
-   * Registers a binding possiblity to binder instance.
-   */
-  /*
-  void DynamicBinder::registerBinding(std::string src, std::string target){
-
-#ifdef VPC_DEBUG
-    std::cerr << "DynamicBinder> registerBinding " << src << " <-> " << target << std::endl;
-#endif //VPC_DEBUG
-
-    std::map<std::string, Binding* >::iterator iter;
-    iter = bindings.find(src);
-    if(iter != bindings.end() && iter->second != NULL) {
-      iter->second->addBinding(target);
-    }else{
-      Binding* b = new Binding(src);
-      b->addBinding(target);
-      bindings[b->getSource()] = b;
-    }
-
-  }*/
 
   /**
    * \brief Used to set Binder specific values

@@ -8,7 +8,7 @@
 #include <string>
 
 #include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_IPreemptable.h"
+#include "hscd_vpc_IDeallocatable.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
 namespace SystemC_VPC{
@@ -19,7 +19,7 @@ namespace SystemC_VPC{
    * be dynamically loaded by a reconfigurable Component represented
    * by an instance of ReconfigurableComponent.
    */
-  class Configuration : public IPreemptable{
+  class Configuration : public IDeallocatable{
 
     public:
       
@@ -125,44 +125,43 @@ namespace SystemC_VPC{
        * \return requested component or NULL if component is no
        *         member of the configuration
        */
-      //AbstractComponent* getComponent(const char* name);
       AbstractComponent* getComponent(std::string name);
 
       /**
-       * \brief Preempts execution of components within current configuration
+       * \brief Preempts execution of components within current configuration and deallocates it
        * Used to preempt the current execution of components.
        * Actual executed tasks are "stored" for later execution or discarded
        * depending on the parameter flag.
-       * \param kill indicates if "hard" preemption should be initiated
+       * \param kill indicates if "hard" deallocation should be initiated
        * and currently registered task are killed without restoring
-       * \return pointer to sc_time specifying time need for preemption
-       * \see IPreemptable::preempt
+       * \return pointer to sc_time specifying time need for deallocation
+       * \see IDeallocatable::deallocate
        */
-      void preempt(bool killTasks);
+      void deallocate(bool killTasks);
 
       /**
-       * \brief Resumes preempted execution
-       * Used to resume execution of preempted configuration which
-       * mean the equalent of resuming all its contained components.
-       * \see IPreemptable::resume
+       * \brief Resumes deallocated execution
+       * Used to resume execution of deallocated configuration which
+       * means the equalent of resuming all its contained components.
+       * \see IDeallocatable::allocate
        */
-      void resume();
+      void allocate();
 
       /**
-       * \brief Gets time needed to preempt all components of configuration
+       * \brief Gets time needed to deallocate all components of configuration
        * Used to determine time needed to store all execution information, if current state
-       * of configuration should be recoverable after preemption.
-       * \return time needed if configuration actually is preempted
-       * \see IPreemptable::timeToPreempt
+       * of configuration should be recoverable after deallocation.
+       * \return time needed if configuration actually is deallocated
+       * \see IDeallocatable::timeToDeallocate
        */
-      sc_time timeToPreempt();
+      sc_time timeToDeallocate();
 
       /**
-       * \brief Gets time needed to restore all components of configuration after preemption
-       * \return time needed for restoring state before preemption
-       * \see IPreemptable::timeToResume
+       * \brief Gets time needed to restore all components of configuration after deallocateion
+       * \return time needed for restoring state before deallocation
+       * \see IDeallocatable::timeToAllocate
        */
-      sc_time timeToResume();
+      sc_time timeToAllocate();
 
       /**
        * \brief Determines minimal time of configuration until all components will be idle

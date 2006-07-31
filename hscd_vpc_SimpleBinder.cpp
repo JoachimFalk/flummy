@@ -36,5 +36,5 @@ namespace SystemC_VPC {
     throw UnknownBindingException(msg);
   }
 
-	void SimpleBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string compID) {}
+	void SimpleBinder::signalProcessEvent(ProcessControlBlock* pcb, std::string compID) {}
 }

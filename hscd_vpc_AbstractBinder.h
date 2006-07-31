@@ -11,7 +11,7 @@
 #include "hscd_vpc_Binding.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "hscd_vpc_MappingInformation.h"
-#include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
 namespace SystemC_VPC {
@@ -22,7 +22,7 @@ namespace SystemC_VPC {
   /**
    * \brief Basic binder class specifying interface for all realized binder sub-classes
    */
-  class AbstractBinder : public virtual TaskEventListener {
+  class AbstractBinder : public virtual ProcessEventListener {
 		
     protected:
 

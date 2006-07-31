@@ -79,9 +79,9 @@ namespace SystemC_VPC {
       //virtual void registerBinding(std::string src, std::string target);
 
       /**
-       * \brief Implementation of TaskEventListener::signalTaskEvent
+       * \brief Implementation of ProcessEventListener::signalProcessEvent
        */
-      void signalTaskEvent(ProcessControlBlock* pcb, std::string CompID);
+      void signalProcessEvent(ProcessControlBlock* pcb, std::string CompID);
 
     private:
 

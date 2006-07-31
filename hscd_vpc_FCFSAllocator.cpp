@@ -122,9 +122,9 @@ namespace SystemC_VPC{
    }
   
   /**
-   * \brief Implementation of FCFSAllocator::signalTaskEvent
+   * \brief Implementation of FCFSAllocator::signalProcessEvent
    */
-  void FCFSAllocator::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void FCFSAllocator::signalProcessEvent(ProcessControlBlock* pcb, std::string compID){
   
 #ifdef VPC_DEBUG
     std::cerr << "FCFSAllocator " << this->getController().getName() << "> got notified by task: " << pcb->getName() << "::" << pcb->getFuncName()
@@ -146,9 +146,9 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of FCFSConfScheudler::signalPreemption
+   * \brief Implementation of FCFSConfScheudler::signalDeallocation
    */
-  void FCFSAllocator::signalPreemption(bool kill, ReconfigurableComponent* rc){
+  void FCFSAllocator::signalDeallocation(bool kill, ReconfigurableComponent* rc){
     // only interested in Preemption with KILL
     if(kill){
       

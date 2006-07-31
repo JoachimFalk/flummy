@@ -13,7 +13,7 @@
 #include "hscd_vpc_AbstractConfigurationMapper.h"
 #include "hscd_vpc_AbstractAllocator.h"
 
-#include "hscd_vpc_TaskEventListener.h"
+#include "hscd_vpc_ProcessEventListener.h"
 
 #include "hscd_vpc_Configuration.h"
 #include "hscd_vpc_datatypes.h"
@@ -53,14 +53,6 @@ namespace SystemC_VPC{
     virtual AbstractBinder* getBinder()=0;
     virtual AbstractConfigurationMapper* getConfigurationMapper()=0;
     virtual AbstractAllocator* getAllocator()=0;
-    
-/*
-    virtual void setBinder(AbstractBinder* binder)=0;
-    
-    virtual void setConfigurationMapper(AbstractConfigurationMapper* mapper)=0;
-    
-    virtual void setAllocator(AbstractAllocator* allocator)=0;
-*/
     
     /**
      * \brief Sets the currently controlled reconfigurable Component of instance
@@ -131,29 +123,29 @@ namespace SystemC_VPC{
     virtual ProcessControlBlock* getNextTask(ReconfigurableComponent* rc)=0;
     
     /**
-     * \brief Getter to determine which preemption mode is used
+     * \brief Getter to determine which deallocation mode is used
      */
-    virtual bool preemptByKill()=0;
+    virtual bool deallocateByKill()=0;
         
     /**
      * \brief Callback Mehtode used to inform Controller about task state
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID)=0;
+    virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID)=0;
     
     /**
-     * \brief Signals to controller that managed component has been preempted.
-     * Used within controller to adapt scheduling to preemption of managed
+     * \brief Signals to controller that managed component has been deallocated.
+     * Used within controller to adapt scheduling to deallocation of managed
      * component.
-     * \param kill indicates if preemption used kill as parameter
+     * \param kill indicates if deallocation used kill as parameter
      */
-    virtual void signalPreemption(bool kill, ReconfigurableComponent* rc)=0;
+    virtual void signalDeallocation(bool kill, ReconfigurableComponent* rc)=0;
     
     /**
-     * \brief Signals to controller that managed component has been resumed.
+     * \brief Signals to controller that managed component has been reallocated.
      * Used within controller to adapt scheduling to resuming of managed
      * component.
      */
-    virtual void signalResume(ReconfigurableComponent* rc)=0;
+    virtual void signalAllocation(ReconfigurableComponent* rc)=0;
     
     /**
      * \brief 

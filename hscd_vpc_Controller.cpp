@@ -205,24 +205,24 @@ namespace SystemC_VPC{
   }
   
   /**
-    * \brief Dummy implementation of Controller::signalPreemption
+    * \brief Dummy implementation of Controller::signalDeallocation
     */  
-  void Controller::signalPreemption(bool kill, ReconfigurableComponent* rc){
-    this->allocator->signalPreemption(kill, rc);
+  void Controller::signalDeallocation(bool kill, ReconfigurableComponent* rc){
+    this->allocator->signalDeallocation(kill, rc);
   }
   
   /**
-    * \brief Dummy implementation of Controller::signalResume
+    * \brief Dummy implementation of Controller::signalAllocation
     */
-  void Controller::signalResume(ReconfigurableComponent* rc){
-    this->allocator->signalResume(rc);
+  void Controller::signalAllocation(ReconfigurableComponent* rc){
+    this->allocator->signalAllocation(rc);
   }
   
   /**
    * \brief Getter to determine which preemption mode is used
    */
-  bool Controller::preemptByKill(){
-    return this->allocator->preemptByKill();
+  bool Controller::deallocateByKill(){
+    return this->allocator->deallocateByKill();
   }
   
   /**
@@ -232,11 +232,9 @@ namespace SystemC_VPC{
     return this->decisions[pid];
   }
 
-  void Controller::signalTaskEvent(ProcessControlBlock* pcb, std::string compID){
+  void Controller::signalProcessEvent(ProcessControlBlock* pcb, std::string compID){
     
-    this->binder->signalTaskEvent(pcb, compID);
-    this->allocator->signalTaskEvent(pcb, compID);
-  
+    this->binder->signalProcessEvent(pcb, compID);
      
     // if task has been killed and controlled instance is not killed solve decision here
     if(pcb->getState() == activation_state(aborted) && !this->managedComponent->hasBeenKilled()){

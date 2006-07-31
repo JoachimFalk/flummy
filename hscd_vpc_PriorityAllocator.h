@@ -167,16 +167,6 @@ namespace SystemC_VPC{
        */
       virtual void performSchedule(ReconfigurableComponent* rc);
 
-
-      /**
-       * \brief Realizes scheduling decision for tasks to be forwarded to configurations
-       * This method is used to perform scheduling decision for tasks and within this context
-       * their corresponding configurationgs depending on the strategie of the different
-       * controller. It is used to initialize and set up all necessary data for a new "round" of
-       * scheduling. 
-       */
-      //    virtual void addTasksToSchedule(std::deque<ProcessControlBlock* >& newTasks);
-
       /**
        * \brief Returns next configuration to be loaded
        * Used to indicate if a new configuration should be loaded by the controller
@@ -203,9 +193,9 @@ namespace SystemC_VPC{
 
       /**
        * \brief Used to signal finished tasks to the controller
-       * \see TaskEventListener::signalTaskEvent
+       * \see ProcessEventListener::signalProcessEvent
        */
-      virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
+      virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID);
 
     private:
 

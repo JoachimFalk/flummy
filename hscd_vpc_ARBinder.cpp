@@ -115,7 +115,7 @@ namespace SystemC_VPC {
 				MappingInformation* mInfo = mIter->getNext();
 				delete mIter;
 #ifdef VPC_DEBUG
-        std::cerr << "ARBinder> result of binding for " << task.getName() << ":" << task.getPID()is << " is " << target << std::endl;
+        std::cerr << "ARBinder> result of binding for " << task.getName() << ":" << task.getPID() << " is " << target << std::endl;
 #endif //VPC_DEBUG
 				return std::pair<std::string, MappingInformation* >(target, mInfo);
 			}else{
@@ -161,7 +161,7 @@ namespace SystemC_VPC {
 		return true;
 	}
 	
-	void ARBinder::signalTaskEvent(ProcessControlBlock* pcb, std::string compID) {
+	void ARBinder::signalProcessEvent(ProcessControlBlock* pcb, std::string compID) {
 
 		std::string target = this->decisions[pcb->getName()];
 		std::pair<std::multimap<std::string, std::pair<std::string, int> >::iterator, 

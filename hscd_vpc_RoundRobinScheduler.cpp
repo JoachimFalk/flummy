@@ -138,16 +138,16 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of RoundRobinScheduler::signalPreemption
+   * \brief Implementation of RoundRobinScheduler::signalDeallocation
    */
-  void RoundRobinScheduler::signalPreemption(){
+  void RoundRobinScheduler::signalDeallocation(){
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
   }
   
   /**
-   * \brief Implementation of RoundRobinScheduler::signalResume
+   * \brief Implementation of RoundRobinScheduler::signalAllocation
    */  
-  void RoundRobinScheduler::signalResume(){
+  void RoundRobinScheduler::signalAllocation(){
     this->lastassign = sc_simulation_time();
   }
 }

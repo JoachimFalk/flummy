@@ -167,21 +167,21 @@ namespace SystemC_VPC {
 
 
       /**
-       * \brief Signals to controller that managed component has been preempted.
+       * \brief Signals to controller that managed component has been deallocated.
        * Used within controller to adapt scheduling to preemption of managed
        * component.
        * \param kill indicates if preemption happend with kill flag
        */
-      void signalPreemption(bool kill, ReconfigurableComponent* rc);
+      void signalDeallocation(bool kill, ReconfigurableComponent* rc);
 
       /**
-       * \brief Signals to controller that managed component has been resumed.
+       * \brief Signals to controller that managed component has been reallocated.
        * Used within controller to adapt scheduling to resuming of managed
        * component.
        */
-      void signalResume(ReconfigurableComponent* rc);
+      void signalAllocation(ReconfigurableComponent* rc);
 
-      void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
+      void signalProcessEvent(ProcessControlBlock* pcb, std::string compID);
 
     private:
 

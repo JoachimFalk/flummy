@@ -67,7 +67,7 @@ pkginclude_HEADERS =				\
 	hscd_vpc_AbstractConfigurationMapper.h	\
 	hscd_vpc_datatypes.h                    \
 	hscd_vpc_Director.h                     \
-	hscd_vpc_TaskEventListener.h		\
+	hscd_vpc_ProcessEventListener.h		\
 	hscd_vpc_Director.h			\
 	hscd_vpc_ProcessControlBlock.h		\
 	hscd_vpc_PCBPool.h			\
@@ -75,7 +75,7 @@ pkginclude_HEADERS =				\
 	hscd_vpc_Binding.h			\
 	hscd_vpc_MappingInformation.h		\
 	hscd_vpc_DelayMapper.h			\
-	hscd_vpc_IPreemptable.h			\
+	hscd_vpc_IDeallocatable.h		\
 	hscd_vpc_EventPair.h	
 
 #noinst_HEADERS=	oneof.hpp

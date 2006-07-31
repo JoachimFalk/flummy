@@ -10,10 +10,10 @@ namespace SystemC_VPC{
   class AbstractComponent;
 
   /**
-   * TaskEventListener defines common interface used for communicating task state
+   * ProcessEventListener defines common interface used for communicating task state
    * through the control hierarchy within VPC framework.
    */
-  class TaskEventListener{
+  class ProcessEventListener{
   
   public:
     
@@ -23,7 +23,7 @@ namespace SystemC_VPC{
      * event which happened.
      * \param pcb points to the task which the notification corresponds to
      */
-    virtual void signalTaskEvent(ProcessControlBlock* pcb, std::string compID)=0;
+    virtual void signalProcessEvent(ProcessControlBlock* pcb, std::string compID)=0;
     
     /**
      * \note Not used yet

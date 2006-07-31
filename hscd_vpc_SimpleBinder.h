@@ -5,6 +5,10 @@
 
 namespace SystemC_VPC {
 
+  /**
+   * SimpleBinder is a dummy implementation for a binding strategy.
+   * It simply takes the first binding alternativ for binding a process to a component.
+   */
   class SimpleBinder : public StaticBinder {
 
     public:
@@ -16,10 +20,11 @@ namespace SystemC_VPC {
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
 
       /**
-       * \brief Implementation of TaskEventListener::signalTaskEvent
+       * \brief Implementation of ProcessEventListener::signalProcessEvent
        * Dummy implementation as SimpleBinder is not interested in task events
+       * \sa ProcessEventListener
        */
-      void signalTaskEvent(ProcessControlBlock* pcb, std::string compID);
+      void signalProcessEvent(ProcessControlBlock* pcb, std::string compID);
   };
 
 

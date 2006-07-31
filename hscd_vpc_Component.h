@@ -158,26 +158,26 @@ namespace SystemC_VPC{
 
     protected:
 
-      // used to indicate preemption request
-      sc_event notify_preempt;
-      // used to indicate resume request
-      sc_event notify_resume;
+      // used to indicate deallocation request
+      sc_event notify_deallocate;
+      // used to indicate allocate request
+      sc_event notify_allocate;
 
     public:
 
       /**
        * \brief Preempts execution of component
-       * Used to preempt the current execution of a component.
-       * \sa AbstractComponent::preempt
+       * Used to deallocate the current execution of a component.
+       * \sa AbstractComponent::deallocate
        */
-      virtual void preempt(bool kill);
+      virtual void deallocate(bool kill);
 
       /**
-       * \brief Resumes preempted execution
-       * Used to resume execution of preempted component.
+       * \brief Resumes deallocated execution
+       * Used to allocate execution of deallocated component.
        * \sa AbstractComponent
        */
-      virtual void resume();
+      virtual void allocate();
 
       /**
        * \brief An implementation of AbstractComponent::compute(ProcessControlBlock* , const char *).
