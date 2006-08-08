@@ -73,7 +73,7 @@ namespace SystemC_VPC{
      * the reconfigurable instance is handled. 
      * Runs as SC_THREAD of ReconfigurableComponent
      */
-    void ReconfigurableComponent::schedule_thread();
+    void schedule_thread();
 
 protected:
 
@@ -137,6 +137,7 @@ protected:
     
     /**
      * \brief Adds new Configuration to the reconfigurable component.
+     * \param name of Configuration
      * \param config the Configuration to be added
      */
     void addConfiguration(const char* name, Configuration* config);
@@ -163,10 +164,6 @@ protected:
     /**
      * \brief Sets currently loaded Configuration
      * \param name specifies the Configuration to be set as activ on
-     */
-    /**
-     * \brief Sets the currently loaded Configuration
-     * \param identifying name of Configuration to be set loaded
      */
     void setActivConfiguration(const char* name);
     
@@ -223,7 +220,7 @@ protected:
      */
     bool reconfigurationInterrupted(sc_time timeStamp, sc_time interval);
     
-    void ReconfigurableComponent::traceConfigurationState(Configuration* config, trace_value value);
+    void traceConfigurationState(Configuration* config, trace_value value);
   };
 
 }

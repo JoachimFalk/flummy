@@ -244,7 +244,6 @@ namespace SystemC_VPC {
       
       /**
        * \brief Default constructor of an PCB instance
-       * \param name specifies the identifying name of the instance
        */
       ProcessControlBlock();
       

@@ -82,7 +82,7 @@ namespace SystemC_VPC{
      */
     //AbstractComponent& getResource( const char *name );
     //  AbstractComponent& getResource(int process);
-     Director& Director::getResource( const char* name)
+     Director& getResource( const char* name)
        __attribute__((deprecated));
      
     /**
@@ -148,8 +148,8 @@ namespace SystemC_VPC{
      * 
      * Determines for a given task the component to run on and delegates it.
      * \param name of task
-     * \param name of function
-     * \param event to signal finished request
+     * \param funcname of function
+     * \param end to signal finished request
      */
     void compute(const char* name, const char* funcname, VPC_Event* end) 
       __attribute__((__deprecated__));
@@ -159,14 +159,14 @@ namespace SystemC_VPC{
      *
      * Determines for a given task the component to run on and delegates it.
      * \param name of task
-     * \param event to signal finished request
+     * \param end to signal finished request
      */
     void compute(const char *name, VPC_Event *end)
       __attribute__((__deprecated__));
  
     /**
      * \brief Adds new constraint to Director
-     * \param cons points to the constraint to be added
+     * \param constraint points to the constraint to be added
      */
     void addConstraint(Constraint* constraint);
     

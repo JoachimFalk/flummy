@@ -98,7 +98,7 @@ namespace SystemC_VPC{
      * Used to deallocate the current execution of components.
      * Actual executed tasks are "stored" for later execution or discarded
      * depending on the parameter flag.
-     * \param kill indicates if "hard" deallocation should be initiated
+     * \param killTasks indicates if "hard" deallocation should be initiated
      * and currently registered task are killed without restoring
      * \return pointer to sc_time specifying time need for deallocation
      * \see IDeallocatable::deallocate

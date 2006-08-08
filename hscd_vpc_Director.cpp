@@ -30,9 +30,6 @@ namespace SystemC_VPC{
   
   std::auto_ptr<Director> Director::singleton(new Director());
  
-  /**
-   *
-   */
    /*
   AbstractComponent& Director::getResource( const char *name ){
     if(!FALLBACKMODE){
