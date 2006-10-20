@@ -19,19 +19,15 @@
 # Boston, MA 02111-1307, USA.
 #
 # $Log$
+root_srcdir   := $(shell cd $(top_srcdir)/.. && pwd)
+root_builddir := $(shell cd $(top_builddir)/.. && pwd)
 
-root_srcdir=$(top_srcdir)/..
-root_builddir=$(top_builddir)/..
+include $(auxdir)/jfrules.mk
 
 SUBDIRS=
+
+# This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
-
-ac_aux_dir = @ac_aux_dir@
-
-include $(ac_aux_dir)/jfrules.mk
-
-#pkgincludeprefix=systemoc/
-
 
 compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 	@date > $@
@@ -39,11 +35,13 @@ compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 # FIXME: Decouple SystemC-VPC and SysteMoC by moving SysteMoC
 #        dependant code from SystemC-VPC into SysteMoC
 #        restore thread based compute interface to SystemC-VPC
-INCLUDES = @INCLUDES@					\
-	   @SYSTEMC_INCLUDE@				\
-	   @XERCES_INCLUDE@				\
-	   -I./include					\
-	   -I$(srcdir)
+AM_CPPFLAGS =			\
+	-O1 -Wuninitialized	\
+	@AM_CPPFLAGS@		\
+	@SYSTEMC_INCLUDE@	\
+	@XERCES_INCLUDE@	\
+	-I./include		\
+	-I$(srcdir)
 
 #AM_LDFLAGS=
 
@@ -74,8 +72,6 @@ pkginclude_HEADERS =				\
 
 #noinst_HEADERS=	oneof.hpp
 
-AM_CPPFLAGS=-Wall -O1 -Wuninitialized
-
 libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)		\
 	$(hscd_pggen_hpp_CH_LTOBJS)
@@ -87,9 +83,6 @@ libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @
 
 libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
 libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
-
-
-
 
 libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
