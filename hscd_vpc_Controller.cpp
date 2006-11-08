@@ -222,6 +222,7 @@ namespace SystemC_VPC{
   void Controller::signalProcessEvent(ProcessControlBlock* pcb, std::string compID){
     
     this->binder->signalProcessEvent(pcb, compID);
+    this->allocator->signalProcessEvent(pcb, compID);
      
     // if process has been killed and controlled instance is not killed solve decision here
     if(pcb->getState() == activation_state(aborted) && !this->managedComponent->hasBeenKilled()){
