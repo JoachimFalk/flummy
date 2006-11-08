@@ -22,10 +22,11 @@
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_AbstractComponent.h"
 
-#include <vector.h>
-#include <map.h>
-#include <deque.h>
-#include <queue.h>
+#include <vector>
+#include <map>
+#include <deque>
+#include <queue>
+using namespace std;
 
 namespace SystemC_VPC{
 

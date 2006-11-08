@@ -2,8 +2,6 @@
 #include <hscd_vpc_datatypes.h>
 #include <hscd_vpc_Director.h>
 
-#include <values.h>
-
 namespace SystemC_VPC{
   /**
    * IMPLEMENTATION OF ReconfigurableComponent

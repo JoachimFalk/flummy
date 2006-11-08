@@ -20,7 +20,7 @@
 
 #include <systemc.h>
 
-#include <string.h>
+#include <string>
 
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_IDeallocatable.h"

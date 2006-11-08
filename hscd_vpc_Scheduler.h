@@ -2,7 +2,8 @@
 #ifndef HSCD_VPC_SCHEDULER_H
 #define HSCD_VPC_SCHEDULER_H
 #include <hscd_vpc_datatypes.h>
-#include <map.h>
+#include <map>
+using namespace std;
 
 namespace SystemC_VPC{
   

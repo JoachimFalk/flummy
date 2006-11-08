@@ -19,21 +19,22 @@
 #define HSCD_VPC_DIRECTOR_H
 
 #include "hscd_vpc_AbstractDirector.h"
-#include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_EventPair.h"
 
 // provide compatibility with other compilers then gcc, hopefully
 #include <ansidecl.h>
 
 #include <string>
-#include <map.h>
-#include <vector.h>
+#include <map>
+#include <vector>
+using namespace std;
 
 #include "hscd_vpc_PCBPool.h"
 
 namespace SystemC_VPC{
 
+  // forward decl;
+  class AbstractComponent;
   class AbstractBinder;
   class ProcessControlBlock;
   class Constraint;

@@ -59,20 +59,12 @@ lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
 	hscd_vpc_Tracing.h			\
 	hscd_vpc_AbstractComponent.h            \
-	hscd_vpc_AbstractController.h           \
 	hscd_vpc_AbstractDirector.h             \
-	hscd_vpc_AbstractConfigurationPool.h	\
-	hscd_vpc_AbstractConfigurationMapper.h	\
 	hscd_vpc_datatypes.h                    \
 	hscd_vpc_Director.h                     \
 	hscd_vpc_ProcessEventListener.h		\
-	hscd_vpc_Director.h			\
 	hscd_vpc_ProcessControlBlock.h		\
 	hscd_vpc_PCBPool.h			\
-	hscd_vpc_AbstractBinder.h		\
-	hscd_vpc_Binding.h			\
-	hscd_vpc_MappingInformation.h		\
-	hscd_vpc_DelayMapper.h			\
 	hscd_vpc_IDeallocatable.h		\
 	hscd_vpc_EventPair.h	
 

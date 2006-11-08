@@ -3,9 +3,10 @@
 #include <systemc.h>
 #include <hscd_vpc_Scheduler.h>
 #include <hscd_vpc_datatypes.h>
-#include <map.h>
-#include <queue.h>
-#include <vector.h>
+#include <map>
+#include <queue>
+#include <vector>
+using namespace std;
 
 namespace SystemC_VPC{
   class Component;

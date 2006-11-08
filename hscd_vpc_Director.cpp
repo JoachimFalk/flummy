@@ -57,7 +57,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  Director::Director() : end(0), FALLBACKMODE(false), binder(NULL) {
+  Director::Director() : end(0), binder(NULL), FALLBACKMODE(false) {
     
     try{
       VPCBuilder builder((Director*)this);
