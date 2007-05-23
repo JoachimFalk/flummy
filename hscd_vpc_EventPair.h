@@ -19,7 +19,7 @@
 #ifndef HSCD_VPC_EVENTPAIR_H
 #define HSCD_VPC_EVENTPAIR_H
 #include <systemc.h>
-#include <systemc_support.hpp>
+#include <cosupport/systemc_support.hpp>
 
 namespace SystemC_VPC {
 

@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 
-#include <systemc_support.hpp>
+#include <cosupport/systemc_support.hpp>
 
 #include "hscd_vpc_EventPair.h"
 #include "hscd_vpc_Tracing.h"
