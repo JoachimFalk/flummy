@@ -66,7 +66,7 @@ namespace SystemC_VPC{
     sc_signal<trace_value> schedulerTrace;
     
     inline void resignTask(int &taskToResign, sc_time &actualRemainingDelay,int &actualRunningPID);
-    inline void Component::assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
+    inline void assignTask(int &taskToAssign, sc_time &actualRemainingDelay,int &actualRunningPID) ;
     
     // time last task started
     sc_time startTime;

@@ -36,7 +36,6 @@ compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 #        dependant code from SystemC-VPC into SysteMoC
 #        restore thread based compute interface to SystemC-VPC
 AM_CPPFLAGS =			\
-	-O1 -Wuninitialized	\
 	@AM_CPPFLAGS@		\
 	@SYSTEMC_INCLUDE@	\
 	@XERCES_INCLUDE@	\
