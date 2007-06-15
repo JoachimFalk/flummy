@@ -196,8 +196,6 @@ namespace SystemC_VPC{
      */
     ProcessControlBlock& generatePCB(const char* name);
     
-    //void registerPCB(const char* name, ProcessControlBlock* pcb);
-
     PCBPool& getPCBPool(); 
 
     void signalProcessEvent(ProcessControlBlock* pcb);
