@@ -6,32 +6,36 @@
 namespace SystemC_VPC{
   PriorityScheduler::PriorityScheduler(const char *schedulername){
 
-    priority_queue<p_queue_entry,vector<p_queue_entry>,p_queue_compare> pqueue(comp);
+    priority_queue<p_queue_entry,vector<p_queue_entry>,p_queue_compare>
+      pqueue(comp);
 
     order_counter=0;
 
     char rest[VPC_MAX_STRING_LENGTH];
     int sublength;
     char *secondindex;
-    char *firstindex=strchr(schedulername,':');    //':' finden -> ':' trennt key-value Paare 
+    //':' finden -> ':' trennt key-value Paare 
+    char *firstindex=strchr(schedulername,':');
     while(firstindex!=NULL){
-      secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+        //':' überspringen und nächste ':' finden
+      secondindex=strchr(firstindex+1,':');
       if(secondindex!=NULL)
-  sublength=secondindex-firstindex;          //Länge bestimmen
+        sublength=secondindex-firstindex;          //Länge bestimmen
       else
-  sublength=strlen(firstindex);              
+        sublength=strlen(firstindex);              
       strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
       rest[sublength-1]='\0';
       firstindex=secondindex;                     
     
-    
-      char *key, *value;               // key und value trennen und Property setzen
+      // key und value trennen und Property setzen
+      char *key, *value;
+
       value=strstr(rest,"-");
       if(value!=NULL){
-  value[0]='\0';
-  value++;
-  key=rest;
-  setProperty(key,value);
+        value[0]='\0';
+        value++;
+        key=rest;
+        setProperty(key,value);
       }
     
     }
@@ -40,8 +44,12 @@ namespace SystemC_VPC{
   void PriorityScheduler::setProperty(char* key, char* value){
   }
 
-  bool PriorityScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
-     return false;
+  bool PriorityScheduler::getSchedulerTimeSlice(
+    sc_time& time,
+    const map<int,ProcessControlBlock*> &ready_tasks,
+    const  map<int,ProcessControlBlock*> &running_tasks )
+  {
+    return false;
   }
   /**
    *
@@ -59,11 +67,20 @@ namespace SystemC_VPC{
   /**
    *
    */
-   scheduling_decision PriorityScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
+   scheduling_decision PriorityScheduler::schedulingDecision(
+     int& task_to_resign,
+     int& task_to_assign,
+     const  map<int,ProcessControlBlock*> &ready_tasks,
+     const  map<int,ProcessControlBlock*> &running_tasks)
+   {
      scheduling_decision ret_decision=ONLY_ASSIGN;
      if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
-     p_queue_entry prior_ready=pqueue.top();  // höchste priorität der ready tasks
-     double d_prior_ready=prior_ready.pcb->getPriority();  // wert der priorität
+
+     // höchste priorität der ready tasks
+     p_queue_entry prior_ready=pqueue.top();
+
+     // wert der priorität
+     double d_prior_ready=prior_ready.pcb->getPriority();
      task_to_assign=prior_ready.pcb->getPID();
 
 
@@ -71,7 +88,9 @@ namespace SystemC_VPC{
        map<int,ProcessControlBlock*>::const_iterator iter;
        iter=running_tasks.begin();
        ProcessControlBlock *pcb=iter->second;
-       if(pcb->getPriority() <= d_prior_ready){             //laufender mit höherer oder gleicher priorität ->
+
+       //laufender mit höherer oder gleicher priorität ->
+       if(pcb->getPriority() <= d_prior_ready){
          ret_decision=NOCHANGE;                       //nicht verdrängen
        }else{
          ret_decision=PREEMPT;                        //verdrängen

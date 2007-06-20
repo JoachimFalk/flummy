@@ -1,4 +1,4 @@
-/*******************************************************************************
+/******************************************************************************
  *                        Copyright 2004
  *                Lehrstuhl fuer Hardware-Software-Codesign
  *                  Universitaet Erlangen-Nuernberg
@@ -6,15 +6,15 @@
  *
  * Title: SystemC-VPC
  * Comment:
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * hscd_vpc_TERM.cpp
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Modifications History:
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Notes:
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * $log$
- ******************************************************************************/
+ *****************************************************************************/
 #include "hscd_vpc_Term.h"
 
 namespace SystemC_VPC{
@@ -35,12 +35,13 @@ namespace SystemC_VPC{
   /**
    *
    */
-  Constraint::Constraint(const char *sname,  const char *scount,  const char *sdivider){
+  Constraint::Constraint(const char *sname,
+                         const char *scount,
+                         const char *sdivider){
     assert(sscanf(scount,"%d",&count));
     assert(sscanf(sdivider,"%d",&divider));
     strncpy(name,sname,VPC_MAX_STRING_LENGTH);
     activationTime=-1;
-    //cerr << VPC_GREEN("created Constraint: name="<<name<<" count="<<count<<" divider="<<divider)<<NENDL;
   }
 
   /**
@@ -78,7 +79,8 @@ namespace SystemC_VPC{
    *
    */
   void Constraint::getReport(){
-    cerr << VPC_YELLOW("Constraint: "<<name<<" valid activation: " <<activationTime)<<NENDL;
+    cerr << VPC_YELLOW("Constraint: "<< name <<" valid activation: "
+         <<activationTime)<<NENDL;
   }
   
   /**

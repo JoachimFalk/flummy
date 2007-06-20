@@ -20,9 +20,13 @@ namespace SystemC_VPC{
        */
     int sublength;
     char *secondindex;
-    char *firstindex=strchr(schedulername,':');    //':' finden -> ':' trennt key-value Paare 
+
+    //':' finden -> ':' trennt key-value Paare 
+    char *firstindex=strchr(schedulername,':');
     while(firstindex!=NULL){
-      secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+
+      //':' überspringen und nächste ':' finden
+      secondindex=strchr(firstindex+1,':');
       if(secondindex!=NULL)
         sublength=secondindex-firstindex;          //Länge bestimmen
       else
@@ -31,8 +35,8 @@ namespace SystemC_VPC{
       rest[sublength-1]='\0';
       firstindex=secondindex;                     
 
-
-      char *key, *value;               // key und value trennen und Property setzen
+      // key und value trennen und Property setzen
+      char *key, *value;
       value=strstr(rest,"-");
       if(value!=NULL){
         value[0]='\0';
@@ -56,7 +60,11 @@ namespace SystemC_VPC{
     }
   }
 
-  bool RoundRobinScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
+  bool RoundRobinScheduler::getSchedulerTimeSlice(
+    sc_time& time,
+    const map<int,ProcessControlBlock*> &ready_tasks,
+    const  map<int,ProcessControlBlock*> &running_tasks )
+  {
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
     time=sc_time(TIMESLICE,SC_NS);
     return true;
@@ -73,10 +81,15 @@ namespace SystemC_VPC{
       }
     }
   }
-  scheduling_decision RoundRobinScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
+  scheduling_decision RoundRobinScheduler::schedulingDecision(
+    int& task_to_resign,
+    int& task_to_assign,
+    const  map<int,ProcessControlBlock*> &ready_tasks,
+    const  map<int,ProcessControlBlock*> &running_tasks )
+  {
 
     scheduling_decision ret_decision=NOCHANGE;
-    //  cerr << LASTASSIGN+TIMESLICE << " : "<<sc_simulation_time()<< " : " << LASTASSIGN << " : " << TIMESLICE<< " : " <<rr_fifo.size()<<endl;
+
     this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
     this->lastassign = sc_simulation_time();
 
@@ -84,7 +97,10 @@ namespace SystemC_VPC{
       if(rr_fifo.size()>0){    // neuen Task bestimmen
         task_to_assign = rr_fifo.front();
         rr_fifo.pop_front();
-        ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
+        
+        //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
+        // -> kein preemption!
+        ret_decision= ONLY_ASSIGN;
         if(running_tasks.size()!=0){  // alten Task entfernen
           map<int,ProcessControlBlock*>::const_iterator iter;
           iter=running_tasks.begin();
@@ -92,7 +108,9 @@ namespace SystemC_VPC{
           task_to_resign=pcb->getPID();
           rr_fifo.push_back(pcb->getPID());
           ret_decision= PREEMPT;  
-        }// else{}    -> //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
+        }
+        // else{}    ->
+        //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
       }    
     }else{//neuer Task hinzugefügt -> nichts tun 
       //oder alter entfernt    -> neuen setzen
@@ -102,12 +120,16 @@ namespace SystemC_VPC{
         if(rr_fifo.size()>0){            // ist da auch ein neuer da?
           task_to_assign = rr_fifo.front();
           rr_fifo.pop_front();
-          ret_decision= ONLY_ASSIGN;    //alter wurde schon entfernt (freiwillige abgabe "BLOCK") -> kein preemption!
+
+          //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
+          // -> kein preemption!
+          ret_decision= ONLY_ASSIGN;
         }
       }
 
       //nichts tun:
-      //     ret_decision=NOCHANGE;         //neuer Task hinzugefügt -> nichts tun
+      //     ret_decision=NOCHANGE;
+      //neuer Task hinzugefügt -> nichts tun
     } 
 
     /*
@@ -141,7 +163,8 @@ namespace SystemC_VPC{
    * \brief Implementation of RoundRobinScheduler::signalDeallocation
    */
   void RoundRobinScheduler::signalDeallocation(){
-    this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
+    this->remainingSlice =
+      this->remainingSlice - (sc_simulation_time() - this->lastassign);
   }
   
   /**

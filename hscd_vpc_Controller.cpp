@@ -9,9 +9,13 @@ namespace SystemC_VPC{
     char rest[VPC_MAX_STRING_LENGTH];
     int sublength;
     char *secondindex;
-    char *firstindex=strchr(name,':');    //':' finden -> ':' trennt key-value Paare 
+
+    //':' finden -> ':' trennt key-value Paare 
+    char *firstindex=strchr(name,':');
     while(firstindex!=NULL){
-      secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+
+      //':' überspringen und nächste ':' finden
+      secondindex=strchr(firstindex+1,':');
       if(secondindex!=NULL)
         sublength=secondindex-firstindex;          //Länge bestimmen
       else
@@ -20,7 +24,8 @@ namespace SystemC_VPC{
       rest[sublength-1]='\0';
       firstindex=secondindex;                     
 
-      char *key, *value;               // key und value trennen und Property setzen
+      // key und value trennen und Property setzen
+      char *key, *value;
       value=strstr(rest,"-");
       if(value!=NULL){
         value[0]='\0';
@@ -44,7 +49,8 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Controller::setManagedComponent
    */
-  void Controller::setManagedComponent(ReconfigurableComponent* managedComponent){
+  void
+  Controller::setManagedComponent(ReconfigurableComponent* managedComponent){
     
     assert(managedComponent != NULL);
     this->managedComponent = managedComponent;
@@ -85,7 +91,9 @@ namespace SystemC_VPC{
       AbstractComponent* comp = (iter->second)->getComponent(compName);
       if(comp != NULL){
         // found component
-        this->mapping_map_configs.insert(std::pair<std::string, std::string>(taskName, (iter->second)->getName()));
+        this->mapping_map_configs.insert(
+         std::pair<std::string, std::string>(taskName,
+                                             (iter->second)->getName()));
         // exactly one match possible
         break;
       }  
@@ -100,7 +108,8 @@ namespace SystemC_VPC{
     if(0 == strcmp(key, "mode")){
 
 #ifdef VPC_DEBUG
-      std::cerr << VPC_BLUE("Controller> Found input data for preemption mode = ") << value << std::endl;
+      std::cerr << VPC_BLUE("Controller> Found input data for preemption mode"
+                            " = ") << value << std::endl;
 #endif //VPC_DEBUG
       if(0 == strcmp(value, "kill")){
         this->setPreemptionStrategy(true);
@@ -108,7 +117,8 @@ namespace SystemC_VPC{
       if(0 == strcmp(value, "store")){
         this->setPreemptionStrategy(false);
       }else{
-        std::cerr << VPC_YELLOW("Controller> Unkown preemption mode!") << std::endl;
+        std::cerr << VPC_YELLOW("Controller> Unkown preemption mode!")
+                  << std::endl;
       }
     }
     
@@ -129,9 +139,13 @@ namespace SystemC_VPC{
   AbstractComponent* Controller::getMappedComponent(ProcessControlBlock* task){
      // determine requied configuration
     std::string configName = this->mapping_map_configs[task->getName()];
-    Configuration* conf = this->managedComponent->getConfiguration(configName.c_str());
+    Configuration* conf =
+      this->managedComponent->getConfiguration(configName.c_str());
+
     // get mapped component from configuration
-    AbstractComponent* comp = conf->getComponent((this->mapping_map_component_ids[task->getName()]).c_str());
+    AbstractComponent* comp = 
+      conf->getComponent(
+        (this->mapping_map_component_ids[task->getName()]).c_str());
     
     return comp;
     
@@ -155,7 +169,9 @@ namespace SystemC_VPC{
     std::map<std::string, std::string>::iterator iter;
     iter = this->mapping_map_configs.find(name);
     if(iter == this->mapping_map_configs.end()){
-      std::cerr << VPC_RED("AbstractController " << this->getName() << "> No mapped configuration found for " << name) << std::endl;
+      std::cerr << VPC_RED("AbstractController " << this->getName()
+                << "> No mapped configuration found for " << name)
+                << std::endl;
       return NULL;
     }
     

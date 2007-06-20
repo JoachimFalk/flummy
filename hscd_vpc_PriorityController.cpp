@@ -5,18 +5,24 @@ namespace SystemC_VPC{
   /**
    * \brief Initializes instance of PriorityController
    */
-  PriorityController::PriorityController(const char* name) : Controller(name), order_count(0){}
+  PriorityController::PriorityController(const char* name) :
+    Controller(name),
+    order_count(0){}
   
   PriorityController::~PriorityController(){}
   
   /**
    * \brief Implementation of PreempetivController::addProcessToSchedule
    */
-  void PriorityController::addProcessToSchedule(std::deque<ProcessControlBlock* >& newTasks){
+  void PriorityController::addProcessToSchedule(
+    std::deque<ProcessControlBlock* >& newTasks)
+  {
     this->waitInterval = NULL;
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("PriorityController "<< this->getName() <<"> addProcessToSchedule called! ") << sc_simulation_time() << endl;
+        std::cerr << VPC_YELLOW("PriorityController "<< this->getName()
+                  <<"> addProcessToSchedule called! ") << sc_simulation_time()
+                  << endl;
 #endif //VPC_DEBUG
 
     // add all task to processing list
@@ -27,19 +33,28 @@ namespace SystemC_VPC{
       pcb = newTasks.front();
       this->tasksToProcess.push(pcb);
       // determine configuration and add priority of task to configuration
-      std::map<std::string, std::string>::iterator iter = this->mapping_map_configs.find(pcb->getName());
+      std::map<std::string, std::string>::iterator iter =
+        this->mapping_map_configs.find(pcb->getName());
       if(iter == this->mapping_map_configs.end()){
-        std::cerr << VPC_RED("PriorityController " << this->getName() << "> No mapped configuration found for " << pcb->getName()) << std::endl; 
+        std::cerr << VPC_RED("PriorityController " << this->getName()
+                  << "> No mapped configuration found for " << pcb->getName())
+                  << std::endl; 
       }else{
         //get configuration from managed component
-        Configuration* config = this->getManagedComponent()->getConfiguration(iter->second.c_str());
+        Configuration* config =
+          this->getManagedComponent()->getConfiguration(iter->second.c_str());
         
         std::list<PriorityListElement<Configuration* > >::iterator iter;
         
-        iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
+        iter = std::find(this->nextConfigurations.begin(),
+                         this->nextConfigurations.end(),
+                         config);
         // if configuration is not in scheduling list add it
         if(iter == this->nextConfigurations.end()){
-          this->nextConfigurations.push_back(PriorityListElement<Configuration* >(config, pcb->getPriority(), order_count++));
+          this->nextConfigurations.push_back(
+            PriorityListElement<Configuration* >( config,
+                                                  pcb->getPriority(),
+                                                  order_count++ ));
         }else{
           iter->addPriority(pcb->getPriority());
         }
@@ -65,8 +80,9 @@ namespace SystemC_VPC{
       if(next != this->getManagedComponent()->getActivConfiguration()){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_YELLOW("PriorityController " << this->getName() << "> next config to load: "
-              << next->getName()) << std::endl;
+        std::cerr << VPC_YELLOW("PriorityController " << this->getName()
+                  << "> next config to load: "
+                  << next->getName()) << std::endl;
 #endif //VPC_DEBUG
 
         return next;
@@ -102,21 +118,26 @@ namespace SystemC_VPC{
   void PriorityController::signalProcessEvent(ProcessControlBlock* pcb){
   
 #ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("PriorityController " << this->getName() << "> got notified by task: " << pcb->getName()) << std::endl;
+    std::cerr << VPC_YELLOW("PriorityController " << this->getName()
+              << "> got notified by task: " << pcb->getName()) << std::endl;
 #endif //VPC_DEBUG
     
     //get mapped configuration
-    Configuration* config = this->getMappedConfiguration((pcb->getName()).c_str());
+    Configuration* config =
+      this->getMappedConfiguration((pcb->getName()).c_str());
     std::list<PriorityListElement<Configuration* > >::iterator iter;
         
-    iter = std::find(this->nextConfigurations.begin(), this->nextConfigurations.end(), config);
+    iter = std::find(this->nextConfigurations.begin(),
+                     this->nextConfigurations.end(),
+                     config);
     // if configuration is in scheduling list process it
     if(iter != this->nextConfigurations.end()){
       iter->removePriority(pcb->getPriority());
       
 #ifdef VPC_DEBUG
-      std::cerr << VPC_YELLOW("PriorityController " << this->getName() << "> priority of mapped configuration after change is: "
-          << iter->getPriority()) << std::endl;
+      std::cerr << VPC_YELLOW("PriorityController " << this->getName()
+                << "> priority of mapped configuration after change is: "
+                << iter->getPriority()) << std::endl;
 #endif //VPC_DEBUG
     
       // if no more task on configuration
@@ -127,8 +148,10 @@ namespace SystemC_VPC{
       } 
     }
     
-    // if task has been killed and controlled instance is not killed solve decision here
-    if(pcb->getState() == activation_state(aborted) && !this->getManagedComponent()->hasBeenKilled()){
+    // if task has been killed and controlled instance is not killed solve
+    // decision here
+    if( pcb->getState() == activation_state(aborted)
+        && !this->getManagedComponent()->hasBeenKilled()){
       // recompute
       this->getManagedComponent()->compute(pcb);
     }else{
@@ -137,16 +160,20 @@ namespace SystemC_VPC{
         
 #ifdef VPC_DEBUG
     if(pcb->getState() == activation_state(aborted)){
-      std::cerr << VPC_YELLOW("PriorityController> task: " << pcb->getName() << " got killed!")  << std::endl;
+      std::cerr << VPC_YELLOW("PriorityController> task: " << pcb->getName()
+                << " got killed!")  << std::endl;
     }
 #endif //VPC_DEBUG
       
-    // if there are still ready configurations and current activ does not fit selected its time to wakeUp ReconfigurableComponent
-    if(this->nextConfigurations.size() > 0
-        && this->getManagedComponent()->getActivConfiguration() != this->getNextConfiguration()){
+    // if there are still ready configurations and current activ does not fit
+    // selected its time to wakeUp ReconfigurableComponent
+    if( this->nextConfigurations.size() > 0
+        && ( this->getManagedComponent()->getActivConfiguration()
+             != this->getNextConfiguration() )){
 
 #ifdef VPC_DEBUG
-      std::cerr << "PriorityController> waking up component thread!" << std::endl;
+      std::cerr << "PriorityController> waking up component thread!"
+                << std::endl;
 #endif //VPC_DEBUG
 
       this->getManagedComponent()->wakeUp();

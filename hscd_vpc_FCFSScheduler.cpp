@@ -4,7 +4,10 @@
 
 namespace SystemC_VPC{
 
-  bool FCFSScheduler::getSchedulerTimeSlice(sc_time& time,const  map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
+  bool FCFSScheduler::getSchedulerTimeSlice(
+    sc_time& time,
+    const  map<int,ProcessControlBlock*> &ready_tasks,
+    const  map<int,ProcessControlBlock*> &running_tasks ){
     return false;
   }
   void FCFSScheduler::addedNewTask(ProcessControlBlock *pcb){
@@ -19,7 +22,11 @@ namespace SystemC_VPC{
       }
     }
   }
-  scheduling_decision FCFSScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
+  scheduling_decision FCFSScheduler::schedulingDecision(
+    int& task_to_resign,
+    int& task_to_assign,
+    const  map<int,ProcessControlBlock*> &ready_tasks,
+    const  map<int,ProcessControlBlock*> &running_tasks ){
     if(running_tasks.size()==0){
       if(fcfs_fifo.size()>0){
         //      cerr << "only_assign" << endl;

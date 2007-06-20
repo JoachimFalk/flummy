@@ -21,7 +21,9 @@ namespace SystemC_VPC{
   /**
    * \brief Creates instance of Configuration
    */    
-  Configuration::Configuration(const char* name, const char* loadTime, const char* storeTime) 
+  Configuration::Configuration( const char* name,
+                                const char* loadTime,
+                                const char* storeTime ) 
     : activ(false), stored(false){
       
     strcpy(this->configName,name);
@@ -131,14 +133,15 @@ namespace SystemC_VPC{
       std::map<std::string, AbstractComponent* >::iterator iter;
       
       for(iter = this->component_map_by_name.begin(); 
-        iter != this->component_map_by_name.end(); iter++){
+          iter != this->component_map_by_name.end(); iter++){
   
 #ifdef VPC_DEBUG
-          std::cerr << VPC_YELLOW("Configuration " << this->getName() 
-              << " trying to deallocate component: " << iter->first << " with kill=" << kill) << std::endl;
+        std::cerr << VPC_YELLOW("Configuration " << this->getName() 
+                  << " trying to deallocate component: " << iter->first
+                  << " with kill=" << kill) << std::endl;
 #endif // VPC_DEBUG
   
-          iter->second->deallocate(kill);
+        iter->second->deallocate(kill);
 
       }
       
@@ -160,7 +163,8 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
           std::cerr << VPC_YELLOW("Configuration " << this->getName() 
-              << " trying to allocate component: " << iter->first) << std::endl;
+                    << " trying to allocate component: " << iter->first)
+                    << std::endl;
 #endif // VPC_DEBUG
   
         iter->second->allocate(); 
@@ -187,7 +191,8 @@ namespace SystemC_VPC{
   
 #ifdef VPC_DEBUG
           std::cerr << VPC_YELLOW("Configuration " << this->getName() 
-              << " caculate time to deallocate component: " << iter->first) << std::endl;
+                    << " caculate time to deallocate component: "
+                    << iter->first) << std::endl;
 #endif // VPC_DEBUG
   
           tmp = iter->second->timeToDeallocate();
@@ -216,7 +221,9 @@ namespace SystemC_VPC{
     if(!this->isActiv()){
         
       std::map<std::string, AbstractComponent*>::iterator iter;
-      for(iter = this->component_map_by_name.begin(); iter != this->component_map_by_name.end(); iter++){
+      for(iter = this->component_map_by_name.begin();
+          iter != this->component_map_by_name.end();
+          ++iter){
         tmp = iter->second->timeToAllocate();
         if(tmp > max){
           max = tmp;

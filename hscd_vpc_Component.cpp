@@ -1,4 +1,4 @@
-/*******************************************************************************
+/******************************************************************************
  *                        Copyright 2004
  *                Lehrstuhl fuer Hardware-Software-Codesign
  *                  Universitaet Erlangen-Nuernberg
@@ -6,15 +6,15 @@
  *
  * Title: SystemC-VPC
  * Comment:
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * hscd_vpc_Component.cpp
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Modifications History:
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Notes:
- * -----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * $log$
- ******************************************************************************/
+ *****************************************************************************/
 #include <hscd_vpc_Component.h>
 #include <hscd_vpc_Scheduler.h>
 #include <hscd_vpc_FCFSScheduler.h>
@@ -24,9 +24,6 @@
 #include <hscd_vpc_datatypes.h>
 #include <hscd_vpc_Director.h>
 
-
-//#include <cosupport/systemc_support.hpp>
-
 #include <float.h>
 
 namespace SystemC_VPC{
@@ -35,16 +32,6 @@ namespace SystemC_VPC{
    *
    */
   void Component::schedule_thread(){
-    /////////////////////////////////////
-    // while(1){
-    //  wait(notify_scheduler_thread);
-    //   do{
-    //     wait(2,SC_NS);
-    //     notify(*(events.front()));
-    //     events.pop_front();
-    //   }while(events.size()>0);
-    // }
-    /////////////////////////////////////
     sc_time timeslice;
     sc_time actualRemainingDelay;
     sc_time *overhead = new sc_time( SC_ZERO_TIME );
@@ -54,20 +41,25 @@ namespace SystemC_VPC{
     while(1){
 
       //determine the time slice for next scheduling descission and wait for
-      bool hasTimeSlice= scheduler->getSchedulerTimeSlice(timeslice, readyTasks,runningTasks);
+      bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
+                                                           readyTasks,
+                                                           runningTasks );
       startTime = sc_time_stamp();
       if(!newTaskDuringOverhead && this->isActiv()){ 
         if(runningTasks.size()<=0){                    // no running task
           if(hasTimeSlice){                           
-            wait(timeslice - (*overhead), notify_scheduler_thread | notify_deallocate); 
+            wait( timeslice - (*overhead),
+                  notify_scheduler_thread | notify_deallocate ); 
           }else{
-            wait(notify_scheduler_thread | notify_deallocate);
+            wait( notify_scheduler_thread | notify_deallocate );
           }
         }else{                                        // a task allready runs
-          if(hasTimeSlice && (timeslice - (*overhead)) < actualRemainingDelay){ 
-            wait(timeslice - (*overhead), notify_scheduler_thread | notify_deallocate);
+          if(hasTimeSlice && (timeslice - (*overhead)) < actualRemainingDelay){
+            wait( timeslice - (*overhead),
+                  notify_scheduler_thread | notify_deallocate );
           }else{
-            wait(actualRemainingDelay, notify_scheduler_thread | notify_deallocate);
+            wait( actualRemainingDelay,
+                  notify_scheduler_thread | notify_deallocate );
           }
           sc_time runTime=sc_time_stamp()-startTime;
           assert(runTime.value()>=0);
@@ -76,8 +68,11 @@ namespace SystemC_VPC{
           assert(actualRemainingDelay.value()>=0);
 
 #ifdef VPC_DEBUG
-          std::cerr << VPC_RED("Component " << this->basename() << "> actualRemainingDelay= " << actualRemainingDelay.value()
-              << " for pid=" << actualRunningPID << " at: " << sc_simulation_time()) << std::endl;
+          std::cerr << VPC_RED("Component " << this->basename()
+                    << "> actualRemainingDelay= "
+                    << actualRemainingDelay.value() << " for pid="
+                    << actualRunningPID << " at: " << sc_simulation_time())
+                    << std::endl;
 #endif //VPC_DEBUG
 
           if(actualRemainingDelay.value()==0){
@@ -90,38 +85,44 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
             cerr << this->basename() << " PID: " << actualRunningPID<< " > ";
-            cerr << this->basename() << " removed Task: " << task->getName() << " at: " << sc_simulation_time() << endl;
+            cerr << this->basename() << " removed Task: " << task->getName()
+                 << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
             //notify(*(task->blockEvent));
             scheduler->removedTask(task);
 #ifndef NO_VCD_TRACES
-            if(task->getTraceSignal()!=0) task->getTraceSignal()->value(S_BLOCKED);     
+            if(task->getTraceSignal()!=0)
+              task->getTraceSignal()->value(S_BLOCKED);     
 #endif //NO_VCD_TRACES
             runningTasks.erase(actualRunningPID);
 
-            //Removed: this will erase the task from VPC, but with pipelining support the erasing should occur later 
+            // Removed: this will erase the task from VPC, but with pipelining
+            // support the erasing should occur later 
             //this->notifyParentController(task);
+            
             task->getBlockEvent().dii->notify();
             moveToRemainingPipelineStages(task);
             //wait(SC_ZERO_TIME);
           }else{
 
             // store remainingDela within ProcessControlBlock
-            runningTasks[actualRunningPID]->setRemainingDelay(actualRemainingDelay);
-
+            runningTasks[actualRunningPID]->setRemainingDelay(
+              actualRemainingDelay );
           }
         }
       }else{
         newTaskDuringOverhead=false;
       }
 
-      // before making any scheduling decision check if component is deallocated
+      // before making any scheduling decision:
+      // check if component is deallocated
       // and remain in this state as long as component is deactivated
       while(! this->isActiv()){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED( this->basename()  << " deactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << VPC_RED( this->basename()  << " deactivated at ")
+                  << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
 
         //check if deallocation is with kill flag
@@ -132,8 +133,11 @@ namespace SystemC_VPC{
 #ifndef NO_VCD_TRACES
           this->setTraceSignalReadyTasks(S_SUSPENDED);
 
-          if(this->runningTasks.size() > 0 && runningTasks[actualRunningPID]->getTraceSignal() != NULL){
-            runningTasks[actualRunningPID]->getTraceSignal()->value(S_SUSPENDED);
+          if( this->runningTasks.size() > 0
+              && runningTasks[actualRunningPID]->getTraceSignal() != NULL
+              ){
+            runningTasks[actualRunningPID]->getTraceSignal()
+              ->value(S_SUSPENDED);
           }     
 #endif //NO_VCD_TRACES
 
@@ -148,13 +152,16 @@ namespace SystemC_VPC{
 #ifndef NO_VCD_TRACES
         this->setTraceSignalReadyTasks(S_READY);
 
-        if(this->runningTasks.size() > 0 && runningTasks[actualRunningPID]->getTraceSignal() != NULL){
+        if( this->runningTasks.size() > 0
+            && runningTasks[actualRunningPID]->getTraceSignal() != NULL
+            ){
           runningTasks[actualRunningPID]->getTraceSignal()->value(S_RUNNING);
         }     
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED( this->basename()  << " reactivated at ") << sc_simulation_time() << std::endl;    
+        std::cerr << VPC_RED( this->basename()  << " reactivated at ")
+                  << sc_simulation_time() << std::endl;    
 #endif // VPC_DEBUG
 
       }
@@ -165,14 +172,18 @@ namespace SystemC_VPC{
         newTask=newTasks[0];
         newTasks.pop_front();
 #ifdef VPC_DEBUG
-        cerr << this->basename() << " received new Task: " << newTask->getName() << " at: " << sc_simulation_time() << endl;
+        cerr << this->basename() << " received new Task: "
+             << newTask->getName() << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 #ifndef NO_VCD_TRACES
-        if(newTask->getTraceSignal()!=0) newTask->getTraceSignal()->value(S_READY);     
+        if(newTask->getTraceSignal()!=0)
+          newTask->getTraceSignal()->value(S_READY);     
 #endif //NO_VCD_TRACES
         //insert new task in read list
-        assert(readyTasks.find(newTask->getPID())   == readyTasks.end()   /* A task can call compute only one time! */);
-        assert(runningTasks.find(newTask->getPID()) == runningTasks.end() /* A task can call compute only one time! */);
+        assert( readyTasks.find(newTask->getPID())   == readyTasks.end()
+                /* A task can call compute only one time! */);
+        assert( runningTasks.find(newTask->getPID()) == runningTasks.end()
+                /* A task can call compute only one time! */);
 
         readyTasks[newTask->getPID()]=newTask;
         scheduler->addedNewTask(newTask);
@@ -180,9 +191,11 @@ namespace SystemC_VPC{
 
 
       int taskToResign,taskToAssign;
-      scheduling_decision decision=
-        scheduler->schedulingDecision(taskToResign, taskToAssign, readyTasks, runningTasks);
-
+      scheduling_decision decision =
+        scheduler->schedulingDecision(taskToResign,
+                                      taskToAssign,
+                                      readyTasks,
+                                      runningTasks);
 
       //resign task
       if(decision==RESIGNED || decision==PREEMPT){
@@ -191,7 +204,8 @@ namespace SystemC_VPC{
         actualRunningPID=-1;
         readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
 #ifndef NO_VCD_TRACES
-        if(readyTasks[taskToResign]->getTraceSignal()!=0) readyTasks[taskToResign]->getTraceSignal()->value(S_READY);     
+        if(readyTasks[taskToResign]->getTraceSignal()!=0)
+          readyTasks[taskToResign]->getTraceSignal()->value(S_READY);     
 #endif //NO_VCD_TRACES
       }
 
@@ -205,7 +219,8 @@ namespace SystemC_VPC{
         while( (sc_time_stamp() < timestamp + (*overhead))
             && this->isActiv() ){ 
 
-          wait((timestamp+(*overhead))-sc_time_stamp(), notify_scheduler_thread | notify_deallocate);
+          wait( (timestamp+(*overhead))-sc_time_stamp(),
+                notify_scheduler_thread | notify_deallocate);
 
         }
 
@@ -237,15 +252,18 @@ namespace SystemC_VPC{
         readyTasks.erase(taskToAssign);
         actualRunningPID=taskToAssign;
 #ifdef VPC_DEBUG
-        cerr << "PID: " << taskToAssign;
-        cerr << "> remaining delay for " << runningTasks[taskToAssign]->getName();
+        cerr << "PID: " << taskToAssign << "> remaining delay for "
+             << runningTasks[taskToAssign]->getName();
 #endif // VPCDEBUG
-        actualRemainingDelay=sc_time(runningTasks[taskToAssign]->getRemainingDelay());
+        actualRemainingDelay 
+          = sc_time(runningTasks[taskToAssign]->getRemainingDelay());
 #ifdef VPC_DEBUG
-        cerr<< " is " << runningTasks[taskToAssign]->getRemainingDelay() << endl;
+        cerr << " is " << runningTasks[taskToAssign]->getRemainingDelay()
+             << endl;
 #endif // VPCDEBUG
 #ifndef NO_VCD_TRACES
-        if(runningTasks[taskToAssign]->getTraceSignal()!=0) runningTasks[taskToAssign]->getTraceSignal()->value(S_RUNNING);     
+        if(runningTasks[taskToAssign]->getTraceSignal()!=0)
+          runningTasks[taskToAssign]->getTraceSignal()->value(S_RUNNING);     
 #endif //NO_VCD_TRACES
       }
     }
@@ -263,14 +281,25 @@ namespace SystemC_VPC{
    *
    */
   void  Component::setScheduler(const char *schedulername){
-    if(0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN)) || 0==strncmp(schedulername,STR_RR,strlen(STR_RR))){
+    if( 0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN))
+        || 0==strncmp(schedulername,STR_RR,strlen(STR_RR)) ){
       scheduler=new RoundRobinScheduler((const char*)schedulername);
-    }else if(0==strncmp(schedulername,STR_PRIORITYSCHEDULER,strlen(STR_PRIORITYSCHEDULER)) || 0==strncmp(schedulername,STR_PS,strlen(STR_PS))){
+
+    }else if( 0==strncmp(schedulername,
+                         STR_PRIORITYSCHEDULER,strlen(STR_PRIORITYSCHEDULER))
+              || 0==strncmp(schedulername,STR_PS,strlen(STR_PS)) ){
       scheduler=new PriorityScheduler((const char*)schedulername);
-    }else if(0==strncmp(schedulername,STR_RATEMONOTONIC,strlen(STR_RATEMONOTONIC)) || 0==strncmp(schedulername,STR_RM,strlen(STR_RM))){
+
+    }else if( 0==strncmp(schedulername,STR_RATEMONOTONIC,
+                         strlen(STR_RATEMONOTONIC))
+              || 0==strncmp(schedulername,STR_RM,strlen(STR_RM))){
       scheduler=new RateMonotonicScheduler((const char*)schedulername);
-    }else if(0==strncmp(schedulername,STR_FIRSTCOMEFIRSTSERVE,strlen(STR_FIRSTCOMEFIRSTSERVE)) || 0==strncmp(schedulername,STR_FCFS,strlen(STR_FCFS))){
+
+    }else if( 0==strncmp(schedulername,STR_FIRSTCOMEFIRSTSERVE,
+                         strlen(STR_FIRSTCOMEFIRSTSERVE))
+              || 0==strncmp(schedulername,STR_FCFS,strlen(STR_FCFS))){
       scheduler=new FCFSScheduler();
+
     }else{
       //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVE << endl;
       scheduler=new FCFSScheduler();
@@ -280,55 +309,84 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::_compute( const char *name, const char *funcname, VPC_Event *end) { 
-    ProcessControlBlock  *actualTask = Director::getInstance().getProcessControlBlock(name);
+  void Component::_compute( const char *name,
+                            const char *funcname,
+                            VPC_Event *end) { 
+    ProcessControlBlock  *actualTask =
+      Director::getInstance().getProcessControlBlock(name);
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << VPC_RED("Component::compute( ") <<VPC_WHITE(actualTask->getName())<<VPC_RED(" , ")<<VPC_WHITE(actualTask->getFuncName())<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl
+    cerr << VPC_RED("Component::compute( ") << VPC_WHITE(actualTask->getName())
+         << VPC_RED(" , ") << VPC_WHITE(actualTask->getFuncName()) 
+         << VPC_RED(" ) at time: " << sc_simulation_time()) << endl
       ;
 #endif
 
 #ifndef NO_VCD_TRACES
     Tracing * trace_signal;
     if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string, Tracing* >::iterator iter = trace_map_by_name.find(actualTask->getName());
+      map<string, Tracing* >::iterator iter =
+        trace_map_by_name.find(actualTask->getName());
       trace_signal=(iter->second);
     }
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
     if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << VPC_RED("VPC_LOGICAL_ERROR> ") << VPC_YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<VPC_YELLOW(")!")
-        << endl;
+      cerr << VPC_RED("VPC_LOGICAL_ERROR> ")
+           << VPC_YELLOW("having \"functionDelays\" in general,"
+                         " but no delay for this function (")
+           << actualTask->getFuncName() <<VPC_YELLOW(")!") << endl;
 
-    std::cerr << "Component> Check if special delay exist for "<< actualTask->getFuncName() << " on " << this->basename() << ": " << (actualTask->hasDelay(this->basename(), actualTask->getFuncName())) << std::endl;
+    std::cerr << "Component> Check if special delay exist for "
+              << actualTask->getFuncName() << " on " << this->basename()
+              << ": " << (actualTask->hasDelay(this->basename(),
+                                               actualTask->getFuncName()))
+              << std::endl;
 #endif // VPC_DEBUG
 
     // reset the execution delay
     if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
       // function specific delay
-      actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
-      actualTask->setDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
-      actualTask->setLatency(actualTask->getFuncLatency(this->basename(), actualTask->getFuncName()));
+      actualTask->
+        setRemainingDelay(actualTask->getFuncDelay(this->basename(),
+                                                   actualTask->getFuncName()));
+      actualTask->
+        setDelay(actualTask->getFuncDelay(this->basename(),
+                                          actualTask->getFuncName()));
+      actualTask->
+        setLatency(actualTask->getFuncLatency(this->basename(),
+                                              actualTask->getFuncName()));
 #ifdef VPC_DEBUG
-      cerr << "Using " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
-      cerr << "And using " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "Using " << actualTask->getRemainingDelay()
+           << " as delay for function " << actualTask->getFuncName() << "!"
+           << endl;
+      cerr << "And using " << actualTask->getLatency()
+           << " as latency for function " << actualTask->getFuncName() << "!"
+           << endl;
 #endif // VPC_DEBUG
     } else {
       // general delay for actor
-      actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->
+        setRemainingDelay(actualTask->getFuncDelay(this->basename()));
+
       actualTask->setDelay(actualTask->getFuncDelay(this->basename()));
       actualTask->setLatency(actualTask->getFuncLatency(this->basename()));
 #ifdef VPC_DEBUG
-      cerr << "Using standard delay " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
-      cerr << "Using standard latency " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "Using standard delay " << actualTask->getRemainingDelay()
+           << " as delay for function " << actualTask->getFuncName() << "!"
+           << endl;
+      cerr << "Using standard latency " << actualTask->getLatency()
+           << " as latency for function " << actualTask->getFuncName() << "!"
+           << endl;
 #endif // VPC_DEBUG
     }
 
 
     if( actualTask->getBlockEvent().dii == NULL ){
-      // active mode -> returns if simulated delay time has expired (blocking compute call)
+      // active mode -> returns if simulated delay time has expired
+      // (blocking compute call)
       actualTask->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
       compute(actualTask);
       CoSupport::SystemC::wait(*(actualTask->getBlockEvent().dii));
@@ -350,7 +408,8 @@ namespace SystemC_VPC{
   void Component::_compute( const char *name, VPC_Event *end) { 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << VPC_RED("Component::compute( ") <<VPC_WHITE(name)<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << VPC_RED("Component::compute( ") << VPC_WHITE(name)
+         << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
     _compute(name,"",end);
@@ -412,42 +471,65 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cout << flush;
-    cerr << VPC_RED("Component::compute( ") <<VPC_WHITE(actualTask->getName())<<VPC_RED(" , ")<<VPC_WHITE(actualTask->getFuncName())<<VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
+    cerr << VPC_RED("Component::compute( ") << VPC_WHITE(actualTask->getName())
+         << VPC_RED(" , ") << VPC_WHITE(actualTask->getFuncName())
+         << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
 #ifndef NO_VCD_TRACES
     Tracing *trace_signal;
     if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string,Tracing* >::iterator iter = trace_map_by_name.find(actualTask->getName());
+      map<string,Tracing* >::iterator iter
+        = trace_map_by_name.find(actualTask->getName());
       trace_signal=(iter->second);
     }
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
     if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << VPC_RED("VPC_LOGICAL_ERROR> ") << VPC_YELLOW("having \"functionDelays\" in general, but no delay for this function (")<< actualTask->getFuncName() <<VPC_YELLOW(")!") << endl;
+      cerr << VPC_RED("VPC_LOGICAL_ERROR> ")
+           << VPC_YELLOW("having \"functionDelays\" in general,"
+                         " but no delay for this function (")
+           << actualTask->getFuncName() <<VPC_YELLOW(")!") << endl;
 
-    std::cerr << "Component> Check if special delay exist for "<< actualTask->getFuncName() << " on " << this->basename() << ": " << (actualTask->hasDelay(basename())) << std::endl;
+    std::cerr << "Component> Check if special delay exist for "
+              << actualTask->getFuncName() << " on " << this->basename()
+              << ": " << (actualTask->hasDelay(basename())) << std::endl;
 #endif // VPC_DEBUG
 
     // reset the execution delay
     if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
       // function specific delay
-      actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
-      actualTask->setDelay(actualTask->getFuncDelay(this->basename(), actualTask->getFuncName()));
-      actualTask->setLatency(actualTask->getFuncLatency(this->basename(), actualTask->getFuncName()));
+      actualTask->
+        setRemainingDelay(actualTask->getFuncDelay(this->basename(),
+                                                   actualTask->getFuncName()));
+      actualTask->
+        setDelay(actualTask->getFuncDelay(this->basename(),
+                                          actualTask->getFuncName()));
+      actualTask->
+        setLatency(actualTask->getFuncLatency(this->basename(),
+                                              actualTask->getFuncName()));
 #ifdef VPC_DEBUG
-      cerr << "Using " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
-      cerr << "And " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "Using " << actualTask->getRemainingDelay()
+           << " as delay for function " << actualTask->getFuncName() << "!"
+           << endl;
+      cerr << "And " << actualTask->getLatency() << " as latency for function "
+           << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG
     } else {
       // general delay for actor
-      actualTask->setRemainingDelay(actualTask->getFuncDelay(this->basename()));
+      actualTask->
+        setRemainingDelay(actualTask->getFuncDelay(this->basename()));
+
       actualTask->setDelay(actualTask->getFuncDelay(this->basename()));
       actualTask->setLatency(actualTask->getFuncLatency(this->basename()));
 #ifdef VPC_DEBUG
-      cerr << "Using standard delay " << actualTask->getRemainingDelay() << " as delay for function " << actualTask->getFuncName() << "!" << endl;
-      cerr << "Using standard latency " << actualTask->getLatency() << " as latency for function " << actualTask->getFuncName() << "!" << endl;
+      cerr << "Using standard delay " << actualTask->getRemainingDelay()
+           << " as delay for function " << actualTask->getFuncName() << "!"
+           << endl;
+      cerr << "Using standard latency " << actualTask->getLatency()
+           << " as latency for function " << actualTask->getFuncName() << "!"
+           << endl;
 #endif // VPC_DEBUG  
     }
 
@@ -458,7 +540,8 @@ namespace SystemC_VPC{
 
 #ifndef NO_VCD_TRACES
     if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string, Tracing* >::iterator iter = trace_map_by_name.find(actualTask->getName());
+      map<string, Tracing* >::iterator iter
+        = trace_map_by_name.find(actualTask->getName());
       actualTask->setTraceSignal(iter->second);
     }
 #endif //NO_VCD_TRACES
@@ -489,14 +572,17 @@ namespace SystemC_VPC{
 
     // kill all running tasks
     std::map<int,ProcessControlBlock* >::iterator iter;
-    for(iter = this->runningTasks.begin(); iter != this->runningTasks.end(); iter++){
+    for(iter = this->runningTasks.begin();
+        iter != this->runningTasks.end();
+        ++iter){
 
       iter->second->setState(activation_state(aborted));
 
 #ifdef VPC_DEBUG
       cerr << this->basename() << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
-        << " activation state set to "<< iter->second->getState() << " at: " << sc_simulation_time() << endl;
+           << " activation state set to "<< iter->second->getState() << " at: "
+           << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
       scheduler->removedTask(iter->second);
@@ -507,7 +593,8 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
       cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
-      cerr << this->basename() << " killed Task: " << iter->second->getName() << " at: " << sc_simulation_time() << endl;
+      cerr << this->basename() << " killed Task: " << iter->second->getName()
+           << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
 #ifndef NO_VCD_TRACES
@@ -523,13 +610,16 @@ namespace SystemC_VPC{
     this->runningTasks.clear();
 
     // kill all ready tasks
-    for(iter = this->readyTasks.begin(); iter != this->readyTasks.end(); iter++){
+    for(iter = this->readyTasks.begin();
+        iter != this->readyTasks.end();
+        ++iter){
       iter->second->setState(activation_state(aborted));
 
 #ifdef VPC_DEBUG
       cerr << this->basename() << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
-        << " activation state set to "<< iter->second->getState() << " at: " << sc_simulation_time() << endl;
+           << " activation state set to "<< iter->second->getState() << " at: "
+           << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
       scheduler->removedTask(iter->second);
@@ -540,7 +630,8 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
       cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
-      cerr << this->basename() << " killed Task: " << iter->second->getName() << " at: " << sc_simulation_time() << endl;
+      cerr << this->basename() << " killed Task: " << iter->second->getName()
+           << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
 #ifndef NO_VCD_TRACES
@@ -565,7 +656,8 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
       cerr << this->basename() << " > ";
       cerr << this->basename() << " killed Task: " << newTask->getName()
-        << " activation state set to "<< newTask->getState() << " at: " << sc_simulation_time() << endl;
+           << " activation state set to "<< newTask->getState() << " at: "
+           << sc_simulation_time() << endl;
 #endif // VPCDEBUG
 
       //reset actualTask
@@ -587,7 +679,9 @@ namespace SystemC_VPC{
   void Component::setTraceSignalReadyTasks(trace_value value){
 
     std::map<int, ProcessControlBlock* >::iterator iter;
-    for(iter = this->readyTasks.begin(); iter != this->readyTasks.end(); iter++){
+    for(iter = this->readyTasks.begin();
+        iter != this->readyTasks.end();
+        ++iter){
 
       if(iter->second->getTraceSignal() !=0 ){
         iter->second->getTraceSignal()->value(value);
@@ -612,13 +706,16 @@ namespace SystemC_VPC{
       }else{
         timePcbPair front = pqueue.top();
 
-        //cerr << "Pop from list: " << front.time << " : " << front.pcb->getBlockEvent().latency << endl;
+        //cerr << "Pop from list: " << front.time << " : " 
+        //<< front.pcb->getBlockEvent().latency << endl;
         sc_time waitFor	= front.time-sc_time_stamp();
         assert(front.time >= sc_time_stamp());
-        //cerr << "Pipeline> Wait till " << front.time << " (" << waitFor << ") at: " << sc_time_stamp() << endl;
+        //cerr << "Pipeline> Wait till " << front.time
+        //<< " (" << waitFor << ") at: " << sc_time_stamp() << endl;
         wait( waitFor, remainingPipelineStages_WakeUp );
 
-        //DISABLED: if a task completes at same time (but not necessarily in same delta cycle)
+        //DISABLED: if a task completes at same time
+        // (but not necessarily in same delta cycle)
         //          then this task is completed nonetheless
         //if( !this->isActiv() ) continue;
 
@@ -628,8 +725,13 @@ namespace SystemC_VPC{
           //cerr << "------------------------------" << endl;
         }else{
           assert(rest == SC_ZERO_TIME);
-          //cerr << "Ready! releasing task (" <<  front.time <<") at: " << sc_time_stamp() << endl;
-          this->notifyParentController(front.pcb); // Latenzy over -> remove Task
+          //cerr << "Ready! releasing task (" <<  front.time <<") at: "
+          //<< sc_time_stamp() << endl;
+
+
+          // Latenzy over -> remove Task
+          this->notifyParentController(front.pcb);
+
           //wait(SC_ZERO_TIME);
           pqueue.pop();
         }
@@ -654,7 +756,8 @@ namespace SystemC_VPC{
     timePcbPair pair;
     pair.time = end;
     pair.pcb  = task;
-    //std::cerr << "Rest of pipeline added: " << task->getName() << " (EndTime: " << pair.time << ") " << std::endl;
+    //std::cerr << "Rest of pipeline added: " << task->getName()
+    //<< " (EndTime: " << pair.time << ") " << std::endl;
     pqueue.push(pair);
     remainingPipelineStages_WakeUp.notify();
   }
@@ -671,13 +774,14 @@ namespace SystemC_VPC{
         top.pcb->setState(activation_state(aborted));
         scheduler->removedTask(top.pcb);
 #ifndef NO_VCD_TRACES
-        if(top.pcb->getTraceSignal()!=0) top.pcb->getTraceSignal()->value(S_KILLED);
+        if(top.pcb->getTraceSignal()!=0)
+          top.pcb->getTraceSignal()->value(S_KILLED);
 #endif //NO_VCD_TRACES
         this->parentControlUnit->signalProcessEvent(top.pcb);
 
         pqueue.pop();
       }
-      //pqueue = priority_queue<timePcbPair, vector<timePcbPair>,timeCompare>();
+
       assert(pqueue.empty());
     }else{
       //making absolute timing to relative timings (deduct actual time stamp)

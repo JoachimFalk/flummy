@@ -6,16 +6,20 @@
 namespace SystemC_VPC{
   RateMonotonicScheduler::RateMonotonicScheduler(const char *schedulername){
 
-    priority_queue<p_queue_entry,vector<p_queue_entry>,rm_queue_compare> pqueue(comp);
+    priority_queue<p_queue_entry,vector<p_queue_entry>,rm_queue_compare>
+      pqueue(comp);
 
     order_counter=0;
 
     char rest[VPC_MAX_STRING_LENGTH];
     int sublength;
     char *secondindex;
-    char *firstindex=strchr(schedulername,':');    //':' finden -> ':' trennt key-value Paare 
+    //':' finden -> ':' trennt key-value Paare 
+    char *firstindex=strchr(schedulername,':');
     while(firstindex!=NULL){
-      secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+
+      //':' überspringen und nächste ':' finden
+      secondindex=strchr(firstindex+1,':');
       if(secondindex!=NULL)
   sublength=secondindex-firstindex;          //Länge bestimmen
       else
@@ -24,8 +28,8 @@ namespace SystemC_VPC{
       rest[sublength-1]='\0';
       firstindex=secondindex;                     
     
-    
-      char *key, *value;               // key und value trennen und Property setzen
+      // key und value trennen und Property setzen
+      char *key, *value;
       value=strstr(rest,"-");
       if(value!=NULL){
   value[0]='\0';
@@ -40,7 +44,11 @@ namespace SystemC_VPC{
   void RateMonotonicScheduler::setProperty(char* key, char* value){
   }
 
-  bool RateMonotonicScheduler::getSchedulerTimeSlice(sc_time& time,const map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
+  bool RateMonotonicScheduler::getSchedulerTimeSlice(
+    sc_time& time,
+    const map<int,ProcessControlBlock*> &ready_tasks,
+    const  map<int,ProcessControlBlock*> &running_tasks)
+  {
      return false;
   }
   /**
@@ -59,33 +67,42 @@ namespace SystemC_VPC{
   /**
    *
    */
-   scheduling_decision RateMonotonicScheduler::schedulingDecision(int& task_to_resign, int& task_to_assign,const  map<int,ProcessControlBlock*> &ready_tasks,const  map<int,ProcessControlBlock*> &running_tasks){
-     scheduling_decision ret_decision=ONLY_ASSIGN;
-     if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
-     p_queue_entry prior_ready=pqueue.top();  // höchste priorität der ready tasks
-     double d_prior_ready=prior_ready.pcb->getPriority();  // wert der priorität
-     task_to_assign=prior_ready.pcb->getPID();
+  scheduling_decision RateMonotonicScheduler::schedulingDecision(
+    int& task_to_resign,
+    int& task_to_assign,
+    const  map<int,ProcessControlBlock*> &ready_tasks,
+    const  map<int,ProcessControlBlock*> &running_tasks)
+  {
+    scheduling_decision ret_decision=ONLY_ASSIGN;
+    if(pqueue.size()<=0) return NOCHANGE;  // kein neuer -> nichts tun
+    p_queue_entry prior_ready=pqueue.top();// höchste priorität der ready tasks
+
+    // wert der priorität
+    double d_prior_ready=prior_ready.pcb->getPriority();
+    task_to_assign=prior_ready.pcb->getPID();
 
 
-     if(running_tasks.size()!=0){  // läuft noch einer ?
-       map<int,ProcessControlBlock*>::const_iterator iter;
-       iter=running_tasks.begin();
-       ProcessControlBlock *pcb=iter->second;
-       if(pcb->getPriority() <= d_prior_ready){             //laufender mit höherer oder gleicher priorität ->
-         ret_decision=NOCHANGE;                       //nicht verdrängen
-       }else{
-         ret_decision=PREEMPT;                        //verdrängen
-         task_to_resign=pcb->getPID(); 
-         pqueue.pop();
-         p_queue_entry pqe={0,pcb};
-         pqueue.push(pqe);
-       }
-     }else{
-       pqueue.pop();
-       ret_decision=ONLY_ASSIGN;  
-     }
+    if(running_tasks.size()!=0){  // läuft noch einer ?
+      map<int,ProcessControlBlock*>::const_iterator iter;
+      iter=running_tasks.begin();
+      ProcessControlBlock *pcb=iter->second;
 
-
-     return ret_decision;
-   }
+      //laufender mit höherer oder gleicher priorität ->
+      if(pcb->getPriority() <= d_prior_ready){
+        ret_decision=NOCHANGE;                       //nicht verdrängen
+      }else{
+        ret_decision=PREEMPT;                        //verdrängen
+        task_to_resign=pcb->getPID(); 
+        pqueue.pop();
+        p_queue_entry pqe={0,pcb};
+        pqueue.push(pqe);
+      }
+    }else{
+      pqueue.pop();
+      ret_decision=ONLY_ASSIGN;  
+    }
+    
+    
+    return ret_decision;
+  }
 }
