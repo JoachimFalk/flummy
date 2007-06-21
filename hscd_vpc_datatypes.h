@@ -142,13 +142,5 @@ typedef CoSupport::SystemC::Event         VPC_Event;
 
   };
 
-
-  enum action_command { ASSIGN,RESIGN,BLOCK,READY};
-
-  typedef struct{
-    int target_pid;
-    action_command command;
-  }action_struct;
-
 } // namespace SystemC_VPC
 #endif
