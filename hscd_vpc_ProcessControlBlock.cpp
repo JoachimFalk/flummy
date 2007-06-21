@@ -62,7 +62,7 @@ namespace SystemC_VPC{
     return this->base_latency;
   }
 
-  ProcessControlBlock::DelayMapper::~DelayMapper(){
+  DelayMapper::~DelayMapper(){
 
     std::map<std::string, ComponentDelay*>::iterator iter;
     for(iter = this->compDelays.begin();
@@ -74,10 +74,18 @@ namespace SystemC_VPC{
   
   }
 
-  void ProcessControlBlock::DelayMapper::addFuncDelay(std::string comp,
+  void DelayMapper::addFuncDelay(std::string comp,
                                                       const char* funcname,
                                                       sc_time delay){
     
+#ifdef VPC_DEBUG
+    std::cerr << "DelayMapper> Adding Function Delay for " << comp;
+    if(funcname != NULL){
+      std::cerr << " function " << funcname;
+    }
+    std::cerr << " delay " << delay << std::endl;
+#endif //VPC_DEBUG
+
     std::map<std::string, ComponentDelay*>::iterator iter;
     iter = this->compDelays.find(comp);
     if(iter == this->compDelays.end()){
@@ -88,24 +96,40 @@ namespace SystemC_VPC{
 
   }
 
-  sc_time ProcessControlBlock::DelayMapper::getFuncDelay(
-    std::string comp,
-    const char* funcname) const
+  sc_time DelayMapper::getFuncDelay( std::string comp,
+                                     const char* funcname ) const
   {
+    sc_time ret = SC_ZERO_TIME;
+
     std::map<std::string, ComponentDelay* >::const_iterator iter;
     iter = this->compDelays.find(comp);
     if(iter != compDelays.end()){
-      return iter->second->getDelay(funcname);
-    }else{
-      return SC_ZERO_TIME;
+      ret = iter->second->getDelay(funcname);
     }
 
+#ifdef VPC_DEBUG
+    std::cerr << "DelayMapper> Delay for " << comp;
+    if(funcname != NULL){
+      std::cerr << "->" << funcname;
+    }
+    std::cerr << " is " << ret << std::endl;
+#endif //VPC_DEBUG 
+    
+    return ret;
   }
 
-  void ProcessControlBlock::DelayMapper::addFuncLatency(std::string comp,
-                                                    const char* funcname,
-                                                    sc_time latency){
+  void DelayMapper::addFuncLatency(std::string comp,
+                                   const char* funcname,
+                                   sc_time latency){
     
+#ifdef VPC_DEBUG
+    std::cerr << "ProcessControlBlock> Adding Function Latency for " << comp;
+    if(funcname != NULL){
+      std::cerr << " function " << funcname;
+    }
+    std::cerr << " delay " << delay << std::endl;
+#endif //VPC_DEBUG
+
     std::map<std::string, ComponentDelay*>::iterator iter;
     iter = this->compDelays.find(comp);
     if(iter == this->compDelays.end()){
@@ -116,18 +140,26 @@ namespace SystemC_VPC{
 
   }
 
-  sc_time ProcessControlBlock::DelayMapper::getFuncLatency(
-    std::string comp,
-    const char* funcname) const
+  sc_time DelayMapper::getFuncLatency( std::string comp,
+                                       const char* funcname) const
   {
+    sc_time ret = SC_ZERO_TIME;
+
     std::map<std::string, ComponentDelay* >::const_iterator iter;
     iter = this->compDelays.find(comp);
     if(iter != compDelays.end()){
-      return iter->second->getLatency(funcname);
-    }else{
-      return SC_ZERO_TIME;
+      ret = iter->second->getLatency(funcname);
     }
 
+#ifdef VPC_DEBUG
+    std::cerr << "DelayMapper> Latency for " << comp;
+    if(funcname != NULL){
+      std::cerr << "->" << funcname;
+    }
+    std::cerr << " is " << ret << std::endl;
+#endif //VPC_DEBUG 
+
+    return ret;
   }
 
 
@@ -159,7 +191,6 @@ namespace SystemC_VPC{
   ProcessControlBlock::~ProcessControlBlock(){
     if(*(this->copyCount) == 0){
       delete this->activationCount;
-      delete this->dmapper;
       delete this->copyCount; 
     }else{
       (*(this->copyCount))--;
@@ -184,7 +215,6 @@ namespace SystemC_VPC{
     this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
-    this->dmapper = pcb.dmapper;
 
     // remember amount of copies for later clean up 
     this->copyCount = pcb.copyCount;
@@ -207,7 +237,6 @@ namespace SystemC_VPC{
 
 
     this->activationCount = new ActivationCounter();
-    this->dmapper = new DelayMapper();
 
     this->copyCount = new int(0);
   }
@@ -326,66 +355,6 @@ namespace SystemC_VPC{
 
   Tracing* ProcessControlBlock::getTraceSignal(){
     return this->traceSignal;
-  }
-
-  void ProcessControlBlock::addFuncDelay(std::string comp,
-                                         const char* funcname,
-                                         sc_time delay){
-
-#ifdef VPC_DEBUG
-    std::cerr << "ProcessControlBlock> Adding Function Delay for " << comp;
-    if(funcname != NULL){
-      std::cerr << " function " << funcname;
-    }
-    std::cerr << " delay " << delay << std::endl;
-#endif //VPC_DEBUG
-    
-    this->dmapper->addFuncDelay(comp, funcname, delay);
-  }
-
-  sc_time ProcessControlBlock::getFuncDelay(std::string comp,
-                                            const char* funcname) const{
-
-#ifdef VPC_DEBUG
-    std::cerr << "ProcessControlBlock> Delay for " << comp;
-    if(funcname != NULL){
-      std::cerr << "->" << funcname;
-    }
-    std::cerr << " is " << this->dmapper->getFuncDelay(comp, funcname)
-              << std::endl;
-#endif //VPC_DEBUG 
-    
-    return this->dmapper->getFuncDelay(comp, funcname);
-  }
-
-  void ProcessControlBlock::addFuncLatency(std::string comp,
-                                           const char* funcname,
-                                           sc_time delay){
-
-#ifdef VPC_DEBUG
-    std::cerr << "ProcessControlBlock> Adding Function Latency for " << comp;
-    if(funcname != NULL){
-      std::cerr << " function " << funcname;
-    }
-    std::cerr << " delay " << delay << std::endl;
-#endif //VPC_DEBUG
-    
-    this->dmapper->addFuncLatency(comp, funcname, delay);
-  }
-
-  sc_time ProcessControlBlock::getFuncLatency(std::string comp,
-                                              const char* funcname) const{
-
-#ifdef VPC_DEBUG
-    std::cerr << "ProcessControlBlock> Latency for " << comp;
-    if(funcname != NULL){
-      std::cerr << "->" << funcname;
-    }
-    std::cerr << " is " << this->dmapper->getFuncLatency(comp, funcname)
-              << std::endl;
-#endif //VPC_DEBUG 
-    
-    return this->dmapper->getFuncLatency(comp, funcname);
   }
 
 }
