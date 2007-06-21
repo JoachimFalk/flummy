@@ -172,14 +172,6 @@ namespace SystemC_VPC {
       sc_time getFuncDelay(std::string comp, const char* funcname=NULL) const;
 
       /**
-       * \brief Test if an delay is specified for a given component
-       * \param comp specifies the associated component
-       * \param funcname refers to an optional function name
-       * \return true if a delay is registered else false
-       */
-      bool hasDelay(std::string comp, const char* funcname=NULL) const;
-
-      /**
        * \brief Used to register component specific latency to PCB instance
        * \param comp specifies associated component
        * \param funcname refers to an function name or may be null for common
@@ -198,14 +190,6 @@ namespace SystemC_VPC {
       sc_time getFuncLatency( std::string comp,
                               const char* funcname=NULL) const;
 
-      /**
-       * \brief Test if a latency is specified for a given component
-       * \param comp specifies the associated component
-       * \param funcname refers to an optional function name
-       * \return true if a delay is registered else false
-       */
-      bool hasLatency(std::string comp, const char* funcname=NULL) const;
- 
     private:
       
       /**
@@ -239,15 +223,7 @@ namespace SystemC_VPC {
            * component of the process. If no function name is given or there is
            * no corresponding entry registered the default delay is returned.
            */
-          sc_time getDelay(const char* funcname=NULL);
-
-          /**
-           * \brief Tests if an specific function delay exisits
-           * \param funcname specifies name of the requested function delay
-           * \returns true if a specific function delay has been found
-           * else false
-           */
-          bool hasDelay(const char* funcname);
+          sc_time getDelay(const char* funcname=NULL) const;
 
           /**
            * \brief Adds a new function latency to the instance
@@ -265,15 +241,7 @@ namespace SystemC_VPC {
            * or there is no corresponding entry registered the default latency
            * is returned.
            */
-          sc_time getLatency(const char* funcname=NULL);
-
-          /**
-           * \brief Tests if an specific function latency exisits
-           * \param funcname specifies name of the requested function latency
-           * \returns true if a specific function latency has been found
-           * else false
-           */
-          bool hasLatency(const char* funcname);
+          sc_time getLatency(const char* funcname=NULL) const;
 
         private:
          
@@ -308,7 +276,9 @@ namespace SystemC_VPC {
          * \param funcname represents the function name
          * \param delay is the given function delay
          */
-        void addDelay(std::string comp, const char* funcname, sc_time delay);
+        void addFuncDelay(std::string comp,
+                          const char* funcname,
+                          sc_time delay);
 
         /**
          * \brief Used to access the delay
@@ -318,16 +288,8 @@ namespace SystemC_VPC {
          *  function name.
          * If there is no value found 0 is returned as default.
          */
-        sc_time getDelay(std::string comp, const char* funcname=NULL);
-        
-        /**
-         * \brief Test if delay for an given component and optional given
-         * function exists
-         * \param comp specifies the component
-         * \param funcname refers to the optional function name
-         * \return true if the requested delay exists else false
-         */
-        bool hasDelay(std::string comp, const char* funcname=NULL);
+        sc_time getFuncDelay(std::string comp,
+                             const char* funcname=NULL) const;
         
         /**
          * \brief Registers special function latency to the mapping instance
@@ -339,8 +301,9 @@ namespace SystemC_VPC {
          * \param funcname represents the function name
          * \param latency is the given function latency
          */
-        void addLatency( std::string comp,
-                         const char* funcname, sc_time latency );
+        void addFuncLatency( std::string comp,
+                             const char* funcname,
+                             sc_time latency );
 
         /**
          * \brief Used to access the latency
@@ -350,16 +313,8 @@ namespace SystemC_VPC {
          * function name.
          * If there is no value found 0 is returned as default.
          */
-        sc_time getLatency(std::string comp, const char* funcname=NULL);
-        
-        /**
-         * \brief Test if latency for an given component and optional given
-         * function exists
-         * \param comp specifies the component
-         * \param funcname refers to the optional function name
-         * \return true if the requested latency exists else false
-         */
-        bool hasLatency(std::string comp, const char* funcname=NULL);
+        sc_time getFuncLatency(std::string comp,
+                               const char* funcname=NULL) const;
         
       private:
         /*

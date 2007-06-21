@@ -332,58 +332,25 @@ namespace SystemC_VPC{
     }
 #endif //NO_VCD_TRACES
 
-#ifdef VPC_DEBUG
-    if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << VPC_RED("VPC_LOGICAL_ERROR> ")
-           << VPC_YELLOW("having \"functionDelays\" in general,"
-                         " but no delay for this function (")
-           << actualTask->getFuncName() <<VPC_YELLOW(")!") << endl;
-
-    std::cerr << "Component> Check if special delay exist for "
-              << actualTask->getFuncName() << " on " << this->basename()
-              << ": " << (actualTask->hasDelay(this->basename(),
-                                               actualTask->getFuncName()))
-              << std::endl;
-#endif // VPC_DEBUG
-
     // reset the execution delay
-    if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
-      // function specific delay
-      actualTask->
-        setRemainingDelay(actualTask->getFuncDelay(this->basename(),
-                                                   actualTask->getFuncName()));
-      actualTask->
-        setDelay(actualTask->getFuncDelay(this->basename(),
-                                          actualTask->getFuncName()));
-      actualTask->
-        setLatency(actualTask->getFuncLatency(this->basename(),
-                                              actualTask->getFuncName()));
+    actualTask->
+      setRemainingDelay(actualTask->getFuncDelay(this->basename(),
+                                                 actualTask->getFuncName()));
+    actualTask->
+      setDelay(actualTask->getFuncDelay(this->basename(),
+                                        actualTask->getFuncName()));
+    actualTask->
+      setLatency(actualTask->getFuncLatency(this->basename(),
+                                            actualTask->getFuncName()));
 #ifdef VPC_DEBUG
-      cerr << "Using " << actualTask->getRemainingDelay()
-           << " as delay for function " << actualTask->getFuncName() << "!"
-           << endl;
-      cerr << "And using " << actualTask->getLatency()
-           << " as latency for function " << actualTask->getFuncName() << "!"
-           << endl;
+    cerr << "Using " << actualTask->getRemainingDelay()
+         << " as delay for function " << actualTask->getFuncName() << "!"
+         << endl;
+    cerr << "And using " << actualTask->getLatency()
+         << " as latency for function " << actualTask->getFuncName() << "!"
+         << endl;
 #endif // VPC_DEBUG
-    } else {
-      // general delay for actor
-      actualTask->
-        setRemainingDelay(actualTask->getFuncDelay(this->basename()));
-
-      actualTask->setDelay(actualTask->getFuncDelay(this->basename()));
-      actualTask->setLatency(actualTask->getFuncLatency(this->basename()));
-#ifdef VPC_DEBUG
-      cerr << "Using standard delay " << actualTask->getRemainingDelay()
-           << " as delay for function " << actualTask->getFuncName() << "!"
-           << endl;
-      cerr << "Using standard latency " << actualTask->getLatency()
-           << " as latency for function " << actualTask->getFuncName() << "!"
-           << endl;
-#endif // VPC_DEBUG
-    }
-
-
+    
     if( actualTask->getBlockEvent().dii == NULL ){
       // active mode -> returns if simulated delay time has expired
       // (blocking compute call)
@@ -485,54 +452,24 @@ namespace SystemC_VPC{
     }
 #endif //NO_VCD_TRACES
 
-#ifdef VPC_DEBUG
-    if(!actualTask->hasDelay(this->basename(), actualTask->getFuncName()))
-      cerr << VPC_RED("VPC_LOGICAL_ERROR> ")
-           << VPC_YELLOW("having \"functionDelays\" in general,"
-                         " but no delay for this function (")
-           << actualTask->getFuncName() <<VPC_YELLOW(")!") << endl;
-
-    std::cerr << "Component> Check if special delay exist for "
-              << actualTask->getFuncName() << " on " << this->basename()
-              << ": " << (actualTask->hasDelay(basename())) << std::endl;
-#endif // VPC_DEBUG
-
     // reset the execution delay
-    if( actualTask->hasDelay(this->basename(), actualTask->getFuncName())){
-      // function specific delay
-      actualTask->
-        setRemainingDelay(actualTask->getFuncDelay(this->basename(),
-                                                   actualTask->getFuncName()));
-      actualTask->
-        setDelay(actualTask->getFuncDelay(this->basename(),
-                                          actualTask->getFuncName()));
-      actualTask->
-        setLatency(actualTask->getFuncLatency(this->basename(),
-                                              actualTask->getFuncName()));
+    actualTask->
+      setRemainingDelay(actualTask->getFuncDelay(this->basename(),
+                                                 actualTask->getFuncName()));
+    actualTask->
+      setDelay(actualTask->getFuncDelay(this->basename(),
+                                        actualTask->getFuncName()));
+    actualTask->
+      setLatency(actualTask->getFuncLatency(this->basename(),
+                                            actualTask->getFuncName()));
 #ifdef VPC_DEBUG
-      cerr << "Using " << actualTask->getRemainingDelay()
-           << " as delay for function " << actualTask->getFuncName() << "!"
-           << endl;
-      cerr << "And " << actualTask->getLatency() << " as latency for function "
-           << actualTask->getFuncName() << "!" << endl;
+    cerr << "Using " << actualTask->getRemainingDelay()
+         << " as delay for function " << actualTask->getFuncName() << "!"
+         << endl;
+    cerr << "And " << actualTask->getLatency() << " as latency for function "
+         << actualTask->getFuncName() << "!" << endl;
 #endif // VPC_DEBUG
-    } else {
-      // general delay for actor
-      actualTask->
-        setRemainingDelay(actualTask->getFuncDelay(this->basename()));
-
-      actualTask->setDelay(actualTask->getFuncDelay(this->basename()));
-      actualTask->setLatency(actualTask->getFuncLatency(this->basename()));
-#ifdef VPC_DEBUG
-      cerr << "Using standard delay " << actualTask->getRemainingDelay()
-           << " as delay for function " << actualTask->getFuncName() << "!"
-           << endl;
-      cerr << "Using standard latency " << actualTask->getLatency()
-           << " as latency for function " << actualTask->getFuncName() << "!"
-           << endl;
-#endif // VPC_DEBUG  
-    }
-
+    
     //*********************************************************
     // * SECTION FROM OLD METHOD COMPUTE(P_STRUCT ACTUAL_TASK)
     // *********************************************************/
