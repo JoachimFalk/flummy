@@ -104,7 +104,7 @@ namespace SystemC_VPC{
 
       while(iter.hasNext()){
         const ProcessControlBlock& pcb= iter.getNext();
-        if(0==excludes.count(pcb.getName())){
+        if( excludes.end() == excludes.find(pcb.getName()) ){
           if((rule==start && pcb.getState()==starting)){
             satisfiableCounter=0;
             return true;

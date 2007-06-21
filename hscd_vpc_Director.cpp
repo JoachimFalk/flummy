@@ -205,11 +205,11 @@ namespace SystemC_VPC{
       // prepare passiv mode
       pcb->setBlockEvent(endPair);
     }
-    if(1!=mapping_map_by_name.count(name)){
+    if( mapping_map_by_name.end() == mapping_map_by_name.find(name) ){
       cerr << "Unknown mapping <"<<name<<"> to ??"<<endl;
     }
     
-    assert(1==mapping_map_by_name.count(name));
+    assert( mapping_map_by_name.end() == mapping_map_by_name.find(name) );
     
     
     // get Component

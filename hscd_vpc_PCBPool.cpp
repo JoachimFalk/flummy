@@ -171,7 +171,7 @@ namespace SystemC_VPC {
 
   bool PCBPool::hasPCBType(std::string type){
 
-    return (this->typepools.count(type) > 0);
+    return ( this->typepools.find(type) != this->typepools.end() );
   
   }
   

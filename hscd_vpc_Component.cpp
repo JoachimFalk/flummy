@@ -323,15 +323,6 @@ namespace SystemC_VPC{
       ;
 #endif
 
-#ifndef NO_VCD_TRACES
-    Tracing * trace_signal;
-    if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string, Tracing* >::iterator iter =
-        trace_map_by_name.find(actualTask->getName());
-      trace_signal=(iter->second);
-    }
-#endif //NO_VCD_TRACES
-
     // reset the execution delay
     actualTask->
       setRemainingDelay(actualTask->getFuncDelay(this->basename(),
@@ -443,15 +434,6 @@ namespace SystemC_VPC{
          << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
 #endif
 
-#ifndef NO_VCD_TRACES
-    Tracing *trace_signal;
-    if(1==trace_map_by_name.count(actualTask->getName())){
-      map<string,Tracing* >::iterator iter
-        = trace_map_by_name.find(actualTask->getName());
-      trace_signal=(iter->second);
-    }
-#endif //NO_VCD_TRACES
-
     // reset the execution delay
     actualTask->
       setRemainingDelay(actualTask->getFuncDelay(this->basename(),
@@ -476,10 +458,12 @@ namespace SystemC_VPC{
 
 
 #ifndef NO_VCD_TRACES
-    if(1==trace_map_by_name.count(actualTask->getName())){
+    {
       map<string, Tracing* >::iterator iter
         = trace_map_by_name.find(actualTask->getName());
-      actualTask->setTraceSignal(iter->second);
+      if( iter != trace_map_by_name.end() ){
+        actualTask->setTraceSignal(iter->second);
+      }
     }
 #endif //NO_VCD_TRACES
 

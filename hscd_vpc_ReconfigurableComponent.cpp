@@ -710,9 +710,9 @@ namespace SystemC_VPC{
   void ReconfigurableComponent::traceConfigurationState(Configuration* config,
                                                         trace_value value){
 
-      if(1==trace_map_by_name.count(config->getName())){
-        std::map<std::string, sc_signal<trace_value>* >::iterator iter =
-          trace_map_by_name.find(config->getName());
+    std::map<std::string, sc_signal<trace_value>* >::iterator iter =
+      trace_map_by_name.find(config->getName());
+    if( iter != trace_map_by_name.end() ){
         *(iter->second) = value;
       }
   
