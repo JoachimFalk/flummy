@@ -209,7 +209,7 @@ namespace SystemC_VPC{
       cerr << "Unknown mapping <"<<name<<"> to ??"<<endl;
     }
     
-    assert( mapping_map_by_name.end() == mapping_map_by_name.find(name) );
+    assert( mapping_map_by_name.end() != mapping_map_by_name.find(name) );
     
     
     // get Component
