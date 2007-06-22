@@ -24,9 +24,10 @@ namespace SystemC_VPC{
     if(funcname == NULL){
       return this->base_delay;
     }else{
-      std::map<std::string, sc_time>::const_iterator iter;
       std::string key(funcname, strlen(funcname));
-      iter = this->funcDelays.find(key);
+      std::map<std::string, sc_time>::const_iterator iter =
+        this->funcDelays.find(key);
+
       if(iter != this->funcDelays.end()){
         return iter->second;
       }
@@ -62,16 +63,14 @@ namespace SystemC_VPC{
     return this->base_latency;
   }
 
-  DelayMapper::~DelayMapper(){
+  DelayMapper::~DelayMapper(){}
 
-    std::map<std::string, ComponentDelay*>::iterator iter;
-    for(iter = this->compDelays.begin();
-        iter != this->compDelays.end();
-        ++iter){
-      delete iter->second;
-    }
-    this->compDelays.clear();
-  
+  DelayMapper::DelayMapper(const DelayMapper & dm)
+    : compDelays(dm.compDelays){
+  }
+
+  DelayMapper::DelayMapper()
+    : compDelays() {
   }
 
   void DelayMapper::addFuncDelay(std::string comp,
@@ -101,8 +100,8 @@ namespace SystemC_VPC{
   {
     sc_time ret = SC_ZERO_TIME;
 
-    std::map<std::string, ComponentDelay* >::const_iterator iter;
-    iter = this->compDelays.find(comp);
+    std::map<std::string, ComponentDelay* >::const_iterator iter =
+      this->compDelays.find(comp);
     if(iter != compDelays.end()){
       ret = iter->second->getDelay(funcname);
     }
@@ -123,11 +122,11 @@ namespace SystemC_VPC{
                                    sc_time latency){
     
 #ifdef VPC_DEBUG
-    std::cerr << "ProcessControlBlock> Adding Function Latency for " << comp;
+    std::cerr << "DelayMapper> Adding Function Latency for -" << comp << "-";
     if(funcname != NULL){
       std::cerr << " function " << funcname;
     }
-    std::cerr << " delay " << delay << std::endl;
+    std::cerr << " latency " << latency << std::endl;
 #endif //VPC_DEBUG
 
     std::map<std::string, ComponentDelay*>::iterator iter;
@@ -197,7 +196,8 @@ namespace SystemC_VPC{
     }
   }
   
-  ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb){
+  ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb)
+    : DelayMapper(pcb){
 
     this->setName(pcb.getName());
     this->setDeadline(pcb.getDeadline());

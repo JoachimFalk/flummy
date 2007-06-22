@@ -30,6 +30,10 @@ namespace SystemC_VPC {
 
     ~DelayMapper();
 
+    explicit DelayMapper(const DelayMapper& dm);
+
+    DelayMapper();
+
     /**
      * \brief Registers new special function delay to the mapping instance
      * This method registers a new function delay to the mapping instance.
