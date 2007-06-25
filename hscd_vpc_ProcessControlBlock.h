@@ -194,16 +194,11 @@ namespace SystemC_VPC {
        * \brief Used to access name of PCB
        */
       std::string const& getName() const;
-
+      
       /**
-       * \brief Set process id of instance
+       * \brief due to pipelining, there may be several instances of a process
        */
-      void setPID(int pid);
-
-      /**
-       * \brief Used to access process id
-       */
-      int getPID() const;
+      int getInstanceId() const;
       
       /**
        * \brief Sets currently associated function name of process
@@ -320,11 +315,11 @@ namespace SystemC_VPC {
 
       };
 
-      static int global_pid;
+      static int globalInstanceId;
 
       std::string name;
       const char* funcname;
-      int pid;
+      int instanceId;
       sc_event* interrupt;
       EventPair blockEvent;
       sc_time delay;

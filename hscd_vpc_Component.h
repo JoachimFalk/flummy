@@ -164,10 +164,10 @@ namespace SystemC_VPC{
     
     inline void resignTask( int &taskToResign,
                             sc_time &actualRemainingDelay,
-                            int &actualRunningPID );
+                            int &actualRunningIID );
     inline void assignTask( int &taskToAssign,
                             sc_time &actualRemainingDelay,
-                            int &actualRunningPID );
+                            int &actualRunningIID );
     
     // time last task started
     sc_time startTime;

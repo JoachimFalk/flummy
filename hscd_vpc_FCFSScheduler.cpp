@@ -11,12 +11,12 @@ namespace SystemC_VPC{
     return false;
   }
   void FCFSScheduler::addedNewTask(ProcessControlBlock *pcb){
-    fcfs_fifo.push_back(pcb->getPID());
+    fcfs_fifo.push_back(pcb->getInstanceId());
   }
   void FCFSScheduler::removedTask(ProcessControlBlock *pcb){
     deque<int>::iterator iter;
     for(iter=fcfs_fifo.begin();iter!=fcfs_fifo.end();iter++){
-      if( *iter == pcb->getPID()){
+      if( *iter == pcb->getInstanceId()){
   fcfs_fifo.erase(iter);
   break;
       }

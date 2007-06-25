@@ -35,7 +35,7 @@ namespace SystemC_VPC{
     sc_time timeslice;
     sc_time actualRemainingDelay;
     sc_time *overhead = new sc_time( SC_ZERO_TIME );
-    int actualRunningPID;
+    int actualRunningIID;
     bool newTaskDuringOverhead=false;
     //wait(SC_ZERO_TIME);
     while(1){
@@ -70,21 +70,21 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
           std::cerr << VPC_RED("Component " << this->basename()
                     << "> actualRemainingDelay= "
-                    << actualRemainingDelay.value() << " for pid="
-                    << actualRunningPID << " at: " << sc_simulation_time())
+                    << actualRemainingDelay.value() << " for iid="
+                    << actualRunningIID << " at: " << sc_simulation_time())
                     << std::endl;
 #endif //VPC_DEBUG
 
           if(actualRemainingDelay.value()==0){
             // all execution time simulated -> BLOCK running task.
-            ProcessControlBlock *task=runningTasks[actualRunningPID];
+            ProcessControlBlock *task=runningTasks[actualRunningIID];
 
             task->setState(ending);
             Director::getInstance().checkConstraints();
             task->setState(inaktiv);
 
 #ifdef VPC_DEBUG
-            cerr << this->basename() << " PID: " << actualRunningPID<< " > ";
+            cerr << this->basename() << " IID: " << actualRunningIID<< " > ";
             cerr << this->basename() << " removed Task: " << task->getName()
                  << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
@@ -95,7 +95,7 @@ namespace SystemC_VPC{
             if(task->getTraceSignal()!=0)
               task->getTraceSignal()->value(S_BLOCKED);     
 #endif //NO_VCD_TRACES
-            runningTasks.erase(actualRunningPID);
+            runningTasks.erase(actualRunningIID);
 
             // Removed: this will erase the task from VPC, but with pipelining
             // support the erasing should occur later 
@@ -107,7 +107,7 @@ namespace SystemC_VPC{
           }else{
 
             // store remainingDela within ProcessControlBlock
-            runningTasks[actualRunningPID]->setRemainingDelay(
+            runningTasks[actualRunningIID]->setRemainingDelay(
               actualRemainingDelay );
           }
         }
@@ -134,9 +134,9 @@ namespace SystemC_VPC{
           this->setTraceSignalReadyTasks(S_SUSPENDED);
 
           if( this->runningTasks.size() > 0
-              && runningTasks[actualRunningPID]->getTraceSignal() != NULL
+              && runningTasks[actualRunningIID]->getTraceSignal() != NULL
               ){
-            runningTasks[actualRunningPID]->getTraceSignal()
+            runningTasks[actualRunningIID]->getTraceSignal()
               ->value(S_SUSPENDED);
           }     
 #endif //NO_VCD_TRACES
@@ -153,9 +153,9 @@ namespace SystemC_VPC{
         this->setTraceSignalReadyTasks(S_READY);
 
         if( this->runningTasks.size() > 0
-            && runningTasks[actualRunningPID]->getTraceSignal() != NULL
+            && runningTasks[actualRunningIID]->getTraceSignal() != NULL
             ){
-          runningTasks[actualRunningPID]->getTraceSignal()->value(S_RUNNING);
+          runningTasks[actualRunningIID]->getTraceSignal()->value(S_RUNNING);
         }     
 #endif //NO_VCD_TRACES
 
@@ -180,12 +180,13 @@ namespace SystemC_VPC{
           newTask->getTraceSignal()->value(S_READY);     
 #endif //NO_VCD_TRACES
         //insert new task in read list
-        assert( readyTasks.find(newTask->getPID())   == readyTasks.end()
+        assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
                 /* A task can call compute only one time! */);
-        assert( runningTasks.find(newTask->getPID()) == runningTasks.end()
+        assert( runningTasks.find(newTask->getInstanceId()) ==
+                runningTasks.end()
                 /* A task can call compute only one time! */);
 
-        readyTasks[newTask->getPID()]=newTask;
+        readyTasks[newTask->getInstanceId()]=newTask;
         scheduler->addedNewTask(newTask);
       }
 
@@ -201,7 +202,7 @@ namespace SystemC_VPC{
       if(decision==RESIGNED || decision==PREEMPT){
         readyTasks[taskToResign]=runningTasks[taskToResign];
         runningTasks.erase(taskToResign);
-        actualRunningPID=-1;
+        actualRunningIID=-1;
         readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
 #ifndef NO_VCD_TRACES
         if(readyTasks[taskToResign]->getTraceSignal()!=0)
@@ -250,9 +251,9 @@ namespace SystemC_VPC{
       if(decision==ONLY_ASSIGN || decision==PREEMPT){
         runningTasks[taskToAssign]=readyTasks[taskToAssign];
         readyTasks.erase(taskToAssign);
-        actualRunningPID=taskToAssign;
+        actualRunningIID=taskToAssign;
 #ifdef VPC_DEBUG
-        cerr << "PID: " << taskToAssign << "> remaining delay for "
+        cerr << "IID: " << taskToAssign << "> remaining delay for "
              << runningTasks[taskToAssign]->getName();
 #endif // VPCDEBUG
         actualRemainingDelay 
@@ -468,7 +469,7 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
 
 
-    //int process=actualTask->pid;
+    //int process=actualTask->iid;
 
     // register start of task
     actualTask->setState(starting);
@@ -513,7 +514,8 @@ namespace SystemC_VPC{
       iter->second->setRemainingDelay(SC_ZERO_TIME);
 
 #ifdef VPC_DEBUG
-      cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
+      cerr << this->basename() << " IID: " <<  iter->second->getInstanceId()
+           << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
            << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG
@@ -550,7 +552,8 @@ namespace SystemC_VPC{
       iter->second->setRemainingDelay(SC_ZERO_TIME);
 
 #ifdef VPC_DEBUG
-      cerr << this->basename() << " PID: " <<  iter->second->getPID() << " > ";
+      cerr << this->basename() << " IID: " <<  iter->second->getInstanceId()
+           << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
            << " at: " << sc_simulation_time() << endl;
 #endif // VPCDEBUG

@@ -70,12 +70,12 @@ namespace SystemC_VPC{
     return true;
   }
   void RoundRobinScheduler::addedNewTask(ProcessControlBlock *pcb){
-    rr_fifo.push_back(pcb->getPID());
+    rr_fifo.push_back(pcb->getInstanceId());
   }
   void RoundRobinScheduler::removedTask(ProcessControlBlock *pcb){
     deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
-      if( *iter == pcb->getPID()){
+      if( *iter == pcb->getInstanceId()){
         rr_fifo.erase(iter);
         break;
       }
@@ -105,8 +105,8 @@ namespace SystemC_VPC{
           map<int,ProcessControlBlock*>::const_iterator iter;
           iter=running_tasks.begin();
           ProcessControlBlock *pcb=iter->second;
-          task_to_resign=pcb->getPID();
-          rr_fifo.push_back(pcb->getPID());
+          task_to_resign=pcb->getInstanceId();
+          rr_fifo.push_back(pcb->getInstanceId());
           ret_decision= PREEMPT;  
         }
         // else{}    ->

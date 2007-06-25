@@ -81,7 +81,7 @@ namespace SystemC_VPC{
 
      // wert der priorität
      double d_prior_ready=prior_ready.pcb->getPriority();
-     task_to_assign=prior_ready.pcb->getPID();
+     task_to_assign=prior_ready.pcb->getInstanceId();
 
 
      if(running_tasks.size()!=0){  // läuft noch einer ?
@@ -94,7 +94,7 @@ namespace SystemC_VPC{
          ret_decision=NOCHANGE;                       //nicht verdrängen
        }else{
          ret_decision=PREEMPT;                        //verdrängen
-         task_to_resign=pcb->getPID(); 
+         task_to_resign=pcb->getInstanceId(); 
          pqueue.pop();
          p_queue_entry pqe={0,pcb};
          pqueue.push(pqe);

@@ -98,11 +98,11 @@ namespace SystemC_VPC {
     
   }
  
-  PCBPool::PCBPool() : pid_count(0) {}
+  PCBPool::PCBPool() {}
 
   PCBPool::~PCBPool(){
 
-    std::map<std::string, TypePool* >::iterator iter;
+    TypePools::iterator iter;
     for(iter = this->typepools.begin(); iter != this->typepools.end(); iter++){
       delete iter->second;
     }
@@ -112,7 +112,7 @@ namespace SystemC_VPC {
   ProcessControlBlock* PCBPool::allocate(std::string type)
     throw(NotAllocatedException){
 
-    std::map<std::string, TypePool* >::iterator iter;
+    TypePools::iterator iter;
     iter = this->typepools.find(type);
     if(iter != this->typepools.end() && iter->second != NULL){
       return iter->second->allocate();
@@ -125,7 +125,7 @@ namespace SystemC_VPC {
   int PCBPool::lock(ProcessControlBlock* p)
     throw(AlreadyLockedException, NotAllocatedException){
     
-    std::map<std::string, TypePool* >::iterator iter;
+    TypePools::iterator iter;
     iter = this->typepools.find(p->getName());
     if(iter != this->typepools.end() && iter->second != NULL){
       return iter->second->lock(p);
@@ -136,7 +136,7 @@ namespace SystemC_VPC {
   
   void PCBPool::unlock(std::string type, int lockid) throw(NotLockedException){
 
-    std::map<std::string, TypePool* >::iterator iter;
+    TypePools::iterator iter;
     iter = this->typepools.find(type);
     if(iter != this->typepools.end() && iter->second != NULL){
       return iter->second->unlock(lockid);
@@ -147,7 +147,7 @@ namespace SystemC_VPC {
       
   void PCBPool::free(ProcessControlBlock* p){
 
-    std::map<std::string, TypePool* >::iterator iter;
+    TypePools::iterator iter;
     iter = this->typepools.find(p->getName());
     if(iter != this->typepools.end() && iter->second != NULL){
       iter->second->free(p);
@@ -169,12 +169,6 @@ namespace SystemC_VPC {
 
   }
 
-  bool PCBPool::hasPCBType(std::string type){
-
-    return ( this->typepools.find(type) != this->typepools.end() );
-  
-  }
-  
   PCBIterator PCBPool::getPCBIterator(){
     return PCBIterator(&(this->typepools));
   }
@@ -218,8 +212,7 @@ namespace SystemC_VPC {
       this->freePCB.erase(iter);
     }else{
       instance = new ProcessControlBlock(*(this->base));
-      //instance->setPID(PCBPool::pid_count++);
-      this->usedPCB[instance->getPID()] = instance;
+      this->usedPCB[instance->getInstanceId()] = instance;
     }
 
     return instance;
@@ -230,7 +223,7 @@ namespace SystemC_VPC {
     throw(AlreadyLockedException, NotAllocatedException){
   
     std::map<int, ProcessControlBlock* >::iterator iter;
-    iter = this->usedPCB.find(p->getPID());
+    iter = this->usedPCB.find(p->getInstanceId());
     if(iter != this->usedPCB.end()){
       this->usedPCB.erase(iter);
       int lockid = this->lockCount;
@@ -239,7 +232,7 @@ namespace SystemC_VPC {
       return lockid;
     }
     //perform error detection
-    iter = this->lockedPCB.find(p->getPID());
+    iter = this->lockedPCB.find(p->getInstanceId());
     if(iter != this->lockedPCB.end()){
       throw AlreadyLockedException();
     }else{
@@ -253,7 +246,7 @@ namespace SystemC_VPC {
     std::map<int, ProcessControlBlock* >::iterator iter;
     iter = this->lockedPCB.find(lockid);
     if(iter != this->lockedPCB.end()){
-      this->usedPCB[iter->second->getPID()] = iter->second;
+      this->usedPCB[iter->second->getInstanceId()] = iter->second;
       this->lockedPCB.erase(iter);
     }else{
       throw NotLockedException();
@@ -264,13 +257,13 @@ namespace SystemC_VPC {
   void PCBPool::TypePool::free(ProcessControlBlock* p){
 
     std::map<int, ProcessControlBlock* >::iterator iter;
-    iter = this->usedPCB.find(p->getPID());
+    iter = this->usedPCB.find(p->getInstanceId());
     if(iter != this->usedPCB.end()){
       this->usedPCB.erase(iter);
       
-      iter = this->freePCB.find(p->getPID());
+      iter = this->freePCB.find(p->getInstanceId());
       if(iter == this->freePCB.end()){
-        this->freePCB[p->getPID()] = p;
+        this->freePCB[p->getInstanceId()] = p;
       }
     }
   

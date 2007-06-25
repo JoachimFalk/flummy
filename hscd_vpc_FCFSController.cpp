@@ -84,7 +84,7 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
           this->tasksToProcess.push(currTask);
-          this->runningTasks[currTask->getPID()] = currTask;
+          this->runningTasks[currTask->getInstanceId()] = currTask;
 
           // remove task that can be passed from waiting queue
           this->readyTasks.pop_front();
@@ -94,7 +94,7 @@ namespace SystemC_VPC{
             || reqConf == this->nextConfiguration ){
 
           this->tasksToProcess.push(currTask);
-          this->runningTasks[currTask->getPID()] = currTask;
+          this->runningTasks[currTask->getInstanceId()] = currTask;
           // remove task that can be passed from waiting queue
           this->readyTasks.pop_front();
           
@@ -156,7 +156,7 @@ namespace SystemC_VPC{
               << std::endl;
 #endif //VPC_DEBUG
     
-    this->runningTasks.erase(pcb->getPID());
+    this->runningTasks.erase(pcb->getInstanceId());
     
     // if task has been killed and controlled instance is not killed solve
     // decision here

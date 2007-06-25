@@ -188,10 +188,9 @@ namespace SystemC_VPC {
 
       friend class PCBIterator;
 
-      // used to create unique ids
-      int pid_count;
       // contains managed typepools
-      std::map<std::string, TypePool* > typepools;
+      typedef std::map<std::string, TypePool* >  TypePools;
+      TypePools                                  typepools;
 
     public:
 
@@ -208,8 +207,6 @@ namespace SystemC_VPC {
       void free(ProcessControlBlock* p);
 
       ProcessControlBlock& registerPCB(std::string type);
-
-      bool hasPCBType(std::string type);
 
       PCBIterator getPCBIterator();
 

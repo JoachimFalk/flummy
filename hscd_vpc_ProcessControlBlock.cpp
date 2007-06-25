@@ -2,7 +2,7 @@
 
 namespace SystemC_VPC{
 
-  int ProcessControlBlock::global_pid = 0;
+  int ProcessControlBlock::globalInstanceId = 0;
 
   ProcessControlBlock::ComponentDelay::ComponentDelay(std::string name)
     : name(name), base_delay(SC_ZERO_TIME), base_latency(SC_ZERO_TIME) {}
@@ -202,7 +202,7 @@ namespace SystemC_VPC{
     this->setName(pcb.getName());
     this->setDeadline(pcb.getDeadline());
     this->setPeriod(pcb.getPeriod());
-    this->pid = ProcessControlBlock::global_pid++;
+    this->instanceId = ProcessControlBlock::globalInstanceId++;
     this->setPriority(pcb.getPriority());
     
    
@@ -231,7 +231,7 @@ namespace SystemC_VPC{
     this->interrupt = NULL;
     this->remainingDelay = SC_ZERO_TIME;
     this->period = sc_time(DBL_MAX, SC_SEC);
-    this->pid = ProcessControlBlock::global_pid++;
+    this->instanceId = ProcessControlBlock::globalInstanceId++;
     this->priority = 0;
     this->traceSignal = NULL;
 
@@ -249,12 +249,8 @@ namespace SystemC_VPC{
     return this->name;
   }
 
-  void ProcessControlBlock::setPID(int pid){
-    this->pid = pid;
-  }
-
-  int ProcessControlBlock::getPID() const{
-    return pid;
+  int ProcessControlBlock::getInstanceId() const{
+    return this->instanceId;
   }
 
   void ProcessControlBlock::setFuncName(const char* funcname){
