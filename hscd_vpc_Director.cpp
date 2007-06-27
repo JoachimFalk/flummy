@@ -63,7 +63,7 @@ namespace SystemC_VPC{
    *
    */
   void Director::checkConstraints() {
-    vector<Constraint*>::const_iterator iter=constraints.begin();
+    std::vector<Constraint*>::const_iterator iter=constraints.begin();
     for(;iter!=constraints.end();iter++){
       (*iter)->isSatisfied();
     }
@@ -73,7 +73,7 @@ namespace SystemC_VPC{
    *
    */
   void Director::getReport(){
-    vector<Constraint*>::const_iterator iter=constraints.begin();
+    std::vector<Constraint*>::const_iterator iter=constraints.begin();
     char *cons_name;
     double start=-1;
     double end=-1;

@@ -294,7 +294,7 @@ namespace SystemC_VPC{
 #ifndef NO_VCD_TRACES
       sc_signal<trace_value>* newsignal = new sc_signal<trace_value>();
       trace_map_by_name.insert(
-        pair<string,sc_signal<trace_value>*>(name, newsignal));
+        std::pair<string,sc_signal<trace_value>*>(name, newsignal));
 
       sc_trace(this->traceFile, *newsignal, name);
 #endif //NO_VCD_TRACES
@@ -310,7 +310,7 @@ namespace SystemC_VPC{
     
     assert(name != NULL);
     
-    map<std::string, Configuration* >::iterator iter;
+    std::map<std::string, Configuration* >::iterator iter;
     
     iter = this->config_map_by_name.find(name);
     if(iter != this->config_map_by_name.end()){

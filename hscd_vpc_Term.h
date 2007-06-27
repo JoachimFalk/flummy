@@ -93,7 +93,7 @@ namespace SystemC_VPC{
       }
       virtual ~ComplexTerm(){}
     protected:
-      vector<Term*> terms;
+      std::vector<Term*> terms;
   };
 
 
@@ -107,7 +107,7 @@ namespace SystemC_VPC{
       }
       bool isSatisfied(set<string> excludes){
         satisfiableCounter--;
-        vector<Term*>::const_iterator iter=terms.begin();
+        std::vector<Term*>::const_iterator iter=terms.begin();
         for(;iter!=terms.end();iter++){
           if((*iter)->isSatisfied(excludes))return true;
         }

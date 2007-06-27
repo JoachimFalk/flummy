@@ -2,7 +2,7 @@
 #ifndef HSCD_VPC_SCHEDULER_H
 #define HSCD_VPC_SCHEDULER_H
 #include <hscd_vpc_datatypes.h>
-#include <map.h>
+#include <map>
 
 namespace SystemC_VPC{
   
@@ -15,7 +15,7 @@ namespace SystemC_VPC{
   /**
    * \brief A callback class called from Component to do Scheduling.
    *
-   * Main part is virtual funktion scheduling_decision schedulingDecision(int&, int&, map<int,ProcessControlBlock>, map<int,ProcessControlBlock>)
+   * Main part is virtual funktion scheduling_decision schedulingDecision(int&, int&, std::map<int,ProcessControlBlock>, std::map<int,ProcessControlBlock>)
    */
   class Scheduler{
   public:
@@ -25,7 +25,7 @@ namespace SystemC_VPC{
      * /brief Called from Component to determine a "time slice" used as time out.
      * 
      */
-    virtual bool getSchedulerTimeSlice(sc_time &time,const map<int,ProcessControlBlock*> &ready_tasks,const map<int,ProcessControlBlock*> &running_tasks)=0;
+    virtual bool getSchedulerTimeSlice(sc_time &time,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks)=0;
 
     /**
      * \brief Inform Scheduler about new tasks.
@@ -47,7 +47,7 @@ namespace SystemC_VPC{
      * \param [in] running_tasks A map of running tasks! Usualy only one! Component knowes this map.
      * \return Returns a scheduling_decision enum. So Component knows what he has to do.
      */
-    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const map<int,ProcessControlBlock*> &ready_tasks,const map<int,ProcessControlBlock*> &running_tasks)=0;
+    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks)=0;
 
     /**
      *\brief The overhead needed to determine the scheduling descission.

@@ -22,10 +22,10 @@
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_AbstractComponent.h"
 
-#include <vector.h>
-#include <map.h>
-#include <deque.h>
-#include <queue.h>
+#include <vector>
+#include <map>
+#include <deque>
+#include <queue>
 
 namespace SystemC_VPC{
 
@@ -151,13 +151,13 @@ namespace SystemC_VPC{
 
   private:
     sc_event remainingPipelineStages_WakeUp;
-    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> pqueue;
+    std::priority_queue<timePcbPair, std::vector<timePcbPair>,timeCompare> pqueue;
 
     sc_trace_file *traceFile;
-    map<std::string, Tracing* > trace_map_by_name;
+    std::map<std::string, Tracing* > trace_map_by_name;
     Scheduler *scheduler;
-    deque<ProcessControlBlock*>      newTasks;
-    map<int,ProcessControlBlock*> readyTasks,runningTasks;
+    std::deque<ProcessControlBlock*>      newTasks;
+    std::map<int,ProcessControlBlock*> readyTasks,runningTasks;
     
     sc_event notify_scheduler_thread;
     sc_signal<trace_value> schedulerTrace;

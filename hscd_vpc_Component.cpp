@@ -380,7 +380,7 @@ namespace SystemC_VPC{
   void Component::informAboutMapping(string module){
 #ifndef NO_VCD_TRACES
     Tracing *newsignal = new Tracing();
-    trace_map_by_name.insert(pair<string,Tracing* >(module, newsignal));
+    trace_map_by_name.insert(std::pair<string,Tracing* >(module, newsignal));
     sc_trace(this->traceFile, *newsignal->traceSignal, module.c_str());
 #endif //NO_VCD_TRACES
 
@@ -460,7 +460,7 @@ namespace SystemC_VPC{
 
 #ifndef NO_VCD_TRACES
     {
-      map<string, Tracing* >::iterator iter
+      std::map<string, Tracing* >::iterator iter
         = trace_map_by_name.find(actualTask->getName());
       if( iter != trace_map_by_name.end() ){
         actualTask->setTraceSignal(iter->second);
@@ -691,7 +691,7 @@ namespace SystemC_VPC{
    */
   void Component::interuptPipeline(bool kill){
 
-    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> temp;
+    std::priority_queue<timePcbPair, std::vector<timePcbPair>,timeCompare> temp;
     if(kill){
       while(pqueue.size()>0){
         timePcbPair top = pqueue.top();
@@ -724,7 +724,7 @@ namespace SystemC_VPC{
    *
    */
   void Component::resumePipeline(){
-    priority_queue<timePcbPair, vector<timePcbPair>,timeCompare> temp;
+    std::priority_queue<timePcbPair, std::vector<timePcbPair>,timeCompare> temp;
     //making relative timings to absolute timings (add actual time stamp)
     while(pqueue.size()>0){
       timePcbPair top = pqueue.top();

@@ -29,8 +29,8 @@
 #include <ansidecl.h>
 
 #include <string>
-#include <map.h>
-#include <vector.h>
+#include <map>
+#include <vector>
 
 #include "hscd_vpc_PCBPool.h"
 
@@ -213,15 +213,15 @@ namespace SystemC_VPC{
      */
     Director();
 
-    typedef vector<AbstractComponent* >  Components;
+    typedef std::vector<AbstractComponent* >  Components;
     Components                           components;
     
-    typedef vector<AbstractComponent* >  Mappings;
+    typedef std::vector<AbstractComponent* >  Mappings;
     Mappings                             mappings;
 
     PCBPool pcbPool;
 
-    vector<Constraint*> constraints;
+    std::vector<Constraint*> constraints;
 
     // output file to write result to
     std::string vpc_result_file;

@@ -62,8 +62,8 @@ namespace SystemC_VPC{
 
   bool RoundRobinScheduler::getSchedulerTimeSlice(
     sc_time& time,
-    const map<int,ProcessControlBlock*> &ready_tasks,
-    const  map<int,ProcessControlBlock*> &running_tasks )
+    const std::map<int,ProcessControlBlock*> &ready_tasks,
+    const  std::map<int,ProcessControlBlock*> &running_tasks )
   {
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
     time=sc_time(TIMESLICE,SC_NS);
@@ -73,7 +73,7 @@ namespace SystemC_VPC{
     rr_fifo.push_back(pcb->getInstanceId());
   }
   void RoundRobinScheduler::removedTask(ProcessControlBlock *pcb){
-    deque<int>::iterator iter;
+    std::deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
       if( *iter == pcb->getInstanceId()){
         rr_fifo.erase(iter);
@@ -84,8 +84,8 @@ namespace SystemC_VPC{
   scheduling_decision RoundRobinScheduler::schedulingDecision(
     int& task_to_resign,
     int& task_to_assign,
-    const  map<int,ProcessControlBlock*> &ready_tasks,
-    const  map<int,ProcessControlBlock*> &running_tasks )
+    const  std::map<int,ProcessControlBlock*> &ready_tasks,
+    const  std::map<int,ProcessControlBlock*> &running_tasks )
   {
 
     scheduling_decision ret_decision=NOCHANGE;
@@ -102,7 +102,7 @@ namespace SystemC_VPC{
         // -> kein preemption!
         ret_decision= ONLY_ASSIGN;
         if(running_tasks.size()!=0){  // alten Task entfernen
-          map<int,ProcessControlBlock*>::const_iterator iter;
+          std::map<int,ProcessControlBlock*>::const_iterator iter;
           iter=running_tasks.begin();
           ProcessControlBlock *pcb=iter->second;
           task_to_resign=pcb->getInstanceId();

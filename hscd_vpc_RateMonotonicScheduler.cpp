@@ -6,7 +6,7 @@
 namespace SystemC_VPC{
   RateMonotonicScheduler::RateMonotonicScheduler(const char *schedulername){
 
-    priority_queue<p_queue_entry,vector<p_queue_entry>,rm_queue_compare>
+    std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,rm_queue_compare>
       pqueue(comp);
 
     order_counter=0;
@@ -46,8 +46,8 @@ namespace SystemC_VPC{
 
   bool RateMonotonicScheduler::getSchedulerTimeSlice(
     sc_time& time,
-    const map<int,ProcessControlBlock*> &ready_tasks,
-    const  map<int,ProcessControlBlock*> &running_tasks)
+    const std::map<int,ProcessControlBlock*> &ready_tasks,
+    const  std::map<int,ProcessControlBlock*> &running_tasks)
   {
      return false;
   }
@@ -70,8 +70,8 @@ namespace SystemC_VPC{
   scheduling_decision RateMonotonicScheduler::schedulingDecision(
     int& task_to_resign,
     int& task_to_assign,
-    const  map<int,ProcessControlBlock*> &ready_tasks,
-    const  map<int,ProcessControlBlock*> &running_tasks)
+    const  std::map<int,ProcessControlBlock*> &ready_tasks,
+    const  std::map<int,ProcessControlBlock*> &running_tasks)
   {
     scheduling_decision ret_decision=ONLY_ASSIGN;
     if(pqueue.size()<=0) return NOCHANGE;  // kein neuer -> nichts tun
@@ -83,7 +83,7 @@ namespace SystemC_VPC{
 
 
     if(running_tasks.size()!=0){  // läuft noch einer ?
-      map<int,ProcessControlBlock*>::const_iterator iter;
+      std::map<int,ProcessControlBlock*>::const_iterator iter;
       iter=running_tasks.begin();
       ProcessControlBlock *pcb=iter->second;
 
