@@ -392,7 +392,7 @@ namespace SystemC_VPC{
     ProcessControlBlock* pcb = getProcessControlBlock( pid );
     FunctionId           fid = pcb->DelayMapper::getFunctionId( function );
 
-    // pcb has been allocated by calling "getFunctionId"-> free it
+    // pcb has been allocated by calling "getProcessControlBlock"-> free it
     this->pcbPool.free(pcb);
 
     return FastLink(pid, fid);
