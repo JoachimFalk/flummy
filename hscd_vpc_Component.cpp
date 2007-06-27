@@ -326,14 +326,14 @@ namespace SystemC_VPC{
 
     // reset the execution delay
     actualTask->
-      setRemainingDelay(actualTask->getFuncDelay(this->basename(),
-                                                 actualTask->getFuncName()));
+      setRemainingDelay(actualTask->getFuncDelay(this->getComponentId(),
+                                                 actualTask->getFunctionId()));
     actualTask->
-      setDelay(actualTask->getFuncDelay(this->basename(),
-                                        actualTask->getFuncName()));
+      setDelay(actualTask->getFuncDelay(this->getComponentId(),
+                                        actualTask->getFunctionId()));
     actualTask->
-      setLatency(actualTask->getFuncLatency(this->basename(),
-                                            actualTask->getFuncName()));
+      setLatency(actualTask->getFuncLatency(this->getComponentId(),
+                                            actualTask->getFunctionId()));
 #ifdef VPC_DEBUG
     cerr << "Using " << actualTask->getRemainingDelay()
          << " as delay for function " << actualTask->getFuncName() << "!"
@@ -437,14 +437,14 @@ namespace SystemC_VPC{
 
     // reset the execution delay
     actualTask->
-      setRemainingDelay(actualTask->getFuncDelay(this->basename(),
-                                                 actualTask->getFuncName()));
+      setRemainingDelay(actualTask->getFuncDelay(this->getComponentId(),
+                                                 actualTask->getFunctionId()));
     actualTask->
-      setDelay(actualTask->getFuncDelay(this->basename(),
-                                        actualTask->getFuncName()));
+      setDelay(actualTask->getFuncDelay(this->getComponentId(),
+                                        actualTask->getFunctionId()));
     actualTask->
-      setLatency(actualTask->getFuncLatency(this->basename(),
-                                            actualTask->getFuncName()));
+      setLatency(actualTask->getFuncLatency(this->getComponentId(),
+                                            actualTask->getFunctionId()));
 #ifdef VPC_DEBUG
     cerr << "Using " << actualTask->getRemainingDelay()
          << " as delay for function " << actualTask->getFuncName() << "!"

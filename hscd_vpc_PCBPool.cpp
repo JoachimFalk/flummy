@@ -65,12 +65,12 @@ namespace SystemC_VPC {
 
   }
 
-  PCBIterator::PCBIterator(std::map<std::string, PCBPool::TypePool* >* pool) {
+  PCBIterator::PCBIterator(PCBPool::TypePools * pool) {
   
     this->pool = pool;
     this->typeIter = this->pool->begin();
     if(this->typeIter != this->pool->end()){
-     this->instanceIter = this->typeIter->second->getInstanceIterator();
+     this->instanceIter = (*this->typeIter)->getInstanceIterator();
      this->typeIter++;
     } 
     
@@ -84,7 +84,7 @@ namespace SystemC_VPC {
           ++(this->typeIter) ){
         delete this->instanceIter;
         this->instanceIter = NULL;
-        this->instanceIter = this->typeIter->second->getInstanceIterator();
+        this->instanceIter = (*this->typeIter)->getInstanceIterator();
       }
       return this->instanceIter->hasNext();
     }
@@ -98,48 +98,45 @@ namespace SystemC_VPC {
     
   }
  
-  PCBPool::PCBPool() {}
+  PCBPool::PCBPool() : typepools(0) {}
 
   PCBPool::~PCBPool(){
 
     TypePools::iterator iter;
     for(iter = this->typepools.begin(); iter != this->typepools.end(); iter++){
-      delete iter->second;
+      delete *iter;
     }
 
   }
   
-  ProcessControlBlock* PCBPool::allocate(std::string type)
+  ProcessControlBlock* PCBPool::allocate( ProcessId pid )
     throw(NotAllocatedException){
 
-    TypePools::iterator iter;
-    iter = this->typepools.find(type);
-    if(iter != this->typepools.end() && iter->second != NULL){
-      return iter->second->allocate();
+    TypePool *pool = typepools[pid];
+    if( pool != NULL ){
+      return pool->allocate();
     }
 
-    throw NotAllocatedException(type);
+    throw NotAllocatedException(pid);
   
   }
 
   int PCBPool::lock(ProcessControlBlock* p)
     throw(AlreadyLockedException, NotAllocatedException){
     
-    TypePools::iterator iter;
-    iter = this->typepools.find(p->getName());
-    if(iter != this->typepools.end() && iter->second != NULL){
-      return iter->second->lock(p);
+    TypePool *pool = typepools[p->getPid()];
+    if( pool != NULL ){
+      return pool->lock(p);
     }
 
     throw NotAllocatedException();
   }
   
-  void PCBPool::unlock(std::string type, int lockid) throw(NotLockedException){
+  void PCBPool::unlock( ProcessId pid , int lockid) throw(NotLockedException){
 
-    TypePools::iterator iter;
-    iter = this->typepools.find(type);
-    if(iter != this->typepools.end() && iter->second != NULL){
-      return iter->second->unlock(lockid);
+    TypePool *pool = typepools[pid];
+    if( pool != NULL ){
+      return pool->unlock(lockid);
     }
 
     throw NotLockedException();
@@ -147,26 +144,19 @@ namespace SystemC_VPC {
       
   void PCBPool::free(ProcessControlBlock* p){
 
-    TypePools::iterator iter;
-    iter = this->typepools.find(p->getName());
-    if(iter != this->typepools.end() && iter->second != NULL){
-      iter->second->free(p);
+    TypePool *pool = typepools[p->getPid()];
+    if( pool != NULL ){
+       pool->free(p);
     }
 
   }
 
-  ProcessControlBlock& PCBPool::registerPCB(std::string type){
+  ProcessControlBlock& PCBPool::registerPCB(ProcessId pid){
 
-    std::map<std::string, TypePool*>::iterator iter;
-    iter = this->typepools.find(type);
-    if(iter == this->typepools.end()){
-      TypePool* pool = new TypePool();
-      this->typepools[type] = pool;
-      return pool->getBase();
-    }else{
-      return iter->second->getBase();
-    }
+    assert( pid == typepools.size() );
+    typepools.push_back( new TypePool());
 
+    return this->typepools[pid]->getBase();
   }
 
   PCBIterator PCBPool::getPCBIterator(){

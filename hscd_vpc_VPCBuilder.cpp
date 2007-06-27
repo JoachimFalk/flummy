@@ -935,14 +935,14 @@ namespace SystemC_VPC{
 	      //per default latency is used as vpc-delay as well as vpc-latency
               // (vpc-delay == dii)
 	      p.setLatency(sc_latency);
-              p.addFuncLatency(sTarget, fname, sc_latency);
+              p.addFuncLatency( this->director, sTarget, fname, sc_latency );
 	      p.setDelay(sc_latency);
-              p.addFuncDelay(sTarget, fname, sc_latency);
+              p.addFuncDelay( this->director, sTarget, fname, sc_latency );
 
 	      // if having a  then dii overides delay
 	      if( dii != NULL ){
                 p.setDelay(sc_dii);
-                p.addFuncDelay(sTarget, fname, sc_dii);
+                p.addFuncDelay( this->director, sTarget, fname, sc_dii );
 	      }
 	    }else if( 0==XMLString::compareNString( xmlName,
                                                     attributeStr,
@@ -980,13 +980,13 @@ namespace SystemC_VPC{
                                      sizeof(STR_VPC_DELAY) )){
 		sc_time delay = createSC_Time(sValue);
                 p.setDelay(delay);
-                p.addFuncDelay(sTarget, NULL, delay);
+                p.addFuncDelay( this->director, sTarget, NULL, delay );
               }else if( 0 == strncmp(sType,
                                      STR_VPC_LATENCY,
                                      sizeof(STR_VPC_LATENCY) )){
 		sc_time latency = createSC_Time(sValue);
                 p.setLatency(latency);
-                p.addFuncLatency(sTarget, NULL, latency);
+                p.addFuncLatency( this->director, sTarget, NULL, latency );
               }else{
 #ifdef VPC_DEBUG
                 std::cerr << "VPCBuilder> Unknown mapping attribute: type="
@@ -1004,7 +1004,7 @@ namespace SystemC_VPC{
                             << sTarget << "; " << sType << ", " << delay)
                             << std::endl;
 #endif //VPC_DEBUG
-                  p.addFuncDelay(sTarget, sType, delay);
+                  p.addFuncDelay( this->director, sTarget, sType, delay );
 
                 } catch(const InvalidArgumentException& ex) {
 #ifdef VPC_DEBUG
@@ -1126,13 +1126,13 @@ namespace SystemC_VPC{
                                sizeof(STR_VPC_DELAY) )){
 	  sc_time delay = createSC_Time(attiter->second);
           p->setDelay(delay);
-          p->addFuncDelay(target, NULL, delay);
+          p->addFuncDelay( this->director, target, NULL, delay );
         }else if( 0 == strncmp(attiter->first,
                                STR_VPC_LATENCY,
                                sizeof(STR_VPC_LATENCY) )){
 	  sc_time latency = createSC_Time(attiter->second);
 	  p->setLatency(latency);
-	  p->addFuncLatency(target, NULL, latency);
+	  p->addFuncLatency( this->director, target, NULL, latency );
 	}else{
 #ifdef VPC_DEBUG
           std::cerr << "VPCBuilder> Unknown mapping attribute: type="
@@ -1151,7 +1151,7 @@ namespace SystemC_VPC{
                       << target << "; " << attiter->second << ", " << delay)
                       << std::endl;
 #endif //VPC_DEBUG
-            p->addFuncDelay(target, attiter->first, delay);
+            p->addFuncDelay( this->director, target, attiter->first, delay );
 
           } catch(const InvalidArgumentException& ex) {
 
@@ -1173,8 +1173,8 @@ namespace SystemC_VPC{
         VPCBuilder::Timing t = *timings;
         p->setDelay( t.dii );
         p->setLatency(t.latency );
-        p->addFuncDelay(   target, t.fname, t.dii   );
-        p->addFuncLatency( target, t.fname, t.latency );
+        p->addFuncDelay( this->director, target, t.fname, t.dii );
+        p->addFuncLatency( this->director, target, t.fname, t.latency );
       }
     }
     

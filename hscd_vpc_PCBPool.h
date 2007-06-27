@@ -5,7 +5,10 @@
 #include <map>
 #include <string>
 
+#include <cosupport/string_convert.hpp>
+
 #include "hscd_vpc_ProcessControlBlock.h"
+#include "FastLink.h"
 
 namespace SystemC_VPC {
 
@@ -57,6 +60,9 @@ namespace SystemC_VPC {
     }
 
     NotAllocatedException(std::string msg) : msg(msg +" not allocated") {}
+    
+    NotAllocatedException(ProcessId) : msg(CoSupport::asStr(msg) +
+                                           " not allocated") {}
     
     ~NotAllocatedException() throw(){}
 
@@ -189,7 +195,7 @@ namespace SystemC_VPC {
       friend class PCBIterator;
 
       // contains managed typepools
-      typedef std::map<std::string, TypePool* >  TypePools;
+      typedef std::vector<PCBPool::TypePool*>    TypePools;
       TypePools                                  typepools;
 
     public:
@@ -198,15 +204,16 @@ namespace SystemC_VPC {
 
       ~PCBPool();
 
-      ProcessControlBlock* allocate(std::string type) throw (NotAllocatedException);
+      ProcessControlBlock* allocate( ProcessId pid )
+        throw (NotAllocatedException);
 
       int lock(ProcessControlBlock* p) throw(AlreadyLockedException, NotAllocatedException);
 
-      void unlock(std::string type, int lockid) throw(NotLockedException);
+      void unlock( ProcessId pid , int lockid) throw(NotLockedException);
 
       void free(ProcessControlBlock* p);
 
-      ProcessControlBlock& registerPCB(std::string type);
+      ProcessControlBlock& registerPCB( ProcessId pid );
 
       PCBIterator getPCBIterator();
 
@@ -217,13 +224,13 @@ namespace SystemC_VPC {
    */
   class PCBIterator {
 
-    std::map<std::string, PCBPool::TypePool* >* pool;
-    std::map<std::string, PCBPool::TypePool* >::iterator typeIter;
+    PCBPool::TypePools*                  pool;
+    PCBPool::TypePools::iterator         typeIter;
     PCBPool::TypePool::InstanceIterator* instanceIter;
 
     public:
 
-    PCBIterator(std::map<std::string, PCBPool::TypePool* >* pool);
+    PCBIterator( PCBPool::TypePools * pool );
 
     bool hasNext();
 

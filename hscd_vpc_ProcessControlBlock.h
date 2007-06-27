@@ -10,9 +10,14 @@
 
 #include "hscd_vpc_EventPair.h"
 #include "hscd_vpc_Tracing.h"
+#include "FastLink.h"
 
 namespace SystemC_VPC {
- 
+
+  class Director;
+
+  typedef size_t ComponentId;
+
   enum activation_state {
     inaktiv,
     starting,
@@ -44,9 +49,10 @@ namespace SystemC_VPC {
      * \param funcname represents the function name
      * \param delay is the given function delay
      */
-    void addFuncDelay(std::string comp,
-                      const char* funcname,
-                      sc_time delay);
+    void addFuncDelay( Director* director,
+                       std::string comp,
+                       const char* funcname,
+                       sc_time delay );
 
     /**
      * \brief Used to access the delay
@@ -56,8 +62,8 @@ namespace SystemC_VPC {
      *  function name.
      * If there is no value found 0 is returned as default.
      */
-    sc_time getFuncDelay(std::string comp,
-                         const char* funcname=NULL) const;
+    sc_time getFuncDelay( ComponentId cid,
+                          FunctionId  fid ) const;
 
     /**
      * \brief Registers special function latency to the mapping instance
@@ -69,7 +75,8 @@ namespace SystemC_VPC {
      * \param funcname represents the function name
      * \param latency is the given function latency
      */
-    void addFuncLatency( std::string comp,
+    void addFuncLatency( Director* director,
+                         std::string comp,
                          const char* funcname,
                          sc_time latency );
 
@@ -81,9 +88,17 @@ namespace SystemC_VPC {
      * function name.
      * If there is no value found 0 is returned as default.
      */
-    sc_time getFuncLatency(std::string comp,
-                           const char* funcname=NULL) const;
+    sc_time getFuncLatency( ComponentId cid,
+                            FunctionId  fid ) const;
 
+
+    typedef std::map<std::string, FunctionId>  FunctionIdMap;
+    FunctionId uniqueFunctionId();
+    FunctionId getFunctionId(std::string function);
+
+    FunctionIdMap   functionIdMap;
+    FunctionId      globalFunctionId;
+  
     /**
      * Internal helper class to enable management of component specific
      * delays of a task, additional function specific delays on an associated
@@ -99,14 +114,21 @@ namespace SystemC_VPC {
        * \param base_delay specifies the standard delay used for execution
        * simulation
        */
-      ComponentDelay(std::string name);
+      ComponentDelay( ComponentId cid );
 
       /**
        * \brief Adds a new function delay to the instance
        * \param funcname specifies the associated function
        * \param delay is the corresponding delay for the function execution
        */
-      void addDelay(const char* funcname, sc_time delay);
+      void addDelay(FunctionId fid, sc_time delay);
+
+      /**
+       * \brief Set the base delay to the instance
+       * \param funcname specifies the associated function
+       * \param delay is the corresponding delay for the function execution
+       */
+      void setBaseDelay(sc_time delay);
 
       /**
        * \brief Used to access delay
@@ -115,7 +137,7 @@ namespace SystemC_VPC {
        * component of the process. If no function name is given or there is
        * no corresponding entry registered the default delay is returned.
        */
-      sc_time getDelay(const char* funcname=NULL) const;
+      sc_time getDelay(FunctionId fid) const;
 
       /**
        * \brief Adds a new function latency to the instance
@@ -123,7 +145,14 @@ namespace SystemC_VPC {
        * \param latency is the corresponding latency for the function
        * execution
        */
-      void addLatency(const char* funcname, sc_time latency);
+      void addLatency(FunctionId fid, sc_time latency);
+
+      /**
+       * \brief Set the base latency to the instance
+       * \param latency is the corresponding latency for the function
+       * execution
+       */
+      void setBaseLatency(sc_time latency);
 
       /**
        * \brief Used to access latency
@@ -133,20 +162,25 @@ namespace SystemC_VPC {
        * or there is no corresponding entry registered the default latency
        * is returned.
        */
-      sc_time getLatency(const char* funcname=NULL) const;
+      sc_time getLatency(FunctionId fid) const;
 
     private:
 
-      // name of the associated component
-      std::string name;
+      // the associated component
+      ComponentId cid;
+
       // base delay used for task running on this component
       sc_time base_delay;
-      // map of possible special delay depending on functions
-      std::map<std::string, sc_time> funcDelays;
+
       // base latency used for tasks running on this component
       sc_time base_latency;
+
+      typedef std::vector<sc_time> FunctionTimes;
+      // map of possible special delay depending on functions
+      FunctionTimes funcDelays;
+
       // map of possible function specific latencies
-      std::map<std::string, sc_time> funcLatencies;
+      FunctionTimes funcLatencies;
     };
 
   private:
@@ -155,7 +189,8 @@ namespace SystemC_VPC {
      * delays for different components on different
      * functions
      */
-    std::map<std::string, ComponentDelay*> compDelays;
+    typedef std::vector<ComponentDelay* >          ComponentDelays;
+    ComponentDelays                                compDelays;
 
   };
 
@@ -194,16 +229,21 @@ namespace SystemC_VPC {
        * \brief Used to access name of PCB
        */
       std::string const& getName() const;
+
+      void setPid( ProcessId pid);
+      ProcessId getPid( ) const;
+      
+      /**
+       * \brief Sets currently associated function id of process
+       */
+      void setFunctionId( FunctionId fid);
+      FunctionId getFunctionId( ) const;
       
       /**
        * \brief due to pipelining, there may be several instances of a process
        */
       int getInstanceId() const;
       
-      /**
-       * \brief Sets currently associated function name of process
-       */
-      void setFuncName(const char* funcname);
 
       /**
        * \brief Gets currently associated function name of PCB instance
@@ -318,7 +358,9 @@ namespace SystemC_VPC {
       static int globalInstanceId;
 
       std::string name;
-      const char* funcname;
+      ProcessId   pid;
+      FunctionId  fid;
+
       int instanceId;
       sc_event* interrupt;
       EventPair blockEvent;

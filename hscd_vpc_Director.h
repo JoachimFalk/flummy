@@ -22,6 +22,8 @@
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_EventPair.h"
+#include "FastLink.h"
+
 
 // provide compatibility with other compilers then gcc, hopefully
 #include <ansidecl.h>
@@ -44,32 +46,6 @@ namespace SystemC_VPC{
    * Direktor reads allokation and binding from file.
    */
   class Director : public AbstractDirector{
-  private:
-
-    /**
-     * Singleton design pattern
-     */
-    static std::auto_ptr<Director> singleton; 
-
-    /**
-     * \brief Reads allokation and binding from file.
-     */
-    Director();
-    
-    map<std::string, AbstractComponent*> component_map_by_name;
-    
-    map<std::string, AbstractComponent*> mapping_map_by_name;
-
-    PCBPool pcbPool;
-
-    vector<Constraint*> constraints;
-
-    // output file to write result to
-    std::string vpc_result_file;
-    
-    // time of latest acknowledge simulated task
-    double end;
-  
   public:
     bool FALLBACKMODE;
 
@@ -87,16 +63,12 @@ namespace SystemC_VPC{
      * \brief Get the process control block used within SystemC-VPC Modell.
      */
     ProcessControlBlock* getProcessControlBlock( const char *name );
-    //  ProcessControlBlock& getProcessControlBlock(int process);
 
     /**
-     *
+     * \brief Get the process control block used within SystemC-VPC Modell.
      */
-    /*
-    map<std::string,ProcessControlBlock*>& getPcbMap(){
-      return pcb_map_by_name;
-    }
-    */
+    ProcessControlBlock* getProcessControlBlock(  ProcessId pid );
+
     /**
      *
      */
@@ -115,6 +87,21 @@ namespace SystemC_VPC{
     }
 
     virtual ~Director();
+
+    /**
+     * \brief Simulates computation of a given task
+     * 
+     * Determines the component from FastLink.
+     * Supports pipelining!
+     * \param fLink FastLink for task and function to execute.
+     * \param endPair EventPair to signal finishing of data introduction 
+     * intervall (dii) and lateny.
+     * If dii == latency no pipelinig is assumed and both events are notified
+     * at same time!
+     * \sa EventPair
+     */
+    void compute(FastLink fLink,
+                 EventPair endPair = EventPair(NULL, NULL));
 
     /**
      * \brief Simulates computation of a given task
@@ -205,7 +192,50 @@ namespace SystemC_VPC{
     string getResultFile(){
       return this->vpc_result_file;
     }
-   
+
+    ProcessId uniqueProcessId();
+
+    ProcessId getProcessId(std::string process);
+
+    ComponentId getComponentId(std::string component);
+
+    FastLink getFastLink(std::string process, std::string function);
+
+  private:
+
+    /**
+     * Singleton design pattern
+     */
+    static std::auto_ptr<Director> singleton; 
+
+    /**
+     * \brief Reads allokation and binding from file.
+     */
+    Director();
+
+    typedef vector<AbstractComponent* >  Components;
+    Components                           components;
+    
+    typedef vector<AbstractComponent* >  Mappings;
+    Mappings                             mappings;
+
+    PCBPool pcbPool;
+
+    vector<Constraint*> constraints;
+
+    // output file to write result to
+    std::string vpc_result_file;
+    
+    // time of latest acknowledge simulated task
+    double end;
+
+    typedef std::map<std::string, ProcessId>   ProcessIdMap;
+    typedef std::map<std::string, ComponentId> ComponentIdMap;
+
+    ProcessIdMap    processIdMap;
+    ComponentIdMap  componentIdMap;
+
+    ProcessId       globalProcessId;
   };
 
 }

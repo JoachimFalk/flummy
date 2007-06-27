@@ -27,7 +27,7 @@
 #include "hscd_vpc_ProcessEventListener.h"
 
 namespace SystemC_VPC{
-  
+
   /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).
    * 
@@ -106,7 +106,9 @@ namespace SystemC_VPC{
   
   public:
   
-    AbstractComponent(sc_module_name name) : sc_module(name){
+    AbstractComponent(sc_module_name name)
+      : sc_module(name),
+      componentId(globalComponentId++){
       
       this->killed = false;
       this->activ = true;
@@ -187,6 +189,20 @@ namespace SystemC_VPC{
     virtual void notifyParentController(ProcessControlBlock* pcb){
       this->parentControlUnit->signalProcessEvent(pcb);
     }
+
+    /**
+     *
+     */
+    ComponentId getComponentId();
+
+  private:
+    //
+    static ComponentId globalComponentId;
+
+    //
+    ComponentId componentId;
+    
+
 
   };
   

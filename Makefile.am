@@ -68,7 +68,8 @@ pkginclude_HEADERS =				\
 	hscd_vpc_ProcessControlBlock.h		\
 	hscd_vpc_PCBPool.h			\
 	hscd_vpc_IDeallocatable.h		\
-	hscd_vpc_EventPair.h
+	hscd_vpc_EventPair.h			\
+	FastLink.h
 
 #noinst_HEADERS=	oneof.hpp
 
@@ -102,7 +103,9 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
 	hscd_vpc_PCBPool.cpp			\
-	hscd_vpc_Term.cpp			
+	hscd_vpc_Term.cpp			\
+	FastLink.cpp				\
+	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 
 

@@ -38,7 +38,13 @@ namespace SystemC_VPC{
   /**
    *
    */
-  Director::Director() : end(0), FALLBACKMODE(false) {
+  Director::Director()
+    : FALLBACKMODE(false),
+      mappings(),
+      end(0),
+      componentIdMap(),
+      globalProcessId(0)
+  {
     try{
       VPCBuilder builder((Director*)this);
       builder.buildVPC();
@@ -115,24 +121,28 @@ namespace SystemC_VPC{
     getReport();
     
     // clear components
-    map<string,AbstractComponent*>::iterator it =
-      component_map_by_name.begin();
-    
-    while(it != component_map_by_name.end()){
-      delete it->second;
-      it++;
+    for( Components::iterator it = components.begin();
+         it != components.end();
+         ++it ){
+      delete *it;
     }
     
-    component_map_by_name.clear();
+    componentIdMap.clear();
   }
 
   //
   ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
+    ProcessId pid = getProcessId(name);
+    return this->getProcessControlBlock( pid );
+  }
+
+  //
+  ProcessControlBlock* Director::getProcessControlBlock( ProcessId pid ){
 
     assert(!FALLBACKMODE);
 
     try{
-      return this->pcbPool.allocate(name);
+      return this->pcbPool.allocate( pid );
     }catch(NotAllocatedException& e){
       std::cerr << "Director> getProcessControlBlock failed due to"
                 << std::endl << e.what() << std::endl;
@@ -146,6 +156,75 @@ namespace SystemC_VPC{
   //
   PCBPool& Director::getPCBPool(){
     return this->pcbPool;
+  }
+
+
+  //
+  void Director::compute( FastLink fLink,
+                          EventPair endPair ){
+
+    if(FALLBACKMODE){
+      // create Fallback behavior for active and passive mode!
+      if( endPair.dii != NULL )
+        endPair.dii->notify();      // passive mode: notify end
+      if( endPair.latency != NULL )
+        endPair.latency->notify();  // passive mode: notify end
+
+      // do nothing, just return
+      return;
+    }
+
+
+    ProcessControlBlock* pcb = this->getProcessControlBlock(fLink.process);
+    pcb->setFunctionId(fLink.func);
+    
+    int lockid = -1;
+    
+    //HINT: also treat mode!!
+    //if( endPair.latency != NULL ) endPair.latency->notify();
+
+    if( endPair.dii == NULL ){
+      // prepare active mode
+      pcb->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
+      // we could use a pool of VPC_Events instead of new/delete
+      lockid = this->pcbPool.lock(pcb);
+    }else{
+      // prepare passiv mode
+      pcb->setBlockEvent(endPair);
+    }
+
+    
+    if( mappings.capacity() < fLink.process &&
+        mappings[fLink.process] != NULL ){
+      cerr << "Unknown mapping <" << pcb->getName() << "> to ??" 
+           << mappings[fLink.process]<< endl;
+      cerr << fLink.process << " # " << mappings.size() << endl;
+    }
+    
+    assert( mappings.capacity() >= fLink.process ||
+            mappings[fLink.process] == NULL );
+    
+    
+    // get Component
+    AbstractComponent* comp = mappings[fLink.process];
+
+    // compute task on found component
+    assert(!FALLBACKMODE);
+    comp->compute(pcb);
+
+    if( endPair.dii == NULL){
+      // active mode -> waits until simulated delay time has expired
+      
+      CoSupport::SystemC::wait(*(pcb->getBlockEvent().dii));
+      delete pcb->getBlockEvent().dii;
+      delete pcb->getBlockEvent().latency;
+      pcb->setBlockEvent(EventPair());
+      // as psb has been locked -> unlock it
+      this->pcbPool.unlock(pcb->getPid(), lockid);
+      // and free it
+      this->pcbPool.free(pcb);
+    }
+    
   }
 
   void Director::compute(const char* name,
@@ -164,78 +243,9 @@ namespace SystemC_VPC{
                          const char* funcname,
                          EventPair endPair)
   {
-    if(FALLBACKMODE){
-#ifdef VPC_DEBUG
-      cout << flush;
-      cerr << VPC_RED("FallBack::compute( ") << VPC_WHITE(name)
-           << VPC_RED(" , ") << VPC_WHITE(funcname)
-	   << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
-#endif
-
-      // create Fallback behavior for active and passive mode!
-      if( endPair.dii != NULL )
-        endPair.dii->notify();      // passive mode: notify end
-      if( endPair.latency != NULL )
-        endPair.latency->notify();  // passive mode: notify end
-
-      // do nothing, just return
-      return;
-    }
-
-
-#ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("Director> compute(") << VPC_WHITE(name)
-              << VPC_YELLOW(",") << VPC_WHITE(funcname) << VPC_YELLOW(") at: ")
-              << sc_simulation_time() << std::endl;
-#endif //VPC_DEBUG
-    
-    ProcessControlBlock* pcb = this->getProcessControlBlock(name);
-    pcb->setFuncName(funcname);
-    int lockid = -1;
-    
-    //HINT: also treat mode!!
-    //if( endPair.latency != NULL ) endPair.latency->notify();
-
-    if( endPair.dii == NULL ){
-      // prepare active mode
-      pcb->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
-      // we could use a pool of VPC_Events instead of new/delete
-      lockid = this->pcbPool.lock(pcb);
-    }else{
-      // prepare passiv mode
-      pcb->setBlockEvent(endPair);
-    }
-    if( mapping_map_by_name.end() == mapping_map_by_name.find(name) ){
-      cerr << "Unknown mapping <"<<name<<"> to ??"<<endl;
-    }
-    
-    assert( mapping_map_by_name.end() != mapping_map_by_name.find(name) );
-    
-    
-    // get Component
-    AbstractComponent* comp = mapping_map_by_name.find(name)->second;
-    
-#ifdef VPC_DEBUG
-    std::cerr << VPC_YELLOW("Director> delegating to ")
-              << VPC_WHITE(comp->basename()) << std::endl;
-#endif //VPC_DEBUG
-    // compute task on found component
-    assert(!FALLBACKMODE);
-    comp->compute(pcb);
-
-    if( endPair.dii == NULL){
-      // active mode -> waits until simulated delay time has expired
-      
-      CoSupport::SystemC::wait(*(pcb->getBlockEvent().dii));
-      delete pcb->getBlockEvent().dii;
-      delete pcb->getBlockEvent().latency;
-      pcb->setBlockEvent(EventPair());
-      // as psb has been locked -> unlock it
-      this->pcbPool.unlock(pcb->getName(), lockid);
-      // and free it
-      this->pcbPool.free(pcb);
-    }
-     
+    assert(0);
+    this->compute( this->getFastLink(name, funcname),
+                   endPair );
   }
 
   //
@@ -259,8 +269,19 @@ namespace SystemC_VPC{
    * \brief Implementation of Director::registerComponent
    */
   void Director::registerComponent(AbstractComponent* comp){
-    this->component_map_by_name.insert(
-      std::pair<std::string, AbstractComponent* >(comp->basename(), comp));
+    ComponentId cid = comp->getComponentId();
+    if(cid >= components.capacity())
+      components.reserve(cid+100);
+
+    this->componentIdMap[comp->basename()] = cid;
+
+    this->components[cid] = comp;
+
+#ifdef VPC_DEBUG
+    cerr << " Director::registerComponent(" << comp->basename()
+         << ") [" << comp->getComponentId() << "] # " << components.capacity()
+         << endl;
+#endif //VPC_DEBUG
   }
     
   /**
@@ -269,18 +290,19 @@ namespace SystemC_VPC{
   void Director::registerMapping(const char* taskName, const char* compName){
     assert(!FALLBACKMODE);
 
-    std::map<std::string, AbstractComponent*>::iterator iter;
-    iter = this->component_map_by_name.find(compName);
-    //check if component is known
-    if(iter != this->component_map_by_name.end()){
-
-#ifdef VPC_DEBUG
-      std::cout << "Director: registering mapping: "<< taskName << " <-> "
-                << compName << endl;
-#endif //VPC_DEBUG
-      
-      this->mapping_map_by_name[taskName]= iter->second;
+    ProcessId       pid = getProcessId( taskName );
+    if( pid >= mappings.capacity() ){
+      mappings.reserve( pid + 100 );
     }
+
+    assert(pid <= mappings.capacity());
+    
+    ComponentId cid = this->getComponentId(compName);
+
+    AbstractComponent * comp = components[cid];
+
+    assert( comp != NULL );
+    mappings[pid] = comp;
   }
     
   /**
@@ -288,9 +310,14 @@ namespace SystemC_VPC{
    */
   ProcessControlBlock& Director::generatePCB(const char* name){
     assert(!FALLBACKMODE);
+
+    //cerr << "generatePCB( " << name << ")" << endl;
+
+    ProcessId       pid = getProcessId( name );
     
-    ProcessControlBlock& pcb = this->pcbPool.registerPCB(name);
+    ProcessControlBlock& pcb = this->pcbPool.registerPCB( pid );
     pcb.setName(name);
+    pcb.setPid( pid );
     return pcb;
   }
 
@@ -321,10 +348,55 @@ namespace SystemC_VPC{
       std::cerr << "Director> re-compute: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
       // get Component
-      AbstractComponent* comp = mapping_map_by_name[pcb->getName()];
+      AbstractComponent* comp = mappings[pcb->getPid()];
       comp->compute(pcb);
     }
     wait(SC_ZERO_TIME);
   }
+
+
+  ProcessId Director::uniqueProcessId() {
+    return globalProcessId++;
+  }
+
+  ProcessId Director::getProcessId(std::string process) {
+    ProcessIdMap::const_iterator iter = processIdMap.find(process);
+    if( iter == processIdMap.end() ) {
+      processIdMap[process] = this->uniqueProcessId();
+    }
+    iter = processIdMap.find(process);
+    return iter->second;
+  }
+
+  ComponentId Director::getComponentId(std::string component) {
+#ifdef VPC_DEBUG
+    cerr << " Director::getComponentId(" << component
+         << ") # " << componentIdMap.size()
+         << endl;
+#endif //VPC_DEBUG
+
+    ComponentIdMap::const_iterator iter = componentIdMap.find(component);
+    assert( iter != componentIdMap.end() );
+    return iter->second;
+      
+  }
+
+
+  FastLink Director::getFastLink(std::string process, std::string function) {
+    //cerr << "getFastLink( " << process << ", " << function << ")" << endl;
+    if(FALLBACKMODE) return FastLink();
+    assert(!FALLBACKMODE);
+
+    ProcessId       pid = getProcessId(  process  );
+
+    ProcessControlBlock* pcb = getProcessControlBlock( pid );
+    FunctionId           fid = pcb->DelayMapper::getFunctionId( function );
+
+    // pcb has been allocated by calling "getFunctionId"-> free it
+    this->pcbPool.free(pcb);
+
+    return FastLink(pid, fid);
+  }
+
 }
 
