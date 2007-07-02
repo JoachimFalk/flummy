@@ -243,7 +243,6 @@ namespace SystemC_VPC{
                          const char* funcname,
                          EventPair endPair)
   {
-    assert(0);
     this->compute( this->getFastLink(name, funcname),
                    endPair );
   }
