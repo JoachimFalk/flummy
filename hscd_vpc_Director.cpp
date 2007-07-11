@@ -266,8 +266,8 @@ namespace SystemC_VPC{
    */
   void Director::registerComponent(AbstractComponent* comp){
     ComponentId cid = comp->getComponentId();
-    if(cid >= components.capacity())
-      components.reserve(cid+100);
+    if(cid >= components.size())
+      components.resize(cid+100, NULL);
 
     this->componentIdMap[comp->basename()] = cid;
 
@@ -275,7 +275,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
     cerr << " Director::registerComponent(" << comp->basename()
-         << ") [" << comp->getComponentId() << "] # " << components.capacity()
+         << ") [" << comp->getComponentId() << "] # " << components.size()
          << endl;
 #endif //VPC_DEBUG
   }
