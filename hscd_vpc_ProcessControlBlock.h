@@ -31,6 +31,10 @@ namespace SystemC_VPC {
    * associated PCB can run on.
    */
   class DelayMapper{
+  protected:
+    static const FunctionId defaultFunctionId;
+  
+
   public:
 
     ~DelayMapper();
@@ -95,10 +99,11 @@ namespace SystemC_VPC {
     typedef std::map<std::string, FunctionId>  FunctionIdMap;
     FunctionId uniqueFunctionId();
     FunctionId getFunctionId(std::string function);
+    FunctionId createFunctionId(std::string function);
 
     FunctionIdMap   functionIdMap;
     FunctionId      globalFunctionId;
-  
+
     /**
      * Internal helper class to enable management of component specific
      * delays of a task, additional function specific delays on an associated
@@ -111,7 +116,6 @@ namespace SystemC_VPC {
       /**
        * \brief Default constuctor of an ComponentDealy instance
        * \param name specifies the name of the associated component
-       * \param base_delay specifies the standard delay used for execution
        * simulation
        */
       ComponentDelay( ComponentId cid );
@@ -129,6 +133,7 @@ namespace SystemC_VPC {
        * \param delay is the corresponding delay for the function execution
        */
       void setBaseDelay(sc_time delay);
+      sc_time getBaseDelay( ) const;
 
       /**
        * \brief Used to access delay
@@ -153,6 +158,7 @@ namespace SystemC_VPC {
        * execution
        */
       void setBaseLatency(sc_time latency);
+      sc_time getBaseLatency( ) const;
 
       /**
        * \brief Used to access latency
@@ -168,12 +174,6 @@ namespace SystemC_VPC {
 
       // the associated component
       ComponentId cid;
-
-      // base delay used for task running on this component
-      sc_time base_delay;
-
-      // base latency used for tasks running on this component
-      sc_time base_latency;
 
       typedef std::vector<sc_time> FunctionTimes;
       // map of possible special delay depending on functions

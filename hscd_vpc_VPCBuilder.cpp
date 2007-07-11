@@ -934,14 +934,14 @@ namespace SystemC_VPC{
 
 	      //per default latency is used as vpc-delay as well as vpc-latency
               // (vpc-delay == dii)
-	      p.setLatency(sc_latency);
+              //	      p.setLatency(sc_latency);
               p.addFuncLatency( this->director, sTarget, fname, sc_latency );
-	      p.setDelay(sc_latency);
+              //	      p.setDelay(sc_latency);
               p.addFuncDelay( this->director, sTarget, fname, sc_latency );
 
 	      // if having a  then dii overides delay
 	      if( dii != NULL ){
-                p.setDelay(sc_dii);
+                //                p.setDelay(sc_dii);
                 p.addFuncDelay( this->director, sTarget, fname, sc_dii );
 	      }
 	    }else if( 0==XMLString::compareNString( xmlName,

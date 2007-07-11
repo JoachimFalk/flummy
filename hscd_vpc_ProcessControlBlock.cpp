@@ -7,67 +7,59 @@ namespace SystemC_VPC{
 
   ProcessControlBlock::ComponentDelay::ComponentDelay( ComponentId cid )
     : cid(cid),
-      base_delay(SC_ZERO_TIME),
-      base_latency(SC_ZERO_TIME),
-      funcDelays(1, sc_time(-1,SC_PS)),
-      funcLatencies(1, sc_time(-1,SC_PS)) {}
+      funcDelays(1, SC_ZERO_TIME),
+      funcLatencies(1, SC_ZERO_TIME)
+  {
+    setBaseDelay(SC_ZERO_TIME);
+    setBaseLatency(SC_ZERO_TIME);
+  }
 
   void ProcessControlBlock::ComponentDelay::addDelay( FunctionId fid,
                                                       sc_time delay ){
-    if( fid >= funcDelays.size())
-      funcDelays.resize( fid + 100, sc_time(-1,SC_PS) );
-
+    if( fid >= funcDelays.size()){
+      funcDelays.resize( fid + 100, SC_ZERO_TIME );
+    }
     this->funcDelays[fid] = delay;
   }
 
   void ProcessControlBlock::ComponentDelay::setBaseDelay( sc_time delay ){
-    this->base_delay = delay;
+    this->funcDelays[defaultFunctionId] = delay;
+  }
+
+  sc_time ProcessControlBlock::ComponentDelay::getBaseDelay( ) const {
+    return this->funcDelays[defaultFunctionId];
   }
 
   sc_time ProcessControlBlock::ComponentDelay::getDelay(
     FunctionId fid) const
   {
-    //if(funcname == NULL){
-    //return this->base_delay;
-    //}else{
-    //std::string key(funcname, strlen(funcname));
-
+    assert(fid < funcDelays.size());
     sc_time ret = funcDelays[fid];
-
-    if( ret >= SC_ZERO_TIME ){
-      return ret;
-    }
-
-    // no function delay given in configuration -> use base delay
-    return this->base_delay;
+    return ret;
   }
 
   void ProcessControlBlock::ComponentDelay::addLatency( FunctionId fid,
                                                         sc_time latency ){
     if( fid >= funcLatencies.size())
-      funcLatencies.resize( fid + 100, sc_time(-1,SC_PS) );
+      funcLatencies.resize( fid + 100, SC_ZERO_TIME );
 
     this->funcLatencies[fid] = latency;
   }
 
   void ProcessControlBlock::ComponentDelay::setBaseLatency( sc_time latency ){
-    this->base_latency = latency;
+    this->funcLatencies[defaultFunctionId] = latency;
+  }
+
+  sc_time ProcessControlBlock::ComponentDelay::getBaseLatency( ) const {
+    return this->funcLatencies[defaultFunctionId];
   }
 
   sc_time ProcessControlBlock::ComponentDelay::getLatency(
     FunctionId fid) const
   {
-    // if(funcname == NULL){
-    //return this->base_latency;
-    //}else{
+    assert(fid < funcLatencies.size());
     sc_time ret = funcLatencies[fid];
-    
-    if( ret >= SC_ZERO_TIME ){
-      return ret;
-    }
-
-    // no function latency given in configuration -> use base latency
-    return this->base_latency;
+    return ret;
   }
 
   DelayMapper::~DelayMapper(){}
@@ -79,7 +71,7 @@ namespace SystemC_VPC{
 
   DelayMapper::DelayMapper()
     : functionIdMap(),
-      globalFunctionId(0),
+      globalFunctionId( defaultFunctionId + 1 ),
       compDelays() {}
 
   void DelayMapper::addFuncDelay( Director* director,
@@ -108,7 +100,7 @@ namespace SystemC_VPC{
     ComponentDelay *cd = this->compDelays[cid];
 
     if(funcname != NULL){
-      FunctionId  fid = this->getFunctionId(funcname);
+      FunctionId  fid = this->createFunctionId(funcname);
       cd->addDelay(fid, delay);
     } else {
       cd->setBaseDelay(delay);
@@ -158,7 +150,7 @@ namespace SystemC_VPC{
     ComponentDelay *cd = this->compDelays[cid];
 
     if(funcname != NULL){
-      FunctionId  fid = this->getFunctionId(funcname);
+      FunctionId  fid = this->createFunctionId(funcname);
       cd->addLatency(fid, latency);
     } else {
       cd->setBaseLatency(latency);
@@ -387,7 +379,7 @@ namespace SystemC_VPC{
     return this->traceSignal;
   }
 
-  FunctionId DelayMapper::getFunctionId(std::string function) {
+  FunctionId DelayMapper::createFunctionId(std::string function) {
     FunctionIdMap::const_iterator iter = functionIdMap.find(function);
     if( iter == functionIdMap.end() ) {
       functionIdMap[function] = this->uniqueFunctionId();
@@ -396,8 +388,22 @@ namespace SystemC_VPC{
     return iter->second;
   }
 
+  FunctionId DelayMapper::getFunctionId(std::string function) {
+    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
+
+    // the function name was not set in configuration
+    // -> we have to use default delay
+    if( iter == functionIdMap.end() ) {
+      return defaultFunctionId;
+    }
+    return iter->second;
+    
+  }
+
   FunctionId DelayMapper::uniqueFunctionId() {
     return globalFunctionId++;
   }
+
+  const FunctionId DelayMapper::defaultFunctionId = 0;
 
 }
