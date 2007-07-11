@@ -112,16 +112,16 @@ namespace SystemC_VPC{
   {
     ComponentDelay * cd = this->compDelays[cid];
 
+    assert( cd != NULL );
+    sc_time ret = cd->getDelay(fid);
+
 #ifdef VPC_DEBUG
     std::cerr << "DelayMapper> Delay for " << cid;
-    if(funcname != NULL){
-      std::cerr << "->" << fid;
-    }
+    std::cerr << "->" << fid;
     std::cerr << " is " << ret << std::endl;
 #endif //VPC_DEBUG 
     
-    assert( cd != NULL );
-    return cd->getDelay(fid);
+    return ret;
   }
 
   void DelayMapper::addFuncLatency( Director* director,
@@ -163,16 +163,16 @@ namespace SystemC_VPC{
   {
     ComponentDelay * cd = this->compDelays[cid];
 
+    assert( cd != NULL );
+    sc_time ret = cd->getDelay(fid);
+
 #ifdef VPC_DEBUG
     std::cerr << "DelayMapper> Latency for " << cid;
-    if(funcname != NULL){
-      std::cerr << "->" << fid;
-    }
+    std::cerr << "->" << fid;
     std::cerr << " is " << ret << std::endl;
 #endif //VPC_DEBUG 
-    
-    assert( cd != NULL );
-    return cd->getDelay(fid);
+
+    return ret;
   }
 
 
