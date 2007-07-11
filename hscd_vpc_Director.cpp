@@ -194,16 +194,13 @@ namespace SystemC_VPC{
     }
 
     
-    if( mappings.capacity() < fLink.process &&
-        mappings[fLink.process] != NULL ){
-      cerr << "Unknown mapping <" << pcb->getName() << "> to ??" 
-           << mappings[fLink.process]<< endl;
-      cerr << fLink.process << " # " << mappings.size() << endl;
+    if (mappings.size() < fLink.process ||
+        mappings[fLink.process] == NULL) {
+      cerr << "Unknown mapping <" << pcb->getName() << "> to ??" << std::endl;
+      
+      assert(mappings.size() >= fLink.process &&
+             mappings[fLink.process] != NULL);
     }
-    
-    assert( mappings.capacity() >= fLink.process ||
-            mappings[fLink.process] == NULL );
-    
     
     // get Component
     AbstractComponent* comp = mappings[fLink.process];
@@ -290,11 +287,11 @@ namespace SystemC_VPC{
     assert(!FALLBACKMODE);
 
     ProcessId       pid = getProcessId( taskName );
-    if( pid >= mappings.capacity() ){
-      mappings.reserve( pid + 100 );
+    if( pid >= mappings.size() ){
+      mappings.resize( pid + 100, NULL );
     }
 
-    assert(pid <= mappings.capacity());
+    assert(pid <= mappings.size());
     
     ComponentId cid = this->getComponentId(compName);
 
