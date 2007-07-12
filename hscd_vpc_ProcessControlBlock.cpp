@@ -164,7 +164,7 @@ namespace SystemC_VPC{
     ComponentDelay * cd = this->compDelays[cid];
 
     assert( cd != NULL );
-    sc_time ret = cd->getDelay(fid);
+    sc_time ret = cd->getLatency(fid);
 
 #ifdef VPC_DEBUG
     std::cerr << "DelayMapper> Latency for " << cid;
