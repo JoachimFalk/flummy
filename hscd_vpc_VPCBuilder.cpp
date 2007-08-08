@@ -1005,6 +1005,9 @@ namespace SystemC_VPC{
                             << std::endl;
 #endif //VPC_DEBUG
                   p.addFuncDelay( this->director, sTarget, sType, delay );
+                  // using attribute="functionName" for compatibility:
+                  // force to have a latency
+                  p.addFuncLatency( this->director, sTarget, sType, delay );
 
                 } catch(const InvalidArgumentException& ex) {
 #ifdef VPC_DEBUG
