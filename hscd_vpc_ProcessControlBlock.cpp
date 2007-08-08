@@ -5,7 +5,7 @@ namespace SystemC_VPC{
 
   int ProcessControlBlock::globalInstanceId = 0;
 
-  ProcessControlBlock::ComponentDelay::ComponentDelay( ComponentId cid )
+  DelayMapper::ComponentDelay::ComponentDelay( ComponentId cid )
     : cid(cid),
       funcDelays(1, SC_ZERO_TIME),
       funcLatencies(1, SC_ZERO_TIME)
@@ -14,7 +14,7 @@ namespace SystemC_VPC{
     setBaseLatency(SC_ZERO_TIME);
   }
 
-  void ProcessControlBlock::ComponentDelay::addDelay( FunctionId fid,
+  void DelayMapper::ComponentDelay::addDelay( FunctionId fid,
                                                       sc_time delay ){
     if( fid >= funcDelays.size()){
       funcDelays.resize( fid + 100, SC_ZERO_TIME );
@@ -22,15 +22,15 @@ namespace SystemC_VPC{
     this->funcDelays[fid] = delay;
   }
 
-  void ProcessControlBlock::ComponentDelay::setBaseDelay( sc_time delay ){
+  void DelayMapper::ComponentDelay::setBaseDelay( sc_time delay ){
     this->funcDelays[defaultFunctionId] = delay;
   }
 
-  sc_time ProcessControlBlock::ComponentDelay::getBaseDelay( ) const {
+  sc_time DelayMapper::ComponentDelay::getBaseDelay( ) const {
     return this->funcDelays[defaultFunctionId];
   }
 
-  sc_time ProcessControlBlock::ComponentDelay::getDelay(
+  sc_time DelayMapper::ComponentDelay::getDelay(
     FunctionId fid) const
   {
     assert(fid < funcDelays.size());
@@ -38,7 +38,7 @@ namespace SystemC_VPC{
     return ret;
   }
 
-  void ProcessControlBlock::ComponentDelay::addLatency( FunctionId fid,
+  void DelayMapper::ComponentDelay::addLatency( FunctionId fid,
                                                         sc_time latency ){
     if( fid >= funcLatencies.size())
       funcLatencies.resize( fid + 100, SC_ZERO_TIME );
@@ -46,15 +46,15 @@ namespace SystemC_VPC{
     this->funcLatencies[fid] = latency;
   }
 
-  void ProcessControlBlock::ComponentDelay::setBaseLatency( sc_time latency ){
+  void DelayMapper::ComponentDelay::setBaseLatency( sc_time latency ){
     this->funcLatencies[defaultFunctionId] = latency;
   }
 
-  sc_time ProcessControlBlock::ComponentDelay::getBaseLatency( ) const {
+  sc_time DelayMapper::ComponentDelay::getBaseLatency( ) const {
     return this->funcLatencies[defaultFunctionId];
   }
 
-  sc_time ProcessControlBlock::ComponentDelay::getLatency(
+  sc_time DelayMapper::ComponentDelay::getLatency(
     FunctionId fid) const
   {
     assert(fid < funcLatencies.size());
