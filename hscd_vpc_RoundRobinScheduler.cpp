@@ -48,7 +48,7 @@ namespace SystemC_VPC{
     }
   }
 
-  void RoundRobinScheduler::setProperty(char* key, char* value){
+  void RoundRobinScheduler::setProperty(const char* key, const char* value){
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
       char *domain;
       domain=strstr(value,"ns");
@@ -162,7 +162,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of RoundRobinScheduler::signalDeallocation
    */
-  void RoundRobinScheduler::signalDeallocation(){
+  void RoundRobinScheduler::signalDeallocation(bool kill){
     this->remainingSlice =
       this->remainingSlice - (sc_simulation_time() - this->lastassign);
   }

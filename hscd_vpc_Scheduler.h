@@ -8,7 +8,7 @@ namespace SystemC_VPC{
   
   enum scheduling_decision {ONLY_ASSIGN // neuer Task keine alten
           ,PREEMPT    // neuer Task verdrängt alten
-          ,RESIGNED   // alter Task beendet, kein neuer
+          ,RESIGNED   // alter Task beendet/verdraengt, kein neuer
           ,NOCHANGE}; //keine änderung 
   class Component;
 
@@ -59,7 +59,7 @@ namespace SystemC_VPC{
      *
      * Does nothing by default.
      */
-    virtual void setProperty(char* key, char* value){}
+    virtual void setProperty(const char* key, const char* value){}
 
     /**************************/
     /*   EXTENSION SECTION    */
@@ -74,9 +74,11 @@ namespace SystemC_VPC{
       this->name = name;
     }
 
-    virtual void signalDeallocation(){}
+    virtual void signalDeallocation(bool kill){}
     
     virtual void signalAllocation(){}
+    
+    virtual void initialize(){}
             
   private:
       const char* name;

@@ -41,7 +41,7 @@ namespace SystemC_VPC{
     }
   }
 
-  void PriorityScheduler::setProperty(char* key, char* value){
+  void PriorityScheduler::setProperty(const char* key, const char* value){
   }
 
   bool PriorityScheduler::getSchedulerTimeSlice(

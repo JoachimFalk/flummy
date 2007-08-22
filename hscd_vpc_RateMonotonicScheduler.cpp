@@ -41,7 +41,7 @@ namespace SystemC_VPC{
     }
   }
 
-  void RateMonotonicScheduler::setProperty(char* key, char* value){
+  void RateMonotonicScheduler::setProperty(const char* key, const char* value){
   }
 
   bool RateMonotonicScheduler::getSchedulerTimeSlice(

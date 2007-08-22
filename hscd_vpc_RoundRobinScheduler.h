@@ -25,10 +25,10 @@ namespace SystemC_VPC{
     void removedTask(ProcessControlBlock *pcb);
     sc_event& getNotifyEvent();
     scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  std::map<int,ProcessControlBlock*> &ready_tasks,const  std::map<int,ProcessControlBlock*> &running_tasks);
-    void setProperty(char* key, char* value);
+    void setProperty(const char* key, const char* value);
     sc_time* schedulingOverhead();
     
-    void signalDeallocation();
+    void signalDeallocation(bool kill);
     void signalAllocation();
     
   protected:
