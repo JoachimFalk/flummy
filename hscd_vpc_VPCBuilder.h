@@ -30,6 +30,7 @@
 #include "hscd_vpc_RoundRobinController.h"
 #include "hscd_vpc_PriorityController.h"
 #include "hscd_vpc_EDFController.h"
+#include "hscd_vpc_InvalidArgumentException.h"
 
 #include "hscd_vpc_Configuration.h"
 
@@ -269,11 +270,6 @@ namespace SystemC_VPC{
      * \brief Generate pcb for internal use in VPC Framework
      */
     AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
-
-    /**
-     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
-     */
-    sc_time createSC_Time(char* timeString) throw(InvalidArgumentException);
     
   };
     

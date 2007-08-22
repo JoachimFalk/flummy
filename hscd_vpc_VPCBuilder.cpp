@@ -1,6 +1,5 @@
 #include <iostream>
 #include <values.h> 
-#include <sstream>
 #include <algorithm>
 #include <cctype>
 #include <string>
@@ -561,11 +560,11 @@ namespace SystemC_VPC{
 	  sc_time sc_latency = SC_ZERO_TIME;
 	  sc_time sc_dii     = SC_ZERO_TIME;
 	  
-	  if(latency != NULL) sc_latency = createSC_Time(latency);
-	  if(dii != NULL) sc_dii = createSC_Time(dii);
+	  if(latency != NULL) sc_latency = Director::createSC_Time(latency);
+	  if(dii != NULL) sc_dii = Director::createSC_Time(dii);
 	  { // latency and delay are synonym -> take maximum if they differ
 	    sc_time sc_delay = SC_ZERO_TIME;
-	    if(delay != NULL) sc_delay = createSC_Time(delay);
+	    if(delay != NULL) sc_delay = Director::createSC_Time(delay);
 	    sc_latency = MAX(sc_latency,sc_delay);
 	  }
 
@@ -924,11 +923,11 @@ namespace SystemC_VPC{
 	      sc_time sc_latency = SC_ZERO_TIME;
 	      sc_time sc_dii     = SC_ZERO_TIME;
 
-	      if(latency != NULL) sc_latency = createSC_Time(latency);
-	      if(dii != NULL) sc_dii = createSC_Time(dii);
+	      if(latency != NULL) sc_latency = Director::createSC_Time(latency);
+	      if(dii != NULL) sc_dii = Director::createSC_Time(dii);
 	      { // latency and delay are synonym -> take maximum if they differ
 		sc_time sc_delay = SC_ZERO_TIME;
-		if(delay != NULL) sc_delay = createSC_Time(delay);
+		if(delay != NULL) sc_delay = Director::createSC_Time(delay);
 		sc_latency = MAX(sc_latency,sc_delay);
 	      }
 
@@ -970,21 +969,21 @@ namespace SystemC_VPC{
               }else if( 0 == strncmp(sType,
                                      STR_VPC_DEADLINE,
                                      sizeof(STR_VPC_DEADLINE) )){
-                p.setDeadline(createSC_Time(sValue));
+                p.setDeadline(Director::createSC_Time(sValue));
               }else if( 0 == strncmp(sType,
                                      STR_VPC_PERIOD,
                                      sizeof(STR_VPC_PERIOD) )){
-                p.setPeriod(createSC_Time(sValue));
+                p.setPeriod(Director::createSC_Time(sValue));
               }else if( 0 == strncmp(sType,
                                      STR_VPC_DELAY,
                                      sizeof(STR_VPC_DELAY) )){
-		sc_time delay = createSC_Time(sValue);
+		sc_time delay = Director::createSC_Time(sValue);
                 p.setDelay(delay);
                 p.addFuncDelay( this->director, sTarget, NULL, delay );
               }else if( 0 == strncmp(sType,
                                      STR_VPC_LATENCY,
                                      sizeof(STR_VPC_LATENCY) )){
-		sc_time latency = createSC_Time(sValue);
+		sc_time latency = Director::createSC_Time(sValue);
                 p.setLatency(latency);
                 p.addFuncLatency( this->director, sTarget, NULL, latency );
               }else{
@@ -996,7 +995,7 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
 
 		try{  
-		  sc_time delay = createSC_Time(sValue);
+		  sc_time delay = Director::createSC_Time(sValue);
 #ifdef VPC_DEBUG
                   std::cerr << VPC_YELLOW("VPCBuilder> Try to interpret as"
                               " function specific delay!!") << endl;
@@ -1119,21 +1118,21 @@ namespace SystemC_VPC{
         }else if( 0 == strncmp(attiter->first,
                                STR_VPC_DEADLINE,
                                sizeof(STR_VPC_DEADLINE) )){
-          p->setDeadline(createSC_Time(attiter->second));
+          p->setDeadline(Director::createSC_Time(attiter->second));
         }else if( 0 == strncmp(attiter->first,
                                STR_VPC_PERIOD,
                                sizeof(STR_VPC_PERIOD) )){
-          p->setPeriod(createSC_Time(attiter->second));
+          p->setPeriod(Director::createSC_Time(attiter->second));
         }else if( 0 == strncmp(attiter->first,
                                STR_VPC_DELAY,
                                sizeof(STR_VPC_DELAY) )){
-	  sc_time delay = createSC_Time(attiter->second);
+	  sc_time delay = Director::createSC_Time(attiter->second);
           p->setDelay(delay);
           p->addFuncDelay( this->director, target, NULL, delay );
         }else if( 0 == strncmp(attiter->first,
                                STR_VPC_LATENCY,
                                sizeof(STR_VPC_LATENCY) )){
-	  sc_time latency = createSC_Time(attiter->second);
+	  sc_time latency = Director::createSC_Time(attiter->second);
 	  p->setLatency(latency);
 	  p->addFuncLatency( this->director, target, NULL, latency );
 	}else{
@@ -1146,7 +1145,7 @@ namespace SystemC_VPC{
 
           //if( 1 == sscanf(attiter->second, "%lf", &delay) ){  
 	  try{
-	    sc_time delay = createSC_Time(attiter->second);
+	    sc_time delay = Director::createSC_Time(attiter->second);
 #ifdef VPC_DEBUG
             std::cerr << VPC_YELLOW("VPCBuilder> Try to interpret as function"
                                     " specific delay!!") << endl;
@@ -1230,54 +1229,6 @@ namespace SystemC_VPC{
     }
     
     return controller;
-  }
-
-  sc_time VPCBuilder::createSC_Time(char* timeString)
-    throw(InvalidArgumentException){
-    assert(timeString != NULL);
-    double value = -1;
-    string unit;
-
-    sc_time_unit scUnit = SC_NS;
-
-    stringstream data(timeString);
-    if(data.good()){
-      data >> value;
-    }else{
-      string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
-      throw InvalidArgumentException(msg);
-    }
-    if( data.fail() ){
-      string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
-      throw InvalidArgumentException(msg);
-    }
-    if(data.good()){
-      data >> unit;
-      if(data.fail()){
-#ifdef VPC_DEBUG
-	std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!"
-                  << std::endl;
-#endif //VPC_DEBUG
-	scUnit = SC_NS;
-      }else{
-	std::transform (unit.begin(),
-                        unit.end(),
-                        unit.begin(),
-                        (int(*)(int))tolower);
-	if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
-	else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
-	else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
-	else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
-	else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
-	else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
-      }
-    }
-
-    return sc_time(value, scUnit);
   }
 
 }// namespace SystemC_VPC

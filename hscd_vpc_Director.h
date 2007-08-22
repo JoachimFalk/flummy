@@ -23,7 +23,7 @@
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_EventPair.h"
 #include "FastLink.h"
-
+#include <hscd_vpc_InvalidArgumentException.h>
 
 // provide compatibility with other compilers then gcc, hopefully
 #include <ansidecl.h>
@@ -200,6 +200,11 @@ namespace SystemC_VPC{
     ComponentId getComponentId(std::string component);
 
     FastLink getFastLink(std::string process, std::string function);
+
+    /**
+     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
+     */
+    static sc_time createSC_Time(const char* timeString) throw(InvalidArgumentException);
 
   private:
 

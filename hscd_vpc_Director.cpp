@@ -16,11 +16,13 @@
  * $log$
  *****************************************************************************/
 #include <iostream>
+#include <sstream>
 
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_AbstractComponent.h>
 #include <hscd_vpc_Term.h>
 #include <hscd_vpc_VPCBuilder.h>
+#include "hscd_vpc_InvalidArgumentException.h"
 
 #include <systemc.h>
 #include <map>
@@ -392,6 +394,55 @@ namespace SystemC_VPC{
     this->pcbPool.free(pcb);
 
     return FastLink(pid, fid);
+  }
+
+  
+  sc_time Director::createSC_Time(const char* timeString)
+    throw(InvalidArgumentException){
+    assert(timeString != NULL);
+    double value = -1;
+    string unit;
+
+    sc_time_unit scUnit = SC_NS;
+
+    std::stringstream data(timeString);
+    if(data.good()){
+      data >> value;
+    }else{
+      string msg("Parsing Error: Unknown argument: <");
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if( data.fail() ){
+      string msg("Parsing Error: Unknown argument: <");
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
+      throw InvalidArgumentException(msg);
+    }
+    if(data.good()){
+      data >> unit;
+      if(data.fail()){
+#ifdef VPC_DEBUG
+	std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!"
+                  << std::endl;
+#endif //VPC_DEBUG
+	scUnit = SC_NS;
+      }else{
+	std::transform (unit.begin(),
+                        unit.end(),
+                        unit.begin(),
+                        (int(*)(int))tolower);
+	if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
+	else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
+	else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
+	else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
+	else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
+	else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
+      }
+    }
+
+    return sc_time(value, scUnit);
   }
 
 }
