@@ -18,6 +18,7 @@
 #include <hscd_vpc_Component.h>
 #include <hscd_vpc_Scheduler.h>
 #include <hscd_vpc_FCFSScheduler.h>
+#include <TDMAScheduler.h>
 #include <hscd_vpc_RoundRobinScheduler.h>
 #include <hscd_vpc_PriorityScheduler.h>
 #include <hscd_vpc_RateMonotonicScheduler.h>
@@ -38,6 +39,9 @@ namespace SystemC_VPC{
     int actualRunningIID;
     bool newTaskDuringOverhead=false;
     //wait(SC_ZERO_TIME);
+    
+    scheduler->initialize();
+    
     while(1){
 
       //determine the time slice for next scheduling descission and wait for
@@ -300,6 +304,12 @@ namespace SystemC_VPC{
                          strlen(STR_FIRSTCOMEFIRSTSERVE))
               || 0==strncmp(schedulername,STR_FCFS,strlen(STR_FCFS))){
       scheduler=new FCFSScheduler();
+      
+      // TDMA hat nur einen Namen ;-)
+    }else if( 0==strncmp(schedulername,STR_TDMA,
+                         strlen(STR_TDMA))){
+      scheduler=new TDMAScheduler((const char*)schedulername);
+
 
     }else{
       //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVE << endl;

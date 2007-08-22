@@ -1,27 +1,38 @@
-#include <hscd_vpc_RoundRobinScheduler.h>
+
+/* 
+	TDMA-Scheduler mit variabler Minislot-Größe!
+	
+	CMX-Format:
+	Slotkennzeichen: type="slotxxxxx"
+	Funktionszuordnung: value="slotxxxxx"
+	
+	z.B.
+	<component name="Component1" type="threaded" scheduler="TDMA">
+   	<attribute type="slot0" value="20ns"/>
+   	<attribute type="periodic.task1" value="slot0"/>
+   	<attribute type="slot1" value="20ns"/>
+   	<attribute type="periodic.task2" value="slot1"/>
+  	</component>
+
+*/
+
+#include <TDMAScheduler.h>
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_Component.h>
 
 namespace SystemC_VPC{
-  RoundRobinScheduler::RoundRobinScheduler(const char *schedulername){
-    TIMESLICE=5;
-    lastassign=0;
-    this->remainingSlice = 0;
+
+  TDMAScheduler::TDMAScheduler(const char *schedulername)
+    : _properties() {
+    processcount=0;
+    lastassign=sc_time(0,SC_NS);
+    this->remainingSlice = sc_time(0,SC_NS);
+    slicecount=0;
+    curr_slicecount=-1;  
     char rest[VPC_MAX_STRING_LENGTH];
-    //      char muell[VPC_MAX_STRING_LENGTH];
-    /*
-       if(0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN))){
-       cerr << "Scheduler: "<< STR_ROUNDROBIN <<" - "<< schedulername <<endl;
-       sscanf(schedulername,"%s-%s",muell,rest);
-       cerr << "----- Rest: "<<rest<< " muell: "<<muell<<endl;
-       }else if(0==strncmp(schedulername,STR_RR,strlen(STR_RR))){
-       cerr << "Scheduler: "<< STR_RR << endl;
-       }
-       */
     int sublength;
     char *secondindex;
-
-    //':' finden -> ':' trennt key-value Paare 
+     //':' finden -> ':' trennt key-value Paare 
     char *firstindex=strchr(schedulername,':');
     while(firstindex!=NULL){
 
@@ -34,7 +45,7 @@ namespace SystemC_VPC{
       strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
       rest[sublength-1]='\0';
       firstindex=secondindex;                     
-
+     
       // key und value trennen und Property setzen
       char *key, *value;
       value=strstr(rest,"-");
@@ -44,110 +55,177 @@ namespace SystemC_VPC{
         key=rest;
         setProperty(key,value);
       }
-
     }
   }
-
-  void RoundRobinScheduler::setProperty(char* key, char* value){
-    if(0==strncmp(key,"timeslice",strlen("timeslice"))){
-      char *domain;
-      domain=strstr(value,"ns");
-      if(domain!=NULL){
-        domain[0]='\0';
-        sscanf(value,"%lf",&TIMESLICE);
-      }
-
-    }
+  
+  void TDMAScheduler::setProperty(const char* key, const char* value){
+  	std::pair<std::string, std::string> toadd(key,value);
+  	_properties.push_back(toadd);
+  }
+  
+   void TDMAScheduler::initialize(){   
+   	for(std::deque< std::pair <std::string, std::string> >::const_iterator iter = this->_properties.begin();
+	iter != this->_properties.end();
+	++iter){
+		this->_setProperty(iter->first.c_str(), iter->second.c_str());
+	}
+#ifdef VPC_DEBUG
+	cout << "------------ END Initialize ---------"<<endl;
+#endif //VPC_DEBUG 	
+	this->_properties.clear();
+  }
+  
+ 
+  void TDMAScheduler::_setProperty(const char* key, const char* value){
+  	char *domain;
+	int slot;
+    	//Herausfinden, welcher Slot genannt ist + welche Zeit ihm zugeordnet wird      
+    	if(0==strncmp(key,"slot",strlen("slot"))){
+      		domain=strstr(key,"slot");
+      		if(domain!=NULL){
+        		domain+=4*sizeof(char);
+        		sscanf(domain,"%d",&slot);
+			domain=strstr(value,"ns");
+      			if(domain!=NULL){
+			//Erstellen der TDMA-Struktur
+				TDMASlot newSlot;
+				newSlot.length = Director::createSC_Time(value);	
+				newSlot.name = key;
+				TDMA_slots.insert(TDMA_slots.end(), newSlot);
+				slicecount++;
+				/*Erzeugen einer Info-Ausgabe		
+				domain[0]='\0';
+				sscanf(value,"%lf",&slottime);
+				std::cout << "Datensatz für Slot Nr." << slot 
+				<<"gefunden! TDMA-Slotdauer: " <<slottime << "ns"<<std::endl;
+		*/		
+			}
+      		}
+    	}else if(0==strncmp(value,"slot",strlen("slot"))){
+    		int i=-1;
+		//schon Slots geadded? oder cmx-Syntax/Reihenfolge falsch?
+		assert(0<TDMA_slots.size());
+		//Betreffende SlotID in der Slotliste suchen
+    		do{
+			//nichts zu tun.. da lediglich durchiteriert wird!
+		}while(TDMA_slots[++i].name != value && (i+1)<TDMA_slots.size());
+    	 
+		//auch wirklich etwas passendes gefunden?		
+ 		assert(i<TDMA_slots.size());
+		//Beziehung PId - SlotID herstellen
+  		PIDmap[Director::getInstance().getProcessId(key)]=i;   
+// 		cout<<"add Function " <<  key << " to " << value<<endl;
+    	}	
   }
 
-  bool RoundRobinScheduler::getSchedulerTimeSlice(
-    sc_time& time,
-    const std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks )
-  {
-    if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
-    time=sc_time(TIMESLICE,SC_NS);
-    return true;
+  
+  bool TDMAScheduler::getSchedulerTimeSlice( sc_time& time,
+  	 	const std::map<int,ProcessControlBlock*> &ready_tasks,
+    		const  std::map<int,ProcessControlBlock*> &running_tasks )
+  {      
+    // keine wartenden + keine aktiven Threads -> ende!
+    if(processcount==0 && running_tasks.size()==0) return 0;   
+    //ansonsten: Restlaufzeit der Zeitscheibe
+    time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - this->lastassign);  
+    return true;   
   }
-  void RoundRobinScheduler::addedNewTask(ProcessControlBlock *pcb){
-    rr_fifo.push_back(pcb->getInstanceId());
+  
+  
+  void TDMAScheduler::addedNewTask(ProcessControlBlock *pcb){    
+     //Neu für TDMA: Task der entsprechenden Liste des passenden TDMA-Slots hinzufügen
+     TDMA_slots[ PIDmap[pcb->getPid()] ].pid_fifo.push_back(pcb->getInstanceId());
+#ifdef VPC_DEBUG     
+     cout<<"added Process " <<  pcb->getInstanceId() << " to Slot " << PIDmap[pcb->getPid()]  <<endl;
+#endif //VPC_DEBUG
+     processcount++;
   }
-  void RoundRobinScheduler::removedTask(ProcessControlBlock *pcb){
-    std::deque<int>::iterator iter;
-    for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
+  
+  
+  void TDMAScheduler::removedTask(ProcessControlBlock *pcb){  
+    std::deque<ProcessId>::iterator iter;
+    for(iter = TDMA_slots[ PIDmap[pcb->getPid()] ].pid_fifo.begin(); iter!=TDMA_slots[PIDmap[pcb->getPid()]].pid_fifo.end() ;iter++){
       if( *iter == pcb->getInstanceId()){
-        rr_fifo.erase(iter);
+        TDMA_slots[PIDmap[pcb->getPid()]].pid_fifo.erase(iter);
         break;
       }
     }
+#ifdef VPC_DEBUG    
+    cout<<"removed Task: " << pcb->getInstanceId()<<endl;
+#endif //VPC_DEBUG   
+    processcount--;  
   }
-  scheduling_decision RoundRobinScheduler::schedulingDecision(
-    int& task_to_resign,
-    int& task_to_assign,
-    const  std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks )
+  
+  
+  // Eigentlicher Scheduler
+  scheduling_decision TDMAScheduler::schedulingDecision(
+    		int& task_to_resign,
+    		int& task_to_assign,
+    		const  std::map<int,ProcessControlBlock*> &ready_tasks,
+    		const  std::map<int,ProcessControlBlock*> &running_tasks )
   {
-
     scheduling_decision ret_decision=NOCHANGE;
+    //Zeitscheibe abgelaufen?
+    if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
+    else{
+    	this->remainingSlice = this->remainingSlice - (sc_time_stamp() - this->lastassign);  
+    }
+    this->lastassign = sc_time_stamp();
+    
+    if(this->remainingSlice <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
+    	curr_slicecount = (curr_slicecount + 1)%slicecount; // Wechsel auf die nächste Zeitscheibe nötig!
+	//neue Timeslice laden
+    	this->remainingSlice = TDMA_slots[curr_slicecount].length;
 
-    this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
-    this->lastassign = sc_simulation_time();
-
-    if(this->remainingSlice <= 0){//Zeitscheibe wirklich abgelaufen!
-      if(rr_fifo.size()>0){    // neuen Task bestimmen
-        task_to_assign = rr_fifo.front();
-        rr_fifo.pop_front();
+      if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
+        task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
+// 	cout<<"Scheduler:new task: " << task_to_assign << "..." <<endl;
         
-        //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
+	//alter wurde schon entfernt (freiwillige abgabe "BLOCK")
         // -> kein preemption!
         ret_decision= ONLY_ASSIGN;
+	
         if(running_tasks.size()!=0){  // alten Task entfernen
           std::map<int,ProcessControlBlock*>::const_iterator iter;
           iter=running_tasks.begin();
           ProcessControlBlock *pcb=iter->second;
           task_to_resign=pcb->getInstanceId();
-          rr_fifo.push_back(pcb->getInstanceId());
           ret_decision= PREEMPT;  
         }
         // else{}    ->
         //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
+      }else{
+      //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdrängen und "idle" werden!
+      if(running_tasks.size()!=0){  // alten Task entfernen
+          std::map<int,ProcessControlBlock*>::const_iterator iter;
+          iter=running_tasks.begin();
+          ProcessControlBlock *pcb=iter->second;
+          task_to_resign=pcb->getInstanceId();
+          ret_decision=RESIGNED;
+        }else{
+	//war keiner da... und ist auch kein Neuer da -> keine Änderung	
+      	ret_decision=NOCHANGE;
+	}      	
       }    
-    }else{//neuer Task hinzugefügt -> nichts tun 
-      //oder alter entfernt    -> neuen setzen
-
-      //neuen setzen:
+    }else{
+     	//neuer Task hinzugefügt -> nichts tun 
+      	//oder alter entfernt    -> neuen setzen
+      	//neuen setzen:
       if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-        if(rr_fifo.size()>0){            // ist da auch ein neuer da?
-          task_to_assign = rr_fifo.front();
-          rr_fifo.pop_front();
+        if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){            // ist da auch ein neuer da?
+          task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
 
           //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
           // -> kein preemption!
           ret_decision= ONLY_ASSIGN;
         }
       }
-
-      //nichts tun:
-      //     ret_decision=NOCHANGE;
-      //neuer Task hinzugefügt -> nichts tun
+      //neuer Task hinzugefügt, aber ein anderer laeuft noch -> nichts tun
     } 
 
-    /*
-       if(ret_decision==ONLY_ASSIGN || ret_decision==PREEMPT){
-       LASTASSIGN=sc_simulation_time();
-       }
-       */
-
-    /*if(ret_decision==ONLY_ASSIGN){
-      cerr << "ONLY_ASSIGN" <<endl;
-      }else if(ret_decision==PREEMPT){
-      cerr << "PREEMPT" <<endl;
-      }else if(ret_decision==NOCHANGE){
-      cerr << "NOCHANGE " <<endl;
-      }else if(ret_decision==RESIGNED){
-      cerr << "RESIGNED " <<endl;
-      }*/
-
+#ifdef VPC_DEBUG  
+      cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
+      << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << endl;
+#endif //VPC_DEBUG  
     return ret_decision;
   }
 
@@ -155,22 +233,32 @@ namespace SystemC_VPC{
   /**
    *
    */
-  sc_time* RoundRobinScheduler::schedulingOverhead(){
+  sc_time* TDMAScheduler::schedulingOverhead(){
     return NULL; //new sc_time(1,SC_NS);
   }
 
   /**
-   * \brief Implementation of RoundRobinScheduler::signalDeallocation
+   * \brief Implementation of TDMAScheduler::signalDeallocation
    */
-  void RoundRobinScheduler::signalDeallocation(){
+  void TDMAScheduler::signalDeallocation(bool kill){
+  
+  if(!kill){
     this->remainingSlice =
-      this->remainingSlice - (sc_simulation_time() - this->lastassign);
+      this->remainingSlice - (sc_time_stamp() - this->lastassign);
+      }else{
+       
+      //alle Prozesse aus den pid_fifos loeschen
+          std::vector<TDMASlot>::iterator iter;
+    		for(iter = TDMA_slots.begin(); iter!=TDMA_slots.end() ;iter++){
+      		iter->pid_fifo.clear();        
+      		}
+      }
   }
   
   /**
-   * \brief Implementation of RoundRobinScheduler::signalAllocation
+   * \brief Implementation of TDMAScheduler::signalAllocation
    */  
-  void RoundRobinScheduler::signalAllocation(){
-    this->lastassign = sc_simulation_time();
+  void TDMAScheduler::signalAllocation(){
+    this->lastassign = sc_time_stamp();
   }
 }

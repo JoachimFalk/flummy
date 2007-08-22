@@ -91,6 +91,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_PriorityScheduler.cpp		\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
+	TDMAScheduler.cpp			\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_XmlHelper.cpp			\
 	hscd_vpc_Configuration.cpp		\

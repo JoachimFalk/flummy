@@ -1,6 +1,6 @@
 
-#ifndef HSCD_VPC_ROUNDROBINSCHEDULER_H
-#define HSCD_VPC_ROUNDROBINSCHEDULER_H
+#ifndef TDMASCHEDULER_H
+#define TDMASCHEDULER_H
 #include <systemc.h>
 #include <hscd_vpc_Scheduler.h>
 #include <hscd_vpc_datatypes.h>
@@ -10,32 +10,61 @@
 namespace SystemC_VPC{
   class Component;
 
-  class RoundRobinScheduler : public Scheduler{
+  typedef size_t ProcessId;
+  
+  /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
+  	pid_fifo enthält die laufbereiten Prozesse  
+  */
+  struct TDMASlot{
+  	sc_time length;
+	std::string name;
+	std::deque<ProcessId> pid_fifo;
+  };
+  
+  class TDMAScheduler : public Scheduler{
   public:
-
-    RoundRobinScheduler(){
-      TIMESLICE=10;
-      this->lastassign=0;
-      this->remainingSlice=0;
+    
+   TDMAScheduler(){
+      this->lastassign=sc_time(0,SC_NS);
+      this->remainingSlice=sc_time(0,SC_NS);
+      slicecount=0;
+      curr_slicecount=0;
     }
-    RoundRobinScheduler(const char *schedulername);
-    virtual ~RoundRobinScheduler(){}
+    
+    TDMAScheduler(const char *schedulername);
+    
+    virtual ~TDMAScheduler(){}
+    
     bool getSchedulerTimeSlice(sc_time &time,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks);
+    
     void addedNewTask(ProcessControlBlock *pcb);
+    
     void removedTask(ProcessControlBlock *pcb);
+    
     sc_event& getNotifyEvent();
+    
     scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  std::map<int,ProcessControlBlock*> &ready_tasks,const  std::map<int,ProcessControlBlock*> &running_tasks);
-    void setProperty(char* key, char* value);
+    
+    void setProperty(const char* key, const char* value);
+    
     sc_time* schedulingOverhead();
     
-    void signalDeallocation();
+    void signalDeallocation(bool kill);
     void signalAllocation();
     
-  protected:
-    std::deque<int> rr_fifo;
-    double TIMESLICE;
-    double lastassign;
-    double remainingSlice;
+    void initialize();
+    
+  private:
+    void _setProperty(const char* key, const char* value);
+    
+    sc_time lastassign;
+    sc_time remainingSlice;
+    int slicecount;
+    int curr_slicecount;
+    int processcount;
+    std::vector<TDMASlot> TDMA_slots;
+    std::map <ProcessId,int> PIDmap;
+    std::deque<std::pair<std::string, std::string> > _properties;
   };
 }
 #endif
