@@ -71,7 +71,7 @@ namespace SystemC_VPC{
           std::cerr << VPC_RED("Component " << this->basename()
                     << "> actualRemainingDelay= "
                     << actualRemainingDelay.value() << " for iid="
-                    << actualRunningIID << " at: " << sc_simulation_time())
+                    << actualRunningIID << " at: " << sc_time_stamp().to_default_time_units())
                     << std::endl;
 #endif //VPC_DEBUG
 
@@ -86,7 +86,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
             cerr << this->basename() << " IID: " << actualRunningIID<< " > ";
             cerr << this->basename() << " removed Task: " << task->getName()
-                 << " at: " << sc_simulation_time() << endl;
+                 << " at: " << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
             //notify(*(task->blockEvent));
@@ -122,7 +122,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED( this->basename()  << " deactivated at ")
-                  << sc_simulation_time() << std::endl;    
+                  << sc_time_stamp().to_default_time_units() << std::endl;    
 #endif // VPC_DEBUG
 
         //check if deallocation is with kill flag
@@ -161,7 +161,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED( this->basename()  << " reactivated at ")
-                  << sc_simulation_time() << std::endl;    
+                  << sc_time_stamp().to_default_time_units() << std::endl;    
 #endif // VPC_DEBUG
 
       }
@@ -173,7 +173,7 @@ namespace SystemC_VPC{
         newTasks.pop_front();
 #ifdef VPC_DEBUG
         cerr << this->basename() << " received new Task: "
-             << newTask->getName() << " at: " << sc_simulation_time() << endl;
+             << newTask->getName() << " at: " << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 #ifndef NO_VCD_TRACES
         if(newTask->getTraceSignal()!=0)
@@ -320,7 +320,7 @@ namespace SystemC_VPC{
     cout << flush;
     cerr << VPC_RED("Component::compute( ") << VPC_WHITE(actualTask->getName())
          << VPC_RED(" , ") << VPC_WHITE(actualTask->getFuncName()) 
-         << VPC_RED(" ) at time: " << sc_simulation_time()) << endl
+         << VPC_RED(" ) at time: " << sc_time_stamp().to_default_time_units()) << endl
       ;
 #endif
 
@@ -368,7 +368,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
     cout << flush;
     cerr << VPC_RED("Component::compute( ") << VPC_WHITE(name)
-         << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
+         << VPC_RED(" ) at time: " << sc_time_stamp().to_default_time_units()) << endl;
 #endif
 
     _compute(name,"",end);
@@ -432,7 +432,7 @@ namespace SystemC_VPC{
     cout << flush;
     cerr << VPC_RED("Component::compute( ") << VPC_WHITE(actualTask->getName())
          << VPC_RED(" , ") << VPC_WHITE(actualTask->getFuncName())
-         << VPC_RED(" ) at time: " << sc_simulation_time()) << endl;
+         << VPC_RED(" ) at time: " << sc_time_stamp().to_default_time_units()) << endl;
 #endif
 
     // reset the execution delay
@@ -480,7 +480,7 @@ namespace SystemC_VPC{
     newTasks.push_back(actualTask);
 
     //awake scheduler thread
-    notify(notify_scheduler_thread);
+    notify_scheduler_thread.notify();
     //wait(SC_ZERO_TIME);
 
     ////////////////////////////////////////////////
@@ -504,7 +504,7 @@ namespace SystemC_VPC{
       cerr << this->basename() << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
            << " activation state set to "<< iter->second->getState() << " at: "
-           << sc_simulation_time() << endl;
+           << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
       scheduler->removedTask(iter->second);
@@ -517,7 +517,7 @@ namespace SystemC_VPC{
       cerr << this->basename() << " IID: " <<  iter->second->getInstanceId()
            << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
-           << " at: " << sc_simulation_time() << endl;
+           << " at: " << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
 #ifndef NO_VCD_TRACES
@@ -542,7 +542,7 @@ namespace SystemC_VPC{
       cerr << this->basename() << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
            << " activation state set to "<< iter->second->getState() << " at: "
-           << sc_simulation_time() << endl;
+           << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
       scheduler->removedTask(iter->second);
@@ -555,7 +555,7 @@ namespace SystemC_VPC{
       cerr << this->basename() << " IID: " <<  iter->second->getInstanceId()
            << " > ";
       cerr << this->basename() << " killed Task: " << iter->second->getName()
-           << " at: " << sc_simulation_time() << endl;
+           << " at: " << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
 #ifndef NO_VCD_TRACES
@@ -581,7 +581,7 @@ namespace SystemC_VPC{
       cerr << this->basename() << " > ";
       cerr << this->basename() << " killed Task: " << newTask->getName()
            << " activation state set to "<< newTask->getState() << " at: "
-           << sc_simulation_time() << endl;
+           << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
       //reset actualTask

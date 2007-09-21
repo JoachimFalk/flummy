@@ -21,7 +21,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_YELLOW("PriorityController "<< this->getName()
-                  <<"> addProcessToSchedule called! ") << sc_simulation_time()
+                  <<"> addProcessToSchedule called! ") << sc_time_stamp().to_default_time_units()
                   << endl;
 #endif //VPC_DEBUG
 

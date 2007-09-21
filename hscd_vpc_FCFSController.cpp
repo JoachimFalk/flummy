@@ -26,7 +26,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_YELLOW("FCFSController "<< this->getName()
-                  << "> addProcessToSchedule called! ") << sc_simulation_time()
+                  << "> addProcessToSchedule called! ") << sc_time_stamp().to_default_time_units()
                   << std::endl;
 #endif //VPC_DEBUG
 
@@ -75,7 +75,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
           std::cerr << VPC_YELLOW("FCFSController "<< this->getName()
                     << "> current loaded configuration fits required one! ")
-                    << sc_simulation_time() << endl;
+                    << sc_time_stamp().to_default_time_units() << endl;
           std::cerr << VPC_YELLOW("FCFSController "<< this->getName()
                     << "> activ Configuration is activ? "
                     << this->getManagedComponent()->getActivConfiguration()->
