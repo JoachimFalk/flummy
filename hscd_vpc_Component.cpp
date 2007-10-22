@@ -19,6 +19,7 @@
 #include <hscd_vpc_Scheduler.h>
 #include <hscd_vpc_FCFSScheduler.h>
 #include <TDMAScheduler.h>
+#include <FlexRayScheduler.h>
 #include <hscd_vpc_RoundRobinScheduler.h>
 #include <hscd_vpc_PriorityScheduler.h>
 #include <hscd_vpc_RateMonotonicScheduler.h>
@@ -310,6 +311,9 @@ namespace SystemC_VPC{
                          strlen(STR_TDMA))){
       scheduler=new TDMAScheduler((const char*)schedulername);
 
+    }else if( 0==strncmp(schedulername,STR_FLEXRAY,
+                         strlen(STR_FLEXRAY))){
+      scheduler=new FlexRayScheduler((const char*)schedulername);
 
     }else{
       //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVE << endl;
