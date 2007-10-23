@@ -8,8 +8,7 @@
 #include <string>
 #include <map>
 
-//#include <cosupport/systemc_support.hpp>
-#include <systemc_support.hpp>
+#include <cosupport/systemc_support.hpp>
 
 #include "hscd_vpc_ProcessControlBlock.h"
 
