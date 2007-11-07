@@ -1,16 +1,12 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(SystemC-VPC, 0.1, streubuehr@cs.fau.de)
+AC_INIT(SystemC-VPC, 0.6, streubuehr@cs.fau.de)
 AC_PREREQ(2.57)
 ACJF_INIT
 
 AC_CONFIG_SRCDIR([hscd_vpc_Director.cpp])
-
 AC_CONFIG_AUX_DIR([../BuildSystem])
-ac_abs_aux_dir=`cd $ac_aux_dir; pwd`
-AC_SUBST(ac_abs_aux_dir)
-AC_SUBST(ac_aux_dir)
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
@@ -34,6 +30,16 @@ ACJF_ARG_DEBUG([yes], [], [-DNDEBUG])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
 
+DX_HTML_FEATURE(ON)
+DX_CHM_FEATURE(OFF)
+DX_CHI_FEATURE(OFF)
+DX_MAN_FEATURE(ON)
+DX_RTF_FEATURE(OFF)
+DX_XML_FEATURE(OFF)
+DX_PDF_FEATURE(ON)
+DX_PS_FEATURE(OFF)
+DX_INIT_DOXYGEN([SystemC-VPC--mainline], [doxygen.cfg], [doxygen-doc])
+
 AC_DISABLE_SHARED
 AM_PROG_LIBTOOL
 
@@ -49,7 +55,7 @@ AC_EXEEXT
 
 # Checks for library functions.
 
-ACJF_SYSTEMC
+ACJF_CHECK_LIB_SYSTEMC
 ACJF_CHECK_LIB_XERCES
 ACJF_NEED_PKG([Support])
 
