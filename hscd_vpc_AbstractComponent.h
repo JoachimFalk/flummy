@@ -26,6 +26,7 @@
 #include "hscd_vpc_IDeallocatable.h"
 #include "hscd_vpc_ProcessEventListener.h"
 
+
 namespace SystemC_VPC{
 
   /**
@@ -92,6 +93,8 @@ namespace SystemC_VPC{
      * \brief Set parameter for Component and Scheduler.
      */
     virtual void processAndForwardParameter(char *sType,char *sValue)=0;
+    
+    virtual void processAndForwardAttribute(Attribute& fr_Attribute)=0;
 
   protected:
      

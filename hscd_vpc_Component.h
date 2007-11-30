@@ -121,6 +121,7 @@ namespace SystemC_VPC{
      * \brief Set parameter for Component and Scheduler.
      */
     virtual void processAndForwardParameter(char *sType,char *sValue);
+    virtual void processAndForwardAttribute(Attribute& fr_Attributes);
     
   protected:
 

@@ -112,6 +112,8 @@ protected:
      */
     virtual void processAndForwardParameter(char *sType,char *sValue);
     
+    void processAndForwardAttribute(Attribute& fr_Attribute){}
+    
     /**
      * \brief Preempts execution of component
      * Used to deallocate the current execution of a component.

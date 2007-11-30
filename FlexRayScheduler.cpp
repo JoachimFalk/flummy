@@ -28,8 +28,8 @@ namespace SystemC_VPC{
   FlexRayScheduler::FlexRayScheduler(const char *schedulername)
     : _properties() {
     //neu FlexRay
-    StartslotDynamic = 2;
-    TimeDynamicSegment = Director::createSC_Time("50ns");
+//    StartslotDynamic = 3;
+//    TimeDynamicSegment = Director::createSC_Time("50ns");
         
     //alt (TDMA)
     processcount=0;
@@ -46,10 +46,10 @@ namespace SystemC_VPC{
     char *firstindex=strchr(schedulername,':');
     while(firstindex!=NULL){
 
-      //':' überspringen und nächste ':' finden
+      // ueberspringen und naechste ':' finden
       secondindex=strchr(firstindex+1,':');
       if(secondindex!=NULL)
-        sublength=secondindex-firstindex;          //Länge bestimmen
+        sublength=secondindex-firstindex;          //Laenge bestimmen
       else
         sublength=strlen(firstindex);              
       strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
@@ -87,10 +87,12 @@ namespace SystemC_VPC{
   
  
   void FlexRayScheduler::_setProperty(const char* key, const char* value){
-  	char *domain;
+  	/*char *domain;
 	int slot;
-    	//Herausfinden, welcher Slot genannt ist + welche Zeit ihm zugeordnet wird      
+    	//Herausfinden, welcher Slot genannt ist + welche Zeit ihm zugeordnet wird    
+  
     	if(0==strncmp(key,"slot",strlen("slot"))){
+	//cout<<"hier darf ich - bei neuer Config - nichtmehr hin!!!!!!!"<<endl;
       		domain=strstr(key,"slot");
       		if(domain!=NULL){
         		domain+=4*sizeof(char);
@@ -98,7 +100,6 @@ namespace SystemC_VPC{
 			domain=strstr(value,"ns");
       			if(domain!=NULL){
 			//Erstellen der TDMA-Struktur
-				
 				TDMASlot newSlot;
 				newSlot.length = Director::createSC_Time(value);	
 				newSlot.name = key;
@@ -106,18 +107,21 @@ namespace SystemC_VPC{
 				TDMA_slots.insert(TDMA_slots.end(), newSlot);
 				}else{
 				Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
-				cout<<"new Dynamic One!"<<endl;
+				//cout<<"new Dynamic One! " << newSlot.length <<endl;
 				}
 				slicecount++;
-				/*Erzeugen einer Info-Ausgabe		
+				//Erzeugen einer Info-Ausgabe		
 				domain[0]='\0';
 				sscanf(value,"%lf",&slottime);
-				std::cout << "Datensatz für Slot Nr." << slot 
+				std::cout << "Datensatz fuer Slot Nr." << slot 
 				<<"gefunden! TDMA-Slotdauer: " <<slottime << "ns"<<std::endl;
-		*/		
+				
 			}
       		}
-    	}else if(0==strncmp(value,"slot",strlen("slot"))){
+    	}else 
+	 if(0==strncmp(value,"slot",strlen("slot"))){
+	 */
+	//cout<<"looking for "<< key << " and " << value<<endl;
     		int i=-1;
 		//schon Slots geadded? oder cmx-Syntax/Reihenfolge falsch?
 		assert(0<TDMA_slots.size());
@@ -125,12 +129,12 @@ namespace SystemC_VPC{
     		do{
 			//nichts zu tun.. da lediglich durchiteriert wird!
 		}while(TDMA_slots[++i].name != value && (i+1)<TDMA_slots.size());
-    	 	cout<<"found at i= " <<i<<endl;
+    	 	//cout<<"found at i= " <<i<<endl;
 		
 		if(TDMA_slots[i].name != value){
 		i=-1;
 		assert(0<Dynamic_slots.size());
-		cout<< "DynSize: " << Dynamic_slots.size()<<endl;
+		//cout<< "DynSize: " << Dynamic_slots.size()<<endl;
 		do{
 			//nichts zu tun.. da lediglich durchiteriert wird!
 		}while(Dynamic_slots[++i].name != value && (i+1)<Dynamic_slots.size());
@@ -138,42 +142,126 @@ namespace SystemC_VPC{
 		assert(i<Dynamic_slots.size());	
 		i+=StartslotDynamic;	
 		}
-		cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<endl;
+		//cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<endl;
 		//Beziehung PId - SlotID herstellen
   		PIDmap[Director::getInstance().getProcessId(key)]=i;   
 // 		cout<<"add Function " <<  key << " to " << value<<endl;
-    	}	
+    		
   }
 
+  void FlexRayScheduler::setAttribute(Attribute& fr_Attribute){
+  	char* value = fr_Attribute.getType();
+	int i,j,k;
+	assert(value!=NULL);
+  	assert (strncmp("FlexRayParams", value, sizeof(value))==0);
+	//cout<<fr_Attribute.getAttributeSize()<<endl;
+	for(i=0;i<fr_Attribute.getAttributeSize();i++){
+	std::pair<std::string, Attribute >attribute=fr_Attribute.getNextAttribute(i);
+	
+	if(attribute.first=="static"){
+		StartslotDynamic=0;
+		for(k=0;k<attribute.second.getAttributeSize();k++){
+			std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(k);
+			//Slot einrichten
+			StartslotDynamic++;
+			slicecount++;
+			std::pair<std::string, std::string > param;
+			param.first=attribute2.second.getType();
+			param.second=attribute2.second.getValue();
+			//cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
+			TDMASlot newSlot;
+			newSlot.length = Director::createSC_Time(param.second.c_str() );	
+			newSlot.name = param.first;
+			TDMA_slots.insert(TDMA_slots.end(), newSlot);
+			
+			//jetzt noch die Task-mappings!
+			for(j=0;j<attribute2.second.getParameterSize();j++){
+			std::pair<std::string, std::string > param2 =attribute2.second.getNextParameter(j);
+			if(param2.first == "mapping"){
+				param2.first=param2.second;
+				param2.second=param.first;
+				// cout<<"found static binding: "<<param2.second <<" with value: "<<param2.first<<endl;
+				this->_properties.push_back(param2);
+				}
+				
+			}
+		}
+		
+		/*
+		for(j=0;j<attribute2.second.getParameterSize();j++){
+		std::pair<std::string, std::string > param=attribute2.second.getNextParameter(j);
+			cout<<"found static Slot: "<<param.first <<" with value: "<<param.second <<endl;
+			this->_properties.push_back(param);
+			
+		}
+		*/
+			
+	}else if(attribute.first=="dynamic"){
+		this->TimeDynamicSegment = Director::createSC_Time(attribute.second.getValue());
+		
+		for(k=0;k<attribute.second.getAttributeSize();k++){
+			std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(k);
+			//Slot einrichten
+			slicecount++;
+			std::pair<std::string, std::string > param;
+			param.first=attribute2.second.getType();
+			param.second=attribute2.second.getValue();
+//			cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second <<endl;
+			
+			TDMASlot newSlot;
+			newSlot.length = Director::createSC_Time(param.second.c_str() );	
+			newSlot.name = param.first;
+	 		Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
+//			cout<<"new Dynamic One! " << newSlot.length <<endl;
+		
+			//jetzt noch die Task-mappings!
+			for(j=0;j<attribute2.second.getParameterSize();j++){
+			std::pair<std::string, std::string > param2 =attribute2.second.getNextParameter(j);
+			if(param2.first == "mapping"){
+				param2.first=param2.second;
+				param2.second=param.first;
+//				cout<<"found dyn. binding: "<<param2.first <<"value: "<<param2.second<<endl;
+				this->_properties.push_back(param2);
+				}
+			}
+		}
+		
+	/*	std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(0);
+		for(j=0;j<attribute2.second.getParameterSize();j++){
+		std::pair<std::string, std::string > param=attribute2.second.getNextParameter(j);
+			cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second<<endl;
+			this->_properties.push_back(param);
+		}
+	*/
+	}	
+	}
+  }
   
   bool FlexRayScheduler::getSchedulerTimeSlice( sc_time& time,
   	 	const std::map<int,ProcessControlBlock*> &ready_tasks,
     		const  std::map<int,ProcessControlBlock*> &running_tasks )
   {   
-  cout<<"moep "<< running_tasks.size() << endl;
     // keine wartenden + keine aktiven Threads -> ende!
     if(processcount==0 && running_tasks.size()==0) return 0;   
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
-    cout<<"moep1 - "<< curr_slicecount<<endl;   
+//     cout<<"moep1 - "<< curr_slicecount<<endl;   
     	if(curr_slicecount == -1){
 		time=sc_time(0,SC_NS);
 	}else{
-    	time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - this->lastassign);  
-//     	cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
+//     	time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - this->lastassign);  
+	time=this->remainingSlice;
+//      	cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
 	}
     }else{
-    cout<<"moep2"<<endl;   
-    //Dynamisch
-//     cout<<"dynamic-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time << "running_tasks " << running_tasks.size() <<endl;
+//Dynamisch
+//      cout<<"dynamic-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time << "running_tasks " << running_tasks.size() <<endl;
     if(running_tasks.size()<=1){
-    cout<<"moep2-1 " << running_tasks.size() <<endl;   
-    //gerade kein (dynamic) Task aktiv.. -> nächster Schedulevorgang!
+    //gerade kein (dynamic) Task aktiv.. -> naechster Schedulevorgang!
     //oder nur einer -> ein Kanal frei!
-       time=sc_time(10,SC_NS); //sofortiges Reschedule bewirken!
+       time=sc_time(1,SC_NS); //sofortiges Reschedule bewirken!
     }else{
-    	//beide Kanäle voll.. -> nächster Schedulevorgang nach Ende von einem...
-	cout<<"moep2-2"<<endl;   
+    	//beide Kanaele voll.. -> naechster Schedulevorgang nach Ende von einem...
 	if(remainingSliceA < remainingSliceB)
     	time=remainingSliceA - (sc_time_stamp() - this->lastassignA);
     	else 
@@ -186,7 +274,6 @@ namespace SystemC_VPC{
   
   void FlexRayScheduler::addedNewTask(ProcessControlBlock *pcb){    
      int index = PIDmap[pcb->getPid()];
-     cout<< "added index " << index<<endl;
      if(index<StartslotDynamic){
      //TDMA-Task
      TDMA_slots[ index ].pid_fifo.push_back(pcb->getInstanceId());
@@ -194,20 +281,19 @@ namespace SystemC_VPC{
      cout<<"added Process " <<  pcb->getInstanceId() << " to Slot " << PIDmap[pcb->getPid()]  <<endl;
 #endif //VPC_DEBUG
     
-	cout << "added static Task" <<endl;
+    //cout << "added static Task" <<endl;
      }else{
-     cout << "added Dynamic Task" <<endl;
+   //  cout << "added Dynamic Task at Slot " << index - StartslotDynamic  <<endl;
      Dynamic_slots[ index - StartslotDynamic ].pid_fifo.push_back(pcb->getInstanceId());
      }
      processcount++;
   }
   
-  
   void FlexRayScheduler::removedTask(ProcessControlBlock *pcb){ 
-  
-  cout<<"Task entfernt! @ "<< sc_time_stamp() << endl;
-  
     int index = PIDmap[pcb->getPid()];
+    
+ // cout<<"Task entfernt! @ "<< sc_time_stamp() << "  " << index << endl;
+      
     std::deque<ProcessId>::iterator iter;
     if(index<StartslotDynamic){
     for(iter = TDMA_slots[ index ].pid_fifo.begin(); iter!=TDMA_slots[index].pid_fifo.end() ;iter++){
@@ -243,8 +329,8 @@ namespace SystemC_VPC{
     
     //statischer oder dynamischer Teil?
     if(curr_slicecount+1<StartslotDynamic){
-    cout<<"Static! @ "<< sc_time_stamp() << "  " << curr_slicecount+1 << endl;
-    //TDMA-Scheduleing: unverändert aus TDMAScheduler verwendet.
+  //  cout<<"Static! @ "<< sc_time_stamp() << "  " << curr_slicecount+1 << endl;
+    //TDMA-Scheduleing: unveraendert aus TDMAScheduler verwendet.
     ret_decision=NOCHANGE;
     //Zeitscheibe abgelaufen?
     if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
@@ -254,14 +340,12 @@ namespace SystemC_VPC{
     this->lastassign = sc_time_stamp();
     
     if(this->remainingSlice <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
-    	curr_slicecount++; // Wechsel auf die nächste Zeitscheibe nötig!
+    	curr_slicecount++; // Wechsel auf die naechste Zeitscheibe noetig!
 	//neue Timeslice laden
     	this->remainingSlice = TDMA_slots[curr_slicecount].length;
 
       if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
         task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
-// 	cout<<"Scheduler:new task: " << task_to_assign << "..." <<endl;
-        
 	//alter wurde schon entfernt (freiwillige abgabe "BLOCK")
         // -> kein preemption!
         ret_decision= ONLY_ASSIGN;
@@ -276,7 +360,7 @@ namespace SystemC_VPC{
         // else{}    ->
         //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
       }else{
-      //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdrängen und "idle" werden!
+      //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
       if(running_tasks.size()!=0){  // alten Task entfernen
           std::map<int,ProcessControlBlock*>::const_iterator iter;
           iter=running_tasks.begin();
@@ -284,31 +368,38 @@ namespace SystemC_VPC{
           task_to_resign=pcb->getInstanceId();
           ret_decision=RESIGNED;
         }else{
-	//war keiner da... und ist auch kein Neuer da -> keine Änderung	
+	//war keiner da... und ist auch kein Neuer da -> keine Aenderung	
       	ret_decision=NOCHANGE;
 	}      	
       }    
     }else{
-     	//neuer Task hinzugefügt -> nichts tun 
+     	//neuer Task hinzugefuegt -> nichts tun 
       	//oder alter entfernt    -> neuen setzen
       	//neuen setzen:
       if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-      cout<<"Task feddich!"<<endl;
+   //   cout<<"Task feddich!"<<endl;
         if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){            // ist da auch ein neuer da?
           task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
 
           //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
           // -> kein preemption!
           ret_decision= ONLY_ASSIGN;
-        }
+        }	
       }
-      //neuer Task hinzugefügt, aber ein anderer laeuft noch -> nichts tun
+      //neuer Task hinzugefuegt, aber ein anderer laeuft noch -> nichts tun
     }
     }else{
-    	//Dynamischer Teil von FlexRay
+    	//Dynamischer Teil von FlexRay  
+	if((curr_slicecount+1)==StartslotDynamic && this->remainingSlice > sc_time(0,SC_NS) ){
+	//Restzeit des statischen Abschnitts "verbraten"
+	ret_decision=NOCHANGE;
+	if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
+    	else{ this->remainingSlice = this->remainingSlice - (sc_time_stamp() - this->lastassign);  }
+    	this->lastassign = sc_time_stamp();
 	
-	cout<<"Dynamic! "<< curr_slicecount << endl;
-	
+	}else{
+    
+  //	cout<<"Dynamic! "<< curr_slicecount << "  " << sc_time_stamp()<< endl;
 	if(curr_slicecount+1==StartslotDynamic){
 	//Start des Dyn. Segments
 	curr_slicecount++;
@@ -318,7 +409,7 @@ namespace SystemC_VPC{
 	 curr_slicecountB=0;
 	 remainingSliceA=sc_time(0,SC_NS);
 	 
-	 //auf alle Fälle den letzten (periodischen) Task verdrängen!
+	 //auf alle Faelle den letzten (periodischen) Task verdraengen!
 	 if(running_tasks.size()!=0){  // alten Task entfernen
           std::map<int,ProcessControlBlock*>::const_iterator iter;
           iter=running_tasks.begin();
@@ -330,10 +421,9 @@ namespace SystemC_VPC{
       	  ret_decision=NOCHANGE;
 	 }      
 	 this->lastassign = sc_time_stamp();
-	}
-	
-	 //Zeitscheibe abgelaufen? -> ende des dyn. Teils.. und Wechsel zurück zum statischen
-	if(this->remainingSlice <(sc_time_stamp() - this->lastassign)){
+	}else{	
+	 //Zeitscheibe abgelaufen? -> ende des dyn. Teils.. und Wechsel zurueck zum statischen
+	if(this->remainingSlice <=(sc_time_stamp() - this->lastassign)){
 	
 		if(running_tasks.size()!=0){  // alten Task entfernen
          	 std::map<int,ProcessControlBlock*>::const_iterator iter;
@@ -348,36 +438,36 @@ namespace SystemC_VPC{
 		
 		if(running_tasks.size()<2){
 		this->remainingSlice=SC_ZERO_TIME;
-		//dynamischer Teil "aufgeräumt" -> statischer kann starten.
+		//dynamischer Teil "aufgeraeumt" -> statischer kann starten.
 		curr_slicecount=-1;
 		}
 		this->lastassign=sc_time_stamp();
 		curr_slicecountA=0;
 		curr_slicecountB=0;
-		cout<<"Dyn Ende! "<< this->lastassign <<endl;
+		// cout<<"Dyn Ende! "<< this->lastassign <<endl;
 		
     	}else{ //Normalfall im dynamischen Teil.. -> ByteFlight-Protokoll!
-		if(running_tasks.size() ==0){ //es l�uft grad keiner -> aktuellen auf Kanal A einlasten
+		if(running_tasks.size() ==0){ //es laeuft grad keiner -> aktuellen auf Kanal A einlasten
 		     if(curr_slicecountA + StartslotDynamic < slicecount){
 			if(Dynamic_slots[curr_slicecountA].pid_fifo.size()>0){
 				task_to_assign = Dynamic_slots[curr_slicecountA].pid_fifo.front();
 				taskAssignedToA=task_to_assign;
-				curr_slicecountA++;
 				ret_decision= ONLY_ASSIGN;
 				remainingSliceA=Dynamic_slots[curr_slicecountA].length;
-				remainingSliceA=sc_time_stamp();
+				lastassignA=sc_time_stamp();
+				curr_slicecountA++;
 			}else{//oder doch Kanal B nehmen? ;-)
 			    if(curr_slicecountB + StartslotDynamic < slicecount){
 				if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>0){
 				task_to_assign = Dynamic_slots[curr_slicecountB].pid_fifo.front();
 				taskAssignedToB=task_to_assign;
-				curr_slicecountB++;
 				ret_decision= ONLY_ASSIGN;	
 				remainingSliceB=Dynamic_slots[curr_slicecountB].length;
-				remainingSliceB=sc_time_stamp();
+				lastassignB=sc_time_stamp();
+				curr_slicecountB++;
 				}else{
-				//hm, keiner da :-(  -> Zeit/Z�hler vorranschreiten lassen.
-				//bzw. Minislot �berspringen
+				//hm, keiner da :-(  -> Zeit/Zaehler vorranschreiten lassen.
+				//bzw. Minislot ueberspringen
 				curr_slicecountB++;
 				curr_slicecountA++;
 				ret_decision=NOCHANGE;
@@ -387,7 +477,7 @@ namespace SystemC_VPC{
 		    }else{ret_decision=NOCHANGE;}
 		}else{
 		
-		if(running_tasks.size() ==1){ //es l�uft ein Prozess -> pr�fen auf welchem Kanal
+		if(running_tasks.size() ==1){ //es laeft ein Prozess -> pruefen auf welchem Kanal
 		if(remainingSliceA > sc_time(0,SC_NS)){ //auf Kanal A =D
 		//und ob er noch weiterlaufen darf ;-) 
 		
@@ -399,8 +489,10 @@ namespace SystemC_VPC{
 		}
 		this->lastassignA = sc_time_stamp();
 		if(this->remainingSliceA <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
-	  if(curr_slicecountA + StartslotDynamic +1 < slicecount){		
-		curr_slicecountA++; // Wechsel auf die nächste Zeitscheibe nötig!
+	  if(curr_slicecountA + StartslotDynamic +1 < slicecount){
+		// cout<<"next slicecount dynamic"<<endl;
+	  
+// 		curr_slicecountA++; // Wechsel auf die naechste Zeitscheibe noetig!
 		//neue Timeslice laden
 		this->remainingSliceA = Dynamic_slots[curr_slicecountA].length;
 		if(Dynamic_slots[curr_slicecountA].pid_fifo.size()>0){    // neuer Task da?
@@ -412,7 +504,7 @@ namespace SystemC_VPC{
 			task_to_resign=pcb->getInstanceId();
 			ret_decision= PREEMPT;  
 		}else{
-		//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdrängen und "idle" werden!
+		//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
 		// alten Task entfernen
 		std::map<int,ProcessControlBlock*>::const_iterator iter;
 		iter=running_tasks.begin();
@@ -438,14 +530,16 @@ namespace SystemC_VPC{
 		//alter wurde schon entfernt (freiwillige abgabe "BLOCK")
 		// -> kein preemption!
 		ret_decision= ONLY_ASSIGN;
-		if(task_to_assign == taskAssignedToA){ //d.h. es l�uft bereits ein Task dieser Node
-			if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>1){ // den n�chsten nehmen
+		if(task_to_assign == taskAssignedToA){ //d.h. es laeuft bereits ein Task dieser Node
+			if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>1){ // den naechsten nehmen
 			task_to_assign = Dynamic_slots[curr_slicecountB].pid_fifo[2];
 			taskAssignedToB=task_to_assign;
 			ret_decision= ONLY_ASSIGN;
 			}else{
 			ret_decision= NOCHANGE;
 			}
+		}else{
+		remainingSliceB=Dynamic_slots[curr_slicecountB].length;
 		}
 		}
 	   }else{ret_decision=NOCHANGE;}
@@ -463,7 +557,7 @@ namespace SystemC_VPC{
 				
 		if(this->remainingSliceB <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
 	   if(curr_slicecountB + StartslotDynamic +1 < slicecount){
-		curr_slicecountB++; // Wechsel auf die nächste Zeitscheibe nötig!
+		curr_slicecountB++; // Wechsel auf die naechste Zeitscheibe noetig!
 		//neue Timeslice laden
 		this->remainingSliceB = Dynamic_slots[curr_slicecountB].length;
 	
@@ -476,7 +570,7 @@ namespace SystemC_VPC{
 			task_to_resign=pcb->getInstanceId();
 			ret_decision= PREEMPT;  
 		}else{
-	//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdrängen und "idle" werden!
+	//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
 		// alten Task entfernen
 		std::map<int,ProcessControlBlock*>::const_iterator iter;
 		iter=running_tasks.begin();
@@ -495,19 +589,20 @@ namespace SystemC_VPC{
 		//alter wurde schon entfernt (freiwillige abgabe "BLOCK")
 		// -> kein preemption!
 		ret_decision= ONLY_ASSIGN;
-		if(task_to_assign == taskAssignedToB){ //d.h. es l�uft bereits ein Task dieser Node
-			if(Dynamic_slots[curr_slicecountA].pid_fifo.size()>1){ // den n�chsten nehmen
+		if(task_to_assign == taskAssignedToB){ //d.h. es laeuft bereits der Task dieser Node
+			if(Dynamic_slots[curr_slicecountA].pid_fifo.size()>1){ // den naechsten nehmen
 			task_to_assign = Dynamic_slots[curr_slicecountA].pid_fifo[2];
 			taskAssignedToA=task_to_assign;
 			ret_decision= ONLY_ASSIGN;
 			}else{
 			ret_decision= NOCHANGE;
 			}
+		}else{
+		remainingSliceA=Dynamic_slots[curr_slicecountA].length;	
 		}
 		}
 	  }else{ret_decision=NOCHANGE;}
 	}		
-//-------------------------------------------	
 		}
 		
 		std::map<int,ProcessControlBlock*>::const_iterator iter;
@@ -515,18 +610,16 @@ namespace SystemC_VPC{
 		ProcessControlBlock *pcb=iter->second;
 		pcb->getInstanceId();
 		
-// 		cout <<"boing 1 - Ende: "<< ret_decision << "  " << task_to_assign << "  " << running_tasks.size() << "  " <<  pcb->getInstanceId() << endl;
+// 		cout <<"Ende: "<< ret_decision << "  " << task_to_assign << "  " << running_tasks.size() << "  " <<  pcb->getInstanceId() << endl;
 		}
 		if(running_tasks.size() ==2){ // einer von beiden muss abgelaufen sein... welcher?
-		cout <<"boing 2"<<endl;
 		if(this->remainingSliceA < (sc_time_stamp() - this->lastassignA)){ 	
-		cout <<"boing 2-A"<<endl;
 			//na, es war wohl A
 			this->remainingSliceA=SC_ZERO_TIME;
 			this->remainingSliceB = this->remainingSliceB - (sc_time_stamp() - this->lastassignB);  
 		//-------------	
 		   if(curr_slicecountA + StartslotDynamic +1 < slicecount){
-			curr_slicecountA++; // Wechsel auf die nächste Zeitscheibe nötig!
+			curr_slicecountA++; // Wechsel auf die naechste Zeitscheibe noetig!
 			//neue Timeslice laden
 			this->remainingSliceA = Dynamic_slots[curr_slicecountA].length;
 		
@@ -536,7 +629,7 @@ namespace SystemC_VPC{
 			taskAssignedToA=task_to_assign;
 			ret_decision= PREEMPT;  
 		}else{
-		//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdrängen und "idle" werden!	
+		//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!	
 			task_to_resign=taskAssignedToA;
 			ret_decision=RESIGNED;
 			taskAssignedToA=0;
@@ -546,68 +639,61 @@ namespace SystemC_VPC{
 			ret_decision=RESIGNED;
 			taskAssignedToA=0;
 		}
-		//-------------	
     		}else{
-		cout <<"boing 2-B"<<endl;
 			// na, dann wohl B
 			this->remainingSliceB=SC_ZERO_TIME;
     			this->remainingSliceA = this->remainingSliceA - (sc_time_stamp() - this->lastassignA);  
 			
-		//-------------	
 		     if(curr_slicecountA + StartslotDynamic +1 < slicecount){
-		     cout <<"boing 2-B-1"<<endl;
-			curr_slicecountB++; // Wechsel auf die nächste Zeitscheibe nötig!
+			curr_slicecountB++; // Wechsel auf die naechste Zeitscheibe naeig!
 			//neue Timeslice laden
 			this->remainingSliceB = Dynamic_slots[curr_slicecountB].length;
 		
 			if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>0){    // neuer Task da?
-			cout <<"boing 2-B-1-1"<<endl;
 				task_to_assign = Dynamic_slots[curr_slicecountB].pid_fifo.front();
 				task_to_resign=taskAssignedToB;
 				taskAssignedToB=task_to_assign;
 				ret_decision= PREEMPT;  
 				if(task_to_assign == taskAssignedToA){
 				
-				if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>1){ // den n�chsten bitte
+				if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>1){ //den naechsten bitte
 				task_to_assign = Dynamic_slots[curr_slicecountB].pid_fifo[2];
 				taskAssignedToB=task_to_assign;
 				ret_decision= PREEMPT;
 				}else{
 				ret_decision= RESIGNED;
 				taskAssignedToB=0;
+				}	
 				}
-				
-				}
-				
 			}else{
-			//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdrängen und "idle" werden!
+			//kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
 				task_to_resign=taskAssignedToB;
 				ret_decision=RESIGNED;
 				taskAssignedToB=0;
 			}    
 		   }else{
-		   cout <<"boing 2-B-2"<<endl;
 			task_to_resign=taskAssignedToB;
 			ret_decision=RESIGNED;
 			taskAssignedToB=0;
 		}
-		cout <<"boing 2-C " << sc_time_stamp()<<endl;
-		//-------------				
     		}    		
 		this->lastassignA = sc_time_stamp();
     		this->lastassignB = sc_time_stamp();
 		}
 		}				
 	}
-	//Problem: 2 getrennte Kanäle..   
+	}
+	}
     } 
     
-    cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
-      << " old task: " << task_to_resign <<endl;
-
+/* if(ret_decision != NOCHANGE){
+    cout << sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<endl;
+    }
+	
+*/
 #ifdef VPC_DEBUG  
       cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
-      << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << endl;
+      << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << " " << sc_time_stamp() <<  endl;
 #endif //VPC_DEBUG  
     return ret_decision;
   }

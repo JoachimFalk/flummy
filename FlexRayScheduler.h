@@ -11,7 +11,7 @@ namespace SystemC_VPC{
   class Component;
   
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
-  	pid_fifo enthält die laufbereiten Prozesse  
+  	pid_fifo enthaelt die laufbereiten Prozesse  
   */
   
   class FlexRayScheduler : public Scheduler{
@@ -40,6 +40,8 @@ namespace SystemC_VPC{
     
     void setProperty(const char* key, const char* value);
     
+    void setAttribute(Attribute& fr_Attribute);
+    
     sc_time* schedulingOverhead();
     
     void signalDeallocation(bool kill);
@@ -61,8 +63,8 @@ namespace SystemC_VPC{
     std::map <ProcessId,int> PIDmap;
     std::deque<std::pair<std::string, std::string> > _properties;
     
-    //Neu für FlexRay
-    std::vector<TDMASlot> Dynamic_slots; //<-- brauch ich nicht, wenn ich alles in TDMA_slots packe
+    //Neu fuer FlexRay
+    std::vector<TDMASlot> Dynamic_slots;
     int StartslotDynamic;
     sc_time lastassignA;
     sc_time remainingSliceA;
@@ -70,20 +72,7 @@ namespace SystemC_VPC{
     sc_time remainingSliceB;
     int taskAssignedToA;
     int taskAssignedToB;
-    sc_time TimeDynamicSegment;
-    //FlexRay-Parameter
-    int vCycleCount; 			//zählt die bereits abgelaufenen CommunicationCycles
-    int vSlotCounter[2]; 		//Enthält den aktuellen Slot; [0] = KanalA , [1] = KanalB
-    static int cSlotIDMax;		//Max. SlotID bevor Cycle wiederholt wird
-    static int cCycleCountMax; 	 	//Max. Anzahl an Cycles von vCycleCount vor Rücksetzung auf 1
-    static int gdStaticSlot;  		//Anzahl Macroticks pro staticSlot
-    static int gNumberOfStaticSlots;	//Anzahl statischer (TDMA) Slots
-    static int gdMinislot;  		//Anzahl Macroticks pro Minislot
-    static int gNumberOfMinislots; 	//Anzahl der Minislots im dyn. Segment
-    static int gdSymbolWindow;  	//Anzahl Macroticks des Symbol-Windows ( >=0)
-    static int gdActionPointOffset;	//Enthält Versatz zwischen stat. Slotbeginn und Startzeitpunkt
-    static int gdMinislotActionPointOffset;  //Enthält Versatz zwischen dyn. Slotgeinn und Startzeitpunkt
-        
+    sc_time TimeDynamicSegment;   
     
   };
 }

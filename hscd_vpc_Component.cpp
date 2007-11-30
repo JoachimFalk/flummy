@@ -282,6 +282,10 @@ namespace SystemC_VPC{
   void Component::processAndForwardParameter(char *sType,char *sValue){
     scheduler->setProperty(sType,sValue);
   }
+  
+  void Component::processAndForwardAttribute(Attribute& fr_Attributes){
+    scheduler->setAttribute(fr_Attributes);
+  }
 
   /**
    *

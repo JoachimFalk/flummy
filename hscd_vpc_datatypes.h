@@ -11,6 +11,7 @@
 #include <cosupport/systemc_support.hpp>
 
 #include "hscd_vpc_ProcessControlBlock.h"
+#include "Attribute.h"
 
 namespace SystemC_VPC {
 #define VPC_MAX_STRING_LENGTH 128

@@ -33,6 +33,7 @@
 #include "hscd_vpc_InvalidArgumentException.h"
 
 #include "hscd_vpc_Configuration.h"
+#include "Attribute.h"
 
 XERCES_CPP_NAMESPACE_USE
 namespace SystemC_VPC{
@@ -63,6 +64,7 @@ namespace SystemC_VPC{
     XMLCh* templateStr;
     XMLCh* refTemplateStr;
     XMLCh* timingStr;
+    XMLCh* parameterStr;
     //XMLCh *Str;
     
     XMLCh* nameAttrStr;
@@ -147,6 +149,7 @@ namespace SystemC_VPC{
       templateStr     = XMLString::transcode("template");
       refTemplateStr  = XMLString::transcode("reftemplate");
       timingStr       = XMLString::transcode("timing");
+      parameterStr    = XMLString::transcode("parameter");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");
@@ -270,7 +273,12 @@ namespace SystemC_VPC{
      * \brief Generate pcb for internal use in VPC Framework
      */
     AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
-    
+   
+    /**
+    * \brief Used to create the Attribute-Object recursively
+    */
+    void nextAttribute(Attribute &fr_Attribute, DOMNode* node);
+     
   };
     
 }

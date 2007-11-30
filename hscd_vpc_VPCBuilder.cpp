@@ -41,7 +41,7 @@ namespace SystemC_VPC{
                 << std::endl;
 #endif //VPC_DEBUG
     }
-    
+        
     if(cfile){
       fconffile=fopen(cfile,"r");
       if( NULL == fconffile ){       // test if file exists
@@ -628,8 +628,27 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
     if(node != NULL){
       // find all attributes
+ 
+      DOMNamedNodeMap * atts2 = node->getAttributes();
+      char* sType2;
+      char* sValue2="";
+      sType2 = XMLString::transcode(atts2->getNamedItem(typeAttrStr)->getNodeValue());
+  
+      if(strcmp( sType2 , "FlexRayParams") == 0){
+	//neue Realisierung... FlexRay - Parameter ueber class Attribute
+	//Anlegen des Attribute-Elements
+ 	Attribute fr_Attributes( sType2, sValue2);
+	//Jetzt Baum entlang nach unten "laufen" und alle Eigenschaften entsprechend einbauen.	       
+	//rekursive Methode aufrufen!
+	for(unsigned int i=0; i<atts2->getLength(); i++){
+	nextAttribute(fr_Attributes, node->getFirstChild());
+	}
+	//Attribute fertig zusammengebaut -> an den Scheduler weiterreichen!
+	comp->processAndForwardAttribute(fr_Attributes);
+	
+      }else{ // "alte Realisierung"
+      //ALT
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
-
         const XMLCh* xmlName = node->getNodeName();
         DOMNamedNodeMap * atts = node->getAttributes();
 
@@ -662,6 +681,7 @@ namespace SystemC_VPC{
           XMLString::release(&sKey);
 
         }
+	}
       }
       vpcConfigTreeWalker->parentNode();
     }
@@ -1229,6 +1249,39 @@ namespace SystemC_VPC{
     }
     
     return controller;
+  }
+  
+  void VPCBuilder::nextAttribute(Attribute& fr_Attribute, DOMNode* node){
+  	//walk down hierarchy to attributes          	
+  	for(; node != NULL; node = node->getNextSibling()){
+        const XMLCh* xmlName = node->getNodeName();
+	DOMNamedNodeMap * atts = node->getAttributes();
+		
+        // check if its an attribute to add
+        if( 0==XMLString::compareNString( xmlName, attributeStr,sizeof(attributeStr))){
+          char* sType;
+          char* sValue="";
+          sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+	  if(atts->getNamedItem(valueAttrStr)!=NULL){
+          	sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+	  }
+	  
+	  Attribute fr_Attribute2( sType, sValue);
+
+	  //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
+          // XMLString::release(&sValue);
+   	  nextAttribute(fr_Attribute2,node->getFirstChild());
+	  fr_Attribute.addNewAttribute(fr_Attribute2, sType);
+  	}
+	// check if its an Parameter to add
+        if( 0==XMLString::compareNString( xmlName, parameterStr,sizeof(parameterStr))){
+          char* sType;
+          char* sValue;
+          sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+          sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+	  fr_Attribute.addNewParameter( sType, sValue);
+  	}
+	}
   }
 
 }// namespace SystemC_VPC
