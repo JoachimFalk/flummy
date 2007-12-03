@@ -27,8 +27,13 @@ name ID #REQUIRED
 type CDATA #REQUIRED
 scheduler CDATA #REQUIRED>
 
-<!ELEMENT attribute EMPTY>
+<!ELEMENT attribute (attribute|parameter)*>
 <!ATTLIST attribute 
+type CDATA #REQUIRED
+value CDATA #IMPLIED>
+
+<!ELEMENT parameter EMPTY>
+<!ATTLIST parameter
 type CDATA #REQUIRED
 value CDATA #REQUIRED>
 
