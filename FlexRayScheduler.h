@@ -72,6 +72,7 @@ namespace SystemC_VPC{
     sc_time remainingSliceB;
     int taskAssignedToA;
     int taskAssignedToB;
+    bool dualchannel;
     sc_time TimeDynamicSegment;   
     
   };

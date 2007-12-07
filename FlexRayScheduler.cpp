@@ -30,7 +30,8 @@ namespace SystemC_VPC{
     //neu FlexRay
 //    StartslotDynamic = 3;
 //    TimeDynamicSegment = Director::createSC_Time("50ns");
-        
+    //Standardmaessig beide Kanaele aktivieren!
+    dualchannel=1; 
     //alt (TDMA)
     processcount=0;
     lastassign=sc_time(0,SC_NS);
@@ -155,6 +156,15 @@ namespace SystemC_VPC{
 	assert(value!=NULL);
   	assert (strncmp("FlexRayParams", value, sizeof(value))==0);
 	//cout<<fr_Attribute.getAttributeSize()<<endl;
+	if(fr_Attribute.getParameterSize()!=0){
+		//es gibt folglich globale FlexRay-Parameter!
+		for(j=0;j<fr_Attribute.getParameterSize();j++){
+			std::pair<std::string, std::string > param2 =fr_Attribute.getNextParameter(j);
+			if(param2.first == "dualchannel")
+				dualchannel=(param2.second == "true");
+			}
+	}
+	
 	for(i=0;i<fr_Attribute.getAttributeSize();i++){
 	std::pair<std::string, Attribute >attribute=fr_Attribute.getNextAttribute(i);
 	
@@ -209,6 +219,11 @@ namespace SystemC_VPC{
 //			cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second <<endl;
 			
 			TDMASlot newSlot;
+			std::string temp = param.second;
+			if(temp==""){
+			//Default-Value fuer eine Dynamic-Slot-Laenge
+			param.second="30ns";
+			}
 			newSlot.length = Director::createSC_Time(param.second.c_str() );	
 			newSlot.name = param.first;
 	 		Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
@@ -245,7 +260,6 @@ namespace SystemC_VPC{
     if(processcount==0 && running_tasks.size()==0) return 0;   
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
-//     cout<<"moep1 - "<< curr_slicecount<<endl;   
     	if(curr_slicecount == -1){
 		time=sc_time(0,SC_NS);
 	}else{
@@ -521,7 +535,10 @@ namespace SystemC_VPC{
 		ret_decision=RESIGNED;
 		taskAssignedToA=0;	  
 	  }
-	}else{ //Task auf Kanal A noch weiterhin aktiv ->  minislot auf B vergangen -> B schedulen
+	}else{ 
+	
+	if(dualchannel){
+	//Task auf Kanal A noch weiterhin aktiv ->  minislot auf B vergangen -> B schedulen
 	   if(curr_slicecountB + StartslotDynamic +1< slicecount){		
 		curr_slicecountB++;
 		if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>0){            // ist da auch ein neuer da?
@@ -543,9 +560,15 @@ namespace SystemC_VPC{
 		}
 		}
 	   }else{ret_decision=NOCHANGE;}
+	   }else{
+	   //wenn kein Dualchannel, dann darf man hier nichts machen ;)
+	   ret_decision=NOCHANGE;
+	   }
 	}		
 //-------------------------------------------	
 	}else{ //na, dann wohl das Ganze nochmal auf Kanal B ;-)
+		// hier duerfte man bei dualchannel=false normalerweise niemals hinkommen!
+		if(dualchannel){
 		
 //-------------------------------------------		
 		if(this->remainingSliceB < (sc_time_stamp() - this->lastassignB)) 
@@ -604,15 +627,20 @@ namespace SystemC_VPC{
 	  }else{ret_decision=NOCHANGE;}
 	}		
 		}
+		ret_decision=NOCHANGE;
+		}
 		
+		/*
 		std::map<int,ProcessControlBlock*>::const_iterator iter;
 		iter=running_tasks.begin();
 		ProcessControlBlock *pcb=iter->second;
 		pcb->getInstanceId();
-		
+		*/
 // 		cout <<"Ende: "<< ret_decision << "  " << task_to_assign << "  " << running_tasks.size() << "  " <<  pcb->getInstanceId() << endl;
 		}
 		if(running_tasks.size() ==2){ // einer von beiden muss abgelaufen sein... welcher?
+		//auch hier darf man bei dualchannel=false Niemals hinkommen!
+		assert(dualchannel==true);
 		if(this->remainingSliceA < (sc_time_stamp() - this->lastassignA)){ 	
 			//na, es war wohl A
 			this->remainingSliceA=SC_ZERO_TIME;
@@ -689,8 +717,8 @@ namespace SystemC_VPC{
 /* if(ret_decision != NOCHANGE){
     cout << sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<endl;
     }
-	
-*/
+*/	
+
 #ifdef VPC_DEBUG  
       cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
       << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << " " << sc_time_stamp() <<  endl;
