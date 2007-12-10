@@ -400,9 +400,9 @@ namespace SystemC_VPC{
       {
 
         string msg("Unknown Component: name=");
-        msg = sName;
-        msg = " type=";
-        msg = sType;
+        msg += sName;
+        msg += " type=";
+        msg += sType;
         throw InvalidArgumentException(msg);
 
       }
@@ -456,9 +456,9 @@ namespace SystemC_VPC{
         {
 
           string msg("Unknown Component: name=");
-          msg = sName;
-          msg = " type=";
-          msg = sType;
+          msg += sName;
+          msg += " type=";
+          msg += sType;
           throw InvalidArgumentException(msg);
 
         }
@@ -865,7 +865,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
               std::string msg = "attribute values are: ";
               msg.append(sType, strlen(sType));
-              msg = " and ";
+              msg += " and ";
               msg.append(sValue, strlen(sValue));
               std::cerr << msg << std::endl;
 #endif   
@@ -1100,8 +1100,8 @@ namespace SystemC_VPC{
            allocator = new EDFAllocator(controller);
       }else{
         string msg("Unkown allocatortype ");
-        msg = type;
-        msg = ", cannot create instance";
+        msg += type;
+        msg += ", cannot create instance";
         throw InvalidArgumentException(msg);
       }
  
@@ -1164,8 +1164,8 @@ namespace SystemC_VPC{
         binder = new PriorityBinder(factory);
       }else{
         std::string msg("Unkown bindertype ");
-        msg = type;
-        msg = ", cannot create instance";
+        msg += type;
+        msg += ", cannot create instance";
         throw InvalidArgumentException(msg);
       }
 
@@ -1292,9 +1292,9 @@ namespace SystemC_VPC{
             char *secondindex;
             char *firstindex=strchr(sName,':');    //':' finden -> ':' trennt key-value Paare
             while(firstindex!=NULL){
-              secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+              secondindex=strchr(firstindex+1,':');        //':' berspringen und nï¿½hste ':' finden
               if(secondindex!=NULL)
-                sublength=secondindex-firstindex;          //Länge bestimmen
+                sublength=secondindex-firstindex;          //Lï¿½ge bestimmen
               else
                 sublength=strlen(firstindex);
               strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
@@ -1347,14 +1347,14 @@ namespace SystemC_VPC{
       data >> value;
     }else{
       string msg("Parsing Error: Unknown argument: <");
-      msg = timeString;
-      msg = "> How to creating a sc_string from?";
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
       throw InvalidArgumentException(msg);
     }
     if( data.fail() ){
       string msg("Parsing Error: Unknown argument: <");
-      msg = timeString;
-      msg = "> How to creating a sc_string from?";
+      msg += timeString;
+      msg += "> How to creating a sc_string from?";
       throw InvalidArgumentException(msg);
     }
     if(data.good()){

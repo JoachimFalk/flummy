@@ -1,4 +1,4 @@
-#ifndef HSCD_VPC_SIMPLECBINDER_H_
+#ifndef HSCD_VPC_SIMPLEBINDER_H_
 #define HSCD_VPC_SIMPLEBINDER_H_
 
 #include "hscd_vpc_AbstractBinder.h"
