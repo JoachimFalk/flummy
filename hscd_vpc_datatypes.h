@@ -74,6 +74,9 @@ namespace SystemC_VPC {
   // definition for SimpleBinder instance
 #define STR_VPC_SIMPLEBINDER "SimpleBinder"
 #define STR_VPC_SB           "SB"
+  // definition for OfflineBinder instance
+#define STR_VPC_OFFLINEBINDER "OfflineBinder"
+#define STR_VPC_OB           "OB"
   // definition for RoundRobinBinder instance
 #define STR_VPC_RRBINDER     "RoundRobin"
 #define STR_VPC_RRB          "RR"
@@ -111,6 +114,8 @@ namespace SystemC_VPC {
 #define STR_EDF "EDF"
 #define STR_ROUNDROBINEXTENDED "RoundRobinExtended"
 #define STR_RRE "RRE"
+#define STR_OFFLINESCHEDULER "OfflineScheduler"
+#define STR_OS "OS"
 
   /***********************************
    * SECTION attribute values

@@ -17,9 +17,9 @@ namespace SystemC_VPC{
     char rest[VPC_MAX_STRING_LENGTH];
     char *secondindex;
     while(firstindex!=NULL){
-      secondindex=strchr(firstindex+1,':');        //':' überspringen und nächste ':' finden
+      secondindex=strchr(firstindex+1,':');        //':'ueberspringen und naechste ':' finden
       if(secondindex!=NULL)
-        sublength=secondindex-firstindex;          //Länge bestimmen
+        sublength=secondindex-firstindex;          //Laenge bestimmen
       else
         sublength=strlen(firstindex);              
       strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
@@ -45,6 +45,14 @@ namespace SystemC_VPC{
     
   }
   
+  /**
+   * \brief InitController just calls Allocator->InitController
+   *
+   */
+  void Controller::initController(){
+    this->allocator->initController();
+  }
+   
   /**
    * \brief Implementation of Controller::getName()
    */

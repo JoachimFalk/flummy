@@ -35,6 +35,9 @@ namespace SystemC_VPC {
        * \param newTasks refers to new process to be scheduled
        * \param config refers to the required configuration which has to be scheduled
        */
+       
+      virtual void initController() {}
+       
       virtual void addProcessToSchedule(ProcessControlBlock* newTask, unsigned int config, ReconfigurableComponent* rc)=0; 
     
       /**

@@ -114,7 +114,9 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_ARBinder.cpp			\
 	hscd_vpc_BindingGraph.cpp		\
 	hscd_vpc_AbstractBinder.cpp		\
-	hscd_vpc_Term.cpp			
+	hscd_vpc_Term.cpp			\
+	hscd_vpc_OfflineAllocator.cpp		\
+	hscd_vpc_OfflineBinder.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 
 

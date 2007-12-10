@@ -44,12 +44,13 @@ namespace SystemC_VPC{
 
     virtual ~AbstractController() {}
     
+    virtual void initController()=0;
+    
     /**
      * \brief Getter for controller name
      */
     virtual char* getName()=0;
 
-    
     virtual AbstractBinder* getBinder()=0;
     virtual AbstractConfigurationMapper* getConfigurationMapper()=0;
     virtual AbstractAllocator* getAllocator()=0;

@@ -114,6 +114,15 @@ namespace SystemC_VPC{
     }
     
     /**
+     *
+     */
+    std::string getName(){
+      
+      return std::string(this->basename());
+      
+    }
+    
+    /**
      * \brief Getter to determine if component is set to activ
      */
     inline bool isActiv(){

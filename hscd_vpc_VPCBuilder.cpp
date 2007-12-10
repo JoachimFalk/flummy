@@ -15,6 +15,7 @@
 #include "hscd_vpc_PriorityAllocator.h"
 #include "hscd_vpc_EDFAllocator.h"
 #include "hscd_vpc_RREAllocator.h"
+#include "hscd_vpc_OfflineAllocator.h"
 
 #include "hscd_vpc_ARBinder.h"
 #include "hscd_vpc_SimpleBinder.h"
@@ -22,6 +23,7 @@
 #include "hscd_vpc_PriorityBinder.h"
 #include "hscd_vpc_LeastCurrentlyBoundPE.h"
 #include "hscd_vpc_LeastFrequentlyUsedPE.h"
+#include "hscd_vpc_OfflineBinder.h"
 
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
@@ -238,6 +240,9 @@ namespace SystemC_VPC{
                   std::cerr << "VPCBuilder> failed to create requested binder!\n" << e.what() 
                     << "\nLeaving default binder!" << std::endl;
                 }
+#ifdef VPC_DEBUG
+          std::cout << "VPCBuilder> Binder set " << sName << endl;
+#endif //VPC_DEBUG
 
               }
             }
@@ -433,7 +438,10 @@ namespace SystemC_VPC{
           }
 
           comp = new ReconfigurableComponent(sName, controller);
-
+          
+          //Init Controller after ReconfigurableComponent has been generated
+          controller->initController();
+          
           // TODO: modify if dynamic association should be supported
 // >>>>>>>>>>>>>>> here currently setting of Mapper for Controller just to ConfigurationPool
           try{
@@ -447,7 +455,6 @@ namespace SystemC_VPC{
 
           this->initConfigurations((ReconfigurableComponent*)comp);
           this->initCompAttributes(comp);
-
 #ifdef VPC_DEBUG
           std::cerr << "VPCBuilder> Initialized Component name=" << sName << " type=" << sType << endl;
 #endif //VPC_DEBUG
@@ -703,6 +710,9 @@ namespace SystemC_VPC{
           // add configuration to node
           comp->addConfiguration(sName, conf);
           comp->getController()->getConfigurationMapper()->registerConfiguration(conf);
+#ifdef VPC_DEBUG
+    cerr << "Controller ist " << comp->getController()->getName() << endl;
+#endif //VPC_DEBUG
           
         }else // if default configuration is defined init
           if( 0==XMLString::compareNString( xmlName, VPCBuilder::defaultConfStr, sizeof(VPCBuilder::defaultConfStr))){
@@ -1095,6 +1105,10 @@ namespace SystemC_VPC{
            || 0==strncmp(type, STR_PS, strlen(STR_PS))){
            allocator = new PriorityAllocator(controller);
       }else
+        if(0==strncmp(type, STR_OFFLINESCHEDULER, strlen(STR_OFFLINESCHEDULER))
+           || 0==strncmp(type, STR_OS, strlen(STR_OS))){
+           allocator = new OfflineAllocator(controller);
+      }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
            allocator = new EDFAllocator(controller);
@@ -1162,6 +1176,10 @@ namespace SystemC_VPC{
           || 0==strncmp(type, STR_VPC_LFBB, strlen(STR_VPC_LFBB))){
         PriorityElementFactory* factory = new LFUPEFactory();
         binder = new PriorityBinder(factory);
+      }else
+      if(0==strncmp(type, STR_VPC_OFFLINEBINDER, strlen(STR_VPC_OFFLINEBINDER))
+          || 0==strncmp(type, STR_VPC_OB, strlen(STR_VPC_OB))){
+        binder = new OfflineBinder();
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;
@@ -1292,9 +1310,9 @@ namespace SystemC_VPC{
             char *secondindex;
             char *firstindex=strchr(sName,':');    //':' finden -> ':' trennt key-value Paare
             while(firstindex!=NULL){
-              secondindex=strchr(firstindex+1,':');        //':' berspringen und n�hste ':' finden
+              secondindex=strchr(firstindex+1,':');        //':'ueberspringen und naechste ':' finden
               if(secondindex!=NULL)
-                sublength=secondindex-firstindex;          //L�ge bestimmen
+                sublength=secondindex-firstindex;          //Laenge bestimmen
               else
                 sublength=strlen(firstindex);
               strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
