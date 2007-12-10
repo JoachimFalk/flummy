@@ -66,7 +66,7 @@ namespace SystemC_VPC{
   bool Constraint::isSatisfied(){
     // cerr << VPC_YELLOW("Constraint: "<<name<<" isSatisfied()?  ");
     if(term->isSatisfied(excludes)){
-      activationTime=sc_simulation_time();
+      activationTime=sc_time_stamp().to_default_time_units();
       //cerr << VPC_GREEN("YES "<< sc_simulation_time())<<NENDL;
       return true;
     }else{

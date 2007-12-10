@@ -150,7 +150,7 @@ namespace SystemC_VPC{
                 << std::endl << e.what() << std::endl;
       std::cerr << "HINT: probably actor binding not specified in"
                 << " configuration file!" << std::endl;
-      exit(-1);
+      assert(0);
     }
 
   }
@@ -337,7 +337,7 @@ namespace SystemC_VPC{
       if(NULL != pcb->getBlockEvent().latency)
         pcb->getBlockEvent().latency->notify();
       // remember last acknowledged task time
-      this->end = sc_simulation_time();
+      this->end = sc_time_stamp().to_default_time_units();
       
       // free allocated pcb
       this->pcbPool.free(pcb);

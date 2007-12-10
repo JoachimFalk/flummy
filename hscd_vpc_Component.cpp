@@ -498,7 +498,7 @@ namespace SystemC_VPC{
     newTasks.push_back(actualTask);
 
     //awake scheduler thread
-    notify(notify_scheduler_thread);
+    notify_scheduler_thread.notify();
     //wait(SC_ZERO_TIME);
 
     ////////////////////////////////////////////////
