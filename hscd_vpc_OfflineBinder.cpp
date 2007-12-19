@@ -1,7 +1,6 @@
 #include "hscd_vpc_OfflineBinder.h"
 
-#include "hscd_vpc_ReconfigurableComponent.h"
-#define DEBUG
+//#define VPC_DEBUG
 namespace SystemC_VPC {
 
   OfflineBinder::OfflineBinder() : StaticBinder() {}
@@ -15,19 +14,68 @@ namespace SystemC_VPC {
     }else{
       b = task.getBindingGraph().getBinding(comp->basename());
     }
-#ifdef DEBUG
+#ifdef VPC_DEBUG
   if (comp != NULL) std::cerr << "OfflineBinder> Component: "<< comp->basename() <<"> Task: " << task.getName() << endl;
   if (comp == NULL) std::cerr << "OfflineBinder> Component: NULL"<<"> Task: " << task.getName() << endl;
 #endif
+
+//Statische Bindung, aus Datei einlesen
+    OfflineFile *myFile = new OfflineFile("/home/killer/systemoc-top--k--0.6/Examples/benchmarks/schedule.cfg");
+    if(!myFile->open()){
+      std::cerr << "OfflineBinder> Offlinefile open error" << std::endl;
+    }
+      // Lese Datei in Puffer und schliessen
+      std::string buffer = myFile->getbuffer();
+      myFile->close();
     
-    //Statische Bindung, aus Datei einlesen
-    int chosenComponent = 1;
-    if(task.getName()=="periodic.T1")chosenComponent = 3;
-    if(task.getName()=="periodic.T2")chosenComponent = 3;
-    if(task.getName()=="periodic.T3")chosenComponent = 1;
-    if(task.getName()=="periodic.T4")chosenComponent = 1;
-    if(task.getName()=="periodic.T5")chosenComponent = 2;
-    if(task.getName()=="periodic.T6")chosenComponent = 2;
+//Parse Puffer nach Werten für ComponentTable
+    
+    // find section SCHEDULE
+    std::string::size_type position = buffer.find("SCHEDULE");
+    if(position==string::npos) 
+      std::cerr << "OfflineBinder> Offlinefile: No Schedule found in file" << std::endl;
+    std::string schedule = buffer.substr(position, buffer.end()-buffer.begin());
+    
+    
+    // find task name in section SCHEDULE
+    std::string recomp;
+    position = schedule.find(task.getName());
+    if(position==string::npos){
+      std::cerr << "OfflineBinder> Offlinefile: task " << task.getName() << " not found in schedule" << std::endl;
+    }else{
+#ifdef VPC_DEBUG
+      std::cerr << "OfflineBinder> Offlinefile accepted line:" << std::endl;
+      for (std::string::iterator scheduleiter = schedule.begin()+position; scheduleiter != schedule.end(); ++scheduleiter){
+        if (*scheduleiter == '\n') {
+          std::cerr << endl;
+          break;
+        }
+        std::cerr << *scheduleiter;
+      }
+#endif
+      // find component name for previous found task
+      unsigned int compstart, compend;
+      compstart = schedule.find(';', position+1);
+      if(compstart==string::npos){
+        std::cerr << "OfflineBinder> Offlinefile: parse error after position" << position << std::endl;
+      }else{
+        compend = schedule.find(';', compstart+1);
+        if(compend==string::npos){
+          std::cerr << "OfflineBinder> Offlinefile: parse error after position" << compstart << std::endl;
+        }else{
+          recomp = schedule.substr(compstart+1, compend-compstart-1);
+          StringParser * sp = new StringParser();
+          sp->cleanstring(&recomp);
+        }
+      }
+     }// end of task found in schedule
+#ifdef VPC_DEBUG    
+    std::cerr << "OfflineBinder> Offlinefile: Comp for Task "<< task.getName() << " should be '" << recomp << "'"<<std::endl;
+#endif    
+    int chosenComponent = 1; //Default
+    if(recomp=="ESM-Slot1") chosenComponent = 1;
+    if(recomp=="ESM-Slot2") chosenComponent = 2;
+    if(recomp=="ESM-Slot3") chosenComponent = 3;
     
     ChildIterator* bIter = b->getChildIterator();
     if(bIter->hasNext()){
@@ -41,7 +89,7 @@ namespace SystemC_VPC {
       if(iter->hasNext()){
         MappingInformation* mInfo = iter->getNext();
         delete iter;
-#ifdef DEBUG
+#ifdef VPC_DEBUG
   std::cerr << "OfflineBinder> Chose Mapping: "<< b->getID() << endl;
 #endif        
         return std::pair<std::string, MappingInformation*>(b->getID(), mInfo);

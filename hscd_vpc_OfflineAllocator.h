@@ -2,7 +2,6 @@
 #define HSCD_VPC_OFFLINEALLOCATOR_H_
 
 #include <systemc.h>
-
 #include <string>
 #include <map>
 #include <queue>
@@ -10,7 +9,8 @@
 
 #include "hscd_vpc_Allocator.h"
 #include "hscd_vpc_Director.h"
-
+#include "hscd_vpc_OfflineFile.h"
+#include "hscd_vpc_StringParser.h"
 
 namespace SystemC_VPC{
 

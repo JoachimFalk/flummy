@@ -2,12 +2,15 @@
 #define HSCD_VPC_OFFLINEBINDER_H_
 
 #include "hscd_vpc_AbstractBinder.h"
+#include "hscd_vpc_ReconfigurableComponent.h"
+#include "hscd_vpc_OfflineFile.h"
+#include "hscd_vpc_StringParser.h"
 
 namespace SystemC_VPC {
 
   /**
-   * OfflineBinder is a dummy implementation for a binding strategy.
-   * It simply takes the first binding alternativ for binding a process to a component.
+   * OfflineBinder is a implementation for a binding strategy.
+   * It takes the binding decision from the schedule config file.
    */
   class OfflineBinder : public StaticBinder {
 
