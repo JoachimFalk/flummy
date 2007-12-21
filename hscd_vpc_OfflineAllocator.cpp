@@ -20,10 +20,10 @@ namespace SystemC_VPC{
     //assert(this->tasks.size() == 0);
   }
   
-  void OfflineAllocator::initController(){
+  void OfflineAllocator::initController(char* OfflineFileName){
   
    //Statische Bindung, aus Datei einlesen
-    OfflineFile *myFile = new OfflineFile("/home/killer/systemoc-top--k--0.6/Examples/benchmarks/schedule.cfg");
+    OfflineFile *myFile = new OfflineFile(OfflineFileName);
     std::string buffer;
     if(!myFile->open()){
       std::cerr << "OfflineAllocator> Offlinefile open error" << std::endl;

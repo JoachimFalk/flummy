@@ -233,7 +233,8 @@ namespace SystemC_VPC{
               
               if( 0==XMLString::compareNString( xmlName, binderStr, sizeof(binderStr) ) ){
         
-                char* sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());    
+                char* sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
+                this->OfflineFileName=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
                 try{
                   this->director->setBinder(this->generateBinder(sName, node, NULL));
                 }catch(InvalidArgumentException& e){
@@ -243,7 +244,6 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
           std::cout << "VPCBuilder> Binder set " << sName << endl;
 #endif //VPC_DEBUG
-
               }
             }
 
@@ -440,7 +440,8 @@ namespace SystemC_VPC{
           comp = new ReconfigurableComponent(sName, controller);
           
           //Init Controller after ReconfigurableComponent has been generated
-          controller->initController();
+          controller->initController(this->OfflineFileName);
+          
           
           // TODO: modify if dynamic association should be supported
 // >>>>>>>>>>>>>>> here currently setting of Mapper for Controller just to ConfigurationPool
@@ -1179,7 +1180,7 @@ namespace SystemC_VPC{
       }else
       if(0==strncmp(type, STR_VPC_OFFLINEBINDER, strlen(STR_VPC_OFFLINEBINDER))
           || 0==strncmp(type, STR_VPC_OB, strlen(STR_VPC_OB))){
-        binder = new OfflineBinder();
+        binder = new OfflineBinder(this->OfflineFileName);
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;

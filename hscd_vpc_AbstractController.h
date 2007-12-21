@@ -44,7 +44,7 @@ namespace SystemC_VPC{
 
     virtual ~AbstractController() {}
     
-    virtual void initController()=0;
+    virtual void initController(char*)=0;
     
     /**
      * \brief Getter for controller name

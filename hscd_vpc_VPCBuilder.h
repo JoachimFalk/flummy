@@ -120,6 +120,9 @@ namespace SystemC_VPC{
     // pointer to Director to be initialized
     Director* director;
     
+    // pointer to schedulefile for OfflineBinder
+    char *OfflineFileName;
+    
   public:
     
     VPCBuilder(Director* director){

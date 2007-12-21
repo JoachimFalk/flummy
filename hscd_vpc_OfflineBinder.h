@@ -14,9 +14,12 @@ namespace SystemC_VPC {
    */
   class OfflineBinder : public StaticBinder {
 
+    private:
+      char *OfflineFileName;
+  
     public:
        
-      OfflineBinder::OfflineBinder();
+      OfflineBinder::OfflineBinder(char*);
 
       OfflineBinder::~OfflineBinder();
 

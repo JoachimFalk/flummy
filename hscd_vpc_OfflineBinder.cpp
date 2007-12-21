@@ -1,9 +1,13 @@
 #include "hscd_vpc_OfflineBinder.h"
 
-//#define VPC_DEBUG
+//#define OFFLINEFILENAME "/home/killer/systemoc-top--k--0.6/Examples/benchmarks/schedule.cfg"
+
+#define VPC_DEBUG
 namespace SystemC_VPC {
 
-  OfflineBinder::OfflineBinder() : StaticBinder() {}
+  OfflineBinder::OfflineBinder(char * OfflineFileName) : StaticBinder() {
+    this->OfflineFileName = OfflineFileName;
+  }
 
   OfflineBinder::~OfflineBinder() {}
 
@@ -20,7 +24,8 @@ namespace SystemC_VPC {
 #endif
 
 //Statische Bindung, aus Datei einlesen
-    OfflineFile *myFile = new OfflineFile("/home/killer/systemoc-top--k--0.6/Examples/benchmarks/schedule.cfg");
+    std::cerr << "FILE:" << this->OfflineFileName << std::endl;
+    OfflineFile *myFile = new OfflineFile(this->OfflineFileName);
     if(!myFile->open()){
       std::cerr << "OfflineBinder> Offlinefile open error" << std::endl;
     }

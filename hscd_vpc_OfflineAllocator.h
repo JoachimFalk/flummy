@@ -74,7 +74,7 @@ namespace SystemC_VPC{
       * \brief Initializes Controller after Component has been set
       * This method is used to initialize the controller after a component has been set.
       */
-      virtual void initController();
+      virtual void initController(char*);
             
       /**
        * \brief Updates management structures for performing schedule decisions

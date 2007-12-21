@@ -49,8 +49,8 @@ namespace SystemC_VPC{
    * \brief InitController just calls Allocator->InitController
    *
    */
-  void Controller::initController(){
-    this->allocator->initController();
+  void Controller::initController(char* OfflineFileName){
+    this->allocator->initController(OfflineFileName);
   }
    
   /**
