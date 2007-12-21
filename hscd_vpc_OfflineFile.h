@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <systemc.h>
 
 namespace SystemC_VPC{
   
@@ -25,6 +27,9 @@ namespace SystemC_VPC{
     int OfflineFile::getlength();
     std::string OfflineFile::getbuffer();
     void OfflineFile::print();
+    
+    void OfflineFile::cleanstring(std::string*);
+    sc_time OfflineFile::generate_sctime(std::string);
   };
 }
 #endif //HSCD_VPC_OFFLINEFILE_H_

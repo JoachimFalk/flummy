@@ -54,8 +54,7 @@ namespace SystemC_VPC{
       if(endpos==string::npos){
         std::cerr << "OfflineAllocator> Offlinefile: task format error" << std::endl;break;}
       taskname = schedule.substr(startpos, endpos-startpos);
-      StringParser * sp = new StringParser();
-      sp->cleanstring(&taskname);
+      myFile->cleanstring(&taskname);
 #ifdef VPC_DEBUG
       std::cerr << "A taskname:" << taskname;
 #endif //VPC_DEBUG     
@@ -65,7 +64,7 @@ namespace SystemC_VPC{
       if(endpos==string::npos){
         std::cerr << "OfflineAllocator> Offlinefile: recomponent format error" << std::endl;break;}
       recomponentname = schedule.substr(startpos, endpos-startpos);
-      sp->cleanstring(&recomponentname);
+      myFile->cleanstring(&recomponentname);
 #ifdef VPC_DEBUG      
       std::cerr << "; a Recomponentname:" << recomponentname << std::endl;
 #endif //VPC_DEBUG           
@@ -75,13 +74,13 @@ namespace SystemC_VPC{
       if(endpos==string::npos){
         std::cerr << "OfflineAllocator> Offlinefile: starttime format error" << std::endl;break;}
       starttime = schedule.substr(startpos, endpos-startpos);
-      sp->cleanstring(&starttime);
+      myFile->cleanstring(&starttime);
 #ifdef VPC_DEBUG            
       std::cerr << "; a Starttime:" << starttime << std::endl;
 #endif //VPC_DEBUG              
       //if we are on the right recomponent, add entry to timesTable
       if(controller->getManagedComponent()->getName() == recomponentname){
-        timesTable_entry entry = timesTable_entry (sp->generate_sctime(starttime), taskname, recomponentname);
+        timesTable_entry entry = timesTable_entry (myFile->generate_sctime(starttime), taskname, recomponentname);
         this->timesTable.push(entry);
       }
       //repeat

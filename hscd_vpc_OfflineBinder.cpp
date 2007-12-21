@@ -64,8 +64,7 @@ namespace SystemC_VPC {
           std::cerr << "OfflineBinder> Offlinefile: parse error after position" << compstart << std::endl;
         }else{
           recomp = schedule.substr(compstart+1, compend-compstart-1);
-          StringParser * sp = new StringParser();
-          sp->cleanstring(&recomp);
+          myFile->cleanstring(&recomp);
         }
       }
      }// end of task found in schedule
