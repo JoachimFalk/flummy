@@ -1,8 +1,6 @@
 #include "hscd_vpc_OfflineBinder.h"
 
-//#define OFFLINEFILENAME "/home/killer/systemoc-top--k--0.6/Examples/benchmarks/schedule.cfg"
-
-#define VPC_DEBUG
+//#define VPC_DEBUG
 namespace SystemC_VPC {
 
   OfflineBinder::OfflineBinder(char * OfflineFileName) : StaticBinder() {
@@ -24,7 +22,9 @@ namespace SystemC_VPC {
 #endif
 
 //Statische Bindung, aus Datei einlesen
-    std::cerr << "FILE:" << this->OfflineFileName << std::endl;
+#ifdef VPC_DEBUG
+    std::cerr << "OfflineBinder> Schedule filename: " << this->OfflineFileName << std::endl;
+#endif
     OfflineFile *myFile = new OfflineFile(this->OfflineFileName);
     if(!myFile->open()){
       std::cerr << "OfflineBinder> Offlinefile open error" << std::endl;
@@ -77,9 +77,21 @@ namespace SystemC_VPC {
     std::cerr << "OfflineBinder> Offlinefile: Comp for Task "<< task.getName() << " should be '" << recomp << "'"<<std::endl;
 #endif    
     int chosenComponent = 1; //Default
-    if(recomp=="ESM-Slot1") chosenComponent = 1;
-    if(recomp=="ESM-Slot2") chosenComponent = 2;
-    if(recomp=="ESM-Slot3") chosenComponent = 3;
+    //generic Slots
+    std::string numbers = "0123456789";
+    std::string result;
+    std::string::iterator iter;
+    for(iter=recomp.begin();iter != recomp.end();iter++){
+      if(numbers.find(*iter)!= std::string::npos){
+      result.push_back(*iter);
+      }
+    }
+    std::istringstream converter;
+    converter.str( result );
+    converter >> chosenComponent;
+#ifdef VPC_DEBUG    
+    std::cerr << "OfflineBinder> Offlinefile: Chosen Component: "<< chosenComponent << std::endl;
+#endif    
     
     ChildIterator* bIter = b->getChildIterator();
     if(bIter->hasNext()){
