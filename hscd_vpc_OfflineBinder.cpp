@@ -76,29 +76,10 @@ namespace SystemC_VPC {
 #ifdef VPC_DEBUG    
     std::cerr << "OfflineBinder> Offlinefile: Comp for Task "<< task.getName() << " should be '" << recomp << "'"<<std::endl;
 #endif    
-    int chosenComponent = 1; //Default
-    //generic Slots
-    std::string numbers = "0123456789";
-    std::string result;
-    std::string::iterator iter;
-    for(iter=recomp.begin();iter != recomp.end();iter++){
-      if(numbers.find(*iter)!= std::string::npos){
-      result.push_back(*iter);
-      }
-    }
-    std::istringstream converter;
-    converter.str( result );
-    converter >> chosenComponent;
-#ifdef VPC_DEBUG    
-    std::cerr << "OfflineBinder> Offlinefile: Chosen Component: "<< chosenComponent << std::endl;
-#endif    
-    
     ChildIterator* bIter = b->getChildIterator();
-    if(bIter->hasNext()){
-    
-      // Set Chosen Component for task
-      for(int i=0;i < chosenComponent;i++)
-        b = bIter->getNext();
+    while(bIter->hasNext()){
+      b = bIter->getNext();
+      if(b->getID() != recomp) continue;
         
       delete bIter;
       MappingInformationIterator* iter = b->getMappingInformationIterator();
@@ -114,7 +95,7 @@ namespace SystemC_VPC {
         delete iter;
       }
     }
-
+    delete bIter;
     std::string msg = "No target specified for "+ task.getName() +"->?";
     throw UnknownBindingException(msg);
   }

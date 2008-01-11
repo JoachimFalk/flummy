@@ -4,7 +4,6 @@
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_OfflineFile.h"
-#include "hscd_vpc_StringParser.h"
 
 namespace SystemC_VPC {
 

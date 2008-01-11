@@ -10,7 +10,6 @@
 #include "hscd_vpc_Allocator.h"
 #include "hscd_vpc_Director.h"
 #include "hscd_vpc_OfflineFile.h"
-#include "hscd_vpc_StringParser.h"
 
 namespace SystemC_VPC{
 
