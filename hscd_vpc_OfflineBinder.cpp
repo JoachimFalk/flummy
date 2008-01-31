@@ -1,6 +1,6 @@
 #include "hscd_vpc_OfflineBinder.h"
 
-//#define VPC_DEBUG
+#define VPC_DEBUG
 namespace SystemC_VPC {
 
   OfflineBinder::OfflineBinder(char * OfflineFileName) : StaticBinder() {
@@ -88,6 +88,8 @@ namespace SystemC_VPC {
         delete iter;
 #ifdef VPC_DEBUG
   std::cerr << "OfflineBinder> Chose Mapping: "<< b->getID() << endl;
+  std::cerr << mInfo->getDeadline() << endl;
+  
 #endif        
         return std::pair<std::string, MappingInformation*>(b->getID(), mInfo);
       }else{

@@ -249,10 +249,14 @@ namespace SystemC_VPC{
   }
 
   sc_time Controller::getSchedulingOverhead(){
-    sc_time t = SC_ZERO_TIME;
-    t += this->binder->getBindingOverhead();
-    t += this->allocator->getSchedulingOverhead();
-    return t;
+    //ReconfigurableComponent* myComp = getManagedComponent();
+    //Configuration* myConfig = myComp->getActivConfiguration();
+    //const sc_time& myTime = myConfig->getLoadTime();
+    sc_time myTime = this->binder->getBindingOverhead();
+    myTime += this->allocator->getSchedulingOverhead();
+    //std::cerr << "MyTime: " << myTime << std::endl;
+    return myTime;
+    
   }
   
 }

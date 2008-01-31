@@ -9,6 +9,14 @@
 
 namespace SystemC_VPC {
 
+   void AbstractBinder::setDirector(AbstractDirector* dir){
+      this->director = dir;
+   }
+   
+   AbstractDirector* AbstractBinder::getDirector(){
+      return this->director;
+   }
+
   /**
    * \brief Updates data fields of pcb to binding decision
    * This method ensures that at each hierarchy the data fields
@@ -80,6 +88,18 @@ namespace SystemC_VPC {
 
 
   sc_time LocalBinder::getBindingOverhead(){
+    //get Setuptime
+//       Decision d;
+//       // determine binding of process
+//       d.comp = b->getID();
+//       AbstractController* myCtrl = comp->getController();
+//     if(myCtrl){  
+//       d.conf = myCtrl->getConfigurationMapper()->getConfigForComp(d.comp);
+//       Configuration* myConf = comp->getConfiguration(d.conf);
+//       const sc_time& mytime = myConf->getLoadTime();
+//       
+//       std::cerr << "setuptime: " << mytime << std::endl;
+    
     return SC_ZERO_TIME;
   }
 

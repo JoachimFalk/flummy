@@ -117,7 +117,9 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Term.cpp			\
 	hscd_vpc_OfflineAllocator.cpp		\
 	hscd_vpc_OfflineBinder.cpp		\
-	hscd_vpc_OfflineFile.cpp
+	hscd_vpc_OfflineFile.cpp		\
+	hscd_vpc_ListBinder.cpp		\
+	hscd_vpc_OnlineAllocator.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 
 

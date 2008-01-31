@@ -13,6 +13,7 @@
 #include "hscd_vpc_MappingInformation.h"
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_InvalidArgumentException.h"
+#include "hscd_vpc_AbstractDirector.h"
 
 namespace SystemC_VPC {
 
@@ -23,7 +24,10 @@ namespace SystemC_VPC {
    * \brief Basic binder class specifying interface for all realized binder sub-classes
    */
   class AbstractBinder : public virtual ProcessEventListener {
-		
+ 
+    private:
+      AbstractDirector* director;
+    
     protected:
 
       AbstractBinder() {}
@@ -61,6 +65,10 @@ namespace SystemC_VPC {
       virtual bool setProperty(char* key, char* value)=0;
 
       virtual sc_time getBindingOverhead()=0;
+      
+      virtual void setDirector(AbstractDirector*);
+      
+      virtual AbstractDirector* getDirector();
   };
 
   /**
@@ -85,6 +93,7 @@ namespace SystemC_VPC {
 			// map containing associated controlling instances
 			std::map<std::string, AbstractController* > ctrls;
 
+      
     protected:
 
       // map of binding decisions pid -> target
@@ -124,7 +133,7 @@ namespace SystemC_VPC {
       std::string resolveBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
   
       virtual sc_time getBindingOverhead();
-  };
+   };
 
   /**
    * \brief Base class for all Binder using only one binding possibility to perfom task binding
@@ -169,7 +178,6 @@ namespace SystemC_VPC {
        * \sa AbstractBinder
        */
       virtual bool setProperty(char* key, char* value);
-
   };
 
 }

@@ -16,6 +16,7 @@
 #include "hscd_vpc_EDFAllocator.h"
 #include "hscd_vpc_RREAllocator.h"
 #include "hscd_vpc_OfflineAllocator.h"
+#include "hscd_vpc_OnlineAllocator.h"
 
 #include "hscd_vpc_ARBinder.h"
 #include "hscd_vpc_SimpleBinder.h"
@@ -24,6 +25,7 @@
 #include "hscd_vpc_LeastCurrentlyBoundPE.h"
 #include "hscd_vpc_LeastFrequentlyUsedPE.h"
 #include "hscd_vpc_OfflineBinder.h"
+#include "hscd_vpc_ListBinder.h"
 
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
@@ -234,7 +236,9 @@ namespace SystemC_VPC{
               if( 0==XMLString::compareNString( xmlName, binderStr, sizeof(binderStr) ) ){
         
                 char* sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
-                this->OfflineFileName=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+                if(strcmp(sName,"OB") == 0){
+                  this->OfflineFileName=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+                }
                 try{
                   this->director->setBinder(this->generateBinder(sName, node, NULL));
                 }catch(InvalidArgumentException& e){
@@ -438,6 +442,7 @@ namespace SystemC_VPC{
           }
 
           comp = new ReconfigurableComponent(sName, controller);
+          this->director->setReComp( dynamic_cast<ReconfigurableComponent*>(comp) );
           
           //Init Controller after ReconfigurableComponent has been generated
           controller->initController(this->OfflineFileName);
@@ -1110,6 +1115,10 @@ namespace SystemC_VPC{
            || 0==strncmp(type, STR_OS, strlen(STR_OS))){
            allocator = new OfflineAllocator(controller);
       }else
+        if(0==strncmp(type, STR_ONLINEALLOCATOR, strlen(STR_ONLINEALLOCATOR))
+           || 0==strncmp(type, STR_OA, strlen(STR_OA))){
+           allocator = new OnlineAllocator(controller);
+      }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
            allocator = new EDFAllocator(controller);
@@ -1181,6 +1190,10 @@ namespace SystemC_VPC{
       if(0==strncmp(type, STR_VPC_OFFLINEBINDER, strlen(STR_VPC_OFFLINEBINDER))
           || 0==strncmp(type, STR_VPC_OB, strlen(STR_VPC_OB))){
         binder = new OfflineBinder(this->OfflineFileName);
+      }else
+      if(0==strncmp(type, STR_VPC_LISTBINDER, strlen(STR_VPC_LISTBINDER))
+          || 0==strncmp(type, STR_VPC_LIST, strlen(STR_VPC_LIST))){
+        binder = new ListBinder();
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;

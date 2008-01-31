@@ -89,6 +89,9 @@ namespace SystemC_VPC {
   //definition for ARBinder
 #define STR_VPC_ARBINDER     "AvoidReconfigurationBinder"
 #define STR_VPC_ARB          "ARB"
+  //definition for ListBinder
+#define STR_VPC_LISTBINDER   "ListBinder"
+#define STR_VPC_LIST         "LIST"
   
   /***********************************
    * SECTION Mapper
@@ -116,6 +119,8 @@ namespace SystemC_VPC {
 #define STR_RRE "RRE"
 #define STR_OFFLINESCHEDULER "OfflineScheduler"
 #define STR_OS "OS"
+#define STR_ONLINEALLOCATOR "OnlineAllocator"
+#define STR_OA "OA"
 
   /***********************************
    * SECTION attribute values

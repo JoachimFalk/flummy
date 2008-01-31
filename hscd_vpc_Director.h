@@ -20,6 +20,7 @@
 
 #include "hscd_vpc_AbstractDirector.h"
 #include "hscd_vpc_EventPair.h"
+#include "hscd_vpc_ReconfigurableComponent.h"
 
 // provide compatibility with other compilers then gcc, hopefully
 #include <ansidecl.h>
@@ -72,6 +73,8 @@ namespace SystemC_VPC{
     // binder instance to resolve bindings
     AbstractBinder* binder;
     
+    ReconfigurableComponent* recomp;
+  
   public:
     bool FALLBACKMODE;
 
@@ -220,7 +223,11 @@ namespace SystemC_VPC{
     string getResultFile(){
       return this->vpc_result_file;
     }
-
+    
+    ReconfigurableComponent* getReComp();
+    
+    void setReComp(ReconfigurableComponent*);
+    
   private:
 
     void compute(ProcessControlBlock* pcb, EventPair endPair);

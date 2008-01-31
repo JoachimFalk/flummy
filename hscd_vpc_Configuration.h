@@ -197,6 +197,7 @@ namespace SystemC_VPC{
        * time needed for loading encapsulated components.
        * \return sc_time specifying time to load configuration
        */
+      //const sc_time& getLoadTime();
       const sc_time& getLoadTime();
 
       /**

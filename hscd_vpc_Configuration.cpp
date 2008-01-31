@@ -295,7 +295,7 @@ namespace SystemC_VPC{
     if(time >= SC_ZERO_TIME){
       this->loadTime = time;
     }else{
-      this->loadTime = SC_ZERO_TIME;
+      this->loadTime = sc_time(SC_ZERO_TIME);
     }
     
 #ifdef VPC_DEBUG
@@ -308,6 +308,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Configuration::getLoadTime
    */
+  //const sc_time& Configuration::getLoadTime(){
   const sc_time& Configuration::getLoadTime(){
     return this->loadTime;
   }
