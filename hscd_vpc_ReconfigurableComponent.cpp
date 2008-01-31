@@ -153,8 +153,10 @@ namespace SystemC_VPC{
 
         }
 
+// Hier eventuell warten auf Andere Recomponenten
+        
         wait(this->notify_allocate);
-
+        
         this->loadConfiguration(currConfig);
         this->controller->signalAllocation(this);
 
@@ -179,6 +181,7 @@ namespace SystemC_VPC{
       if(overhead != SC_ZERO_TIME){
         // TODO: apply implementation if overhead of scheduling should be modeled!
         // wait(overhead ...
+        // this->mintimetowait +=overhead;
         // Does not interact with other ReconfigurableComponent, so all Recomps will wait at once
         overhead = SC_ZERO_TIME;
       }

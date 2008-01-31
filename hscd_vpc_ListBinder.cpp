@@ -44,6 +44,7 @@ namespace SystemC_VPC {
     }
 #ifdef VPC_DEBUG  
     std::cerr << "**************************************"<< std::endl;
+    std::cerr << "ListBinder> sc_time_stamp: " << sc_time_stamp() << endl;
     std::cerr << "ListBinder> numberofcomp "<< numberofcomp << std::endl;
 #endif    
 
@@ -74,19 +75,20 @@ namespace SystemC_VPC {
     if(iter->hasNext()){
       MappingInformation* mInfo = iter->getNext();
       delete iter;
-   
+
+      //Runtime + Mapping
+#ifdef VPC_DEBUG
+      std::cerr << "ListBinder> Runtime: " << mInfo->getDelay() << endl;   
+      std::cerr << "ListBinder> Chose Mapping: "<< b->getID() << endl;
+#endif        
+      
       //getSetupTime
       Director* myDir = dynamic_cast<Director*>(getDirector());
       ReconfigurableComponent* myComp = myDir->getReComp();
-      //task vorhanden
+
       if(myComp == NULL){
         std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
       }
-//       Configuration* myConf = myComp->getConfiguration(task.getPID());
-//       std::cerr << "ListBinder> myNAME:" << myComp->getName() << std::endl;
-//       if(myConf == NULL){
-//         std::cerr << "ListBinder> MyConf ist NULL" << std::endl;
-//       }
       AbstractController* myCtrl = myComp->getController();
       if(myCtrl == NULL){
         std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
@@ -95,8 +97,7 @@ namespace SystemC_VPC {
       if(myAll == NULL){
         std::cerr << "ListBinder> Myall ist NULL" << std::endl;
       }
-      
-      //sc_time setuptime = generate_sctime("1ms");
+  
       sc_time setuptime = myAll->getSchedulingOverhead();
       std::cerr << "ListBinder> SetupTime: "<< setuptime << std::endl;
       
@@ -107,21 +108,19 @@ namespace SystemC_VPC {
           rctime[i] = chosentime+setuptime;
           if(i == chosen)
             rctime[chosen] += mInfo->getDelay();
-        std::cerr << "ListBinder> time-border for Slot" << i << " = " << rctime[i] << std::endl;
-      }
 #ifdef VPC_DEBUG
-  std::cerr << "ListBinder> Chose Mapping: "<< b->getID() << endl;
-  //std::cerr << "Setuptime: " << ??? << endl;
-  std::cerr << "ListBinder> sc_time_stamp: " << sc_time_stamp() << endl;
-  std::cerr << "ListBinder> Runtime: " << mInfo->getDelay() << endl;
-  std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;
-#endif        
+        std::cerr << "ListBinder> time-border for Slot" << i << " = " << rctime[i] << std::endl;
+#endif
+      }
+    
       //wait till last configuration finished
       if (sc_time_stamp() < config_blocked_until){
         wait(config_blocked_until - sc_time_stamp());
       }
       config_blocked_until = sc_time_stamp() + setuptime;     
-
+#ifdef VPC_DEBUG
+      std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;
+#endif            
     //return MappingInformation
     return std::pair<std::string, MappingInformation*>(b->getID(), mInfo);
       
@@ -167,9 +166,6 @@ namespace SystemC_VPC {
     timex >> timeindouble;
     
     cleanstring(&unit);
-#ifdef VPC_DEBUG    
-    std::cerr << "ListBinder> time:"<<timeindouble<<"Unit:"<<unit<<std::endl;
-#endif //VPC_DEBUG     
     //generiere sc_time(zahl,einheit)
     sc_time_unit scUnit = SC_NS;
     if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
