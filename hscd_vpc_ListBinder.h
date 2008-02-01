@@ -9,6 +9,7 @@
 #include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_AbstractController.h"
 #include "hscd_vpc_AbstractAllocator.h"
+#include "hscd_vpc_OnlineAllocator.h"
 namespace SystemC_VPC {
 
   /**
@@ -19,8 +20,9 @@ namespace SystemC_VPC {
     private:
     
       int numberofcomp;
-      //priority queue der Recomponent-Restlaufzeiten, bei neuem Task wird das Element entfernt und mit neuer Restlaufzeit wieder eingefügt
-      sc_time rctime[4];
+      
+      //sc_time rctime[4];
+      std::vector<sc_time> rctime;
       
       sc_time config_blocked_until;
   

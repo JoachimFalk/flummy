@@ -7,9 +7,9 @@ namespace SystemC_VPC {
    */
   ListBinder::ListBinder() : DynamicBinder() {
     
-    for(int i = 1; i <= 3; i++){
-      rctime[i] = generate_sctime("0ms");
-    }
+//     for(int i = 0; i < 3; i++){
+//       rctime[i] = generate_sctime("0ms");
+//     }
     numberofcomp = 0;
     config_blocked_until = sc_time_stamp();
     
@@ -38,6 +38,7 @@ namespace SystemC_VPC {
       ChildIterator* counter = bIter;
       while(counter->hasNext()){
         counter->getNext();
+        rctime.push_back(generate_sctime("0ms"));
         numberofcomp++;
       }
       bIter = b->getChildIterator();
@@ -54,13 +55,13 @@ namespace SystemC_VPC {
 #endif
 
     //check queue for rc with minimum runtime left
-    int chosen = 1;
-    for(int i=1; i <= numberofcomp; i++){
+    int chosen = 0;
+    for(int i=0; i < numberofcomp; i++){
       if (rctime[i] < rctime[chosen])
         chosen = i;
     }
     //jump to chosen Recomponent
-    for(int i=0; i < chosen; i++){
+    for(int i=0; i <= chosen; i++){
       if(bIter->hasNext()){
         b = bIter->getNext();
       }else{    
@@ -93,7 +94,7 @@ namespace SystemC_VPC {
       if(myCtrl == NULL){
         std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
       }
-      AbstractAllocator* myAll = myCtrl->getAllocator();
+      OnlineAllocator* myAll = (OnlineAllocator*)myCtrl->getAllocator();
       if(myAll == NULL){
         std::cerr << "ListBinder> Myall ist NULL" << std::endl;
       }
@@ -103,20 +104,22 @@ namespace SystemC_VPC {
       
       //move all slots time-border for next possible configuration by this->setuptime
       sc_time chosentime = rctime[chosen];
-      for(int i=1;i<=numberofcomp; i++){
+      for(int i=0; i<numberofcomp; i++){
         if(rctime[i] < (chosentime+setuptime))
           rctime[i] = chosentime+setuptime;
           if(i == chosen)
             rctime[chosen] += mInfo->getDelay();
 #ifdef VPC_DEBUG
-        std::cerr << "ListBinder> time-border for Slot" << i << " = " << rctime[i] << std::endl;
+        std::cerr << "ListBinder> time-border for Slot" << i+1 << " = " << rctime[i] << std::endl;
 #endif
       }
     
       //wait till last configuration finished
       if (sc_time_stamp() < config_blocked_until){
         wait(config_blocked_until - sc_time_stamp());
+        //myAll->setBlockedTime(config_blocked_until - sc_time_stamp());
       }
+      //Statt wait hier, myAll->setBlockedTime: PROBLEM, nur eine ReComponente geladen, Director müsste alle schicken
       config_blocked_until = sc_time_stamp() + setuptime;     
 #ifdef VPC_DEBUG
       std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;

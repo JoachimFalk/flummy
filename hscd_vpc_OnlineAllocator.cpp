@@ -1,5 +1,5 @@
 #include <hscd_vpc_OnlineAllocator.h>
-#define VPC_DEBUG
+//#define VPC_DEBUG
 namespace SystemC_VPC{
   
   /**
@@ -82,7 +82,10 @@ namespace SystemC_VPC{
 
         // load new configuration
         this->nextConfiguration = reqConfig;
-
+        
+        //blocked because of other SetupTime
+        //this->waitInterval = getBlockedTime();
+        //this->nextConfiguration = 0;
       }else{
         // current task not processable, so leave it and stop processing any further tasks
         break;
@@ -175,7 +178,6 @@ namespace SystemC_VPC{
 
     sc_time myTime = generate_sctime("2ms"); //VPCBuilder::createSC_Time
     if(this->tasksToProcess.size() > 0){
-      ProcessControlBlock* task = this->tasksToProcess.front();
       ReconfigurableComponent* myComp = this->getManagedComponent();
       Configuration* myConf = myComp->getConfiguration(this->nextConfiguration);
       myTime = myConf->getLoadTime();
@@ -197,6 +199,13 @@ namespace SystemC_VPC{
     //Wenn von Recomponent aufgerufen, return blockingtime durch andere Recomp die gerade Configern
     return myTime;
     
+  }
+  
+  /**
+   * \brief Implementation of OnlineAllocator::setBlockedTime, called by Binder to block concurrent configuration
+   */
+  void OnlineAllocator::setBlockedTime(sc_time time){
+    //this->waitInterval = &time;
   }
   
   /**

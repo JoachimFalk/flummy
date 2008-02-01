@@ -121,6 +121,8 @@ namespace SystemC_VPC{
       
       sc_time getSchedulingOverhead();
       
+      void setBlockedTime(sc_time);
+      
       sc_time generate_sctime(std::string);
       
       void cleanstring(std::string*);
