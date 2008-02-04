@@ -67,10 +67,10 @@ namespace SystemC_VPC{
     // cerr << VPC_YELLOW("Constraint: "<<name<<" isSatisfied()?  ");
     if(term->isSatisfied(excludes)){
       activationTime=sc_time_stamp().to_default_time_units();
-      //cerr << VPC_GREEN("YES "<< sc_simulation_time())<<NENDL;
+      //cerr << VPC_GREEN("YES "<< sc_time_stamp().to_default_time_units())<<NENDL;
       return true;
     }else{
-      //cerr << VPC_RED("NO "<< sc_simulation_time())<<NENDL;
+      //cerr << VPC_RED("NO "<< sc_time_stamp().to_default_time_units())<<NENDL;
     }
     return false;
   }

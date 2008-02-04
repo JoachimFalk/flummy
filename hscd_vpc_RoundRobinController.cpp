@@ -49,7 +49,8 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName()
-                  <<"> addProcessToSchedule called! ") << sc_simulation_time()
+                  <<"> addProcessToSchedule called! ")
+                  << sc_time_stamp().to_default_time_units()
                   << endl;
 #endif //VPC_DEBUG
     
@@ -83,8 +84,8 @@ namespace SystemC_VPC{
     }
     
     this->remainingSlice = this->remainingSlice -
-      (sc_simulation_time() - this->lastassign);
-    this->lastassign = sc_simulation_time();
+      (sc_time_stamp().to_default_time_units() - this->lastassign);
+    this->lastassign = sc_time_stamp().to_default_time_units();
   
     // configuration has to be switched if timeslice elapsed or no
     // configuration scheduled yet
@@ -92,7 +93,8 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName()
-                  << "> timeslice elapsed at: ") << sc_simulation_time()
+                  << "> timeslice elapsed at: ")
+                  << sc_time_stamp().to_default_time_units()
                   << endl;
 #endif //VPC_DEBUG
 
@@ -107,12 +109,14 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
       std::cerr << VPC_YELLOW("RoundRobinController "<< this->getName()
                 << "> timeslice lasts: "
-                << this->TIMESLICE-(sc_simulation_time()-this->lastassign)
-                << " at: ") << sc_simulation_time() << endl;
+                << this->TIMESLICE-( sc_time_stamp().to_default_time_units()
+                                     - this->lastassign )
+                << " at: ") << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
   
       this->waitInterval =
-        new sc_time( this->TIMESLICE-(sc_simulation_time()-this->lastassign),
+        new sc_time( this->TIMESLICE-( sc_time_stamp().to_default_time_units()
+                                       - this->lastassign ),
                      true);
     }
   }
@@ -255,7 +259,7 @@ namespace SystemC_VPC{
     Configuration* nextConfiguration)
   {
     
-    this->lastassign = sc_simulation_time();
+    this->lastassign = sc_time_stamp().to_default_time_units();
     
     if( nextConfiguration != 
         this->getManagedComponent()->getActivConfiguration() ){
@@ -289,14 +293,15 @@ namespace SystemC_VPC{
    */
   void RoundRobinController::signalDeallocation(bool kill){
     this->remainingSlice =
-      this->remainingSlice - (sc_simulation_time() - this->lastassign);
+      this->remainingSlice - ( sc_time_stamp().to_default_time_units()
+                               - this->lastassign );
   }
 
   /**
    * \brief Implementation of RoundRobinController::signalAllocation
    */  
   void RoundRobinController::signalAllocation(){
-    this->lastassign = sc_simulation_time();
+    this->lastassign = sc_time_stamp().to_default_time_units();
   }
 
 } //namespace SystemC_VPC

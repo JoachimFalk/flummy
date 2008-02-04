@@ -104,7 +104,8 @@ namespace SystemC_VPC{
       if( !newTasksDuringLoad && this->isActiv() ){  
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
-                  << "> going to wait at time: ") << sc_simulation_time()
+                  << "> going to wait at time: ")
+                  << sc_time_stamp().to_default_time_units()
                   << endl;
 #endif //VPC_DEBUG
                   
@@ -142,7 +143,8 @@ namespace SystemC_VPC{
       
 #ifdef VPC_DEBUG
       std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
-                << "> got notified at time: " << sc_simulation_time() 
+                << "> got notified at time: "
+                << sc_time_stamp().to_default_time_units() 
                 << " with num of new tasks= " << this->newTasks.size()) 
                 << endl;
 #endif //VPC_DEBUG
@@ -153,7 +155,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
                   << "> not activ going to sleep at time: ")
-                  << sc_simulation_time() << endl;
+                  << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
         
         this->controller->signalDeallocation(this->killed);
@@ -178,7 +180,8 @@ namespace SystemC_VPC{
         
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
-                  << "> awoke at time: ") << sc_simulation_time() << endl;
+                  << "> awoke at time: ")
+                  << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
 
       }
@@ -189,7 +192,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
                   << "> finished delegation to controller !")
-                  << sc_simulation_time() << endl;
+                  << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
       
       // delegate all processable tasks
@@ -205,7 +208,8 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent " << this->basename()
                   << "> still task to forward: ") << currTask->getName()
-                  << " at "  << sc_simulation_time() << endl;
+                  << " at "  << sc_time_stamp().to_default_time_units()
+                  << endl;
 #endif //VPC_DEBUG
 
 
@@ -218,7 +222,7 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
                   <<"> finished forwarding and checking config !")
-                  << sc_simulation_time() << endl;
+                  << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
       
       // check if new configuration has to be loaded

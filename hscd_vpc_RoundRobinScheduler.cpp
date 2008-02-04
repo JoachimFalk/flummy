@@ -90,8 +90,9 @@ namespace SystemC_VPC{
 
     scheduling_decision ret_decision=NOCHANGE;
 
-    this->remainingSlice = this->remainingSlice - (sc_simulation_time() - this->lastassign);
-    this->lastassign = sc_simulation_time();
+    this->remainingSlice = this->remainingSlice -
+      (sc_time_stamp().to_default_time_units() - this->lastassign);
+    this->lastassign = sc_time_stamp().to_default_time_units();
 
     if(this->remainingSlice <= 0){//Zeitscheibe wirklich abgelaufen!
       if(rr_fifo.size()>0){    // neuen Task bestimmen
@@ -134,7 +135,7 @@ namespace SystemC_VPC{
 
     /*
        if(ret_decision==ONLY_ASSIGN || ret_decision==PREEMPT){
-       LASTASSIGN=sc_simulation_time();
+       LASTASSIGN=sc_time_stamp().to_default_time_units();
        }
        */
 
@@ -164,13 +165,14 @@ namespace SystemC_VPC{
    */
   void RoundRobinScheduler::signalDeallocation(bool kill){
     this->remainingSlice =
-      this->remainingSlice - (sc_simulation_time() - this->lastassign);
+      this->remainingSlice - ( sc_time_stamp().to_default_time_units()
+                               - this->lastassign );
   }
   
   /**
    * \brief Implementation of RoundRobinScheduler::signalAllocation
    */  
   void RoundRobinScheduler::signalAllocation(){
-    this->lastassign = sc_simulation_time();
+    this->lastassign = sc_time_stamp().to_default_time_units();
   }
 }
