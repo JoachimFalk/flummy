@@ -6,10 +6,7 @@ namespace SystemC_VPC {
    * \brief Implementation of ListBinder constructor
    */
   ListBinder::ListBinder() : DynamicBinder() {
-    
-//     for(int i = 0; i < 3; i++){
-//       rctime[i] = generate_sctime("0ms");
-//     }
+
     numberofcomp = 0;
     config_blocked_until = sc_time_stamp();
     
@@ -25,6 +22,8 @@ namespace SystemC_VPC {
    */
   std::pair<std::string, MappingInformation* > ListBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp)
   throw(UnknownBindingException){
+    
+    //Get access to Components to count them
     Binding* b = NULL;
     if(comp == NULL){
       b = task.getBindingGraph().getRoot();
@@ -94,13 +93,20 @@ namespace SystemC_VPC {
       if(myCtrl == NULL){
         std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
       }
-      OnlineAllocator* myAll = (OnlineAllocator*)myCtrl->getAllocator();
-      if(myAll == NULL){
-        std::cerr << "ListBinder> Myall ist NULL" << std::endl;
-      }
-  
-      sc_time setuptime = myAll->getSchedulingOverhead();
-      std::cerr << "ListBinder> SetupTime: "<< setuptime << std::endl;
+      
+      Binding* myBinding = task.getBindingGraph().getBinding(myComp->basename());
+      ChildIterator* mybIter = myBinding->getChildIterator();
+      if (mybIter->hasNext()) myBinding = mybIter->getNext();
+      
+      unsigned int ConfID = myCtrl->getConfigurationMapper()->getConfigForComp(myBinding->getID());
+      
+      Configuration* myConfig = myComp->getConfiguration(ConfID);
+      
+      sc_time setuptime = myConfig->getLoadTime();
+      
+#ifdef VPC_DEBUG      
+      std::cerr << "OnlineController> SetupTime: "<< setuptime << std::endl;
+#endif      
       
       //move all slots time-border for next possible configuration by this->setuptime
       sc_time chosentime = rctime[chosen];
@@ -188,19 +194,4 @@ namespace SystemC_VPC {
     //std::cerr << "ReComp "<< compID << " ist frei" <<endl;
   }
   
-  /**
-   * \brief Implementation of ListBinder::getSetupTime()
-   */
-  sc_time getSetupTime(ProcessControlBlock* task){
-//       ReconfigurableComponent* myComp = new ReconfigurableComponent();
-//       Configuration* myConf = myComp->getConfiguration(task->getPID());
-//       sc_time myTime = sc_time(myConf->getLoadTime());
-//       
-//       return myTime;
-    return SC_ZERO_TIME;
-  }
-  
-  /**
-   * \brief Implementation of ListBinder::setController()
-   */
 }

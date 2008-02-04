@@ -92,7 +92,12 @@ namespace SystemC_VPC {
   //definition for ListBinder
 #define STR_VPC_LISTBINDER   "ListBinder"
 #define STR_VPC_LIST         "LIST"
-  
+    //definition for LPTBinder
+#define STR_VPC_LPTBINDER    "LPTBinder"
+#define STR_VPC_LPT          "LPT"
+  //definition for LPTBinder
+#define STR_VPC_ONLINECONTROLLER    "OnlineController"
+#define STR_VPC_OC          "OC"
   /***********************************
    * SECTION Mapper
    ***********************************/
@@ -121,6 +126,9 @@ namespace SystemC_VPC {
 #define STR_OS "OS"
 #define STR_ONLINEALLOCATOR "OnlineAllocator"
 #define STR_OA "OA"
+#define STR_ONLINECONTROLLER "OnlineController"
+#define STR_OC "OC"
+
 
   /***********************************
    * SECTION attribute values

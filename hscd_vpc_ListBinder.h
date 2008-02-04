@@ -1,15 +1,14 @@
 #ifndef HSCD_VPC_LISTBINDER_H_
 #define HSCD_VPC_LISTBINDER_H_
 
-#include "hscd_vpc_AbstractBinder.h"
-#include "hscd_vpc_ReconfigurableComponent.h"
-#include "hscd_vpc_OfflineFile.h"
 #include <systemc.h>
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_AbstractController.h"
+#include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_AbstractAllocator.h"
+#include "hscd_vpc_ReconfigurableComponent.h"
+#include "hscd_vpc_Director.h"
 #include "hscd_vpc_OnlineAllocator.h"
+
 namespace SystemC_VPC {
 
   /**
@@ -21,7 +20,6 @@ namespace SystemC_VPC {
     
       int numberofcomp;
       
-      //sc_time rctime[4];
       std::vector<sc_time> rctime;
       
       sc_time config_blocked_until;
@@ -39,8 +37,7 @@ namespace SystemC_VPC {
       void cleanstring(std::string*);
       
       void signalProcessEvent(ProcessControlBlock*, std::string);
-      
-      sc_time getSetupTime(ProcessControlBlock&);
+
   };
 
 

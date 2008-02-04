@@ -26,6 +26,8 @@
 #include "hscd_vpc_LeastFrequentlyUsedPE.h"
 #include "hscd_vpc_OfflineBinder.h"
 #include "hscd_vpc_ListBinder.h"
+#include "hscd_vpc_LPTBinder.h"
+#include "hscd_vpc_OnlineController.h"
 
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
@@ -1119,6 +1121,10 @@ namespace SystemC_VPC{
            || 0==strncmp(type, STR_OA, strlen(STR_OA))){
            allocator = new OnlineAllocator(controller);
       }else
+        if(0==strncmp(type, STR_ONLINECONTROLLER, strlen(STR_ONLINECONTROLLER))
+           || 0==strncmp(type, STR_OC, strlen(STR_OC))){
+           allocator = new OnlineController(controller);
+      }else
         if(0==strncmp(type, STR_EARLIESTDEADLINEFIRST, strlen(STR_EARLIESTDEADLINEFIRST))
            || 0==strncmp(type, STR_EDF, strlen(STR_EDF))){
            allocator = new EDFAllocator(controller);
@@ -1194,6 +1200,14 @@ namespace SystemC_VPC{
       if(0==strncmp(type, STR_VPC_LISTBINDER, strlen(STR_VPC_LISTBINDER))
           || 0==strncmp(type, STR_VPC_LIST, strlen(STR_VPC_LIST))){
         binder = new ListBinder();
+      }else
+      if(0==strncmp(type, STR_VPC_ONLINECONTROLLER, strlen(STR_VPC_ONLINECONTROLLER))
+          || 0==strncmp(type, STR_VPC_OC, strlen(STR_VPC_OC))){
+        binder = new OnlineController(controller);
+      }else
+      if(0==strncmp(type, STR_VPC_LPTBINDER, strlen(STR_VPC_LPTBINDER))
+          || 0==strncmp(type, STR_VPC_LPT, strlen(STR_VPC_LPT))){
+        binder = new LPTBinder();
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;

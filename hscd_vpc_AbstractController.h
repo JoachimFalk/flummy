@@ -153,7 +153,9 @@ namespace SystemC_VPC{
      */
     virtual Decision getDecision(int pid, ReconfigurableComponent* rc)=0;
 
-    virtual sc_time getSchedulingOverhead()=0;    
+    virtual sc_time getSchedulingOverhead()=0; 
+    
+    //virtual Configuration* getConfiguration(ProcessControlBlock*)=0;
   };
 
 }

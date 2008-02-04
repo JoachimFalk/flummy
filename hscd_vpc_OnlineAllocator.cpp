@@ -170,13 +170,22 @@ namespace SystemC_VPC{
 
     }
   }
-  
+  /**
+   * \brief Implementation of OnlineAllocator::getSetuptime()
+   */
+   sc_time OnlineAllocator::getSetuptime(ProcessControlBlock* task){
+     ReconfigurableComponent* myComp = this->getManagedComponent();
+     Configuration* myConf = myComp->getConfiguration(task->getPID());
+     if(!myConf)std::cerr << "Conf ist NULL" << std::endl;
+     return myConf->getLoadTime();
+   }
+   
   /**
    * \brief Implementation of OnlineAllocator::getSchedulingOverhead()
    */
   sc_time OnlineAllocator::getSchedulingOverhead(){
 
-    sc_time myTime = generate_sctime("2ms"); //VPCBuilder::createSC_Time
+    sc_time myTime = generate_sctime("10ms"); //VPCBuilder::createSC_Time
     if(this->tasksToProcess.size() > 0){
       ReconfigurableComponent* myComp = this->getManagedComponent();
       Configuration* myConf = myComp->getConfiguration(this->nextConfiguration);
