@@ -1,5 +1,5 @@
 #include <hscd_vpc_OnlineAllocator.h>
-#define VPC_DEBUG
+//#define VPC_DEBUG
 namespace SystemC_VPC{
   
   /**

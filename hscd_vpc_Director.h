@@ -227,12 +227,13 @@ namespace SystemC_VPC{
     ReconfigurableComponent* getReComp();
     
     void setReComp(ReconfigurableComponent*);
-    
+
+    ReconfigurableComponent* getCompByName(std::string);
+        
   private:
 
     void compute(ProcessControlBlock* pcb, EventPair endPair);
     
   };
-
 }
 #endif

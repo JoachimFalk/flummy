@@ -45,10 +45,10 @@ namespace SystemC_VPC {
     }
 #ifdef VPC_DEBUG  
     std::cerr << "**************************************"<< std::endl;
-    std::cerr << "ListBinder> sc_time_stamp: " << sc_time_stamp() << endl;
-    std::cerr << "ListBinder> numberofcomp "<< numberofcomp << std::endl;
-    if (comp != NULL) std::cerr << "ListBinder> Component: "<< comp->basename() <<"> Task: " << task.getName() << endl;
-    if (comp == NULL) std::cerr << "ListBinder> Component: NULL"<<"> Task: " << task.getName() << endl;
+    std::cerr << "ListBinder> Simulation time: " << sc_time_stamp() << endl;
+    //std::cerr << "ListBinder> Number of ReComponents "<< numberofcomp << std::endl;
+    if (comp != NULL) std::cerr << "ListBinder> ReComponent: "<< comp->basename() <<"> Task: " << task.getName() << endl;
+    if (comp == NULL) std::cerr << "ListBinder> ReComponent: NULL"<<"> Task: " << task.getName() << endl;
 #endif
 
 //check queue for rc with minimum runtime left
@@ -101,7 +101,19 @@ namespace SystemC_VPC {
       //wait till last configuration finished
       if (sc_time_stamp() < config_blocked_until){
         wait(config_blocked_until - sc_time_stamp());
-        //myAll->setBlockedTime(config_blocked_until - sc_time_stamp());
+        //Code für Zugriff auf alle ReconfigurableComponents des Director						
+//         Director* myDir = dynamic_cast<Director*>(getDirector());
+//         ReconfigurableComponent* myComp = myDir->getCompByName(RecomponentBindingChild->getID());
+//         //ReconfigurableComponent* myComp = myDir->getReComp();
+//         if(myComp == NULL){
+//           std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
+//         }
+//         AbstractController* myCtrl = myComp->getController();
+//         if(myCtrl == NULL){
+//           std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
+//         }
+//           OnlineAllocator* myAll = (OnlineAllocator*)myCtrl->getAllocator();
+//           myAll->setBlockedTime(config_blocked_until);
       }
       //Statt wait hier, myAll->setBlockedTime: PROBLEM, nur eine ReComponente geladen, Director müsste alle schicken
       config_blocked_until = sc_time_stamp() + setuptime;
