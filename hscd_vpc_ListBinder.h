@@ -37,7 +37,10 @@ namespace SystemC_VPC {
       void cleanstring(std::string*);
       
       void signalProcessEvent(ProcessControlBlock*, std::string);
-
+      
+      Configuration* getConfiguration(ProcessControlBlock);
+      
+      sc_time getSetuptime(ProcessControlBlock);
   };
 
 

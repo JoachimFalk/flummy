@@ -1,5 +1,5 @@
 #include <hscd_vpc_OnlineAllocator.h>
-//#define VPC_DEBUG
+#define VPC_DEBUG
 namespace SystemC_VPC{
   
   /**
@@ -185,28 +185,7 @@ namespace SystemC_VPC{
    */
   sc_time OnlineAllocator::getSchedulingOverhead(){
 
-    sc_time myTime = generate_sctime("10ms"); //VPCBuilder::createSC_Time
-    if(this->tasksToProcess.size() > 0){
-      ReconfigurableComponent* myComp = this->getManagedComponent();
-      Configuration* myConf = myComp->getConfiguration(this->nextConfiguration);
-      myTime = myConf->getLoadTime();
-    }
-    else if(this->readyTasks.size()){
-      ReconfigurableComponent* myComp = this->getManagedComponent();
-      Configuration* myConf = myComp->getConfiguration(this->readyTasks.front().second);
-      myTime = myConf->getLoadTime();
-    }
-    else{
-#ifdef VPC_DEBUG    
-      std::cerr << "OnlineAllocator::getSchedulingOverhead> No task found" << std::endl;
-#endif
-    }
-    
-#ifdef VPC_DEBUG        
-    std::cerr << "OnlineAllocator::getSchedulingOverhead> loadtime: " << myTime << std::endl;
-#endif
-    //Wenn von Recomponent aufgerufen, return blockingtime durch andere Recomp die gerade Configern
-    return myTime;
+    return SC_ZERO_TIME;
     
   }
   

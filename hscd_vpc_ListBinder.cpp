@@ -24,88 +24,66 @@ namespace SystemC_VPC {
   throw(UnknownBindingException){
     
     //Get access to Components to count them
-    Binding* b = NULL;
+    Binding* RecomponentBinding = NULL;
     if(comp == NULL){
-      b = task.getBindingGraph().getRoot();
+      RecomponentBinding = task.getBindingGraph().getRoot();
     }else{
-      b = task.getBindingGraph().getBinding(comp->basename());
+      RecomponentBinding = task.getBindingGraph().getBinding(comp->basename());
     }
-
-    ChildIterator* bIter = b->getChildIterator();
+    //get Iterator on Components
+    ChildIterator* RecomponentBindingChildIter = RecomponentBinding->getChildIterator();
     
     if(numberofcomp == 0){
-      ChildIterator* counter = bIter;
-      while(counter->hasNext()){
-        counter->getNext();
+      //ChildIterator* counter = bIter;
+      while(RecomponentBindingChildIter->hasNext()){
+        RecomponentBindingChildIter->getNext();
         rctime.push_back(generate_sctime("0ms"));
         numberofcomp++;
       }
-      bIter = b->getChildIterator();
+      //reset
+      RecomponentBindingChildIter = RecomponentBinding->getChildIterator();
     }
 #ifdef VPC_DEBUG  
     std::cerr << "**************************************"<< std::endl;
     std::cerr << "ListBinder> sc_time_stamp: " << sc_time_stamp() << endl;
     std::cerr << "ListBinder> numberofcomp "<< numberofcomp << std::endl;
-#endif    
-
-#ifdef VPC_DEBUG
-  if (comp != NULL) std::cerr << "ListBinder> Component: "<< comp->basename() <<"> Task: " << task.getName() << endl;
-  if (comp == NULL) std::cerr << "ListBinder> Component: NULL"<<"> Task: " << task.getName() << endl;
+    if (comp != NULL) std::cerr << "ListBinder> Component: "<< comp->basename() <<"> Task: " << task.getName() << endl;
+    if (comp == NULL) std::cerr << "ListBinder> Component: NULL"<<"> Task: " << task.getName() << endl;
 #endif
 
-    //check queue for rc with minimum runtime left
+//check queue for rc with minimum runtime left
     int chosen = 0;
     for(int i=0; i < numberofcomp; i++){
       if (rctime[i] < rctime[chosen])
         chosen = i;
     }
-    //jump to chosen Recomponent
+    
+//scroll to chosen Recomponent
+    Binding * RecomponentBindingChild;
     for(int i=0; i <= chosen; i++){
-      if(bIter->hasNext()){
-        b = bIter->getNext();
+      if(RecomponentBindingChildIter->hasNext()){
+        RecomponentBindingChild = RecomponentBindingChildIter->getNext();
       }else{    
-        delete bIter;
+        delete RecomponentBindingChildIter;
         std::string msg = "ListBinder> No target specified for "+ task.getName() +"->?";
         throw UnknownBindingException(msg);
       }
     }
-    delete bIter;
-    //getMappingInformation
-    MappingInformationIterator* iter = b->getMappingInformationIterator();
-    if(iter->hasNext()){
-      MappingInformation* mInfo = iter->getNext();
-      delete iter;
+    delete RecomponentBindingChildIter;
+    
+//getMappingInformation
+    MappingInformationIterator* MapInfoIter = RecomponentBindingChild->getMappingInformationIterator();
+    if(MapInfoIter->hasNext()){
+      MappingInformation* mInfo = MapInfoIter->getNext();
+      delete MapInfoIter;
 
-      //Runtime + Mapping
+//getSetuptime
+      sc_time setuptime = this->getSetuptime(task);
+
 #ifdef VPC_DEBUG
+      std::cerr << "ListBinder> Chose Mapping: "<< RecomponentBindingChild->getID() << endl;
+      std::cerr << "ListBinder> SetupTime: "<< setuptime << std::endl;
       std::cerr << "ListBinder> Runtime: " << mInfo->getDelay() << endl;   
-      std::cerr << "ListBinder> Chose Mapping: "<< b->getID() << endl;
-#endif        
-      
-      //getSetupTime
-      Director* myDir = dynamic_cast<Director*>(getDirector());
-      ReconfigurableComponent* myComp = myDir->getReComp();
-
-      if(myComp == NULL){
-        std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
-      }
-      AbstractController* myCtrl = myComp->getController();
-      if(myCtrl == NULL){
-        std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
-      }
-      
-      Binding* myBinding = task.getBindingGraph().getBinding(myComp->basename());
-      ChildIterator* mybIter = myBinding->getChildIterator();
-      if (mybIter->hasNext()) myBinding = mybIter->getNext();
-      
-      unsigned int ConfID = myCtrl->getConfigurationMapper()->getConfigForComp(myBinding->getID());
-      
-      Configuration* myConfig = myComp->getConfiguration(ConfID);
-      
-      sc_time setuptime = myConfig->getLoadTime();
-      
-#ifdef VPC_DEBUG      
-      std::cerr << "OnlineController> SetupTime: "<< setuptime << std::endl;
 #endif      
       
       //move all slots time-border for next possible configuration by this->setuptime
@@ -126,17 +104,17 @@ namespace SystemC_VPC {
         //myAll->setBlockedTime(config_blocked_until - sc_time_stamp());
       }
       //Statt wait hier, myAll->setBlockedTime: PROBLEM, nur eine ReComponente geladen, Director müsste alle schicken
-      config_blocked_until = sc_time_stamp() + setuptime;     
+      config_blocked_until = sc_time_stamp() + setuptime;
 #ifdef VPC_DEBUG
       std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;
 #endif            
+    
     //return MappingInformation
-    return std::pair<std::string, MappingInformation*>(b->getID(), mInfo);
+    return std::pair<std::string, MappingInformation*>(RecomponentBindingChild->getID(), mInfo);
       
     }else{
       // also free iterator
-      delete iter;
-      return std::pair<std::string, MappingInformation*>(NULL, NULL);
+      delete MapInfoIter;
     }
   }//end of ListBinder::performBinding()
 
@@ -194,4 +172,42 @@ namespace SystemC_VPC {
     //std::cerr << "ReComp "<< compID << " ist frei" <<endl;
   }
   
+  /**
+   * \brief Implementation of ListBinder::getConfiguration
+   * Used e.g. to the setuptime with getLoadtime()
+   */
+  Configuration* ListBinder::getConfiguration(ProcessControlBlock task){
+    Director* myDir = dynamic_cast<Director*>(getDirector());
+    ReconfigurableComponent* myComp = myDir->getReComp();
+
+    if(myComp == NULL){
+      std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
+    }
+    AbstractController* myCtrl = myComp->getController();
+    if(myCtrl == NULL){
+      std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
+    }
+    
+    Binding* myBinding = task.getBindingGraph().getBinding(myComp->basename());
+    ChildIterator* myBindingChildIter = myBinding->getChildIterator();
+    Binding* myBindingChild;
+    if (myBindingChildIter->hasNext()) 
+      myBindingChild = myBindingChildIter->getNext();
+    
+    unsigned int ConfID = myCtrl->getConfigurationMapper()->getConfigForComp(myBindingChild->getID());
+    
+    Configuration* myConfig = myComp->getConfiguration(ConfID);
+    
+    return myConfig;
+  }
+  
+  /**
+   * \brief Implementation of ListBinder::getSetuptime
+   */
+  sc_time ListBinder::getSetuptime(ProcessControlBlock task){
+    Configuration* myConfig = this->getConfiguration(task);
+    sc_time setuptime = myConfig->getLoadTime();
+    
+    return setuptime;
+  }
 }
