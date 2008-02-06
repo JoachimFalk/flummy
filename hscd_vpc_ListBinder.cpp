@@ -37,7 +37,7 @@ namespace SystemC_VPC {
       //ChildIterator* counter = bIter;
       while(RecomponentBindingChildIter->hasNext()){
         RecomponentBindingChildIter->getNext();
-        rctime.push_back(generate_sctime("0ms"));
+        rctime.push_back(sc_time(SC_ZERO_TIME));
         numberofcomp++;
       }
       //reset
@@ -51,14 +51,14 @@ namespace SystemC_VPC {
     if (comp == NULL) std::cerr << "ListBinder> ReComponent: NULL"<<"> Task: " << task.getName() << endl;
 #endif
 
-//check queue for rc with minimum runtime left
+    //check queue for rc with minimum runtime left
     int chosen = 0;
     for(int i=0; i < numberofcomp; i++){
       if (rctime[i] < rctime[chosen])
         chosen = i;
     }
     
-//scroll to chosen Recomponent
+    //scroll to chosen Recomponent
     Binding * RecomponentBindingChild;
     for(int i=0; i <= chosen; i++){
       if(RecomponentBindingChildIter->hasNext()){
@@ -71,13 +71,13 @@ namespace SystemC_VPC {
     }
     delete RecomponentBindingChildIter;
     
-//getMappingInformation
+    //getMappingInformation
     MappingInformationIterator* MapInfoIter = RecomponentBindingChild->getMappingInformationIterator();
     if(MapInfoIter->hasNext()){
       MappingInformation* mInfo = MapInfoIter->getNext();
       delete MapInfoIter;
 
-//getSetuptime
+    //getSetuptime
       sc_time setuptime = this->getSetuptime(task);
 
 #ifdef VPC_DEBUG
@@ -101,21 +101,7 @@ namespace SystemC_VPC {
       //wait till last configuration finished
       if (sc_time_stamp() < config_blocked_until){
         wait(config_blocked_until - sc_time_stamp());
-        //Code für Zugriff auf alle ReconfigurableComponents des Director						
-//         Director* myDir = dynamic_cast<Director*>(getDirector());
-//         ReconfigurableComponent* myComp = myDir->getCompByName(RecomponentBindingChild->getID());
-//         //ReconfigurableComponent* myComp = myDir->getReComp();
-//         if(myComp == NULL){
-//           std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
-//         }
-//         AbstractController* myCtrl = myComp->getController();
-//         if(myCtrl == NULL){
-//           std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
-//         }
-//           OnlineAllocator* myAll = (OnlineAllocator*)myCtrl->getAllocator();
-//           myAll->setBlockedTime(config_blocked_until);
       }
-      //Statt wait hier, myAll->setBlockedTime: PROBLEM, nur eine ReComponente geladen, Director müsste alle schicken
       config_blocked_until = sc_time_stamp() + setuptime;
 #ifdef VPC_DEBUG
       std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;
@@ -128,6 +114,7 @@ namespace SystemC_VPC {
       // also free iterator
       delete MapInfoIter;
     }
+    
   }//end of ListBinder::performBinding()
 
   /**
@@ -190,7 +177,11 @@ namespace SystemC_VPC {
    */
   Configuration* ListBinder::getConfiguration(ProcessControlBlock task){
     Director* myDir = dynamic_cast<Director*>(getDirector());
-    ReconfigurableComponent* myComp = myDir->getReComp();
+    //ReconfigurableComponent* myComp = myDir->getReComp();
+    std::string aReComp =
+      task.getBindingGraph().getRoot()->getChildIterator()->getNext()->getID();
+    ReconfigurableComponent* myComp = myDir->getCompByName(aReComp);
+    
 
     if(myComp == NULL){
       std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
@@ -222,4 +213,28 @@ namespace SystemC_VPC {
     
     return setuptime;
   }
+  
+  /**
+   * \brief Implementation of ListBinder::getRuntime
+   */
+  sc_time ListBinder::getRuntime(ProcessControlBlock task){
+    
+    //getReconfigurableComponent
+    Binding* RecomponentBinding = task.getBindingGraph().getRoot();
+    Binding* RecomponentBindingChild;
+    ChildIterator* RecomponentBindingChildIter = RecomponentBinding->getChildIterator();
+    if(RecomponentBindingChildIter->hasNext())
+      RecomponentBindingChild = RecomponentBindingChildIter->getNext();
+    delete RecomponentBindingChildIter;
+    
+    //getMappingInformation
+    MappingInformationIterator* MapInfoIter = RecomponentBindingChild->getMappingInformationIterator();
+    MappingInformation* mInfo;
+    if(MapInfoIter->hasNext())
+      mInfo = MapInfoIter->getNext();
+    delete MapInfoIter;
+    
+    return mInfo->getDelay();
+  }
+  
 }

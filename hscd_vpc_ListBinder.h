@@ -41,6 +41,7 @@ namespace SystemC_VPC {
       Configuration* getConfiguration(ProcessControlBlock);
       
       sc_time getSetuptime(ProcessControlBlock);
+      sc_time getRuntime(ProcessControlBlock);
   };
 
 

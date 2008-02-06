@@ -89,7 +89,10 @@ namespace SystemC_VPC {
       
       //getSetupTime
       Director* myDir = dynamic_cast<Director*>(getDirector());
-      ReconfigurableComponent* myComp = myDir->getReComp();
+      //ReconfigurableComponent* myComp = myDir->getReComp();
+      std::string aReComp =
+        task.getBindingGraph().getRoot()->getChildIterator()->getNext()->getID();
+      ReconfigurableComponent* myComp = myDir->getCompByName(aReComp);
 
       if(myComp == NULL){
         std::cerr << "OnlineController> MyComp ist NULL" << std::endl;
@@ -376,14 +379,17 @@ namespace SystemC_VPC {
     //this->waitInterval = &time;
   }
   
-  /**
+   /**
    * \brief Implementation of ListBinder::getConfiguration
    * Used e.g. to the setuptime with getLoadtime()
    */
   Configuration* OnlineController::getConfiguration(ProcessControlBlock task){
-  
     Director* myDir = dynamic_cast<Director*>(getDirector());
-    ReconfigurableComponent* myComp = myDir->getReComp();
+    //ReconfigurableComponent* myComp = myDir->getReComp();
+    std::string aReComp =
+    task.getBindingGraph().getRoot()->getChildIterator()->getNext()->getID();
+    ReconfigurableComponent* myComp = myDir->getCompByName(aReComp);
+    
 
     if(myComp == NULL){
       std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
@@ -407,7 +413,7 @@ namespace SystemC_VPC {
   }
   
   /**
-   * \brief Implementation of OnlineController::getSetuptime
+   * \brief Implementation of ListBinder::getSetuptime
    */
   sc_time OnlineController::getSetuptime(ProcessControlBlock task){
     Configuration* myConfig = this->getConfiguration(task);
@@ -415,4 +421,28 @@ namespace SystemC_VPC {
     
     return setuptime;
   }
+  
+  /**
+   * \brief Implementation of ListBinder::getRuntime
+   */
+  sc_time OnlineController::getRuntime(ProcessControlBlock task){
+    
+    //getReconfigurableComponent
+    Binding* RecomponentBinding = task.getBindingGraph().getRoot();
+    Binding* RecomponentBindingChild;
+    ChildIterator* RecomponentBindingChildIter = RecomponentBinding->getChildIterator();
+    if(RecomponentBindingChildIter->hasNext())
+      RecomponentBindingChild = RecomponentBindingChildIter->getNext();
+    delete RecomponentBindingChildIter;
+    
+    //getMappingInformation
+    MappingInformationIterator* MapInfoIter = RecomponentBindingChild->getMappingInformationIterator();
+    MappingInformation* mInfo;
+    if(MapInfoIter->hasNext())
+      mInfo = MapInfoIter->getNext();
+    delete MapInfoIter;
+    
+    return mInfo->getDelay();
+  }
+  
 } //end of Namespace SystemC_VPC

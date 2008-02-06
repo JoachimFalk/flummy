@@ -224,9 +224,9 @@ namespace SystemC_VPC{
       return this->vpc_result_file;
     }
     
-    ReconfigurableComponent* getReComp();
-    
-    void setReComp(ReconfigurableComponent*);
+//     ReconfigurableComponent* getReComp();
+//     
+//     void setReComp(ReconfigurableComponent*);
 
     ReconfigurableComponent* getCompByName(std::string);
         

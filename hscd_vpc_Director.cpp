@@ -302,12 +302,12 @@ namespace SystemC_VPC{
 
   }
 
-  ReconfigurableComponent* Director::getReComp(){
-    return this->recomp;  
-  }
-  void Director::setReComp(ReconfigurableComponent* recomp){
-    this->recomp = recomp;
-  }
+//   ReconfigurableComponent* Director::getReComp(){
+//     return this->recomp;  
+//   }
+//   void Director::setReComp(ReconfigurableComponent* recomp){
+//     this->recomp = recomp;
+//   }
   
   /**
    * \brief Implementation of  Director::generatePCB

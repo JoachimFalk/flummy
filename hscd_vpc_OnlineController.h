@@ -141,6 +141,8 @@ namespace SystemC_VPC {
       
       sc_time getSetuptime(ProcessControlBlock);
       
+      sc_time getRuntime(ProcessControlBlock task);
+      
   };
 
 } //end of Namespace SystemC_VPC
