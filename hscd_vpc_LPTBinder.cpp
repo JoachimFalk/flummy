@@ -1,11 +1,11 @@
-#include "hscd_vpc_ListBinder.h"
+#include "hscd_vpc_LPTBinder.h"
 
 #define VPC_DEBUG
 namespace SystemC_VPC {
   /**
-   * \brief Implementation of ListBinder constructor
+   * \brief Implementation of LPTBinder constructor
    */
-  ListBinder::ListBinder() : DynamicBinder() {
+  LPTBinder::LPTBinder() : DynamicBinder() {
 
     numberofcomp = 0;
     config_blocked_until = sc_time_stamp();
@@ -13,14 +13,14 @@ namespace SystemC_VPC {
   }
   
   /**
-   * \brief Implementation of ListBinder destructor
+   * \brief Implementation of LPTBinder destructor
    */
-  ListBinder::~ListBinder() {}
+  LPTBinder::~LPTBinder() {}
   
   /**
-   * \brief Implemetation of ListBinder::performBinding
+   * \brief Implemetation of LPTBinder::performBinding
    */
-  std::pair<std::string, MappingInformation* > ListBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp)
+  std::pair<std::string, MappingInformation* > LPTBinder::performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp)
   throw(UnknownBindingException){
     
     //Get access to Components to count them
@@ -45,10 +45,10 @@ namespace SystemC_VPC {
     }
 #ifdef VPC_DEBUG  
     std::cerr << "**************************************"<< std::endl;
-    std::cerr << "ListBinder> Simulation time: " << sc_time_stamp() << endl;
-    //std::cerr << "ListBinder> Number of ReComponents "<< numberofcomp << std::endl;
-    if (comp != NULL) std::cerr << "ListBinder> ReComponent: "<< comp->basename() <<"> Task: " << task.getName() << endl;
-    if (comp == NULL) std::cerr << "ListBinder> ReComponent: NULL"<<"> Task: " << task.getName() << endl;
+    std::cerr << "LPTBinder> Simulation time: " << sc_time_stamp() << endl;
+    //std::cerr << "LPTBinder> Number of ReComponents "<< numberofcomp << std::endl;
+    if (comp != NULL) std::cerr << "LPTBinder> ReComponent: "<< comp->basename() <<"> Task: " << task.getName() << endl;
+    if (comp == NULL) std::cerr << "LPTBinder> ReComponent: NULL"<<"> Task: " << task.getName() << endl;
 #endif
 
     //check queue for rc with minimum runtime left
@@ -65,7 +65,7 @@ namespace SystemC_VPC {
         RecomponentBindingChild = RecomponentBindingChildIter->getNext();
       }else{    
         delete RecomponentBindingChildIter;
-        std::string msg = "ListBinder> No target specified for "+ task.getName() +"->?";
+        std::string msg = "LPTBinder> No target specified for "+ task.getName() +"->?";
         throw UnknownBindingException(msg);
       }
     }
@@ -81,9 +81,9 @@ namespace SystemC_VPC {
       sc_time setuptime = this->getSetuptime(task);
 
 #ifdef VPC_DEBUG
-      std::cerr << "ListBinder> Chose Mapping: "<< RecomponentBindingChild->getID() << endl;
-      std::cerr << "ListBinder> SetupTime: "<< setuptime << std::endl;
-      std::cerr << "ListBinder> Runtime: " << mInfo->getDelay() << endl;   
+      std::cerr << "LPTBinder> Chose Mapping: "<< RecomponentBindingChild->getID() << endl;
+      std::cerr << "LPTBinder> SetupTime: "<< setuptime << std::endl;
+      std::cerr << "LPTBinder> Runtime: " << mInfo->getDelay() << endl;   
 #endif      
       
       //move all slots time-border for next possible configuration by this->setuptime
@@ -94,7 +94,7 @@ namespace SystemC_VPC {
           if(i == chosen)
             rctime[chosen] += mInfo->getDelay();
 #ifdef VPC_DEBUG
-        std::cerr << "ListBinder> time-border for Slot" << i+1 << " = " << rctime[i] << std::endl;
+        std::cerr << "LPTBinder> time-border for Slot" << i+1 << " = " << rctime[i] << std::endl;
 #endif
       }
     
@@ -104,7 +104,7 @@ namespace SystemC_VPC {
       }
       config_blocked_until = sc_time_stamp() + setuptime;
 #ifdef VPC_DEBUG
-      std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;
+      std::cerr << "LPTBinder> config_blocked_until: " << config_blocked_until << endl;
 #endif            
     
     //return MappingInformation
@@ -115,20 +115,21 @@ namespace SystemC_VPC {
       delete MapInfoIter;
     }
     
-  }//end of ListBinder::performBinding()
+  }//end of LPTBinder::performBinding()
 
+  
   /**
-   * \brief Implementation of ListBinder::signalProcessEvent
+   * \brief Implementation of LPTBinder::signalProcessEvent
    */
-  void ListBinder::signalProcessEvent(ProcessControlBlock* pcb, std::string compID) {
+  void LPTBinder::signalProcessEvent(ProcessControlBlock* pcb, std::string compID) {
     //std::cerr << "ReComp "<< compID << " ist frei" <<endl;
   }
   
   /**
-   * \brief Implementation of ListBinder::getConfiguration
+   * \brief Implementation of LPTBinder::getConfiguration
    * Used e.g. to the setuptime with getLoadtime()
    */
-  Configuration* ListBinder::getConfiguration(ProcessControlBlock task){
+  Configuration* LPTBinder::getConfiguration(ProcessControlBlock task){
     Director* myDir = dynamic_cast<Director*>(getDirector());
     //ReconfigurableComponent* myComp = myDir->getReComp();
     std::string aReComp =
@@ -137,11 +138,11 @@ namespace SystemC_VPC {
     
 
     if(myComp == NULL){
-      std::cerr << "ListBinder> MyComp ist NULL" << std::endl;
+      std::cerr << "LPTBinder> MyComp ist NULL" << std::endl;
     }
     AbstractController* myCtrl = myComp->getController();
     if(myCtrl == NULL){
-      std::cerr << "ListBinder> MyCtrl ist NULL" << std::endl;
+      std::cerr << "LPTBinder> MyCtrl ist NULL" << std::endl;
     }
     
     Binding* myBinding = task.getBindingGraph().getBinding(myComp->basename());
@@ -158,9 +159,9 @@ namespace SystemC_VPC {
   }
   
   /**
-   * \brief Implementation of ListBinder::getSetuptime
+   * \brief Implementation of LPTBinder::getSetuptime
    */
-  sc_time ListBinder::getSetuptime(ProcessControlBlock task){
+  sc_time LPTBinder::getSetuptime(ProcessControlBlock task){
     Configuration* myConfig = this->getConfiguration(task);
     sc_time setuptime = myConfig->getLoadTime();
     
@@ -168,9 +169,9 @@ namespace SystemC_VPC {
   }
   
   /**
-   * \brief Implementation of ListBinder::getRuntime
+   * \brief Implementation of LPTBinder::getRuntime
    */
-  sc_time ListBinder::getRuntime(ProcessControlBlock task){
+  sc_time LPTBinder::getRuntime(ProcessControlBlock task){
     
     //getReconfigurableComponent
     Binding* RecomponentBinding = task.getBindingGraph().getRoot();

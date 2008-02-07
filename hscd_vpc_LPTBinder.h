@@ -1,5 +1,5 @@
-#ifndef HSCD_VPC_LISTBINDER_H_
-#define HSCD_VPC_LISTBINDER_H_
+#ifndef HSCD_VPC_LPTBINDER_H_
+#define HSCD_VPC_LPTBINDER_H_
 
 #include <systemc.h>
 #include "hscd_vpc_AbstractController.h"
@@ -12,9 +12,9 @@
 namespace SystemC_VPC {
 
   /**
-   * ListBinder is a implementation for a binding strategy.
+   * LPTBinder is a implementation for a binding strategy.
    */
-  class ListBinder : public DynamicBinder {
+  class LPTBinder : public DynamicBinder {
 
     private:
     
@@ -26,12 +26,16 @@ namespace SystemC_VPC {
   
     public:
        
-      ListBinder::ListBinder();
+      LPTBinder::LPTBinder();
 
-      ListBinder::~ListBinder();
+      LPTBinder::~LPTBinder();
 
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock&, ReconfigurableComponent*) throw(UnknownBindingException);
-    
+
+      sc_time generate_sctime(std::string);
+      
+      void cleanstring(std::string*);
+      
       void signalProcessEvent(ProcessControlBlock*, std::string);
       
       Configuration* getConfiguration(ProcessControlBlock);
@@ -43,4 +47,4 @@ namespace SystemC_VPC {
 
 }
 
-#endif //HSCD_VPC_LISTBINDER_H_
+#endif //HSCD_VPC_LPTBinder_H_
