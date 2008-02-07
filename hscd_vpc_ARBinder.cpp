@@ -138,7 +138,7 @@ namespace SystemC_VPC {
     
 		if(c != NULL && c->getID() != comp->getController()->getConfigurationMapper()->getConfigForComp(target)){
       return true;
-    }else{
+    }else if(c != NULL){
       //check if sub-comp is reconfigurable component
 			ReconfigurableComponent* rc = dynamic_cast<ReconfigurableComponent* >(c->getComponent(target));
 			// if != NULL we have a rc

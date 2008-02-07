@@ -32,10 +32,6 @@ namespace SystemC_VPC {
 
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock&, ReconfigurableComponent*) throw(UnknownBindingException);
 
-      sc_time generate_sctime(std::string);
-      
-      void cleanstring(std::string*);
-      
       void signalProcessEvent(ProcessControlBlock*, std::string);
       
       Configuration* getConfiguration(ProcessControlBlock);

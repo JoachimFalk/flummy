@@ -131,7 +131,6 @@ namespace SystemC_VPC {
    */
   Configuration* LPTBinder::getConfiguration(ProcessControlBlock task){
     Director* myDir = dynamic_cast<Director*>(getDirector());
-    //ReconfigurableComponent* myComp = myDir->getReComp();
     std::string aReComp =
       task.getBindingGraph().getRoot()->getChildIterator()->getNext()->getID();
     ReconfigurableComponent* myComp = myDir->getCompByName(aReComp);
