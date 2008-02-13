@@ -11,9 +11,9 @@ namespace SystemC_VPC{
   class Component;
 
   typedef size_t ProcessId;
-  
+  typedef std::deque< std::pair <std::string, std::string> > Properties;
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
-  	pid_fifo enthält die laufbereiten Prozesse  
+  	pid_fifo enthaelt die laufbereiten Prozesse  
   */
   struct TDMASlot{
   	sc_time length;

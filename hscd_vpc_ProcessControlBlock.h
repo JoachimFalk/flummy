@@ -436,5 +436,6 @@ namespace SystemC_VPC {
 
   };
 
+  typedef std::map<int,ProcessControlBlock*>  PCBMap;
 }
 #endif // HSCD_VPC_PROCESSCONTROLBLOCK_H_
