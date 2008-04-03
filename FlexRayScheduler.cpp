@@ -2,20 +2,40 @@
 	FlexRay-Scheduler
 	
 	CMX-Format:
-	Slotkennzeichen: type="slotxxxxx"
-	Funktionszuordnung: value="slotxxxxx"
 	
 	z.B.
-	<component name="Component1" type="threaded" scheduler="TDMA">
-   	<attribute type="slot0" value="20ns"/>
-   	<attribute type="periodic.task1" value="slot0"/>
-   	<attribute type="slot1" value="20ns"/>
-   	<attribute type="periodic.task2" value="slot1"/>
-  	</component>
-	
-	aktuelle Zuordnung: TDMA_slots bis [StartslotDynamic-1] festes TDMA, danach Dynamischer Teil
-	
-	Sebastian Graf - Oktober 2007
+	 <component name="Component1" type="threaded" scheduler="FlexRay">
+         <attribute type="FlexRayParams">
+              <parameter type="dualchannel" value="false"/>
+              <attribute type="static">
+                      <!-- attribute type="slots" -->
+                              <attribute type="slot0" value="20ns">
+                                      <parameter type="mapping" value="periodic.task1"/>
+                              </attribute>
+                              <attribute type="slot1" value="20ns">
+                                      <parameter type="mapping" value="periodic.task2"/>
+                              </attribute>
+                              <attribute type="slot2" value="20ns">
+                                      <parameter type="mapping" value="periodic.task3"/>
+                              </attribute>
+                      <!-- /attribute -->
+              </attribute>
+                      
+              <attribute type="dynamic" value="50ns">
+                      <!-- attribute type="slots" -->
+                              <attribute type="slot3">
+                                      <parameter type="mapping" value="periodic.task4"/>
+                              </attribute>
+                              <attribute type="slot4" value="30ns">
+                                      <parameter type="mapping" value="periodic.task5"/>
+                              </attribute>
+                              <!-- parameter type="slot3" value="30ns"/ -->
+                              <!-- parameter type="slot4" value="30ns"/-->
+                      <!-- /attribute -->
+              </attribute>
+        </attribute>
+        </component>
+	Sebastian Graf - Dezember 2007
 
 */
 
