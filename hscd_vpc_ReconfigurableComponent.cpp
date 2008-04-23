@@ -236,7 +236,10 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << VPC_BLUE("ReconfigurableComponent " << this->basename() << "> new config to load: ") << nextConfig->getName() << std::endl;
 #endif //VPC_DEBUG
-
+        
+        //wait() blockedtime cause of other reconfiguration is activ
+        sc_time reconfigurationManagerWaitInterval = Director::getInstance().getReconfigurationWaitInterval(nextConfig->getLoadTime());
+        wait(reconfigurationManagerWaitInterval);
         // perform reconfiguration
         if(this->storeActivConfiguration(this->controller->deallocateByKill())){
           // perform loading new configuration if no deallocation happend!

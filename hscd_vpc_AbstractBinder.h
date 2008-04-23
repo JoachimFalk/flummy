@@ -25,8 +25,8 @@ namespace SystemC_VPC {
    */
   class AbstractBinder : public virtual ProcessEventListener {
  
-    private:
-      AbstractDirector* director;
+    //private:
+      //AbstractDirector* director;
     
     protected:
 
@@ -66,9 +66,9 @@ namespace SystemC_VPC {
 
       virtual sc_time getBindingOverhead()=0;
       
-      virtual void setDirector(AbstractDirector*);
+      //virtual void setDirector(AbstractDirector*);
       
-      virtual AbstractDirector* getDirector();
+      //virtual AbstractDirector* getDirector();
   };
 
   /**

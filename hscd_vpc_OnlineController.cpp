@@ -88,7 +88,8 @@ namespace SystemC_VPC {
 #endif        
       
       //getSetupTime
-      Director* myDir = dynamic_cast<Director*>(getDirector());
+      //Director* myDir = dynamic_cast<Director*>(getDirector());
+      Director* myDir = &Director::getInstance();
       //ReconfigurableComponent* myComp = myDir->getReComp();
       std::string aReComp =
         task.getBindingGraph().getRoot()->getChildIterator()->getNext()->getID();
@@ -148,6 +149,7 @@ namespace SystemC_VPC {
     }else{
       // also free iterator
       delete iter;
+      return std::pair<std::string, MappingInformation*>("", NULL);
     }
   }//end of OnlineController::performBinding()
 
@@ -384,7 +386,8 @@ namespace SystemC_VPC {
    * Used e.g. to the setuptime with getLoadtime()
    */
   Configuration* OnlineController::getConfiguration(ProcessControlBlock task){
-    Director* myDir = dynamic_cast<Director*>(getDirector());
+    //Director* myDir = dynamic_cast<Director*>(getDirector());
+    Director* myDir = &Director::getInstance(); 
     //ReconfigurableComponent* myComp = myDir->getReComp();
     std::string aReComp =
     task.getBindingGraph().getRoot()->getChildIterator()->getNext()->getID();

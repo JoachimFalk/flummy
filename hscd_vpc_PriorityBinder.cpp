@@ -1,7 +1,7 @@
 #include "hscd_vpc_PriorityBinder.h"
 
 #include "hscd_vpc_ReconfigurableComponent.h"
-
+#define VPC_DEBUG
 namespace SystemC_VPC {
 
   PriorityBinder::PriorityBinder(PriorityElementFactory* factory) 

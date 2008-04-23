@@ -13,7 +13,7 @@
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_AbstractConfigurationMapper.h"
 #include "hscd_vpc_AbstractAllocator.h"
-
+#include "hscd_vpc_Director.h"
 #include "hscd_vpc_ReconfigurableComponent.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 

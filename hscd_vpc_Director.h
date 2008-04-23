@@ -73,8 +73,8 @@ namespace SystemC_VPC{
     // binder instance to resolve bindings
     AbstractBinder* binder;
     
-    ReconfigurableComponent* recomp;
-  
+    sc_time reconfigurationBlockedUntil;
+    
   public:
     bool FALLBACKMODE;
 
@@ -224,11 +224,9 @@ namespace SystemC_VPC{
       return this->vpc_result_file;
     }
     
-//     ReconfigurableComponent* getReComp();
-//     
-//     void setReComp(ReconfigurableComponent*);
-
     ReconfigurableComponent* getCompByName(std::string);
+
+    sc_time getReconfigurationWaitInterval(sc_time);
         
   private:
 

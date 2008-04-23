@@ -179,9 +179,7 @@ namespace SystemC_VPC{
    * \brief Implementation of Controller::getWaitInterval
    */
   sc_time* Controller::getWaitInterval(ReconfigurableComponent* rc){
-    
     return this->allocator->getWaitInterval(rc);
-    
   }
      
   /**

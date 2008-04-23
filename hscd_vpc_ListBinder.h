@@ -22,7 +22,7 @@ namespace SystemC_VPC {
       
       std::vector<sc_time> rctime;
       
-      sc_time config_blocked_until;
+      //sc_time config_blocked_until;
   
     public:
        

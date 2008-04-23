@@ -8,7 +8,7 @@ namespace SystemC_VPC {
   ListBinder::ListBinder() : DynamicBinder() {
 
     numberofcomp = 0;
-    config_blocked_until = sc_time_stamp();
+    //config_blocked_until = sc_time_stamp();
     
   }
   
@@ -44,7 +44,7 @@ namespace SystemC_VPC {
       RecomponentBindingChildIter = RecomponentBinding->getChildIterator();
     }
 #ifdef VPC_DEBUG  
-    std::cerr << "**************************************"<< std::endl;
+    std::cerr << "***************************************"<< std::endl;
     std::cerr << "ListBinder> Simulation time: " << sc_time_stamp() << endl;
     //std::cerr << "ListBinder> Number of ReComponents "<< numberofcomp << std::endl;
     if (comp != NULL) std::cerr << "ListBinder> ReComponent: "<< comp->basename() <<"> Task: " << task.getName() << endl;
@@ -99,13 +99,13 @@ namespace SystemC_VPC {
       }
     
       //wait till last configuration finished
-      if (sc_time_stamp() < config_blocked_until){
-        wait(config_blocked_until - sc_time_stamp());
-      }
-      config_blocked_until = sc_time_stamp() + setuptime;
+//       if (sc_time_stamp() < config_blocked_until){
+//         wait(config_blocked_until - sc_time_stamp());
+//       }
+/*      config_blocked_until += setuptime;
 #ifdef VPC_DEBUG
       std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;
-#endif            
+#endif            */
     
     //return MappingInformation
     return std::pair<std::string, MappingInformation*>(RecomponentBindingChild->getID(), mInfo);
@@ -113,6 +113,7 @@ namespace SystemC_VPC {
     }else{
       // also free iterator
       delete MapInfoIter;
+      return std::pair<std::string, MappingInformation*>("",NULL);
     }
     
   }//end of ListBinder::performBinding()
@@ -129,7 +130,8 @@ namespace SystemC_VPC {
    * Used e.g. to the setuptime with getLoadtime()
    */
   Configuration* ListBinder::getConfiguration(ProcessControlBlock task){
-    Director* myDir = dynamic_cast<Director*>(getDirector());
+    //Director* myDir = dynamic_cast<Director*>(getDirector());
+    Director* myDir = &Director::getInstance();
     //ReconfigurableComponent* myComp = myDir->getReComp();
     std::string aReComp =
       task.getBindingGraph().getRoot()->getChildIterator()->getNext()->getID();
@@ -161,8 +163,10 @@ namespace SystemC_VPC {
    * \brief Implementation of ListBinder::getSetuptime
    */
   sc_time ListBinder::getSetuptime(ProcessControlBlock task){
+    sc_time setuptime;
     Configuration* myConfig = this->getConfiguration(task);
-    sc_time setuptime = myConfig->getLoadTime();
+    if(myConfig) setuptime = myConfig->getLoadTime();
+    else setuptime = SC_ZERO_TIME;
     
     return setuptime;
   }

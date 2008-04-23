@@ -26,7 +26,6 @@
 #include "hscd_vpc_LeastFrequentlyUsedPE.h"
 #include "hscd_vpc_OfflineBinder.h"
 #include "hscd_vpc_ListBinder.h"
-#include "hscd_vpc_LPTBinder.h"
 #include "hscd_vpc_OnlineController.h"
 
 #include "hscd_vpc_XmlHelper.h"
@@ -1204,10 +1203,6 @@ namespace SystemC_VPC{
       if(0==strncmp(type, STR_VPC_ONLINECONTROLLER, strlen(STR_VPC_ONLINECONTROLLER))
           || 0==strncmp(type, STR_VPC_OC, strlen(STR_VPC_OC))){
         binder = new OnlineController(controller);
-      }else
-      if(0==strncmp(type, STR_VPC_LPTBINDER, strlen(STR_VPC_LPTBINDER))
-          || 0==strncmp(type, STR_VPC_LPT, strlen(STR_VPC_LPT))){
-        binder = new LPTBinder();
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;
