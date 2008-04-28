@@ -206,7 +206,7 @@ namespace SystemC_VPC{
      */
     static sc_time createSC_Time(const char* timeString) throw(InvalidArgumentException);
     
-    std::vector<ProcessId> getTaskAnnotation(std::string compName);
+    std::vector<ProcessId> * getTaskAnnotation(std::string compName);
 
   private:
 
@@ -225,6 +225,10 @@ namespace SystemC_VPC{
     
     typedef std::vector<AbstractComponent* >  Mappings;
     Mappings                             mappings;
+
+    typedef std::vector<ProcessId>                ProcessList;  
+    typedef std::map<ComponentId, ProcessList* >  ReverseMapping;
+    ReverseMapping reverseMapping;
 
     PCBPool pcbPool;
 
