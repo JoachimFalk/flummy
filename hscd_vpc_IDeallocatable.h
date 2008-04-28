@@ -42,7 +42,12 @@ namespace SystemC_VPC{
        * \return time needed to restore actual state of an instance to allocate
        */
       virtual sc_time timeToAllocate()=0;
-      
+
+      /**
+       * \brief Virtual destructor for base classes
+       * GCC complains if not present
+       */
+      virtual ~IDeallocatable() {}      
   };
 
 }

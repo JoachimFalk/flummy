@@ -28,6 +28,11 @@ namespace SystemC_VPC{
      */
     virtual void signalStateChanged(){};
     
+    /**
+     * \brief Virtual destructor for base classes
+     * GCC complains if not present
+     */
+    virtual ~ProcessEventListener() {}      
   };
 
 }
