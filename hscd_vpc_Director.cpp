@@ -43,6 +43,7 @@ namespace SystemC_VPC{
   Director::Director()
     : FALLBACKMODE(false),
       mappings(),
+      reverseMapping(),
       end(0),
       componentIdMap(),
       globalProcessId(0)
@@ -301,6 +302,8 @@ namespace SystemC_VPC{
 
     assert( comp != NULL );
     mappings[pid] = comp;
+    if(reverseMapping[cid] == NULL) reverseMapping[cid] = new ProcessList();
+    reverseMapping[cid]->push_back(pid);
   }
     
   /**
@@ -445,5 +448,10 @@ namespace SystemC_VPC{
     return sc_time(value, scUnit);
   }
 
+std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
+  ComponentId cid=getComponentId(compName);
+  return reverseMapping[cid];
+}  
+  
 }
 
