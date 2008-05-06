@@ -104,6 +104,41 @@ namespace SystemC_VPC{
                  EventPair endPair = EventPair(NULL, NULL));
 
     /**
+     * \brief Simulates communication delay of a given task
+     * 
+     * Determines the component from FastLink.
+     * Supports pipelining!
+     * \param fLink FastLink for task and function to execute.
+     * \param quantum Number of read data tokens.
+     * \param endPair EventPair to signal finishing of data introduction 
+     * intervall (dii) and lateny.
+     * If dii == latency no pipelinig is assumed and both events are notified
+     * at same time!
+     * \sa EventPair
+     */
+    void read( FastLink fLink,
+               size_t quantum,
+               EventPair endPair = EventPair(NULL, NULL) );
+
+    /**
+     * \brief Simulates communication delay of a given task
+     * 
+     * Determines the component from FastLink.
+     * Supports pipelining!
+     * \param fLink FastLink for task and function to execute.
+     * \param quantum Number of written data tokens.
+     * \param endPair EventPair to signal finishing of data introduction 
+     * intervall (dii) and lateny.
+     * If dii == latency no pipelinig is assumed and both events are notified
+     * at same time!
+     * \sa EventPair
+     */
+    void write( FastLink fLink,
+                size_t quantum,
+                EventPair endPair = EventPair(NULL, NULL) );
+
+
+    /**
      * \brief Simulates computation of a given task
      * 
      * Determines the component for a given task and delegates it for execution time simulation.
@@ -162,7 +197,7 @@ namespace SystemC_VPC{
      * is used as identifier for it.
      * \param comp points to component instance to be registered
      */
-    void registerComponent(AbstractComponent* comp);
+    void registerComponent(Delayer* comp);
     
     /**
      * \brief Registers mapping between task and component to Director
@@ -201,6 +236,10 @@ namespace SystemC_VPC{
 
     FastLink getFastLink(std::string process, std::string function);
 
+    FastLink getFastLink(std::string source,
+                         std::string destination,
+                         std::string function);
+
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
      */
@@ -220,10 +259,10 @@ namespace SystemC_VPC{
      */
     Director();
 
-    typedef std::vector<AbstractComponent* >  Components;
+    typedef std::vector<Delayer* >  Components;
     Components                           components;
     
-    typedef std::vector<AbstractComponent* >  Mappings;
+    typedef std::vector<Delayer* >  Mappings;
     Mappings                             mappings;
 
     typedef std::vector<ProcessId>                ProcessList;  

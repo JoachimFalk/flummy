@@ -22,6 +22,7 @@
 #include <hscd_vpc_AbstractComponent.h>
 #include <hscd_vpc_Term.h>
 #include <hscd_vpc_VPCBuilder.h>
+#include <StaticRoute.h>
 #include "hscd_vpc_InvalidArgumentException.h"
 
 #include <systemc.h>
@@ -127,7 +128,8 @@ namespace SystemC_VPC{
     for( Components::iterator it = components.begin();
          it != components.end();
          ++it ){
-      delete *it;
+      // FIXME: find the bug
+      //delete *it;
     }
     
     componentIdMap.clear();
@@ -205,11 +207,18 @@ namespace SystemC_VPC{
              mappings[fLink.process] != NULL);
     }
     
+    //    //
+    //    ComponentId cid = this->getComponentId("Bus");
+    //    AbstractComponent * bus = components[cid];
+    //    cerr << "Got ID: " << cid << " BUS: " << bus->name() << endl;
     // get Component
-    AbstractComponent* comp = mappings[fLink.process];
+    Delayer* comp = mappings[fLink.process];
 
+    //    StaticRoute * route = new StaticRoute(comp, bus);
+    //
     // compute task on found component
     assert(!FALLBACKMODE);
+    //    route->compute(pcb);
     comp->compute(pcb);
 
     if( endPair.dii == NULL){
@@ -225,6 +234,22 @@ namespace SystemC_VPC{
       this->pcbPool.free(pcb);
     }
     
+  }
+
+  //
+  void Director::read( FastLink fLink,
+                       size_t quantum,
+                       EventPair endPair ) {
+    // FIXME: treat quantum
+    this->compute(fLink, endPair);
+  }
+
+  //
+  void Director::write( FastLink fLink,
+                        size_t quantum,
+                        EventPair endPair ) {
+    // FIXME: treat quantum
+    this->compute(fLink, endPair);
   }
 
   void Director::compute(const char* name,
@@ -267,20 +292,20 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::registerComponent
    */
-  void Director::registerComponent(AbstractComponent* comp){
+  void Director::registerComponent(Delayer* comp){
     ComponentId cid = comp->getComponentId();
     if(cid >= components.size())
       components.resize(cid+100, NULL);
 
-    this->componentIdMap[comp->basename()] = cid;
+    this->componentIdMap[comp->getName()] = cid;
 
     this->components[cid] = comp;
 
-#ifdef VPC_DEBUG
-    cerr << " Director::registerComponent(" << comp->basename()
+    //#ifdef VPC_DEBUG
+    cerr << " Director::registerComponent(" << comp->getName()
          << ") [" << comp->getComponentId() << "] # " << components.size()
          << endl;
-#endif //VPC_DEBUG
+    //#endif //VPC_DEBUG
   }
     
   /**
@@ -288,7 +313,7 @@ namespace SystemC_VPC{
    */
   void Director::registerMapping(const char* taskName, const char* compName){
     assert(!FALLBACKMODE);
-
+    cerr << "registerMapping( " << taskName<< ", " << compName << " )" << endl;
     ProcessId       pid = getProcessId( taskName );
     if( pid >= mappings.size() ){
       mappings.resize( pid + 100, NULL );
@@ -298,7 +323,7 @@ namespace SystemC_VPC{
     
     ComponentId cid = this->getComponentId(compName);
 
-    AbstractComponent * comp = components[cid];
+    Delayer * comp = components[cid];
 
     assert( comp != NULL );
     mappings[pid] = comp;
@@ -349,7 +374,7 @@ namespace SystemC_VPC{
       std::cerr << "Director> re-compute: " << pcb->getName() << std::endl;
 #endif //VPC_DEBUG
       // get Component
-      AbstractComponent* comp = mappings[pcb->getPid()];
+      Delayer* comp = mappings[pcb->getPid()];
       comp->compute(pcb);
     }
     wait(SC_ZERO_TIME);
@@ -397,6 +422,13 @@ namespace SystemC_VPC{
     this->pcbPool.free(pcb);
 
     return FastLink(pid, fid);
+  }
+
+  FastLink Director::getFastLink(std::string source,
+                                 std::string destination,
+                                 std::string function){
+    std::string name_hack = "msg_" + source + "_2_" + destination;
+    return this->getFastLink(name_hack, function);
   }
 
   

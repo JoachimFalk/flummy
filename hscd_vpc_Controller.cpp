@@ -69,7 +69,7 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Controller::registerComponent
    */
-  void Controller::registerComponent(AbstractComponent* comp){
+  void Controller::registerComponent(Delayer* comp){
     // do nothing right now
   }
       

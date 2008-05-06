@@ -8,6 +8,7 @@
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
 #include "hscd_vpc_datatypes.h"
+#include "StaticRoute.h"
 
 namespace SystemC_VPC{
 #define MAX(x,y) ((x > y) ? x : y)
@@ -186,7 +187,7 @@ namespace SystemC_VPC{
 
 #ifdef VPC_DEBUG
               std::cout << "VPCBuilder> registering component: "
-                        << comp->basename() << " to Director" << endl;
+                        << comp->getName() << " to Director" << endl;
 #endif //VPC_DEBUG
               // register "upper-layer" components to Director
               this->director->registerComponent(comp);
@@ -236,6 +237,11 @@ namespace SystemC_VPC{
             this->director->setResultFile(vpc_result_file);
             remove(vpc_result_file.c_str());
         
+        }else if( 0==XMLString::compareNString( xmlName,
+                                                topologyStr,
+                                                sizeof(resourcesStr) ) ){
+          node = vpcConfigTreeWalker->getCurrentNode();
+          parseTopology( node );
         }else{
         
         }
@@ -522,7 +528,7 @@ namespace SystemC_VPC{
     
     if(node != NULL){
       std::vector<std::pair<char*, char* > > attributes;
-      std::vector<VPCBuilder::Timing > timings;
+      std::vector<Timing > timings;
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
         const XMLCh* xmlName = node->getNodeName();
@@ -533,50 +539,7 @@ namespace SystemC_VPC{
 
         if( 0==XMLString::compareNString( xmlName, timingStr,
                                           sizeof(timingStr))){
-	  char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
-	  
-	  DOMNamedNodeMap* atts = node->getAttributes();
-	  for(unsigned int i=0; i<atts->getLength(); i++){
-	    DOMNode* a=atts->item(i);
-	    if(0==XMLString::compareNString( a->getNodeName(),
-                                             delayAttrStr,
-                                             sizeof(delayAttrStr))){
-	      delay = XMLString::transcode(a->getNodeValue());
-	    }else if(0==XMLString::compareNString( a->getNodeName(),
-                                                   latencyAttrStr,
-                                                   sizeof(latencyAttrStr))){
-	      latency = XMLString::transcode(a->getNodeValue());
-	    }else if(0==XMLString::compareNString( a->getNodeName(),
-                                                   diiAttrStr,
-                                                   sizeof(diiAttrStr))){
-	      dii   = XMLString::transcode(a->getNodeValue());
-	    }else if(0==XMLString::compareNString( a->getNodeName(),
-                                                   fnameAttrStr,
-                                                   sizeof(fnameAttrStr))){
-	      fname = XMLString::transcode(a->getNodeValue());
-	    }
-	  }
-	  VPCBuilder::Timing t;
-	  sc_time sc_latency = SC_ZERO_TIME;
-	  sc_time sc_dii     = SC_ZERO_TIME;
-	  
-	  if(latency != NULL) sc_latency = Director::createSC_Time(latency);
-	  if(dii != NULL) sc_dii = Director::createSC_Time(dii);
-	  { // latency and delay are synonym -> take maximum if they differ
-	    sc_time sc_delay = SC_ZERO_TIME;
-	    if(delay != NULL) sc_delay = Director::createSC_Time(delay);
-	    sc_latency = MAX(sc_latency,sc_delay);
-	  }
-
-	  t.fname   = fname;
-	  //per default latency is used as vpc-delay as well as vpc-latency
-          // (vpc-delay == dii)
-	  t.latency = sc_latency;
-	  t.dii   = sc_latency;
-	  if( dii != NULL ){
-	    t.dii   = sc_latency;
-	  }
-
+          Timing t = this->parseTiming( node );
 	  timings.push_back(t);
 	  
         // check if its an attribute to add
@@ -623,7 +586,7 @@ namespace SystemC_VPC{
   void VPCBuilder::initCompAttributes(AbstractComponent* comp){
     DOMNode* node = this->vpcConfigTreeWalker->firstChild(); 
 #ifdef VPC_DEBUG
-    cerr << "VPC> InitAttribute for Component name=" << comp->basename()
+    cerr << "VPC> InitAttribute for Component name=" << comp->getName()
          << endl;
 #endif //VPC_DEBUG
     if(node != NULL){
@@ -772,7 +735,7 @@ namespace SystemC_VPC{
           // register relation between configuration and component
           this->config_to_ParentComp.insert(
             std::pair<std::string, std::string>(conf->getName(),
-                                                comp->basename()));
+                                                comp->getName()));
 
           //}else{
 
@@ -832,16 +795,16 @@ namespace SystemC_VPC{
         }
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED("Adding Component=" << innerComp->basename()
+        std::cerr << VPC_RED("Adding Component=" << innerComp->getName()
                   << " to Configuration=" << conf->getName()) << std::endl;
 #endif //VPC_DEBUG
 
         innerComp->setParentController(comp->getController());
-        conf->addComponent(innerComp->basename(), innerComp);
+        conf->addComponent(innerComp->getName(), innerComp);
 
         // register mapping
         this->subComp_to_Config.insert(
-          std::pair<std::string, std::string >(innerComp->basename(),
+          std::pair<std::string, std::string >(innerComp->getName(),
                                                conf->getName()));
 
       }
@@ -1184,15 +1147,15 @@ namespace SystemC_VPC{
         }
       }
     }
-    std::map<std::string, std::vector<VPCBuilder::Timing> >::iterator
+    std::map<std::string, std::vector<Timing> >::iterator
       timingIter = timingTemplates.find(key);
     if(timingIter != timingTemplates.end()){
-      for(std::vector<VPCBuilder::Timing>::iterator
+      for(std::vector<Timing>::iterator
             timings = timingTemplates[key].begin();
 	  timings != timingTemplates[key].end();
           ++timings)
       {
-        VPCBuilder::Timing t = *timings;
+        Timing t = *timings;
         p->setDelay( t.dii );
         p->setLatency(t.latency );
         p->addFuncDelay( this->director, target, t.fname, t.dii );
@@ -1282,6 +1245,125 @@ namespace SystemC_VPC{
 	  fr_Attribute.addNewParameter( sType, sValue);
   	}
 	}
+  }
+
+  void VPCBuilder::parseTopology( DOMNode* top ){
+    // iterate children of <topology>
+    try{
+      for(DOMNode * routeNode = top->getFirstChild();
+          routeNode != NULL;
+          routeNode = routeNode->getNextSibling()){
+        
+        const XMLCh* xmlName = routeNode->getNodeName();
+
+        if( 0==XMLString::compareNString( xmlName,
+                                          routeStr,
+                                          sizeof(routeStr))){
+          
+          // scan <route>
+          DOMNamedNodeMap * atts = routeNode->getAttributes();
+          std::string src = XMLString::transcode(
+            atts->getNamedItem(sourceAttrStr)->getNodeValue() );
+          std::string dest = XMLString::transcode(
+            atts->getNamedItem(destinationAttrStr)->getNodeValue() );
+
+          StaticRoute * route = new StaticRoute(src, dest); 
+          this->director->registerComponent(route);
+          this->director->registerMapping(route->getName(), route->getName());
+
+          ProcessControlBlock& pcb =
+            this->director->generatePCB( route->getName() );
+
+          // add <hop>s
+          for(DOMNode * hopNode = routeNode->getFirstChild();
+              hopNode != NULL;
+              hopNode = hopNode->getNextSibling()){
+            const XMLCh* xmlName = hopNode->getNodeName();
+            if( 0==XMLString::compareNString( xmlName,
+                                              hopStr,
+                                              sizeof(hopStr) ) ){
+              std::string name =
+                XMLString::transcode(hopNode->getAttributes()->
+                                     getNamedItem(nameAttrStr)->
+                                     getNodeValue() );
+
+              std::map<std::string, AbstractComponent* >::iterator iterComp =
+                this->knownComps.find(name);
+              assert( iterComp != this->knownComps.end() );
+              
+              route->addHop( name, iterComp->second );
+              (iterComp->second)->informAboutMapping(route->getName());
+
+              // parse <timing>s
+              for(DOMNode * timingNode = hopNode->getFirstChild();
+                  timingNode != NULL;
+                  timingNode = timingNode->getNextSibling()){
+                const XMLCh* xmlName = timingNode->getNodeName();
+              
+                if( 0==XMLString::compareNString( xmlName,
+                                                  timingStr,
+                                                  sizeof(timingStr) ) ){
+                  Timing t = this->parseTiming( timingNode );
+                  pcb.addFuncDelay( this->director, name, t.fname, t.dii );
+                  pcb.addFuncLatency( this->director, name , t.fname, t.latency );
+                }
+              }
+            }
+          }
+        }
+      }
+    }catch(InvalidArgumentException &e){
+      std::cerr << "VPCBuilder> " << e.what() << std::endl;
+      std::cerr << "VPCBuilder> ignoring topology section,"
+        " continue initialization" << std::endl;
+    }
+  }
+  Timing VPCBuilder::parseTiming(DOMNode* node){
+    char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
+	  
+    DOMNamedNodeMap* atts = node->getAttributes();
+    for(unsigned int i=0; i<atts->getLength(); i++){
+      DOMNode* a=atts->item(i);
+      if(0==XMLString::compareNString( a->getNodeName(),
+                                       delayAttrStr,
+                                       sizeof(delayAttrStr))){
+        delay = XMLString::transcode(a->getNodeValue());
+      }else if(0==XMLString::compareNString( a->getNodeName(),
+                                             latencyAttrStr,
+                                             sizeof(latencyAttrStr))){
+        latency = XMLString::transcode(a->getNodeValue());
+      }else if(0==XMLString::compareNString( a->getNodeName(),
+                                             diiAttrStr,
+                                             sizeof(diiAttrStr))){
+        dii   = XMLString::transcode(a->getNodeValue());
+      }else if(0==XMLString::compareNString( a->getNodeName(),
+                                             fnameAttrStr,
+                                             sizeof(fnameAttrStr))){
+        fname = XMLString::transcode(a->getNodeValue());
+      }
+    }
+    Timing t;
+    sc_time sc_latency = SC_ZERO_TIME;
+    sc_time sc_dii     = SC_ZERO_TIME;
+  
+    if(latency != NULL) sc_latency = Director::createSC_Time(latency);
+    if(dii != NULL) sc_dii = Director::createSC_Time(dii);
+    { // latency and delay are synonym -> take maximum if they differ
+      sc_time sc_delay = SC_ZERO_TIME;
+      if(delay != NULL) sc_delay = Director::createSC_Time(delay);
+      sc_latency = MAX(sc_latency,sc_delay);
+    }
+
+    t.fname   = fname;
+    //per default latency is used as vpc-delay as well as vpc-latency
+    // (vpc-delay == dii)
+    t.latency = sc_latency;
+    t.dii   = sc_latency;
+    if( dii != NULL ){
+      t.dii   = sc_latency;
+    }
+    
+    return t;
   }
 
 }// namespace SystemC_VPC

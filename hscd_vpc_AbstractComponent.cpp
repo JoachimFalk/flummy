@@ -20,12 +20,14 @@
 namespace SystemC_VPC{
 
   //
-  ComponentId AbstractComponent::globalComponentId = 0;
+  ComponentId Delayer::globalComponentId = 0;
 
   //
-  ComponentId AbstractComponent::getComponentId(){
+  ComponentId Delayer::getComponentId(){
     return this->componentId;
   }
 
-
+  const char* AbstractComponent::getName() const {
+    return this->basename();
+  }
 } //namespace SystemC_VPC

@@ -50,6 +50,7 @@ namespace SystemC_VPC{
       /// counts how often this term is satisfiable
       int satisfiableCounter;
 
+      virtual ~Term() {}
   };
 
   /**

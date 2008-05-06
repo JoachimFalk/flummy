@@ -32,6 +32,7 @@
 #include "hscd_vpc_EDFController.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
+#include "Timing.h"
 #include "hscd_vpc_Configuration.h"
 #include "Attribute.h"
 
@@ -65,6 +66,9 @@ namespace SystemC_VPC{
     XMLCh* refTemplateStr;
     XMLCh* timingStr;
     XMLCh* parameterStr;
+    XMLCh* topologyStr;
+    XMLCh *hopStr;
+    XMLCh *routeStr;
     //XMLCh *Str;
     
     XMLCh* nameAttrStr;
@@ -81,6 +85,7 @@ namespace SystemC_VPC{
     XMLCh *diiAttrStr;
     XMLCh *latencyAttrStr;
     XMLCh *fnameAttrStr;
+    XMLCh *destinationAttrStr;
     //XMLCh *AttrStr;
     
     /*
@@ -106,12 +111,6 @@ namespace SystemC_VPC{
     // map containing specified templates
     std::map<std::string, std::vector<std::pair<char*, char* > > > templates;
 
-    //helper struct
-    struct Timing{
-      sc_time dii;
-      sc_time latency;
-      char*   fname;
-    };
     // map containing template Timings
     std::map<std::string, std::vector<Timing> > timingTemplates;
 
@@ -150,6 +149,9 @@ namespace SystemC_VPC{
       refTemplateStr  = XMLString::transcode("reftemplate");
       timingStr       = XMLString::transcode("timing");
       parameterStr    = XMLString::transcode("parameter");
+      topologyStr     = XMLString::transcode("topology");
+      hopStr          = XMLString::transcode("hop");
+      routeStr        = XMLString::transcode("route");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");
@@ -166,6 +168,7 @@ namespace SystemC_VPC{
       diiAttrStr          = XMLString::transcode("dii");
       latencyAttrStr      = XMLString::transcode("latency");
       fnameAttrStr        = XMLString::transcode("fname");
+      destinationAttrStr  = XMLString::transcode("destination");
       //XMLCh* VPCBuilder::AttrStr   = XMLString::transcode("");
       
       /*
@@ -279,6 +282,15 @@ namespace SystemC_VPC{
     */
     void nextAttribute(Attribute &fr_Attribute, DOMNode* node);
      
+    /**
+    * \brief Topology parsing related code
+    */
+    void parseTopology(DOMNode* node);
+
+    /**
+    * \brief Parsing helper for <timing>
+    */
+    Timing parseTiming(DOMNode* node);
   };
     
 }

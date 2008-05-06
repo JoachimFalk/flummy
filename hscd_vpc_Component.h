@@ -83,7 +83,7 @@ namespace SystemC_VPC{
       setScheduler(schedulername);
 
 #ifndef NO_VCD_TRACES
-      std::string tracefilename=this->basename(); //componentName;
+      std::string tracefilename=this->getName(); //componentName;
       char tracefilechar[VPC_MAX_STRING_LENGTH];
       char* traceprefix= getenv("VPCTRACEFILEPREFIX");
       if(0!=traceprefix){
@@ -105,7 +105,7 @@ namespace SystemC_VPC{
           /**************************/
       if(!this->activ){
 #ifdef VPC_DEBUG
-	std::cerr << VPC_GREEN(this->basename() << "> Activating")
+	std::cerr << VPC_GREEN(this->getName() << "> Activating")
 		  << std::endl;
 #endif //VPC_DEBUG
 	this->setActiv(true);

@@ -73,7 +73,7 @@ namespace SystemC_VPC{
           assert(actualRemainingDelay.value()>=0);
 
 #ifdef VPC_DEBUG
-          std::cerr << VPC_RED("Component " << this->basename()
+          std::cerr << VPC_RED("Component " << this->getName()
                     << "> actualRemainingDelay= "
                     << actualRemainingDelay.value() << " for iid="
                     << actualRunningIID << " at: "
@@ -90,8 +90,8 @@ namespace SystemC_VPC{
             task->setState(inaktiv);
 
 #ifdef VPC_DEBUG
-            cerr << this->basename() << " IID: " << actualRunningIID<< " > ";
-            cerr << this->basename() << " removed Task: " << task->getName()
+            cerr << this->getName() << " IID: " << actualRunningIID<< " > ";
+            cerr << this->getName() << " removed Task: " << task->getName()
                  << " at: " << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
@@ -127,7 +127,7 @@ namespace SystemC_VPC{
       while(! this->isActiv()){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED( this->basename()  << " deactivated at ")
+        std::cerr << VPC_RED( this->getName()  << " deactivated at ")
                   << sc_time_stamp().to_default_time_units() << std::endl;    
 #endif // VPC_DEBUG
 
@@ -166,7 +166,7 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED( this->basename()  << " reactivated at ")
+        std::cerr << VPC_RED( this->getName()  << " reactivated at ")
                   << sc_time_stamp().to_default_time_units() << std::endl;    
 #endif // VPC_DEBUG
 
@@ -178,7 +178,7 @@ namespace SystemC_VPC{
         newTask=newTasks[0];
         newTasks.pop_front();
 #ifdef VPC_DEBUG
-        cerr << this->basename() << " received new Task: "
+        cerr << this->getName() << " received new Task: "
              << newTask->getName() << " at: "
              << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
@@ -450,13 +450,13 @@ namespace SystemC_VPC{
    */
   void Component::compute(ProcessControlBlock* actualTask){ 
 
-#ifdef VPC_DEBUG
+    //#ifdef VPC_DEBUG
     cout << flush;
     cerr << VPC_RED("Component::compute( ") << VPC_WHITE(actualTask->getName())
-         << VPC_RED(" , ") << VPC_WHITE(actualTask->getFuncName())
+      //<< VPC_RED(" , ") << VPC_WHITE(actualTask->getFuncName())
          << VPC_RED(" ) at time: "
          << sc_time_stamp().to_default_time_units()) << endl;
-#endif
+    //#endif
 
     // reset the execution delay
     actualTask->
@@ -524,8 +524,8 @@ namespace SystemC_VPC{
       iter->second->setState(activation_state(aborted));
 
 #ifdef VPC_DEBUG
-      cerr << this->basename() << " > ";
-      cerr << this->basename() << " killed Task: " << iter->second->getName()
+      cerr << this->getName() << " > ";
+      cerr << this->getName() << " killed Task: " << iter->second->getName()
            << " activation state set to "<< iter->second->getState() << " at: "
            << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
@@ -537,9 +537,9 @@ namespace SystemC_VPC{
       iter->second->setRemainingDelay(SC_ZERO_TIME);
 
 #ifdef VPC_DEBUG
-      cerr << this->basename() << " IID: " <<  iter->second->getInstanceId()
+      cerr << this->getName() << " IID: " <<  iter->second->getInstanceId()
            << " > ";
-      cerr << this->basename() << " killed Task: " << iter->second->getName()
+      cerr << this->getName() << " killed Task: " << iter->second->getName()
            << " at: " << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
@@ -562,8 +562,8 @@ namespace SystemC_VPC{
       iter->second->setState(activation_state(aborted));
 
 #ifdef VPC_DEBUG
-      cerr << this->basename() << " > ";
-      cerr << this->basename() << " killed Task: " << iter->second->getName()
+      cerr << this->getName() << " > ";
+      cerr << this->getName() << " killed Task: " << iter->second->getName()
            << " activation state set to "<< iter->second->getState() << " at: "
            << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
@@ -575,9 +575,9 @@ namespace SystemC_VPC{
       iter->second->setRemainingDelay(SC_ZERO_TIME);
 
 #ifdef VPC_DEBUG
-      cerr << this->basename() << " IID: " <<  iter->second->getInstanceId()
+      cerr << this->getName() << " IID: " <<  iter->second->getInstanceId()
            << " > ";
-      cerr << this->basename() << " killed Task: " << iter->second->getName()
+      cerr << this->getName() << " killed Task: " << iter->second->getName()
            << " at: " << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG
 
@@ -601,8 +601,8 @@ namespace SystemC_VPC{
       newTask->setState(activation_state(aborted));
 
 #ifdef VPC_DEBUG
-      cerr << this->basename() << " > ";
-      cerr << this->basename() << " killed Task: " << newTask->getName()
+      cerr << this->getName() << " > ";
+      cerr << this->getName() << " killed Task: " << newTask->getName()
            << " activation state set to "<< newTask->getState() << " at: "
            << sc_time_stamp().to_default_time_units() << endl;
 #endif // VPCDEBUG

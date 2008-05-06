@@ -124,7 +124,7 @@ namespace SystemC_VPC{
                                              const PCBMap &running_tasks )
   {      
     // keine wartenden + keine aktiven Threads -> ende!
-    if(processcount==0 && running_tasks.size()==0) return 0;   
+    if(processcount==0 && running_tasks.size()==0) return false;   
     //ansonsten: Restlaufzeit der Zeitscheibe
     time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - lastassign);  
     return true;   

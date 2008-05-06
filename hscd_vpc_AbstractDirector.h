@@ -21,7 +21,7 @@ namespace SystemC_VPC{
      * is used as identifier for it.
      * \param comp points to component instance to be registered
      */
-    virtual void registerComponent(AbstractComponent* comp)=0;
+    virtual void registerComponent(Delayer* comp)=0;
     
     /**
      * \brief Registers mapping between task and component to Director

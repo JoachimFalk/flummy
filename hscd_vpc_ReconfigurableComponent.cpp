@@ -22,7 +22,7 @@ namespace SystemC_VPC{
     this->setController(controller);
     
 #ifndef NO_VCD_TRACES
-    std::string tracefilename = this->basename();
+    std::string tracefilename = this->getName();
     char tracefilechar[VPC_MAX_STRING_LENGTH];
     char* traceprefix= getenv("VPCTRACEFILEPREFIX");
     if(NULL != traceprefix){
@@ -35,7 +35,7 @@ namespace SystemC_VPC{
     
     if(!this->isActiv()){
 #ifdef VPC_DEBUG
-      std::cerr << VPC_RED(this->basename() << "> Activating") << std::endl;
+      std::cerr << VPC_RED(this->getName() << "> Activating") << std::endl;
 #endif //VPC_DEBUG
       this->setActiv(true);
     }
@@ -103,7 +103,7 @@ namespace SystemC_VPC{
       // for notification
       if( !newTasksDuringLoad && this->isActiv() ){  
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+        std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                   << "> going to wait at time: ")
                   << sc_time_stamp().to_default_time_units()
                   << endl;
@@ -114,7 +114,7 @@ namespace SystemC_VPC{
         if(minTimeToWait == NULL){
           
 #ifdef VPC_DEBUG
-          std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+          std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                     << "> waiting for new tasks.") << endl;
 #endif //VPC_DEBUG
 
@@ -123,7 +123,7 @@ namespace SystemC_VPC{
         }else{
         
 #ifdef VPC_DEBUG
-          std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+          std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                     <<"> waiting for redelegation in: ")
                     << minTimeToWait->to_default_time_units() << endl;
 #endif //VPC_DEBUG
@@ -142,7 +142,7 @@ namespace SystemC_VPC{
       
       
 #ifdef VPC_DEBUG
-      std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+      std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                 << "> got notified at time: "
                 << sc_time_stamp().to_default_time_units() 
                 << " with num of new tasks= " << this->newTasks.size()) 
@@ -153,7 +153,7 @@ namespace SystemC_VPC{
       if( !this->isActiv() ){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+        std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                   << "> not activ going to sleep at time: ")
                   << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
@@ -179,7 +179,7 @@ namespace SystemC_VPC{
         this->controller->signalAllocation();
         
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+        std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                   << "> awoke at time: ")
                   << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
@@ -190,7 +190,7 @@ namespace SystemC_VPC{
       this->controller->addProcessToSchedule(this->newTasks);
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+        std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                   << "> finished delegation to controller !")
                   << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
@@ -206,7 +206,7 @@ namespace SystemC_VPC{
         currTask = this->controller->getNextProcess();
         
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED("ReconfigurableComponent " << this->basename()
+        std::cerr << VPC_RED("ReconfigurableComponent " << this->getName()
                   << "> still task to forward: ") << currTask->getName()
                   << " at "  << sc_time_stamp().to_default_time_units()
                   << endl;
@@ -220,7 +220,7 @@ namespace SystemC_VPC{
 
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_RED("ReconfigurableComponent "<< this->basename()
+        std::cerr << VPC_RED("ReconfigurableComponent "<< this->getName()
                   <<"> finished forwarding and checking config !")
                   << sc_time_stamp().to_default_time_units() << endl;
 #endif //VPC_DEBUG
@@ -233,7 +233,7 @@ namespace SystemC_VPC{
       if(nextConfig != NULL && nextConfig != this->activConfiguration){
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_BLUE("ReconfigurableComponent " << this->basename()
+        std::cerr << VPC_BLUE("ReconfigurableComponent " << this->getName()
                   << "> new config to load: ") << nextConfig->getName()
                   << std::endl;
 #endif //VPC_DEBUG
@@ -246,13 +246,13 @@ namespace SystemC_VPC{
           
 #ifdef VPC_DEBUG
             std::cerr << VPC_BLUE("ReconfigurableComponent "
-                      << this->basename() << "> failed loading!") << std::endl;
+                      << this->getName() << "> failed loading!") << std::endl;
 #endif //VPC_DEBUG
           
           }else{
 
 #ifdef VPC_DEBUG
-        std::cerr << VPC_BLUE("ReconfigurableComponent " << this->basename()
+        std::cerr << VPC_BLUE("ReconfigurableComponent " << this->getName()
                   << "> new configuration loaded: "
                   << this->activConfiguration->getName()) << std::endl;
 #endif //VPC_DEBUG
@@ -261,7 +261,7 @@ namespace SystemC_VPC{
         }else{
         
 #ifdef VPC_DEBUG
-          std::cerr << VPC_BLUE("ReconfigurableComponent " << this->basename()
+          std::cerr << VPC_BLUE("ReconfigurableComponent " << this->getName()
                     << "> failed storing!") << std::endl;
 #endif //VPC_DEBUG
         
@@ -539,7 +539,7 @@ namespace SystemC_VPC{
     if(this->activConfiguration != NULL){
 
 #ifdef VPC_DEBUG
-      std::cerr << "ReconfigurableComponent" << this->basename()
+      std::cerr << "ReconfigurableComponent" << this->getName()
                 << "> trying to store config kill=" << kill << std::endl;
 #endif //VPC_DEBUG
 
@@ -576,7 +576,7 @@ namespace SystemC_VPC{
         if(this->killed){
 
 #ifdef VPC_DEBUG
-          std::cerr << "ReconfigurableComponent " << this->basename()
+          std::cerr << "ReconfigurableComponent " << this->getName()
                     << "> storing configuration has been interrupted "
                     << std::endl;
 #endif //VPC_DEBUG
@@ -627,7 +627,7 @@ namespace SystemC_VPC{
     if(config != NULL){
       
 #ifdef VPC_DEBUG
-      std::cerr << "ReconfigurableComponent " << this->basename()
+      std::cerr << "ReconfigurableComponent " << this->getName()
                 << "> loading configuration config= " << config->getName()
                 << std::endl;
 #endif //VPC_DEBUG
@@ -696,10 +696,10 @@ namespace SystemC_VPC{
     if(elapsedTime.value() < interval.value()){
 
 #ifdef VPC_DEBUG
-      std::cerr << "ReconfigurableComponent " << this->basename()
+      std::cerr << "ReconfigurableComponent " << this->getName()
                 << "> reconfiguration phase has been interrupted "
                 << std::endl;
-      std::cerr << "ReconfigurableComponent " << this->basename()
+      std::cerr << "ReconfigurableComponent " << this->getName()
                 << "> startTime= " << timeStamp << " interval= " << interval
       << " elapsedTime= " << elapsedTime << std::endl;
 #endif //VPC_DEBUG

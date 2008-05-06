@@ -153,8 +153,9 @@ namespace SystemC_VPC {
 
   ProcessControlBlock& PCBPool::registerPCB(ProcessId pid){
 
-    assert( pid == typepools.size() );
-    typepools.push_back( new TypePool());
+    if( pid == typepools.size() ){
+      typepools.push_back( new TypePool());
+    }
 
     return this->typepools[pid]->getBase();
   }

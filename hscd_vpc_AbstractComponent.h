@@ -30,11 +30,40 @@
 namespace SystemC_VPC{
 
   /**
+   * \brief Interface for classes implementing delay simulation.
+   */
+  class Delayer{
+  public:
+    /**
+       * \brief Simulate the delay caused by this Delayer.
+       *
+       * While this simulation is running SystemC simulation time is consumed.
+       */
+    virtual void compute(ProcessControlBlock* pcb)=0;
+
+    virtual const char* getName() const = 0;
+
+    ComponentId getComponentId();
+
+  protected:
+    Delayer(): componentId(globalComponentId++) {}
+
+    virtual ~Delayer() {}
+  private:
+    //
+    static ComponentId globalComponentId;
+
+    //
+    ComponentId componentId;
+  };
+
+  /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).
    * 
    * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
    */
-  class AbstractComponent: public sc_module, public IDeallocatable{
+  class AbstractComponent:
+    public sc_module, public IDeallocatable, public Delayer{
   
   protected:
 
@@ -78,7 +107,7 @@ namespace SystemC_VPC{
       _compute( name, end);
     }
 
-    virtual ~AbstractComponent(){};
+    virtual ~AbstractComponent(){}
 
     /**
      * \brief Used to create the Tracefiles.
@@ -96,6 +125,8 @@ namespace SystemC_VPC{
     
     virtual void processAndForwardAttribute(Attribute& fr_Attribute)=0;
 
+    const char* getName() const;
+
   protected:
      
     // used to reflect state of component
@@ -111,7 +142,7 @@ namespace SystemC_VPC{
   
     AbstractComponent(sc_module_name name)
       : sc_module(name),
-      componentId(globalComponentId++){
+        Delayer() {
       
       this->killed = false;
       this->activ = true;
@@ -196,17 +227,6 @@ namespace SystemC_VPC{
     /**
      *
      */
-    ComponentId getComponentId();
-
-  private:
-    //
-    static ComponentId globalComponentId;
-
-    //
-    ComponentId componentId;
-    
-
-
   };
   
 }

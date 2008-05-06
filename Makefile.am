@@ -108,6 +108,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_PCBPool.cpp			\
 	hscd_vpc_Term.cpp			\
 	FastLink.cpp				\
+	StaticRoute.cpp				\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 
