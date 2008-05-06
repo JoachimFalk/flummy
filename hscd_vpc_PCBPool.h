@@ -61,7 +61,7 @@ namespace SystemC_VPC {
 
     NotAllocatedException(std::string msg) : msg(msg +" not allocated") {}
     
-    NotAllocatedException(ProcessId) : msg(CoSupport::asStr(msg) +
+    NotAllocatedException(ProcessId id) : msg(CoSupport::asStr(id) +
                                            " not allocated") {}
     
     ~NotAllocatedException() throw(){}
