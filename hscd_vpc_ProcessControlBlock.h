@@ -77,6 +77,7 @@ namespace SystemC_VPC {
       int priority;
       sc_time period;
       sc_time deadline;
+      
       activation_state state;
       Tracing * traceSignal;
 
@@ -90,7 +91,7 @@ namespace SystemC_VPC {
       int* copyCount;
 
     public:
-      
+      sc_time RCWaitInterval;
       /**
        * \brief Default constructor of an PCB instance
        */

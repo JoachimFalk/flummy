@@ -2,6 +2,8 @@
 #include <hscd_vpc_datatypes.h>
 #include <hscd_vpc_Director.h>
 
+#define RESERVATION
+
 namespace SystemC_VPC{
   /**
    * IMPLEMENTATION OF ReconfigurableComponent
@@ -236,10 +238,17 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG
         std::cerr << VPC_BLUE("ReconfigurableComponent " << this->basename() << "> new config to load: ") << nextConfig->getName() << std::endl;
 #endif //VPC_DEBUG
+
+        //wait SetuptimeReservation
+        wait(this->controller->getRCWaitInterval(this));
+#ifdef RESERVATION
+            std::cerr << VPC_BLUE("ReconfigurableComponent " << this->basename() << "> Setuptime-Reservation: " << this->controller->getRCWaitInterval(this) ) << std::endl;
+#endif //VPC_DEBUG
         
         //wait() blockedtime cause of other reconfiguration is activ
         sc_time reconfigurationManagerWaitInterval = Director::getInstance().getReconfigurationWaitInterval(nextConfig->getLoadTime());
         wait(reconfigurationManagerWaitInterval);
+        //assert(reconfigurationManagerWaitInterval == SC_ZERO_TIME);
         // perform reconfiguration
         if(this->storeActivConfiguration(this->controller->deallocateByKill())){
           // perform loading new configuration if no deallocation happend!

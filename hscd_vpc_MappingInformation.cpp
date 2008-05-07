@@ -40,6 +40,14 @@ namespace SystemC_VPC {
   sc_time MappingInformation::getDeadline() const{
     return this->deadline;
   }
+  
+  void MappingInformation::setRCWaitInterval(sc_time myTime){
+    this->RCWaitInterval = myTime;
+  }
+  
+  sc_time MappingInformation::getRCWaitInterval(){
+    return this->RCWaitInterval;
+  }
 
   /**
    * \brief Used to register component specific delay to MappingInformation instance

@@ -27,6 +27,7 @@
 #include "hscd_vpc_OfflineBinder.h"
 #include "hscd_vpc_ListBinder.h"
 #include "hscd_vpc_OnlineController.h"
+#include "hscd_vpc_OnlineBinder.h"
 
 #include "hscd_vpc_XmlHelper.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
@@ -238,6 +239,9 @@ namespace SystemC_VPC{
         
                 char* sName=XMLString::transcode(atts->getNamedItem(nameAttrStr)->getNodeValue());
                 if(strcmp(sName,"OB") == 0){
+                  this->OfflineFileName=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+                }
+                if(strcmp(sName,"ONLINE") == 0 || strcmp(sName,"OnlineBinder") == 0){
                   this->OfflineFileName=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
                 }
                 try{
@@ -1203,6 +1207,10 @@ namespace SystemC_VPC{
       if(0==strncmp(type, STR_VPC_ONLINECONTROLLER, strlen(STR_VPC_ONLINECONTROLLER))
           || 0==strncmp(type, STR_VPC_OC, strlen(STR_VPC_OC))){
         binder = new OnlineController(controller);
+      }else
+      if(0==strncmp(type, STR_VPC_ONLINEBINDER, strlen(STR_VPC_ONLINEBINDER))
+          || 0==strncmp(type, STR_VPC_ONLINE, strlen(STR_VPC_ONLINE))){
+        binder = new OnlineBinder(this->OfflineFileName);
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;

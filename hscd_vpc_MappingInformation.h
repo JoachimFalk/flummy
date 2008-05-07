@@ -14,6 +14,7 @@ namespace SystemC_VPC {
       int priority;
       sc_time period;
       sc_time deadline;
+      sc_time RCWaitInterval;
       DelayMapper dmapper;
 
     public:
@@ -37,6 +38,10 @@ namespace SystemC_VPC {
 
       sc_time getDeadline() const;
 
+      void setRCWaitInterval(sc_time);
+      
+      sc_time getRCWaitInterval();
+      
       /**
        * \brief Used to register component specific delay to MappingInformation instance
        * \param funcname refers to an function name or may be null for common
@@ -80,7 +85,7 @@ namespace SystemC_VPC {
        * \return true if a delay is registered else false
        */
       bool hasLatency(const char* funcname=NULL) const;
-
+      
   };
 
 }

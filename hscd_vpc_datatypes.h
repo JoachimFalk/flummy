@@ -92,9 +92,9 @@ namespace SystemC_VPC {
   //definition for ListBinder
 #define STR_VPC_LISTBINDER   "ListBinder"
 #define STR_VPC_LIST         "LIST"
-    //definition for LPTBinder
-#define STR_VPC_LPTBINDER    "LPTBinder"
-#define STR_VPC_LPT          "LPT"
+    //definition for OnlineBinder
+#define STR_VPC_ONLINEBINDER    "OnlineBinder"
+#define STR_VPC_ONLINE          "ONLINE"
   //definition for LPTBinder
 #define STR_VPC_ONLINECONTROLLER    "OnlineController"
 #define STR_VPC_OC          "OC"

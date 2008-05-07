@@ -30,6 +30,7 @@ namespace SystemC_VPC {
 
       // time indicating next request wish
       sc_time* waitInterval;
+      sc_time RCWaitInterval;
 
       Allocator(AbstractController* controller);
 
@@ -44,6 +45,7 @@ namespace SystemC_VPC {
        * \return time interval to wait or NULL if no time interval required
        */
       sc_time* getWaitInterval(ReconfigurableComponent* rc);
+      sc_time getRCWaitInterval(ReconfigurableComponent* rc);
 
       /**
        * \brief Used to set Scheduler specific values

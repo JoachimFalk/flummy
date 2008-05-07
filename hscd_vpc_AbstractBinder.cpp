@@ -34,7 +34,8 @@ namespace SystemC_VPC {
     pcb.setDelay(mapping->getDelay(pcb.getFuncName()));
     pcb.setLatency(mapping->getFuncLatency(pcb.getFuncName()));
     pcb.setRemainingDelay(pcb.getDelay());
-
+    
+    pcb.RCWaitInterval = mapping->getRCWaitInterval();
   }
 
   /**

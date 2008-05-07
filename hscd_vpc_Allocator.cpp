@@ -57,6 +57,9 @@ namespace SystemC_VPC{
   sc_time* Allocator::getWaitInterval(ReconfigurableComponent* rc){
       return this->waitInterval;
   }
+  sc_time Allocator::getRCWaitInterval(ReconfigurableComponent* rc){
+      return this->RCWaitInterval;
+  }
      
   /**
     * \brief Dummy implementation of Allocator::signalDeallocation

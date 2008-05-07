@@ -1,12 +1,12 @@
 #include <hscd_vpc_OnlineAllocator.h>
-//#define VPC_DEBUG
+
 namespace SystemC_VPC{
   
   /**
    * \brief Initializes instance of OnlineAllocator
    */
   OnlineAllocator::OnlineAllocator(AbstractController* controller) : Allocator(controller){
-  
+
     this->nextConfiguration = 0;
     
   }
@@ -15,11 +15,9 @@ namespace SystemC_VPC{
    * \brief Deletes instance of OnlineAllocator
    */
   OnlineAllocator::~OnlineAllocator(){
-  
     assert(this->readyTasks.size() == 0);
     assert(this->runningTasks.size() == 0);
     assert(this->tasksToProcess.size() == 0);
-    
   }
   
   /**
@@ -32,6 +30,7 @@ namespace SystemC_VPC{
           << "For task " << newTask->getName() << " with required configuration id " << config << " at " << sc_simulation_time() << endl;
 //        std::cerr << VPC_YELLOW("OnlineAllocator "<< this->getController().getName() <<"> addTasksToSchedule called! ") << sc_simulation_time() << endl;
 #endif //VPC_DEBUG
+
     // first of all add task to local storage structure
     std::pair<ProcessControlBlock*, unsigned int> entry(newTask, config);
     this->readyTasks.push_back(entry);
@@ -67,8 +66,7 @@ namespace SystemC_VPC{
       if((this->getManagedComponent()->getActivConfiguration() == NULL && this->nextConfiguration == 0) // no activ and no next conf selected
           || (this->runningTasks.size() == 0 && this->nextConfiguration == 0) // or no running tasks and no next conf selected
           || (this->nextConfiguration == 0 && reqConfig == this->getManagedComponent()->getActivConfiguration()->getID()) // or no selected conf but actual one fits!
-          || reqConfig == this->nextConfiguration)
-        { // or required conf fits already selected one
+          || reqConfig == this->nextConfiguration){ // or required conf fits already selected one
 
 #ifdef VPC_DEBUG
         std::cerr << VPC_YELLOW("OnlineAllocator "<< this->getController().getName() <<"> can process task ") << currTask->getName() 
@@ -82,18 +80,19 @@ namespace SystemC_VPC{
 
         // load new configuration
         this->nextConfiguration = reqConfig;
+
+        //blocked because of SetupTimeReservation
+        this->RCWaitInterval = currTask->RCWaitInterval;
         
-        //blocked because of other SetupTime
-        //this->waitInterval = getBlockedTime();
-        //this->nextConfiguration = 0;
       }else{
         // current task not processable, so leave it and stop processing any further tasks
         break;
       }
     }
+
   }
   
-  /**
+  /*
    * \brief Implementation of OnlineAllocator::getNextConfiguration
    */  
   unsigned int OnlineAllocator::getNextConfiguration(ReconfigurableComponent* rc){
@@ -150,7 +149,7 @@ namespace SystemC_VPC{
   }
 
   /**
-   * \brief Implementation of OnlineAllocator::signalDeallocation
+   * \brief Implementation of OnlineConfScheudler::signalDeallocation
    */
   void OnlineAllocator::signalDeallocation(bool kill, ReconfigurableComponent* rc){
     // only interested in Preemption with KILL
@@ -170,76 +169,5 @@ namespace SystemC_VPC{
 
     }
   }
-  /**
-   * \brief Implementation of OnlineAllocator::getSetuptime()
-   */
-   sc_time OnlineAllocator::getSetuptime(ProcessControlBlock* task){
-     ReconfigurableComponent* myComp = this->getManagedComponent();
-     Configuration* myConf = myComp->getConfiguration(task->getPID());
-     if(!myConf)std::cerr << "Conf ist NULL" << std::endl;
-     return myConf->getLoadTime();
-   }
-   
-  /**
-   * \brief Implementation of OnlineAllocator::getSchedulingOverhead()
-   */
-  sc_time OnlineAllocator::getSchedulingOverhead(){
-
-    return SC_ZERO_TIME;
-    
-  }
   
-  /**
-   * \brief Implementation of OnlineAllocator::setBlockedTime, called by Binder to block concurrent configuration
-   */
-  void OnlineAllocator::setBlockedTime(sc_time time){
-    //this->waitInterval = &time;
-  }
-  
-  /**
-   * \brief Implementation of OnlineAllocator::cleanstring, helper of generate_sctime
-   */
-  void OnlineAllocator::cleanstring(std::string *output){
-    std::string::iterator iter = output->begin();
-        while(*iter == ' ' || *iter == '\t' ) {
-          iter = output->erase(iter);
-        }
-        iter = output->end()-1;
-        while(*iter == ' ' || *iter == '\t') {
-          output->erase(iter);
-          iter = output->end()-1;
-        }
-    return;
-  }
-  
-  /**
-   * \brief Implementation of OnlineAllocator::generate_sctime
-   */
-  sc_time OnlineAllocator::generate_sctime(std::string starttime){
-    //trenne Zahl und einheit
-    std::string numbers = "0123456789.";
-    std::string::iterator iter = starttime.begin();
-    while( numbers.find(*iter) != std::string::npos) iter++;
-    std::string time = starttime.substr(0, iter - starttime.begin());
-    std::string unit = starttime.substr(iter - starttime.begin(), starttime.end() - iter);
-    
-    //std::cerr << "time:"<<time<<"Unit:"<<unit<<std::endl;
-      
-    std::istringstream timex;
-    double timeindouble;
-    timex.str( time );
-    timex >> timeindouble;
-    
-    cleanstring(&unit);
-    //generiere sc_time(zahl,einheit)
-    sc_time_unit scUnit = SC_NS;
-    if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
-    else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
-    else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
-    else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
-    else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
-    else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
-    
-    return sc_time(timeindouble,scUnit);
-  }
 } //namespace SystemC_VPC

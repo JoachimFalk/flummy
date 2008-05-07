@@ -79,6 +79,8 @@ namespace SystemC_VPC {
        * \return sc_time indicating time to wake up or NULL if no wake up delay is required
        */
       virtual sc_time* getWaitInterval(ReconfigurableComponent* rc)=0;
+                
+      virtual sc_time getRCWaitInterval(ReconfigurableComponent* rc)=0;
 
       /**
        * \brief Used to set Scheduler specific values

@@ -10,13 +10,13 @@
 
 #include "hscd_vpc_Allocator.h"
 #include "hscd_vpc_Director.h"
-#include "hscd_vpc_VPCBuilder.h"
+
 
 namespace SystemC_VPC{
 
   /**
    * Implementation of AbstactController which runs FIFO strategy without preempting or killing 
-   * running configuraitons.
+   * running configurations.
    * This means that process are served in their arriving order and completed
    * before other conflicting process, which need another configuration, may be
    * completed.
@@ -113,21 +113,11 @@ namespace SystemC_VPC{
       /**
        * \brief Signals always true as configuration is only switched if all process have finished
        * or have been aborted
-       * So this may seem strange as FCFS is non preemptiv, but as it takes care that no more processes running, this behaviour is OK.
+       * So this may seem strange as Online is non preemptiv, but as it takes care that no more processes running, this behaviour is OK.
        */
       bool deallocateByKill(){
         return true;
       } 
-      
-      sc_time getSchedulingOverhead();
-      
-      sc_time getSetuptime(ProcessControlBlock*);
-      
-      void setBlockedTime(sc_time);
-      
-      sc_time generate_sctime(std::string);
-      
-      void cleanstring(std::string*);
   };
 
 }

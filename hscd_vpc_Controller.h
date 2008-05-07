@@ -130,7 +130,9 @@ namespace SystemC_VPC {
        * \return time interval to wait or NULL if no time interval required
        */
       sc_time* getWaitInterval(ReconfigurableComponent* rc);
-
+                
+      sc_time getRCWaitInterval(ReconfigurableComponent* rc);
+                
       /**
        * \brief Register component to Director
        * Used to register a component to the Director for
