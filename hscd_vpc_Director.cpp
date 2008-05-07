@@ -30,11 +30,12 @@
 namespace SystemC_VPC{
 
   //
-  std::auto_ptr<Director> Director::singleton(new Director());
+  //std::auto_ptr<Director> Director::singleton(new Director());
 
   //
   Director& Director::getResource( const char* name){
-    return *(this->singleton);
+    //return *(this->singleton);
+    return getInstance();
   }
 
   /**

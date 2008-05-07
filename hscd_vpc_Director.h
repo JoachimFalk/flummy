@@ -83,7 +83,8 @@ namespace SystemC_VPC{
      * \brief Access to singleton Director. 
      */
     static Director& getInstance(){
-      return *singleton;
+      //return *singleton;
+      static Director d; return d;
     }
 
     virtual ~Director();
@@ -213,7 +214,7 @@ namespace SystemC_VPC{
     /**
      * Singleton design pattern
      */
-    static std::auto_ptr<Director> singleton; 
+    //static std::auto_ptr<Director> singleton; 
 
     /**
      * \brief Reads allokation and binding from file.
