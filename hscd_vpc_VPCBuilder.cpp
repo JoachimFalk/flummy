@@ -47,9 +47,9 @@ namespace SystemC_VPC{
       if( NULL == fconffile ){       // test if file exists
 
         // for joachim
-        assert( 0 == strncmp(cfile, "", sizeof("")) 
-                && "VPCCONFIGURATION is set, but points to nowhere" != NULL );
-        
+        std::cerr << "VPCBuilder> Warning: could not open '" << cfile << "'"
+                  << std::endl;
+
         FALLBACKMODE=true;
       }else{
         fclose(fconffile);
