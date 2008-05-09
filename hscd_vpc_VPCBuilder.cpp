@@ -250,19 +250,19 @@ namespace SystemC_VPC{
 #ifdef VPC_DEBUG 
       std::cerr << "VPCBuilder> finished initialization of components"
                 << std::endl;
-      std::cerr << "VPCBuilder> starting parsing of measurefile" << std::endl;
-      std::cerr << "VPCBuilder> measure_file: "<< vpc_measure_file << endl;
+      std::cerr << "VPCBuilder> starting parsing of measurefile '"
+                << vpc_measure_file << "'" << std::endl;
 #endif // VPC_DEBUG
 
       if(!vpc_measure_file){
-          cerr << VPC_ERROR << "VPCBuilder> No vpc_measure_file"<< NENDL;
+          cerr << VPC_ERROR << "VPCBuilder> No measurefile"<< NENDL;
           return;
       }else{
         ifstream f;
         f.open(vpc_measure_file);
         if(!f) {
-          cerr << "VPCBuilder> Warning: " << vpc_measure_file
-               << " does not exists!" << endl; 
+          cerr << "VPCBuilder> Warning: measurefile '" << vpc_measure_file
+               << "' does not exist!" << endl; 
          return;
        }
        f.close();
