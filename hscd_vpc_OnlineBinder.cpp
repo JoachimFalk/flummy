@@ -217,7 +217,10 @@ if(strcmp(algorithm,"List") == 0){
       std::cerr << "OnlineBinder> Chosen Slot: " << chosen +1 << std::endl;
       std::cerr << "OnlineBinder> Chose Mapping: "<< RecomponentBindingChild->getID() << endl;
       std::cerr << "OnlineBinder> SetupTime: "<< setuptime << std::endl;
-      std::cerr << "OnlineBinder> Runtime: " << mInfo->getDelay() << endl;   
+      std::cerr << "OnlineBinder> Runtime: " << mInfo->getDelay() << endl;
+      for(int i=0; i < numberofcomp; i++){
+        std::cerr << "OnlineBinder> time-border for Slot" << i+1 << " = " << timesTable[i].time << std::endl;
+      }
 #endif      
       
     //return MappingInformation
