@@ -39,21 +39,23 @@ namespace SystemC_VPC {
           return time <= other.time;
         }
       };
-
-//       struct timesTable_compare{
-//       bool operator()(const timesTable_entry& pqe1, const timesTable_entry& pqe2) const
-//         {
-//           sc_time p1=pqe1.time;
-//           sc_time p2=pqe2.time;
-//           if (p1 < p2)
-//             return true;
-//           else
-//             return false;
-//         }
-//       };
-//       
-//       priority_queue<timesTable_entry,vector<timesTable_entry>,timesTable_compare> timesTable;
-       vector<timesTable_entry> timesTable;
+      
+      vector<timesTable_entry> timesTable;
+      
+      class slotTable_entry{
+      public:
+        int recomponentnumber;
+        std::string recomponentname;
+        slotTable_entry(int recomponentnumber, string recomponentname) :
+          recomponentnumber(recomponentnumber),
+          recomponentname(recomponentname){}
+        slotTable_entry() :
+          recomponentnumber(0),
+          recomponentname("") {}
+      };
+       
+      vector<slotTable_entry> slotTable;
+       
     public:
        
       OnlineBinder::OnlineBinder(char*);

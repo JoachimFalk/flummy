@@ -22,7 +22,22 @@ namespace SystemC_VPC {
       
       std::vector<sc_time> rctime;
       
-      //sc_time config_blocked_until;
+      sc_time config_blocked_until;
+
+      class slotTable_entry{
+      public:
+        int recomponentnumber;
+        std::string recomponentname;
+        slotTable_entry(int recomponentnumber, string recomponentname) :
+          recomponentnumber(recomponentnumber),
+          recomponentname(recomponentname){}
+        slotTable_entry() :
+          recomponentnumber(0),
+          recomponentname("") {}
+      };
+       
+      vector<slotTable_entry> slotTable;
+
   
     public:
        

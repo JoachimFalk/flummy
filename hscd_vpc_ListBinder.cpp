@@ -8,7 +8,7 @@ namespace SystemC_VPC {
   ListBinder::ListBinder() : DynamicBinder() {
 
     numberofcomp = 0;
-    //config_blocked_until = sc_time_stamp();
+    config_blocked_until = sc_time_stamp();
     
   }
   
@@ -36,8 +36,10 @@ namespace SystemC_VPC {
     if(numberofcomp == 0){
       //ChildIterator* counter = bIter;
       while(RecomponentBindingChildIter->hasNext()){
-        RecomponentBindingChildIter->getNext();
+        Binding* Slot = RecomponentBindingChildIter->getNext();
         rctime.push_back(sc_time(SC_ZERO_TIME));
+        slotTable_entry sentry = slotTable_entry (numberofcomp, Slot->getID());
+        this->slotTable.push_back(sentry);
         numberofcomp++;
       }
       //reset
@@ -60,7 +62,9 @@ namespace SystemC_VPC {
     
     //scroll to chosen Recomponent
     Binding * RecomponentBindingChild;
-    for(int i=0; i <= chosen; i++){
+    if(RecomponentBindingChildIter->hasNext())
+        RecomponentBindingChild = RecomponentBindingChildIter->getNext();
+    while(slotTable[chosen].recomponentname != RecomponentBindingChild->getID()){
       if(RecomponentBindingChildIter->hasNext()){
         RecomponentBindingChild = RecomponentBindingChildIter->getNext();
       }else{    
@@ -91,21 +95,23 @@ namespace SystemC_VPC {
       for(int i=0; i<numberofcomp; i++){
         if(rctime[i] < (chosentime+setuptime))
           rctime[i] = chosentime+setuptime;
-          if(i == chosen)
-            rctime[chosen] += mInfo->getDelay();
+        if(i == chosen){
+          rctime[chosen] += mInfo->getDelay();
+          std::cerr << "chosen:" << chosen << std::endl;
+        }
 #ifdef VPC_DEBUG
         std::cerr << "ListBinder> time-border for Slot" << i+1 << " = " << rctime[i] << std::endl;
 #endif
       }
     
       //wait till last configuration finished
-//       if (sc_time_stamp() < config_blocked_until){
-//         wait(config_blocked_until - sc_time_stamp());
-//       }
-/*      config_blocked_until += setuptime;
+       if (sc_time_stamp() < config_blocked_until){
+         wait(config_blocked_until - sc_time_stamp());
+       }
+      config_blocked_until = chosentime + setuptime;
 #ifdef VPC_DEBUG
       std::cerr << "ListBinder> config_blocked_until: " << config_blocked_until << endl;
-#endif            */
+#endif
     
     //return MappingInformation
     return std::pair<std::string, MappingInformation*>(RecomponentBindingChild->getID(), mInfo);

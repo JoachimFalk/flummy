@@ -34,15 +34,17 @@ namespace SystemC_VPC {
     
     if(numberofcomp == 0){
       while(RecomponentBindingChildIter->hasNext()){
-        RecomponentBindingChildIter->getNext();
+        Binding * Slot = RecomponentBindingChildIter->getNext();
         timesTable_entry entry = timesTable_entry (SC_ZERO_TIME, numberofcomp);
         this->timesTable.push_back(entry);
+        slotTable_entry sentry = slotTable_entry (numberofcomp, Slot->getID());
+        this->slotTable.push_back(sentry);
         numberofcomp++;
       }
-      
-      //reset
-      RecomponentBindingChildIter = RecomponentBinding->getChildIterator();
     }
+    //reset
+    RecomponentBindingChildIter->reset();
+
 #ifdef VPC_DEBUG  
     std::cerr << "***************************************"<< std::endl;
     std::cerr << "OnlineBinder> Simulation time: " << sc_time_stamp() << endl;
@@ -50,11 +52,32 @@ namespace SystemC_VPC {
     if (comp != NULL) std::cerr << "OnlineBinder> ReComponent: "<< comp->basename() <<"> Task: " << task.getName() << endl;
     if (comp == NULL) std::cerr << "OnlineBinder> ReComponent: NULL"<<"> Task: " << task.getName() << endl;
 #endif
-    int chosen;
+    
+int chosen;
 
 sc_time RCWaitInterval = SC_ZERO_TIME;
      
-if(strcmp(algorithm,"Bartal") == 0){
+if(strcmp(algorithm,"List") == 0){
+    
+    chosen = 0;
+    
+    //find lowest Slot
+    for(int i=0; i < numberofcomp; i++){
+      if(timesTable[i].time < timesTable[chosen].time)
+        chosen = i;
+    }
+    timesTable[chosen].time += getSetuptime(task);
+    
+    //set all Slottimes to new border
+    for(int i=0; i < numberofcomp; i++){
+      if(timesTable[i].time < timesTable[chosen].time)
+        timesTable[i].time = timesTable[chosen].time;
+    }
+    timesTable[chosen].time += getRuntime(task);
+    
+//End Algorithm List
+
+}else if(strcmp(algorithm,"Bartal") == 0){
     
     sort(timesTable.begin(), timesTable.end());
     sc_time job = getSetuptime(task) + getRuntime(task);
@@ -94,15 +117,21 @@ if(strcmp(algorithm,"Bartal") == 0){
       Aall += timesTable[i].time;
     }
     sc_time Ai;
+    int zero_slots = 0;
     for(int i = numberofcomp-1; i > 0; i--){
       Ai = Aall / i;
+      if(timesTable[i].time == SC_ZERO_TIME)
+        ++zero_slots;
       if(timesTable[i].time + job <= alpha * Ai){
         chosen = timesTable[i].recomponentnumber;
 //RCWaitInterval        
-        if( (timesTable[i].time-timesTable[i-1].time) < getSetuptime(task) ){
-          RCWaitInterval = getSetuptime(task) - (timesTable[i].time-timesTable[i-1].time);
-          timesTable[i].time += RCWaitInterval;
-        }
+        //if(zero_slots != 0){
+        //  RCWaitInterval = zero_slots * getSetuptime(task);
+        //}else{
+          //RCWaitInterval = i * getSetuptime(task);
+        //}
+        std::cerr << "RCWaitInterval: " << RCWaitInterval << std::endl;
+        //timesTable[i].time += RCWaitInterval;
         timesTable[i].time += job;
         break; 
       }
@@ -110,6 +139,11 @@ if(strcmp(algorithm,"Bartal") == 0){
     }
     if(chosen == -1){
         chosen = timesTable[0].recomponentnumber;
+        if(zero_slots != 0){
+          RCWaitInterval = zero_slots * getSetuptime(task);
+          std::cerr << "RCWaitInterval: " << RCWaitInterval << std::endl;
+          timesTable[0].time += RCWaitInterval;
+        }
         timesTable[0].time += job;
     }
 
@@ -155,7 +189,9 @@ if(strcmp(algorithm,"Bartal") == 0){
 }
     //scroll to chosen Recomponent
     Binding * RecomponentBindingChild;
-    for(int i=0; i <= chosen; i++){
+    if(RecomponentBindingChildIter->hasNext())
+        RecomponentBindingChild = RecomponentBindingChildIter->getNext();
+    while(slotTable[chosen].recomponentname != RecomponentBindingChild->getID()){
       if(RecomponentBindingChildIter->hasNext()){
         RecomponentBindingChild = RecomponentBindingChildIter->getNext();
       }else{    
@@ -178,23 +214,12 @@ if(strcmp(algorithm,"Bartal") == 0){
     //set Setuptime Reservation
       mInfo->setRCWaitInterval(RCWaitInterval);
 #ifdef VPC_DEBUG
+      std::cerr << "OnlineBinder> Chosen Slot: " << chosen +1 << std::endl;
       std::cerr << "OnlineBinder> Chose Mapping: "<< RecomponentBindingChild->getID() << endl;
       std::cerr << "OnlineBinder> SetupTime: "<< setuptime << std::endl;
       std::cerr << "OnlineBinder> Runtime: " << mInfo->getDelay() << endl;   
 #endif      
       
-/*      //move all slots time-border for next possible configuration by this->setuptime
-      sc_time chosentime = rctime[chosen];
-      for(int i=0; i<numberofcomp; i++){
-        if(rctime[i] < (chosentime+setuptime))
-          rctime[i] = chosentime+setuptime;
-          if(i == chosen)
-            rctime[chosen] += mInfo->getDelay();
-#ifdef VPC_DEBUG
-        std::cerr << "OnlineBinder> time-border for Slot" << i+1 << " = " << rctime[i] << std::endl;
-#endif
-      }*/
-  
     //return MappingInformation
     return std::pair<std::string, MappingInformation*>(RecomponentBindingChild->getID(), mInfo);
       
