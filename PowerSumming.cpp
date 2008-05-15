@@ -36,17 +36,19 @@ void PowerSumming::notify(const ComponentInfo *ci)
 
 void PowerSumming::printPowerChange()
 {
-  static std::size_t lastPowerSum = 0;
-  static double energySum = 0.0;
+  static sc_core::sc_time lastChangedTime;
+  static std::size_t      lastPowerSum = 0;
+  static double           energySum    = 0.0;
 
   int timeStamp = int(m_changedTime.to_seconds() * 1000000000.0);
 
   if( (lastPowerSum != m_powerSum) || (timeStamp == 0) ) {
-    double duration = (sc_core::sc_time_stamp() - m_changedTime).to_seconds();
+    double duration = (m_changedTime - lastChangedTime).to_seconds();
+
+    energySum      += double(lastPowerSum) * duration;
+    lastPowerSum    = m_powerSum;
+    lastChangedTime = m_changedTime;
 
     m_output << timeStamp << '\t' << m_powerSum << '\t' << energySum << std::endl;
-
-    energySum += double(lastPowerSum) * duration;
-    lastPowerSum = m_powerSum;
   }
 }
