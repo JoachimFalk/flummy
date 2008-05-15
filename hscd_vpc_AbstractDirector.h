@@ -1,7 +1,7 @@
 #ifndef HSCD_VPC_ABSTRACTDIRECTOR_H_
 #define HSCD_VPC_ABSTRACTDIRECTOR_H_
 
-//#include <cosupport/systemc_support.hpp>
+//#include <CoSupport/SystemC/systemc_support.hpp>
 #include "hscd_vpc_datatypes.h"
 
 #include "hscd_vpc_AbstractComponent.h"

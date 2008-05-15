@@ -21,7 +21,7 @@
 
 #include <systemc.h>
 
-#include <cosupport/systemc_support.hpp>
+#include <CoSupport/SystemC/systemc_support.hpp>
 
 namespace SystemC_VPC {
 

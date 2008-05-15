@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 
-#include <cosupport/systemc_support.hpp>
+#include <CoSupport/SystemC/systemc_support.hpp>
 
 #include "hscd_vpc_EventPair.h"
 #include "hscd_vpc_Tracing.h"
