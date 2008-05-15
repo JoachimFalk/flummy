@@ -28,6 +28,20 @@
 
 #include <float.h>
 
+#include "debug_config.h"
+// if compiled with DBG_COMPONENT create stream and include debug macros
+#ifdef DBG_COMPONENT
+#include <cosupport/smoc_debug_out.hpp>
+#include <cosupport/filter_ostream.hpp>
+  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
+  //  with this name exists when DBG.. is used. here every actor creates its
+  //  own stream.
+  #define DBGOUT_STREAM dbgout
+  #include "debug_on.h"
+#else
+  #include "debug_off.h"
+#endif
+
 namespace SystemC_VPC{
 
   /**
@@ -450,13 +464,9 @@ namespace SystemC_VPC{
    */
   void Component::compute(ProcessControlBlock* actualTask){ 
 
-    //#ifdef VPC_DEBUG
-    cout << flush;
-    cerr << VPC_RED("Component::compute( ") << VPC_WHITE(actualTask->getName())
-      //<< VPC_RED(" , ") << VPC_WHITE(actualTask->getFuncName())
-         << VPC_RED(" ) at time: "
-         << sc_time_stamp().to_default_time_units()) << endl;
-    //#endif
+    DBG_OUT("Component::compute( " << actualTask->getName()
+            << " ) at time: " << sc_time_stamp()
+            << endl);
 
     // reset the execution delay
     actualTask->

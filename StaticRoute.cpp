@@ -1,5 +1,18 @@
 #include "StaticRoute.h"
 
+#include "debug_config.h"
+// if compiled with DBG_STATIC_ROUTE create stream and include debug macros
+#ifdef DBG_STATIC_ROUTE
+#include <cosupport/smoc_debug_out.hpp>
+  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
+  //  with this name exists when DBG.. is used. here every actor creates its
+  //  own stream.
+  #define DBGOUT_STREAM dbgout
+  #include "debug_on.h"
+#else
+  #include "debug_off.h"
+#endif
+
 namespace SystemC_VPC {
 
   //
@@ -16,7 +29,7 @@ namespace SystemC_VPC {
     if(!components.empty()){
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
       task->setBlockEvent(np);
-      cerr << "route on: " << components.front()->getName() << endl;
+      DBG_OUT("route on: " << components.front()->getName() << endl);
       components.front()->compute(task);
       components.pop_front();
     } else {
@@ -27,7 +40,7 @@ namespace SystemC_VPC {
   //
   void StaticRoute::signaled(EventWaiter *e) {
     if(e->isActive()){
-      cerr << "signaled @ " << sc_time_stamp() << endl;
+      DBG_OUT("signaled @ " << sc_time_stamp() << endl);
       this->reset();
       route( EventPair(&dummy, this) );
     }
@@ -35,7 +48,7 @@ namespace SystemC_VPC {
 
   //
   void StaticRoute::eventDestroyed(EventWaiter *e){
-    cerr << "eventDestroyed" << endl;
+    DBG_OUT("eventDestroyed" << endl);
   }
 
   //
@@ -67,7 +80,7 @@ namespace SystemC_VPC {
   }
 
   StaticRoute::~StaticRoute( ){
-    cerr << "StaticRoute::~StaticRoute( )" << endl;
+    DBG_OUT("StaticRoute::~StaticRoute( )" << endl);
   }
 
   //

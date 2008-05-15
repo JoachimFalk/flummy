@@ -28,6 +28,19 @@
 #include <systemc.h>
 #include <map>
 
+#include "debug_config.h"
+// if compiled with DBG_DIRECTOR create stream and include debug macros
+#ifdef DBG_DIRECTOR
+#include <cosupport/smoc_debug_out.hpp>
+  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
+  //  with this name exists when DBG.. is used. here every actor creates its
+  //  own stream.
+  #define DBGOUT_STREAM dbgout
+  #include "debug_on.h"
+#else
+  #include "debug_off.h"
+#endif
+
 namespace SystemC_VPC{
 
   //
@@ -301,11 +314,9 @@ namespace SystemC_VPC{
 
     this->components[cid] = comp;
 
-    //#ifdef VPC_DEBUG
-    cerr << " Director::registerComponent(" << comp->getName()
-         << ") [" << comp->getComponentId() << "] # " << components.size()
-         << endl;
-    //#endif //VPC_DEBUG
+    DBG_OUT(" Director::registerComponent(" << comp->getName()
+            << ") [" << comp->getComponentId() << "] # " << components.size()
+            << endl);
   }
     
   /**
@@ -313,7 +324,7 @@ namespace SystemC_VPC{
    */
   void Director::registerMapping(const char* taskName, const char* compName){
     assert(!FALLBACKMODE);
-    cerr << "registerMapping( " << taskName<< ", " << compName << " )" << endl;
+    DBG_OUT("registerMapping( " << taskName<< ", " << compName << " )"<< endl);
     ProcessId       pid = getProcessId( taskName );
     if( pid >= mappings.size() ){
       mappings.resize( pid + 100, NULL );
