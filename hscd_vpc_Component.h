@@ -21,6 +21,7 @@
 
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_AbstractComponent.h"
+#include "ComponentInfo.h"
 
 #include <vector>
 #include <map>
@@ -29,13 +30,32 @@
 
 namespace SystemC_VPC{
 
+  class ComponentState
+  {
+    public:
+      ComponentState(const size_t &_state) : state(_state) {}
+
+      bool operator==(const ComponentState &rhs) const
+      {
+        return state == rhs.state;
+      }
+
+      bool operator<(const ComponentState &rhs) const
+      {
+        return state < rhs.state;
+      }
+
+    private:
+      size_t state;
+  };
+
   class Scheduler;
 
   /**
    * \brief An implementation of AbstractComponent.
    * 
    */
-  class Component : public AbstractComponent{
+  class Component : public AbstractComponent, public ComponentInfo{
     
     SC_HAS_PROCESS(Component);
 
@@ -81,6 +101,9 @@ namespace SystemC_VPC{
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
       setScheduler(schedulername);
+
+      powerTable[Component::IDLE]    = 0;
+      powerTable[Component::RUNNING] = 1;
 
 #ifndef NO_VCD_TRACES
       std::string tracefilename=this->getName(); //componentName;
@@ -160,9 +183,13 @@ namespace SystemC_VPC{
     std::deque<ProcessControlBlock*>      newTasks;
     std::map<int,ProcessControlBlock*> readyTasks,runningTasks;
     
+    std::map<ComponentState, int> powerTable;
+    
     sc_event notify_scheduler_thread;
     sc_signal<trace_value> schedulerTrace;
     
+    bool processParameter(char *sType,char *sValue);
+
     inline void resignTask( int &taskToResign,
                             sc_time &actualRemainingDelay,
                             int &actualRunningIID );
@@ -186,6 +213,10 @@ namespace SystemC_VPC{
 
     void setTraceSignalReadyTasks(trace_value value);
 
+    static const ComponentState IDLE;
+    static const ComponentState RUNNING;
+
+    void setComponentState(const ComponentState &state);
   };
 
 } 

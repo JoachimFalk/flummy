@@ -18,6 +18,8 @@
 #ifndef HSCD_VPC_ABSTRACTCOMPONENT_H
 #define HSCD_VPC_ABSTRACTCOMPONENT_H
 
+#include <vector>
+
 #include <systemc.h>
 
 #include <string.h>
@@ -26,6 +28,8 @@
 #include "hscd_vpc_IDeallocatable.h"
 #include "hscd_vpc_ProcessEventListener.h"
 
+class ComponentObserver;
+class ComponentInfo;
 
 namespace SystemC_VPC{
 
@@ -45,10 +49,22 @@ namespace SystemC_VPC{
 
     ComponentId getComponentId();
 
+    void addObserver(ComponentObserver *obs);
+
+    void removeObserver(ComponentObserver *obs);
+    
+    void fireNotification(ComponentInfo *compInf);
+
   protected:
+
     Delayer(): componentId(globalComponentId++) {}
 
     virtual ~Delayer() {}
+
+    typedef std::vector<ComponentObserver *> Observers;
+    
+    Observers observers;
+    
   private:
     //
     static ComponentId globalComponentId;
@@ -128,7 +144,7 @@ namespace SystemC_VPC{
     const char* getName() const;
 
   protected:
-     
+  
     // used to reflect state of component
     bool activ;
   

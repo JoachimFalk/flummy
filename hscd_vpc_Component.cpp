@@ -44,6 +44,9 @@
 
 namespace SystemC_VPC{
 
+  const ComponentState Component::IDLE    = 0;
+  const ComponentState Component::RUNNING = 1;
+
   /**
    *
    */
@@ -56,8 +59,11 @@ namespace SystemC_VPC{
     //wait(SC_ZERO_TIME);
     
     scheduler->initialize();
+    setComponentState(IDLE);
     
     while(1){
+      // Notify observers (e.g. powersum)
+      this->fireNotification(this);
 
       //determine the time slice for next scheduling descission and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
@@ -111,6 +117,7 @@ namespace SystemC_VPC{
 
             //notify(*(task->blockEvent));
             scheduler->removedTask(task);
+            setComponentState(IDLE);
 #ifndef NO_VCD_TRACES
             if(task->getTraceSignal()!=0)
               task->getTraceSignal()->value(S_BLOCKED);     
@@ -225,6 +232,7 @@ namespace SystemC_VPC{
         runningTasks.erase(taskToResign);
         actualRunningIID=-1;
         readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
+        setComponentState(IDLE);
 #ifndef NO_VCD_TRACES
         if(readyTasks[taskToResign]->getTraceSignal()!=0)
           readyTasks[taskToResign]->getTraceSignal()->value(S_READY);     
@@ -283,6 +291,7 @@ namespace SystemC_VPC{
         cerr << " is " << runningTasks[taskToAssign]->getRemainingDelay()
              << endl;
 #endif // VPCDEBUG
+        setComponentState(RUNNING);
 #ifndef NO_VCD_TRACES
         if(runningTasks[taskToAssign]->getTraceSignal()!=0)
           runningTasks[taskToAssign]->getTraceSignal()->value(S_RUNNING);     
@@ -292,10 +301,37 @@ namespace SystemC_VPC{
 
   }
 
+
+  bool Component::processParameter(char *sType,char *sValue)
+  {
+    if(strcmp(sType, "power") != 0)
+      return false;
+    
+    const char *equals = strchr(sValue, '=');
+    if(equals == NULL) {
+      // No '=' character found!
+      return false;
+    }
+    const int value = atoi(equals + 1);
+    
+    if(strncmp(sValue, "IDLE", 4) == 0) {
+      powerTable[Component::IDLE] = value;
+    } else if(strncmp(sValue, "RUNNING", 7) == 0) {
+      powerTable[Component::RUNNING] = value;
+    } else {
+      // Not a supported power mode
+      return false;
+    }
+    
+    return true;
+  }
+
   /**
    *
    */
   void Component::processAndForwardParameter(char *sType,char *sValue){
+    if(processParameter(sType, sValue))
+      return;
     scheduler->setProperty(sType,sValue);
   }
   
@@ -770,4 +806,8 @@ namespace SystemC_VPC{
     remainingPipelineStages_WakeUp.notify();
   }
 
+  void Component::setComponentState(const ComponentState &state)
+  {
+    this->setPowerConsumption(powerTable[state]);
+  }
 } //namespace SystemC_VPC

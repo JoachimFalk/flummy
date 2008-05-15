@@ -31,8 +31,11 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <fstream>
 
 #include "hscd_vpc_PCBPool.h"
+
+class PowerSumming;
 
 namespace SystemC_VPC{
 
@@ -279,6 +282,8 @@ namespace SystemC_VPC{
     // time of latest acknowledge simulated task
     double end;
 
+    std::ofstream powerConsStream;
+
     typedef std::map<std::string, ProcessId>   ProcessIdMap;
     typedef std::map<std::string, ComponentId> ComponentIdMap;
 
@@ -286,6 +291,8 @@ namespace SystemC_VPC{
     ComponentIdMap  componentIdMap;
 
     ProcessId       globalProcessId;
+
+    PowerSumming    *powerSumming;
   };
 
 }

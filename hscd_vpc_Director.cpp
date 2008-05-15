@@ -24,6 +24,7 @@
 #include <hscd_vpc_VPCBuilder.h>
 #include <StaticRoute.h>
 #include "hscd_vpc_InvalidArgumentException.h"
+#include "PowerSumming.h"
 
 #include <systemc.h>
 #include <map>
@@ -59,6 +60,7 @@ namespace SystemC_VPC{
       mappings(),
       reverseMapping(),
       end(0),
+      powerConsStream("powerconsumption.dat"),
       componentIdMap(),
       globalProcessId(0)
   {
@@ -73,6 +75,16 @@ namespace SystemC_VPC{
       std::cerr << "Director> Got exception while setting up VPC:\n"
                 << e.what() << std::endl;
       exit(-1);
+    }
+    
+    powerSumming = new PowerSumming(powerConsStream);
+    for( Components::iterator it = components.begin();
+         it != components.end();
+         ++it )
+    {
+      if(*it != NULL) {
+        (*it)->addObserver(powerSumming);
+      }
     }
   }
 
@@ -146,6 +158,8 @@ namespace SystemC_VPC{
     }
     
     componentIdMap.clear();
+    
+    delete powerSumming;
   }
 
   //
