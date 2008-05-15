@@ -53,23 +53,43 @@ EXTRA_DIST	=
 
 PROGLDFLAGS=
 
-pkgincludeprefix=systemcvpc/
+pkgincludedir=$(includedir)/systemcvpc
 
 lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
+	Attribute.h				\
+	hscd_vpc_datatypes.h                 	\
+	hscd_vpc_PriorityController.h       	\
+	hscd_vpc_Term.h				\
+	FastLink.h                     		\
+	hscd_vpc_Director.h                  	\
+	hscd_vpc_PriorityScheduler.h        	\
 	hscd_vpc_Tracing.h			\
-	hscd_vpc_AbstractComponent.h            \
-	hscd_vpc_AbstractController.h           \
-	hscd_vpc_AbstractDirector.h             \
-	hscd_vpc_datatypes.h                    \
-	hscd_vpc_Director.h                     \
-	hscd_vpc_ProcessEventListener.h		\
-	hscd_vpc_Director.h			\
-	hscd_vpc_ProcessControlBlock.h		\
-	hscd_vpc_PCBPool.h			\
-	hscd_vpc_IDeallocatable.h		\
-	hscd_vpc_EventPair.h			\
-	FastLink.h
+	FlexRayScheduler.h             		\
+	hscd_vpc_EDFController.h             	\
+	hscd_vpc_ProcessControlBlock.h      	\
+	hscd_vpc_VPCBuilder.h			\
+	hscd_vpc_AbstractComponent.h   		\
+	hscd_vpc_EventPair.h                 	\
+	hscd_vpc_ProcessEventListener.h     	\
+	hscd_vpc_VpcDomErrorHandler.h		\
+	hscd_vpc_AbstractController.h  		\
+	hscd_vpc_FCFSController.h            	\
+	hscd_vpc_RateMonotonicScheduler.h   	\
+	hscd_vpc_XmlHelper.h			\
+	hscd_vpc_AbstractDirector.h    		\
+	hscd_vpc_FCFSScheduler.h             	\
+	hscd_vpc_ReconfigurableComponent.h  	\
+	TDMAScheduler.h				\
+	hscd_vpc_Component.h           		\
+	hscd_vpc_IDeallocatable.h            	\
+	hscd_vpc_RoundRobinController.h		\
+	hscd_vpc_Configuration.h       		\
+	hscd_vpc_InvalidArgumentException.h  	\
+	hscd_vpc_RoundRobinScheduler.h		\
+	hscd_vpc_Controller.h          		\
+	hscd_vpc_PCBPool.h                   	\
+	hscd_vpc_Scheduler.h
 
 #noinst_HEADERS=	oneof.hpp
 
