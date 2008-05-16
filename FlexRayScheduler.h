@@ -1,11 +1,11 @@
 #ifndef FLEXRAYSCHEDULER_H
 #define FLEXRAYSCHEDULER_H
 #include <systemc.h>
-#include <hscd_vpc_Scheduler.h>
-#include <hscd_vpc_datatypes.h>
+#include "hscd_vpc_Scheduler.h"
+#include "hscd_vpc_datatypes.h"
 #include <map>
 #include <deque>
-#include <TDMAScheduler.h>
+#include "TDMAScheduler.h"
 
 namespace SystemC_VPC{
   class Component;

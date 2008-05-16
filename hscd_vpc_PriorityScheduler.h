@@ -1,8 +1,8 @@
 #ifndef HSCD_VPC_PRIORITYSCHEDULER_H
 #define HSCD_VPC_PRIORITYSCHEDULER_H
 #include <systemc.h>
-#include <hscd_vpc_Scheduler.h>
-#include <hscd_vpc_datatypes.h>
+#include "hscd_vpc_Scheduler.h"
+#include "hscd_vpc_datatypes.h"
 #include <map>
 #include <queue>
 #include <vector>

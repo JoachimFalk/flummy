@@ -12,7 +12,7 @@
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_ProcessEventListener.h"
 
-#include <hscd_vpc_InvalidArgumentException.h>
+#include "hscd_vpc_InvalidArgumentException.h"
 
 namespace SystemC_VPC{
   

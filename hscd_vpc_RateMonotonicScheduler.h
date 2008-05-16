@@ -1,8 +1,8 @@
 #ifndef HSCD_VPC_RATEMONOTONICSCHEDULER_H
 #define HSCD_VPC_RATEMONOTONICSCHEDULER_H
 #include <systemc.h>
-#include <hscd_vpc_Scheduler.h>
-#include <hscd_vpc_datatypes.h>
+#include "hscd_vpc_Scheduler.h"
+#include "hscd_vpc_datatypes.h"
 #include <map>
 #include <queue>
 #include <vector>

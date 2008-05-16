@@ -1,7 +1,7 @@
-#include <systemc.h>
 #ifndef HSCD_VPC_SCHEDULER_H
 #define HSCD_VPC_SCHEDULER_H
-#include <hscd_vpc_datatypes.h>
+#include <systemc.h>
+#include "hscd_vpc_datatypes.h"
 #include <map>
 
 namespace SystemC_VPC{
