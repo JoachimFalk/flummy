@@ -22,6 +22,7 @@
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_AbstractComponent.h"
 #include "ComponentInfo.h"
+#include "PowerSumming.h"
 
 #include <vector>
 #include <map>
@@ -105,6 +106,13 @@ namespace SystemC_VPC{
       powerTable[Component::IDLE]    = 0;
       powerTable[Component::RUNNING] = 1;
 
+      std::string powerSumFileName(this->getName());
+      powerSumFileName += ".dat";
+
+      powerSumStream = new std::ofstream(powerSumFileName.c_str());
+      powerSumming   = new PowerSumming(*powerSumStream);
+      this->addObserver(powerSumming);
+
 #ifndef NO_VCD_TRACES
       std::string tracefilename=this->getName(); //componentName;
       char tracefilechar[VPC_MAX_STRING_LENGTH];
@@ -138,7 +146,12 @@ namespace SystemC_VPC{
           /**************************/
     }
       
-    virtual ~Component(){}
+    virtual ~Component()
+    {
+      this->removeObserver(powerSumming);
+      delete powerSumming;
+      delete powerSumStream;
+    }
 
     /**
      * \brief Set parameter for Component and Scheduler.
@@ -188,6 +201,9 @@ namespace SystemC_VPC{
     sc_event notify_scheduler_thread;
     sc_signal<trace_value> schedulerTrace;
     
+    std::ofstream *powerSumStream;
+    PowerSumming  *powerSumming;
+
     bool processParameter(char *sType,char *sValue);
 
     inline void resignTask( int &taskToResign,
