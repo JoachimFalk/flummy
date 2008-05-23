@@ -377,32 +377,21 @@ namespace SystemC_VPC{
    */
   void Director::signalProcessEvent(ProcessControlBlock* pcb){
     assert(!FALLBACKMODE);
+    assert(pcb->getState() != activation_state(aborted));
 
 #ifdef VPC_DEBUG
     std::cerr << "Director> got notified from: " << pcb->getName()
               << std::endl;
+    std::cerr << "Director> task successful finished: " << pcb->getName()
+              << std::endl;
 #endif //VPC_DEBUG
-    if(pcb->getState() != activation_state(aborted)){
-#ifdef VPC_DEBUG
-      std::cerr << "Director> task successful finished: " << pcb->getName()
-                << std::endl;
-#endif //VPC_DEBUG
-      if(NULL != pcb->getBlockEvent().latency)
-        pcb->getBlockEvent().latency->notify();
-      // remember last acknowledged task time
-      this->end = sc_time_stamp().to_default_time_units();
-      
-      // free allocated pcb
-      this->pcbPool.free(pcb);
-    }else{
-#ifdef VPC_DEBUG
-      std::cerr << "Director> re-compute: " << pcb->getName() << std::endl;
-#endif //VPC_DEBUG
-      // get Component
-      Delayer* comp = mappings[pcb->getPid()];
-      comp->compute(pcb);
-    }
-    wait(SC_ZERO_TIME);
+    if(NULL != pcb->getBlockEvent().latency)
+      pcb->getBlockEvent().latency->notify();
+    // remember last acknowledged task time
+    this->end = sc_time_stamp().to_default_time_units();
+    
+    // free allocated pcb
+    this->pcbPool.free(pcb);
   }
 
 

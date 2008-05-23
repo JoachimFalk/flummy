@@ -23,17 +23,10 @@
 
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_Component.h"
-#include "hscd_vpc_ReconfigurableComponent.h"
 
-#include "hscd_vpc_AbstractController.h"
-#include "hscd_vpc_FCFSController.h"
-#include "hscd_vpc_RoundRobinController.h"
-#include "hscd_vpc_PriorityController.h"
-#include "hscd_vpc_EDFController.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
 #include "Timing.h"
-#include "hscd_vpc_Configuration.h"
 #include "Attribute.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -57,10 +50,6 @@ namespace SystemC_VPC{
     XMLCh* componentStr;
     XMLCh* mappingStr;
     XMLCh* attributeStr;
-    XMLCh* configurationStr;
-    XMLCh* switchtimesStr;
-    XMLCh* switchtimeStr;
-    XMLCh* defaultConfStr;
     XMLCh* templateSectionStr;
     XMLCh* templateStr;
     XMLCh* refTemplateStr;
@@ -79,8 +68,6 @@ namespace SystemC_VPC{
     XMLCh* valueAttrStr;
     XMLCh* targetAttrStr;
     XMLCh* sourceAttrStr;
-    XMLCh* loadTimeAttrStr;
-    XMLCh* storeTimeAttrStr;
     XMLCh *delayAttrStr;
     XMLCh *diiAttrStr;
     XMLCh *latencyAttrStr;
@@ -102,12 +89,6 @@ namespace SystemC_VPC{
      */
     // map of all created components
     std::map<std::string, AbstractComponent* > knownComps;
-    // map of all created configs
-    std::map<std::string, Configuration* > knownConfigs;
-    // map from all subComponents to their configs
-    std::multimap<std::string, std::string > subComp_to_Config;
-    // map from all configs to their parents components
-    std::map<std::string, std::string > config_to_ParentComp;
     // map containing specified templates
     std::map<std::string, std::vector<std::pair<char*, char* > > > templates;
 
@@ -140,10 +121,6 @@ namespace SystemC_VPC{
       componentStr    = XMLString::transcode("component");
       mappingStr      = XMLString::transcode("mapping");
       attributeStr    = XMLString::transcode("attribute");
-      configurationStr= XMLString::transcode("configuration");
-      switchtimesStr  = XMLString::transcode("switchtimes");
-      switchtimeStr   = XMLString::transcode("switchtime");
-      defaultConfStr  = XMLString::transcode("defaultconfiguration");
       templateSectionStr    = XMLString::transcode("templates");
       templateStr     = XMLString::transcode("template");
       refTemplateStr  = XMLString::transcode("reftemplate");
@@ -162,8 +139,6 @@ namespace SystemC_VPC{
       valueAttrStr  = XMLString::transcode("value");
       targetAttrStr  = XMLString::transcode("target");
       sourceAttrStr  = XMLString::transcode("source");
-      loadTimeAttrStr  = XMLString::transcode("loadtime");
-      storeTimeAttrStr= XMLString::transcode("storetime");
       delayAttrStr        = XMLString::transcode("delay");
       diiAttrStr          = XMLString::transcode("dii");
       latencyAttrStr      = XMLString::transcode("latency");
@@ -217,34 +192,6 @@ namespace SystemC_VPC{
     void initCompAttributes(AbstractComponent* comp);
     
     /**
-     * \brief Initializes the Configurations of an ReconfigurableComponent
-     * As long as there are defined Configurations, they will be register and
-     * added to the given component.
-     * \param comp represents the component for which to initialize the configurations
-     * \param node specifies current position within dom tree
-     */
-    //void initConfigurations(ReconfigurableComponent* comp, DOMNode* node);
-    void initConfigurations(ReconfigurableComponent* comp);
-    
-    /**
-     * \brief Initializes one Configuration of an ReconfigurableComponent
-     * As long as there are defined inner Components, they will be register and
-     * added to the given Configuration.
-     * \param comp represents the component for which to initialize the configurations
-     * \param node specifies current postion within dom tree
-     */
-    //void initConfiguration(ReconfigurableComponent* comp, Configuration* conf, DOMNode* node);
-    void initConfiguration(ReconfigurableComponent* comp, Configuration* conf);
-    
-    /**
-     * \brief Initializes the Configuration switch times for a component
-     * As long as there are defined switch times, they will be
-     * added to the associated Controller of the ReconfigurableComponent.
-     * \param comp represents the component for which to initialize the switch times
-     */
-    void initSwitchTimesOfComponent(ReconfigurableComponent* comp);
-    
-    /**
      * \brief Passes attributes of a specified template to a given component instance
      * \param comp represents the component to apply the attributes on
      * \param key references the key of the template to apply
@@ -265,18 +212,6 @@ namespace SystemC_VPC{
     //void initMappingAPStruct(DOMNode* node);
     void initMappingAPStruct();
 
-    /**
-     * \brief Used to build up bind hierarchy within vpc framework
-     * This method is used to add corresponding binding information at each
-     * level within the control hierarchy of vpc
-     */
-    void buildUpBindHierarchy(const char* source, const char* target);
-    
-    /**
-     * \brief Generate pcb for internal use in VPC Framework
-     */
-    AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
-   
     /**
     * \brief Used to create the Attribute-Object recursively
     */

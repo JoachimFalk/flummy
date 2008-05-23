@@ -124,10 +124,6 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES
             runningTasks.erase(actualRunningIID);
 
-            // Removed: this will erase the task from VPC, but with pipelining
-            // support the erasing should occur later 
-            //this->notifyParentController(task);
-            
             task->getBlockEvent().dii->notify();
             moveToRemainingPipelineStages(task);
             //wait(SC_ZERO_TIME);
@@ -722,7 +718,7 @@ namespace SystemC_VPC{
           //<< sc_time_stamp() << endl;
 
 
-          // Latenzy over -> remove Task
+          // Latency over -> remove Task
           this->notifyParentController(front.pcb);
 
           //wait(SC_ZERO_TIME);

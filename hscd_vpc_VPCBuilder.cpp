@@ -452,51 +452,6 @@ namespace SystemC_VPC{
         //this->initCompAttributes(comp, node->getFirstChild());
         this->initCompAttributes(comp);
         
-      }else // reconfigurable component 
-      if(0==strncmp(sType,
-                    STR_VPC_RECONFIGURABLECOMPONENTSTRING,
-                    sizeof(STR_VPC_RECONFIGURABLECOMPONENTSTRING))){
-
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Found Component name=" << sName << " type="
-                  << sType << endl;
-#endif //VPC_DEBUG
-        AbstractController* controller;
-        try{
-          controller = this->generateController(sScheduler, sName);
-        }catch(InvalidArgumentException &e){
-          std::cerr << "VPCBuilder> Error: " << e.what() << std::endl;
-          std::cerr << "VPCBuilder> setting default FCFS for "<< sName
-                    << std::endl;
-          controller = this->generateController("FCFS", sName);
-        }catch(...){
-          std::cerr << "VPCBuilder> unkown exception occured while creating"
-            " controller instance" << std::endl;
-          throw;
-        }
-        
-        // check if component already exists
-        //std::map<std::string, AbstractComponent* >::iterator iter
-        //    = this->knownComps.find(sName);
-        //if(iter == this->knownComps.end()){ 
-          comp = new ReconfigurableComponent(sName, controller);
-          this->knownComps.insert(pair<string, AbstractComponent* >(sName,
-                                                                    comp));
-        //}else{
-        //  comp = iter->second;
-        //}
-        
-        //this->initConfigurations((ReconfigurableComponent*)comp,
-        // node->getFirstChild());
-        this->initConfigurations((ReconfigurableComponent*)comp);
-        //this->initCompAttributes(comp, node->getFirstChild());
-        this->initCompAttributes(comp);
-
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Initialized Component name=" << sName
-                  << " type=" << sType << endl;
-#endif //VPC_DEBUG
-      
       }else // unkown component type
       {
         
@@ -670,148 +625,6 @@ namespace SystemC_VPC{
     
   }
   
-  /**
-   * \brief Initializes the Configurations of an ReconfigurableComponent
-   * As long as there are defined Configurations, they will be register and
-   * added to the given component.
-   * \param comp represents the component for which to initialize the
-   *  configurations
-   * \param node specifies current position within dom tree
-   */
-  void VPCBuilder::initConfigurations(ReconfigurableComponent* comp){
-
-    DOMNode* node = this->vpcConfigTreeWalker->firstChild();
-#ifdef VPC_DEBUG
-    std::cout << "VPCBuilder> entering initConfigurations"<< endl;
-#endif //VPC_DEBUG
-    if(node != NULL){
-      const XMLCh* xmlName;
-
-      for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling())
-      {
-
-        xmlName = node->getNodeName();
-
-        // as long as there are exisiting configuration register them to
-        // component
-        if(0==XMLString::compareNString(xmlName,
-                                        VPCBuilder::configurationStr,
-                                        sizeof(VPCBuilder::configurationStr))){
-
-          //create and initialize configuration
-          DOMNamedNodeMap* atts=node->getAttributes();
-          char* sName;
-          char* sLoadTime;
-          char* sStoreTime;
-          // read values
-          sName = XMLString::transcode(
-            atts->getNamedItem(nameAttrStr)->getNodeValue());
-
-          sLoadTime = XMLString::transcode(
-            atts->getNamedItem(loadTimeAttrStr)->getNodeValue());
-
-          sStoreTime = XMLString::transcode(
-            atts->getNamedItem(storeTimeAttrStr)->getNodeValue());
-
-#ifdef VPC_DEBUG
-          std::cout << "VPCBuilder> Initializing new config: "<< sName << endl;
-          std::cout << "VPCBuilder> with load time = "<< sLoadTime
-                    << " and store time = " << sStoreTime << endl;
-#endif //VPC_DEBUG
-
-          Configuration* conf = NULL; 
-
-          // std::map<std::string, Configuration*>::iterator iter;
-          //iter = this->knownConfigs.find(sName);
-          //if(iter == this->knownConfigs.end()){
-
-          conf = new Configuration(sName, sLoadTime, sStoreTime);
-          /*
-           * register configuration for inner parsing purposes
-           */
-          // register as known configuration
-          this->knownConfigs.insert(
-            std::pair<std::string, Configuration* >(conf->getName(), conf));
-          // register relation between configuration and component
-          this->config_to_ParentComp.insert(
-            std::pair<std::string, std::string>(conf->getName(),
-                                                comp->getName()));
-
-          //}else{
-
-          //conf = iter->second;
-
-          //}
-
-          // add configuration to node
-          comp->addConfiguration(sName, conf);
-
-          //this->initConfiguration(comp, conf, node->getFirstChild());
-          this->initConfiguration(comp, conf);
-
-        }else // if default configuration is defined init
-          if(0==XMLString::compareNString(xmlName,
-                                          VPCBuilder::defaultConfStr,
-                                          sizeof(VPCBuilder::defaultConfStr))){
-
-            DOMNamedNodeMap* atts=node->getAttributes();
-            char* sName;
-            sName = XMLString::transcode(
-              atts->getNamedItem(nameAttrStr)->getNodeValue());
-
-            comp->setActivConfiguration(sName);
-          }
-      }
-
-      vpcConfigTreeWalker->parentNode();
-    }
-  }
-
-  /**
-   * \brief Implementation of VPCBuilder::initConfiguration
-   * \param comp specifies the associated component of the configuration
-   * \param conf specifies the  configuration to initialize
-   */
-  void VPCBuilder::initConfiguration(ReconfigurableComponent* comp,
-                                     Configuration* conf){
-    
-    DOMNode* node = this->vpcConfigTreeWalker->firstChild();
-
-    if(node != NULL){
-      // points to components defined within current configuration
-      AbstractComponent* innerComp;
-
-      // as long as there are inner components defined process them
-      for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
-
-        try{
-          //innerComp = this->initComponent(node);
-          innerComp = this->initComponent();
-        }catch(InvalidArgumentException &e){
-          std::cerr << "VPCBuilder> " << e.what() << std::endl;
-          std::cerr << "VPCBuilder> ignoring specification of component,"
-            " going on with initialization" << std::endl;
-          continue;
-        }
-
-#ifdef VPC_DEBUG
-        std::cerr << VPC_RED("Adding Component=" << innerComp->getName()
-                  << " to Configuration=" << conf->getName()) << std::endl;
-#endif //VPC_DEBUG
-
-        innerComp->setParentController(comp->getController());
-        conf->addComponent(innerComp->getName(), innerComp);
-
-        // register mapping
-        this->subComp_to_Config.insert(
-          std::pair<std::string, std::string >(innerComp->getName(),
-                                               conf->getName()));
-
-      }
-      this->vpcConfigTreeWalker->parentNode();
-    }
-  }
-    
   /**
    * \brief Initializes the mappings and process structures.
    */
@@ -1022,7 +835,7 @@ namespace SystemC_VPC{
           
           //check if component member of a configuration and iterativly
           // adding mapping info
-          this->buildUpBindHierarchy(sSource, sTarget);
+          this->director->registerMapping(sSource, sTarget);
           
         }else{
           std::cerr << "VPCBuilder> No valid component found for mapping:"
@@ -1030,50 +843,6 @@ namespace SystemC_VPC{
         }
       }
     }
-  }
-
-  /**
-   * \brief Implementation of VPCBiulder::buildUpBindHierarchy
-   */
-  void VPCBuilder::buildUpBindHierarchy(const char* source, 
-                                        const char* target)
-  {
-    std::map<std::string, std::string>::iterator iterVCtC;
-    // determine existence of mapping to configuration
-    iterVCtC = this->subComp_to_Config.find(target);
-    for(;iterVCtC != this->subComp_to_Config.end(); 
-        iterVCtC = this->subComp_to_Config.find(target))
-    {
-
-#ifdef VPC_DEBUG
-      std::cerr << "VPCBuilder> Mapped component " << target
-                << " is wrapped within Configuration: " 
-        << iterVCtC->second << std::endl; 
-#endif //VPC_DEBUG
-
-      static std::map<std::string, std::string>::iterator iterConftC;
-      // determine associated Component of Configuration
-      iterConftC = this->config_to_ParentComp.find(iterVCtC->second);
-
-      if(iterConftC != this->config_to_ParentComp.end()){
-
-        // add mapping to controller of surrounding component
-        ReconfigurableComponent* comp;
-        comp = (ReconfigurableComponent*)this->knownComps[iterConftC->second];
-        comp->getController()->registerMapping(source, target);
-
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Additional mapping between: " << source
-                  << "<->" << target << std::endl; 
-#endif //VPC_DEBUG
-            
-        target = (iterConftC->second).c_str(); 
-      }
-    }
-          
-    //finally register mapping to Director
-    this->director->registerMapping(source, target);
-
   }
 
   /**
@@ -1163,55 +932,6 @@ namespace SystemC_VPC{
       }
     }
     
-  }
-  
-  /**
-   * \brief Implementation of VPCBuilder::generateController
-   * \param controllertype specifies type of controller to instantiate
-   * \param id is part of id to be set for the controller
-   */
-  AbstractController*
-  VPCBuilder::generateController(const char* controllertype, const char* id)
-    throw(InvalidArgumentException){
-    // TODO UPDATE IMPLEMENTATION WHEN NEW CONTROLLER IS IMPLEMENTED
-    AbstractController* controller;
-  
-    // create correct ID for sgEdit compatibility
-    std::string cID = string(id);
-    cID.append("-");
-    cID.append(controllertype);
-    
-    if(0==strncmp(controllertype,
-                  STR_FIRSTCOMEFIRSTSERVE,
-                  strlen(STR_FIRSTCOMEFIRSTSERVE))
-      || 0==strncmp(controllertype, STR_FCFS,strlen(STR_FCFS))){
-      controller = new FCFSController(cID.c_str());      
-    }else 
-    if(0==strncmp(controllertype,
-                  STR_ROUNDROBIN,
-                  strlen(STR_ROUNDROBIN))
-      || 0==strncmp(controllertype, STR_RR, strlen(STR_RR))){
-      controller = new RoundRobinController(cID.c_str());
-    }else
-    if(0==strncmp(controllertype,
-                  STR_PRIORITYSCHEDULER,
-                  strlen(STR_PRIORITYSCHEDULER))
-      || 0==strncmp(controllertype, STR_PS, strlen(STR_PS))){
-      controller = new PriorityController(cID.c_str());
-    }else
-    if(0==strncmp(controllertype,
-                  STR_EARLIESTDEADLINEFIRST,
-                  strlen(STR_EARLIESTDEADLINEFIRST))
-      || 0==strncmp(controllertype, STR_EDF, strlen(STR_EDF))){
-      controller = new EDFController(cID.c_str());
-    }else{
-      string msg("Unkown controllertype ");
-      msg += controllertype;
-      msg += ", cannot create instance";
-      throw InvalidArgumentException(msg);
-    }
-    
-    return controller;
   }
   
   void VPCBuilder::nextAttribute(Attribute& fr_Attribute, DOMNode* node){

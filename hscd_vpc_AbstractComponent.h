@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include "hscd_vpc_datatypes.h"
-#include "hscd_vpc_IDeallocatable.h"
 #include "hscd_vpc_ProcessEventListener.h"
 
 class ComponentObserver;
@@ -79,7 +78,7 @@ namespace SystemC_VPC{
    * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
    */
   class AbstractComponent:
-    public sc_module, public IDeallocatable, public Delayer{
+    public sc_module, public Delayer{
   
   protected:
 
@@ -191,25 +190,7 @@ namespace SystemC_VPC{
       return this->killed;
       
     }
-    
-    /**
-     * \brief Default implementation of IDeallocatable::timeToDeallocate
-     * Default implementation just returns SC_ZERO_TIME
-     * \return sc_time with value SC_ZERO_TIME
-     */
-    virtual sc_time timeToDeallocate(){
-      return sc_time(SC_ZERO_TIME);
-    }
-    
-    /**
-     * \brief Default implementation of IDeallocatable::timeToAllocate
-     * Default implementation just returns SC_ZERO_TIME
-     * \return sc_time with value SC_ZERO_TIME
-     */  
-    virtual sc_time timeToAllocate(){
-      return sc_time(SC_ZERO_TIME);
-    }
-    
+        
     /**
        * \brief Simulate an execution on this "Virtual Component".
        *

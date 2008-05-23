@@ -59,7 +59,6 @@ lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
 	hscd_vpc_Tracing.h			\
 	hscd_vpc_AbstractComponent.h            \
-	hscd_vpc_AbstractController.h           \
 	hscd_vpc_AbstractDirector.h             \
 	hscd_vpc_datatypes.h                    \
 	hscd_vpc_Director.h                     \
@@ -67,7 +66,6 @@ pkginclude_HEADERS =				\
 	hscd_vpc_Director.h			\
 	hscd_vpc_ProcessControlBlock.h		\
 	hscd_vpc_PCBPool.h			\
-	hscd_vpc_IDeallocatable.h		\
 	hscd_vpc_EventPair.h			\
 	FastLink.h
 
@@ -97,13 +95,6 @@ libsystemcvpc_la_SOURCES =			\
 	Attribute.cpp				\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_XmlHelper.cpp			\
-	hscd_vpc_Configuration.cpp		\
-	hscd_vpc_Controller.cpp			\
-	hscd_vpc_EDFController.cpp		\
-	hscd_vpc_FCFSController.cpp		\
-	hscd_vpc_PriorityController.cpp		\
-	hscd_vpc_RoundRobinController.cpp	\
-	hscd_vpc_ReconfigurableComponent.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
 	hscd_vpc_PCBPool.cpp			\
