@@ -59,7 +59,10 @@ ACJF_CHECK_LIB_SYSTEMC
 ACJF_CHECK_LIB_XERCES
 ACJF_NEED_PKG([Support])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([
+  Makefile
+  pkginclude/Makefile
+])
 
 ACJF_DONE
 

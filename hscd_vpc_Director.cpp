@@ -18,11 +18,11 @@
 #include <iostream>
 #include <sstream>
 
-#include <hscd_vpc_Director.h>
-#include <hscd_vpc_AbstractComponent.h>
-#include <hscd_vpc_Term.h>
-#include <hscd_vpc_VPCBuilder.h>
-#include "hscd_vpc_InvalidArgumentException.h"
+#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_AbstractComponent.h>
+#include <systemcvpc/hscd_vpc_Term.h>
+#include <systemcvpc/hscd_vpc_VPCBuilder.h>
+#include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
 
 #include <systemc.h>
 #include <map>

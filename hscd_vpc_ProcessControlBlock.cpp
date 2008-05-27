@@ -1,5 +1,5 @@
-#include "hscd_vpc_ProcessControlBlock.h"
-#include "hscd_vpc_Director.h"
+#include <systemcvpc/hscd_vpc_ProcessControlBlock.h>
+#include <systemcvpc/hscd_vpc_Director.h>
 
 namespace SystemC_VPC{
 

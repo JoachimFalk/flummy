@@ -1,4 +1,4 @@
-#include <hscd_vpc_PriorityController.h>
+#include <systemcvpc/hscd_vpc_PriorityController.h>
 
 namespace SystemC_VPC{
   

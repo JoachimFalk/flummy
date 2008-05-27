@@ -1,4 +1,4 @@
-#include <hscd_vpc_RoundRobinController.h>
+#include <systemcvpc/hscd_vpc_RoundRobinController.h>
 
 namespace SystemC_VPC{
   

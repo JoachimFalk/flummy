@@ -1,4 +1,4 @@
-#include <hscd_vpc_EDFController.h>
+#include <systemcvpc/hscd_vpc_EDFController.h>
 
 namespace SystemC_VPC{
   

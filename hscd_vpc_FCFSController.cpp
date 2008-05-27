@@ -1,4 +1,4 @@
-#include <hscd_vpc_FCFSController.h>
+#include <systemcvpc/hscd_vpc_FCFSController.h>
 
 namespace SystemC_VPC{
   

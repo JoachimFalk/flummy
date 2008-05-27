@@ -1,4 +1,4 @@
-#include <Attribute.h>
+#include <systemcvpc/Attribute.h>
 #include <iostream>
 
 namespace SystemC_VPC{

@@ -4,10 +4,10 @@
 #include <cctype>
 #include <string>
 
-#include "hscd_vpc_VPCBuilder.h"
-#include "hscd_vpc_XmlHelper.h"
-#include "hscd_vpc_VpcDomErrorHandler.h"
-#include "hscd_vpc_datatypes.h"
+#include <systemcvpc/hscd_vpc_VPCBuilder.h>
+#include <systemcvpc/hscd_vpc_XmlHelper.h>
+#include <systemcvpc/hscd_vpc_VpcDomErrorHandler.h>
+#include <systemcvpc/hscd_vpc_datatypes.h>
 
 namespace SystemC_VPC{
 #define MAX(x,y) ((x > y) ? x : y)

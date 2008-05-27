@@ -1,6 +1,6 @@
-#include <hscd_vpc_ReconfigurableComponent.h>
-#include <hscd_vpc_datatypes.h>
-#include <hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_ReconfigurableComponent.h>
+#include <systemcvpc/hscd_vpc_datatypes.h>
+#include <systemcvpc/hscd_vpc_Director.h>
 
 #include <values.h>
 

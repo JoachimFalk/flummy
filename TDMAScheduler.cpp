@@ -17,9 +17,9 @@
 */
 #include <utility>
 
-#include <TDMAScheduler.h>
-#include <hscd_vpc_Director.h>
-#include <hscd_vpc_Component.h>
+#include <systemcvpc/TDMAScheduler.h>
+#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_Component.h>
 
 namespace SystemC_VPC{
 

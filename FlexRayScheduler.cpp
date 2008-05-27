@@ -39,9 +39,9 @@
 
 */
 
-#include <FlexRayScheduler.h>
-#include <hscd_vpc_Director.h>
-#include <hscd_vpc_Component.h>
+#include <systemcvpc/FlexRayScheduler.h>
+#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_Component.h>
 
 namespace SystemC_VPC{
 

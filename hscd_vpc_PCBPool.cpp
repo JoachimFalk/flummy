@@ -1,4 +1,4 @@
-#include "hscd_vpc_PCBPool.h"
+#include <systemcvpc/hscd_vpc_PCBPool.h>
 
 namespace SystemC_VPC {
 

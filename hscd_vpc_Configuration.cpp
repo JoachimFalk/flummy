@@ -1,4 +1,4 @@
-#include <hscd_vpc_Configuration.h>
+#include <systemcvpc/hscd_vpc_Configuration.h>
 
 namespace SystemC_VPC{
 

@@ -15,7 +15,7 @@
  * -----------------------------------------------------------------------------
  * $log$
  ******************************************************************************/
-#include "hscd_vpc_XmlHelper.h"
+#include <systemcvpc/hscd_vpc_XmlHelper.h>
 namespace SystemC_VPC{
 
   ///init xml chars

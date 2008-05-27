@@ -15,16 +15,16 @@
  * ----------------------------------------------------------------------------
  * $log$
  *****************************************************************************/
-#include <hscd_vpc_Component.h>
-#include <hscd_vpc_Scheduler.h>
-#include <hscd_vpc_FCFSScheduler.h>
-#include <TDMAScheduler.h>
-#include <FlexRayScheduler.h>
-#include <hscd_vpc_RoundRobinScheduler.h>
-#include <hscd_vpc_PriorityScheduler.h>
-#include <hscd_vpc_RateMonotonicScheduler.h>
-#include <hscd_vpc_datatypes.h>
-#include <hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_Component.h>
+#include <systemcvpc/hscd_vpc_Scheduler.h>
+#include <systemcvpc/hscd_vpc_FCFSScheduler.h>
+#include <systemcvpc/TDMAScheduler.h>
+#include <systemcvpc/FlexRayScheduler.h>
+#include <systemcvpc/hscd_vpc_RoundRobinScheduler.h>
+#include <systemcvpc/hscd_vpc_PriorityScheduler.h>
+#include <systemcvpc/hscd_vpc_RateMonotonicScheduler.h>
+#include <systemcvpc/hscd_vpc_datatypes.h>
+#include <systemcvpc/hscd_vpc_Director.h>
 
 #include <float.h>
 

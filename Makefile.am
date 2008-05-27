@@ -25,13 +25,18 @@ root_builddir := $(shell cd $(top_builddir)/.. && pwd)
 include $(auxdir)/jfrules.mk
 include ../BuildSystem/doxygen.am
 
-SUBDIRS=
+SUBDIRS = pkginclude
 
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
 compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 	@date > $@
+
+AM_LDFLAGS =			\
+	@AM_LDFLAGS@		\
+	@SYSTEMC_LDFLAGS@	\
+	@XERCES_LDFLAGS@
 
 # FIXME: Decouple SystemC-VPC and SysteMoC by moving SysteMoC
 #        dependant code from SystemC-VPC into SysteMoC
@@ -40,71 +45,33 @@ AM_CPPFLAGS =			\
 	@AM_CPPFLAGS@		\
 	@SYSTEMC_INCLUDE@	\
 	@XERCES_INCLUDE@	\
-	-I./include		\
-	-I$(srcdir)
+	-Ipkginclude		\
+	-I$(srcdir)/pkginclude
 
 #AM_LDFLAGS=
 
 #noinst_SCRIPTS  = test_pathstuff.sh
+#noinst_PROGRAMS = test_pathstuff
 
 EXTRA_DIST	=
 
-#noinst_PROGRAMS = test_pathstuff
-
 PROGLDFLAGS=
 
-pkgincludeprefix=systemcvpc/
-
 lib_LTLIBRARIES = libsystemcvpc.la
-pkginclude_HEADERS =				\
-	Attribute.h 				\
-	FastLink.h				\
-	FlexRayScheduler.h			\
-	hscd_vpc_AbstractComponent.h		\
-	hscd_vpc_AbstractController.h		\
-	hscd_vpc_AbstractDirector.h		\
-	hscd_vpc_Component.h			\
-	hscd_vpc_Configuration.h		\
-	hscd_vpc_Controller.h			\
-	hscd_vpc_datatypes.h			\
-	hscd_vpc_Director.h			\
-	hscd_vpc_EDFController.h		\
-	hscd_vpc_EventPair.h			\
-	hscd_vpc_FCFSController.h		\
-	hscd_vpc_FCFSScheduler.h		\
-	hscd_vpc_IDeallocatable.h		\
-	hscd_vpc_InvalidArgumentException.h	\
-	hscd_vpc_PCBPool.h			\
-	hscd_vpc_PriorityController.h		\
-	hscd_vpc_PriorityScheduler.h		\
-	hscd_vpc_ProcessControlBlock.h		\
-	hscd_vpc_ProcessEventListener.h		\
-	hscd_vpc_RateMonotonicScheduler.h	\
-	hscd_vpc_ReconfigurableComponent.h	\
-	hscd_vpc_RoundRobinController.h		\
-	hscd_vpc_RoundRobinScheduler.h		\
-	hscd_vpc_Scheduler.h			\
-	hscd_vpc_Term.h				\
-	hscd_vpc_Tracing.h			\
-	hscd_vpc_VPCBuilder.h			\
-	hscd_vpc_VpcDomErrorHandler.h		\
-	hscd_vpc_XmlHelper.h			\
-	TDMAScheduler.h
-
-
-#noinst_HEADERS=	oneof.hpp
 
 libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)		\
 	$(hscd_pggen_hpp_CH_LTOBJS)
 
-## DISABLE -lefence because is causes crashes on systemc where libefence is linked with -lpthread
-## because of quick-thread (SystemC) pthread incompatibilities
-#libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++ -lefence
-libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++
-
-libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
-libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
+libsystemcvpc_la_LDFLAGS =			\
+	-version-info 0:0:0 			\
+	-no-undefined 				\
+	-lsystemc 				\
+	-lxerces-c
+libsystemcvpc_la_DEPENDENCIES = 		\
+	compileheader-libsystemcvpc.stamp
+libsystemcvpc_la_LIBADD = 			\
+	$(libsystemcvpc_CH_LTOBJS)
 
 libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
@@ -131,10 +98,3 @@ libsystemcvpc_la_SOURCES =			\
 	FastLink.cpp				\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
-
-
-# Need pkinclude files in include/$(pkgincludeprefix)
-$(libsystemcvpc_la_OBJECTS) $(libsystemcvpc_CH_LTOBJS): include
-
-#test_pathstuff_LDADD = libsystemcvpc.la
-#test_pathstuff_SOURCES = test_pathstuff.C
