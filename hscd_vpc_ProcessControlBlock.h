@@ -4,6 +4,7 @@
 #include <systemc.h>
 #include <float.h>
 #include <map>
+#include <vector>
 #include <string>
 
 #include <cosupport/systemc_support.hpp>
