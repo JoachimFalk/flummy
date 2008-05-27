@@ -80,47 +80,7 @@ namespace SystemC_VPC{
   class AbstractComponent:
     public sc_module, public Delayer{
   
-  protected:
-
-    /**
-     * \brief Simulate an execution on this "Virtual Component".
-     *
-     * While this simulation is running SystemC simulation time is consumed.
-     * \deprecated since dynamic allocation has been introduced
-     */
-    virtual void _compute( const char *name, const char *funcname, VPC_Event* end=NULL)
-      __attribute__ ((deprecated)) =0;
-
-    /**
-     * \brief Simulate an execution on this "Virtual Component".
-     *
-     * While this simulation is running SystemC simulation time is consumed.
-     * \deprecated since dynamic allocation has been introduced
-     */
-    virtual void _compute( const char *name, VPC_Event *end=NULL)
-      __attribute__ ((deprecated)) =0;
-   
   public:
-
-    /**
-     * \brief Simulate an execution on this "Virtual Component".
-     *
-     * While this simulation is running SystemC simulation time is consumed.
-     * \deprecated since dynamic allocation has been introduced
-     */
-    void __attribute__ ((deprecated)) compute( const char *name, const char *funcname, VPC_Event* end=NULL){
-      _compute( name, funcname, end);
-    }
-
-    /**
-     * \brief Simulate an execution on this "Virtual Component".
-     *
-     * While this simulation is running SystemC simulation time is consumed.
-     * \deprecated since dynamic allocation has been introduced
-     */
-    void __attribute__ ((deprecated)) compute( const char *name, VPC_Event *end=NULL){
-      _compute( name, end);
-    }
 
     virtual ~AbstractComponent(){}
 
@@ -143,13 +103,7 @@ namespace SystemC_VPC{
     const char* getName() const;
 
   protected:
-  
-    // used to reflect state of component
-    bool activ;
-  
-    // used to reflect if components execution has been killed
-    bool killed;
-  
+
     // points to direct associated controlling instance
     ProcessEventListener* parentControlUnit;
   
@@ -157,40 +111,8 @@ namespace SystemC_VPC{
   
     AbstractComponent(sc_module_name name)
       : sc_module(name),
-        Delayer() {
-      
-      this->killed = false;
-      this->activ = true;
-      
-    }
-    
-    /**
-     * \brief Getter to determine if component is set to activ
-     */
-    inline bool isActiv(){
-      
-      return this->activ;
-      
-    }
-    
-    /**
-     * \brief Setter to set value of component to activ or not
-     */
-    inline void setActiv(bool newVal){
-      
-      this->activ = newVal;
-      
-    }
-    
-    /**
-     * \brief Getter to determine if kill has been called on component
-     */
-    inline bool hasBeenKilled(){
-      
-      return this->killed;
-      
-    }
-        
+        Delayer() {}
+            
     /**
        * \brief Simulate an execution on this "Virtual Component".
        *

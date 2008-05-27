@@ -63,20 +63,6 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief Preempts execution of component
-     * Used to deallocate the current execution of a component.
-     * \sa AbstractComponent::deallocate
-     */
-    virtual void deallocate(bool kill);
-
-    /**
-     * \brief Resumes deallocated execution
-     * Used to allocate execution of deallocated component.
-     * \sa AbstractComponent
-     */
-    virtual void allocate();
-
-    /**
      * implementation of AbstractComponent::compute(ProcessControlBlock*)
      */
     virtual void compute(ProcessControlBlock* pcb);
@@ -130,20 +116,6 @@ namespace SystemC_VPC{
       // FIXME: disabled Scheduler tracing (there is no scheduling overhead)
       //sc_trace(this->traceFile,schedulerTrace,schedulername);
 #endif //NO_VCD_TRACES      
-
-          /**************************/
-          /*  EXTENSION SECTION     */
-          /**************************/
-      if(!this->activ){
-#ifdef VPC_DEBUG
-	std::cerr << VPC_GREEN(this->getName() << "> Activating")
-		  << std::endl;
-#endif //VPC_DEBUG
-	this->setActiv(true);
-      }
-          /**************************/
-          /*  END OF EXTENSION      */
-          /**************************/
     }
       
     virtual ~Component()
@@ -161,30 +133,9 @@ namespace SystemC_VPC{
     
   protected:
 
-    /**
-     * implementation of AbstractComponent::compute(const char *, const char *,
-     * VPC_Event)
-     */
-    virtual void _compute( const char *name,
-                           const char *funcname=NULL,
-                           VPC_Event *end=NULL )
-      __attribute__ ((deprecated));
-    
-    /**
-     * implementation of AbstractComponent::compute(const char *, VPC_Event)
-     */
-    virtual void _compute( const char *name, VPC_Event *end=NULL)
-      __attribute__ ((deprecated));
-    
     virtual void schedule_thread(); 
 
     virtual void remainingPipelineStages(); 
-
-    // used to indicate deallocation request
-    sc_event notify_deallocate;
-
-    // used to indicate allocate request
-    sc_event notify_allocate;
 
   private:
     sc_event remainingPipelineStages_WakeUp;
@@ -206,13 +157,6 @@ namespace SystemC_VPC{
 
     bool processParameter(char *sType,char *sValue);
 
-    inline void resignTask( int &taskToResign,
-                            sc_time &actualRemainingDelay,
-                            int &actualRunningIID );
-    inline void assignTask( int &taskToAssign,
-                            sc_time &actualRemainingDelay,
-                            int &actualRunningIID );
-    
     // time last task started
     sc_time startTime;
 
@@ -220,15 +164,6 @@ namespace SystemC_VPC{
     
     void setScheduler(const char *schedulername);
     
-    
-    void interuptPipeline(bool);
-
-    void resumePipeline();
-
-    void killAllTasks();
-
-    void setTraceSignalReadyTasks(trace_value value);
-
     static const ComponentState IDLE;
     static const ComponentState RUNNING;
 
