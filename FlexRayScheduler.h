@@ -13,6 +13,10 @@ namespace SystemC_VPC{
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
   	pid_fifo enthaelt die laufbereiten Prozesse  
   */
+  struct SlotParameters{
+    int offset; //in cycles
+    int multiplex; //in 2^multiplex - cycles
+  };
   
   class FlexRayScheduler : public Scheduler{
   public:
@@ -59,8 +63,11 @@ namespace SystemC_VPC{
     int curr_slicecountA;
     int curr_slicecountB;
     int processcount;
+    int cyclecount;
     std::vector<TDMASlot> TDMA_slots;
     std::map <ProcessId,int> PIDmap;
+    std::map <std::string,struct SlotParameters> ProcessParams_string;
+    std::map <ProcessId,struct SlotParameters> ProcessParams;
     std::deque<std::pair<std::string, std::string> > _properties;
     
     //Neu fuer FlexRay

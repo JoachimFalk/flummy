@@ -54,6 +54,7 @@ namespace SystemC_VPC{
     dualchannel=1; 
     //alt (TDMA)
     processcount=0;
+    cyclecount=0;
     lastassign=sc_time(0,SC_NS);
     this->remainingSlice = sc_time(0,SC_NS);
     slicecount=0;
@@ -165,14 +166,17 @@ namespace SystemC_VPC{
 		}
 		//cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<endl;
 		//Beziehung PId - SlotID herstellen
-  		PIDmap[Director::getInstance().getProcessId(key)]=i;   
+                ProcessId id=Director::getInstance().getProcessId(key);
+  		PIDmap[id]=i;   
+                ProcessParams[id]=ProcessParams_string[key];
+//                 cout<<"registered function: "<< key<<" with ID: "<<id<<endl;
 // 		cout<<"add Function " <<  key << " to " << value<<endl;
     		
   }
 
   void FlexRayScheduler::setAttribute(Attribute& fr_Attribute){
   	char* value = fr_Attribute.getType();
-	int i,j,k;
+	int i,j,k,l,m;
 	assert(value!=NULL);
   	assert (strncmp("FlexRayParams", value, sizeof(value))==0);
 	//cout<<fr_Attribute.getAttributeSize()<<endl;
@@ -198,23 +202,60 @@ namespace SystemC_VPC{
 			std::pair<std::string, std::string > param;
 			param.first=attribute2.second.getType();
 			param.second=attribute2.second.getValue();
-			//cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
-			TDMASlot newSlot;
+			
+                        //cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
+                        TDMASlot newSlot;
+                        //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
 			newSlot.length = Director::createSC_Time(param.second.c_str() );	
 			newSlot.name = param.first;
 			TDMA_slots.insert(TDMA_slots.end(), newSlot);
 			
 			//jetzt noch die Task-mappings!
+                        //für jeden Attribute-Eintrag Parameter verarbeiten
+                        for(l=0;l<attribute2.second.getAttributeSize();l++){
+	                  std::pair<std::string, Attribute >attribute3=attribute2.second.getNextAttribute(l);
+			  std::pair<std::string, std::string > param3;
+	                  if(attribute3.first=="mapping"){
+
+			    param3.first=attribute3.second.getValue();
+			    param3.second=param.first;
+ 			    // cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<endl;
+                            
+			    this->_properties.push_back(param3);
+                            ProcessParams_string[param3.first]=(struct SlotParameters){0,0};
+			    if(attribute3.second.getParameterSize()==0){
+                              //we don't have further Parameters, so let them as they are
+                            }else{
+                              //parse parameters
+                              for(m=0;m<attribute3.second.getParameterSize();m++){
+                              std::pair<std::string, std::string > param4 =attribute3.second.getNextParameter(m);
+                                if(param4.first=="offset"){
+                                  ProcessParams_string[param3.first].offset=atoi(param4.second.c_str());
+//                                   cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+                                }
+                                if(param4.first=="multiplex"){
+                                  ProcessParams_string[param3.first].multiplex=atoi(param4.second.c_str());
+//                                   cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+                                }
+                              }
+                            }
+                          }
+                        }
+                          
+                            
+                        
+                        /*
 			for(j=0;j<attribute2.second.getParameterSize();j++){
 			std::pair<std::string, std::string > param2 =attribute2.second.getNextParameter(j);
 			if(param2.first == "mapping"){
 				param2.first=param2.second;
 				param2.second=param.first;
-				// cout<<"found static binding: "<<param2.second <<" with value: "<<param2.first<<endl;
+				 cout<<"found static binding: "<<param2.second <<" with value: "<<param2.first<<endl;
 				this->_properties.push_back(param2);
 				}
 				
 			}
+                        */
 		}
 		
 		/*
@@ -308,9 +349,11 @@ namespace SystemC_VPC{
   
   void FlexRayScheduler::addedNewTask(ProcessControlBlock *pcb){    
      int index = PIDmap[pcb->getPid()];
+//      cout<<"addedNewTask- index: "<<index<<" PID: "<<pcb->getPid()<<" instanceID: "<<pcb->getInstanceId()<<endl;
      if(index<StartslotDynamic){
      //TDMA-Task
      TDMA_slots[ index ].pid_fifo.push_back(pcb->getInstanceId());
+     ProcessParams[pcb->getInstanceId()]=ProcessParams[pcb->getPid()];
 #ifdef VPC_DEBUG     
      cout<<"added Process " <<  pcb->getInstanceId() << " to Slot " << PIDmap[pcb->getPid()]  <<endl;
 #endif //VPC_DEBUG
@@ -363,8 +406,8 @@ namespace SystemC_VPC{
     
     //statischer oder dynamischer Teil?
     if(curr_slicecount+1<StartslotDynamic){
-  //  cout<<"Static! @ "<< sc_time_stamp() << "  " << curr_slicecount+1 << endl;
-    //TDMA-Scheduleing: unveraendert aus TDMAScheduler verwendet.
+//     cout<<"Static! @ "<< sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< endl;
+    //TDMA-Scheduling: unveraendert aus TDMAScheduler verwendet.
     ret_decision=NOCHANGE;
     //Zeitscheibe abgelaufen?
     if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
@@ -379,10 +422,46 @@ namespace SystemC_VPC{
     	this->remainingSlice = TDMA_slots[curr_slicecount].length;
 
       if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
-        task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
-	//alter wurde schon entfernt (freiwillige abgabe "BLOCK")
+        int tempcount=0;
+        bool found=false;
+        //if not.. try the next one (if existing)
+        while(!found && tempcount<TDMA_slots[curr_slicecount].pid_fifo.size()){
+          task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
+          //is this task allowed to run in this slot?
+//            cout<<"testing "<<tempcount<<" @ "<<curr_slicecount<<" bei "<<task_to_assign<<" von gesamt: "<<TDMA_slots[curr_slicecount].pid_fifo.size()<<endl;
+          if(ProcessParams[task_to_assign].offset<=cyclecount){
+//          cout<<"found task_to_assign: "<<task_to_assign<<endl;
+            int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
+            if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
+             /* cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
+              cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
+              cout<< " MOD= " << cyclecount % mux_value <<endl;
+             */
+              found=true;
+            }
+          }
+          tempcount++;
+        }
+        
+        //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
         // -> kein preemption!
+//         cout<<"here we are"<<endl;
         ret_decision= ONLY_ASSIGN;
+        
+        if(!found){ //keinen lauffaehigen gefunden! -> idle werden
+        task_to_assign=0;
+          if(running_tasks.size()!=0){  // alten Task entfernen, wenn noetig
+            std::map<int,ProcessControlBlock*>::const_iterator iter;
+            iter=running_tasks.begin();
+            ProcessControlBlock *pcb=iter->second;
+
+            task_to_resign=pcb->getInstanceId();
+            ret_decision=RESIGNED;
+          }else{
+          //war keiner da... und ist auch kein Neuer da -> keine Aenderung	
+          ret_decision=NOCHANGE;
+          }  
+        }else{
 	
         if(running_tasks.size()!=0){  // alten Task entfernen
           std::map<int,ProcessControlBlock*>::const_iterator iter;
@@ -391,7 +470,9 @@ namespace SystemC_VPC{
           task_to_resign=pcb->getInstanceId();
           ret_decision= PREEMPT;  
         }
-        // else{}    ->
+        }
+        // else{}
+
         //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
       }else{
       //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
@@ -411,13 +492,38 @@ namespace SystemC_VPC{
       	//oder alter entfernt    -> neuen setzen
       	//neuen setzen:
       if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-   //   cout<<"Task feddich!"<<endl;
-        if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){            // ist da auch ein neuer da?
-          task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
+   //   cout<<"Task fertig!"<<endl;
+        if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){            // ist da auch ein neuer da?        
+        int tempcount=0;
+        bool found=false;
+        //if not.. try the next one (if existing)
+        while(!found && tempcount<=TDMA_slots[curr_slicecount].pid_fifo.size()){
+          task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
+          
 
+        //is this task allowed to run in this slot? or is an offset required?
+          if(ProcessParams[task_to_assign].offset<cyclecount){
+            //potenzieren des cycle-multiplex
+            int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
+            //no multiplex - run it  -- 
+            if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
+            /*  cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
+              cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
+              cout<< " MOD= " << cyclecount % mux_value <<endl;
+            */
+              found==true;
+              }
+          }
+          tempcount++;
+        }
+        
+        if(!found){
+        ret_decision=NOCHANGE;
+        }else{
           //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
           // -> kein preemption!
           ret_decision= ONLY_ASSIGN;
+          }
         }	
       }
       //neuer Task hinzugefuegt, aber ein anderer laeuft noch -> nichts tun
@@ -451,7 +557,7 @@ namespace SystemC_VPC{
           task_to_resign=pcb->getInstanceId();
           ret_decision=RESIGNED;
          }else{
-	  //war keiner da... und ist auch kein Neuer da -> keine Änderung	
+	  //war keiner da... und ist auch kein Neuer da -> keine Aenderung	
       	  ret_decision=NOCHANGE;
 	 }      
 	 this->lastassign = sc_time_stamp();
@@ -466,7 +572,7 @@ namespace SystemC_VPC{
          	 task_to_resign=pcb->getInstanceId();
          	 ret_decision=RESIGNED;
         	 }else{
-	 	 //war keiner da... und ist auch kein Neuer da -> keine Änderung	
+	 	 //war keiner da... und ist auch kein Neuer da -> keine Aenderung	
       	 	 ret_decision=NOCHANGE;
 		 }    
 		
@@ -474,6 +580,8 @@ namespace SystemC_VPC{
 		this->remainingSlice=SC_ZERO_TIME;
 		//dynamischer Teil "aufgeraeumt" -> statischer kann starten.
 		curr_slicecount=-1;
+                //naechster Zyklus beginnt
+                cyclecount++;
 		}
 		this->lastassign=sc_time_stamp();
 		curr_slicecountA=0;
