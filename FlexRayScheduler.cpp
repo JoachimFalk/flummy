@@ -8,30 +8,29 @@
          <attribute type="FlexRayParams">
               <parameter type="dualchannel" value="false"/>
               <attribute type="static">
-                      <!-- attribute type="slots" -->
-                              <attribute type="slot0" value="20ns">
-                                      <parameter type="mapping" value="periodic.task1"/>
-                              </attribute>
-                              <attribute type="slot1" value="20ns">
-                                      <parameter type="mapping" value="periodic.task2"/>
-                              </attribute>
-                              <attribute type="slot2" value="20ns">
-                                      <parameter type="mapping" value="periodic.task3"/>
-                              </attribute>
-                      <!-- /attribute -->
+                    	<attribute type="slot0" value="20ns">
+                          <attribute type="mapping" value="periodic.task1">
+			    <parameter type="multiplex" value="0"/>
+                            <parameter type="offset" value="0"/>
+                          </attribute>
+			</attribute>
+                        
+                        <attribute type="slot1" value="20ns">
+                          <attribute type="mapping" value="periodic.task2">
+			    <parameter type="multiplex" value="4"/>
+                            <parameter type="offset" value="2"/>
+                          </attribute>
+			</attribute>
               </attribute>
                       
               <attribute type="dynamic" value="50ns">
-                      <!-- attribute type="slots" -->
-                              <attribute type="slot3">
-                                      <parameter type="mapping" value="periodic.task4"/>
-                              </attribute>
-                              <attribute type="slot4" value="30ns">
-                                      <parameter type="mapping" value="periodic.task5"/>
-                              </attribute>
-                              <!-- parameter type="slot3" value="30ns"/ -->
-                              <!-- parameter type="slot4" value="30ns"/-->
-                      <!-- /attribute -->
+                        <attribute type="slot3">
+                          <parameter type="mapping" value="periodic.task4"/>
+                        </attribute>
+                        <attribute type="slot4" value="30ns">
+                          <parameter type="mapping" value="periodic.task5"/>
+                        </attribute>
+                        
               </attribute>
         </attribute>
         </component>
@@ -422,7 +421,7 @@ namespace SystemC_VPC{
     	this->remainingSlice = TDMA_slots[curr_slicecount].length;
 
       if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
-        int tempcount=0;
+        unsigned int tempcount=0;
         bool found=false;
         //if not.. try the next one (if existing)
         while(!found && tempcount<TDMA_slots[curr_slicecount].pid_fifo.size()){
@@ -494,7 +493,7 @@ namespace SystemC_VPC{
       if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
    //   cout<<"Task fertig!"<<endl;
         if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){            // ist da auch ein neuer da?        
-        int tempcount=0;
+        unsigned int tempcount=0;
         bool found=false;
         //if not.. try the next one (if existing)
         while(!found && tempcount<=TDMA_slots[curr_slicecount].pid_fifo.size()){
@@ -511,7 +510,7 @@ namespace SystemC_VPC{
               cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
               cout<< " MOD= " << cyclecount % mux_value <<endl;
             */
-              found==true;
+              found=true;
               }
           }
           tempcount++;
