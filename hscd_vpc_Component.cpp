@@ -20,6 +20,7 @@
 #include <hscd_vpc_FCFSScheduler.h>
 #include <TDMAScheduler.h>
 #include <FlexRayScheduler.h>
+#include <TimeTriggeredCCScheduler.h>
 #include <hscd_vpc_RoundRobinScheduler.h>
 #include <hscd_vpc_PriorityScheduler.h>
 #include <hscd_vpc_RateMonotonicScheduler.h>
@@ -301,7 +302,9 @@ namespace SystemC_VPC{
     }else if( 0==strncmp(schedulername,STR_FLEXRAY,
                          strlen(STR_FLEXRAY))){
       scheduler=new FlexRayScheduler((const char*)schedulername);
-
+    }else if( 0==strncmp(schedulername,STR_TTCC,
+                         strlen(STR_TTCC))){
+      scheduler=new TimeTriggeredCCScheduler((const char*)schedulername);
     }else{
       //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVE << endl;
       scheduler=new FCFSScheduler();
