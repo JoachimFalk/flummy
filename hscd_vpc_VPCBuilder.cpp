@@ -694,51 +694,11 @@ namespace SystemC_VPC{
 	    if( 0==XMLString::compareNString( xmlName,
                                               timingStr,
                                               sizeof(timingStr))){
-	      char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
-	      for(unsigned int i=0; i<atts->getLength(); i++){
-		DOMNode* a=atts->item(i);
-		if(0==XMLString::compareNString( a->getNodeName(),
-                                                 delayAttrStr,
-                                                 sizeof(delayAttrStr))){
-		  delay = XMLString::transcode(a->getNodeValue());
-		}else if(0==XMLString::compareNString(a->getNodeName(),
-                                                      latencyAttrStr,
-                                                      sizeof(latencyAttrStr))){
-		  latency = XMLString::transcode(a->getNodeValue());
-		}else if(0==XMLString::compareNString( a->getNodeName(),
-                                                       diiAttrStr,
-                                                       sizeof(diiAttrStr))){
-		  dii   = XMLString::transcode(a->getNodeValue());
-		}else if(0==XMLString::compareNString( a->getNodeName(),
-                                                       fnameAttrStr,
-                                                       sizeof(fnameAttrStr))){
-		  fname = XMLString::transcode(a->getNodeValue());
-		}
-	      }
-	      
-	      sc_time sc_latency = SC_ZERO_TIME;
-	      sc_time sc_dii     = SC_ZERO_TIME;
+              Timing t = this->parseTiming( attnode );
 
-	      if(latency != NULL) sc_latency = Director::createSC_Time(latency);
-	      if(dii != NULL) sc_dii = Director::createSC_Time(dii);
-	      { // latency and delay are synonym -> take maximum if they differ
-		sc_time sc_delay = SC_ZERO_TIME;
-		if(delay != NULL) sc_delay = Director::createSC_Time(delay);
-		sc_latency = MAX(sc_latency,sc_delay);
-	      }
-
-	      //per default latency is used as vpc-delay as well as vpc-latency
-              // (vpc-delay == dii)
-              //	      p.setLatency(sc_latency);
-              p.addFuncLatency( this->director, sTarget, fname, sc_latency );
-              //	      p.setDelay(sc_latency);
-              p.addFuncDelay( this->director, sTarget, fname, sc_latency );
-
-	      // if having a  then dii overides delay
-	      if( dii != NULL ){
-                //                p.setDelay(sc_dii);
-                p.addFuncDelay( this->director, sTarget, fname, sc_dii );
-	      }
+              p.addFuncLatency( this->director, sTarget, t.fname, t.latency );
+              p.addFuncDelay( this->director, sTarget, t.fname, t.dii );
+              
 	    }else if( 0==XMLString::compareNString( xmlName,
                                                     attributeStr,
                                                     sizeof(attributeStr))){
@@ -1080,7 +1040,7 @@ namespace SystemC_VPC{
     t.latency = sc_latency;
     t.dii   = sc_latency;
     if( dii != NULL ){
-      t.dii   = sc_latency;
+      t.dii   = sc_dii;
     }
     
     return t;
