@@ -19,14 +19,6 @@ namespace SystemC_VPC {
 
   typedef size_t ComponentId;
 
-  enum activation_state {
-    inaktiv,
-    starting,
-    aktiv,
-    ending,
-    aborted
-  };
-
   /**
    * Internal helper class to manage delays of components which an
    * associated PCB can run on.
@@ -320,10 +312,6 @@ namespace SystemC_VPC {
 
       unsigned int getActivationCount() const;
 
-      void setState(activation_state state);
-
-      activation_state getState() const;
-      
       void setTraceSignal(Tracing* signal);
 
       Tracing* getTraceSignal();
@@ -378,7 +366,6 @@ namespace SystemC_VPC {
       int priority;
       sc_time period;
       sc_time deadline;
-      activation_state state;
       Tracing * traceSignal;
 
 

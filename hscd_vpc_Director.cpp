@@ -20,7 +20,6 @@
 
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_AbstractComponent.h>
-#include <hscd_vpc_Term.h>
 #include <hscd_vpc_VPCBuilder.h>
 #include <StaticRoute.h>
 #include "hscd_vpc_InvalidArgumentException.h"
@@ -91,64 +90,30 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Director::checkConstraints() {
-    std::vector<Constraint*>::const_iterator iter=constraints.begin();
-    for(;iter!=constraints.end();iter++){
-      (*iter)->isSatisfied();
-    }
-  }
+  Director::~Director(){
 
-  /**
-   *
-   */
-  void Director::getReport(){
-    std::vector<Constraint*>::const_iterator iter=constraints.begin();
-    char *cons_name;
-    double start=-1;
-    double end=-1;
-    // if there are any constaints to be viewed calculate time
-    if(this->constraints.size() > 0){
-      for(;iter!=constraints.end();iter++){
-        cons_name=(*iter)->getName();
-        if(0==strncmp("start",cons_name,5))
-          start=(*iter)->getSatisfiedTime();
-        else if(0==strncmp("end",cons_name,3))
-          end=(*iter)->getSatisfiedTime();
-      }
-    }else{ // else take total simulation time
-      start = 0;
-      end = this->end;
-    }
+    double start = 0;
+    double end   = this->end;
 #ifdef VPC_DEBUG
     std::cerr << "start: " << start << " end: " << end  << std::endl;
 #endif //VPC_DEBUG
-    if ((start != -1) && (end != -1)){
-      if(0 != this->vpc_result_file.compare("")){
 
+    if(0 != this->vpc_result_file.compare("")) {
 #ifdef VPC_DEBUG
-        std::cerr << "Director> result_file: "
-                  << this->vpc_result_file << std::endl;
+      std::cerr << "Director> result_file: "
+                << this->vpc_result_file << std::endl;
 #endif //VPC_DEBUG
-        ofstream resultFile;
-        resultFile.open(this->vpc_result_file.c_str());
-        if(resultFile){
-          resultFile << (end-start);
-        }
-        resultFile.flush();
-        resultFile.close();
-      }else{
-        std::cerr << "latency: " << end - start << std::endl;
+      ofstream resultFile;
+      resultFile.open(this->vpc_result_file.c_str());
+      if(resultFile){
+        resultFile << (end-start);
       }
+      resultFile.flush();
+      resultFile.close();
+    }else{
+      std::cerr << "latency: " << end - start << std::endl;
     }
-  }
 
-  /**
-   *
-   */
-  Director::~Director(){
-
-    getReport();
-    
     // clear components
     for( Components::iterator it = components.begin();
          it != components.end();
@@ -310,13 +275,6 @@ namespace SystemC_VPC{
   }
     
   /**
-   * \brief Implementation of Director::addConstraint
-   */
-  void Director::addConstraint(Constraint* cons){
-    this->constraints.push_back(cons);
-  }
-
-  /**
    * \brief Implementation of Director::registerComponent
    */
   void Director::registerComponent(Delayer* comp){
@@ -377,7 +335,6 @@ namespace SystemC_VPC{
    */
   void Director::signalProcessEvent(ProcessControlBlock* pcb){
     assert(!FALLBACKMODE);
-    assert(pcb->getState() != activation_state(aborted));
 
 #ifdef VPC_DEBUG
     std::cerr << "Director> got notified from: " << pcb->getName()

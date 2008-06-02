@@ -32,6 +32,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <stdio.h>
 
 #include "hscd_vpc_PCBPool.h"
 
@@ -40,8 +41,6 @@ class PowerSumming;
 namespace SystemC_VPC{
 
   class ProcessControlBlock;
-//  class PCBPool;  
-  class Constraint;
 
   /**
    * \brief Director knowes all (Abstract-)Components, all mappings (task -> component).
@@ -71,16 +70,6 @@ namespace SystemC_VPC{
      * \brief Get the process control block used within SystemC-VPC Modell.
      */
     ProcessControlBlock* getProcessControlBlock(  ProcessId pid );
-
-    /**
-     *
-     */
-    void checkConstraints();
-
-    /**
-     *
-     */
-    void getReport();
 
     /**
      * \brief Access to singleton Director. 
@@ -188,12 +177,6 @@ namespace SystemC_VPC{
       __attribute__((__deprecated__));
  
     /**
-     * \brief Adds new constraint to Director
-     * \param constraint points to the constraint to be added
-     */
-    void addConstraint(Constraint* constraint);
-    
-    /**
      * \brief Register component to Director
      * Used to register a component to the Director for
      * later computation of task on it. The components name
@@ -225,6 +208,7 @@ namespace SystemC_VPC{
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;
+      remove(vpc_result_file.c_str());
     }
     
     string getResultFile(){
@@ -273,8 +257,6 @@ namespace SystemC_VPC{
     ReverseMapping reverseMapping;
 
     PCBPool pcbPool;
-
-    std::vector<Constraint*> constraints;
 
     // output file to write result to
     std::string vpc_result_file;

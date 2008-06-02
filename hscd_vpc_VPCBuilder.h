@@ -42,7 +42,6 @@ namespace SystemC_VPC{
     /*
      * SECTION: init tag values for comparison while initializing
      */
-    XMLCh* constraintStr;
     XMLCh* measurefileStr;
     XMLCh* resultfileStr;
     XMLCh* resourcesStr;
@@ -113,8 +112,6 @@ namespace SystemC_VPC{
       /*
        * SECTION: initialization of init tag values for comparison while initializing
        */
-      constraintStr   = XMLString::transcode("constraint");
-      measurefileStr  = XMLString::transcode("measurefile");
       resultfileStr   = XMLString::transcode("resultfile");
       resourcesStr    = XMLString::transcode("resources");
       mappingsStr     = XMLString::transcode("mappings");

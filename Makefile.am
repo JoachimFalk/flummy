@@ -95,11 +95,9 @@ libsystemcvpc_la_SOURCES =			\
 	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
-	hscd_vpc_XmlHelper.cpp			\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
 	hscd_vpc_PCBPool.cpp			\
-	hscd_vpc_Term.cpp			\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
 	PowerSumming.cpp                        \

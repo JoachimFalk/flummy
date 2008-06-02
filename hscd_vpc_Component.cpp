@@ -106,10 +106,6 @@ namespace SystemC_VPC{
             // all execution time simulated -> BLOCK running task.
             ProcessControlBlock *task=runningTasks[actualRunningIID];
 
-            task->setState(ending);
-            Director::getInstance().checkConstraints();
-            task->setState(inaktiv);
-
 #ifdef VPC_DEBUG
             cerr << this->getName() << " IID: " << actualRunningIID<< " > ";
             cerr << this->getName() << " removed Task: " << task->getName()
@@ -362,11 +358,6 @@ namespace SystemC_VPC{
 
 
     //int process=actualTask->iid;
-
-    // register start of task
-    actualTask->setState(starting);
-    Director::getInstance().checkConstraints();
-    actualTask->setState(aktiv);
 
     //store added task
     newTasks.push_back(actualTask);

@@ -363,14 +363,6 @@ namespace SystemC_VPC{
     return this->activationCount->getActivationCount();
   }
 
-  void ProcessControlBlock::setState(activation_state state){
-    this->state = state;
-  }
-
-  activation_state ProcessControlBlock::getState() const{
-    return this->state;
-  }
-
   void ProcessControlBlock::setTraceSignal(Tracing* signal){
     this->traceSignal = signal;
   }
