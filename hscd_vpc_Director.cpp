@@ -148,10 +148,24 @@ namespace SystemC_VPC{
     try{
       return this->pcbPool.allocate( pid );
     }catch(NotAllocatedException& e){
+      
+      std::string name;
+
+      for(ProcessIdMap::const_iterator iter = processIdMap.begin();
+          iter != processIdMap.end();
+          ++iter)
+      {
+        if(iter->second == pid) {
+          name = iter->first;
+          break;
+        }
+      }
+
       std::cerr << "Director> getProcessControlBlock failed due to"
                 << std::endl << e.what() << std::endl;
       std::cerr << "HINT: probably actor binding not specified in"
-                << " configuration file!" << std::endl;
+                << " configuration file! (PID: " << pid
+                << "; NAME: " << name << ")" << std::endl;
       assert(0);
     }
 
