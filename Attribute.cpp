@@ -13,7 +13,8 @@ Attribute::Attribute( char* newType, char* newValue){
 	value=newValue;
 }
 
-std::pair<std::string, std::string> Attribute::getNextParameter(int pos)throw(InvalidArgumentException){
+std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos)
+  throw(InvalidArgumentException){
 	if(pos<=parameters.size()) return parameters[pos];
 	throw new InvalidArgumentException("getNextParameter");
 }
@@ -23,7 +24,8 @@ void Attribute::addNewParameter(char* newType,char* newValue){
   	this->parameters.push_back(toadd);
 }
 
-std::pair<std::string, Attribute > Attribute::getNextAttribute(int pos)throw(InvalidArgumentException){
+std::pair<std::string, Attribute > Attribute::getNextAttribute(size_t pos)
+  throw(InvalidArgumentException){
 	if(pos<=attributes.size()) return attributes[pos];
 	throw new InvalidArgumentException("getNextAttribute");
 	
