@@ -52,21 +52,6 @@ namespace SystemC_VPC{
     bool FALLBACKMODE;
 
     /**
-     * \brief A task (identifikation by name) calling this Funktion gets the 
-     * AbstractComponent where he is binded to.
-     * \note Re-added for downward compatibility
-     */
-    //AbstractComponent& getResource( const char *name );
-    //  AbstractComponent& getResource(int process);
-     Director& getResource( const char* name)
-       __attribute__((deprecated));
-     
-    /**
-     * \brief Get the process control block used within SystemC-VPC Modell.
-     */
-    ProcessControlBlock* getProcessControlBlock( const char *name );
-
-    /**
      * \brief Get the process control block used within SystemC-VPC Modell.
      */
     ProcessControlBlock* getProcessControlBlock(  ProcessId pid );
@@ -155,27 +140,6 @@ namespace SystemC_VPC{
      */
     void compute(const char *name, EventPair endPair = EventPair(NULL, NULL));
 
-    /**
-     * \brief Simulates computation of a given task
-     * 
-     * Determines for a given task the component to run on and delegates it.
-     * \param name of task
-     * \param funcname of function
-     * \param end to signal finished request
-     */
-    void compute(const char* name, const char* funcname, VPC_Event* end) 
-      __attribute__((__deprecated__));
-   
-    /**
-     * \brief Simulates computation of a given task
-     *
-     * Determines for a given task the component to run on and delegates it.
-     * \param name of task
-     * \param end to signal finished request
-     */
-    void compute(const char *name, VPC_Event *end)
-      __attribute__((__deprecated__));
- 
     /**
      * \brief Register component to Director
      * Used to register a component to the Director for

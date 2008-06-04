@@ -46,11 +46,6 @@ namespace SystemC_VPC{
   //
   std::auto_ptr<Director> Director::singleton(new Director());
 
-  //
-  Director& Director::getResource( const char* name){
-    return *(this->singleton);
-  }
-
   /**
    *
    */
@@ -125,12 +120,6 @@ namespace SystemC_VPC{
     componentIdMap.clear();
     
     delete powerSumming;
-  }
-
-  //
-  ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
-    ProcessId pid = getProcessId(name);
-    return this->getProcessControlBlock( pid );
   }
 
   //
@@ -246,18 +235,6 @@ namespace SystemC_VPC{
 
   void Director::compute(const char* name,
                          const char* funcname,
-                         VPC_Event* end)
-  {
-    //HINT: treat mode!!
-    //if (mode) { ....
-    compute(name, funcname, EventPair(end, NULL));
-    //} else{
-    //  compute(name, funcname, EventPair(NULL, end));
-    //}
-  }
-
-  void Director::compute(const char* name,
-                         const char* funcname,
                          EventPair endPair)
   {
     this->compute( this->getFastLink(name, funcname),
@@ -267,11 +244,6 @@ namespace SystemC_VPC{
   //
   void Director::compute(const char *name, EventPair endPair){
     compute( name, "", endPair);
-  }
-
-  //
-  void Director::compute(const char* name, VPC_Event* end){
-    this->compute(name, "", end);
   }
     
   /**
