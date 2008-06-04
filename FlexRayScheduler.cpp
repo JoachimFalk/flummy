@@ -325,7 +325,7 @@ namespace SystemC_VPC{
 	}else{
 //     	time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - this->lastassign);  
 	time=this->remainingSlice;
-//      	cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
+//       	cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
 	}
     }else{
 //Dynamisch
@@ -341,6 +341,10 @@ namespace SystemC_VPC{
     	else 
 	time=remainingSliceB - (sc_time_stamp() - this->lastassignB);
     }    
+      if( TimeDynamicSegment == sc_time(0,SC_NS) )
+        //Quick-FIX Falls KEIN dynamischer Teil benutzt wird..
+        time=sc_time(0,SC_NS);
+
     }
     return true;   
   }
@@ -496,7 +500,7 @@ namespace SystemC_VPC{
         unsigned int tempcount=0;
         bool found=false;
         //if not.. try the next one (if existing)
-        while(!found && tempcount<=TDMA_slots[curr_slicecount].pid_fifo.size()){
+        while(!found && tempcount<TDMA_slots[curr_slicecount].pid_fifo.size()){
           task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
           
 
@@ -844,7 +848,7 @@ namespace SystemC_VPC{
 /* if(ret_decision != NOCHANGE){
     cout << sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<endl;
     }
-*/	
+*/
 
 #ifdef VPC_DEBUG  
       cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 

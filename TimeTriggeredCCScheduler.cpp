@@ -149,7 +149,7 @@ namespace SystemC_VPC{
 			param.first=attribute2.second.getType();
 			param.second=attribute2.second.getValue();
 			
-                        cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
+//                         cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
                         TDMASlot newSlot;
                         //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
 			newSlot.length = Director::createSC_Time(param.second.c_str() );	
@@ -165,7 +165,7 @@ namespace SystemC_VPC{
 
 			    param3.first=attribute3.second.getValue();
 			    param3.second=param.first;
- 			    cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<endl;
+//  			    cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<endl;
                             
 			    this->_properties.push_back(param3);
                             ProcessParams_string[param3.first]=(struct SlotParameters){0,0};
@@ -177,11 +177,11 @@ namespace SystemC_VPC{
                               std::pair<std::string, std::string > param4 =attribute3.second.getNextParameter(m);
                                 if(param4.first=="offset"){
                                   ProcessParams_string[param3.first].offset=atoi(param4.second.c_str());
-                                  cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+//                                  cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
                                 }
                                 if(param4.first=="multiplex"){
                                   ProcessParams_string[param3.first].multiplex=atoi(param4.second.c_str());
-                                  cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+//                                   cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
                                 }
                               }
                             }
@@ -198,7 +198,7 @@ namespace SystemC_VPC{
     		const  std::map<int,ProcessControlBlock*> &running_tasks )
   {   
     // keine wartenden + keine aktiven Threads -> ende!
-  cout<<"getSchedulerTimeSlice "<< processcount<<" "<<running_tasks.size()<<endl;
+//   cout<<"getSchedulerTimeSlice "<< processcount<<" "<<running_tasks.size()<<endl;
     if(processcount==0 && running_tasks.size()==0) return 0;   
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
@@ -218,7 +218,7 @@ namespace SystemC_VPC{
   
   void TimeTriggeredCCScheduler::addedNewTask(ProcessControlBlock *pcb){    
      int index = PIDmap[pcb->getPid()];
-      cout<<"addedNewTask- index: "<<index<<" PID: "<<pcb->getPid()<<" instanceID: "<<pcb->getInstanceId()<<endl;
+//       cout<<"addedNewTask- index: "<<index<<" PID: "<<pcb->getPid()<<" instanceID: "<<pcb->getInstanceId()<<endl;
      if(index<StartslotDynamic){
      //TDMA-Task
      TDMA_slots[ index ].pid_fifo.push_back(pcb->getInstanceId());
@@ -268,7 +268,7 @@ namespace SystemC_VPC{
     
     //statischer oder dynamischer Teil?
     if(curr_slicecount+1<StartslotDynamic){
-     cout<<"Static! @ "<< sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< endl;
+//      cout<<"Static! @ "<< sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< endl;
     //TDMA-Scheduling: unveraendert aus TDMAScheduler verwendet.
     ret_decision=NOCHANGE;
     //Zeitscheibe abgelaufen?
@@ -290,7 +290,7 @@ namespace SystemC_VPC{
         while(!found && tempcount<TDMA_slots[curr_slicecount].pid_fifo.size()){
           task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
           //is this task allowed to run in this slot?
-            cout<<"testing "<<tempcount<<" @ "<<curr_slicecount<<" bei "<<task_to_assign<<" von gesamt: "<<TDMA_slots[curr_slicecount].pid_fifo.size()<<endl;
+//             cout<<"testing "<<tempcount<<" @ "<<curr_slicecount<<" bei "<<task_to_assign<<" von gesamt: "<<TDMA_slots[curr_slicecount].pid_fifo.size()<<endl;
           if(ProcessParams[task_to_assign].offset<=cyclecount){
 //          cout<<"found task_to_assign: "<<task_to_assign<<endl;
             int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
@@ -360,7 +360,7 @@ namespace SystemC_VPC{
         unsigned int tempcount=0;
         bool found=false;
         //if not.. try the next one (if existing)
-        while(!found && tempcount <= TDMA_slots[curr_slicecount].pid_fifo.size()){
+        while(!found && tempcount < TDMA_slots[curr_slicecount].pid_fifo.size()){
       cout<<"task_to_assign =  TDMA_slots["<<curr_slicecount<<"].pid_fifo["<<tempcount<<"]"<<endl;
           task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
 
