@@ -18,7 +18,6 @@
 #ifndef HSCD_VPC_DIRECTOR_H
 #define HSCD_VPC_DIRECTOR_H
 
-#include "hscd_vpc_AbstractDirector.h"
 #include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_EventPair.h"
@@ -47,7 +46,7 @@ namespace SystemC_VPC{
    *
    * Direktor reads allokation and binding from file.
    */
-  class Director : public AbstractDirector{
+  class Director : public ProcessEventListener{
   public:
     bool FALLBACKMODE;
 
@@ -206,7 +205,7 @@ namespace SystemC_VPC{
     static std::auto_ptr<Director> singleton; 
 
     /**
-     * \brief Reads allokation and binding from file.
+     * \brief Reads allocation and binding from file.
      */
     Director();
 

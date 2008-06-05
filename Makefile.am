@@ -59,7 +59,6 @@ lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
 	hscd_vpc_Tracing.h			\
 	hscd_vpc_AbstractComponent.h            \
-	hscd_vpc_AbstractDirector.h             \
 	hscd_vpc_datatypes.h                    \
 	hscd_vpc_Director.h                     \
 	hscd_vpc_ProcessEventListener.h		\

@@ -24,11 +24,6 @@ namespace SystemC_VPC{
     virtual void signalProcessEvent(ProcessControlBlock* pcb)=0;
     
     /**
-     * \note Not used yet
-     */
-    virtual void signalStateChanged(){};
-    
-    /**
      * \brief Virtual destructor for base classes
      * GCC complains if not present
      */
