@@ -164,8 +164,6 @@ namespace SystemC_VPC{
     ProcessControlBlock* pcb = this->getProcessControlBlock(fLink.process);
     pcb->setFunctionId(fLink.func);
     
-    int lockid = -1;
-    
     //HINT: also treat mode!!
     //if( endPair.latency != NULL ) endPair.latency->notify();
 
@@ -173,7 +171,6 @@ namespace SystemC_VPC{
       // prepare active mode
       pcb->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
       // we could use a pool of VPC_Events instead of new/delete
-      lockid = this->pcbPool.lock(pcb);
     }else{
       // prepare passiv mode
       pcb->setBlockEvent(endPair);
@@ -209,8 +206,6 @@ namespace SystemC_VPC{
       delete pcb->getBlockEvent().dii;
       delete pcb->getBlockEvent().latency;
       pcb->setBlockEvent(EventPair());
-      // as psb has been locked -> unlock it
-      this->pcbPool.unlock(pcb->getPid(), lockid);
       // and free it
       this->pcbPool.free(pcb);
     }

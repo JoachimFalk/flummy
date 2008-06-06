@@ -12,44 +12,6 @@
 
 namespace SystemC_VPC {
 
-  class AlreadyLockedException: public std::exception{
-
-    std::string msg;
-
-    public:
-
-    AlreadyLockedException() : msg("Already locked"){
-    }
-
-    ~AlreadyLockedException() throw(){}
-
-    const std::string& what(){
-
-      return msg;
-
-    }
-
-  };
-
-  class NotLockedException: public std::exception{
-
-    std::string msg;
-
-    public:
-
-    NotLockedException() : msg("Not locked"){
-    }
-
-    ~NotLockedException() throw(){}
-
-    const std::string& what(){
-
-      return NotLockedException::msg;
-
-    }
-
-  }; 
-
   class NotAllocatedException: public std::exception{
 
     std::string msg;
@@ -104,7 +66,6 @@ namespace SystemC_VPC {
           enum pcbIteratorState {
             pos_free, 
             pos_used, 
-            pos_locked, 
             pos_end
           };
 
@@ -126,15 +87,12 @@ namespace SystemC_VPC {
         
         private:
 
-        int lockCount;
         // references base instance of PCB 
         ProcessControlBlock* base;
         // list of currently used PCBs
         std::map<int, ProcessControlBlock* > usedPCB;
         // list of currently available PCBs
         std::map<int, ProcessControlBlock* > freePCB;
-        // list of currently locked PCBs
-        std::map<int, ProcessControlBlock* > lockedPCB;
 
         public:
 
@@ -142,7 +100,7 @@ namespace SystemC_VPC {
          * \brief Default constructor of TypePool
          * \param pcb specifies the associated PCB to be managed and replicated
          */
-        TypePool() :  lockCount(0) {
+        TypePool() {
           base = new ProcessControlBlock();
         }
 
@@ -161,25 +119,6 @@ namespace SystemC_VPC {
          * to satify request.
          */
         ProcessControlBlock* allocate();
-
-        /**
-         * \brief locks an allocated PCB
-         * This method is used to lock an already allocated ProcessControlBlock instance
-         * to ensure noone else than the instance requesting the lock can delete this
-         * instance. Only one lock at time is allowed!
-         * \param p refers to the instance to be locked
-         * \throws AlreadyLockedException if the requested instance is already locked
-         * \throws NotAllocatedException if the requested instance is not allocated before locking
-         * \return locking id used to release lock
-         */
-        int lock(ProcessControlBlock* p) throw(AlreadyLockedException, NotAllocatedException);
-
-        /**
-         * \brief releases locked PCB instance
-         * \param lockid specifies the lock id returned when locking the instance
-         * \throws NotLockedException if given lockid refers to a not locked instance
-         */
-        void unlock(int lockid) throw(NotLockedException);
 
         /**
          * \brief returns instance of managed PCB into the pool
@@ -206,10 +145,6 @@ namespace SystemC_VPC {
 
       ProcessControlBlock* allocate( ProcessId pid )
         throw (NotAllocatedException);
-
-      int lock(ProcessControlBlock* p) throw(AlreadyLockedException, NotAllocatedException);
-
-      void unlock( ProcessId pid , int lockid) throw(NotLockedException);
 
       void free(ProcessControlBlock* p);
 

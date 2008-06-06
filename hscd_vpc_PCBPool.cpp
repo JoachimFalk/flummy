@@ -14,10 +14,6 @@ namespace SystemC_VPC {
       if(this->pool->usedPCB.size() > 0){
         this->state = PCBPool::TypePool::InstanceIterator::pos_used;
         this->iter = pool->usedPCB.begin();
-    }else
-      if(this->pool->lockedPCB.size() > 0){
-        this->state = PCBPool::TypePool::InstanceIterator::pos_locked;
-        this->iter = this->pool->lockedPCB.begin();
     }else{
       this->state = PCBPool::TypePool::InstanceIterator::pos_end;
     }
@@ -39,14 +35,6 @@ namespace SystemC_VPC {
          if(this->iter != this->pool->usedPCB.end()){
           return true;
         }else{
-          // go to next set of PCB instances
-          this->state = PCBPool::TypePool::InstanceIterator::pos_locked;
-          this->iter = this->pool->lockedPCB.begin();
-        }
-      case PCBPool::TypePool::InstanceIterator::pos_locked:
-         if(this->iter != this->pool->lockedPCB.end()){
-           return true;
-         }else{
            // we reached the end so mark it!
            this->state = PCBPool::TypePool::InstanceIterator::pos_end;
          }
@@ -121,27 +109,6 @@ namespace SystemC_VPC {
   
   }
 
-  int PCBPool::lock(ProcessControlBlock* p)
-    throw(AlreadyLockedException, NotAllocatedException){
-    
-    TypePool *pool = typepools[p->getPid()];
-    if( pool != NULL ){
-      return pool->lock(p);
-    }
-
-    throw NotAllocatedException();
-  }
-  
-  void PCBPool::unlock( ProcessId pid , int lockid) throw(NotLockedException){
-
-    TypePool *pool = typepools[pid];
-    if( pool != NULL ){
-      return pool->unlock(lockid);
-    }
-
-    throw NotLockedException();
-  }
-      
   void PCBPool::free(ProcessControlBlock* p){
 
     TypePool *pool = typepools[p->getPid()];
@@ -171,12 +138,6 @@ namespace SystemC_VPC {
 
   PCBPool::TypePool::~TypePool(){
 
-    if(this->lockedPCB.size() != 0){
-      std::cerr << "WARNING: TypePool for " << this->base->getName()
-                << " still locked instances exist!" << std::endl
-                << "Assuming interruption by sc_stop happend."
-        " Cleaning up all instances of " << this->base->getName() << std::endl;
-    }
     if(this->usedPCB.size() != 0){
       std::cerr << "WARNING: TypePool for " << this->base->getName()
                 << " still used instances exist!" << std::endl
@@ -210,41 +171,6 @@ namespace SystemC_VPC {
 
   }
 
-  int PCBPool::TypePool::lock(ProcessControlBlock* p)
-    throw(AlreadyLockedException, NotAllocatedException){
-  
-    std::map<int, ProcessControlBlock* >::iterator iter;
-    iter = this->usedPCB.find(p->getInstanceId());
-    if(iter != this->usedPCB.end()){
-      this->usedPCB.erase(iter);
-      int lockid = this->lockCount;
-      this->lockCount++;
-      this->lockedPCB[lockid] = p;
-      return lockid;
-    }
-    //perform error detection
-    iter = this->lockedPCB.find(p->getInstanceId());
-    if(iter != this->lockedPCB.end()){
-      throw AlreadyLockedException();
-    }else{
-      throw NotAllocatedException();
-    }
-    
-  }
-  
-  void PCBPool::TypePool::unlock(int lockid) throw(NotLockedException){
-    
-    std::map<int, ProcessControlBlock* >::iterator iter;
-    iter = this->lockedPCB.find(lockid);
-    if(iter != this->lockedPCB.end()){
-      this->usedPCB[iter->second->getInstanceId()] = iter->second;
-      this->lockedPCB.erase(iter);
-    }else{
-      throw NotLockedException();
-    }
-
-  }
-  
   void PCBPool::TypePool::free(ProcessControlBlock* p){
 
     std::map<int, ProcessControlBlock* >::iterator iter;
