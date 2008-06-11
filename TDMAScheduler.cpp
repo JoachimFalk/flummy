@@ -108,10 +108,10 @@ namespace SystemC_VPC{
       //Betreffende SlotID in der Slotliste suchen
       do{
         //nichts zu tun.. da lediglich durchiteriert wird!
-      }while(TDMA_slots[++i].name != value && (i+1)<TDMA_slots.size());
+      }while(TDMA_slots[++i].name != value && (i+1)<(int)TDMA_slots.size());
     	 
       //auch wirklich etwas passendes gefunden?		
-      assert(i<TDMA_slots.size());
+      assert(i<(int)TDMA_slots.size());
       //Beziehung PId - SlotID herstellen
       PIDmap[Director::getInstance().getProcessId(key)]=i;   
       // 		cout<<"add Function " <<  key << " to " << value<<endl;
@@ -147,7 +147,7 @@ namespace SystemC_VPC{
     for(iter = TDMA_slots[ PIDmap[pcb->getPid()] ].pid_fifo.begin();
         iter!=TDMA_slots[PIDmap[pcb->getPid()]].pid_fifo.end();
         ++iter){
-      if( *iter == pcb->getInstanceId()){
+      if( *iter == (unsigned int)pcb->getInstanceId()){
         TDMA_slots[PIDmap[pcb->getPid()]].pid_fifo.erase(iter);
         break;
       }

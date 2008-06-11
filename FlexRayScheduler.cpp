@@ -149,7 +149,7 @@ namespace SystemC_VPC{
 		//Betreffende SlotID in der Slotliste suchen
     		do{
 			//nichts zu tun.. da lediglich durchiteriert wird!
-		}while(TDMA_slots[++i].name != value && (i+1)<TDMA_slots.size());
+		}while(TDMA_slots[++i].name != value && (i+1)<(int)TDMA_slots.size());
     	 	//cout<<"found at i= " <<i<<endl;
 		
 		if(TDMA_slots[i].name != value){
@@ -158,9 +158,9 @@ namespace SystemC_VPC{
 		//cout<< "DynSize: " << Dynamic_slots.size()<<endl;
 		do{
 			//nichts zu tun.. da lediglich durchiteriert wird!
-		}while(Dynamic_slots[++i].name != value && (i+1)<Dynamic_slots.size());
+		}while(Dynamic_slots[++i].name != value && (i+1)<(int)Dynamic_slots.size());
 		//auch wirklich etwas passendes gefunden?		
-		assert(i<Dynamic_slots.size());	
+		assert(i<(int)Dynamic_slots.size());	
 		i+=StartslotDynamic;	
 		}
 		//cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<endl;
@@ -377,7 +377,7 @@ namespace SystemC_VPC{
     std::deque<ProcessId>::iterator iter;
     if(index<StartslotDynamic){
     for(iter = TDMA_slots[ index ].pid_fifo.begin(); iter!=TDMA_slots[index].pid_fifo.end() ;iter++){
-      if( *iter == pcb->getInstanceId()){
+      if( *iter == (unsigned int)pcb->getInstanceId()){
         TDMA_slots[index].pid_fifo.erase(iter);
         break;
       }
@@ -385,7 +385,7 @@ namespace SystemC_VPC{
     }else{
     index -= StartslotDynamic;
     for(iter = Dynamic_slots[index].pid_fifo.begin(); iter!=Dynamic_slots[index].pid_fifo.end() ;iter++){
-    	if( *iter == pcb->getInstanceId()){
+    	if( *iter == (unsigned int)pcb->getInstanceId()){
         	Dynamic_slots[index].pid_fifo.erase(iter);
         	break;
       	}
