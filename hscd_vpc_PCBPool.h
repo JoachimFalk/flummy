@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 
-#include <cosupport/string_convert.hpp>
+#include <CoSupport/String/convert.hpp>
 
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "FastLink.h"
@@ -23,7 +23,7 @@ namespace SystemC_VPC {
 
     NotAllocatedException(std::string msg) : msg(msg +" not allocated") {}
     
-    NotAllocatedException(ProcessId id) : msg(CoSupport::asStr(id) +
+    NotAllocatedException(ProcessId id) : msg(CoSupport::String::asStr(id) +
                                            " not allocated") {}
     
     ~NotAllocatedException() throw(){}

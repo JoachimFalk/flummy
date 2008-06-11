@@ -1,4 +1,4 @@
-#include <cosupport/smoc_debug_out.hpp>
+#include <CoSupport/Streams/DebugOStream.hpp>
 
 #ifndef INCLUDED__DEBUG_CONFIG__H__
 #define INCLUDED__DEBUG_CONFIG__H__

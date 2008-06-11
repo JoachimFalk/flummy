@@ -32,8 +32,8 @@
 #include "debug_config.h"
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_COMPONENT
-#include <cosupport/smoc_debug_out.hpp>
-#include <cosupport/filter_ostream.hpp>
+#include <CoSupport/Streams/DebugOStream.hpp>
+#include <CoSupport/Streams/FilterOStream.hpp>
   // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.

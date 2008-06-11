@@ -3,7 +3,7 @@
 #include "debug_config.h"
 // if compiled with DBG_STATIC_ROUTE create stream and include debug macros
 #ifdef DBG_STATIC_ROUTE
-#include <cosupport/smoc_debug_out.hpp>
+#include <CoSupport/Streams/DebugOStream.hpp>
   // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
