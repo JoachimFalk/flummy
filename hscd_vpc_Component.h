@@ -89,8 +89,8 @@ namespace SystemC_VPC{
       SC_THREAD(remainingPipelineStages);
       setScheduler(schedulername);
 
-      powerTable[Component::IDLE]    = 0;
-      powerTable[Component::RUNNING] = 1;
+      powerTable[Component::IDLE]    = 0.0;
+      powerTable[Component::RUNNING] = 1.0;
 
       std::string powerSumFileName(this->getName());
       powerSumFileName += ".dat";
@@ -147,7 +147,7 @@ namespace SystemC_VPC{
     std::deque<ProcessControlBlock*>      newTasks;
     std::map<int,ProcessControlBlock*> readyTasks,runningTasks;
     
-    std::map<ComponentState, int> powerTable;
+    std::map<ComponentState, double> powerTable;
     
     sc_event notify_scheduler_thread;
     sc_signal<trace_value> schedulerTrace;

@@ -6,20 +6,20 @@
 class ComponentInfo
 {
   public:
-    ComponentInfo() : powerConsumption(0) {}
+    ComponentInfo() : powerConsumption(0.0) {}
 
-    std::size_t getPowerConsumption() const
+    double getPowerConsumption() const
     {
       return powerConsumption;
     }
 
-    void setPowerConsumption(const std::size_t pc)
+    void setPowerConsumption(const double pc)
     {
       powerConsumption = pc;
     }
 
   protected:
-    std::size_t powerConsumption;
+    double powerConsumption;
 };
 
 #endif // HSCD_VPC_COMPONENTINFO_H_

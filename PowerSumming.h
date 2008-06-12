@@ -18,8 +18,12 @@ class PowerSumming : public ComponentObserver
   private:
     std::ostream    &m_output;
     sc_core::sc_time m_changedTime;
-    std::size_t      m_powerSum;
-    std::map<const ComponentInfo *, std::size_t> m_powerConsumption;
+    double           m_powerSum;
+    std::map<const ComponentInfo *, double> m_powerConsumption;
+
+    sc_core::sc_time m_lastChangedTime;
+    double           m_lastPowerSum;
+    double           m_energySum;
 
     void printPowerChange();
 };

@@ -240,7 +240,7 @@ namespace SystemC_VPC{
       // No '=' character found!
       return false;
     }
-    const int value = atoi(equals + 1);
+    const double value = atof(equals + 1);
     
     if(strncmp(sValue, "IDLE", 4) == 0) {
       powerTable[Component::IDLE] = value;

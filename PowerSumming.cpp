@@ -5,7 +5,10 @@
 PowerSumming::PowerSumming(std::ostream &os) :
   m_output(os),
   m_changedTime(sc_core::SC_ZERO_TIME),
-  m_powerSum(0)
+  m_powerSum(0.0),
+  m_lastChangedTime(sc_core::SC_ZERO_TIME),
+  m_lastPowerSum(0.0),
+  m_energySum(0.0)
 {
   assert(m_output.good());
 }
@@ -17,8 +20,8 @@ PowerSumming::~PowerSumming()
 
 void PowerSumming::notify(const ComponentInfo *ci)
 {
-  std::size_t old_powerConsumption = m_powerConsumption[ci];
-  std::size_t new_powerConsumption = ci->getPowerConsumption();
+  double old_powerConsumption = m_powerConsumption[ci];
+  double new_powerConsumption = ci->getPowerConsumption();
 
   if(old_powerConsumption == new_powerConsumption)
     return;
@@ -36,19 +39,16 @@ void PowerSumming::notify(const ComponentInfo *ci)
 
 void PowerSumming::printPowerChange()
 {
-  static sc_core::sc_time lastChangedTime;
-  static std::size_t      lastPowerSum = 0;
-  static double           energySum    = 0.0;
+  unsigned long long timeStamp = m_changedTime.to_seconds() * 1000000000.0;
 
-  int timeStamp = int(m_changedTime.to_seconds() * 1000000000.0);
+  if( (m_lastPowerSum == m_powerSum) && (timeStamp != 0) )
+    return;
 
-  if( (lastPowerSum != m_powerSum) || (timeStamp == 0) ) {
-    double duration = (m_changedTime - lastChangedTime).to_seconds();
+  double duration = (m_changedTime - m_lastChangedTime).to_seconds();
 
-    energySum      += double(lastPowerSum) * duration;
-    lastPowerSum    = m_powerSum;
-    lastChangedTime = m_changedTime;
+  m_energySum      += m_lastPowerSum * duration;
+  m_lastPowerSum    = m_powerSum;
+  m_lastChangedTime = m_changedTime;
 
-    m_output << timeStamp << '\t' << m_powerSum << '\t' << energySum << std::endl;
-  }
+  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << std::endl;
 }
