@@ -50,7 +50,34 @@ namespace SystemC_VPC{
       size_t state;
   };
 
+  /**
+   * 
+   */
+  class PowerMode
+  {
+    public:
+      PowerMode(const size_t &_mode) : mode(_mode) {}
+
+      //FIXME: needed for std::map only
+      PowerMode() : mode(0) {}
+
+      bool operator==(const PowerMode &rhs) const
+      {
+        return mode == rhs.mode;
+      }
+
+      bool operator<(const PowerMode &rhs) const
+      {
+        return mode < rhs.mode;
+      }
+
+    private:
+      size_t mode;
+  };
+
   class Scheduler;
+
+  typedef std::map<std::string, PowerMode> PowerModes;
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -83,7 +110,9 @@ namespace SystemC_VPC{
      */
     Component( sc_module_name name,
 	       const char *schedulername )
-      : AbstractComponent(name)
+      : AbstractComponent(name),
+      powerMode(NULL),
+      powerModes()
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
@@ -129,7 +158,7 @@ namespace SystemC_VPC{
      * \brief Set parameter for Component and Scheduler.
      */
     virtual void processAndForwardParameter(char *sType,char *sValue);
-    virtual void processAndForwardAttribute(Attribute& fr_Attributes);
+    virtual void setAttribute(Attribute& fr_Attributes);
     
   protected:
 
@@ -155,7 +184,7 @@ namespace SystemC_VPC{
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
 
-    bool processParameter(char *sType,char *sValue);
+    bool processPower(Attribute att);
 
     // time last task started
     sc_time startTime;
@@ -168,6 +197,19 @@ namespace SystemC_VPC{
     static const ComponentState RUNNING;
 
     void setComponentState(const ComponentState &state);
+
+    PowerMode *powerMode;
+
+    PowerModes powerModes;
+
+    PowerMode getPowerMode(std::string mode){
+      PowerModes::const_iterator i = powerModes.find(mode);
+      if(i == powerModes.end()){
+        size_t id = powerModes.size();
+        powerModes[mode] = PowerMode(id);
+      }
+      return powerModes[mode];
+    }
   };
 
 } 

@@ -230,27 +230,44 @@ namespace SystemC_VPC{
   }
 
 
-  bool Component::processParameter(char *sType,char *sValue)
+  bool Component::processPower(Attribute att)
   {
-    if(strcmp(sType, "power") != 0)
-      return false;
-    
-    const char *equals = strchr(sValue, '=');
-    if(equals == NULL) {
-      // No '=' character found!
+    // deprecated format
+    if(att.isType("power")){
+      std::string v = att.getValue();
+      const char* sValue = v.c_str();
+
+      const char *equals = strchr(sValue, '=');
+      if(equals == NULL) {
+        // No '=' character found!
+        return false;
+      }
+      const double value = atof(equals + 1);
+      
+      if(strncmp(sValue, "IDLE", 4) == 0) {
+        powerTable[Component::IDLE] = value;
+      } else if(strncmp(sValue, "RUNNING", 7) == 0) {
+        powerTable[Component::RUNNING] = value;
+      } else {
+        // Not a supported power mode
+        return false;
+      }
+    }
+    // hierarchical format
+    if(!att.isType("powermode")) {
       return false;
     }
-    const double value = atof(equals + 1);
-    
-    if(strncmp(sValue, "IDLE", 4) == 0) {
-      powerTable[Component::IDLE] = value;
-    } else if(strncmp(sValue, "RUNNING", 7) == 0) {
-      powerTable[Component::RUNNING] = value;
-    } else {
-      // Not a supported power mode
-      return false;
+
+    if(att.hasAttribute("FAST")){
+      Attribute fast = att.getAttribute("FAST");
+      if(fast.hasAttribute("IDLE")){
+        Attribute idle = fast.getAttribute("IDLE");
+        std::string v =  idle.getType();
+        const int value = atoi(v.c_str());
+        powerTable[Component::IDLE] = value;
+      }
     }
-    
+        
     return true;
   }
 
@@ -258,13 +275,16 @@ namespace SystemC_VPC{
    *
    */
   void Component::processAndForwardParameter(char *sType,char *sValue){
-    if(processParameter(sType, sValue))
-      return;
     scheduler->setProperty(sType,sValue);
   }
   
-  void Component::processAndForwardAttribute(Attribute& fr_Attributes){
-    scheduler->setAttribute(fr_Attributes);
+  void Component::setAttribute(Attribute& attributes){
+    cerr << "Component recieved attribute: t=" << attributes.getType();
+    cerr << " v=" << attributes.getValue();
+    cerr << " size= " << attributes.getAttributeSize() << endl;
+    if(processPower(attributes))
+      return
+    scheduler->setAttribute(attributes);
   }
 
   /**
