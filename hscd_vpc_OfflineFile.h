@@ -20,16 +20,16 @@ namespace SystemC_VPC{
     const char *filename;
   
   public:
-    OfflineFile::OfflineFile(const char*);
-    OfflineFile::~OfflineFile();
-    bool OfflineFile::open();
-    void OfflineFile::close();
-    int OfflineFile::getlength();
-    std::string OfflineFile::getbuffer();
-    void OfflineFile::print();
+    OfflineFile(const char*);
+    ~OfflineFile();
+    bool open();
+    void close();
+    int getlength();
+    std::string getbuffer();
+    void print();
     
-    void OfflineFile::cleanstring(std::string*);
-    sc_time OfflineFile::generate_sctime(std::string);
+    void cleanstring(std::string*);
+    sc_time generate_sctime(std::string);
   };
 }
 #endif //HSCD_VPC_OFFLINEFILE_H_

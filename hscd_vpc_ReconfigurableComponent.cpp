@@ -243,7 +243,7 @@ namespace SystemC_VPC{
         if(sc_time_stamp() < this->controller->getRCWaitInterval(this)){
           wait(this->controller->getRCWaitInterval(this) - sc_time_stamp());
         }
-#ifdef RESERVATION
+#ifdef VPC_DEBUG
             std::cerr << VPC_BLUE("ReconfigurableComponent " << this->basename() << "> Setuptime-Reservation: " << this->controller->getRCWaitInterval(this) ) << std::endl;
 #endif //VPC_DEBUG
         

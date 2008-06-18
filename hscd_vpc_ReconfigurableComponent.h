@@ -75,7 +75,7 @@ namespace SystemC_VPC{
        * the reconfigurable instance is handled. 
        * Runs as SC_THREAD of ReconfigurableComponent
        */
-      void ReconfigurableComponent::schedule_thread();
+      void schedule_thread();
 
     protected:
 
@@ -218,7 +218,7 @@ namespace SystemC_VPC{
       /**
        * \brief Used to trace configuration state during simulation
        */ 
-      void ReconfigurableComponent::traceConfigurationState(Configuration* config, trace_value value);
+      void traceConfigurationState(Configuration* config, trace_value value);
   };
 
 }

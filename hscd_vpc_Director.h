@@ -85,7 +85,7 @@ namespace SystemC_VPC{
      */
     //AbstractComponent& getResource( const char *name );
     //  AbstractComponent& getResource(int process);
-     Director& Director::getResource( const char* name)
+     Director& getResource( const char* name)
        __attribute__((deprecated));
      
     /**

@@ -58,9 +58,9 @@ namespace SystemC_VPC {
        
     public:
        
-      OnlineBinder::OnlineBinder(char*);
+      OnlineBinder(char*);
 
-      OnlineBinder::~OnlineBinder();
+      ~OnlineBinder();
 
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock&, ReconfigurableComponent*) throw(UnknownBindingException);
     

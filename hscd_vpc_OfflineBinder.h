@@ -18,9 +18,9 @@ namespace SystemC_VPC {
   
     public:
        
-      OfflineBinder::OfflineBinder(char*);
+      OfflineBinder(char*);
 
-      OfflineBinder::~OfflineBinder();
+      ~OfflineBinder();
 
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
 

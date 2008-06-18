@@ -13,9 +13,9 @@ namespace SystemC_VPC {
 
     public:
        
-      SimpleBinder::SimpleBinder();
+      SimpleBinder();
 
-      SimpleBinder::~SimpleBinder();
+      ~SimpleBinder();
 
       std::pair<std::string, MappingInformation* > performBinding(ProcessControlBlock& task, ReconfigurableComponent* comp) throw(UnknownBindingException);
 

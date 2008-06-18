@@ -1,6 +1,6 @@
 #include "hscd_vpc_OnlineBinder.h"
 
-#define VPC_DEBUG
+//#define VPC_DEBUG
 namespace SystemC_VPC {
   /**
    * \brief Implementation of OnlineBinder constructor
@@ -186,7 +186,9 @@ if(strcmp(algorithm,"List") == 0){
     }
     if(sc_time_stamp() < timesTable[chosen].time){
       RCWaitInterval = timesTable[chosen].time;
+#ifdef VPC_DEBUG      
       std::cerr << "OnlineBinder> RCWaitInterval: " << RCWaitInterval << std::endl;
+#endif
     }
     timesTable[chosen].time += getSetuptime(task);
             
@@ -218,7 +220,9 @@ if(strcmp(algorithm,"List") == 0){
   if( (timesTable[lowestLi].time + job) <= (1.986 * ARi) ){
     chosen = timesTable[lowestLi].recomponentnumber;
     RCWaitInterval = timesTable[lowestLi].time + lowestLi * getSetuptime(task);
+#ifdef VPC_DEBUG    
     std::cerr << "OnlineBinder> RCWaitInterval: " << RCWaitInterval << std::endl;
+#endif    
     timesTable[lowestLi].time = RCWaitInterval;
     timesTable[lowestLi].time += job;
   }else{
@@ -252,9 +256,11 @@ if(strcmp(algorithm,"List") == 0){
       if(zero_slots != 0){
         RCWaitInterval = zero_slots * getSetuptime(task);
       }else{
-        RCWaitInterval = timesTable[i].time + i * getSetuptime(task);
+        RCWaitInterval = timesTable[i].time + getSetuptime(task);
       }
+#ifdef VPC_DEBUG      
       std::cerr << "OnlineBinder> RCWaitInterval: " << RCWaitInterval << std::endl;
+#endif
       timesTable[i].time = RCWaitInterval;
       timesTable[i].time += job;
       break; 
@@ -265,7 +271,9 @@ if(strcmp(algorithm,"List") == 0){
     chosen = timesTable[0].recomponentnumber;
     if(zero_slots != 0){
       RCWaitInterval = zero_slots * getSetuptime(task);
+#ifdef VPC_DEBUG      
       std::cerr << "OnlineBinder> RCWaitInterval: " << RCWaitInterval << std::endl;
+#endif
       timesTable[0].time += RCWaitInterval;
     }
     timesTable[0].time += job;
@@ -307,7 +315,9 @@ if(strcmp(algorithm,"List") == 0){
              }else{ //i+1 loaded
                chosen = timesTable[i+1].recomponentnumber;
                RCWaitInterval = timesTable[i+1].time + i * getSetuptime(task);
+#ifdef VPC_DEBUG               
                std::cerr << "OnlineBinder> RCWaitInterval: " << RCWaitInterval << std::endl;
+#endif
                timesTable[i+1].time = RCWaitInterval;
                timesTable[i+1].time += job;
              }

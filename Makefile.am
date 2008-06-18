@@ -26,6 +26,7 @@ include $(auxdir)/jfrules.mk
 include ../BuildSystem/doxygen.am
 
 SUBDIRS=
+CPPFLAGS = -O
 
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
@@ -119,8 +120,6 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_OfflineBinder.cpp		\
 	hscd_vpc_OfflineFile.cpp		\
 	hscd_vpc_OnlineAllocator.cpp		\
-	hscd_vpc_ListBinder.cpp		\
-	hscd_vpc_OnlineController.cpp 	\
 	hscd_vpc_OnlineBinder.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 
