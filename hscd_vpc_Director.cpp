@@ -418,6 +418,11 @@ namespace SystemC_VPC{
     return sc_time(value, scUnit);
   }
 
+  sc_time Director::createSC_Time(std::string timeString)
+    throw(InvalidArgumentException){
+    return Director::createSC_Time( timeString.c_str());
+  }
+
 std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
   ComponentId cid=getComponentId(compName);
   return reverseMapping[cid];

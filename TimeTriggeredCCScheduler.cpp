@@ -122,10 +122,12 @@ namespace SystemC_VPC{
   }
 
   void TimeTriggeredCCScheduler::setAttribute(Attribute& fr_Attribute){
-  	char* value = fr_Attribute.getType();
+  	std::string value = fr_Attribute.getType();
 	int i,j,k,l,m;
-	assert(value!=NULL);
-  	assert (strncmp("FlexRayParams", value, sizeof(value))==0);
+
+  	if( value!="FlexRayParams" )
+          return;
+
 	if(fr_Attribute.getParameterSize()!=0){
 		//es gibt folglich globale FlexRay-Parameter!
 		for(j=0;j<fr_Attribute.getParameterSize();j++){

@@ -98,7 +98,7 @@ namespace SystemC_VPC{
      */
     virtual void processAndForwardParameter(char *sType,char *sValue)=0;
     
-    virtual void processAndForwardAttribute(Attribute& fr_Attribute)=0;
+    virtual void setAttribute(Attribute& fr_Attribute) {};
 
     const char* getName() const;
 

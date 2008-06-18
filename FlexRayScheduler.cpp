@@ -174,27 +174,26 @@ namespace SystemC_VPC{
   }
 
   void FlexRayScheduler::setAttribute(Attribute& fr_Attribute){
-  	char* value = fr_Attribute.getType();
-	int i,j,k,l,m;
-	assert(value!=NULL);
-  	assert (strncmp("FlexRayParams", value, sizeof(value))==0);
+  	std::string value = fr_Attribute.getType();
+	int j,k,l;
+	//assert(value!=NULL);
+  	if( value!="FlexRayParams" )
+          return;
+
 	//cout<<fr_Attribute.getAttributeSize()<<endl;
 	if(fr_Attribute.getParameterSize()!=0){
 		//es gibt folglich globale FlexRay-Parameter!
-		for(j=0;j<fr_Attribute.getParameterSize();j++){
-			std::pair<std::string, std::string > param2 =fr_Attribute.getNextParameter(j);
-			if(param2.first == "dualchannel")
-				dualchannel=(param2.second == "true");
-			}
+          if(fr_Attribute.hasParameter("duachannel")){
+            dualchannel=(fr_Attribute.getParameter("duachannel") == "true");
+          }
 	}
 	
-	for(i=0;i<fr_Attribute.getAttributeSize();i++){
-	std::pair<std::string, Attribute >attribute=fr_Attribute.getNextAttribute(i);
 	
-	if(attribute.first=="static"){
+	if( fr_Attribute.hasAttribute("static") ){
+          Attribute fr_static = fr_Attribute.getAttribute("static");
 		StartslotDynamic=0;
-		for(k=0;k<attribute.second.getAttributeSize();k++){
-			std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(k);
+		for(k=0;k<fr_static.getAttributeSize();k++){
+			std::pair<std::string, Attribute >attribute2=fr_static.getNextAttribute(k);
 			//Slot einrichten
 			StartslotDynamic++;
 			slicecount++;
@@ -226,16 +225,21 @@ namespace SystemC_VPC{
                               //we don't have further Parameters, so let them as they are
                             }else{
                               //parse parameters
-                              for(m=0;m<attribute3.second.getParameterSize();m++){
-                              std::pair<std::string, std::string > param4 =attribute3.second.getNextParameter(m);
-                                if(param4.first=="offset"){
-                                  ProcessParams_string[param3.first].offset=atoi(param4.second.c_str());
+                              if(attribute3.second.hasParameter("offset")){
+                                ProcessParams_string[param3.first].offset
+                                  = atoi(
+                                    attribute3.second.getParameter("offset")
+                                    .c_str()
+                                    );
 //                                   cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
-                                }
-                                if(param4.first=="multiplex"){
-                                  ProcessParams_string[param3.first].multiplex=atoi(param4.second.c_str());
+                              }
+                              if(attribute3.second.hasParameter("multiplex")){
+                                ProcessParams_string[param3.first].multiplex
+                                  = atoi(
+                                    attribute3.second.getParameter("multiplex")
+                                    .c_str()
+                                    );
 //                                   cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
-                                }
                               }
                             }
                           }
@@ -265,12 +269,13 @@ namespace SystemC_VPC{
 			
 		}
 		*/
-			
-	}else if(attribute.first=="dynamic"){
-		this->TimeDynamicSegment = Director::createSC_Time(attribute.second.getValue());
+        }	
+	if( fr_Attribute.hasAttribute("dynamic") ){
+          Attribute fr_dynamic = fr_Attribute.getAttribute("dynamic");
+		this->TimeDynamicSegment = Director::createSC_Time(fr_dynamic.getValue());
 		
-		for(k=0;k<attribute.second.getAttributeSize();k++){
-			std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(k);
+		for(k=0;k<fr_dynamic.getAttributeSize();k++){
+			std::pair<std::string, Attribute >attribute2=fr_dynamic.getNextAttribute(k);
 			//Slot einrichten
 			slicecount++;
 			std::pair<std::string, std::string > param;
@@ -309,7 +314,6 @@ namespace SystemC_VPC{
 		}
 	*/
 	}	
-	}
   }
   
   bool FlexRayScheduler::getSchedulerTimeSlice( sc_time& time,

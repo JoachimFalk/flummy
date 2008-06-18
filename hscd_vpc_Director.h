@@ -194,6 +194,11 @@ namespace SystemC_VPC{
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
      */
     static sc_time createSC_Time(const char* timeString) throw(InvalidArgumentException);
+
+    /**
+     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
+     */
+    static sc_time createSC_Time(std::string timeString) throw(InvalidArgumentException);
     
     std::vector<ProcessId> * getTaskAnnotation(std::string compName);
 
