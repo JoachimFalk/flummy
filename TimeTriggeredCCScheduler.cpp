@@ -123,26 +123,25 @@ namespace SystemC_VPC{
 
   void TimeTriggeredCCScheduler::setAttribute(Attribute& fr_Attribute){
     std::string value = fr_Attribute.getType();
-    int i,j,k,l,m;
 
     if( value!="FlexRayParams" )
       return;
 
     if(fr_Attribute.getParameterSize()!=0){
       //es gibt folglich globale FlexRay-Parameter!
-      for(j=0;j<fr_Attribute.getParameterSize();j++){
+      for(size_t j=0;j<fr_Attribute.getParameterSize();j++){
         std::pair<std::string, std::string > param2 =fr_Attribute.getNextParameter(j);
         if(param2.first == "dualchannel")
           dualchannel=(param2.second == "true");
       }
     }
 
-    for(i=0;i<fr_Attribute.getAttributeSize();i++){
+    for(size_t i=0;i<fr_Attribute.getAttributeSize();i++){
       std::pair<std::string, Attribute >attribute=fr_Attribute.getNextAttribute(i);
         
       if(attribute.first=="static"){
         StartslotDynamic=0;
-        for(k=0;k<attribute.second.getAttributeSize();k++){
+        for(size_t k=0;k<attribute.second.getAttributeSize();k++){
           std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(k);
           //Slot einrichten
           StartslotDynamic++;
@@ -160,7 +159,7 @@ namespace SystemC_VPC{
 
           //jetzt noch die Task-mappings!
           //für jeden Attribute-Eintrag Parameter verarbeiten
-          for(l=0;l<attribute2.second.getAttributeSize();l++){
+          for(size_t l=0;l<attribute2.second.getAttributeSize();l++){
             std::pair<std::string, Attribute >attribute3=attribute2.second.getNextAttribute(l);
             std::pair<std::string, std::string > param3;
             if(attribute3.first=="mapping"){
@@ -175,7 +174,7 @@ namespace SystemC_VPC{
                 //we don't have further Parameters, so let them as they are
               }else{
                 //parse parameters
-                for(m=0;m<attribute3.second.getParameterSize();m++){
+                for(size_t m=0;m<attribute3.second.getParameterSize();m++){
                   std::pair<std::string, std::string > param4 =attribute3.second.getNextParameter(m);
                   if(param4.first=="offset"){
                     ProcessParams_string[param3.first].offset=atoi(param4.second.c_str());

@@ -88,11 +88,11 @@ namespace SystemC_VPC{
     attributes.push_back( std::make_pair(type, att) );
   }
 
-  int Attribute::getParameterSize(){
+  size_t Attribute::getParameterSize(){
     return parameters.size();
   }
 
-  int Attribute::getAttributeSize(){
+  size_t Attribute::getAttributeSize(){
     return attributes.size();
   }
 

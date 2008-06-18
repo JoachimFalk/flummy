@@ -175,7 +175,6 @@ namespace SystemC_VPC{
 
   void FlexRayScheduler::setAttribute(Attribute& fr_Attribute){
     std::string value = fr_Attribute.getType();
-    int j,k,l;
     //assert(value!=NULL);
     if( value!="FlexRayParams" )
       return;
@@ -192,7 +191,7 @@ namespace SystemC_VPC{
     if( fr_Attribute.hasAttribute("static") ){
       Attribute fr_static = fr_Attribute.getAttribute("static");
       StartslotDynamic=0;
-      for(k=0;k<fr_static.getAttributeSize();k++){
+      for(size_t k=0;k<fr_static.getAttributeSize();k++){
         std::pair<std::string, Attribute >attribute2=fr_static.getNextAttribute(k);
         //Slot einrichten
         StartslotDynamic++;
@@ -210,7 +209,7 @@ namespace SystemC_VPC{
                         
         //jetzt noch die Task-mappings!
         //für jeden Attribute-Eintrag Parameter verarbeiten
-        for(l=0;l<attribute2.second.getAttributeSize();l++){
+        for(size_t l=0;l<attribute2.second.getAttributeSize();l++){
           std::pair<std::string, Attribute >attribute3=attribute2.second.getNextAttribute(l);
           std::pair<std::string, std::string > param3;
           if(attribute3.first=="mapping"){
@@ -274,7 +273,7 @@ namespace SystemC_VPC{
       Attribute fr_dynamic = fr_Attribute.getAttribute("dynamic");
       this->TimeDynamicSegment = Director::createSC_Time(fr_dynamic.getValue());
                 
-      for(k=0;k<fr_dynamic.getAttributeSize();k++){
+      for(size_t k=0;k<fr_dynamic.getAttributeSize();k++){
         std::pair<std::string, Attribute >attribute2=fr_dynamic.getNextAttribute(k);
         //Slot einrichten
         slicecount++;
@@ -295,7 +294,7 @@ namespace SystemC_VPC{
         //                      cout<<"new Dynamic One! " << newSlot.length <<endl;
                 
         //jetzt noch die Task-mappings!
-        for(j=0;j<attribute2.second.getParameterSize();j++){
+        for(size_t j=0;j<attribute2.second.getParameterSize();j++){
           std::pair<std::string, std::string > param2 =attribute2.second.getNextParameter(j);
           if(param2.first == "mapping"){
             param2.first=param2.second;

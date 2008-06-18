@@ -57,8 +57,8 @@ namespace SystemC_VPC{
 
     void addAttribute( std::string type, Attribute& att );
 
-    int getParameterSize();
-    int getAttributeSize();
+    size_t getParameterSize();
+    size_t getAttributeSize();
 
     std::string getValue();
     std::string getType();
