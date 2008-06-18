@@ -13,7 +13,7 @@ namespace SystemC_VPC{
   class Component;
   
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
-  	pid_fifo enthaelt die laufbereiten Prozesse  
+    pid_fifo enthaelt die laufbereiten Prozesse  
   */
 
   class TimeTriggeredCCScheduler : public Scheduler{

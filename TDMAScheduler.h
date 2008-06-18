@@ -13,18 +13,18 @@ namespace SystemC_VPC{
   typedef size_t ProcessId;
   typedef std::deque< std::pair <std::string, std::string> > Properties;
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
-  	pid_fifo enthaelt die laufbereiten Prozesse  
+    pid_fifo enthaelt die laufbereiten Prozesse  
   */
   struct TDMASlot{
-  	sc_time length;
-	std::string name;
-	std::deque<ProcessId> pid_fifo;
+    sc_time length;
+    std::string name;
+    std::deque<ProcessId> pid_fifo;
   };
   
   class TDMAScheduler : public Scheduler{
   public:
     
-   TDMAScheduler(){
+    TDMAScheduler(){
       this->lastassign=sc_time(0,SC_NS);
       this->remainingSlice=sc_time(0,SC_NS);
       slicecount=0;

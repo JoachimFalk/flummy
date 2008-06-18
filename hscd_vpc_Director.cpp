@@ -397,21 +397,21 @@ namespace SystemC_VPC{
       data >> unit;
       if(data.fail()){
 #ifdef VPC_DEBUG
-	std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!"
+        std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!"
                   << std::endl;
 #endif //VPC_DEBUG
-	scUnit = SC_NS;
+        scUnit = SC_NS;
       }else{
-	std::transform (unit.begin(),
+        std::transform (unit.begin(),
                         unit.end(),
                         unit.begin(),
                         (int(*)(int))tolower);
-	if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
-	else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
-	else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
-	else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
-	else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
-	else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
+        if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
+        else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
+        else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
+        else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
+        else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
+        else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
       }
     }
 

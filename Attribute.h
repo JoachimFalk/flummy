@@ -15,7 +15,7 @@ namespace SystemC_VPC{
   typedef std::deque<std::pair<std::string, std::string>  >  Parameters;
 
   class Attribute{
-  public:	
+  public:
     Attribute();
 
     /**
@@ -38,7 +38,7 @@ namespace SystemC_VPC{
     bool hasParameter(const std::string type);
 
     void addParameter(std::string type, std::string value);
-		
+
     std::pair<std::string, Attribute > getNextAttribute(size_t pos)
       throw (InvalidArgumentException);
 
@@ -59,7 +59,7 @@ namespace SystemC_VPC{
 
     int getParameterSize();
     int getAttributeSize();
-		
+
     std::string getValue();
     std::string getType();
 
@@ -72,7 +72,6 @@ namespace SystemC_VPC{
 
     void setValue(std::string);
     void setType(std::string);
-		
 
     ~Attribute(){
       std::cerr << "~Attribute(" << getType() << ", ";
@@ -85,7 +84,6 @@ namespace SystemC_VPC{
 
     Parameters  parameters;
     Attributes  attributes;
-	
   };
 }
 

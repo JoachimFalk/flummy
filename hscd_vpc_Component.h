@@ -109,7 +109,7 @@ namespace SystemC_VPC{
      * passive actors and global SMoC v2 Schedulers.
      */
     Component( sc_module_name name,
-	       const char *schedulername )
+               const char *schedulername )
       : AbstractComponent(name),
       powerMode(NULL),
       powerModes()
@@ -133,7 +133,7 @@ namespace SystemC_VPC{
       char tracefilechar[VPC_MAX_STRING_LENGTH];
       char* traceprefix= getenv("VPCTRACEFILEPREFIX");
       if(0!=traceprefix){
-	tracefilename.insert(0,traceprefix);
+        tracefilename.insert(0,traceprefix);
       }
       strcpy(tracefilechar,tracefilename.c_str());
       vcd_trace_file *vcd = new vcd_trace_file(tracefilechar);

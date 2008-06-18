@@ -1,11 +1,11 @@
 
 /* 
    TDMA-Scheduler mit variabler Minislot-Groesze!
-	
+
    CMX-Format:
    Slotkennzeichen: type="slotxxxxx"
    Funktionszuordnung: value="slotxxxxx"
-	
+
    z.B.
    <component name="Component1" type="threaded" scheduler="TDMA">
    <attribute type="slot0" value="20ns"/>
@@ -65,13 +65,13 @@ namespace SystemC_VPC{
   
   void TDMAScheduler::initialize(){   
     for(Properties::const_iterator iter = this->_properties.begin();
-	iter != this->_properties.end();
-	++iter){
+        iter != this->_properties.end();
+        ++iter){
       this->_setProperty(iter->first.c_str(), iter->second.c_str());
     }
 #ifdef VPC_DEBUG
     cout << "------------ END Initialize ---------"<<endl;
-#endif //VPC_DEBUG 	
+#endif //VPC_DEBUG      
     this->_properties.clear();
   }
   
@@ -89,16 +89,16 @@ namespace SystemC_VPC{
         if(domain!=NULL){
           //Erstellen der TDMA-Struktur
           TDMASlot newSlot;
-          newSlot.length = Director::createSC_Time(value);	
+          newSlot.length = Director::createSC_Time(value);      
           newSlot.name = key;
           TDMA_slots.insert(TDMA_slots.end(), newSlot);
           slicecount++;
-          /*Erzeugen einer Info-Ausgabe		
+          /*Erzeugen einer Info-Ausgabe         
             domain[0]='\0';
             sscanf(value,"%lf",&slottime);
             std::cout << "Datensatz fuer Slot Nr." << slot 
             <<"gefunden! TDMA-Slotdauer: " <<slottime << "ns"<<std::endl;
-          */		
+          */            
         }
       }
     }else if(0==strncmp(value,"slot",strlen("slot"))){
@@ -109,13 +109,13 @@ namespace SystemC_VPC{
       do{
         //nichts zu tun.. da lediglich durchiteriert wird!
       }while(TDMA_slots[++i].name != value && (i+1)<(int)TDMA_slots.size());
-    	 
-      //auch wirklich etwas passendes gefunden?		
+         
+      //auch wirklich etwas passendes gefunden?         
       assert(i<(int)TDMA_slots.size());
       //Beziehung PId - SlotID herstellen
       PIDmap[Director::getInstance().getProcessId(key)]=i;   
-      // 		cout<<"add Function " <<  key << " to " << value<<endl;
-    }	
+      //                cout<<"add Function " <<  key << " to " << value<<endl;
+    }   
   }
 
   
@@ -161,10 +161,10 @@ namespace SystemC_VPC{
   
   // Eigentlicher Scheduler
   scheduling_decision TDMAScheduler::schedulingDecision(
-    int& task_to_resign,
-    int& task_to_assign,
-    const PCBMap &ready_tasks,
-    const PCBMap &running_tasks )
+                                                        int& task_to_resign,
+                                                        int& task_to_assign,
+                                                        const PCBMap &ready_tasks,
+                                                        const PCBMap &running_tasks )
   {
     scheduling_decision ret_decision=NOCHANGE;
     //Zeitscheibe abgelaufen?
@@ -184,12 +184,12 @@ namespace SystemC_VPC{
 
       if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
         task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
-        // 	cout<<"Scheduler:new task: " << task_to_assign << "..." <<endl;
+        //      cout<<"Scheduler:new task: " << task_to_assign << "..." <<endl;
         
-	//alter wurde schon entfernt (freiwillige abgabe "BLOCK")
+        //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
         // -> kein preemption!
         ret_decision= ONLY_ASSIGN;
-	
+        
         if(running_tasks.size()!=0){  // alten Task entfernen
           PCBMap::const_iterator iter;
           iter=running_tasks.begin();
@@ -209,9 +209,9 @@ namespace SystemC_VPC{
           task_to_resign=pcb->getInstanceId();
           ret_decision=RESIGNED;
         }else{
-          //war keiner da... und ist auch kein Neuer da -> keine AEnderung	
+          //war keiner da... und ist auch kein Neuer da -> keine AEnderung      
           ret_decision=NOCHANGE;
-	}      	
+        }       
       }    
     }else{
       //neuer Task hinzugefuegt -> nichts tun 

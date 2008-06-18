@@ -54,15 +54,15 @@ namespace SystemC_VPC {
     void value(trace_value value){
       if(lastChange != sc_time_stamp()){
         // remember value from last real changing (ignore delta cycle changing)
-	lastValue    = *traceSignal;
-	lastChange   = sc_time_stamp();
+        lastValue    = *traceSignal;
+        lastChange   = sc_time_stamp();
       }
       if(lastValue == value){
         // if value does not change toggle between upper and lower case
-	if(value & LOWER_CASE) *traceSignal  = value & UPPER_CASE;
-	else                   *traceSignal  = value | LOWER_CASE;
+        if(value & LOWER_CASE) *traceSignal  = value & UPPER_CASE;
+        else                   *traceSignal  = value | LOWER_CASE;
       }else{
-	*traceSignal  = value;
+        *traceSignal  = value;
       }
     }
 

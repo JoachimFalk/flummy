@@ -11,7 +11,7 @@ namespace SystemC_VPC{
   class Component;
   
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
-  	pid_fifo enthaelt die laufbereiten Prozesse  
+    pid_fifo enthaelt die laufbereiten Prozesse  
   */
   struct SlotParameters{
     int offset; //in cycles
@@ -21,7 +21,7 @@ namespace SystemC_VPC{
   class FlexRayScheduler : public Scheduler{
   public:
     
-   FlexRayScheduler(){
+    FlexRayScheduler(){
       this->lastassign=sc_time(0,SC_NS);
       this->remainingSlice=sc_time(0,SC_NS);
       slicecount=0;

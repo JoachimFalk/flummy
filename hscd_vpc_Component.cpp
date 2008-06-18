@@ -399,7 +399,7 @@ namespace SystemC_VPC{
 
         //cerr << "Pop from list: " << front.time << " : " 
         //<< front.pcb->getBlockEvent().latency << endl;
-        sc_time waitFor	= front.time-sc_time_stamp();
+        sc_time waitFor = front.time-sc_time_stamp();
         assert(front.time >= sc_time_stamp());
         //cerr << "Pipeline> Wait till " << front.time
         //<< " (" << waitFor << ") at: " << sc_time_stamp() << endl;

@@ -10,11 +10,11 @@ namespace SystemC_VPC{
   Attribute::Attribute( std::string type, std::string value)
     : type(type), value(value){}
 
-std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos)
-  throw(InvalidArgumentException){
-	if(pos<=parameters.size()) return parameters[pos];
-	throw new InvalidArgumentException("getNextParameter");
-}
+  std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos)
+    throw(InvalidArgumentException){
+    if(pos<=parameters.size()) return parameters[pos];
+    throw new InvalidArgumentException("getNextParameter");
+  }
 
   //
   std::string Attribute::getParameter(const std::string type)
@@ -46,12 +46,12 @@ std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos)
     this->parameters.push_back( std::make_pair(type, value) );
   }
 
-std::pair<std::string, Attribute > Attribute::getNextAttribute(size_t pos)
-  throw(InvalidArgumentException){
-	if(pos<=attributes.size()) return attributes[pos];
-	throw new InvalidArgumentException("getNextAttribute");
-	
-}
+  std::pair<std::string, Attribute > Attribute::getNextAttribute(size_t pos)
+    throw(InvalidArgumentException){
+    if(pos<=attributes.size()) return attributes[pos];
+    throw new InvalidArgumentException("getNextAttribute");
+        
+  }
 
   //
   Attribute Attribute::getAttribute(const std::string name)
@@ -88,30 +88,27 @@ std::pair<std::string, Attribute > Attribute::getNextAttribute(size_t pos)
     attributes.push_back( std::make_pair(type, att) );
   }
 
-int Attribute::getParameterSize(){
-	return parameters.size();
-}
+  int Attribute::getParameterSize(){
+    return parameters.size();
+  }
 
-int Attribute::getAttributeSize(){
-	return attributes.size();
-}
+  int Attribute::getAttributeSize(){
+    return attributes.size();
+  }
 
-std::string Attribute::getValue(){
-	return value;
-}
+  std::string Attribute::getValue(){
+    return value;
+  }
 
-std::string Attribute::getType(){
-	return type;
-}
+  std::string Attribute::getType(){
+    return type;
+  }
 
-void Attribute::setValue(std::string newValue){
-	value=newValue;
-}
+  void Attribute::setValue(std::string newValue){
+    value=newValue;
+  }
 
-void Attribute::setType(std::string newType){
-	type=newType;
-}
-		
-	
-
+  void Attribute::setType(std::string newType){
+    type=newType;
+  }
 }
