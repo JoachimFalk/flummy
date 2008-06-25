@@ -282,8 +282,9 @@ namespace SystemC_VPC{
     cerr << "Component recieved attribute: t=" << attributes.getType();
     cerr << " v=" << attributes.getValue();
     cerr << " size= " << attributes.getAttributeSize() << endl;
-    if(processPower(attributes))
-      return
+    if(processPower(attributes)){
+      return;
+    }
     scheduler->setAttribute(attributes);
   }
 
