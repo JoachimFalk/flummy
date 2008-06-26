@@ -2,5 +2,5 @@
 #include <iostream>
 
 #ifdef DBG_ENABLE
-CoSupport::DebugOstream dbgout(std::cerr);
+CoSupport::Streams::DebugOStream dbgout(std::cerr);
 #endif //DBG_ENABLE

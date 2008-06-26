@@ -7,7 +7,7 @@
 //#define DBG_ENABLE
 
 #ifdef DBG_ENABLE
-extern CoSupport::DebugOstream dbgout;
+extern CoSupport::Streams::DebugOStream dbgout;
 #endif //DBG_ENABLE
 
 /** enable/disable debugging for StaticRoute */
