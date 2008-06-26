@@ -25,7 +25,6 @@
 #include <hscd_vpc_PriorityScheduler.h>
 #include <hscd_vpc_RateMonotonicScheduler.h>
 #include <hscd_vpc_datatypes.h>
-#include <hscd_vpc_Director.h>
 
 #include <float.h>
 
@@ -345,20 +344,18 @@ namespace SystemC_VPC{
    */
   void Component::compute(ProcessControlBlock* actualTask){ 
 
-    DBG_OUT("Component::compute ( " << actualTask->getName()
+    DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
             << " ) at time: " << sc_time_stamp()
             << endl);
 
     // reset the execution delay
+    FunctionId fid = actualTask->getFunctionId();
     actualTask->
-      setRemainingDelay(actualTask->getFuncDelay(this->getComponentId(),
-                                                 actualTask->getFunctionId()));
+      setRemainingDelay(actualTask->ComponentDelay::getDelay(fid));
     actualTask->
-      setDelay(actualTask->getFuncDelay(this->getComponentId(),
-                                        actualTask->getFunctionId()));
+      setDelay(actualTask->ComponentDelay::getDelay(fid));
     actualTask->
-      setLatency(actualTask->getFuncLatency(this->getComponentId(),
-                                            actualTask->getFunctionId()));
+      setLatency(actualTask->ComponentDelay::getLatency(fid));
 #ifdef VPC_DEBUG
     cerr << "Using " << actualTask->getRemainingDelay()
          << " as delay for function " << actualTask->getFuncName() << "!"
@@ -437,7 +434,7 @@ namespace SystemC_VPC{
    */
   void Component::moveToRemainingPipelineStages(ProcessControlBlock* task){
     sc_time now                 = sc_time_stamp();
-    sc_time restOfLatency       = task->getLatency() - task->getDelay();
+    sc_time restOfLatency       = task->getLatency()  - task->getDelay();
     sc_time end                 = now + restOfLatency;
     if(end <= now){
       //early exit if (Latency-DII) <= 0

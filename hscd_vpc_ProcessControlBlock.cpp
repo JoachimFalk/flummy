@@ -1,21 +1,45 @@
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "hscd_vpc_Director.h"
+#include "hscd_vpc_PCBPool.h"
+
+#include "debug_config.h"
+// if compiled with DBG_COMPONENT create stream and include debug macros
+#ifdef DBG_PCB
+#include <CoSupport/Streams/DebugOStream.hpp>
+#include <CoSupport/Streams/FilterOStream.hpp>
+  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
+  //  with this name exists when DBG.. is used. here every actor creates its
+  //  own stream.
+  #define DBGOUT_STREAM dbgout
+  #include "debug_on.h"
+#else
+  #include "debug_off.h"
+#endif
 
 namespace SystemC_VPC{
 
   int ProcessControlBlock::globalInstanceId = 0;
 
-  DelayMapper::ComponentDelay::ComponentDelay( ComponentId cid )
-    : cid(cid),
-      funcDelays(1, SC_ZERO_TIME),
+  DelayMapper::ComponentDelay::ComponentDelay( )
+    : funcDelays(1, SC_ZERO_TIME),
       funcLatencies(1, SC_ZERO_TIME)
   {
     setBaseDelay(SC_ZERO_TIME);
     setBaseLatency(SC_ZERO_TIME);
   }
 
+  DelayMapper::ComponentDelay::ComponentDelay( const ComponentDelay &delay )
+    : funcDelays(    delay.funcDelays    ),
+      funcLatencies( delay.funcLatencies )
+  {
+    setBaseDelay(   delay.getBaseDelay()   );
+    setBaseLatency( delay.getBaseLatency() );
+  }
+
   void DelayMapper::ComponentDelay::addDelay( FunctionId fid,
-                                                      sc_time delay ){
+                                              sc_time delay ){
+    DBG_OUT( "::addDelay(" << fid << ") " << delay
+             << std::endl);
     if( fid >= funcDelays.size()){
       funcDelays.resize( fid + 100, SC_ZERO_TIME );
     }
@@ -23,6 +47,8 @@ namespace SystemC_VPC{
   }
 
   void DelayMapper::ComponentDelay::setBaseDelay( sc_time delay ){
+    DBG_OUT( "::setBaseDelay() " << delay
+             << std::endl);
     this->funcDelays[defaultFunctionId] = delay;
   }
 
@@ -33,6 +59,8 @@ namespace SystemC_VPC{
   sc_time DelayMapper::ComponentDelay::getDelay(
     FunctionId fid) const
   {
+    DBG_OUT( "::getDelay(" << fid << ") " << funcDelays.size()
+             << std::endl);
     assert(fid < funcDelays.size());
     sc_time ret = funcDelays[fid];
     return ret;
@@ -64,117 +92,9 @@ namespace SystemC_VPC{
 
   DelayMapper::~DelayMapper(){}
 
-  DelayMapper::DelayMapper(const DelayMapper & dm)
-    : functionIdMap(dm.functionIdMap),
-      globalFunctionId(dm.globalFunctionId),
-      compDelays(dm.compDelays) {}
+  DelayMapper::DelayMapper(const DelayMapper & dm) {}
 
-  DelayMapper::DelayMapper()
-    : functionIdMap(),
-      globalFunctionId( defaultFunctionId + 1 ),
-      compDelays() {}
-
-  void DelayMapper::addFuncDelay( Director* director,
-                                  std::string comp,
-                                  const char* funcname,
-                                  sc_time delay ){
-    
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Adding Function Delay for " << comp;
-    if(funcname != NULL){
-      std::cerr << " function " << funcname;
-    }
-    std::cerr << " delay " << delay << std::endl;
-#endif //VPC_DEBUG
-
-    ComponentId cid = director->getComponentId(comp);
-
-    if(cid >= compDelays.size()){
-      compDelays.resize( cid + 100, NULL );
-    }
-
-    if( this->compDelays[cid] == NULL ){
-      this->compDelays[cid] = new ComponentDelay(cid);
-    }
-
-    ComponentDelay *cd = this->compDelays[cid];
-
-    if(funcname != NULL){
-      FunctionId  fid = this->createFunctionId(funcname);
-      cd->addDelay(fid, delay);
-    } else {
-      cd->setBaseDelay(delay);
-    }
-  }
-
-  sc_time DelayMapper::getFuncDelay( ComponentId cid,
-                                     FunctionId  fid ) const
-  {
-    ComponentDelay * cd = this->compDelays[cid];
-
-    assert( cd != NULL );
-    sc_time ret = cd->getDelay(fid);
-
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Delay for " << cid;
-    std::cerr << "->" << fid;
-    std::cerr << " is " << ret << std::endl;
-#endif //VPC_DEBUG 
-    
-    return ret;
-  }
-
-  void DelayMapper::addFuncLatency( Director* director,
-                                    std::string comp,
-                                    const char* funcname,
-                                    sc_time latency ){
-    
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Adding Function Latency for -" << comp << "-";
-    if(funcname != NULL){
-      std::cerr << " function " << funcname;
-    }
-    std::cerr << " latency " << latency << std::endl;
-#endif //VPC_DEBUG
-
-    ComponentId cid = director->getComponentId(comp);
-
-    if(cid >= compDelays.size()){
-      compDelays.resize( cid + 100, NULL );
-    }
-
-    if( this->compDelays[cid] == NULL ){
-      this->compDelays[cid] = new ComponentDelay(cid);
-    }
-
-    ComponentDelay *cd = this->compDelays[cid];
-
-    if(funcname != NULL){
-      FunctionId  fid = this->createFunctionId(funcname);
-      cd->addLatency(fid, latency);
-    } else {
-      cd->setBaseLatency(latency);
-    }
-
-  }
-
-  sc_time DelayMapper::getFuncLatency( ComponentId cid,
-                                       FunctionId  fid ) const
-  {
-    ComponentDelay * cd = this->compDelays[cid];
-
-    assert( cd != NULL );
-    sc_time ret = cd->getLatency(fid);
-
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Latency for " << cid;
-    std::cerr << "->" << fid;
-    std::cerr << " is " << ret << std::endl;
-#endif //VPC_DEBUG 
-
-    return ret;
-  }
-
+  DelayMapper::DelayMapper() {}
 
   ProcessControlBlock::ActivationCounter::ActivationCounter() :
     activation_count(0){}
@@ -193,7 +113,8 @@ namespace SystemC_VPC{
    */
   
   
-  ProcessControlBlock::ProcessControlBlock(): name("NN"){
+  ProcessControlBlock::ProcessControlBlock(PCBPool* parent)
+    : name("NN"), parentPool(parent) {
     this->init();
   }
   
@@ -211,8 +132,8 @@ namespace SystemC_VPC{
   }
   
   ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb)
-    : DelayMapper(pcb){
-
+    : DelayMapper::ComponentDelay(pcb)
+  {
     this->setName(pcb.getName());
     this->setDeadline(pcb.getDeadline());
     this->setPeriod(pcb.getPeriod());
@@ -230,10 +151,12 @@ namespace SystemC_VPC{
     this->activationCount = pcb.activationCount;
 
     this->setPid(pcb.getPid());
+    this->setFunctionId(pcb.getFunctionId());
 
     // remember amount of copies for later clean up 
     this->copyCount = pcb.copyCount;
     (*(this->copyCount))++;
+    this->parentPool = pcb.parentPool;
   }
 
   void ProcessControlBlock::init(){
@@ -371,31 +294,7 @@ namespace SystemC_VPC{
     return this->traceSignal;
   }
 
-  FunctionId DelayMapper::createFunctionId(std::string function) {
-    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
-    if( iter == functionIdMap.end() ) {
-      functionIdMap[function] = this->uniqueFunctionId();
-    }
-    iter = functionIdMap.find(function);
-    return iter->second;
+  void ProcessControlBlock::release(){
+    this->parentPool->free(this);
   }
-
-  FunctionId DelayMapper::getFunctionId(std::string function) {
-    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
-
-    // the function name was not set in configuration
-    // -> we have to use default delay
-    if( iter == functionIdMap.end() ) {
-      return defaultFunctionId;
-    }
-    return iter->second;
-    
-  }
-
-  FunctionId DelayMapper::uniqueFunctionId() {
-    return globalFunctionId++;
-  }
-
-  const FunctionId DelayMapper::defaultFunctionId = 0;
-
 }

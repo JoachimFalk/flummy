@@ -57,6 +57,8 @@ namespace SystemC_VPC{
     ProcessId            process;
     FunctionId           func;
   };
+
+  static const FunctionId defaultFunctionId = 0;
 }
 
 #endif // __INCLUDED__FASTLINK__H__

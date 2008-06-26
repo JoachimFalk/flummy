@@ -24,6 +24,7 @@
 #include <StaticRoute.h>
 #include "hscd_vpc_InvalidArgumentException.h"
 #include "PowerSumming.h"
+#include "Task.h"
 
 #include <systemc.h>
 #include <map>
@@ -123,29 +124,6 @@ namespace SystemC_VPC{
   }
 
   //
-  ProcessControlBlock* Director::getProcessControlBlock( ProcessId pid ){
-
-    assert(!FALLBACKMODE);
-
-    try{
-      return this->pcbPool.allocate( pid );
-    }catch(NotAllocatedException& e){
-      std::cerr << "Director> getProcessControlBlock failed due to"
-                << std::endl << e.what() << std::endl;
-      std::cerr << "HINT: probably actor binding not specified in"
-                << " configuration file!" << std::endl;
-      assert(0);
-    }
-
-  }
-
-  //
-  PCBPool& Director::getPCBPool(){
-    return this->pcbPool;
-  }
-
-
-  //
   void Director::compute( FastLink fLink,
                           EventPair endPair ){
 
@@ -160,26 +138,21 @@ namespace SystemC_VPC{
       return;
     }
 
+    EventPair blockEvent = endPair;
+    if( endPair.dii == NULL ){
+      // prepare active mode
+      blockEvent=EventPair(new VPC_Event(), new VPC_Event());
+      // we could use a pool of VPC_Events instead of new/delete
+    }
 
-    ProcessControlBlock* pcb = this->getProcessControlBlock(fLink.process);
-    pcb->setFunctionId(fLink.func);
+    Task task(fLink, endPair);
     
     //HINT: also treat mode!!
     //if( endPair.latency != NULL ) endPair.latency->notify();
-
-    if( endPair.dii == NULL ){
-      // prepare active mode
-      pcb->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
-      // we could use a pool of VPC_Events instead of new/delete
-    }else{
-      // prepare passiv mode
-      pcb->setBlockEvent(endPair);
-    }
-
     
     if (mappings.size() < fLink.process ||
         mappings[fLink.process] == NULL) {
-      cerr << "Unknown mapping <" << pcb->getName() << "> to ??" << std::endl;
+      cerr << "Unknown mapping <" << task.getName() << "> to ??" << std::endl;
       
       assert(mappings.size() >= fLink.process &&
              mappings[fLink.process] != NULL);
@@ -197,17 +170,14 @@ namespace SystemC_VPC{
     // compute task on found component
     assert(!FALLBACKMODE);
     //    route->compute(pcb);
-    comp->compute(pcb);
+    comp->compute(task);
 
     if( endPair.dii == NULL){
       // active mode -> waits until simulated delay time has expired
       
-      CoSupport::SystemC::wait(*(pcb->getBlockEvent().dii));
-      delete pcb->getBlockEvent().dii;
-      delete pcb->getBlockEvent().latency;
-      pcb->setBlockEvent(EventPair());
-      // and free it
-      this->pcbPool.free(pcb);
+      CoSupport::SystemC::wait(*blockEvent.dii);
+      delete blockEvent.dii;
+      delete blockEvent.latency;
     }
     
   }
@@ -282,22 +252,6 @@ namespace SystemC_VPC{
   }
     
   /**
-   * \brief Implementation of  Director::generatePCB
-   */
-  ProcessControlBlock& Director::generatePCB(const char* name){
-    assert(!FALLBACKMODE);
-
-    //cerr << "generatePCB( " << name << ")" << endl;
-
-    ProcessId       pid = getProcessId( name );
-    
-    ProcessControlBlock& pcb = this->pcbPool.registerPCB( pid );
-    pcb.setName(name);
-    pcb.setPid( pid );
-    return pcb;
-  }
-
-  /**
    * \brief Implementation of Director::signalProcessEvent
    */
   void Director::signalProcessEvent(ProcessControlBlock* pcb){
@@ -315,7 +269,7 @@ namespace SystemC_VPC{
     this->end = sc_time_stamp().to_default_time_units();
     
     // free allocated pcb
-    this->pcbPool.free(pcb);
+    pcb->release();
   }
 
 
@@ -345,20 +299,36 @@ namespace SystemC_VPC{
       
   }
 
+  FunctionId Director::createFunctionId(std::string function) {
+    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
+    if( iter == functionIdMap.end() ) {
+      functionIdMap[function] = this->uniqueFunctionId();
+    }
+    iter = functionIdMap.find(function);
+    return iter->second;
+  }
+
+  FunctionId Director::getFunctionId(std::string function) {
+    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
+
+    // the function name was not set in configuration
+    // -> we have to use default delay
+    if( iter == functionIdMap.end() ) {
+      return defaultFunctionId;
+    }
+    return iter->second;
+    
+  }
+
+  FunctionId Director::uniqueFunctionId() {
+    return globalFunctionId++;
+  }
 
   FastLink Director::getFastLink(std::string process, std::string function) {
-    //cerr << "getFastLink( " << process << ", " << function << ")" << endl;
     if(FALLBACKMODE) return FastLink();
-    assert(!FALLBACKMODE);
 
     ProcessId       pid = getProcessId(  process  );
-
-    ProcessControlBlock* pcb = getProcessControlBlock( pid );
-    FunctionId           fid = pcb->DelayMapper::getFunctionId( function );
-
-    // pcb has been allocated by calling "getProcessControlBlock"-> free it
-    this->pcbPool.free(pcb);
-
+    FunctionId      fid = getFunctionId( function );
     return FastLink(pid, fid);
   }
 

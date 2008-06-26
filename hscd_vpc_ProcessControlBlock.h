@@ -17,6 +17,8 @@ namespace SystemC_VPC {
 
   class Director;
 
+  class PCBPool;
+
   typedef size_t ComponentId;
 
   /**
@@ -24,10 +26,6 @@ namespace SystemC_VPC {
    * associated PCB can run on.
    */
   class DelayMapper{
-  protected:
-    static const FunctionId defaultFunctionId;
-  
-
   public:
 
     ~DelayMapper();
@@ -35,67 +33,6 @@ namespace SystemC_VPC {
     explicit DelayMapper(const DelayMapper& dm);
 
     DelayMapper();
-
-    /**
-     * \brief Registers new special function delay to the mapping instance
-     * This method registers a new function delay to the mapping instance.
-     * if there is no currently associated management entry for the given
-     * component, a new entry is created with the given delay additionally
-     * as standard delay.
-     * \param comp specifies the associated component
-     * \param funcname represents the function name
-     * \param delay is the given function delay
-     */
-    void addFuncDelay( Director* director,
-                       std::string comp,
-                       const char* funcname,
-                       sc_time delay );
-
-    /**
-     * \brief Used to access the delay
-     * \param comp specifies the requested component
-     * \param funcname optionally refers to the function name
-     * \return delay for a requested component and the optionally given
-     *  function name.
-     * If there is no value found 0 is returned as default.
-     */
-    sc_time getFuncDelay( ComponentId cid,
-                          FunctionId  fid ) const;
-
-    /**
-     * \brief Registers special function latency to the mapping instance
-     * This method registers a function latency to the mapping instance.
-     * if there is no currently associated management entry for the given
-     * component, a new entry is created with the given latency
-     * additionally as standard latency.
-     * \param comp specifies the associated component
-     * \param funcname represents the function name
-     * \param latency is the given function latency
-     */
-    void addFuncLatency( Director* director,
-                         std::string comp,
-                         const char* funcname,
-                         sc_time latency );
-
-    /**
-     * \brief Used to access the latency
-     * \param comp specifies the requested component
-     * \param funcname optionally refers to the function name
-     * \return latency for a requested component and the optionally given
-     * function name.
-     * If there is no value found 0 is returned as default.
-     */
-    sc_time getFuncLatency( ComponentId cid,
-                            FunctionId  fid ) const;
-
-
-    typedef std::map<std::string, FunctionId>  FunctionIdMap;
-    FunctionId uniqueFunctionId();
-    FunctionId getFunctionId(std::string function);
-    FunctionId createFunctionId(std::string function);
-
-    FunctionIdMap   functionIdMap;
-    FunctionId      globalFunctionId;
 
     /**
      * Internal helper class to enable management of component specific
@@ -111,7 +48,12 @@ namespace SystemC_VPC {
        * \param name specifies the name of the associated component
        * simulation
        */
-      ComponentDelay( ComponentId cid );
+      ComponentDelay( );
+
+      /**
+       * copy constructor
+       */
+      ComponentDelay( const ComponentDelay &delay );
 
       /**
        * \brief Adds a new function delay to the instance
@@ -165,9 +107,6 @@ namespace SystemC_VPC {
 
     private:
 
-      // the associated component
-      ComponentId cid;
-
       typedef std::vector<sc_time> FunctionTimes;
       // map of possible special delay depending on functions
       FunctionTimes funcDelays;
@@ -176,29 +115,22 @@ namespace SystemC_VPC {
       FunctionTimes funcLatencies;
     };
 
-  private:
-    /*
-     * Replaced by new version to enable multiple
-     * delays for different components on different
-     * functions
-     */
-    typedef std::vector<ComponentDelay* >          ComponentDelays;
-    ComponentDelays                                compDelays;
-
   };
 
  /**
   * This class represents all necessary data of a simulated process within VPC
   * and provides necessary access methods for its data.
   */
-  class ProcessControlBlock : public DelayMapper{
+  class ProcessControlBlock :
+    //    public DelayMapper,
+    public DelayMapper::ComponentDelay {
 
     public:
       
       /**
        * \brief Default constructor of an PCB instance
        */
-      ProcessControlBlock();
+      ProcessControlBlock( PCBPool *parent );
       
       /**
        * \brief Default constructor of an PCB instance
@@ -316,6 +248,8 @@ namespace SystemC_VPC {
 
       Tracing* getTraceSignal();
 
+      void release();
+
     private:
 
       /**
@@ -376,6 +310,9 @@ namespace SystemC_VPC {
       ActivationCounter* activationCount; //activation_count;
       int* copyCount;
 
+      // reference to "parent" PCBPool
+      PCBPool *parentPool;
+
     private:
 
       /**
@@ -386,7 +323,7 @@ namespace SystemC_VPC {
   };
 
   struct p_queue_entry{
-    int fifo_order;  // sekund?rstrategie
+    int fifo_order;  // sekundärstrategie
     ProcessControlBlock *pcb;
   };
 

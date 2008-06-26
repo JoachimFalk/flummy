@@ -26,6 +26,8 @@
 
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_ProcessEventListener.h"
+#include "hscd_vpc_PCBPool.h"
+#include "Task.h"
 
 class ComponentObserver;
 class ComponentInfo;
@@ -42,7 +44,7 @@ namespace SystemC_VPC{
        *
        * While this simulation is running SystemC simulation time is consumed.
        */
-    virtual void compute(ProcessControlBlock* pcb)=0;
+    virtual void compute(Task& task) = 0;
 
     virtual const char* getName() const = 0;
 
@@ -102,6 +104,28 @@ namespace SystemC_VPC{
 
     const char* getName() const;
 
+    /**
+     * \brief Get the process control block.
+     */
+    ProcessControlBlock* getProcessControlBlock(ProcessId pid)
+      throw(NotAllocatedException)
+    {
+      return this->getPCBPool().allocate(pid);
+    }
+
+    /**
+     * \brief Create the process control block.
+     */
+    ProcessControlBlock& createPCB(ProcessId pid){
+      return this->getPCBPool().registerPCB(pid);
+    }
+
+    /**
+     *
+     */
+    PCBPool& getPCBPool(){
+      return this->pcbPool;
+    }
   protected:
 
     // points to direct associated controlling instance
@@ -119,6 +143,13 @@ namespace SystemC_VPC{
        * While this simulation is running SystemC simulation time is consumed.
        */
     virtual void compute(ProcessControlBlock* pcb)=0;
+
+    void compute(Task& task){
+      ProcessControlBlock* pcb =
+        this->pcbPool.allocate(task.pid);
+      pcb->setBlockEvent(task.blockEvent);
+      this->compute(pcb);
+    };
     
     /**
      * \brief Sets next controlling instance of component
@@ -143,9 +174,12 @@ namespace SystemC_VPC{
       this->parentControlUnit->signalProcessEvent(pcb);
     }
 
+    private:
     /**
      *
      */
+    PCBPool pcbPool;
+
   };
   
 }

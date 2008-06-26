@@ -93,6 +93,8 @@ namespace SystemC_VPC {
         std::map<int, ProcessControlBlock* > usedPCB;
         // list of currently available PCBs
         std::map<int, ProcessControlBlock* > freePCB;
+        // reference to "parent" PCBPool
+        PCBPool *parentPool;
 
         public:
 
@@ -100,8 +102,8 @@ namespace SystemC_VPC {
          * \brief Default constructor of TypePool
          * \param pcb specifies the associated PCB to be managed and replicated
          */
-        TypePool() {
-          base = new ProcessControlBlock();
+        TypePool( PCBPool *parent ) {
+          base = new ProcessControlBlock(parent);
         }
 
         ~TypePool();
@@ -115,7 +117,7 @@ namespace SystemC_VPC {
 
         /**
          * \brief retrieves instance of managed PCB out of the pool
-         * If currently no instance is available a new instance if created
+         * If currently no instance is available a new instance if create
          * to satify request.
          */
         ProcessControlBlock* allocate();
@@ -151,6 +153,8 @@ namespace SystemC_VPC {
       ProcessControlBlock& registerPCB( ProcessId pid );
 
       PCBIterator getPCBIterator();
+
+      ProcessControlBlock& getBase( ProcessId pid );
 
   };
 

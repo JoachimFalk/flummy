@@ -119,11 +119,21 @@ namespace SystemC_VPC {
   }
 
   ProcessControlBlock& PCBPool::registerPCB(ProcessId pid){
-
+    // fill vector with NULL dummys to preserve ids
+    // instead of vector we could use a map
+    while( pid > typepools.size() ){
+      typepools.push_back( NULL );
+    }
     if( pid == typepools.size() ){
-      typepools.push_back( new TypePool());
+      typepools.push_back( new TypePool( this ));
     }
 
+    return this->typepools[pid]->getBase();
+  }
+
+  ProcessControlBlock& PCBPool::getBase( ProcessId pid ){
+    assert(pid < typepools.size());
+    assert(this->typepools[pid]);
     return this->typepools[pid]->getBase();
   }
 

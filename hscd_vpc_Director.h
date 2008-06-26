@@ -33,8 +33,6 @@
 #include <fstream>
 #include <stdio.h>
 
-#include "hscd_vpc_PCBPool.h"
-
 class PowerSumming;
 
 namespace SystemC_VPC{
@@ -49,11 +47,6 @@ namespace SystemC_VPC{
   class Director : public ProcessEventListener{
   public:
     bool FALLBACKMODE;
-
-    /**
-     * \brief Get the process control block used within SystemC-VPC Modell.
-     */
-    ProcessControlBlock* getProcessControlBlock(  ProcessId pid );
 
     /**
      * \brief Access to singleton Director. 
@@ -155,18 +148,6 @@ namespace SystemC_VPC{
      */
     void registerMapping(const char* taskName, const char* compName);
     
-    /**
-     * \brief Generates and registers new PCB to Director
-     * Generates a new PCB or returns a already registered one
-     * form the Director.
-     * \param name specifies name of actor/task/process for PCB
-     * \return ProcessControlBlock representing default initialized 
-     * PCB for given task or if PCB already exists the initialized one;
-     */
-    ProcessControlBlock& generatePCB(const char* name);
-    
-    PCBPool& getPCBPool(); 
-
     void signalProcessEvent(ProcessControlBlock* pcb);
 
     void setResultFile(std::string vpc_result_file){
@@ -202,6 +183,8 @@ namespace SystemC_VPC{
     
     std::vector<ProcessId> * getTaskAnnotation(std::string compName);
 
+    FunctionId getFunctionId(std::string function);
+    FunctionId createFunctionId(std::string function);
   private:
 
     /**
@@ -214,6 +197,12 @@ namespace SystemC_VPC{
      */
     Director();
 
+    typedef std::map<std::string, FunctionId>  FunctionIdMap;
+    FunctionId uniqueFunctionId();
+
+    FunctionIdMap   functionIdMap;
+    FunctionId      globalFunctionId;
+
     typedef std::vector<Delayer* >  Components;
     Components                           components;
     
@@ -223,8 +212,6 @@ namespace SystemC_VPC{
     typedef std::vector<ProcessId>                ProcessList;  
     typedef std::map<ComponentId, ProcessList* >  ReverseMapping;
     ReverseMapping reverseMapping;
-
-    PCBPool pcbPool;
 
     // output file to write result to
     std::string vpc_result_file;

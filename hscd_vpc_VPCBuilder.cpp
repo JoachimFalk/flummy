@@ -10,6 +10,20 @@
 #include "hscd_vpc_datatypes.h"
 #include "StaticRoute.h"
 
+#include "debug_config.h"
+// if compiled with DBG_COMPONENT create stream and include debug macros
+#ifdef DBG_VPCBUILDER
+#include <CoSupport/Streams/DebugOStream.hpp>
+#include <CoSupport/Streams/FilterOStream.hpp>
+  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
+  //  with this name exists when DBG.. is used. here every actor creates its
+  //  own stream.
+  #define DBGOUT_STREAM dbgout
+  #include "debug_on.h"
+#else
+  #include "debug_off.h"
+#endif
+
 namespace SystemC_VPC{
 #define MAX(x,y) ((x > y) ? x : y)
 
@@ -502,35 +516,34 @@ namespace SystemC_VPC{
       sSource=XMLString::transcode(
         atts->getNamedItem(sourceAttrStr)->getNodeValue());
 
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Found mapping attribute: source=" << sSource
-                  << " target=" << sTarget << endl; 
-#endif //VPC_DEBUG
+
+      DBG_OUT( "VPCBuilder> Found mapping attribute: source=" << sSource
+               << " target=" << sTarget << endl); 
 
       // check if component exists
       if(this->knownComps.count(sTarget)==1){
         
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Target of Mapping: " << sTarget << " exists!"
-                  << std::endl; 
-#endif //VPC_DEBUG
+        DBG_OUT( "VPCBuilder> Target of Mapping: " << sTarget << " exists!"
+                 << std::endl); 
 
         std::map<std::string, AbstractComponent* >::iterator iterComp;
         iterComp = this->knownComps.find(sTarget);
 
         // first of all initialize PCB for task        
         if(iterComp != this->knownComps.end()){
+          AbstractComponent* comp = iterComp->second;
+          DBG_OUT( "VPCBuilder> Configure mapping: " << sSource << "<->"
+                   << sTarget << std::endl); 
 
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Configure mapping: " << sSource << "<->"
-                  << sTarget << std::endl; 
-#endif //VPC_DEBUG
-
-          (iterComp->second)->informAboutMapping(sSource);
+          // adding mapping info
+          this->director->registerMapping(sSource, sTarget);
+          comp->informAboutMapping(sSource);
           
           //generate new ProcessControlBlock or get existing one for
           // initialization
-          ProcessControlBlock& p = this->director->generatePCB(sSource);
+          ProcessControlBlock& p =
+            comp->createPCB(this->director->getProcessId(sSource));
+          p.setName(sSource);
             
           //walk down hierarchy to attributes
           DOMNode* attnode = node->getFirstChild();
@@ -546,8 +559,13 @@ namespace SystemC_VPC{
                                               sizeof(timingStr))){
               Timing t = this->parseTiming( attnode );
 
-              p.addFuncLatency( this->director, sTarget, t.fname, t.latency );
-              p.addFuncDelay( this->director, sTarget, t.fname, t.dii );
+              DBG_OUT( "PCB: " << sSource
+                       << " " << t.fid
+                       << " " << t.latency
+                       << " " << t.dii
+                       << std::endl);
+              p.addLatency( t.fid, t.latency );
+              p.addDelay( t.fid, t.dii );
               
             }else if( 0==XMLString::compareNString( xmlName,
                                                     attributeStr,
@@ -585,13 +603,13 @@ namespace SystemC_VPC{
                                      sizeof(STR_VPC_DELAY) )){
                 sc_time delay = Director::createSC_Time(sValue);
                 p.setDelay(delay);
-                p.addFuncDelay( this->director, sTarget, NULL, delay );
+                p.setBaseDelay( delay );
               }else if( 0 == strncmp(sType,
                                      STR_VPC_LATENCY,
                                      sizeof(STR_VPC_LATENCY) )){
                 sc_time latency = Director::createSC_Time(sValue);
                 p.setLatency(latency);
-                p.addFuncLatency( this->director, sTarget, NULL, latency );
+                p.setBaseLatency( latency );
               }else{
 #ifdef VPC_DEBUG
                 std::cerr << "VPCBuilder> Unknown mapping attribute: type="
@@ -609,10 +627,12 @@ namespace SystemC_VPC{
                             << sTarget << "; " << sType << ", " << delay)
                             << std::endl;
 #endif //VPC_DEBUG
-                  p.addFuncDelay( this->director, sTarget, sType, delay );
+                  p.addDelay( this->director->createFunctionId(sType),
+                              delay );
                   // using attribute="functionName" for compatibility:
                   // force to have a latency
-                  p.addFuncLatency( this->director, sTarget, sType, delay );
+                  p.addLatency( this->director->createFunctionId(sType),
+                                delay );
 
                 } catch(const InvalidArgumentException& ex) {
 #ifdef VPC_DEBUG
@@ -638,15 +658,7 @@ namespace SystemC_VPC{
               XMLString::release(&sKey);
               
             }
-
           }
-          
-          // node = vpcConfigTreeWalker->parentNode();
-          
-          //check if component member of a configuration and iterativly
-          // adding mapping info
-          this->director->registerMapping(sSource, sTarget);
-          
         }else{
           std::cerr << "VPCBuilder> No valid component found for mapping:"
             " source=" << sSource << " target=" << sTarget<< endl;
@@ -690,13 +702,13 @@ namespace SystemC_VPC{
                                sizeof(STR_VPC_DELAY) )){
           sc_time delay = Director::createSC_Time(attiter->second);
           p->setDelay(delay);
-          p->addFuncDelay( this->director, target, NULL, delay );
+          p->setBaseDelay( delay );
         }else if( 0 == strncmp(attiter->first,
                                STR_VPC_LATENCY,
                                sizeof(STR_VPC_LATENCY) )){
           sc_time latency = Director::createSC_Time(attiter->second);
           p->setLatency(latency);
-          p->addFuncLatency( this->director, target, NULL, latency );
+          p->setBaseLatency( latency );
         }else{
 #ifdef VPC_DEBUG
           std::cerr << "VPCBuilder> Unknown mapping attribute: type="
@@ -715,7 +727,8 @@ namespace SystemC_VPC{
                       << target << "; " << attiter->second << ", " << delay)
                       << std::endl;
 #endif //VPC_DEBUG
-            p->addFuncDelay( this->director, target, attiter->first, delay );
+            p->addDelay( this->director->createFunctionId(attiter->first),
+                         delay );
 
           } catch(const InvalidArgumentException& ex) {
 
@@ -737,8 +750,8 @@ namespace SystemC_VPC{
         Timing t = *timings;
         p->setDelay( t.dii );
         p->setLatency(t.latency );
-        p->addFuncDelay( this->director, target, t.fname, t.dii );
-        p->addFuncLatency( this->director, target, t.fname, t.latency );
+        p->addDelay(t.fid,t.dii);
+        p->addLatency(t.fid,t.latency);
       }
     }
     
@@ -803,9 +816,6 @@ namespace SystemC_VPC{
           this->director->registerComponent(route);
           this->director->registerMapping(route->getName(), route->getName());
 
-          ProcessControlBlock& pcb =
-            this->director->generatePCB( route->getName() );
-
           // add <hop>s
           for(DOMNode * hopNode = routeNode->getFirstChild();
               hopNode != NULL;
@@ -822,8 +832,13 @@ namespace SystemC_VPC{
               std::map<std::string, AbstractComponent* >::iterator iterComp =
                 this->knownComps.find(name);
               assert( iterComp != this->knownComps.end() );
+              AbstractComponent* hop = iterComp->second; 
+              ProcessControlBlock& pcb =
+                hop->createPCB(this->director->getProcessId(route->getName()));
+              pcb.setName(route->getName());
+
               
-              route->addHop( name, iterComp->second );
+              route->addHop( name, hop );
               (iterComp->second)->informAboutMapping(route->getName());
 
               // parse <timing>s
@@ -836,8 +851,8 @@ namespace SystemC_VPC{
                                                   timingStr,
                                                   sizeof(timingStr) ) ){
                   Timing t = this->parseTiming( timingNode );
-                  pcb.addFuncDelay( this->director, name, t.fname, t.dii );
-                  pcb.addFuncLatency( this->director, name , t.fname, t.latency );
+                  pcb.addDelay( t.fid, t.dii );
+                  pcb.addLatency( t.fid, t.latency );
                 }
               }
             }
@@ -888,7 +903,11 @@ namespace SystemC_VPC{
       sc_latency = MAX(sc_latency,sc_delay);
     }
 
-    t.fname   = fname;
+    t.fid = defaultFunctionId;
+    if(fname != NULL){
+      t.fid = this->director->createFunctionId(fname);
+    }
+    
     //per default latency is used as vpc-delay as well as vpc-latency
     // (vpc-delay == dii)
     t.latency = sc_latency;

@@ -16,9 +16,9 @@
 namespace SystemC_VPC {
 
   //
-  void StaticRoute::compute( ProcessControlBlock *pcb ) {
-    task = pcb;
-    taskEvents = task->getBlockEvent();
+  void StaticRoute::compute( Task& _task ) {
+    task = _task;
+    taskEvents = task.blockEvent;
     assert(!components.empty());
     StaticRoute * route = new StaticRoute(*this);
     route->route( EventPair(taskEvents.dii, route) );
@@ -28,7 +28,7 @@ namespace SystemC_VPC {
   void StaticRoute::route( EventPair np ){
     if(!components.empty()){
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
-      task->setBlockEvent(np);
+      task.blockEvent = np;
       DBG_OUT("route on: " << components.front()->getName() << endl);
       components.front()->compute(task);
       components.pop_front();
