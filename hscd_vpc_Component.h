@@ -23,6 +23,7 @@
 #include "hscd_vpc_AbstractComponent.h"
 #include "ComponentInfo.h"
 #include "PowerSumming.h"
+#include "PowerMode.h"
 
 #include <vector>
 #include <map>
@@ -50,31 +51,6 @@ namespace SystemC_VPC{
       size_t state;
   };
 
-  /**
-   * 
-   */
-  class PowerMode
-  {
-    public:
-      PowerMode(const size_t &_mode) : mode(_mode) {}
-
-      //FIXME: needed for std::map only
-      PowerMode() : mode(0) {}
-
-      bool operator==(const PowerMode &rhs) const
-      {
-        return mode == rhs.mode;
-      }
-
-      bool operator<(const PowerMode &rhs) const
-      {
-        return mode < rhs.mode;
-      }
-
-    private:
-      size_t mode;
-  };
-
   class Scheduler;
 
   typedef std::map<std::string, PowerMode> PowerModes;
@@ -83,7 +59,7 @@ namespace SystemC_VPC{
    * \brief An implementation of AbstractComponent.
    * 
    */
-  class Component : public AbstractComponent, public ComponentInfo{
+  class Component : public AbstractComponent{
     
     SC_HAS_PROCESS(Component);
 
@@ -116,6 +92,8 @@ namespace SystemC_VPC{
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
+      std::cerr << "setPowerMode" << std::endl;
+      this->setPowerMode(this->getPowerMode("FAST"));
       setScheduler(schedulername);
 
       powerTable[Component::IDLE]    = 0.0;

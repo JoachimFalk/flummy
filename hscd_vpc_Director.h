@@ -33,10 +33,10 @@
 #include <fstream>
 #include <stdio.h>
 
-class PowerSumming;
-
 namespace SystemC_VPC{
 
+  class PowerSumming;
+ 
   class ProcessControlBlock;
 
   /**

@@ -28,11 +28,12 @@
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_PCBPool.h"
 #include "Task.h"
-
-class ComponentObserver;
-class ComponentInfo;
+#include "PowerMode.h"
+#include "ComponentInfo.h"
 
 namespace SystemC_VPC{
+
+class ComponentObserver;
 
   /**
    * \brief Interface for classes implementing delay simulation.
@@ -80,7 +81,7 @@ namespace SystemC_VPC{
    * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
    */
   class AbstractComponent:
-    public sc_module, public Delayer{
+    public sc_module, public Delayer, public ComponentInfo{
   
   public:
 
@@ -124,7 +125,7 @@ namespace SystemC_VPC{
      *
      */
     PCBPool& getPCBPool(){
-      return this->pcbPool;
+      return *(this->pcbPool);
     }
   protected:
 
@@ -146,7 +147,7 @@ namespace SystemC_VPC{
 
     void compute(Task& task){
       ProcessControlBlock* pcb =
-        this->pcbPool.allocate(task.pid);
+        this->getPCBPool().allocate(task.pid);
       pcb->setBlockEvent(task.blockEvent);
       this->compute(pcb);
     };
@@ -174,11 +175,21 @@ namespace SystemC_VPC{
       this->parentControlUnit->signalProcessEvent(pcb);
     }
 
+    /**
+     * 
+     */
+    virtual void setPowerMode(const PowerMode& mode){
+      if(pcbPools.find(mode) == pcbPools.end()){
+        pcbPools[mode] = new PCBPool();
+      }
+      this->pcbPool =  pcbPools[mode];
+    }
     private:
     /**
      *
      */
-    PCBPool pcbPool;
+    PCBPool *pcbPool;
+    std::map<PowerMode, PCBPool*> pcbPools;
 
   };
   

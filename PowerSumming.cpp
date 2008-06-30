@@ -2,6 +2,8 @@
 
 #include "PowerSumming.h"
 
+namespace SystemC_VPC{
+
 PowerSumming::PowerSumming(std::ostream &os) :
   m_output(os),
   m_changedTime(sc_core::SC_ZERO_TIME),
@@ -52,3 +54,5 @@ void PowerSumming::printPowerChange()
 
   m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << std::endl;
 }
+
+} //namespace SystemC_VPC

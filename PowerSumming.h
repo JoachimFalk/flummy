@@ -7,8 +7,10 @@
 
 #include "ComponentObserver.h"
 
-class PowerSumming : public ComponentObserver
-{
+namespace SystemC_VPC{
+
+  class PowerSumming : public ComponentObserver
+  {
   public:
     PowerSumming(std::ostream &os);
     ~PowerSumming();
@@ -26,6 +28,6 @@ class PowerSumming : public ComponentObserver
     double           m_energySum;
 
     void printPowerChange();
-};
-
+  };
+} //namespace SystemC_VPC
 #endif // HSCD_VPC_POWERSUMMING_H_
