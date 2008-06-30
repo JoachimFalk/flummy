@@ -92,7 +92,6 @@ namespace SystemC_VPC{
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
-      std::cerr << "setPowerMode" << std::endl;
       this->setPowerMode(this->getPowerMode("FAST"));
       setScheduler(schedulername);
 

@@ -182,7 +182,7 @@ class ComponentObserver;
       if(pcbPools.find(mode) == pcbPools.end()){
         pcbPools[mode] = new PCBPool();
       }
-      this->pcbPool =  pcbPools[mode];
+      this->pcbPool = pcbPools[mode];
     }
     private:
     /**
