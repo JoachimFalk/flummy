@@ -20,7 +20,7 @@ namespace SystemC_VPC{
 
   int ProcessControlBlock::globalInstanceId = 0;
 
-  DelayMapper::ComponentDelay::ComponentDelay( )
+  ComponentDelay::ComponentDelay( )
     : funcDelays(1, SC_ZERO_TIME),
       funcLatencies(1, SC_ZERO_TIME)
   {
@@ -28,7 +28,7 @@ namespace SystemC_VPC{
     setBaseLatency(SC_ZERO_TIME);
   }
 
-  DelayMapper::ComponentDelay::ComponentDelay( const ComponentDelay &delay )
+  ComponentDelay::ComponentDelay( const ComponentDelay &delay )
     : funcDelays(    delay.funcDelays    ),
       funcLatencies( delay.funcLatencies )
   {
@@ -36,7 +36,7 @@ namespace SystemC_VPC{
     setBaseLatency( delay.getBaseLatency() );
   }
 
-  void DelayMapper::ComponentDelay::addDelay( FunctionId fid,
+  void ComponentDelay::addDelay( FunctionId fid,
                                               sc_time delay ){
     DBG_OUT( "::addDelay(" << fid << ") " << delay
              << std::endl);
@@ -46,17 +46,17 @@ namespace SystemC_VPC{
     this->funcDelays[fid] = delay;
   }
 
-  void DelayMapper::ComponentDelay::setBaseDelay( sc_time delay ){
+  void ComponentDelay::setBaseDelay( sc_time delay ){
     DBG_OUT( "::setBaseDelay() " << delay
              << std::endl);
     this->funcDelays[defaultFunctionId] = delay;
   }
 
-  sc_time DelayMapper::ComponentDelay::getBaseDelay( ) const {
+  sc_time ComponentDelay::getBaseDelay( ) const {
     return this->funcDelays[defaultFunctionId];
   }
 
-  sc_time DelayMapper::ComponentDelay::getDelay(
+  sc_time ComponentDelay::getDelay(
     FunctionId fid) const
   {
     DBG_OUT( "::getDelay(" << fid << ") " << funcDelays.size()
@@ -66,7 +66,7 @@ namespace SystemC_VPC{
     return ret;
   }
 
-  void DelayMapper::ComponentDelay::addLatency( FunctionId fid,
+  void ComponentDelay::addLatency( FunctionId fid,
                                                         sc_time latency ){
     if( fid >= funcLatencies.size())
       funcLatencies.resize( fid + 100, SC_ZERO_TIME );
@@ -74,27 +74,21 @@ namespace SystemC_VPC{
     this->funcLatencies[fid] = latency;
   }
 
-  void DelayMapper::ComponentDelay::setBaseLatency( sc_time latency ){
+  void ComponentDelay::setBaseLatency( sc_time latency ){
     this->funcLatencies[defaultFunctionId] = latency;
   }
 
-  sc_time DelayMapper::ComponentDelay::getBaseLatency( ) const {
+  sc_time ComponentDelay::getBaseLatency( ) const {
     return this->funcLatencies[defaultFunctionId];
   }
 
-  sc_time DelayMapper::ComponentDelay::getLatency(
+  sc_time ComponentDelay::getLatency(
     FunctionId fid) const
   {
     assert(fid < funcLatencies.size());
     sc_time ret = funcLatencies[fid];
     return ret;
   }
-
-  DelayMapper::~DelayMapper(){}
-
-  DelayMapper::DelayMapper(const DelayMapper & dm) {}
-
-  DelayMapper::DelayMapper() {}
 
   ProcessControlBlock::ActivationCounter::ActivationCounter() :
     activation_count(0){}
@@ -132,7 +126,7 @@ namespace SystemC_VPC{
   }
   
   ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb)
-    : DelayMapper::ComponentDelay(pcb)
+    : ComponentDelay(pcb)
   {
     this->setName(pcb.getName());
     this->setDeadline(pcb.getDeadline());
@@ -144,7 +138,6 @@ namespace SystemC_VPC{
     this->blockEvent = EventPair();
     this->setDelay(SC_ZERO_TIME);
     this->setLatency(SC_ZERO_TIME);
-    this->setInterrupt(NULL);
     this->setRemainingDelay(SC_ZERO_TIME);
     this->setTraceSignal(NULL);
 
@@ -165,7 +158,6 @@ namespace SystemC_VPC{
     this->deadline = sc_time(DBL_MAX, SC_SEC);
     this->delay = SC_ZERO_TIME;
     this->latency = SC_ZERO_TIME;
-    this->interrupt = NULL;
     this->remainingDelay = SC_ZERO_TIME;
     this->period = sc_time(DBL_MAX, SC_SEC);
     this->instanceId = ProcessControlBlock::globalInstanceId++;
@@ -208,14 +200,6 @@ namespace SystemC_VPC{
   const char* ProcessControlBlock::getFuncName() const{
     assert(0);
     return "";
-  }
-
-  void ProcessControlBlock::setInterrupt(sc_event* interrupt){
-    this->interrupt = interrupt;
-  }
-
-  sc_event* ProcessControlBlock::getInterrupt() const{
-    return this->interrupt;
   }
 
   void ProcessControlBlock::setBlockEvent(EventPair blockEvent){
