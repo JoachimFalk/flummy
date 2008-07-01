@@ -316,8 +316,8 @@ namespace SystemC_VPC{
   }
   
   bool FlexRayScheduler::getSchedulerTimeSlice( sc_time& time,
-                                                const std::map<int,ProcessControlBlock*> &ready_tasks,
-                                                const  std::map<int,ProcessControlBlock*> &running_tasks )
+                                                const TaskMap &ready_tasks,
+                                                const TaskMap &running_tasks )
   {   
     // keine wartenden + keine aktiven Threads -> ende!
     if(processcount==0 && running_tasks.size()==0) return 0;   
@@ -353,34 +353,34 @@ namespace SystemC_VPC{
   }
   
   
-  void FlexRayScheduler::addedNewTask(ProcessControlBlock *pcb){    
-    int index = PIDmap[pcb->getPid()];
-    //      cout<<"addedNewTask- index: "<<index<<" PID: "<<pcb->getPid()<<" instanceID: "<<pcb->getInstanceId()<<endl;
+  void FlexRayScheduler::addedNewTask(Task *task){    
+    int index = PIDmap[task->getProcessId()];
+    //      cout<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<endl;
     if(index<StartslotDynamic){
       //TDMA-Task
-      TDMA_slots[ index ].pid_fifo.push_back(pcb->getInstanceId());
-      ProcessParams[pcb->getInstanceId()]=ProcessParams[pcb->getPid()];
+      TDMA_slots[ index ].pid_fifo.push_back(task->getInstanceId());
+      ProcessParams[task->getInstanceId()]=ProcessParams[task->getProcessId()];
 #ifdef VPC_DEBUG     
-      cout<<"added Process " <<  pcb->getInstanceId() << " to Slot " << PIDmap[pcb->getPid()]  <<endl;
+      cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
 #endif //VPC_DEBUG
     
       //cout << "added static Task" <<endl;
     }else{
       //  cout << "added Dynamic Task at Slot " << index - StartslotDynamic  <<endl;
-      Dynamic_slots[ index - StartslotDynamic ].pid_fifo.push_back(pcb->getInstanceId());
+      Dynamic_slots[ index - StartslotDynamic ].pid_fifo.push_back(task->getInstanceId());
     }
     processcount++;
   }
   
-  void FlexRayScheduler::removedTask(ProcessControlBlock *pcb){ 
-    int index = PIDmap[pcb->getPid()];
+  void FlexRayScheduler::removedTask(Task *task){ 
+    int index = PIDmap[task->getProcessId()];
     
     // cout<<"Task entfernt! @ "<< sc_time_stamp() << "  " << index << endl;
       
     std::deque<ProcessId>::iterator iter;
     if(index<StartslotDynamic){
       for(iter = TDMA_slots[ index ].pid_fifo.begin(); iter!=TDMA_slots[index].pid_fifo.end() ;iter++){
-        if( *iter == (unsigned int)pcb->getInstanceId()){
+        if( *iter == (unsigned int)task->getInstanceId()){
           TDMA_slots[index].pid_fifo.erase(iter);
           break;
         }
@@ -388,25 +388,25 @@ namespace SystemC_VPC{
     }else{
       index -= StartslotDynamic;
       for(iter = Dynamic_slots[index].pid_fifo.begin(); iter!=Dynamic_slots[index].pid_fifo.end() ;iter++){
-        if( *iter == (unsigned int)pcb->getInstanceId()){
+        if( *iter == (unsigned int)task->getInstanceId()){
           Dynamic_slots[index].pid_fifo.erase(iter);
           break;
         }
       }
     }
 #ifdef VPC_DEBUG    
-    cout<<"removed Task: " << pcb->getInstanceId()<<endl;
+    cout<<"removed Task: " << task->getInstanceId()<<endl;
 #endif //VPC_DEBUG   
     processcount--;  
   }
   
   
   // Eigentlicher Scheduler
-  scheduling_decision FlexRayScheduler::schedulingDecision(
-                                                           int& task_to_resign,
-                                                           int& task_to_assign,
-                                                           const  std::map<int,ProcessControlBlock*> &ready_tasks,
-                                                           const  std::map<int,ProcessControlBlock*> &running_tasks )
+  scheduling_decision
+  FlexRayScheduler::schedulingDecision(int& task_to_resign,
+                                       int& task_to_assign,
+                                       const TaskMap &ready_tasks,
+                                       const TaskMap &running_tasks )
   {
     scheduling_decision ret_decision = NOCHANGE;;
     
@@ -457,11 +457,11 @@ namespace SystemC_VPC{
           if(!found){ //keinen lauffaehigen gefunden! -> idle werden
             task_to_assign=0;
             if(running_tasks.size()!=0){  // alten Task entfernen, wenn noetig
-              std::map<int,ProcessControlBlock*>::const_iterator iter;
+              TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              ProcessControlBlock *pcb=iter->second;
+              Task *task=iter->second;
 
-              task_to_resign=pcb->getInstanceId();
+              task_to_resign=task->getInstanceId();
               ret_decision=RESIGNED;
             }else{
               //war keiner da... und ist auch kein Neuer da -> keine Aenderung  
@@ -470,10 +470,10 @@ namespace SystemC_VPC{
           }else{
         
             if(running_tasks.size()!=0){  // alten Task entfernen
-              std::map<int,ProcessControlBlock*>::const_iterator iter;
+              TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              ProcessControlBlock *pcb=iter->second;
-              task_to_resign=pcb->getInstanceId();
+              Task *task=iter->second;
+              task_to_resign=task->getInstanceId();
               ret_decision= PREEMPT;  
             }
           }
@@ -483,10 +483,10 @@ namespace SystemC_VPC{
         }else{
           //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
           if(running_tasks.size()!=0){  // alten Task entfernen
-            std::map<int,ProcessControlBlock*>::const_iterator iter;
+            TaskMap::const_iterator iter;
             iter=running_tasks.begin();
-            ProcessControlBlock *pcb=iter->second;
-            task_to_resign=pcb->getInstanceId();
+            Task *task=iter->second;
+            task_to_resign=task->getInstanceId();
             ret_decision=RESIGNED;
           }else{
             //war keiner da... und ist auch kein Neuer da -> keine Aenderung    
@@ -557,10 +557,10 @@ namespace SystemC_VPC{
          
           //auf alle Faelle den letzten (periodischen) Task verdraengen!
           if(running_tasks.size()!=0){  // alten Task entfernen
-            std::map<int,ProcessControlBlock*>::const_iterator iter;
+            TaskMap::const_iterator iter;
             iter=running_tasks.begin();
-            ProcessControlBlock *pcb=iter->second;
-            task_to_resign=pcb->getInstanceId();
+            Task *task=iter->second;
+            task_to_resign=task->getInstanceId();
             ret_decision=RESIGNED;
           }else{
             //war keiner da... und ist auch kein Neuer da -> keine Aenderung    
@@ -572,10 +572,10 @@ namespace SystemC_VPC{
           if(this->remainingSlice <=(sc_time_stamp() - this->lastassign)){
         
             if(running_tasks.size()!=0){  // alten Task entfernen
-              std::map<int,ProcessControlBlock*>::const_iterator iter;
+              TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              ProcessControlBlock *pcb=iter->second;
-              task_to_resign=pcb->getInstanceId();
+              Task *task=iter->second;
+              task_to_resign=task->getInstanceId();
               ret_decision=RESIGNED;
             }else{
               //war keiner da... und ist auch kein Neuer da -> keine Aenderung  
@@ -646,26 +646,26 @@ namespace SystemC_VPC{
                       if(Dynamic_slots[curr_slicecountA].pid_fifo.size()>0){    // neuer Task da?
                         task_to_assign = Dynamic_slots[curr_slicecountA].pid_fifo.front();
                         taskAssignedToA=task_to_assign;
-                        std::map<int,ProcessControlBlock*>::const_iterator iter;
+                        TaskMap::const_iterator iter;
                         iter=running_tasks.begin();
-                        ProcessControlBlock *pcb=iter->second;
-                        task_to_resign=pcb->getInstanceId();
+                        Task *task=iter->second;
+                        task_to_resign=task->getInstanceId();
                         ret_decision= PREEMPT;  
                       }else{
                         //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
                         // alten Task entfernen
-                        std::map<int,ProcessControlBlock*>::const_iterator iter;
+                        TaskMap::const_iterator iter;
                         iter=running_tasks.begin();
-                        ProcessControlBlock *pcb=iter->second;
-                        task_to_resign=pcb->getInstanceId();
+                        Task *task=iter->second;
+                        task_to_resign=task->getInstanceId();
                         ret_decision=RESIGNED;
                         taskAssignedToA=0;
                       }    
                     }else{
-                      std::map<int,ProcessControlBlock*>::const_iterator iter;
+                      TaskMap::const_iterator iter;
                       iter=running_tasks.begin();
-                      ProcessControlBlock *pcb=iter->second;
-                      task_to_resign=pcb->getInstanceId();
+                      Task *task=iter->second;
+                      task_to_resign=task->getInstanceId();
                       ret_decision=RESIGNED;
                       taskAssignedToA=0;          
                     }
@@ -721,18 +721,18 @@ namespace SystemC_VPC{
                         if(Dynamic_slots[curr_slicecountB].pid_fifo.size()>0){    // neuer Task da?
                           task_to_assign = Dynamic_slots[curr_slicecountB].pid_fifo.front();
                           taskAssignedToB=task_to_assign;
-                          std::map<int,ProcessControlBlock*>::const_iterator iter;
+                          TaskMap::const_iterator iter;
                           iter=running_tasks.begin();
-                          ProcessControlBlock *pcb=iter->second;
-                          task_to_resign=pcb->getInstanceId();
+                          Task *task=iter->second;
+                          task_to_resign=task->getInstanceId();
                           ret_decision= PREEMPT;  
                         }else{
                           //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen = Prozess verdraengen und "idle" werden!
                           // alten Task entfernen
-                          std::map<int,ProcessControlBlock*>::const_iterator iter;
+                          TaskMap::const_iterator iter;
                           iter=running_tasks.begin();
-                          ProcessControlBlock *pcb=iter->second;
-                          task_to_resign=pcb->getInstanceId();
+                          Task *task=iter->second;
+                          task_to_resign=task->getInstanceId();
                           ret_decision=RESIGNED;
                           taskAssignedToB=0;
                         }    
@@ -765,12 +765,12 @@ namespace SystemC_VPC{
                 }
                 
                 /*
-                  std::map<int,ProcessControlBlock*>::const_iterator iter;
+                  TaskMap::const_iterator iter;
                   iter=running_tasks.begin();
-                  ProcessControlBlock *pcb=iter->second;
-                  pcb->getInstanceId();
+                  Task *task=iter->second;
+                  task->getInstanceId();
                 */
-                //              cout <<"Ende: "<< ret_decision << "  " << task_to_assign << "  " << running_tasks.size() << "  " <<  pcb->getInstanceId() << endl;
+                //              cout <<"Ende: "<< ret_decision << "  " << task_to_assign << "  " << running_tasks.size() << "  " <<  task->getInstanceId() << endl;
               }
               if(running_tasks.size() ==2){ // einer von beiden muss abgelaufen sein... welcher?
                 //auch hier darf man bei dualchannel=false Niemals hinkommen!

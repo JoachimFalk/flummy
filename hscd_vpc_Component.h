@@ -68,7 +68,7 @@ namespace SystemC_VPC{
     /**
      * implementation of AbstractComponent::compute(ProcessControlBlock*)
      */
-    virtual void compute(ProcessControlBlock* pcb);
+    virtual void compute(Task* task);
 
     
     /**
@@ -150,8 +150,8 @@ namespace SystemC_VPC{
     sc_trace_file *traceFile;
     std::map<std::string, Tracing* > trace_map_by_name;
     Scheduler *scheduler;
-    std::deque<ProcessControlBlock*>      newTasks;
-    std::map<int,ProcessControlBlock*> readyTasks,runningTasks;
+    std::deque<Task*>      newTasks;
+    TaskMap readyTasks,runningTasks;
     
     std::map<ComponentState, double> powerTable;
     
@@ -166,7 +166,7 @@ namespace SystemC_VPC{
     // time last task started
     sc_time startTime;
 
-    void moveToRemainingPipelineStages(ProcessControlBlock* task);
+    void moveToRemainingPipelineStages(Task* task);
     
     void setScheduler(const char *schedulername);
     

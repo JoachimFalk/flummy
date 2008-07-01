@@ -46,22 +46,22 @@ namespace SystemC_VPC{
 
   bool RateMonotonicScheduler::getSchedulerTimeSlice(
     sc_time& time,
-    const std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks)
+    const TaskMap &ready_tasks,
+    const  TaskMap &running_tasks)
   {
      return false;
   }
   /**
    *
-   */  void RateMonotonicScheduler::addedNewTask(ProcessControlBlock *pcb){
+   */  void RateMonotonicScheduler::addedNewTask(Task *task){
     p_queue_entry pqe;
     pqe.fifo_order=order_counter++;
-    pqe.pcb=pcb;
+    pqe.task=task;
     pqueue.push(pqe);
   }
   /**
    *
-   */  void RateMonotonicScheduler::removedTask(ProcessControlBlock *pcb){
+   */  void RateMonotonicScheduler::removedTask(Task *task){
   }
 
   /**
@@ -70,31 +70,31 @@ namespace SystemC_VPC{
   scheduling_decision RateMonotonicScheduler::schedulingDecision(
     int& task_to_resign,
     int& task_to_assign,
-    const  std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks)
+    const  TaskMap &ready_tasks,
+    const  TaskMap &running_tasks)
   {
     scheduling_decision ret_decision=ONLY_ASSIGN;
     if(pqueue.size()<=0) return NOCHANGE;  // kein neuer -> nichts tun
     p_queue_entry prior_ready=pqueue.top();// höchste priorität der ready tasks
 
     // wert der priorität
-    double d_prior_ready=prior_ready.pcb->getPriority();
-    task_to_assign=prior_ready.pcb->getInstanceId();
+    double d_prior_ready=prior_ready.task->getPriority();
+    task_to_assign=prior_ready.task->getInstanceId();
 
 
     if(running_tasks.size()!=0){  // läuft noch einer ?
-      std::map<int,ProcessControlBlock*>::const_iterator iter;
+      TaskMap::const_iterator iter;
       iter=running_tasks.begin();
-      ProcessControlBlock *pcb=iter->second;
+      Task *task=iter->second;
 
       //laufender mit höherer oder gleicher priorität ->
-      if(pcb->getPriority() <= d_prior_ready){
+      if(task->getPriority() <= d_prior_ready){
         ret_decision=NOCHANGE;                       //nicht verdrängen
       }else{
         ret_decision=PREEMPT;                        //verdrängen
-        task_to_resign=pcb->getInstanceId(); 
+        task_to_resign=task->getInstanceId(); 
         pqueue.pop();
-        p_queue_entry pqe={0,pcb};
+        p_queue_entry pqe={0,task};
         pqueue.push(pqe);
       }
     }else{

@@ -120,8 +120,8 @@ namespace SystemC_VPC{
 
   
   bool TDMAScheduler::getSchedulerTimeSlice( sc_time& time,
-                                             const PCBMap &ready_tasks,
-                                             const PCBMap &running_tasks )
+                                             const TaskMap &ready_tasks,
+                                             const TaskMap &running_tasks )
   {      
     // keine wartenden + keine aktiven Threads -> ende!
     if(processcount==0 && running_tasks.size()==0) return false;   
@@ -131,40 +131,40 @@ namespace SystemC_VPC{
   }
   
   
-  void TDMAScheduler::addedNewTask(ProcessControlBlock *pcb){    
+  void TDMAScheduler::addedNewTask(Task *task){    
     //Neu fuer TDMA: Task der entsprechenden Liste des passenden
     //TDMA-Slots hinzufuegen
-    TDMA_slots[ PIDmap[pcb->getPid()] ].pid_fifo.push_back(pcb->getInstanceId());
+    TDMA_slots[ PIDmap[task->getProcessId()] ].pid_fifo.push_back(task->getInstanceId());
 #ifdef VPC_DEBUG     
-    cout<<"added Process " <<  pcb->getInstanceId() << " to Slot " << PIDmap[pcb->getPid()]  <<endl;
+    cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
 #endif //VPC_DEBUG
     processcount++;
   }
   
   
-  void TDMAScheduler::removedTask(ProcessControlBlock *pcb){  
+  void TDMAScheduler::removedTask(Task *task){  
     std::deque<ProcessId>::iterator iter;
-    for(iter = TDMA_slots[ PIDmap[pcb->getPid()] ].pid_fifo.begin();
-        iter!=TDMA_slots[PIDmap[pcb->getPid()]].pid_fifo.end();
+    for(iter = TDMA_slots[ PIDmap[task->getProcessId()] ].pid_fifo.begin();
+        iter!=TDMA_slots[PIDmap[task->getProcessId()]].pid_fifo.end();
         ++iter){
-      if( *iter == (unsigned int)pcb->getInstanceId()){
-        TDMA_slots[PIDmap[pcb->getPid()]].pid_fifo.erase(iter);
+      if( *iter == (unsigned int)task->getInstanceId()){
+        TDMA_slots[PIDmap[task->getProcessId()]].pid_fifo.erase(iter);
         break;
       }
     }
 #ifdef VPC_DEBUG    
-    cout<<"removed Task: " << pcb->getInstanceId()<<endl;
+    cout<<"removed Task: " << task->getInstanceId()<<endl;
 #endif //VPC_DEBUG   
     processcount--;  
   }
   
   
   // Eigentlicher Scheduler
-  scheduling_decision TDMAScheduler::schedulingDecision(
-                                                        int& task_to_resign,
-                                                        int& task_to_assign,
-                                                        const PCBMap &ready_tasks,
-                                                        const PCBMap &running_tasks )
+  scheduling_decision
+  TDMAScheduler::schedulingDecision(int& task_to_resign,
+                                    int& task_to_assign,
+                                    const TaskMap &ready_tasks,
+                                    const TaskMap &running_tasks )
   {
     scheduling_decision ret_decision=NOCHANGE;
     //Zeitscheibe abgelaufen?
@@ -191,10 +191,10 @@ namespace SystemC_VPC{
         ret_decision= ONLY_ASSIGN;
         
         if(running_tasks.size()!=0){  // alten Task entfernen
-          PCBMap::const_iterator iter;
+          TaskMap::const_iterator iter;
           iter=running_tasks.begin();
-          ProcessControlBlock *pcb=iter->second;
-          task_to_resign=pcb->getInstanceId();
+          Task *task=iter->second;
+          task_to_resign=task->getInstanceId();
           ret_decision= PREEMPT;  
         }
         // else{}    ->
@@ -203,10 +203,10 @@ namespace SystemC_VPC{
         //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen =>
         //Prozess verdraengen und "idle" werden!
         if(running_tasks.size()!=0){  // alten Task entfernen
-          PCBMap::const_iterator iter;
+          TaskMap::const_iterator iter;
           iter=running_tasks.begin();
-          ProcessControlBlock *pcb=iter->second;
-          task_to_resign=pcb->getInstanceId();
+          Task *task=iter->second;
+          task_to_resign=task->getInstanceId();
           ret_decision=RESIGNED;
         }else{
           //war keiner da... und ist auch kein Neuer da -> keine AEnderung      

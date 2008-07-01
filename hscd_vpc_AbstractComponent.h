@@ -45,7 +45,7 @@ class ComponentObserver;
        *
        * While this simulation is running SystemC simulation time is consumed.
        */
-    virtual void compute(Task& task) = 0;
+    virtual void compute(Task* task) = 0;
 
     virtual const char* getName() const = 0;
 
@@ -143,14 +143,16 @@ class ComponentObserver;
        *
        * While this simulation is running SystemC simulation time is consumed.
        */
-    virtual void compute(ProcessControlBlock* pcb)=0;
+    virtual void compute(Task* task)=0;
 
+    /*
     void compute(Task& task){
       ProcessControlBlock* pcb =
-        this->getPCBPool().allocate(task.pid);
-      pcb->setBlockEvent(task.blockEvent);
+        this->getPCBPool().allocate(task.getPid());
+      pcb->setBlockEvent(task.getBlockEvent());
       this->compute(pcb);
     };
+    */
     
     /**
      * \brief Sets next controlling instance of component
@@ -169,10 +171,10 @@ class ComponentObserver;
      * \brief Notifies parent controlling instance about task event
      * This mehtod is used to inform "direct" controlling instance about
      * finished or killed tasks.
-     * \param pcb points to the finished or killed task
+     * \param task points to the finished or killed task
      */
-    virtual void notifyParentController(ProcessControlBlock* pcb){
-      this->parentControlUnit->signalProcessEvent(pcb);
+    virtual void notifyParentController(Task* task){
+      this->parentControlUnit->signalProcessEvent(task);
     }
 
     /**

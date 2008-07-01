@@ -167,36 +167,6 @@ namespace SystemC_VPC {
        */
       EventPair getBlockEvent() const;
 
-      /**
-       * \brief Sets current associated delay of instance
-       */
-      void setDelay(sc_time delay);
-
-      /**
-       * \brief Gets currently associated delay of PCB instance
-       */
-      sc_time getDelay() const;
-
-      /**
-       * \brief Sets current associated latency of instance
-       */
-      void setLatency(sc_time latency);
-
-      /**
-       * \brief Gets currently associated latency of PCB instance
-       */
-      sc_time getLatency() const;
-
-      /**
-       * \brief Sets currently remaining delay of PCB instance
-       */
-      void setRemainingDelay(sc_time delay);
-
-      /**
-       * \brief Gets currently remaining delay of PCB instance
-       */
-      sc_time getRemainingDelay() const;
-      
       void setPeriod(sc_time period);
 
       sc_time getPeriod() const;
@@ -258,16 +228,6 @@ namespace SystemC_VPC {
 
       int instanceId;
       EventPair blockEvent;
-      sc_time delay;
-      
-      /**
-       * \brief For pipelining usage!
-       * This is not exact the latency, but it is "real_latency - delay",
-       * in fact.
-       * While real_latency is given within configuration file.
-       */
-      sc_time latency;
-      sc_time remainingDelay;
       int priority;
       sc_time period;
       sc_time deadline;
@@ -291,45 +251,6 @@ namespace SystemC_VPC {
        */
       void init();
  
-  };
-
-  struct p_queue_entry{
-    int fifo_order;  // sekundärstrategie
-    ProcessControlBlock *pcb;
-  };
-
-  struct p_queue_compare{
-    bool operator()(const p_queue_entry& pqe1,
-        const p_queue_entry& pqe2) const
-    {
-      int p1=pqe1.pcb->getPriority();
-      int p2=pqe2.pcb->getPriority();
-      if (p1 > p2)
-        return true;
-      else if(p1 == p2)
-        return (pqe1.fifo_order>pqe2.fifo_order);
-      else
-        return false;
-    }
-
-  };
-
-  struct rm_queue_compare{
-    bool operator()(const p_queue_entry& pqe1,
-        const p_queue_entry& pqe2) const
-    {
-      double p1 = sc_time(1,SC_NS)/pqe1.pcb->getPeriod();
-      double p2 = sc_time(1,SC_NS)/pqe2.pcb->getPeriod();
-      //double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
-      //double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
-      if (p1 > p2)
-        return true;
-      else if(p1 == p2)
-        return (pqe1.fifo_order>pqe2.fifo_order);
-      else
-        return false;
-    }
-
   };
 
   typedef std::map<int,ProcessControlBlock*>  PCBMap;

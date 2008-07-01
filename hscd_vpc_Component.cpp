@@ -25,6 +25,7 @@
 #include <hscd_vpc_PriorityScheduler.h>
 #include <hscd_vpc_RateMonotonicScheduler.h>
 #include <hscd_vpc_datatypes.h>
+#include "Task.h"
 
 #include <float.h>
 
@@ -103,7 +104,7 @@ namespace SystemC_VPC{
 
           if(actualRemainingDelay.value()==0){
             // all execution time simulated -> BLOCK running task.
-            ProcessControlBlock *task=runningTasks[actualRunningIID];
+            Task *task=runningTasks[actualRunningIID];
 
 #ifdef VPC_DEBUG
             cerr << this->getName() << " IID: " << actualRunningIID<< " > ";
@@ -125,7 +126,7 @@ namespace SystemC_VPC{
             //wait(SC_ZERO_TIME);
           }else{
 
-            // store remainingDela within ProcessControlBlock
+            // store remainingDelay
             runningTasks[actualRunningIID]->setRemainingDelay(
               actualRemainingDelay );
           }
@@ -136,7 +137,7 @@ namespace SystemC_VPC{
 
       //look for new tasks (they called compute)
       while(newTasks.size()>0){
-        ProcessControlBlock *newTask;
+        Task *newTask;
         newTask=newTasks[0];
         newTasks.pop_front();
 #ifdef VPC_DEBUG
@@ -342,20 +343,19 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::compute(ProcessControlBlock* actualTask){ 
+  void Component::compute(Task* actualTask){
+    //FIXME: Task should have PCB already set by Director!
+    ProcessControlBlock* pcb =
+      this->getPCBPool().allocate(actualTask->getProcessId());
+    pcb->setBlockEvent(actualTask->getBlockEvent());
+    actualTask->setPCB(pcb);
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
             << " ) at time: " << sc_time_stamp()
             << endl);
 
     // reset the execution delay
-    FunctionId fid = actualTask->getFunctionId();
-    actualTask->
-      setRemainingDelay(actualTask->ComponentDelay::getDelay(fid));
-    actualTask->
-      setDelay(actualTask->ComponentDelay::getDelay(fid));
-    actualTask->
-      setLatency(actualTask->ComponentDelay::getLatency(fid));
+    actualTask->initDelays();
 #ifdef VPC_DEBUG
     cerr << "Using " << actualTask->getRemainingDelay()
          << " as delay for function " << actualTask->getFuncName() << "!"
@@ -419,7 +419,7 @@ namespace SystemC_VPC{
 
 
           // Latency over -> remove Task
-          this->notifyParentController(front.pcb);
+          this->notifyParentController(front.task);
 
           //wait(SC_ZERO_TIME);
           pqueue.pop();
@@ -432,7 +432,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::moveToRemainingPipelineStages(ProcessControlBlock* task){
+  void Component::moveToRemainingPipelineStages(Task* task){
     sc_time now                 = sc_time_stamp();
     sc_time restOfLatency       = task->getLatency()  - task->getDelay();
     sc_time end                 = now + restOfLatency;
@@ -444,7 +444,7 @@ namespace SystemC_VPC{
     }
     timePcbPair pair;
     pair.time = end;
-    pair.pcb  = task;
+    pair.task  = task;
     //std::cerr << "Rest of pipeline added: " << task->getName()
     //<< " (EndTime: " << pair.time << ") " << std::endl;
     pqueue.push(pair);

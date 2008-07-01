@@ -2,6 +2,7 @@
 #define HSCD_VPC_PROCESSEVENTLISTENER_
 
 #include "hscd_vpc_datatypes.h"
+#include "Task.h"
 
 namespace SystemC_VPC{
 
@@ -19,9 +20,9 @@ namespace SystemC_VPC{
      * \brief Signals task event to listener
      * Used by listend instance to notify listener about an
      * event which happened.
-     * \param pcb points to the task which the notification corresponds to
+     * \param task points to the task which the notification corresponds to
      */
-    virtual void signalProcessEvent(ProcessControlBlock* pcb)=0;
+    virtual void signalProcessEvent(Task* task)=0;
     
     /**
      * \brief Virtual destructor for base classes

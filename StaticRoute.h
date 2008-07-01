@@ -39,12 +39,7 @@ namespace SystemC_VPC{
     protected CoSupport::SystemC::EventListener {
   public:
 
-    void compute( Task& pcb );
-
-    /**
-     *
-     */
-    void compute( ProcessControlBlock *pcb );
+    void compute( Task* task );
 
     FunctionId getFunctionId(ProcessId pid, std::string function);
 
@@ -67,7 +62,7 @@ namespace SystemC_VPC{
     typedef std::list<AbstractComponent *> Components;
 
     Components                             components;
-    Task                                   task;
+    Task*                                  task;
     EventPair                              taskEvents;
     CoSupport::SystemC::Event              dummy;
     std::string                            name;

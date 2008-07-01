@@ -11,6 +11,7 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 
 #include "hscd_vpc_ProcessControlBlock.h"
+#include "Task.h"
 #include "Attribute.h"
 
 namespace SystemC_VPC {
@@ -81,55 +82,17 @@ typedef CoSupport::SystemC::Event         VPC_Event;
 #ifdef MODES_EVALUATOR
 #define  NO_VCD_TRACES
 #endif // MODES_EVALUATOR
- 
 
   using std::string;
 
-  //enum trace_value {blocked,ready,running};
-
-/*
   struct p_queue_entry{
-    int fifo_order;  // sekund?rstrategie
-    ProcessControlBlock *pcb;
+    int fifo_order;  // sekundärstrategie
+    Task *task;
   };
-  
-  struct p_queue_compare{
-    bool operator()(const p_queue_entry& pqe1,
-        const p_queue_entry& pqe2) const
-    {
-      int p1=pqe1.pcb->getPriority();
-      int p2=pqe2.pcb->getPriority();
-      if (p1 > p2)
-  return true;
-      else if(p1 == p2)
-  return (pqe1.fifo_order>pqe2.fifo_order);
-      else 
-  return false;
-    }
-    
-  };
-
-  struct rm_queue_compare{
-    bool operator()(const p_queue_entry& pqe1,
-        const p_queue_entry& pqe2) const
-    {
-      double p1=pqe1.pcb->getPriority()/pqe1.pcb->getPeriod();
-      double p2=pqe2.pcb->getPriority()/pqe2.pcb->getPeriod();
-      if (p1 > p2)
-  return true;
-      else if(p1 == p2)
-  return (pqe1.fifo_order>pqe2.fifo_order);
-      else 
-  return false;
-    }
-    
-  };
-*/
-
 
   struct timePcbPair{
     sc_time time;
-    ProcessControlBlock *pcb;
+    Task *task;
   };
 
   struct timeCompare{

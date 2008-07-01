@@ -17,11 +17,16 @@ namespace SystemC_VPC{
     FCFSScheduler(){
     }
     virtual ~FCFSScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks);
-    void addedNewTask(ProcessControlBlock *pcb);
-    void removedTask(ProcessControlBlock *pcb);
+    bool getSchedulerTimeSlice(sc_time &time,
+                               const TaskMap &ready_tasks,
+                               const TaskMap &running_tasks);
+    void addedNewTask(Task *task);
+    void removedTask(Task *task);
     sc_event& getNotifyEvent();
-    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  std::map<int,ProcessControlBlock*> &ready_tasks,const  std::map<int,ProcessControlBlock*> &running_tasks);
+    scheduling_decision schedulingDecision(int& task_to_resign,
+                                           int& task_to_assign,
+                                           const  TaskMap &ready_tasks,
+                                           const  TaskMap &running_tasks);
     sc_time* schedulingOverhead(){return 0;}//new sc_time(1,SC_NS);
   protected:
 

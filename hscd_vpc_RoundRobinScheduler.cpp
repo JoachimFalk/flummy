@@ -62,20 +62,20 @@ namespace SystemC_VPC{
 
   bool RoundRobinScheduler::getSchedulerTimeSlice(
     sc_time& time,
-    const std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks )
+    const TaskMap &ready_tasks,
+    const  TaskMap &running_tasks )
   {
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
     time=sc_time(TIMESLICE,SC_NS);
     return true;
   }
-  void RoundRobinScheduler::addedNewTask(ProcessControlBlock *pcb){
-    rr_fifo.push_back(pcb->getInstanceId());
+  void RoundRobinScheduler::addedNewTask(Task *task){
+    rr_fifo.push_back(task->getInstanceId());
   }
-  void RoundRobinScheduler::removedTask(ProcessControlBlock *pcb){
+  void RoundRobinScheduler::removedTask(Task *task){
     std::deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
-      if( *iter == pcb->getInstanceId()){
+      if( *iter == task->getInstanceId()){
         rr_fifo.erase(iter);
         break;
       }
@@ -84,8 +84,8 @@ namespace SystemC_VPC{
   scheduling_decision RoundRobinScheduler::schedulingDecision(
     int& task_to_resign,
     int& task_to_assign,
-    const  std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks )
+    const  TaskMap &ready_tasks,
+    const  TaskMap &running_tasks )
   {
 
     scheduling_decision ret_decision=NOCHANGE;
@@ -103,11 +103,11 @@ namespace SystemC_VPC{
         // -> kein preemption!
         ret_decision= ONLY_ASSIGN;
         if(running_tasks.size()!=0){  // alten Task entfernen
-          std::map<int,ProcessControlBlock*>::const_iterator iter;
+          TaskMap::const_iterator iter;
           iter=running_tasks.begin();
-          ProcessControlBlock *pcb=iter->second;
-          task_to_resign=pcb->getInstanceId();
-          rr_fifo.push_back(pcb->getInstanceId());
+          Task *task=iter->second;
+          task_to_resign=task->getInstanceId();
+          rr_fifo.push_back(task->getInstanceId());
           ret_decision= PREEMPT;  
         }
         // else{}    ->

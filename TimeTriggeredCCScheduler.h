@@ -30,15 +30,20 @@ namespace SystemC_VPC{
     
     virtual ~TimeTriggeredCCScheduler(){}
     
-    bool getSchedulerTimeSlice(sc_time &time,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks);
+    bool getSchedulerTimeSlice(sc_time &time,
+                               const TaskMap &ready_tasks,
+                               const TaskMap &running_tasks);
     
-    void addedNewTask(ProcessControlBlock *pcb);
+    void addedNewTask(Task *task);
     
-    void removedTask(ProcessControlBlock *pcb);
+    void removedTask(Task *task);
     
     sc_event& getNotifyEvent();
     
-    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  std::map<int,ProcessControlBlock*> &ready_tasks,const  std::map<int,ProcessControlBlock*> &running_tasks);
+    scheduling_decision schedulingDecision(int& task_to_resign,
+                                           int& task_to_assign,
+                                           const  TaskMap &ready_tasks,
+                                           const  TaskMap &running_tasks);
     
     void setProperty(const char* key, const char* value);
     

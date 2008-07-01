@@ -148,7 +148,7 @@ namespace SystemC_VPC{
      */
     void registerMapping(const char* taskName, const char* compName);
     
-    void signalProcessEvent(ProcessControlBlock* pcb);
+    void signalProcessEvent(Task* task);
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;

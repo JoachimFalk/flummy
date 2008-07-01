@@ -602,13 +602,11 @@ namespace SystemC_VPC{
                                      STR_VPC_DELAY,
                                      sizeof(STR_VPC_DELAY) )){
                 sc_time delay = Director::createSC_Time(sValue);
-                p.setDelay(delay);
                 p.setBaseDelay( delay );
               }else if( 0 == strncmp(sType,
                                      STR_VPC_LATENCY,
                                      sizeof(STR_VPC_LATENCY) )){
                 sc_time latency = Director::createSC_Time(sValue);
-                p.setLatency(latency);
                 p.setBaseLatency( latency );
               }else{
 #ifdef VPC_DEBUG
@@ -701,13 +699,11 @@ namespace SystemC_VPC{
                                STR_VPC_DELAY,
                                sizeof(STR_VPC_DELAY) )){
           sc_time delay = Director::createSC_Time(attiter->second);
-          p->setDelay(delay);
           p->setBaseDelay( delay );
         }else if( 0 == strncmp(attiter->first,
                                STR_VPC_LATENCY,
                                sizeof(STR_VPC_LATENCY) )){
           sc_time latency = Director::createSC_Time(attiter->second);
-          p->setLatency(latency);
           p->setBaseLatency( latency );
         }else{
 #ifdef VPC_DEBUG
@@ -748,8 +744,6 @@ namespace SystemC_VPC{
           ++timings)
       {
         Timing t = *timings;
-        p->setDelay( t.dii );
-        p->setLatency(t.latency );
         p->addDelay(t.fid,t.dii);
         p->addLatency(t.fid,t.latency);
       }

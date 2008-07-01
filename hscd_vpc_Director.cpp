@@ -145,14 +145,14 @@ namespace SystemC_VPC{
       // we could use a pool of VPC_Events instead of new/delete
     }
 
-    Task task(fLink, endPair);
+    Task *task = new Task(fLink, endPair);
     
     //HINT: also treat mode!!
     //if( endPair.latency != NULL ) endPair.latency->notify();
     
     if (mappings.size() < fLink.process ||
         mappings[fLink.process] == NULL) {
-      cerr << "Unknown mapping <" << task.getName() << "> to ??" << std::endl;
+      cerr << "Unknown mapping <" << task->getName() << "> to ??" << std::endl;
       
       assert(mappings.size() >= fLink.process &&
              mappings[fLink.process] != NULL);
@@ -254,22 +254,22 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::signalProcessEvent
    */
-  void Director::signalProcessEvent(ProcessControlBlock* pcb){
+  void Director::signalProcessEvent(Task* task){
     assert(!FALLBACKMODE);
 
 #ifdef VPC_DEBUG
-    std::cerr << "Director> got notified from: " << pcb->getName()
+    std::cerr << "Director> got notified from: " << task->getName()
               << std::endl;
-    std::cerr << "Director> task successful finished: " << pcb->getName()
+    std::cerr << "Director> task successful finished: " << task->getName()
               << std::endl;
 #endif //VPC_DEBUG
-    if(NULL != pcb->getBlockEvent().latency)
-      pcb->getBlockEvent().latency->notify();
+    if(NULL != task->getBlockEvent().latency)
+      task->getBlockEvent().latency->notify();
     // remember last acknowledged task time
     this->end = sc_time_stamp().to_default_time_units();
     
-    // free allocated pcb
-    pcb->release();
+    // free allocated task
+    task->release();
   }
 
 

@@ -25,17 +25,20 @@ namespace SystemC_VPC{
      * /brief Called from Component to determine a "time slice" used as time out.
      * 
      */
-    virtual bool getSchedulerTimeSlice(sc_time &time,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks)=0;
+    virtual bool
+    getSchedulerTimeSlice(sc_time &time,
+                          const TaskMap &ready_tasks,
+                          const TaskMap &running_tasks)=0;
 
     /**
      * \brief Inform Scheduler about new tasks.
      */
-    virtual void addedNewTask(ProcessControlBlock *pcb)=0;
+    virtual void addedNewTask(Task *task)=0;
     
     /**
      * \brief Inform Scheduler about removed tasks.
      */
-    virtual void removedTask(ProcessControlBlock *pcb)=0;
+    virtual void removedTask(Task *task)=0;
 
     /**
      * \brief Call the Scheduler to do a scheduling decision.
@@ -47,7 +50,11 @@ namespace SystemC_VPC{
      * \param [in] running_tasks A map of running tasks! Usualy only one! Component knowes this map.
      * \return Returns a scheduling_decision enum. So Component knows what he has to do.
      */
-    virtual scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks)=0;
+    virtual scheduling_decision
+    schedulingDecision(int& task_to_resign,
+                       int& task_to_assign,
+                       const TaskMap &ready_tasks,
+                       const TaskMap &running_tasks)=0;
 
     /**
      *\brief The overhead needed to determine the scheduling descission.

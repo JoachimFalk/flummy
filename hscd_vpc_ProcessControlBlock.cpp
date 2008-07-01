@@ -136,9 +136,6 @@ namespace SystemC_VPC{
     
    
     this->blockEvent = EventPair();
-    this->setDelay(SC_ZERO_TIME);
-    this->setLatency(SC_ZERO_TIME);
-    this->setRemainingDelay(SC_ZERO_TIME);
     this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
@@ -156,9 +153,6 @@ namespace SystemC_VPC{
 
     this->blockEvent = EventPair();
     this->deadline = sc_time(DBL_MAX, SC_SEC);
-    this->delay = SC_ZERO_TIME;
-    this->latency = SC_ZERO_TIME;
-    this->remainingDelay = SC_ZERO_TIME;
     this->period = sc_time(DBL_MAX, SC_SEC);
     this->instanceId = ProcessControlBlock::globalInstanceId++;
     this->priority = 0;
@@ -208,30 +202,6 @@ namespace SystemC_VPC{
 
   EventPair ProcessControlBlock::getBlockEvent() const{
     return this->blockEvent;
-  }
-
-  void ProcessControlBlock::setDelay(sc_time delay){
-    this->delay = delay;
-  }
-
-  sc_time ProcessControlBlock::getDelay() const{
-    return this->delay;
-  }
-
-  void ProcessControlBlock::setLatency(sc_time latency){
-    this->latency = latency;
-  }
-
-  sc_time ProcessControlBlock::getLatency() const{
-    return this->latency;
-  }
-
-  void ProcessControlBlock::setRemainingDelay(sc_time delay){
-    this->remainingDelay = delay;
-  }
-
-  sc_time ProcessControlBlock::getRemainingDelay() const{
-    return this->remainingDelay;
   }
 
   void ProcessControlBlock::setPeriod(sc_time period){
