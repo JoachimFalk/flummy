@@ -96,7 +96,6 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
-	Pool.cpp				\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
 	PowerSumming.cpp                        \
