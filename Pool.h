@@ -45,12 +45,12 @@ namespace SystemC_VPC {
   class PrototypedPool{
   private:
 
-    // references prototype instance of PCB 
+    // references prototype instance of Object 
     OBJECT* prototype;
-    // list of currently used PCBs
-    std::map<int, OBJECT* > usedPCB;
-    // list of currently available PCBs
-    std::map<int, OBJECT* > freePCB;
+    // list of currently used Objects
+    std::map<int, OBJECT* > usedObjects;
+    // list of currently available Objects
+    std::map<int, OBJECT* > freeObjects;
     // reference to "parent" PrototypedPool
     //PrototypedPool *parentPool;
 
@@ -58,7 +58,6 @@ namespace SystemC_VPC {
 
     /**
      * \brief Default constructor of PrototypedPool
-     * \param pcb specifies the associated PCB to be managed and replicated
      */
     template<typename KEY>
     PrototypedPool( AssociativePrototypedPool<KEY, OBJECT> *parent ) {
@@ -66,7 +65,7 @@ namespace SystemC_VPC {
     }
 
     ~PrototypedPool(){
-      if(this->usedPCB.size() != 0){
+      if(this->usedObjects.size() != 0){
         std::cerr << "WARNING: PrototypedPool for "
                   << this->prototype->getName()
                   << " still used instances exist!" << std::endl
@@ -76,8 +75,8 @@ namespace SystemC_VPC {
       }
 
       for(typename std::map<int, OBJECT* >::iterator iter
-            = this->freePCB.begin(); 
-          iter != this->freePCB.end();
+            = this->freeObjects.begin(); 
+          iter != this->freeObjects.end();
           ++iter){
         delete iter->second;
       }
@@ -91,7 +90,7 @@ namespace SystemC_VPC {
     }
 
     /**
-     * \brief retrieves instance of managed PCB out of the pool
+     * \brief retrieves instance of managed Object out of the pool
      * If currently no instance is available a new instance if create
      * to satify request.
      */
@@ -99,15 +98,15 @@ namespace SystemC_VPC {
 
       OBJECT* instance = NULL;
 
-      if(this->freePCB.size() > 0){
+      if(this->freeObjects.size() > 0){
         typename std::map<int, OBJECT* >::iterator iter;
-        iter = this->freePCB.begin();
+        iter = this->freeObjects.begin();
         instance = iter->second;
-        this->usedPCB[iter->first] = instance;
-        this->freePCB.erase(iter);
+        this->usedObjects[iter->first] = instance;
+        this->freeObjects.erase(iter);
       }else{
         instance = new OBJECT(*(this->prototype));
-        this->usedPCB[instance->getInstanceId()] = instance;
+        this->usedObjects[instance->getInstanceId()] = instance;
       }
 
       return instance;
@@ -120,13 +119,13 @@ namespace SystemC_VPC {
     void free(OBJECT* p){
 
       typename std::map<int, OBJECT* >::iterator iter;
-      iter = this->usedPCB.find(p->getInstanceId());
-      if(iter != this->usedPCB.end()){
-        this->usedPCB.erase(iter);
+      iter = this->usedObjects.find(p->getInstanceId());
+      if(iter != this->usedObjects.end()){
+        this->usedObjects.erase(iter);
       
-        iter = this->freePCB.find(p->getInstanceId());
-        if(iter == this->freePCB.end()){
-          this->freePCB[p->getInstanceId()] = p;
+        iter = this->freeObjects.find(p->getInstanceId());
+        if(iter == this->freeObjects.end()){
+          this->freeObjects[p->getInstanceId()] = p;
         }
       }
     }
