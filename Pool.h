@@ -152,7 +152,7 @@ namespace SystemC_VPC {
 
       typename PrototypedPools::iterator iter;
       for(iter = this->pools.begin(); iter != this->pools.end(); iter++){
-        delete *iter;
+        delete iter->second;
       }
     }
 
@@ -195,6 +195,13 @@ namespace SystemC_VPC {
       assert(pools.find(key) != pools.end());
       assert(this->pools[key]);
       return this->pools[key]->getPrototype();
+    }
+
+    /**
+     *
+     */
+    bool contains( KEY key ){
+      return ( pools.find(key)!= pools.end() );
     }
 
   };
