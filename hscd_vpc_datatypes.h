@@ -10,8 +10,6 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
-#include "hscd_vpc_ProcessControlBlock.h"
-#include "Task.h"
 #include "Attribute.h"
 
 namespace SystemC_VPC {
@@ -84,6 +82,8 @@ typedef CoSupport::SystemC::Event         VPC_Event;
 #endif // MODES_EVALUATOR
 
   using std::string;
+
+  class Task;
 
   struct p_queue_entry{
     int fifo_order;  // sekundärstrategie

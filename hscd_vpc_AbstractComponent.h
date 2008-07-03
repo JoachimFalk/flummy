@@ -26,7 +26,8 @@
 
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_ProcessEventListener.h"
-#include "hscd_vpc_PCBPool.h"
+#include "hscd_vpc_ProcessControlBlock.h"
+#include "PCBPool.h"
 #include "Task.h"
 #include "PowerMode.h"
 #include "ComponentInfo.h"
@@ -106,19 +107,10 @@ class ComponentObserver;
     const char* getName() const;
 
     /**
-     * \brief Get the process control block.
-     */
-    ProcessControlBlock* getProcessControlBlock(ProcessId pid)
-      throw(NotAllocatedException)
-    {
-      return this->getPCBPool().allocate(pid);
-    }
-
-    /**
      * \brief Create the process control block.
      */
     ProcessControlBlock& createPCB(ProcessId pid){
-      return this->getPCBPool().registerPCB(pid);
+      return this->getPCBPool().createObject(pid);
     }
 
     /**

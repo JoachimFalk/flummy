@@ -64,7 +64,7 @@ pkginclude_HEADERS =				\
 	hscd_vpc_ProcessEventListener.h		\
 	hscd_vpc_Director.h			\
 	hscd_vpc_ProcessControlBlock.h		\
-	hscd_vpc_PCBPool.h			\
+	Pool.h					\
 	hscd_vpc_EventPair.h			\
 	FastLink.h
 
@@ -96,7 +96,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
-	hscd_vpc_PCBPool.cpp			\
+	Pool.cpp				\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
 	PowerSumming.cpp                        \

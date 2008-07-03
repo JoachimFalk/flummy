@@ -1,6 +1,4 @@
 #include "hscd_vpc_ProcessControlBlock.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_PCBPool.h"
 
 #include "debug_config.h"
 // if compiled with DBG_COMPONENT create stream and include debug macros
@@ -249,6 +247,6 @@ namespace SystemC_VPC{
   }
 
   void ProcessControlBlock::release(){
-    this->parentPool->free(this);
+    this->parentPool->free(this->getPid(), this);
   }
 }

@@ -11,13 +11,14 @@
 
 #include "hscd_vpc_EventPair.h"
 #include "hscd_vpc_Tracing.h"
+#include "hscd_vpc_datatypes.h"
 #include "FastLink.h"
+#include "PCBPool.h"
+#include "Pool.h"
 
 namespace SystemC_VPC {
 
   class Director;
-
-  class PCBPool;
 
   typedef size_t ComponentId;
 
