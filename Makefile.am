@@ -93,6 +93,7 @@ libsystemcvpc_la_SOURCES =			\
 	FlexRayScheduler.cpp			\
 	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\
+	Task.cpp				\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\

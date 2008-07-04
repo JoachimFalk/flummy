@@ -86,7 +86,9 @@ class ComponentObserver;
   
   public:
 
-    virtual ~AbstractComponent(){}
+    virtual ~AbstractComponent(){
+      this->pcbPools.clear();
+    }
 
     /**
      * \brief Used to create the Tracefiles.

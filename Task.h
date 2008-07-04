@@ -5,22 +5,21 @@
 
 #include "FastLink.h"
 #include "hscd_vpc_ProcessControlBlock.h"
+#include "TaskPool.h"
 
 namespace SystemC_VPC {
   class Task{
   public:
-    Task(){}
-    
-    Task(FastLink link, EventPair pair)
-      :  pid(link.process),
-         fid (link.func),
-         blockEvent(pair) {}
-    
-    
+    Task(TaskPool * pool) : pcb(NULL), pool(pool){
+          this->instanceId = Task::globalInstanceId++;
+    }
+
     // getter, setter
     std::string getName(){return pcb->getName();}
     ProcessId  getProcessId()                    {return pid;}
+    void       setProcessId(ProcessId pid)       {this->pid = pid;}
     FunctionId getFunctionId()                   {return fid;}
+    void       setFunctionId(FunctionId fid)     {this->fid = fid;}
     EventPair  getBlockEvent()                   {return blockEvent;}
     void       setBlockEvent(EventPair p)        {blockEvent = p;}
     void       setPCB(ProcessControlBlock* pcb)  {this->pcb = pcb;}
@@ -31,12 +30,14 @@ namespace SystemC_VPC {
     sc_time getLatency() const                  {return this->latency;}
     void setRemainingDelay(const sc_time& delay){this->remainingDelay = delay;}
     sc_time getRemainingDelay() const           {return this->remainingDelay;}
+    int getInstanceId()                         {return this->instanceId;}
 
 
     /**
      * 
      */
     void initDelays(){
+      assert(pcb != NULL);
       FunctionId fid = this->getFunctionId();
       this->setRemainingDelay( pcb->getDelay(fid));
       this->setDelay(          pcb->getDelay(fid));
@@ -44,14 +45,39 @@ namespace SystemC_VPC {
     }
 
     // Adaptor setter / getter for ProcessControlBlock
-    Tracing* getTraceSignal()        {return pcb->getTraceSignal();}
-    void setTraceSignal(Tracing* t)  {return pcb->setTraceSignal(t);}
-    int getInstanceId()              {return pcb->getInstanceId();}
-    void release()                   {return pcb->release(); delete this;}
-    int getPriority()                {return pcb->getPriority();}
-    sc_time getPeriod()              {return pcb->getPeriod();}
+    Tracing* getTraceSignal()
+      {assert(pcb != NULL); return pcb->getTraceSignal();}
+    void setTraceSignal(Tracing* t)
+      {assert(pcb != NULL); return pcb->setTraceSignal(t);}
+    int getPriority()
+      {assert(pcb != NULL); return pcb->getPriority();}
+    sc_time getPeriod()
+      {assert(pcb != NULL); return pcb->getPeriod();}
+
+    void release() {
+      assert(pcb != NULL);
+      pcb->release();
+      pool->free(this->getProcessId(), this);
+    }
 
   private:
+    friend class AssociativePrototypedPool<ProcessId, Task>;
+    friend class PrototypedPool<Task>;
+
+    Task(const Task &task) :
+      pid(task.pid),
+      fid(task.fid),
+      blockEvent(task.blockEvent),
+      delay(task.delay),
+      latency(task.latency),
+      remainingDelay(task.remainingDelay),
+      pcb(task.pcb),
+      pool(task.pool)
+    {
+          this->instanceId = Task::globalInstanceId++;
+    }
+        
+
     ProcessId  pid;
     FunctionId fid;
     EventPair  blockEvent;
@@ -62,6 +88,10 @@ namespace SystemC_VPC {
 
     
     ProcessControlBlock *pcb;
+    TaskPool            *pool;
+
+    static int globalInstanceId;
+    int instanceId;
   };
 
   typedef std::map<int, Task*>  TaskMap;

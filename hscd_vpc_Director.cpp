@@ -145,7 +145,11 @@ namespace SystemC_VPC{
       // we could use a pool of VPC_Events instead of new/delete
     }
 
-    Task *task = new Task(fLink, endPair);
+    //Task *task = new Task(fLink, endPair);
+    Task *task = this->taskPool.allocate( fLink.process );
+    task->setFunctionId( fLink.func );
+    task->setBlockEvent( endPair );
+    
     
     //HINT: also treat mode!!
     //if( endPair.latency != NULL ) endPair.latency->notify();
@@ -237,6 +241,12 @@ namespace SystemC_VPC{
     ProcessId       pid = getProcessId( taskName );
     if( pid >= mappings.size() ){
       mappings.resize( pid + 100, NULL );
+    }
+
+    if( !taskPool.contains( pid ) ){
+      Task &task = taskPool.createObject( pid );
+      task.setProcessId( pid );
+      //task.setName( taskName );
     }
 
     assert(pid <= mappings.size());

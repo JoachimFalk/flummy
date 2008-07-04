@@ -22,6 +22,7 @@
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_EventPair.h"
 #include "FastLink.h"
+#include "TaskPool.h"
 #include <hscd_vpc_InvalidArgumentException.h>
 
 // provide compatibility with other compilers then gcc, hopefully
@@ -230,6 +231,8 @@ namespace SystemC_VPC{
     ProcessId       globalProcessId;
 
     PowerSumming    *powerSumming;
+
+    TaskPool        taskPool;
   };
 
 }
