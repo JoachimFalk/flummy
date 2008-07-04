@@ -66,7 +66,8 @@ pkginclude_HEADERS =				\
 	hscd_vpc_ProcessControlBlock.h		\
 	Pool.h					\
 	hscd_vpc_EventPair.h			\
-	FastLink.h
+	FastLink.h				\
+	PowerGovernor.h
 
 #noinst_HEADERS=	oneof.hpp
 
@@ -100,6 +101,7 @@ libsystemcvpc_la_SOURCES =			\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
 	PowerSumming.cpp                        \
+	ComponentInfo.cpp			\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 

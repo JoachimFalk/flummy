@@ -20,7 +20,7 @@ PowerSumming::~PowerSumming()
   printPowerChange();
 }
 
-void PowerSumming::notify(const ComponentInfo *ci)
+void PowerSumming::notify(ComponentInfo *ci)
 {
   double old_powerConsumption = m_powerConsumption[ci];
   double new_powerConsumption = ci->getPowerConsumption();

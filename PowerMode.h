@@ -17,6 +17,9 @@
  *****************************************************************************/
 #ifndef __INCLUDED__POWERMODE__H__
 #define __INCLUDED__POWERMODE__H__
+
+#include <cstddef>
+
 namespace SystemC_VPC{
 
   /**
@@ -35,9 +38,19 @@ namespace SystemC_VPC{
       return mode == rhs.mode;
     }
 
+    bool operator!=(const PowerMode &rhs) const
+    {
+      return mode != rhs.mode;
+    }
+
     bool operator<(const PowerMode &rhs) const
     {
       return mode < rhs.mode;
+    }
+
+    bool operator>(const PowerMode &rhs) const
+    {
+      return mode > rhs.mode;
     }
 
   private:

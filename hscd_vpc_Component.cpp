@@ -45,9 +45,6 @@
 
 namespace SystemC_VPC{
 
-  const ComponentState Component::IDLE    = 0;
-  const ComponentState Component::RUNNING = 1;
-
   /**
    *
    */
@@ -60,7 +57,7 @@ namespace SystemC_VPC{
     //wait(SC_ZERO_TIME);
     
     scheduler->initialize();
-    setComponentState(IDLE);
+    setComponentState(ComponentState::IDLE);
     
     while(1){
       // Notify observers (e.g. powersum)
@@ -114,7 +111,7 @@ namespace SystemC_VPC{
 
             //notify(*(task->blockEvent));
             scheduler->removedTask(task);
-            setComponentState(IDLE);
+            setComponentState(ComponentState::IDLE);
 #ifndef NO_VCD_TRACES
             if(task->getTraceSignal()!=0)
               task->getTraceSignal()->value(S_BLOCKED);     
@@ -174,7 +171,7 @@ namespace SystemC_VPC{
         runningTasks.erase(taskToResign);
         actualRunningIID=-1;
         readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
-        setComponentState(IDLE);
+        setComponentState(ComponentState::IDLE);
 #ifndef NO_VCD_TRACES
         if(readyTasks[taskToResign]->getTraceSignal()!=0)
           readyTasks[taskToResign]->getTraceSignal()->value(S_READY);     
@@ -219,7 +216,7 @@ namespace SystemC_VPC{
         cerr << " is " << runningTasks[taskToAssign]->getRemainingDelay()
              << endl;
 #endif // VPCDEBUG
-        setComponentState(RUNNING);
+        setComponentState(ComponentState::RUNNING);
 #ifndef NO_VCD_TRACES
         if(runningTasks[taskToAssign]->getTraceSignal()!=0)
           runningTasks[taskToAssign]->getTraceSignal()->value(S_RUNNING);     
@@ -245,9 +242,9 @@ namespace SystemC_VPC{
       const double value = atof(equals + 1);
       
       if(strncmp(sValue, "IDLE", 4) == 0) {
-        powerTable[Component::IDLE] = value;
+        powerTable[ComponentState::IDLE] = value;
       } else if(strncmp(sValue, "RUNNING", 7) == 0) {
-        powerTable[Component::RUNNING] = value;
+        powerTable[ComponentState::RUNNING] = value;
       } else {
         // Not a supported power mode
         return false;
@@ -264,7 +261,7 @@ namespace SystemC_VPC{
         Attribute idle = fast.getAttribute("IDLE");
         std::string v =  idle.getType();
         const int value = atoi(v.c_str());
-        powerTable[Component::IDLE] = value;
+        powerTable[ComponentState::IDLE] = value;
       }
     }
         

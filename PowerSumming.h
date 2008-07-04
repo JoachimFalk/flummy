@@ -15,7 +15,7 @@ namespace SystemC_VPC{
     PowerSumming(std::ostream &os);
     ~PowerSumming();
 
-    void notify(const ComponentInfo *ci);
+    void notify(ComponentInfo *ci);
 
   private:
     std::ostream    &m_output;

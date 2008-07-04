@@ -32,28 +32,7 @@
 
 namespace SystemC_VPC{
 
-  class ComponentState
-  {
-    public:
-      ComponentState(const size_t &_state) : state(_state) {}
-
-      bool operator==(const ComponentState &rhs) const
-      {
-        return state == rhs.state;
-      }
-
-      bool operator<(const ComponentState &rhs) const
-      {
-        return state < rhs.state;
-      }
-
-    private:
-      size_t state;
-  };
-
   class Scheduler;
-
-  typedef std::map<std::string, PowerMode> PowerModes;
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -87,16 +66,15 @@ namespace SystemC_VPC{
     Component( sc_module_name name,
                const char *schedulername )
       : AbstractComponent(name),
-      powerMode(NULL),
-      powerModes()
+      powerMode(NULL)
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
-      this->setPowerMode(this->getPowerMode("FAST"));
+      this->setPowerMode(this->translatePowerMode("FAST"));
       setScheduler(schedulername);
 
-      powerTable[Component::IDLE]    = 0.0;
-      powerTable[Component::RUNNING] = 1.0;
+      powerTable[ComponentState::IDLE]    = 0.0;
+      powerTable[ComponentState::RUNNING] = 1.0;
 
       std::string powerSumFileName(this->getName());
       powerSumFileName += ".dat";
@@ -170,23 +148,9 @@ namespace SystemC_VPC{
     
     void setScheduler(const char *schedulername);
     
-    static const ComponentState IDLE;
-    static const ComponentState RUNNING;
-
     void setComponentState(const ComponentState &state);
 
     PowerMode *powerMode;
-
-    PowerModes powerModes;
-
-    PowerMode getPowerMode(std::string mode){
-      PowerModes::const_iterator i = powerModes.find(mode);
-      if(i == powerModes.end()){
-        size_t id = powerModes.size();
-        powerModes[mode] = PowerMode(id);
-      }
-      return powerModes[mode];
-    }
   };
 
 } 

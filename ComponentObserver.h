@@ -11,7 +11,7 @@ namespace SystemC_VPC{
     virtual ~ComponentObserver() {}
 
     // this callback function shall be called on component state changes
-    virtual void notify(const ComponentInfo *ci) = 0;
+    virtual void notify(ComponentInfo *ci) = 0;
   };
 }
 #endif // HSCD_VPC_COMPONENTOBSERVER_H_
