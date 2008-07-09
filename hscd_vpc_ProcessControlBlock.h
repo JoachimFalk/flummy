@@ -158,16 +158,6 @@ namespace SystemC_VPC {
        */
       const char* getFuncName() const;
 
-      /**
-       * \brief Sets block event of PCB instance
-       */
-      void setBlockEvent(EventPair blockEvent);
-
-      /**
-       * \brief Gets block event of PCB instance
-       */
-      EventPair getBlockEvent() const;
-
       void setPeriod(sc_time period);
 
       sc_time getPeriod() const;
@@ -228,7 +218,6 @@ namespace SystemC_VPC {
       FunctionId  fid;
 
       int instanceId;
-      EventPair blockEvent;
       int priority;
       sc_time period;
       sc_time deadline;

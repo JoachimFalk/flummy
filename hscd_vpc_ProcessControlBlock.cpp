@@ -133,7 +133,6 @@ namespace SystemC_VPC{
     this->setPriority(pcb.getPriority());
     
    
-    this->blockEvent = EventPair();
     this->setTraceSignal(NULL);
 
     this->activationCount = pcb.activationCount;
@@ -149,7 +148,6 @@ namespace SystemC_VPC{
 
   void ProcessControlBlock::init(){
 
-    this->blockEvent = EventPair();
     this->deadline = sc_time(DBL_MAX, SC_SEC);
     this->period = sc_time(DBL_MAX, SC_SEC);
     this->instanceId = ProcessControlBlock::globalInstanceId++;
@@ -192,14 +190,6 @@ namespace SystemC_VPC{
   const char* ProcessControlBlock::getFuncName() const{
     assert(0);
     return "";
-  }
-
-  void ProcessControlBlock::setBlockEvent(EventPair blockEvent){
-    this->blockEvent = blockEvent;
-  }
-
-  EventPair ProcessControlBlock::getBlockEvent() const{
-    return this->blockEvent;
   }
 
   void ProcessControlBlock::setPeriod(sc_time period){

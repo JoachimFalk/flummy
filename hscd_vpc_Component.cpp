@@ -340,7 +340,6 @@ namespace SystemC_VPC{
     //FIXME: Task should have PCB already set by Director!
     ProcessControlBlock* pcb =
       this->getPCBPool().allocate(actualTask->getProcessId());
-    pcb->setBlockEvent(actualTask->getBlockEvent());
     actualTask->setPCB(pcb);
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
