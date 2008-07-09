@@ -130,7 +130,8 @@ class ComponentObserver;
   
     AbstractComponent(sc_module_name name)
       : sc_module(name),
-        Delayer() {}
+        Delayer(),
+      powerMode(NULL) {}
             
     /**
        * \brief Simulate an execution on this "Virtual Component".
@@ -179,6 +180,11 @@ class ComponentObserver;
         pcbPools[mode] = new PCBPool();
       }
       this->pcbPool = pcbPools[mode];
+      this->powerMode = new PowerMode(mode);
+    }
+
+    const PowerMode* getPowerMode(){
+      return this->powerMode;
     }
     private:
     /**
@@ -186,7 +192,7 @@ class ComponentObserver;
      */
     PCBPool *pcbPool;
     std::map<PowerMode, PCBPool*> pcbPools;
-
+    const PowerMode *powerMode;
   };
   
 }

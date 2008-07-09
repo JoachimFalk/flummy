@@ -229,27 +229,6 @@ namespace SystemC_VPC{
 
   bool Component::processPower(Attribute att)
   {
-    // deprecated format
-    if(att.isType("power")){
-      std::string v = att.getValue();
-      const char* sValue = v.c_str();
-
-      const char *equals = strchr(sValue, '=');
-      if(equals == NULL) {
-        // No '=' character found!
-        return false;
-      }
-      const double value = atof(equals + 1);
-      
-      if(strncmp(sValue, "IDLE", 4) == 0) {
-        powerTable[ComponentState::IDLE] = value;
-      } else if(strncmp(sValue, "RUNNING", 7) == 0) {
-        powerTable[ComponentState::RUNNING] = value;
-      } else {
-        // Not a supported power mode
-        return false;
-      }
-    }
     // hierarchical format
     if(!att.isType("powermode")) {
       return false;
@@ -257,11 +236,28 @@ namespace SystemC_VPC{
 
     if(att.hasAttribute("FAST")){
       Attribute fast = att.getAttribute("FAST");
-      if(fast.hasAttribute("IDLE")){
-        Attribute idle = fast.getAttribute("IDLE");
-        std::string v =  idle.getType();
-        const int value = atoi(v.c_str());
+      PowerMode power = this->translatePowerMode("FAST");
+
+      if(powerTables.find(power) == powerTables.end()){
+        powerTables[power] = PowerTable();
+      }
+
+      PowerTable &powerTable=powerTables[power];
+
+      if(fast.hasParameter("IDLE")){
+        std::string v = fast.getParameter("IDLE");
+        const double value = atof(v.c_str());
         powerTable[ComponentState::IDLE] = value;
+      }
+      if(fast.hasParameter("RUNNING")){
+        std::string v = fast.getParameter("RUNNING");
+        const double value = atof(v.c_str());
+        powerTable[ComponentState::RUNNING] = value;
+      }
+      if(fast.hasParameter("STALLED")){
+        std::string v = fast.getParameter("STALLED");
+        const double value = atof(v.c_str());
+        powerTable[ComponentState::STALLED] = value;
       }
     }
         
@@ -450,6 +446,6 @@ namespace SystemC_VPC{
 
   void Component::setComponentState(const ComponentState &state)
   {
-    this->setPowerConsumption(powerTable[state]);
+    this->setPowerConsumption(powerTables[*getPowerMode()][state]);
   }
 } //namespace SystemC_VPC

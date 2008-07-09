@@ -30,6 +30,8 @@ namespace SystemC_VPC{
   public:
     PowerMode(const size_t &_mode) : mode(_mode) {}
 
+    PowerMode(const PowerMode &powerMode) : mode(powerMode.mode) {}
+
     //FIXME: needed for std::map only
     PowerMode() : mode(0) {}
 

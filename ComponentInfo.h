@@ -5,7 +5,9 @@
 
 #include <cstddef>
 #include <string>
+#include <iostream>
 #include <map>
+#include <string>
 
 namespace SystemC_VPC{
 
@@ -38,6 +40,7 @@ namespace SystemC_VPC{
 
       static const ComponentState IDLE;
       static const ComponentState RUNNING;
+      static const ComponentState STALLED;
 
     private:
       size_t state;

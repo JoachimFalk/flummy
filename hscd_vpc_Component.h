@@ -34,6 +34,9 @@ namespace SystemC_VPC{
 
   class Scheduler;
 
+  typedef std::map<ComponentState, double> PowerTable;
+  typedef std::map<PowerMode, PowerTable>  PowerTables;
+
   /**
    * \brief An implementation of AbstractComponent.
    * 
@@ -65,14 +68,18 @@ namespace SystemC_VPC{
      */
     Component( sc_module_name name,
                const char *schedulername )
-      : AbstractComponent(name),
-      powerMode(NULL)
+      : AbstractComponent(name)
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
       this->setPowerMode(this->translatePowerMode("FAST"));
       setScheduler(schedulername);
 
+      if(powerTables.find(*getPowerMode()) == powerTables.end()){
+        powerTables[*getPowerMode()] = PowerTable();
+      }
+
+      PowerTable &powerTable=powerTables[*getPowerMode()];
       powerTable[ComponentState::IDLE]    = 0.0;
       powerTable[ComponentState::RUNNING] = 1.0;
 
@@ -131,7 +138,7 @@ namespace SystemC_VPC{
     std::deque<Task*>      newTasks;
     TaskMap readyTasks,runningTasks;
     
-    std::map<ComponentState, double> powerTable;
+    PowerTables powerTables;
     
     sc_event notify_scheduler_thread;
     sc_signal<trace_value> schedulerTrace;
@@ -149,8 +156,6 @@ namespace SystemC_VPC{
     void setScheduler(const char *schedulername);
     
     void setComponentState(const ComponentState &state);
-
-    PowerMode *powerMode;
   };
 
 } 
