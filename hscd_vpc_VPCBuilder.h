@@ -49,9 +49,6 @@ namespace SystemC_VPC{
     XMLCh* componentStr;
     XMLCh* mappingStr;
     XMLCh* attributeStr;
-    XMLCh* templateSectionStr;
-    XMLCh* templateStr;
-    XMLCh* refTemplateStr;
     XMLCh* timingStr;
     XMLCh* parameterStr;
     XMLCh* topologyStr;
@@ -88,11 +85,6 @@ namespace SystemC_VPC{
      */
     // map of all created components
     std::map<std::string, AbstractComponent* > knownComps;
-    // map containing specified templates
-    std::map<std::string, std::vector<std::pair<char*, char* > > > templates;
-
-    // map containing template Timings
-    std::map<std::string, std::vector<Timing> > timingTemplates;
 
     // pointer to Director to be initialized
     Director* director;
@@ -118,9 +110,6 @@ namespace SystemC_VPC{
       componentStr    = XMLString::transcode("component");
       mappingStr      = XMLString::transcode("mapping");
       attributeStr    = XMLString::transcode("attribute");
-      templateSectionStr    = XMLString::transcode("templates");
-      templateStr     = XMLString::transcode("template");
-      refTemplateStr  = XMLString::transcode("reftemplate");
       timingStr       = XMLString::transcode("timing");
       parameterStr    = XMLString::transcode("parameter");
       topologyStr     = XMLString::transcode("topology");
@@ -174,34 +163,11 @@ namespace SystemC_VPC{
     AbstractComponent* initComponent() throw(InvalidArgumentException);
     
     /**
-     * \brief initializes specified templates
-     * \param tid specifies the id for an template
-     * \param specifies the current position within dom tree
-     */
-    //void initTemplateSpecifications(char* tid, DOMNode* node);
-    void initTemplateSpecifications(char* tid);
-    
-    /**
      * \brief Performs initialization of attribute values for a component
      * \param comp specifies the component to set attributes for
      */
     //void initCompAttributes(AbstractComponent* comp, DOMNode* node);
     void initCompAttributes(AbstractComponent* comp);
-    
-    /**
-     * \brief Passes attributes of a specified template to a given component instance
-     * \param comp represents the component to apply the attributes on
-     * \param key references the key of the template to apply
-     */
-    void applyTemplateOnComponent(AbstractComponent* comp, std::string key);
-    
-    /**
-     * \brief Interprets template for setting up parameter for a given ProcessControlBlock
-     * \param p represents the ProcessControlBlock to be updated
-     * \param target specifies the target of mapping
-     * \param key references the key of the template to apply
-     */
-    void applyTemplateOnPStruct(ProcessControlBlock* p, const char* target, std::string key);
     
     /**
      * \brief Initializes mapping between tasks and components
