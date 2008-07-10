@@ -24,6 +24,7 @@
 #include "ComponentInfo.h"
 #include "PowerSumming.h"
 #include "PowerMode.h"
+#include "hscd_vpc_Director.h"
 
 #include <vector>
 #include <map>
@@ -67,13 +68,21 @@ namespace SystemC_VPC{
      * passive actors and global SMoC v2 Schedulers.
      */
     Component( sc_module_name name,
-               const char *schedulername )
+               const char *schedulername,
+               Director *director )
       : AbstractComponent(name)
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
       this->setPowerMode(this->translatePowerMode("FAST"));
       setScheduler(schedulername);
+
+      midPowerGov = new LoadHysteresisGovernor(
+        director->topPowerGov,
+        sc_time(20,  SC_MS),
+        sc_time(800, SC_US),
+        sc_time(200, SC_US));
+      this->addObserver(midPowerGov);
 
       if(powerTables.find(*getPowerMode()) == powerTables.end()){
         powerTables[*getPowerMode()] = PowerTable();
@@ -145,6 +154,8 @@ namespace SystemC_VPC{
     
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
+
+    LoadHysteresisGovernor *midPowerGov;
 
     bool processPower(Attribute att);
 

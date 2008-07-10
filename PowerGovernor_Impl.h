@@ -8,8 +8,6 @@
 #include "PowerMode.h"
 #include "PowerGovernor.h"
 
-#include "hscd_vpc_Component.h"
-
 namespace SystemC_VPC{
 
 class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<PowerMode>
@@ -20,6 +18,8 @@ class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<PowerMode>
 
     void notify_top(ComponentInfo *ci, PowerMode newMode)
     {
+//    std::cerr << "SelectFastestPowerModeGovernor::notify_top newMode = " << newMode.mode << std::endl;
+
       if(m_components.find(ci) == m_components.end())
         ci->setPowerMode(m_lastMode);
 
@@ -35,6 +35,8 @@ class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<PowerMode>
             newMode = iter->second;
         }
       }
+
+//    std::cerr << "SelectFastestPowerModeGovernor::notify_top setPowerMode(" << newMode.mode << ")" << std::endl;
 
       if(newMode != m_lastMode) {
         for(std::map<ComponentInfo*, PowerMode>::iterator
@@ -62,14 +64,14 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
                            const sc_time fastTime,
                            const sc_time slowTime) :
       LocalPowerGovernor<PowerMode>(tpg),
-      sc_module(NULL),
+      sc_module(sc_module_name("LoadHysteresisGovernor")),
       m_windowTime(windowTime),
       m_fastTime(fastTime),
       m_slowTime(slowTime),
       m_ci(NULL),
       m_lastState(ComponentState::IDLE)
     {
-      SC_THREAD(process);
+      SC_METHOD(process);
       sensitive << m_wakeup_ev;
       dont_initialize();
     }
@@ -81,13 +83,22 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
 
     void notify(ComponentInfo *ci)
     {
-      ComponentState newState = ci->getComponentState();
-      if(newState == m_lastState)
-        return;
-      m_stateHistory.push_back(std::pair<ComponentState, sc_time>(m_lastState, sc_time_stamp()));
-      m_lastState = newState;
-      m_ci = ci;
-      m_wakeup_ev.notify(SC_ZERO_TIME);
+//    std::cerr << "LoadHysteresisGovernor::notify() @ " << sc_time_stamp() << std::endl;
+
+      const ComponentState newState = ci->getComponentState();
+
+      if(m_ci == NULL) {
+        m_ci = ci;
+        m_wakeup_ev.notify(SC_ZERO_TIME);
+      }
+      
+      assert(m_ci == ci);
+      
+      if(newState != m_lastState) {
+        m_stateHistory.push_back(std::pair<ComponentState, sc_time>(m_lastState, sc_time_stamp()));
+        m_lastState = newState;
+        m_wakeup_ev.notify(SC_ZERO_TIME);
+      }
     }
 
   private:
@@ -95,15 +106,17 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
     const sc_time                                   m_fastTime;
     const sc_time                                   m_slowTime;
     ComponentInfo                                  *m_ci;
-    PowerMode                                       m_lastMode;
     ComponentState                                  m_lastState;
+    PowerMode                                       m_mode;
     std::deque<std::pair<ComponentState, sc_time> > m_stateHistory;
     sc_event                                        m_wakeup_ev;
 
     void process()
     {
-      const PowerMode FAST =  m_ci->translatePowerMode("FAST");
-      const PowerMode SLOW =  m_ci->translatePowerMode("SLOW");
+//    std::cerr << "LoadHysteresisGovernor::process() @ " << sc_time_stamp() << std::endl;
+
+      const PowerMode FAST = m_ci->translatePowerMode("FAST");
+      const PowerMode SLOW = m_ci->translatePowerMode("SLOW");
 
       sc_time execTime(SC_ZERO_TIME);
       sc_time startTime(SC_ZERO_TIME);
@@ -125,6 +138,7 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
           iter != m_stateHistory.end();
           iter++)
       {
+        assert(iter->second >= startTime);
         if(iter->first != ComponentState::IDLE)
           execTime += iter->second - startTime;
         startTime = iter->second;
@@ -132,19 +146,21 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
       if(m_lastState != ComponentState::IDLE)
         execTime += sc_time_stamp() - startTime;
 
+//    std::cerr << "execTime = " << execTime << std::endl;
+
       // notify power mode suggestions
-      if((m_lastMode == SLOW) && (execTime > m_fastTime)) {
+      if((m_mode == SLOW) && (execTime >= m_fastTime)) {
         m_tpg->notify_top(m_ci, FAST);
-        m_lastMode = FAST;
-      } else if((m_lastMode == FAST) && (execTime < m_slowTime)) {
+        m_mode = FAST;
+      } else if((m_mode == FAST) && (execTime <= m_slowTime)) {
         m_tpg->notify_top(m_ci, SLOW);
-        m_lastMode = SLOW;
+        m_mode = SLOW;
       }
 
       // wake up process when reaching load boundary
-      if((m_lastMode == SLOW) && (m_lastState != ComponentState::IDLE)) {
+      if((m_mode == SLOW) && (m_lastState != ComponentState::IDLE)) {
         m_wakeup_ev.notify(m_fastTime - execTime);
-      } else if((m_lastMode == FAST) && (m_lastState == ComponentState::IDLE)) {
+      } else if((m_mode == FAST) && (m_lastState == ComponentState::IDLE)) {
         m_wakeup_ev.notify(execTime - m_slowTime);
       }
     }

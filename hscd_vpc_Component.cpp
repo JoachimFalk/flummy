@@ -448,6 +448,7 @@ namespace SystemC_VPC{
 
   void Component::setComponentState(const ComponentState &state)
   {
+    this->ComponentInfo::setComponentState(state);
     this->setPowerConsumption(powerTables[*getPowerMode()][state]);
   }
 } //namespace SystemC_VPC

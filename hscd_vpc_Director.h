@@ -23,6 +23,7 @@
 #include "hscd_vpc_EventPair.h"
 #include "FastLink.h"
 #include "TaskPool.h"
+#include "PowerGovernor_Impl.h"
 #include <hscd_vpc_InvalidArgumentException.h>
 
 // provide compatibility with other compilers then gcc, hopefully
@@ -190,6 +191,10 @@ namespace SystemC_VPC{
     Task* allocateTask(ProcessId pid){
       return this->taskPool.allocate( pid );
     }
+
+    // FIXME !!!
+    SelectFastestPowerModeGovernor *topPowerGov;
+
   private:
 
     /**

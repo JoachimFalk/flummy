@@ -59,6 +59,8 @@ namespace SystemC_VPC{
       componentIdMap(),
       globalProcessId(0)
   {
+    topPowerGov = new SelectFastestPowerModeGovernor;
+
     try{
       VPCBuilder builder((Director*)this);
       builder.buildVPC();
@@ -71,7 +73,7 @@ namespace SystemC_VPC{
                 << e.what() << std::endl;
       exit(-1);
     }
-    
+
     powerSumming = new PowerSumming(powerConsStream);
     for( Components::iterator it = components.begin();
          it != components.end();

@@ -294,7 +294,7 @@ namespace SystemC_VPC{
         //std::map<std::string, AbstractComponent* >::iterator iter
         //  = this->knownComps.find(sName);
         //if(iter == this->knownComps.end()){ 
-          comp = new Component(sName,sScheduler);
+          comp = new Component(sName,sScheduler,director);
           this->knownComps.insert(
             pair<string, AbstractComponent* >(sName, comp));
         //}else{

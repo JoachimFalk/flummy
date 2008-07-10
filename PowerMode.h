@@ -47,12 +47,14 @@ namespace SystemC_VPC{
 
     bool operator<(const PowerMode &rhs) const
     {
-      return mode < rhs.mode;
+      // FIXME !!
+      return mode > rhs.mode;
     }
 
     bool operator>(const PowerMode &rhs) const
     {
-      return mode > rhs.mode;
+      // FIXME !!
+      return mode < rhs.mode;
     }
 
   private:
