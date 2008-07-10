@@ -27,6 +27,7 @@
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_ProcessControlBlock.h"
+#include "FunctionTimingPool.h"
 #include "PCBPool.h"
 #include "Task.h"
 #include "PowerMode.h"
@@ -87,7 +88,7 @@ class ComponentObserver;
   public:
 
     virtual ~AbstractComponent(){
-      this->pcbPools.clear();
+      this->timingPools.clear();
     }
 
     /**
@@ -112,14 +113,18 @@ class ComponentObserver;
      * \brief Create the process control block.
      */
     ProcessControlBlock& createPCB(ProcessId pid){
-      return this->getPCBPool().createObject(pid);
+      PCBPool& pool = this->getPCBPool();
+      assert(pool.find(pid) == pool.end());
+      pool[pid] = new ProcessControlBlock( this );
+      pool[pid]->setPid(pid);
+      return *(pool[pid]);
     }
 
     /**
      *
      */
     PCBPool& getPCBPool(){
-      return *(this->pcbPool);
+      return this->pcbPool;
     }
   protected:
 
@@ -175,23 +180,38 @@ class ComponentObserver;
     /**
      * 
      */
-    virtual void setPowerMode(const PowerMode& mode){
-      if(pcbPools.find(mode) == pcbPools.end()){
-        pcbPools[mode] = new PCBPool();
+    void setPowerMode(const PowerMode& mode){
+      if(timingPools.find(mode) == timingPools.end()){
+        timingPools[mode] = new FunctionTimingPool();
       }
-      this->pcbPool = pcbPools[mode];
+      this->timingPool = timingPools[mode];
       this->powerMode = new PowerMode(mode);
     }
 
     const PowerMode* getPowerMode(){
       return this->powerMode;
     }
+
+    /**
+     *
+     */
+    FunctionTiming * getTiming(PowerMode mode, ProcessId pid){
+      if(timingPools.find(mode) == timingPools.end()){
+        timingPools[mode] = new FunctionTimingPool();
+      }
+      FunctionTimingPool * pool = this->timingPools[mode];
+      if(pool->find(pid) == pool->end()){
+        (*pool)[pid] = new FunctionTiming();
+      }
+      return (*pool)[pid];
+    }
     private:
     /**
      *
      */
-    PCBPool *pcbPool;
-    std::map<PowerMode, PCBPool*> pcbPools;
+    PCBPool pcbPool;
+    FunctionTimingPool * timingPool;
+    std::map<PowerMode, FunctionTimingPool*> timingPools;
     const PowerMode *powerMode;
   };
   

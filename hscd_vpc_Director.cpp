@@ -146,7 +146,7 @@ namespace SystemC_VPC{
     }
 
     //Task *task = new Task(fLink, endPair);
-    Task *task = this->taskPool.allocate( fLink.process );
+    Task *task = this->allocateTask( fLink.process );
     task->setFunctionId( fLink.func );
     task->setBlockEvent( endPair );
     
@@ -246,7 +246,7 @@ namespace SystemC_VPC{
     if( !taskPool.contains( pid ) ){
       Task &task = taskPool.createObject( pid );
       task.setProcessId( pid );
-      //task.setName( taskName );
+      task.setName( taskName );
     }
 
     assert(pid <= mappings.size());

@@ -1,4 +1,5 @@
 #include "StaticRoute.h"
+#include "hscd_vpc_Director.h"
 
 #include "debug_config.h"
 // if compiled with DBG_STATIC_ROUTE create stream and include debug macros
@@ -28,12 +29,16 @@ namespace SystemC_VPC {
   void StaticRoute::route( EventPair np ){
     if(!components.empty()){
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
-      task->setBlockEvent(np);
+      Task *newTask =
+        Director::getInstance().allocateTask(task->getProcessId());
+      newTask->setBlockEvent(np);
+      newTask->setFunctionId(task->getFunctionId());
       DBG_OUT("route on: " << components.front()->getName() << endl);
-      components.front()->compute(task);
+      components.front()->compute(newTask);
       components.pop_front();
     } else {
-      taskEvents.latency->notify();
+      Director::getInstance().signalProcessEvent(task);
+      //taskEvents.latency->notify();
     }
   }
 

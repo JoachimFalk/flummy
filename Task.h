@@ -10,12 +10,13 @@
 namespace SystemC_VPC {
   class Task{
   public:
-    Task(TaskPool * pool) : pcb(NULL), pool(pool){
+    Task(TaskPool * pool) : timing(NULL), pcb(NULL), pool(pool), name("NN"){
           this->instanceId = Task::globalInstanceId++;
     }
 
     // getter, setter
-    std::string getName(){return pcb->getName();}
+    std::string getName(){return name;}
+    void setName(std::string name){this->name = name;}
     ProcessId  getProcessId()                    {return pid;}
     void       setProcessId(ProcessId pid)       {this->pid = pid;}
     FunctionId getFunctionId()                   {return fid;}
@@ -23,6 +24,7 @@ namespace SystemC_VPC {
     EventPair  getBlockEvent()                   {return blockEvent;}
     void       setBlockEvent(EventPair p)        {blockEvent = p;}
     void       setPCB(ProcessControlBlock* pcb)  {this->pcb = pcb;}
+    void       setTiming(FunctionTiming* timing) {this->timing = timing;}
 
     void setDelay(const sc_time& delay)         {this->delay = delay;}
     sc_time getDelay() const                    {return this->delay;}
@@ -39,9 +41,9 @@ namespace SystemC_VPC {
     void initDelays(){
       assert(pcb != NULL);
       FunctionId fid = this->getFunctionId();
-      this->setRemainingDelay( pcb->getDelay(fid));
-      this->setDelay(          pcb->getDelay(fid));
-      this->setLatency(        pcb->getLatency(fid));
+      this->setRemainingDelay( timing->getDelay(fid));
+      this->setDelay(          timing->getDelay(fid));
+      this->setLatency(        timing->getLatency(fid));
     }
 
     // Adaptor setter / getter for ProcessControlBlock
@@ -55,8 +57,6 @@ namespace SystemC_VPC {
       {assert(pcb != NULL); return pcb->getPeriod();}
 
     void release() {
-      assert(pcb != NULL);
-      pcb->release();
       pool->free(this->getProcessId(), this);
     }
 
@@ -71,8 +71,10 @@ namespace SystemC_VPC {
       delay(task.delay),
       latency(task.latency),
       remainingDelay(task.remainingDelay),
+      timing(task.timing),
       pcb(task.pcb),
-      pool(task.pool)
+      pool(task.pool),
+      name(task.name)
     {
           this->instanceId = Task::globalInstanceId++;
     }
@@ -87,11 +89,13 @@ namespace SystemC_VPC {
     sc_time remainingDelay;
 
     
+    FunctionTiming      *timing;
     ProcessControlBlock *pcb;
     TaskPool            *pool;
 
     static int globalInstanceId;
     int instanceId;
+    std::string name;
   };
 
   typedef std::map<int, Task*>  TaskMap;

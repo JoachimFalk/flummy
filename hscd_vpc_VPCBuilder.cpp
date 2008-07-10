@@ -453,8 +453,9 @@ namespace SystemC_VPC{
                        << " " << t.latency
                        << " " << t.dii
                        << std::endl);
-              p.addLatency( t.fid, t.latency );
-              p.addDelay( t.fid, t.dii );
+              //p.addLatency( t.fid, t.latency );
+              //p.addDelay( t.fid, t.dii );
+              p.setTiming(t);
               
             }else if( 0==XMLString::compareNString( xmlName,
                                                     attributeStr,
@@ -634,8 +635,9 @@ namespace SystemC_VPC{
                                                   timingStr,
                                                   sizeof(timingStr) ) ){
                   Timing t = this->parseTiming( timingNode );
-                  pcb.addDelay( t.fid, t.dii );
-                  pcb.addLatency( t.fid, t.latency );
+                  //pcb.addDelay( t.fid, t.dii );
+                  //pcb.addLatency( t.fid, t.latency );
+                  pcb.setTiming(t);
                 }
               }
             }
@@ -652,6 +654,7 @@ namespace SystemC_VPC{
   //
   Timing VPCBuilder::parseTiming(DOMNode* node){
     char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
+    char *powerMode=NULL;
           
     DOMNamedNodeMap* atts = node->getAttributes();
     for(unsigned int i=0; i<atts->getLength(); i++){
@@ -672,11 +675,16 @@ namespace SystemC_VPC{
                                              fnameAttrStr,
                                              sizeof(fnameAttrStr))){
         fname = XMLString::transcode(a->getNodeValue());
+      }else if(0==XMLString::compareNString( a->getNodeName(),
+                                             powerModeStr,
+                                             sizeof(powerModeStr))){
+        powerMode = XMLString::transcode(a->getNodeValue());
       }
     }
     Timing t;
     sc_time sc_latency = SC_ZERO_TIME;
     sc_time sc_dii     = SC_ZERO_TIME;
+    t.powerMode        = "FAST";
   
     if(latency != NULL) sc_latency = Director::createSC_Time(latency);
     if(dii != NULL) sc_dii = Director::createSC_Time(dii);
@@ -689,6 +697,10 @@ namespace SystemC_VPC{
     t.fid = defaultFunctionId;
     if(fname != NULL){
       t.fid = this->director->createFunctionId(fname);
+    }
+
+    if(powerMode != NULL){
+      t.powerMode = powerMode;
     }
     
     //per default latency is used as vpc-delay as well as vpc-latency

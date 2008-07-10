@@ -54,6 +54,7 @@ namespace SystemC_VPC{
     XMLCh* topologyStr;
     XMLCh *hopStr;
     XMLCh *routeStr;
+    XMLCh *powerModeStr;
     //XMLCh *Str;
     
     XMLCh* nameAttrStr;
@@ -115,6 +116,7 @@ namespace SystemC_VPC{
       topologyStr     = XMLString::transcode("topology");
       hopStr          = XMLString::transcode("hop");
       routeStr        = XMLString::transcode("route");
+      powerModeStr    = XMLString::transcode("powermode");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");

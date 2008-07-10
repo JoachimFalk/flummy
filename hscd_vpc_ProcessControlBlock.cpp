@@ -1,3 +1,4 @@
+#include "hscd_vpc_AbstractComponent.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 
 #include "debug_config.h"
@@ -16,9 +17,7 @@
 
 namespace SystemC_VPC{
 
-  int ProcessControlBlock::globalInstanceId = 0;
-
-  ComponentDelay::ComponentDelay( )
+  FunctionTiming::FunctionTiming( )
     : funcDelays(1, SC_ZERO_TIME),
       funcLatencies(1, SC_ZERO_TIME)
   {
@@ -26,7 +25,7 @@ namespace SystemC_VPC{
     setBaseLatency(SC_ZERO_TIME);
   }
 
-  ComponentDelay::ComponentDelay( const ComponentDelay &delay )
+  FunctionTiming::FunctionTiming( const FunctionTiming &delay )
     : funcDelays(    delay.funcDelays    ),
       funcLatencies( delay.funcLatencies )
   {
@@ -34,7 +33,7 @@ namespace SystemC_VPC{
     setBaseLatency( delay.getBaseLatency() );
   }
 
-  void ComponentDelay::addDelay( FunctionId fid,
+  void FunctionTiming::addDelay( FunctionId fid,
                                               sc_time delay ){
     DBG_OUT( "::addDelay(" << fid << ") " << delay
              << std::endl);
@@ -44,17 +43,17 @@ namespace SystemC_VPC{
     this->funcDelays[fid] = delay;
   }
 
-  void ComponentDelay::setBaseDelay( sc_time delay ){
+  void FunctionTiming::setBaseDelay( sc_time delay ){
     DBG_OUT( "::setBaseDelay() " << delay
              << std::endl);
     this->funcDelays[defaultFunctionId] = delay;
   }
 
-  sc_time ComponentDelay::getBaseDelay( ) const {
+  sc_time FunctionTiming::getBaseDelay( ) const {
     return this->funcDelays[defaultFunctionId];
   }
 
-  sc_time ComponentDelay::getDelay(
+  sc_time FunctionTiming::getDelay(
     FunctionId fid) const
   {
     DBG_OUT( "::getDelay(" << fid << ") " << funcDelays.size()
@@ -64,7 +63,7 @@ namespace SystemC_VPC{
     return ret;
   }
 
-  void ComponentDelay::addLatency( FunctionId fid,
+  void FunctionTiming::addLatency( FunctionId fid,
                                                         sc_time latency ){
     if( fid >= funcLatencies.size())
       funcLatencies.resize( fid + 100, SC_ZERO_TIME );
@@ -72,15 +71,15 @@ namespace SystemC_VPC{
     this->funcLatencies[fid] = latency;
   }
 
-  void ComponentDelay::setBaseLatency( sc_time latency ){
+  void FunctionTiming::setBaseLatency( sc_time latency ){
     this->funcLatencies[defaultFunctionId] = latency;
   }
 
-  sc_time ComponentDelay::getBaseLatency( ) const {
+  sc_time FunctionTiming::getBaseLatency( ) const {
     return this->funcLatencies[defaultFunctionId];
   }
 
-  sc_time ComponentDelay::getLatency(
+  sc_time FunctionTiming::getLatency(
     FunctionId fid) const
   {
     assert(fid < funcLatencies.size());
@@ -88,25 +87,18 @@ namespace SystemC_VPC{
     return ret;
   }
 
-  ProcessControlBlock::ActivationCounter::ActivationCounter() :
-    activation_count(0){}
-
-  void ProcessControlBlock::ActivationCounter::increment(){
-    this->activation_count++;
+  void FunctionTiming::setTiming(const Timing& timing){
+    this->addDelay(timing.fid,   timing.dii);
+    this->addLatency(timing.fid, timing.latency);
   }
-
-  unsigned int ProcessControlBlock::ActivationCounter::getActivationCount(){
-    return this->activation_count;
-  }
-
 
   /**
    * SECTION ProcessControlBlock
    */
   
   
-  ProcessControlBlock::ProcessControlBlock(PCBPool* parent)
-    : name("NN"), parentPool(parent) {
+  ProcessControlBlock::ProcessControlBlock( AbstractComponent * component )
+    : name("NN"), component(component) {
     this->init();
   }
   
@@ -115,48 +107,27 @@ namespace SystemC_VPC{
   }
 
   ProcessControlBlock::~ProcessControlBlock(){
-    if(*(this->copyCount) == 0){
-      delete this->activationCount;
-      delete this->copyCount; 
-    }else{
-      (*(this->copyCount))--;
-    }
   }
   
   ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb)
-    : ComponentDelay(pcb)
   {
     this->setName(pcb.getName());
     this->setDeadline(pcb.getDeadline());
     this->setPeriod(pcb.getPeriod());
-    this->instanceId = ProcessControlBlock::globalInstanceId++;
     this->setPriority(pcb.getPriority());
-    
    
     this->setTraceSignal(NULL);
 
-    this->activationCount = pcb.activationCount;
-
     this->setPid(pcb.getPid());
     this->setFunctionId(pcb.getFunctionId());
-
-    // remember amount of copies for later clean up 
-    this->copyCount = pcb.copyCount;
-    (*(this->copyCount))++;
-    this->parentPool = pcb.parentPool;
   }
 
   void ProcessControlBlock::init(){
 
     this->deadline = sc_time(DBL_MAX, SC_SEC);
     this->period = sc_time(DBL_MAX, SC_SEC);
-    this->instanceId = ProcessControlBlock::globalInstanceId++;
     this->priority = 0;
     this->traceSignal = NULL;
-
-    this->activationCount = new ActivationCounter();
-
-    this->copyCount = new int(0);
   }
 
   void ProcessControlBlock::setName(std::string name){
@@ -181,10 +152,6 @@ namespace SystemC_VPC{
 
   FunctionId ProcessControlBlock::getFunctionId( ) const{
     return this->fid;
-  }
-      
-  int ProcessControlBlock::getInstanceId() const{
-    return this->instanceId;
   }
 
   const char* ProcessControlBlock::getFuncName() const{
@@ -220,14 +187,6 @@ namespace SystemC_VPC{
     return this->deadline;
   }
 
-  void ProcessControlBlock::incrementActivationCount(){
-    this->activationCount->increment();
-  }
-
-  unsigned int ProcessControlBlock::getActivationCount() const{
-    return this->activationCount->getActivationCount();
-  }
-
   void ProcessControlBlock::setTraceSignal(Tracing* signal){
     this->traceSignal = signal;
   }
@@ -236,7 +195,34 @@ namespace SystemC_VPC{
     return this->traceSignal;
   }
 
-  void ProcessControlBlock::release(){
-    this->parentPool->free(this->getPid(), this);
+  void ProcessControlBlock::setTiming(const Timing& timing){
+    PowerMode mode = this->component->translatePowerMode(timing.powerMode);
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->setTiming(timing);
   }
+
+  void ProcessControlBlock::setBaseDelay(sc_time delay){
+    PowerMode mode = this->component->translatePowerMode("FAST");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->setBaseDelay(delay);
+  }
+
+  void ProcessControlBlock::setBaseLatency(sc_time latency){
+    PowerMode mode = this->component->translatePowerMode("FAST");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->setBaseLatency(latency);
+  }
+
+  void ProcessControlBlock::addDelay(FunctionId fid, sc_time delay){
+    PowerMode mode = this->component->translatePowerMode("FAST");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->addDelay(fid, delay);
+  }
+
+  void ProcessControlBlock::addLatency(FunctionId fid, sc_time latency){
+    PowerMode mode = this->component->translatePowerMode("FAST");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->addLatency(fid, latency);
+  }
+
 }

@@ -15,17 +15,20 @@
 #include "FastLink.h"
 #include "PCBPool.h"
 #include "Pool.h"
+#include "PowerMode.h"
+#include "Timing.h"
 
 namespace SystemC_VPC {
 
   class Director;
+  class AbstractComponent;
 
   typedef size_t ComponentId;
 
   /**
    * Internal helper class to manage  function specific delays.
    */
-  class ComponentDelay{
+  class FunctionTiming{
 
   public:
 
@@ -34,12 +37,12 @@ namespace SystemC_VPC {
      * \param name specifies the name of the associated component
      * simulation
      */
-    ComponentDelay( );
+    FunctionTiming( );
 
     /**
      * copy constructor
      */
-    ComponentDelay( const ComponentDelay &delay );
+    FunctionTiming( const FunctionTiming &delay );
 
     /**
      * \brief Adds a new function delay to the instance
@@ -91,6 +94,12 @@ namespace SystemC_VPC {
      */
     sc_time getLatency(FunctionId fid) const;
 
+
+    /**
+     *
+     */
+    void setTiming(const Timing& timing);
+
   private:
 
     typedef std::vector<sc_time> FunctionTimes;
@@ -105,15 +114,14 @@ namespace SystemC_VPC {
   * This class represents all necessary data of a simulated process within VPC
   * and provides necessary access methods for its data.
   */
-  class ProcessControlBlock :
-    public ComponentDelay {
+  class ProcessControlBlock {
 
     public:
       
       /**
        * \brief Default constructor of an PCB instance
        */
-      ProcessControlBlock( PCBPool *parent );
+      ProcessControlBlock( AbstractComponent * component );
       
       /**
        * \brief Default constructor of an PCB instance
@@ -181,60 +189,26 @@ namespace SystemC_VPC {
 
       Tracing* getTraceSignal();
 
-      void release();
+      void setTiming(const Timing& timing);
+      void setBaseDelay(sc_time delay);
+      void setBaseLatency(sc_time latency);
+      void addDelay(FunctionId fid, sc_time delay);
+      void addLatency(FunctionId fid, sc_time latency);
 
     private:
 
-      /**
-       * Internal helper class to count the activation of a
-       * ProcessControlBlock instance,
-       * more precisely used with PCBPool instance type.
-       */
-      class ActivationCounter{
-        public:
-
-          ActivationCounter();
-
-          /**
-           * \brief increments activation count
-           */
-          void increment();
-
-          /**
-           * \brief Used to access activation count
-           */
-          unsigned int getActivationCount();
-
-        private:
-
-          unsigned int activation_count;
-
-      };
-
-      static int globalInstanceId;
+      typedef std::map<PowerMode, FunctionTiming*> FunctionTimings;
+      FunctionTimings functionTimings;
 
       std::string name;
       ProcessId   pid;
       FunctionId  fid;
 
-      int instanceId;
       int priority;
       sc_time period;
       sc_time deadline;
       Tracing * traceSignal;
-
-
-      /**
-       * variables common to pcb type
-       */
-      
-      ActivationCounter* activationCount; //activation_count;
-      int* copyCount;
-
-      // reference to "parent" PCBPool
-      PCBPool *parentPool;
-
-    private:
+      AbstractComponent * component;
 
       /**
        * \brief Initializes a newly created intance of ProcessControlBlock
@@ -242,7 +216,5 @@ namespace SystemC_VPC {
       void init();
  
   };
-
-  typedef std::map<int,ProcessControlBlock*>  PCBMap;
 }
 #endif // HSCD_VPC_PROCESSCONTROLBLOCK_H_

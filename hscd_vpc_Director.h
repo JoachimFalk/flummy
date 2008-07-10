@@ -186,6 +186,10 @@ namespace SystemC_VPC{
 
     FunctionId getFunctionId(std::string function);
     FunctionId createFunctionId(std::string function);
+
+    Task* allocateTask(ProcessId pid){
+      return this->taskPool.allocate( pid );
+    }
   private:
 
     /**

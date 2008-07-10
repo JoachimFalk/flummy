@@ -234,9 +234,10 @@ namespace SystemC_VPC{
       return false;
     }
 
-    if(att.hasAttribute("FAST")){
-      Attribute fast = att.getAttribute("FAST");
-      PowerMode power = this->translatePowerMode("FAST");
+    for(size_t i=0; i<att.getAttributeSize();++i){
+      Attribute powerAtt = att.getNextAttribute(i).second;
+      std::string powerMode = att.getNextAttribute(i).first;
+      PowerMode power = this->translatePowerMode(powerMode);
 
       if(powerTables.find(power) == powerTables.end()){
         powerTables[power] = PowerTable();
@@ -244,18 +245,18 @@ namespace SystemC_VPC{
 
       PowerTable &powerTable=powerTables[power];
 
-      if(fast.hasParameter("IDLE")){
-        std::string v = fast.getParameter("IDLE");
+      if(powerAtt.hasParameter("IDLE")){
+        std::string v = powerAtt.getParameter("IDLE");
         const double value = atof(v.c_str());
         powerTable[ComponentState::IDLE] = value;
       }
-      if(fast.hasParameter("RUNNING")){
-        std::string v = fast.getParameter("RUNNING");
+      if(powerAtt.hasParameter("RUNNING")){
+        std::string v = powerAtt.getParameter("RUNNING");
         const double value = atof(v.c_str());
         powerTable[ComponentState::RUNNING] = value;
       }
-      if(fast.hasParameter("STALLED")){
-        std::string v = fast.getParameter("STALLED");
+      if(powerAtt.hasParameter("STALLED")){
+        std::string v = powerAtt.getParameter("STALLED");
         const double value = atof(v.c_str());
         powerTable[ComponentState::STALLED] = value;
       }
@@ -337,10 +338,12 @@ namespace SystemC_VPC{
    *
    */
   void Component::compute(Task* actualTask){
-    //FIXME: Task should have PCB already set by Director!
-    ProcessControlBlock* pcb =
-      this->getPCBPool().allocate(actualTask->getProcessId());
+    ProcessId pid = actualTask->getProcessId();
+    PCBPool &pool = this->getPCBPool();
+    assert(pool.find(pid) != pool.end());
+    ProcessControlBlock* pcb = pool[pid];
     actualTask->setPCB(pcb);
+    actualTask->setTiming(this->getTiming(*this->getPowerMode(), pid));
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
             << " ) at time: " << sc_time_stamp()

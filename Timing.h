@@ -12,6 +12,7 @@ namespace SystemC_VPC{
     sc_time dii;
     sc_time latency;
     FunctionId fid;
+    std::string powerMode;
   };
   
 }

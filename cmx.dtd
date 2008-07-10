@@ -45,6 +45,7 @@ target IDREF #REQUIRED>
 
 <!ELEMENT timing EMPTY>
 <!ATTLIST timing
+powermode CDATA #IMPLIED
 delay   CDATA #IMPLIED
 dii     CDATA #IMPLIED
 latency CDATA #IMPLIED

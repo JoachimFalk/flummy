@@ -4,7 +4,7 @@
 #define INCLUDED__DEBUG_CONFIG__H__
 
 /** enable/disable debugging for any module */
-//#define DBG_ENABLE
+#define DBG_ENABLE
 
 #ifdef DBG_ENABLE
 extern CoSupport::Streams::DebugOStream dbgout;
