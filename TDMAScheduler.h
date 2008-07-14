@@ -52,6 +52,14 @@ namespace SystemC_VPC{
     
     void setProperty(const char* key, const char* value);
     
+    virtual void setAttribute(Attribute& att){
+      if(att.getAttributeSize() != 0 ||  att.getParameterSize() != 0)
+        return;
+
+      this->setProperty(att.getType().c_str(), att.getValue().c_str());
+
+    }
+
     sc_time* schedulingOverhead();
     
     void signalDeallocation(bool kill);

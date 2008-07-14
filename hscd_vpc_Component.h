@@ -80,8 +80,8 @@ namespace SystemC_VPC{
       midPowerGov = new LoadHysteresisGovernor(
         director->topPowerGov,
         sc_time(20,  SC_MS),
-        sc_time(800, SC_US),
-        sc_time(200, SC_US));
+        sc_time(10, SC_MS),
+        sc_time(2, SC_MS));
       this->addObserver(midPowerGov);
 
       if(powerTables.find(*getPowerMode()) == powerTables.end()){
@@ -123,6 +123,7 @@ namespace SystemC_VPC{
       this->removeObserver(powerSumming);
       delete powerSumming;
       delete powerSumStream;
+      sc_close_vcd_trace_file(traceFile);
     }
 
     /**
