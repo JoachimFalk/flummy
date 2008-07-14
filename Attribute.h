@@ -73,11 +73,7 @@ namespace SystemC_VPC{
     void setValue(std::string);
     void setType(std::string);
 
-    ~Attribute(){
-      std::cerr << "~Attribute(" << getType() << ", ";
-      std::cerr << getValue();
-      std::cerr << ")" << std::endl;
-    }
+    ~Attribute(){}
   private:
     std::string type;
     std::string value;

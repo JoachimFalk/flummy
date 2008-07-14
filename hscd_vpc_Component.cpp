@@ -273,9 +273,6 @@ namespace SystemC_VPC{
   }
   
   void Component::setAttribute(Attribute& attributes){
-    cerr << "Component recieved attribute: t=" << attributes.getType();
-    cerr << " v=" << attributes.getValue();
-    cerr << " size= " << attributes.getAttributeSize() << endl;
     if(processPower(attributes)){
       return;
     }

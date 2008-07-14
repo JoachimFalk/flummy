@@ -359,9 +359,6 @@ namespace SystemC_VPC{
           }
 
           Attribute attributes( sType, sValue);
-          cerr << "create Attribute t=" << sType;
-          cerr << " v=" << attributes.getValue();
-          cerr << std::endl;
 
           XMLString::release(&sType);
           if( value  != NULL){
@@ -557,7 +554,6 @@ namespace SystemC_VPC{
           }
           
           Attribute fr_Attribute2( sType, sValue);
-          cerr << "create Attribute t=" << sType << endl;
 
           //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
           // XMLString::release(&sValue);
@@ -571,7 +567,6 @@ namespace SystemC_VPC{
           sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
           sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
           fr_Attribute.addParameter( sType, sValue);
-          cerr << "add Parameter t=" << sType << " v=" << sValue << endl;
         }
         }
   }
