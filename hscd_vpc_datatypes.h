@@ -57,10 +57,6 @@ typedef CoSupport::SystemC::Event         VPC_Event;
   /*  END OF EXTENSION      */
   /**************************/
 
-#define STR_VPC_MEASURE_FILE "measure.xml"
-#define STR_VPC_RESULT_FILE "result"
-#define STR_VPC_CONF_FILE "config"
-
 #define STR_VPC_THREADEDCOMPONENTSTRING "threaded"
 #define STR_VPC_COMPONENTSTRING "normal"
 #define STR_VPC_DELAY "delay"

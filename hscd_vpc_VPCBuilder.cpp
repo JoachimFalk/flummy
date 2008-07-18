@@ -32,29 +32,15 @@ namespace SystemC_VPC{
    */
   void VPCBuilder::buildVPC(){
 
-    // open file and check existence
-    FILE* fconffile;
-    char* cfile;
-    char* vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
-    char vpc_conf_file[VPC_MAX_STRING_LENGTH];
-    
     FALLBACKMODE=false;
     
-    // check if evaluator flag is set, in this case read given file
-    // which ends with STR_VPC_CONGIF_FILE (see hscd_vpc_datatypes)
-    if(vpc_evaluator_prefix){
-      sprintf(vpc_conf_file,"%s%s",vpc_evaluator_prefix,STR_VPC_CONF_FILE);
+    // open file and check existence
+    FILE* fconffile;
+    char* cfile = getenv("VPCCONFIGURATION");
 #ifdef VPC_DEBUG
-      cout <<"VPCBuilder> config found! File name is "<< vpc_conf_file << endl;
+    std::cerr << "VPCBuilder> VPCCONFIGURATION set to " << cfile
+              << std::endl;
 #endif //VPC_DEBUG
-      cfile = vpc_conf_file;
-    }else{
-      cfile= getenv("VPCCONFIGURATION");
-#ifdef VPC_DEBUG
-      std::cerr << "VPCBuilder> VPCCONFIGURATION set to " << cfile
-                << std::endl;
-#endif //VPC_DEBUG
-    }
         
     if(cfile){
       fconffile=fopen(cfile,"r");
