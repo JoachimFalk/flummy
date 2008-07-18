@@ -13,7 +13,7 @@ name CDATA #REQUIRED>
 <!ELEMENT component ((configuration*, defaultconfiguration?)?, (attribute)*)>
 <!ATTLIST component
 name ID #REQUIRED
-type CDATA #REQUIRED
+type CDATA #IMPLIED
 scheduler CDATA #REQUIRED>
 
 <!ELEMENT attribute (attribute|parameter)*>

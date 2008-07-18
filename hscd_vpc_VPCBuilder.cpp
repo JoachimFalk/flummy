@@ -248,15 +248,18 @@ namespace SystemC_VPC{
       
       DOMNamedNodeMap* atts = node->getAttributes();
       char* sName;
-      char* sType;
+      char* sType = STR_VPC_THREADEDCOMPONENTSTRING;
       char* sScheduler;
       AbstractComponent* comp = NULL;
   
       sName = XMLString::transcode(
         atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue());
 
-      sType = XMLString::transcode(
+      DOMNode * value = atts->getNamedItem(VPCBuilder::typeAttrStr);
+      if( value  != NULL){
+        sType = XMLString::transcode(
             atts->getNamedItem(VPCBuilder::typeAttrStr)->getNodeValue());
+      }
 
       sScheduler = XMLString::transcode(
             atts->getNamedItem(VPCBuilder::schedulerAttrStr)->getNodeValue());
