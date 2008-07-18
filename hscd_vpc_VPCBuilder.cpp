@@ -37,10 +37,8 @@ namespace SystemC_VPC{
     // open file and check existence
     FILE* fconffile;
     char* cfile = getenv("VPCCONFIGURATION");
-#ifdef VPC_DEBUG
-    std::cerr << "VPCBuilder> VPCCONFIGURATION set to " << cfile
-              << std::endl;
-#endif //VPC_DEBUG
+    DBG_OUT("VPCBuilder> VPCCONFIGURATION set to " << cfile
+            << std::endl);
         
     if(cfile){
       fconffile=fopen(cfile,"r");
@@ -53,9 +51,7 @@ namespace SystemC_VPC{
         FALLBACKMODE=true;
       }else{
         fclose(fconffile);
-#ifdef VPC_DEBUG
-        cout << "configuration: "<<cfile << endl;
-#endif //VPC_DEBUG
+        DBG_OUT("configuration: "<<cfile << std::endl);
       }
     }else{
       FALLBACKMODE=true;
@@ -64,9 +60,7 @@ namespace SystemC_VPC{
     // init vars for parsing
     if(FALLBACKMODE){
       this->director->FALLBACKMODE = true;
-#ifdef VPC_DEBUG
-      std::cout << "running fallbackmode" << std::endl;
-#endif //VPC_DEBUG
+      DBG_OUT("running fallbackmode" << std::endl);
     }else{
       // process xml
       DOMDocument* vpcConfigDoc;
@@ -92,7 +86,7 @@ namespace SystemC_VPC{
         std::cerr << "\nVPCBuilder> Error while parsing xml file: '"
                   << cfile << "'\n"
           << "Exception message is:  \n"
-          << XMLString::transcode( toCatch.getMessage()) << "\n" << endl;
+          << XMLString::transcode( toCatch.getMessage()) << "\n" << std::endl;
           return;
       }
       catch (const DOMException& toCatch) {
@@ -102,13 +96,13 @@ namespace SystemC_VPC{
         std::cerr << "\nVPCBuilder> DOM Error while parsing xml file: '"
                   << cfile << "'\n"
                   << "DOMException code is:  "
-                  << XMLString::transcode( toCatch.msg) << endl;
+                  << XMLString::transcode( toCatch.msg) << std::endl;
           
         if (DOMImplementation::loadDOMExceptionMsg(toCatch.code,
                                                    errText,
                                                    maxChars))
           std::cerr << "Message is: "
-                    << XMLString::transcode( errText) << endl;
+                    << XMLString::transcode( errText) << std::endl;
         return;
       }
       catch (...) {
@@ -119,8 +113,8 @@ namespace SystemC_VPC{
       
       //check if parsing failed
       if(configErrorh->parseFailed()){
-        std::cerr << VPC_RED("VPCBuilder: Parsing of configuration failed,"
-                             " aborting initialization!") << std::endl;
+        DBG_OUT("VPCBuilder: Parsing of configuration failed,"
+                " aborting initialization!" << std::endl);
         return;
       }
       
@@ -164,10 +158,8 @@ namespace SystemC_VPC{
                 continue;
               }
 
-#ifdef VPC_DEBUG
-              std::cout << "VPCBuilder> registering component: "
-                        << comp->getName() << " to Director" << endl;
-#endif //VPC_DEBUG
+              DBG_OUT("VPCBuilder> registering component: "
+                      << comp->getName() << " to Director" << std::endl);
               // register "upper-layer" components to Director
               this->director->registerComponent(comp);
               comp->setParentController(this->director);
@@ -181,9 +173,7 @@ namespace SystemC_VPC{
                                                 mappingsStr,
                                                 sizeof(mappingsStr) ) ){
 
-#ifdef VPC_DEBUG
-            std::cout << "VPCBuilder> processing mappings " << endl;
-#endif //VPC_DEBUG
+          DBG_OUT("VPCBuilder> processing mappings " << std::endl);
             
           node = vpcConfigTreeWalker->firstChild();
           if(node != NULL){ 
@@ -223,9 +213,7 @@ namespace SystemC_VPC{
       delete configErrorh;
       
     }// else !FALLBACK
-#ifdef VPC_DEBUG    
-    std::cerr << "Initializing VPC finished!" << std::endl;
-#endif //VPC_DEBUG
+    DBG_OUT("Initializing VPC finished!" << std::endl);
   }
 
   /**
@@ -264,9 +252,7 @@ namespace SystemC_VPC{
       sScheduler = XMLString::transcode(
             atts->getNamedItem(VPCBuilder::schedulerAttrStr)->getNodeValue());
   
-#ifdef VPC_DEBUG
-      std::cerr << "VPCBuilder> initComponent: " << sName << std::endl;
-#endif //VPC_DEBUG
+      DBG_OUT("VPCBuilder> initComponent: " << sName << std::endl);
 
       // check which kind of component is defined
       // standard component
@@ -274,10 +260,8 @@ namespace SystemC_VPC{
                     STR_VPC_THREADEDCOMPONENTSTRING,
                     sizeof(STR_VPC_THREADEDCOMPONENTSTRING))){
 
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> Found Component name=" << sName << " type="
-                  << sType << endl;
-#endif //VPC_DEBUG
+        DBG_OUT("VPCBuilder> Found Component name=" << sName << " type="
+                  << sType << std::endl);
         
         // check if component already exists
         //std::map<std::string, AbstractComponent* >::iterator iter
@@ -285,7 +269,7 @@ namespace SystemC_VPC{
         //if(iter == this->knownComps.end()){ 
           comp = new Component(sName,sScheduler,director);
           this->knownComps.insert(
-            pair<string, AbstractComponent* >(sName, comp));
+            std::pair<std::string, AbstractComponent* >(sName, comp));
         //}else{
         //  comp = iter->second;
         //}
@@ -295,7 +279,7 @@ namespace SystemC_VPC{
       }else // unkown component type
       {
         
-        string msg("Unknown Component: name=");
+        std::string msg("Unknown Component: name=");
         msg += sName;
         msg += " type=";
         msg += sType;
@@ -306,7 +290,7 @@ namespace SystemC_VPC{
       return comp;    
     }
 
-    string msg("Unknown configuration tag: ");
+    std::string msg("Unknown configuration tag: ");
     char *name = XMLString::transcode(xmlName);
     msg.append(name, std::strlen (name));
     XMLString::release(&name);
@@ -321,10 +305,8 @@ namespace SystemC_VPC{
    */
   void VPCBuilder::initCompAttributes(AbstractComponent* comp){
     DOMNode* node = this->vpcConfigTreeWalker->firstChild(); 
-#ifdef VPC_DEBUG
-    cerr << "VPC> InitAttribute for Component name=" << comp->getName()
-         << endl;
-#endif //VPC_DEBUG
+    DBG_OUT("VPC> InitAttribute for Component name=" << comp->getName()
+         << std::endl);
     if(node != NULL){
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
@@ -374,9 +356,7 @@ namespace SystemC_VPC{
     
     const XMLCh* xmlName=node->getNodeName();
 
-#ifdef VPC_DEBUG
-      std::cerr << "VPCBuilder> entering initMappingAPStruct"<< std::endl;
-#endif //VPC_DEBUG    
+    DBG_OUT("VPCBuilder> entering initMappingAPStruct"<< std::endl);    
    
     // find mapping tag (not mappings)
     if( 0==XMLString::compareNString( xmlName,
@@ -393,7 +373,7 @@ namespace SystemC_VPC{
 
 
       DBG_OUT( "VPCBuilder> Found mapping attribute: source=" << sSource
-               << " target=" << sTarget << endl); 
+               << " target=" << sTarget << std::endl); 
 
       // check if component exists
       if(this->knownComps.count(sTarget)==1){
@@ -452,13 +432,8 @@ namespace SystemC_VPC{
               sValue=XMLString::transcode(
                 atts->getNamedItem(valueAttrStr)->getNodeValue());
 
-#ifdef VPC_DEBUG
-              std::string msg = "attribute values are: ";
-              msg.append(sType, strlen(sType));
-              msg += " and ";
-              msg.append(sValue, strlen(sValue));
-              std::cerr << msg << std::endl;
-#endif   
+              DBG_OUT("attribute values are: " <<sType
+                      << " and " << sValue << std::endl);
           
               if( 0 == strncmp(sType,
                                STR_VPC_PRIORITY,
@@ -485,22 +460,18 @@ namespace SystemC_VPC{
                 sc_time latency = Director::createSC_Time(sValue);
                 p.setBaseLatency( latency );
               }else{
-#ifdef VPC_DEBUG
-                std::cerr << "VPCBuilder> Unknown mapping attribute: type="
-                          << sType << " value=" << sValue << endl; 
-                std::cerr << "VPCBuilder> Try to interpret as function"
-                  " specific delay!!" << endl;
-#endif //VPC_DEBUG
+                DBG_OUT("VPCBuilder> Unknown mapping attribute: type="
+                          << sType << " value=" << sValue << endl); 
+                DBG_OUT("VPCBuilder> Try to interpret as function"
+                  " specific delay!!" << std::endl);
 
                 try{  
                   sc_time delay = Director::createSC_Time(sValue);
-#ifdef VPC_DEBUG
-                  std::cerr << VPC_YELLOW("VPCBuilder> Try to interpret as"
-                              " function specific delay!!") << endl;
-                  std::cerr << VPC_YELLOW("VPCBuilder> Register delay to: "
-                            << sTarget << "; " << sType << ", " << delay)
-                            << std::endl;
-#endif //VPC_DEBUG
+                  DBG_OUT("VPCBuilder> Try to interpret as"
+                          " function specific delay!!" << std::endl);
+                  DBG_OUT("VPCBuilder> Register delay to: "
+                            << sTarget << "; " << sType << ", " << delay
+                            << std::endl);
                   p.addDelay( this->director->createFunctionId(sType),
                               delay );
                   // using attribute="functionName" for compatibility:
@@ -509,9 +480,7 @@ namespace SystemC_VPC{
                                 delay );
 
                 } catch(const InvalidArgumentException& ex) {
-#ifdef VPC_DEBUG
-                  std::cerr <<  "VPCBuilder> Mapping realy unknown!" << endl;
-#endif //VPC_DEBUG
+                  DBG_OUT("VPCBuilder> Mapping realy unknown!" << std::endl);
                 }
               }
 
@@ -521,7 +490,7 @@ namespace SystemC_VPC{
           }
         }else{
           std::cerr << "VPCBuilder> No valid component found for mapping:"
-            " source=" << sSource << " target=" << sTarget<< endl;
+            " source=" << sSource << " target=" << sTarget<< std::endl;
         }
       }
     }

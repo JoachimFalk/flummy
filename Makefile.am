@@ -90,6 +90,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_PriorityScheduler.cpp		\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
+	hscd_vpc_Tracing.cpp			\
 	TDMAScheduler.cpp			\
 	FlexRayScheduler.cpp			\
 	TimeTriggeredCCScheduler.cpp		\

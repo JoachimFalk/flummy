@@ -27,7 +27,7 @@
 #include <hscd_vpc_InvalidArgumentException.h>
 
 // provide compatibility with other compilers then gcc, hopefully
-#include <ansidecl.h>
+//#include <ansidecl.h>
 
 #include <string>
 #include <map>
@@ -39,8 +39,6 @@ namespace SystemC_VPC{
 
   class PowerSumming;
  
-  class ProcessControlBlock;
-
   /**
    * \brief Director knowes all (Abstract-)Components, all mappings (task -> component).
    *
@@ -157,7 +155,7 @@ namespace SystemC_VPC{
       remove(vpc_result_file.c_str());
     }
     
-    string getResultFile(){
+    std::string getResultFile(){
       return this->vpc_result_file;
     }
 

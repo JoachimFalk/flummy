@@ -21,10 +21,6 @@
 #include <systemc.h>
 
 namespace SystemC_VPC {
-#define S_BLOCKED 'b'
-#define S_READY   'w'
-#define S_RUNNING 'R'
-
   typedef char trace_value;
 
   /** ASCII lower case bit is  2^5 */
@@ -35,8 +31,11 @@ namespace SystemC_VPC {
    * tiny little helper: toggeling ASCII characters used for VCD tracing
    */
   class Tracing{
-
   public:
+    static const trace_value S_BLOCKED;
+    static const trace_value S_READY;
+    static const trace_value S_RUNNING;
+
     Tracing() :
       traceSignal( new sc_signal<trace_value>() ),
       lastChange( SC_ZERO_TIME ),
@@ -46,12 +45,25 @@ namespace SystemC_VPC {
     /** signal for VCD tracing */ 
     sc_signal<trace_value>* traceSignal;
 
+    void traceRunning(){
+      this->setValue(S_RUNNING);
+    }
+
+    void traceBlocking(){
+      this->setValue(S_BLOCKED);
+    }
+
+    void traceReady(){
+      this->setValue(S_READY);
+    }
+
+  private:
     /**
      * Set the value for tracing.
      * If the signal is identic to lastValue then the ascii bit for
      * lowercase id toggled
      */
-    void value(trace_value value){
+    void setValue(trace_value value){
       if(lastChange != sc_time_stamp()){
         // remember value from last real changing (ignore delta cycle changing)
         lastValue    = *traceSignal;
@@ -65,8 +77,6 @@ namespace SystemC_VPC {
         *traceSignal  = value;
       }
     }
-
-    private:
 
     /** remeber last time of signal changing */
     sc_time                 lastChange;

@@ -55,7 +55,6 @@ namespace SystemC_VPC{
     XMLCh *hopStr;
     XMLCh *routeStr;
     XMLCh *powerModeStr;
-    //XMLCh *Str;
     
     XMLCh* nameAttrStr;
     XMLCh* countAttrStr;
@@ -70,16 +69,10 @@ namespace SystemC_VPC{
     XMLCh *latencyAttrStr;
     XMLCh *fnameAttrStr;
     XMLCh *destinationAttrStr;
-    //XMLCh *AttrStr;
-    
-    /*
-     * END OF SECTION: init tag values for comparison while initializing
-     */
     
     // walker over parsed configure file
     // used as instance variable to enable code modularization
     DOMTreeWalker* vpcConfigTreeWalker;
-    
     
     /*
      * HELPER STRUCTURES FOR INITIALIZATION
@@ -100,7 +93,8 @@ namespace SystemC_VPC{
         XMLPlatformUtils::Initialize();
       }
       catch(const XMLException& e){
-        cerr << VPC_ERROR<<"Director> Error initializing Xerces:\n"<<XMLString::transcode(e.getMessage())<<NENDL; // << endl;
+        cerr << "Director> Error initializing Xerces:\n"
+             << XMLString::transcode(e.getMessage()) << std::endl;
       }
       /*
        * SECTION: initialization of init tag values for comparison while initializing

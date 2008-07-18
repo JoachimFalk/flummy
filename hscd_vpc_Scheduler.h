@@ -3,10 +3,9 @@
 
 #include <systemc.h>
 
-#include <map>
-
 #include "Task.h"
 #include "ComponentModel.h"
+#include "Attribute.h"
 
 namespace SystemC_VPC{
   

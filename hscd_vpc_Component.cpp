@@ -90,31 +90,28 @@ namespace SystemC_VPC{
 
           assert(actualRemainingDelay.value()>=0);
 
-#ifdef VPC_DEBUG
-          std::cerr << VPC_RED("Component " << this->getName()
+          DBG_OUT("Component " << this->getName()
                     << "> actualRemainingDelay= "
                     << actualRemainingDelay.value() << " for iid="
                     << actualRunningIID << " at: "
-                    << sc_time_stamp().to_default_time_units())
-                    << std::endl;
-#endif //VPC_DEBUG
+                    << sc_time_stamp().to_default_time_units()
+                    << std::endl);
 
           if(actualRemainingDelay.value()==0){
             // all execution time simulated -> BLOCK running task.
             Task *task=runningTasks[actualRunningIID];
 
-#ifdef VPC_DEBUG
-            cerr << this->getName() << " IID: " << actualRunningIID<< " > ";
-            cerr << this->getName() << " removed Task: " << task->getName()
-                 << " at: " << sc_time_stamp().to_default_time_units() << endl;
-#endif // VPCDEBUG
+          DBG_OUT(this->getName() << " IID: " << actualRunningIID<< " > ");
+          DBG_OUT(this->getName() << " removed Task: " << task->getName()
+                  << " at: " << sc_time_stamp().to_default_time_units()
+                  << std::endl);
 
             //notify(*(task->blockEvent));
             scheduler->removedTask(task);
             fireStateChanged(ComponentState::IDLE);
 #ifndef NO_VCD_TRACES
             if(task->getTraceSignal()!=0)
-              task->getTraceSignal()->value(S_BLOCKED);     
+              task->getTraceSignal()->traceBlocking();
 #endif //NO_VCD_TRACES
             runningTasks.erase(actualRunningIID);
 
@@ -137,14 +134,12 @@ namespace SystemC_VPC{
         Task *newTask;
         newTask=newTasks[0];
         newTasks.pop_front();
-#ifdef VPC_DEBUG
-        cerr << this->getName() << " received new Task: "
+        DBG_OUT(this->getName() << " received new Task: "
              << newTask->getName() << " at: "
-             << sc_time_stamp().to_default_time_units() << endl;
-#endif // VPCDEBUG
+             << sc_time_stamp().to_default_time_units() << std::endl);
 #ifndef NO_VCD_TRACES
         if(newTask->getTraceSignal()!=0)
-          newTask->getTraceSignal()->value(S_READY);     
+          newTask->getTraceSignal()->traceReady();
 #endif //NO_VCD_TRACES
         //insert new task in read list
         assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
@@ -174,7 +169,7 @@ namespace SystemC_VPC{
         fireStateChanged(ComponentState::IDLE);
 #ifndef NO_VCD_TRACES
         if(readyTasks[taskToResign]->getTraceSignal()!=0)
-          readyTasks[taskToResign]->getTraceSignal()->value(S_READY);     
+          readyTasks[taskToResign]->getTraceSignal()->traceReady();
 #endif //NO_VCD_TRACES
       }
 
@@ -183,7 +178,9 @@ namespace SystemC_VPC{
       overhead=scheduler->schedulingOverhead();
 
       if( overhead != NULL ){
-        schedulerTrace = S_RUNNING;
+#ifndef NO_VCD_TRACES
+        schedulerTrace =  SystemC_VPC::Tracing::S_RUNNING;
+#endif //NO_VCD_TRACES
         //    actual time    < endtime
         while( (sc_time_stamp() < timestamp + (*overhead)) ){ 
 
@@ -194,7 +191,9 @@ namespace SystemC_VPC{
 
         // true if some task becames ready during overhead waiting
         newTaskDuringOverhead=(newTasks.size()>0);
-        schedulerTrace=S_READY;
+#ifndef NO_VCD_TRACES
+        schedulerTrace = SystemC_VPC::Tracing::S_READY;
+#endif //NO_VCD_TRACES
       }else {
         // avoid failures
         overhead=new sc_time(SC_ZERO_TIME);
@@ -206,20 +205,16 @@ namespace SystemC_VPC{
         runningTasks[taskToAssign]=readyTasks[taskToAssign];
         readyTasks.erase(taskToAssign);
         actualRunningIID=taskToAssign;
-#ifdef VPC_DEBUG
-        cerr << "IID: " << taskToAssign << "> remaining delay for "
-             << runningTasks[taskToAssign]->getName();
-#endif // VPCDEBUG
+        DBG_OUT("IID: " << taskToAssign << "> remaining delay for "
+             << runningTasks[taskToAssign]->getName());
         actualRemainingDelay 
           = sc_time(runningTasks[taskToAssign]->getRemainingDelay());
-#ifdef VPC_DEBUG
-        cerr << " is " << runningTasks[taskToAssign]->getRemainingDelay()
-             << endl;
-#endif // VPCDEBUG
+        DBG_OUT(" is " << runningTasks[taskToAssign]->getRemainingDelay()
+             << endl);
         fireStateChanged(ComponentState::RUNNING);
 #ifndef NO_VCD_TRACES
         if(runningTasks[taskToAssign]->getTraceSignal()!=0)
-          runningTasks[taskToAssign]->getTraceSignal()->value(S_RUNNING);     
+          runningTasks[taskToAssign]->getTraceSignal()->traceRunning();
 #endif //NO_VCD_TRACES
       }
     }
@@ -322,10 +317,10 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::informAboutMapping(string module){
+  void Component::informAboutMapping(std::string module){
 #ifndef NO_VCD_TRACES
     Tracing *newsignal = new Tracing();
-    trace_map_by_name.insert(std::pair<string,Tracing* >(module, newsignal));
+    trace_map_by_name.insert(std::pair<std::string,Tracing* >(module, newsignal));
     sc_trace(this->traceFile, *newsignal->traceSignal, module.c_str());
 #endif //NO_VCD_TRACES
 
@@ -344,30 +339,25 @@ namespace SystemC_VPC{
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
             << " ) at time: " << sc_time_stamp()
-            << endl);
+            << std::endl);
 
     // reset the execution delay
     actualTask->initDelays();
-#ifdef VPC_DEBUG
-    cerr << "Using " << actualTask->getRemainingDelay()
-         << " as delay for function " << actualTask->getFuncName() << "!"
-         << endl;
-    cerr << "And " << actualTask->getLatency() << " as latency for function "
-         << actualTask->getFuncName() << "!" << endl;
-#endif // VPC_DEBUG
+    DBG_OUT("Using " << actualTask->getRemainingDelay()
+         << " as delay for function " << actualTask->getFunctionId() << "!"
+         << std::endl);
+    DBG_OUT("And " << actualTask->getLatency() << " as latency for function "
+         << actualTask->getFunctionId() << "!" << std::endl);
     
 #ifndef NO_VCD_TRACES
     {
-      std::map<string, Tracing* >::iterator iter
+      std::map<std::string, Tracing* >::iterator iter
         = trace_map_by_name.find(actualTask->getName());
       if( iter != trace_map_by_name.end() ){
         actualTask->setTraceSignal(iter->second);
       }
     }
 #endif //NO_VCD_TRACES
-
-
-    //int process=actualTask->iid;
 
     //store added task
     newTasks.push_back(actualTask);
@@ -395,11 +385,6 @@ namespace SystemC_VPC{
         //<< " (" << waitFor << ") at: " << sc_time_stamp() << endl;
         wait( waitFor, remainingPipelineStages_WakeUp );
 
-        //DISABLED: if a task completes at same time
-        // (but not necessarily in same delta cycle)
-        //          then this task is completed nonetheless
-        //if( !this->isActiv() ) continue;
-
         sc_time rest = front.time-sc_time_stamp();
         assert(rest >= SC_ZERO_TIME);
         if(rest > SC_ZERO_TIME){
@@ -408,7 +393,6 @@ namespace SystemC_VPC{
           assert(rest == SC_ZERO_TIME);
           //cerr << "Ready! releasing task (" <<  front.time <<") at: "
           //<< sc_time_stamp() << endl;
-
 
           // Latency over -> remove Task
           this->notifyParentController(front.task);

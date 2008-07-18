@@ -6,8 +6,6 @@
 
 namespace SystemC_VPC{
 
-  class ProcessControlBlock;
-
   /**
    * ProcessEventListener defines common interface used for communicating task state
    * through the control hierarchy within VPC framework.

@@ -20,7 +20,6 @@
 
 namespace SystemC_VPC {
 
-  class Director;
   class AbstractComponent;
 
   typedef size_t ComponentId;

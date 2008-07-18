@@ -356,7 +356,7 @@ namespace SystemC_VPC{
     throw(InvalidArgumentException){
     assert(timeString != NULL);
     double value = -1;
-    string unit;
+    std::string unit;
 
     sc_time_unit scUnit = SC_NS;
 
@@ -364,13 +364,13 @@ namespace SystemC_VPC{
     if(data.good()){
       data >> value;
     }else{
-      string msg("Parsing Error: Unknown argument: <");
+      std::string msg("Parsing Error: Unknown argument: <");
       msg += timeString;
       msg += "> How to creating a sc_string from?";
       throw InvalidArgumentException(msg);
     }
     if( data.fail() ){
-      string msg("Parsing Error: Unknown argument: <");
+      std::string msg("Parsing Error: Unknown argument: <");
       msg += timeString;
       msg += "> How to creating a sc_string from?";
       throw InvalidArgumentException(msg);

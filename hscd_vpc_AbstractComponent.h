@@ -33,6 +33,7 @@
 #include "PowerMode.h"
 #include "ComponentInfo.h"
 #include "ComponentModel.h"
+#include "Attribute.h"
 
 namespace SystemC_VPC{
 
@@ -146,15 +147,6 @@ class ComponentObserver;
        */
     virtual void compute(Task* task)=0;
 
-    /*
-    void compute(Task& task){
-      ProcessControlBlock* pcb =
-        this->getPCBPool().allocate(task.getPid());
-      pcb->setBlockEvent(task.getBlockEvent());
-      this->compute(pcb);
-    };
-    */
-    
     /**
      * \brief Sets next controlling instance of component
      * Used for callback mechanism to store pointer to "direct" controlling instance

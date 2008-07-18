@@ -123,7 +123,9 @@ namespace SystemC_VPC{
       this->removeObserver(powerSumming);
       delete powerSumming;
       delete powerSumStream;
+#ifndef NO_VCD_TRACES
       sc_close_vcd_trace_file(traceFile);
+#endif //NO_VCD_TRACES      
     }
 
     /**
@@ -142,16 +144,18 @@ namespace SystemC_VPC{
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair, std::vector<timePcbPair>,timeCompare> pqueue;
 
+#ifndef NO_VCD_TRACES
     sc_trace_file *traceFile;
     std::map<std::string, Tracing* > trace_map_by_name;
+    sc_signal<trace_value> schedulerTrace;
+#endif //NO_VCD_TRACES      
+
     Scheduler *scheduler;
     std::deque<Task*>      newTasks;
-    //TaskMap readyTasks,runningTasks;
     
     PowerTables powerTables;
     
     sc_event notify_scheduler_thread;
-    sc_signal<trace_value> schedulerTrace;
     
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
