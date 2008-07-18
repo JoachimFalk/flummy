@@ -57,7 +57,7 @@ namespace SystemC_VPC{
     //wait(SC_ZERO_TIME);
     
     scheduler->initialize();
-    setComponentState(ComponentState::IDLE);
+    fireStateChanged(ComponentState::IDLE);
     
     while(1){
       // Notify observers (e.g. powersum)
@@ -111,7 +111,7 @@ namespace SystemC_VPC{
 
             //notify(*(task->blockEvent));
             scheduler->removedTask(task);
-            setComponentState(ComponentState::IDLE);
+            fireStateChanged(ComponentState::IDLE);
 #ifndef NO_VCD_TRACES
             if(task->getTraceSignal()!=0)
               task->getTraceSignal()->value(S_BLOCKED);     
@@ -171,7 +171,7 @@ namespace SystemC_VPC{
         runningTasks.erase(taskToResign);
         actualRunningIID=-1;
         readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
-        setComponentState(ComponentState::IDLE);
+        fireStateChanged(ComponentState::IDLE);
 #ifndef NO_VCD_TRACES
         if(readyTasks[taskToResign]->getTraceSignal()!=0)
           readyTasks[taskToResign]->getTraceSignal()->value(S_READY);     
@@ -216,7 +216,7 @@ namespace SystemC_VPC{
         cerr << " is " << runningTasks[taskToAssign]->getRemainingDelay()
              << endl;
 #endif // VPCDEBUG
-        setComponentState(ComponentState::RUNNING);
+        fireStateChanged(ComponentState::RUNNING);
 #ifndef NO_VCD_TRACES
         if(runningTasks[taskToAssign]->getTraceSignal()!=0)
           runningTasks[taskToAssign]->getTraceSignal()->value(S_RUNNING);     
@@ -443,9 +443,9 @@ namespace SystemC_VPC{
     remainingPipelineStages_WakeUp.notify();
   }
 
-  void Component::setComponentState(const ComponentState &state)
+  void Component::fireStateChanged(const ComponentState &state)
   {
-    this->ComponentInfo::setComponentState(state);
+    this->setComponentState(state);
     this->setPowerConsumption(powerTables[*getPowerMode()][state]);
   }
 } //namespace SystemC_VPC

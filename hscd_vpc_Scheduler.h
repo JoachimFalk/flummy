@@ -6,6 +6,7 @@
 #include <map>
 
 #include "Task.h"
+#include "ComponentModel.h"
 
 namespace SystemC_VPC{
   
@@ -13,7 +14,6 @@ namespace SystemC_VPC{
           ,PREEMPT    // neuer Task verdrängt alten
           ,RESIGNED   // alter Task beendet/verdraengt, kein neuer
           ,NOCHANGE}; //keine änderung 
-  class Component;
 
   /**
    * \brief A callback class called from Component to do Scheduling.

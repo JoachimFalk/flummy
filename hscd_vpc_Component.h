@@ -146,7 +146,7 @@ namespace SystemC_VPC{
     std::map<std::string, Tracing* > trace_map_by_name;
     Scheduler *scheduler;
     std::deque<Task*>      newTasks;
-    TaskMap readyTasks,runningTasks;
+    //TaskMap readyTasks,runningTasks;
     
     PowerTables powerTables;
     
@@ -167,7 +167,7 @@ namespace SystemC_VPC{
     
     void setScheduler(const char *schedulername);
     
-    void setComponentState(const ComponentState &state);
+    void fireStateChanged(const ComponentState &state);
   };
 
 } 

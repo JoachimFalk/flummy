@@ -32,6 +32,7 @@
 #include "Task.h"
 #include "PowerMode.h"
 #include "ComponentInfo.h"
+#include "ComponentModel.h"
 
 namespace SystemC_VPC{
 
@@ -83,7 +84,7 @@ class ComponentObserver;
    * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
    */
   class AbstractComponent:
-    public sc_module, public Delayer, public ComponentInfo{
+    public sc_module, public Delayer, public ComponentModel {
   
   public:
 

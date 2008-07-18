@@ -21,7 +21,7 @@ class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<PowerMode>
 //    std::cerr << "SelectFastestPowerModeGovernor::notify_top newMode = " << newMode.mode << std::endl;
 
       if(m_components.find(ci) == m_components.end())
-        ci->setPowerMode(m_lastMode);
+        ci->getModel()->setPowerMode(m_lastMode);
 
       m_components[ci] = newMode;
 
@@ -44,7 +44,7 @@ class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<PowerMode>
           iter != m_components.end();
           iter++)
         {
-          iter->first->setPowerMode(newMode);
+          iter->first->getModel()->setPowerMode(newMode);
         }
         m_lastMode = newMode;
       }

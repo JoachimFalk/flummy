@@ -11,6 +11,8 @@
 
 namespace SystemC_VPC{
 
+  class ComponentModel;
+
   typedef std::map<std::string, PowerMode> PowerModes;
 
   class ComponentState
@@ -49,7 +51,8 @@ namespace SystemC_VPC{
   class ComponentInfo
   {
     public:
-      ComponentInfo() : powerConsumption(0.0) {}
+      ComponentInfo(ComponentModel *model)
+        : powerConsumption(0.0), model(model) {}
 
       virtual ~ComponentInfo(){};
 
@@ -58,29 +61,14 @@ namespace SystemC_VPC{
         return componentState;
       }
 
-      void setComponentState(const ComponentState cs)
-      {
-        componentState = cs;
-      }
-
       double getPowerConsumption() const
       {
         return powerConsumption;
       }
 
-      void setPowerConsumption(const double pc)
-      {
-        powerConsumption = pc;
-      }
-
       PowerMode getPowerMode() const
       {
         return powerMode;
-      }
-
-      virtual void setPowerMode(const PowerMode& mode)
-      {
-        powerMode = mode;
       }
 
       PowerMode translatePowerMode(std::string mode)
@@ -93,11 +81,15 @@ namespace SystemC_VPC{
         return powerModes[mode];
       }
 
+      ComponentModel * getModel(){
+        return model;
+      }
     protected:
       ComponentState componentState;
       double         powerConsumption;
       PowerModes     powerModes;
       PowerMode      powerMode;
+      ComponentModel *model;
   };
 } //namespace SystemC_VPC
 #endif // HSCD_VPC_COMPONENTINFO_H_
