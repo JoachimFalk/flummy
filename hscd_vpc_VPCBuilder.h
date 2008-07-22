@@ -39,6 +39,16 @@ namespace SystemC_VPC{
    * simulation start.
    */
   class VPCBuilder{
+
+    static const char* B_TRANSPORT;
+    static const char* STATIC_ROUTE;
+    static const char* STR_VPC_THREADEDCOMPONENTSTRING;
+    static const char* STR_VPC_DELAY;
+    static const char* STR_VPC_LATENCY;
+    static const char* STR_VPC_PRIORITY;
+    static const char* STR_VPC_PERIOD;
+    static const char* STR_VPC_DEADLINE;
+
     /*
      * SECTION: init tag values for comparison while initializing
      */

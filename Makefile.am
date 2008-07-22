@@ -85,6 +85,7 @@ libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
 
 libsystemcvpc_la_SOURCES =			\
 	debug_config.cpp			\
+	BlockingTransport.cpp			\
 	hscd_vpc_Component.cpp			\
 	hscd_vpc_Director.cpp			\
 	hscd_vpc_PriorityScheduler.cpp		\

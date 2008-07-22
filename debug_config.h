@@ -13,6 +13,9 @@ extern CoSupport::Streams::DebugOStream dbgout;
 /** enable/disable debugging for StaticRoute */
 #define DBG_STATIC_ROUTE
 
+/** enable/disable debugging for BlockingTransport */
+#define  DBG_BLOCKING_TRANSPORT
+
 /** enable/disable debugging for Director */
 #define DBG_DIRECTOR
 

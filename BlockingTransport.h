@@ -7,7 +7,7 @@
  * Title: SystemC-VPC
  * Comment:
  * ----------------------------------------------------------------------------
- * StaticRoute.h
+ * BlockingTransport.h
  * ----------------------------------------------------------------------------
  * Modifications History:
  * ----------------------------------------------------------------------------
@@ -16,14 +16,15 @@
  * $log$
  *****************************************************************************/
 
-#ifndef __INCLUDED__STATICROUTE__H__
-#define __INCLUDED__STATICROUTE__H__
+#ifndef __INCLUDED__BLOCKINGTRANSPORT__H__
+#define __INCLUDED__BLOCKINGTRANSPORT__H__
 #include <list>
 
 #include <systemc.h>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
+#include <hscd_vpc_AbstractComponent.h>
 #include "hscd_vpc_EventPair.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "Route.h"
@@ -33,7 +34,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  class StaticRoute :
+  class BlockingTransport :
     public Route,
     public CoSupport::SystemC::Event,
     protected CoSupport::SystemC::EventListener {
@@ -51,11 +52,11 @@ namespace SystemC_VPC{
 
     void addHop(std::string name, AbstractComponent * hop);
 
-    StaticRoute( std::string source, std::string dest );
+    BlockingTransport( std::string source, std::string dest );
 
-    StaticRoute( const StaticRoute & route );
+    BlockingTransport( const BlockingTransport & route );
 
-    ~StaticRoute( );
+    ~BlockingTransport( );
 
     const char* getName() const;
   private:
@@ -71,4 +72,4 @@ namespace SystemC_VPC{
   };
 }
 
-#endif // __INCLUDED__STATICROUTE__H__
+#endif // __INCLUDED__BLOCKINGTRANSPORT__H__

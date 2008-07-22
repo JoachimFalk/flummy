@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "hscd_vpc_datatypes.h"
+#include "Delayer.h"
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "FunctionTimingPool.h"
@@ -38,46 +39,6 @@
 namespace SystemC_VPC{
 
 class ComponentObserver;
-
-  /**
-   * \brief Interface for classes implementing delay simulation.
-   */
-  class Delayer{
-  public:
-    /**
-       * \brief Simulate the delay caused by this Delayer.
-       *
-       * While this simulation is running SystemC simulation time is consumed.
-       */
-    virtual void compute(Task* task) = 0;
-
-    virtual const char* getName() const = 0;
-
-    ComponentId getComponentId();
-
-    void addObserver(ComponentObserver *obs);
-
-    void removeObserver(ComponentObserver *obs);
-    
-    void fireNotification(ComponentInfo *compInf);
-
-  protected:
-
-    Delayer(): componentId(globalComponentId++) {}
-
-    virtual ~Delayer() {}
-
-    typedef std::vector<ComponentObserver *> Observers;
-    
-    Observers observers;
-    
-  private:
-    //
-    static ComponentId globalComponentId;
-
-    //
-    ComponentId componentId;
-  };
 
   /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).

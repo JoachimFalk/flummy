@@ -4,6 +4,7 @@
 #include <cctype>
 #include <string>
 
+#include "BlockingTransport.h"
 #include "hscd_vpc_VPCBuilder.h"
 #include "hscd_vpc_Director.h"
 #include "hscd_vpc_VpcDomErrorHandler.h"
@@ -26,6 +27,15 @@
 
 namespace SystemC_VPC{
 #define MAX(x,y) ((x > y) ? x : y)
+
+  const char* VPCBuilder::B_TRANSPORT =                      "blocking";
+  const char* VPCBuilder::STATIC_ROUTE =                     "static_route";
+  const char* VPCBuilder::STR_VPC_THREADEDCOMPONENTSTRING =  "threaded";
+  const char* VPCBuilder::STR_VPC_DELAY =                    "delay";
+  const char* VPCBuilder::STR_VPC_LATENCY =                  "latency";
+  const char* VPCBuilder::STR_VPC_PRIORITY =                 "priority";
+  const char* VPCBuilder::STR_VPC_PERIOD =                   "period";
+  const char* VPCBuilder::STR_VPC_DEADLINE =                 "deadline";
 
   /**
    * \brief sets ups VPC Framework
@@ -236,7 +246,7 @@ namespace SystemC_VPC{
       
       DOMNamedNodeMap* atts = node->getAttributes();
       char* sName;
-      char* sType = STR_VPC_THREADEDCOMPONENTSTRING;
+      const char* sType = STR_VPC_THREADEDCOMPONENTSTRING;
       char* sScheduler;
       AbstractComponent* comp = NULL;
   
@@ -549,7 +559,24 @@ namespace SystemC_VPC{
           std::string dest = XMLString::transcode(
             atts->getNamedItem(destinationAttrStr)->getNodeValue() );
 
-          StaticRoute * route = new StaticRoute(src, dest); 
+          std::string type = STATIC_ROUTE;
+          if(atts->getNamedItem(typeAttrStr)!=NULL){
+            type = XMLString::transcode(
+                      atts->getNamedItem(typeAttrStr)->getNodeValue() );
+          }
+
+          Route * route = NULL;
+          if(type == B_TRANSPORT){
+            route = new BlockingTransport(src, dest);
+          } else if(type == STATIC_ROUTE) {
+            route = new StaticRoute(src, dest);
+          } else{
+            std::string msg("Unknown Routing type: type=");
+            msg += type;
+            std::cerr << msg << endl;
+            throw InvalidArgumentException(msg);
+          }
+
           this->director->registerComponent(route);
           this->director->registerMapping(route->getName(), route->getName());
 
