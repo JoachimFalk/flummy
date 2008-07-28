@@ -195,6 +195,12 @@ namespace SystemC_VPC{
 
   private:
 
+    Task * preCompute( FastLink fLink,
+                       EventPair endPair );
+
+    void postCompute( Task *task,
+                      EventPair endPair );
+
     /**
      * Singleton design pattern
      */

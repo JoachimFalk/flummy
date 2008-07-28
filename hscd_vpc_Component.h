@@ -53,6 +53,21 @@ namespace SystemC_VPC{
      */
     virtual void compute(Task* task);
 
+
+    /**
+     *
+     */
+    virtual void requestBlockingCompute(Task* task, Event* blocker);
+    
+    /**
+     *
+     */
+    virtual void execBlockingCompute(Task* task, Event* blocker);
+    
+    /**
+     *
+     */
+    virtual void abortBlockingCompute(Task* task, Event* blocker);
     
     /**
      * \brief Used to create the Tracefiles.
@@ -70,7 +85,8 @@ namespace SystemC_VPC{
     Component( sc_module_name name,
                const char *schedulername,
                Director *director )
-      : AbstractComponent(name)
+      : AbstractComponent(name),
+        blockMutex(0)
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
@@ -156,7 +172,8 @@ namespace SystemC_VPC{
     PowerTables powerTables;
     
     sc_event notify_scheduler_thread;
-    
+    Event blockCompute;
+    size_t   blockMutex;
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
 

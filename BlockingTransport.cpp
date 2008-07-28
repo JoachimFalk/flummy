@@ -20,22 +20,51 @@ namespace SystemC_VPC {
   void BlockingTransport::compute( Task* _task ) {
     task = _task;
     taskEvents = task->getBlockEvent();
-    assert(!components.empty());
+    for(Components::iterator iter = this->unblockedComponents.begin();
+        iter != this->unblockedComponents.end();
+        ++iter){
+
+      Task* copy = Director::getInstance().allocateTask(task->getProcessId());
+      copy->setFunctionId(task->getFunctionId());
+      iter->second = copy;
+    }
+
+    assert(!unblockedComponents.empty());
     BlockingTransport * route = new BlockingTransport(*this);
     route->route( EventPair(taskEvents.dii, route) );
   }
 
   //
   void BlockingTransport::route( EventPair np ){
-    if(!components.empty()){
+    if(!unblockedComponents.empty()){
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
-      Task *newTask =
-        Director::getInstance().allocateTask(task->getProcessId());
-      newTask->setBlockEvent(np);
-      newTask->setFunctionId(task->getFunctionId());
-      DBG_OUT("route on: " << components.front()->getName() << endl);
-      components.front()->compute(newTask);
-      components.pop_front();
+      AbstractComponent* comp;
+      Task*              actualTask ;
+      if(this->task->isWrite()){
+        Components::reference p = unblockedComponents.front();
+        comp = p.first;       
+        actualTask = p.second;
+        unblockedComponents.pop_front();
+        blockedComponents.push_front(std::make_pair(comp, actualTask));
+      }else{
+        Components::reference p = unblockedComponents.back();
+        comp = p.first;       
+        actualTask = p.second;
+        unblockedComponents.pop_back();
+        blockedComponents.push_back(std::make_pair(comp, actualTask));
+      }
+      DBG_OUT("b_transport (" << actualTask->getName()
+              << ") on: " << comp->getName() << std::endl);
+      actualTask->setBlockEvent(np);
+
+      comp->requestBlockingCompute(actualTask, this);
+    } else if(!blockedComponents.empty()){
+      DBG_OUT("blocked all resources" << std::endl);
+      AbstractComponent * comp = blockedComponents.back().first;
+      Task* actualTask = blockedComponents.back().second;
+      actualTask->setBlockEvent(np);
+      comp->execBlockingCompute(actualTask, this);
+      blockedComponents.pop_back();
     } else {
       Director::getInstance().signalProcessEvent(task);
       //taskEvents.latency->notify();
@@ -47,6 +76,26 @@ namespace SystemC_VPC {
     if(e->isActive()){
       DBG_OUT("signaled @ " << sc_time_stamp() << endl);
       this->reset();
+      if(!unblockedComponents.empty()){
+        assert(!blockedComponents.empty());
+        //AbstractComponent * comp = blockedComponents.back().first;
+        Task* actualTask = blockedComponents.back().second;
+        if( !actualTask->isAckedBlocking()){
+          while(!blockedComponents.empty()){
+            Task* task = blockedComponents.back().second;
+            AbstractComponent * c = blockedComponents.back().first;
+            task->resetBlockingCompute();
+            c->abortBlockingCompute(task, this);
+            if(this->task->isWrite()){
+              unblockedComponents.push_front(blockedComponents.back());
+            } else {
+              unblockedComponents.push_back(blockedComponents.back());
+            }
+            blockedComponents.pop_back();
+          }
+          return;
+        }
+      }
       route( EventPair(&dummy, this) );
     }
   }
@@ -58,7 +107,8 @@ namespace SystemC_VPC {
 
   //
   void BlockingTransport::addHop(std::string name, AbstractComponent * hop){
-    components.push_back(hop);
+    Task * dummy = NULL;
+    unblockedComponents.push_back(std::make_pair(hop, dummy));
   }
 
   //
@@ -71,16 +121,17 @@ namespace SystemC_VPC {
 
   //
   BlockingTransport::BlockingTransport( const BlockingTransport & route ) :
-    components(),
+    unblockedComponents(),
+    blockedComponents(),
     task(route.task),
     taskEvents(route.taskEvents),
     dummy(),
     name(route.name) {
     this->addListener(this);
-    for(Components::const_iterator iter = route.components.begin();
-        iter != route.components.end();
+    for(Components::const_iterator iter = route.unblockedComponents.begin();
+        iter != route.unblockedComponents.end();
         ++iter){
-      components.push_back(*iter);
+      unblockedComponents.push_back(*iter);
     }
   }
 

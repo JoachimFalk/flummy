@@ -32,6 +32,7 @@ namespace SystemC_VPC {
    */
   class Tracing{
   public:
+    static const trace_value S_SLEEP;
     static const trace_value S_BLOCKED;
     static const trace_value S_READY;
     static const trace_value S_RUNNING;
@@ -51,6 +52,10 @@ namespace SystemC_VPC {
 
     void traceBlocking(){
       this->setValue(S_BLOCKED);
+    }
+
+    void traceSleeping(){
+      this->setValue(S_SLEEP);
     }
 
     void traceReady(){

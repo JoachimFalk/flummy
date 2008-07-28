@@ -111,7 +111,7 @@ namespace SystemC_VPC{
             fireStateChanged(ComponentState::IDLE);
 #ifndef NO_VCD_TRACES
             if(task->getTraceSignal()!=0)
-              task->getTraceSignal()->traceBlocking();
+              task->getTraceSignal()->traceSleeping();
 #endif //NO_VCD_TRACES
             runningTasks.erase(actualRunningIID);
 
@@ -203,6 +203,10 @@ namespace SystemC_VPC{
       //assign task
       if(decision==ONLY_ASSIGN || decision==PREEMPT){
         runningTasks[taskToAssign]=readyTasks[taskToAssign];
+#ifndef NO_VCD_TRACES
+        if(runningTasks[taskToAssign]->getTraceSignal()!=0)
+          runningTasks[taskToAssign]->getTraceSignal()->traceRunning();
+#endif //NO_VCD_TRACES
         readyTasks.erase(taskToAssign);
         actualRunningIID=taskToAssign;
         DBG_OUT("IID: " << taskToAssign << "> remaining delay for "
@@ -212,10 +216,65 @@ namespace SystemC_VPC{
         DBG_OUT(" is " << runningTasks[taskToAssign]->getRemainingDelay()
              << endl);
         fireStateChanged(ComponentState::RUNNING);
+
+        /* */
+        Task * assignedTask = runningTasks[taskToAssign];
+        if(assignedTask->isBlocking() /* && !assignedTask->isExec() */) {
+          blockMutex++;
+          if(blockMutex == 1) {
+            DBG_OUT(this->getName() << " scheduled blocking task: "
+                    << assignedTask->getName() << std::endl);
+            assignedTask->ackBlockingCompute();
+            DBG_OUT(this->getName() << " enter wait: " << std::endl);
+            fireStateChanged(ComponentState::STALLED);
 #ifndef NO_VCD_TRACES
-        if(runningTasks[taskToAssign]->getTraceSignal()!=0)
-          runningTasks[taskToAssign]->getTraceSignal()->traceRunning();
+            if(assignedTask->getTraceSignal()!=0)
+              assignedTask->getTraceSignal()->traceBlocking();
 #endif //NO_VCD_TRACES
+            while(!assignedTask->isExec()){
+              CoSupport::SystemC::wait(blockCompute);
+              blockCompute.reset();
+            }
+            DBG_OUT(this->getName() << " exit wait: " << std::endl);
+            fireStateChanged(ComponentState::RUNNING);
+#ifndef NO_VCD_TRACES
+            if(assignedTask->getTraceSignal()!=0)
+              assignedTask->getTraceSignal()->traceRunning();
+#endif //NO_VCD_TRACES
+            if(assignedTask->isBlocking()){
+              DBG_OUT(this->getName() << " exec Task: "
+                      << assignedTask->getName() << " @  " << sc_time_stamp()
+                      << std::endl);
+              // task is still blocking: exec task
+            } else {
+              DBG_OUT(this->getName() << " abort Task: "
+                      << assignedTask->getName() << " @  " << sc_time_stamp()
+                      << std::endl);
+
+              //notify(*(task->blockEvent));
+              scheduler->removedTask(assignedTask);
+              fireStateChanged(ComponentState::IDLE);
+#ifndef NO_VCD_TRACES
+              if(assignedTask->getTraceSignal()!=0)
+                assignedTask->getTraceSignal()->traceSleeping();
+#endif //NO_VCD_TRACES
+              runningTasks.erase(actualRunningIID);
+             
+            }
+          }else{
+            assert(blockMutex>1);
+            scheduler->removedTask(assignedTask);
+            fireStateChanged(ComponentState::IDLE);
+#ifndef NO_VCD_TRACES
+            if(assignedTask->getTraceSignal()!=0)
+              assignedTask->getTraceSignal()->traceSleeping();
+#endif //NO_VCD_TRACES
+            runningTasks.erase(actualRunningIID);
+            assignedTask->abortBlockingCompute();
+          }
+          blockMutex--;
+        }
+        /* */
       }
     }
 
@@ -330,6 +389,14 @@ namespace SystemC_VPC{
    *
    */
   void Component::compute(Task* actualTask){
+
+    /* * /
+    if(blockMutex > 0) {
+      actualTask->abortBlockingCompute();
+      return;
+    }
+    / * */
+
     ProcessId pid = actualTask->getProcessId();
     PCBPool &pool = this->getPCBPool();
     assert(pool.find(pid) != pool.end());
@@ -366,6 +433,33 @@ namespace SystemC_VPC{
     notify_scheduler_thread.notify();
   }
 
+
+
+  /**
+   *
+   */
+  void Component::requestBlockingCompute(Task* task, Event* blocker){
+    task->setExec(false);
+    task->setBlockingCompute( blocker );
+    this->compute( task );
+  }
+
+  /**
+   *
+   */
+  void Component::execBlockingCompute(Task* task, Event* blocker){
+    task->setExec(true);
+    blockCompute.notify();
+  }
+
+
+  /**
+   *
+   */
+  void Component::abortBlockingCompute(Task* task, Event* blocker){
+    task->resetBlockingCompute();
+    blockCompute.notify();
+  }
 
   /**
    *

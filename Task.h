@@ -3,14 +3,22 @@
 
 #include <sstream>
 
+#include <CoSupport/SystemC/systemc_support.hpp>
 #include "FastLink.h"
 #include "hscd_vpc_ProcessControlBlock.h"
 #include "TaskPool.h"
 
 namespace SystemC_VPC {
+
+  using CoSupport::SystemC::Event;
   class Task{
   public:
-    Task(TaskPool * pool) : timing(NULL), pcb(NULL), pool(pool), name("NN"){
+    Task(TaskPool * pool)
+      : blockingCompute(NULL),
+      timing(NULL),
+      pcb(NULL),
+      pool(pool),
+      name("NN"){
           this->instanceId = Task::globalInstanceId++;
     }
 
@@ -25,6 +33,27 @@ namespace SystemC_VPC {
     void       setBlockEvent(EventPair p)        {blockEvent = p;}
     void       setPCB(ProcessControlBlock* pcb)  {this->pcb = pcb;}
     void       setTiming(FunctionTiming* timing) {this->timing = timing;}
+
+    void       ackBlockingCompute(){
+      blockAck = true;
+      blockingCompute->notify();
+    }
+    void       abortBlockingCompute(){
+      blockAck = false;
+      blockingCompute->notify();
+    }
+
+    void       resetBlockingCompute(){this->setBlockingCompute(NULL);}
+    void       setBlockingCompute(Event* blocker){blockingCompute = blocker;}
+    bool       isBlocking()
+      { return blockingCompute != NULL; }
+    bool       isAckedBlocking()
+      { return blockAck; }
+    void       setExec( bool exec ) {this->exec=exec;}
+    bool       isExec(  ) { return this->exec;}
+    void       setWrite( bool write ) {this->write=write;}
+    bool       isWrite(  ) { return this->write;}
+
 
     void setDelay(const sc_time& delay)         {this->delay = delay;}
     sc_time getDelay() const                    {return this->delay;}
@@ -68,6 +97,8 @@ namespace SystemC_VPC {
       pid(task.pid),
       fid(task.fid),
       blockEvent(task.blockEvent),
+      blockingCompute(task.blockingCompute),
+      write(task.write),
       delay(task.delay),
       latency(task.latency),
       remainingDelay(task.remainingDelay),
@@ -83,6 +114,11 @@ namespace SystemC_VPC {
     ProcessId  pid;
     FunctionId fid;
     EventPair  blockEvent;
+
+    Event*     blockingCompute;
+    bool       blockAck;
+    bool       exec;
+    bool       write;
 
     sc_time delay;
     sc_time latency;

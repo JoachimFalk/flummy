@@ -126,9 +126,8 @@ namespace SystemC_VPC{
   }
 
   //
-  void Director::compute( FastLink fLink,
-                          EventPair endPair ){
-
+  Task* Director::preCompute( FastLink fLink,
+                              EventPair endPair ){
     if(FALLBACKMODE){
       // create Fallback behavior for active and passive mode!
       if( endPair.dii != NULL )
@@ -137,7 +136,7 @@ namespace SystemC_VPC{
         endPair.latency->notify();  // passive mode: notify end
 
       // do nothing, just return
-      return;
+      return NULL;
     }
 
     EventPair blockEvent = endPair;
@@ -164,28 +163,33 @@ namespace SystemC_VPC{
              mappings[fLink.process] != NULL);
     }
     
-    //    //
-    //    ComponentId cid = this->getComponentId("Bus");
-    //    AbstractComponent * bus = components[cid];
-    //    cerr << "Got ID: " << cid << " BUS: " << bus->name() << endl;
-    // get Component
-    Delayer* comp = mappings[fLink.process];
+    return task;
+  }
 
-    //    StaticRoute * route = new StaticRoute(comp, bus);
-    //
-    // compute task on found component
-    assert(!FALLBACKMODE);
-    //    route->compute(pcb);
-    comp->compute(task);
+  //
+  void Director::postCompute( Task * task,
+                              EventPair endPair ){
 
     if( endPair.dii == NULL){
       // active mode -> waits until simulated delay time has expired
       
+      EventPair blockEvent =  task->getBlockEvent();
+
       CoSupport::SystemC::wait(*blockEvent.dii);
       delete blockEvent.dii;
       delete blockEvent.latency;
     }
-    
+  }
+
+  //
+  void Director::compute( FastLink fLink, EventPair endPair ){
+    Task * task = preCompute(fLink, endPair);
+    if(task == NULL) return;
+    assert(!FALLBACKMODE);
+
+    Delayer* comp = mappings[fLink.process];
+    comp->compute(task);
+    postCompute(task, endPair);
   }
 
   //
@@ -193,7 +197,14 @@ namespace SystemC_VPC{
                        size_t quantum,
                        EventPair endPair ) {
     // FIXME: treat quantum
-    this->compute(fLink, endPair);
+    Task * task = preCompute(fLink, endPair);
+    task->setWrite(false);
+    if(task == NULL) return;
+    assert(!FALLBACKMODE);
+
+    Delayer* comp = mappings[fLink.process];
+    comp->compute(task);
+    postCompute(task, endPair);
   }
 
   //
@@ -201,7 +212,14 @@ namespace SystemC_VPC{
                         size_t quantum,
                         EventPair endPair ) {
     // FIXME: treat quantum
-    this->compute(fLink, endPair);
+    Task * task = preCompute(fLink, endPair);
+    task->setWrite(true);
+    if(task == NULL) return;
+    assert(!FALLBACKMODE);
+
+    Delayer* comp = mappings[fLink.process];
+    comp->compute(task);
+    postCompute(task, endPair);
   }
 
   void Director::compute(const char* name,

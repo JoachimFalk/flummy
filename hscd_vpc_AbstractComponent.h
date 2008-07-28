@@ -24,6 +24,8 @@
 
 #include <string.h>
 
+#include <CoSupport/SystemC/systemc_support.hpp>
+
 #include "hscd_vpc_datatypes.h"
 #include "Delayer.h"
 #include "hscd_vpc_ProcessEventListener.h"
@@ -40,6 +42,7 @@ namespace SystemC_VPC{
 
 class ComponentObserver;
 
+  using CoSupport::SystemC::Event;
   /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).
    * 
@@ -107,6 +110,21 @@ class ComponentObserver;
        * While this simulation is running SystemC simulation time is consumed.
        */
     virtual void compute(Task* task)=0;
+
+    /**
+     *
+     */
+    virtual void requestBlockingCompute(Task* task, Event* blocker)=0;
+
+    /**
+     *
+     */
+    virtual void execBlockingCompute(Task* task, Event* blocker)=0;
+
+    /**
+     *
+     */
+    virtual void abortBlockingCompute(Task* task, Event* blocker)=0;
 
     /**
      * \brief Sets next controlling instance of component

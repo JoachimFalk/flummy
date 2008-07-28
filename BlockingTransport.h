@@ -19,6 +19,7 @@
 #ifndef __INCLUDED__BLOCKINGTRANSPORT__H__
 #define __INCLUDED__BLOCKINGTRANSPORT__H__
 #include <list>
+#include <utility>
 
 #include <systemc.h>
 
@@ -60,9 +61,11 @@ namespace SystemC_VPC{
 
     const char* getName() const;
   private:
-    typedef std::list<AbstractComponent *> Components;
+    typedef std::list<std::pair<AbstractComponent *, Task *> > Components;
 
-    Components                             components;
+    Components                             unblockedComponents;
+    Components                             blockedComponents;
+
     Task*                                  task;
     EventPair                              taskEvents;
     CoSupport::SystemC::Event              dummy;
