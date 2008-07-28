@@ -55,8 +55,10 @@ fname   CDATA #IMPLIED>
 
 <!ELEMENT route (hop)*>
 <!ATTLIST route
-source      CDATA #IMPLIED
-destination CDATA #IMPLIED>
+source      CDATA #REQUIRED
+destination CDATA #REQUIRED
+type        CDATA #IMPLIED
+>
 
 <!ELEMENT hop (timing)*>
 <!ATTLIST hop
