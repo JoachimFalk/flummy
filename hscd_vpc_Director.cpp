@@ -185,6 +185,7 @@ namespace SystemC_VPC{
   void Director::compute( FastLink fLink, EventPair endPair ){
     Task * task = preCompute(fLink, endPair);
     if(task == NULL) return;
+    task->setTimingScale(1);
     assert(!FALLBACKMODE);
 
     Delayer* comp = mappings[fLink.process];
@@ -198,8 +199,9 @@ namespace SystemC_VPC{
                        EventPair endPair ) {
     // FIXME: treat quantum
     Task * task = preCompute(fLink, endPair);
-    task->setWrite(false);
     if(task == NULL) return;
+    task->setWrite(false);
+    task->setTimingScale(quantum);
     assert(!FALLBACKMODE);
 
     Delayer* comp = mappings[fLink.process];
@@ -213,8 +215,9 @@ namespace SystemC_VPC{
                         EventPair endPair ) {
     // FIXME: treat quantum
     Task * task = preCompute(fLink, endPair);
-    task->setWrite(true);
     if(task == NULL) return;
+    task->setWrite(true);
+    task->setTimingScale(quantum);
     assert(!FALLBACKMODE);
 
     Delayer* comp = mappings[fLink.process];
