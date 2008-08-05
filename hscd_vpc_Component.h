@@ -189,6 +189,8 @@ namespace SystemC_VPC{
     void setScheduler(const char *schedulername);
     
     void fireStateChanged(const ComponentState &state);
+
+    void addTasks();
   };
 
 } 

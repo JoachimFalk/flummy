@@ -129,29 +129,7 @@ namespace SystemC_VPC{
         newTaskDuringOverhead=false;
       }
 
-      //look for new tasks (they called compute)
-      while(newTasks.size()>0){
-        Task *newTask;
-        newTask=newTasks[0];
-        newTasks.pop_front();
-        DBG_OUT(this->getName() << " received new Task: "
-             << newTask->getName() << " at: "
-             << sc_time_stamp().to_default_time_units() << std::endl);
-#ifndef NO_VCD_TRACES
-        if(newTask->getTraceSignal()!=0)
-          newTask->getTraceSignal()->traceReady();
-#endif //NO_VCD_TRACES
-        //insert new task in read list
-        assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
-                /* A task can call compute only one time! */);
-        assert( runningTasks.find(newTask->getInstanceId()) ==
-                runningTasks.end()
-                /* A task can call compute only one time! */);
-
-        readyTasks[newTask->getInstanceId()]=newTask;
-        scheduler->addedNewTask(newTask);
-      }
-
+      this->addTasks();
 
       int taskToResign,taskToAssign;
       scheduling_decision decision =
@@ -232,8 +210,9 @@ namespace SystemC_VPC{
               assignedTask->getTraceSignal()->traceBlocking();
 #endif //NO_VCD_TRACES
             while(!assignedTask->isExec()){
-              CoSupport::SystemC::wait(blockCompute);
               blockCompute.reset();
+              CoSupport::SystemC::wait(blockCompute);
+              this->addTasks();
             }
             DBG_OUT(this->getName() << " exit wait: " << std::endl);
             fireStateChanged(ComponentState::RUNNING);
@@ -381,6 +360,7 @@ namespace SystemC_VPC{
     Tracing *newsignal = new Tracing();
     trace_map_by_name.insert(std::pair<std::string,Tracing* >(module, newsignal));
     sc_trace(this->traceFile, *newsignal->traceSignal, module.c_str());
+    newsignal->traceSleeping();
 #endif //NO_VCD_TRACES
 
   }
@@ -431,6 +411,7 @@ namespace SystemC_VPC{
 
     //awake scheduler thread
     notify_scheduler_thread.notify();
+    blockCompute.notify();
   }
 
 
@@ -525,5 +506,31 @@ namespace SystemC_VPC{
   {
     this->setComponentState(state);
     this->setPowerConsumption(powerTables[*getPowerMode()][state]);
+  }
+
+  void Component::addTasks(){
+    //look for new tasks (they called compute)
+    while(newTasks.size()>0){
+      Task *newTask;
+      newTask=newTasks.front();
+      newTasks.pop_front();
+      DBG_OUT(this->getName() << " received new Task: "
+              << newTask->getName() << " at: "
+              << sc_time_stamp().to_default_time_units() << std::endl);
+#ifndef NO_VCD_TRACES
+      if(newTask->getTraceSignal()!=0)
+        newTask->getTraceSignal()->traceReady();
+#endif //NO_VCD_TRACES
+      //insert new task in read list
+      assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
+              /* A task can call compute only one time! */);
+      assert( runningTasks.find(newTask->getInstanceId()) ==
+              runningTasks.end()
+              /* A task can call compute only one time! */);
+
+      readyTasks[newTask->getInstanceId()]=newTask;
+      scheduler->addedNewTask(newTask);
+    }
+
   }
 } //namespace SystemC_VPC
