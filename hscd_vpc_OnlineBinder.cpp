@@ -68,6 +68,12 @@ if(strcmp(algorithm,"List") == 0){
       if(timesTable[i].time < timesTable[chosen].time)
         chosen = i;
     }
+    if(sc_time_stamp() < timesTable[chosen].time){
+      RCWaitInterval = timesTable[chosen].time;
+#ifdef VPC_DEBUG      
+      std::cerr << "OnlineBinder> RCWaitInterval: " << RCWaitInterval << std::endl;
+#endif
+    }
     timesTable[chosen].time += getSetuptime(task);
     
     //set all Slottimes to new border
@@ -170,6 +176,125 @@ if(strcmp(algorithm,"List") == 0){
       timesTable[i+1].time += job;
     }
 //End Algorithm Albers
+}else if(strcmp(algorithm,"Karger12") == 0){
+
+    sort(timesTable.begin(), timesTable.end());
+  
+    double alpha = 1.2;
+    sc_time job = getSetuptime(task) + getRuntime(task);
+    
+    chosen = -1;    
+    sc_time Aall = SC_ZERO_TIME;
+    for(int i = numberofcomp-1; i > 0; i--){
+      Aall += timesTable[i].time;
+    }
+    sc_time Ai;
+    for(int i = numberofcomp-1; i > 0; i--){
+      Ai = Aall / i;
+      //h(k)+j <= alpha * A(tk)
+      if(timesTable[i].time + job <= alpha * Ai){
+        chosen = timesTable[i].recomponentnumber;
+        timesTable[i].time += job;
+        break;
+      }
+      Aall -= timesTable[i].time;
+    }
+    if(chosen == -1){
+        chosen = timesTable[0].recomponentnumber;
+        timesTable[0].time += job;
+    }
+//End Algorithm Karger12
+}else if(strcmp(algorithm,"Karger075") == 0){
+
+    sort(timesTable.begin(), timesTable.end());
+  
+    double alpha = 0.75;
+    sc_time job = getSetuptime(task) + getRuntime(task);
+    
+    chosen = -1;    
+    sc_time Aall = SC_ZERO_TIME;
+    for(int i = numberofcomp-1; i >= 0; i--){
+      Aall += timesTable[i].time;
+    }
+    sc_time Ai;
+    for(int i = numberofcomp-1; i >= 0; i--){
+      Ai = Aall / i;
+      //h(k)+j <= alpha * A(tk)
+      if(timesTable[i].time + job <= alpha * Ai){
+        chosen = timesTable[i].recomponentnumber;
+        timesTable[i].time += job;
+        break;
+      }
+      Aall -= timesTable[i].time;
+    }
+    if(chosen == -1){
+        chosen = timesTable[0].recomponentnumber;
+        timesTable[0].time += job;
+    }
+//End Algorithm Karger075
+}else if(strcmp(algorithm,"Bartal15") == 0){
+
+    sort(timesTable.begin(), timesTable.end());
+    sc_time job = getSetuptime(task) + getRuntime(task);
+    
+    //Calculate lowest in Li 44,5%
+    int lowestLi = (int)floor(0.445 * numberofcomp);
+
+    //Calculate A(Ri)
+    sc_time ARi = SC_ZERO_TIME;
+    for(int i=0; i < lowestLi;i++){
+      ARi += timesTable[i].time;
+    }
+    ARi = ARi / lowestLi;
+    
+    //Make decision
+    if( (timesTable[lowestLi].time + job) <= (1.5 * ARi) ){
+      chosen = timesTable[lowestLi].recomponentnumber;
+      timesTable[lowestLi].time += job;
+    }else{
+      chosen = timesTable[0].recomponentnumber;
+      timesTable[0].time += job;
+    }
+//End Algorithm Bartal15
+}else if(strcmp(algorithm,"Albers1435") == 0){
+
+    sort(timesTable.begin(), timesTable.end());
+    
+    int m = numberofcomp;
+    double c = 1.435;
+    int i = (int)floor(0.5 * m);
+    double j = 0.29 * m;
+    double alpha = ( (c-1)*i-j/2 ) / ( (c-1)*(m-i) );
+
+    sc_time job = getSetuptime(task) + getRuntime(task);
+
+    sc_time Ll = SC_ZERO_TIME;
+    for(int l=0; l < i;l++){
+      Ll += timesTable[l].time;
+    }
+    Ll += job;    
+
+    sc_time Lh = SC_ZERO_TIME;
+    for(int l=i; l < m;l++){
+      Lh += timesTable[l].time;
+    }    
+    Lh += job;
+
+    //Make decision
+    if( Ll <= alpha * Lh ){ //least loaded
+      chosen = timesTable[0].recomponentnumber;
+      timesTable[0].time += job;
+    }else if ((timesTable[i+1].time + job > timesTable[m-1].time) 
+          && (timesTable[i+1].time + job > (c *(Ll+Lh)/m))){ //least loaded
+      chosen = timesTable[0].recomponentnumber;
+      timesTable[0].time += job;
+    }else{ //i+1 loaded
+      chosen = timesTable[i+1].recomponentnumber;
+      timesTable[i+1].time += job;
+    }
+//End Algorithm Albers1435
+
+
 //*****************************************************************************************
 // Following Algorithms were modified by slot time reservation
 //*****************************************************************************************
