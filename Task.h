@@ -65,6 +65,7 @@ namespace SystemC_VPC {
     sc_time getRemainingDelay() const           {return this->remainingDelay;}
     int getInstanceId()                         {return this->instanceId;}
     void setTimingScale( double scale )         {this->timingScale = scale;}
+    double getTimingScale()                     {return this->timingScale;}
 
 
     /**

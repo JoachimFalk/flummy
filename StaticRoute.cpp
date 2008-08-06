@@ -31,6 +31,7 @@ namespace SystemC_VPC {
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
       Task *newTask =
         Director::getInstance().allocateTask(task->getProcessId());
+      newTask->setTimingScale(task->getTimingScale());
       newTask->setBlockEvent(np);
       newTask->setFunctionId(task->getFunctionId());
       DBG_OUT("route on: " << components.front()->getName() << endl);
