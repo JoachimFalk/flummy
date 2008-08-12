@@ -62,9 +62,6 @@ namespace SystemC_VPC{
 
     sc_time* schedulingOverhead();
     
-    void signalDeallocation(bool kill);
-    void signalAllocation();
-    
     void initialize();
     
   private:

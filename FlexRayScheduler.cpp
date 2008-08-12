@@ -869,29 +869,4 @@ namespace SystemC_VPC{
     
     //     return new sc_time(1,SC_NS);
   }
-
-  /**
-   * \brief Implementation of FlexRayScheduler::signalDeallocation
-   */
-  void FlexRayScheduler::signalDeallocation(bool kill){
-  
-    if(!kill){
-      this->remainingSlice =
-        this->remainingSlice - (sc_time_stamp() - this->lastassign);
-    }else{
-       
-      //alle Prozesse aus den pid_fifos loeschen
-      std::vector<TDMASlot>::iterator iter;
-      for(iter = TDMA_slots.begin(); iter!=TDMA_slots.end() ;iter++){
-        iter->pid_fifo.clear();        
-      }
-    }
-  }
-  
-  /**
-   * \brief Implementation of FlexRayScheduler::signalAllocation
-   */  
-  void FlexRayScheduler::signalAllocation(){
-    this->lastassign = sc_time_stamp();
-  }
 }

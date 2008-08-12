@@ -34,9 +34,6 @@ namespace SystemC_VPC{
     void setProperty(const char* key, const char* value);
     sc_time* schedulingOverhead();
     
-    void signalDeallocation(bool kill);
-    void signalAllocation();
-    
   protected:
     std::deque<int> rr_fifo;
     double TIMESLICE;

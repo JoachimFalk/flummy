@@ -159,20 +159,4 @@ namespace SystemC_VPC{
   sc_time* RoundRobinScheduler::schedulingOverhead(){
     return NULL; //new sc_time(1,SC_NS);
   }
-
-  /**
-   * \brief Implementation of RoundRobinScheduler::signalDeallocation
-   */
-  void RoundRobinScheduler::signalDeallocation(bool kill){
-    this->remainingSlice =
-      this->remainingSlice - ( sc_time_stamp().to_default_time_units()
-                               - this->lastassign );
-  }
-  
-  /**
-   * \brief Implementation of RoundRobinScheduler::signalAllocation
-   */  
-  void RoundRobinScheduler::signalAllocation(){
-    this->lastassign = sc_time_stamp().to_default_time_units();
-  }
 }

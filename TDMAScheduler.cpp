@@ -243,29 +243,4 @@ namespace SystemC_VPC{
   sc_time* TDMAScheduler::schedulingOverhead(){
     return NULL; //new sc_time(1,SC_NS);
   }
-
-  /**
-   * \brief Implementation of TDMAScheduler::signalDeallocation
-   */
-  void TDMAScheduler::signalDeallocation(bool kill){
-  
-    if(!kill){
-      this->remainingSlice =
-        this->remainingSlice - (sc_time_stamp() - this->lastassign);
-    }else{
-       
-      //alle Prozesse aus den pid_fifos loeschen
-      std::vector<TDMASlot>::iterator iter;
-      for(iter = TDMA_slots.begin(); iter!=TDMA_slots.end() ;iter++){
-        iter->pid_fifo.clear();        
-      }
-    }
-  }
-  
-  /**
-   * \brief Implementation of TDMAScheduler::signalAllocation
-   */  
-  void TDMAScheduler::signalAllocation(){
-    this->lastassign = sc_time_stamp();
-  }
 }

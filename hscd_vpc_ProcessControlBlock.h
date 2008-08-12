@@ -121,20 +121,8 @@ namespace SystemC_VPC {
        * \brief Default constructor of an PCB instance
        */
       ProcessControlBlock( AbstractComponent * component );
-      
-      /**
-       * \brief Default constructor of an PCB instance
-       * \param name specifies the identifying name of the instance
-       */
-      ProcessControlBlock(std::string name);
 
-      ~ProcessControlBlock();
 
-      /**
-       * \brief Copy Contstructor
-       */
-      ProcessControlBlock(const ProcessControlBlock& pcb);
-    
       /**
        * \brief Sets name of instance
        */

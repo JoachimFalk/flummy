@@ -101,26 +101,6 @@ namespace SystemC_VPC{
     : name("NN"), component(component) {
     this->init();
   }
-  
-  ProcessControlBlock::ProcessControlBlock(std::string name): name(name){
-    this->init();
-  }
-
-  ProcessControlBlock::~ProcessControlBlock(){
-  }
-  
-  ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb)
-  {
-    this->setName(pcb.getName());
-    this->setDeadline(pcb.getDeadline());
-    this->setPeriod(pcb.getPeriod());
-    this->setPriority(pcb.getPriority());
-   
-    this->setTraceSignal(NULL);
-
-    this->setPid(pcb.getPid());
-    this->setFunctionId(pcb.getFunctionId());
-  }
 
   void ProcessControlBlock::init(){
 
