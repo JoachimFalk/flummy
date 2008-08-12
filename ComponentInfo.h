@@ -76,7 +76,7 @@ namespace SystemC_VPC{
         PowerModes::const_iterator i = powerModes.find(mode);
         if(i == powerModes.end()) {
           size_t id = powerModes.size();
-          powerModes[mode] = PowerMode(id);
+          powerModes[mode] = PowerMode(id, mode);
         }
         return powerModes[mode];
       }

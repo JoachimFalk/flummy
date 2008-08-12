@@ -19,6 +19,7 @@
 #define __INCLUDED__POWERMODE__H__
 
 #include <cstddef>
+#include <string>
 
 namespace SystemC_VPC{
 
@@ -28,9 +29,13 @@ namespace SystemC_VPC{
   class PowerMode
   {
   public:
-    PowerMode(const size_t &_mode) : mode(_mode) {}
+    PowerMode(const size_t &_mode, std::string name)
+      : mode(_mode),
+        name(name) {}
 
-    PowerMode(const PowerMode &powerMode) : mode(powerMode.mode) {}
+    PowerMode(const PowerMode &powerMode)
+      : mode(powerMode.mode),
+        name(powerMode.name) {}
 
     //FIXME: needed for std::map only
     PowerMode() : mode(0) {}
@@ -57,8 +62,13 @@ namespace SystemC_VPC{
       return mode < rhs.mode;
     }
 
+    std::string getName() const {
+      return name;
+    }
+
   private:
     size_t mode;
+    std::string name;
   };
 
 }

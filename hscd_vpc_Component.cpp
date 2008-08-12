@@ -386,6 +386,7 @@ namespace SystemC_VPC{
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
             << " ) at time: " << sc_time_stamp()
+            << " mode: " << this->getPowerMode()->getName()
             << std::endl);
 
     // reset the execution delay
