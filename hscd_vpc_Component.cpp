@@ -266,6 +266,8 @@ namespace SystemC_VPC{
     if(!att.isType("powermode")) {
       return false;
     }
+    
+    this->addPowerGovernor(midPowerGov);
 
     for(size_t i=0; i<att.getAttributeSize();++i){
       Attribute powerAtt = att.getNextAttribute(i).second;

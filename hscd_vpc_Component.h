@@ -98,7 +98,6 @@ namespace SystemC_VPC{
         sc_time(20,  SC_MS),
         sc_time(10, SC_MS),
         sc_time(2, SC_MS));
-      this->addObserver(midPowerGov);
 
       if(powerTables.find(*getPowerMode()) == powerTables.end()){
         powerTables[*getPowerMode()] = PowerTable();
@@ -150,6 +149,10 @@ namespace SystemC_VPC{
     virtual void processAndForwardParameter(char *sType,char *sValue);
     virtual void setAttribute(Attribute& fr_Attributes);
     
+    void addPowerGovernor(LocalPowerGovernor<PowerMode> * gov){
+      this->addObserver(gov);
+    }
+
   protected:
 
     virtual void schedule_thread(); 
