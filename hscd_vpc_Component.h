@@ -107,12 +107,14 @@ namespace SystemC_VPC{
       powerTable[ComponentState::IDLE]    = 0.0;
       powerTable[ComponentState::RUNNING] = 1.0;
 
+#ifndef NO_POWER_SUM
       std::string powerSumFileName(this->getName());
       powerSumFileName += ".dat";
 
       powerSumStream = new std::ofstream(powerSumFileName.c_str());
       powerSumming   = new PowerSumming(*powerSumStream);
       this->addObserver(powerSumming);
+#endif // NO_POWER_SUM
 
 #ifndef NO_VCD_TRACES
       std::string tracefilename=this->getName(); //componentName;
@@ -135,9 +137,11 @@ namespace SystemC_VPC{
       
     virtual ~Component()
     {
+#ifndef NO_POWER_SUM
       this->removeObserver(powerSumming);
       delete powerSumming;
       delete powerSumStream;
+#endif // NO_POWER_SUM
 #ifndef NO_VCD_TRACES
       sc_close_vcd_trace_file(traceFile);
 #endif //NO_VCD_TRACES      
@@ -177,8 +181,10 @@ namespace SystemC_VPC{
     sc_event notify_scheduler_thread;
     Event blockCompute;
     size_t   blockMutex;
+#ifndef NO_POWER_SUM
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
+#endif // NO_POWER_SUM
 
     LoadHysteresisGovernor *midPowerGov;
 
