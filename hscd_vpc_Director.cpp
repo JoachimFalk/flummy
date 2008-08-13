@@ -146,24 +146,29 @@ namespace SystemC_VPC{
       // we could use a pool of VPC_Events instead of new/delete
     }
 
-    //Task *task = new Task(fLink, endPair);
-    Task *task = this->allocateTask( fLink.process );
-    task->setFunctionId( fLink.func );
-    task->setBlockEvent( endPair );
+    try{
+      //Task *task = new Task(fLink, endPair);
+      Task *task = this->allocateTask( fLink.process );
+      task->setFunctionId( fLink.func );
+      task->setBlockEvent( endPair );
     
     
-    //HINT: also treat mode!!
-    //if( endPair.latency != NULL ) endPair.latency->notify();
+      //HINT: also treat mode!!
+      //if( endPair.latency != NULL ) endPair.latency->notify();
     
-    if (mappings.size() < fLink.process ||
-        mappings[fLink.process] == NULL) {
-      cerr << "Unknown mapping <" << task->getName() << "> to ??" << std::endl;
+      if (mappings.size() < fLink.process ||
+          mappings[fLink.process] == NULL) {
+        cerr << "Unknown mapping <" << task->getName() << "> to ??" << std::endl;
       
-      assert(mappings.size() >= fLink.process &&
-             mappings[fLink.process] != NULL);
-    }
+        assert(mappings.size() >= fLink.process &&
+               mappings[fLink.process] != NULL);
+      }
     
-    return task;
+      return task;
+    } catch (NotAllocatedException e){
+      cerr << "Unknown Task: ID = " << fLink.process
+           << " name = " << this->getTaskName(fLink.process)  << std::endl;
+    }
   }
 
   //
@@ -313,7 +318,9 @@ namespace SystemC_VPC{
   ProcessId Director::getProcessId(std::string process) {
     ProcessIdMap::const_iterator iter = processIdMap.find(process);
     if( iter == processIdMap.end() ) {
-      processIdMap[process] = this->uniqueProcessId();
+      ProcessId id = this->uniqueProcessId();
+      processIdMap[process] = id;
+      debugProcessNames[id] = process;
     }
     iter = processIdMap.find(process);
     return iter->second;

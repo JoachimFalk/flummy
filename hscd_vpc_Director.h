@@ -193,6 +193,9 @@ namespace SystemC_VPC{
     // FIXME !!!
     SelectFastestPowerModeGovernor *topPowerGov;
 
+    std::string getTaskName(ProcessId id) {
+      return debugProcessNames[id];
+    }
   private:
 
     Task * preCompute( FastLink fLink,
@@ -240,6 +243,7 @@ namespace SystemC_VPC{
 
     ProcessIdMap    processIdMap;
     ComponentIdMap  componentIdMap;
+    std::map<ProcessId, std::string> debugProcessNames;
 
     ProcessId       globalProcessId;
 
