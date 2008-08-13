@@ -169,6 +169,7 @@ namespace SystemC_VPC{
       cerr << "Unknown Task: ID = " << fLink.process
            << " name = " << this->getTaskName(fLink.process)  << std::endl;
     }
+    throw NotAllocatedException(this->getTaskName(fLink.process));
   }
 
   //
