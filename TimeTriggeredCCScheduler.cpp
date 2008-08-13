@@ -44,33 +44,6 @@ namespace SystemC_VPC{
     this->remainingSlice = sc_time(0,SC_NS);
     slicecount=0;
     curr_slicecount=-1; 
-    char rest[VPC_MAX_STRING_LENGTH];
-    int sublength;
-    char *secondindex;
-    //':' finden -> ':' trennt key-value Paare 
-    char *firstindex=strchr(schedulername,':');
-    while(firstindex!=NULL){
-
-      // ueberspringen und naechste ':' finden
-      secondindex=strchr(firstindex+1,':');
-      if(secondindex!=NULL)
-        sublength=secondindex-firstindex;          //Laenge bestimmen
-      else
-        sublength=strlen(firstindex);              
-      strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
-      rest[sublength-1]='\0';
-      firstindex=secondindex;                     
-     
-      // key und value trennen und Property setzen
-      char *key, *value;
-      value=strstr(rest,"-");
-      if(value!=NULL){
-        value[0]='\0';
-        value++;
-        key=rest;
-        setProperty(key,value);
-      }
-    }
   }
   
   void TimeTriggeredCCScheduler::setProperty(const char* key, const char* value){

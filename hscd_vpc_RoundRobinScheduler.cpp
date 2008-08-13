@@ -7,45 +7,6 @@ namespace SystemC_VPC{
     TIMESLICE=5;
     lastassign=0;
     this->remainingSlice = 0;
-    char rest[VPC_MAX_STRING_LENGTH];
-    //      char muell[VPC_MAX_STRING_LENGTH];
-    /*
-       if(0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN))){
-       cerr << "Scheduler: "<< STR_ROUNDROBIN <<" - "<< schedulername <<endl;
-       sscanf(schedulername,"%s-%s",muell,rest);
-       cerr << "----- Rest: "<<rest<< " muell: "<<muell<<endl;
-       }else if(0==strncmp(schedulername,STR_RR,strlen(STR_RR))){
-       cerr << "Scheduler: "<< STR_RR << endl;
-       }
-       */
-    int sublength;
-    char *secondindex;
-
-    //':' finden -> ':' trennt key-value Paare 
-    char *firstindex=strchr(schedulername,':');
-    while(firstindex!=NULL){
-
-      //':' überspringen und nächste ':' finden
-      secondindex=strchr(firstindex+1,':');
-      if(secondindex!=NULL)
-        sublength=secondindex-firstindex;          //Länge bestimmen
-      else
-        sublength=strlen(firstindex);              
-      strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
-      rest[sublength-1]='\0';
-      firstindex=secondindex;                     
-
-      // key und value trennen und Property setzen
-      char *key, *value;
-      value=strstr(rest,"-");
-      if(value!=NULL){
-        value[0]='\0';
-        value++;
-        key=rest;
-        setProperty(key,value);
-      }
-
-    }
   }
 
   void RoundRobinScheduler::setProperty(const char* key, const char* value){
