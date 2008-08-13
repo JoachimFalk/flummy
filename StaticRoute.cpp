@@ -20,7 +20,12 @@ namespace SystemC_VPC {
   void StaticRoute::compute( Task* _task ) {
     task = _task;
     taskEvents = task->getBlockEvent();
-    assert(!components.empty());
+    if(components.empty()){
+      taskEvents.dii->notify();
+      //taskEvents.latency->notify();
+      Director::getInstance().signalProcessEvent(task);
+      return;
+    }
     StaticRoute * route = new StaticRoute(*this);
     route->route( EventPair(taskEvents.dii, route) );
   }
