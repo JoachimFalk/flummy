@@ -26,6 +26,7 @@ namespace SystemC_VPC {
 
       Task* copy = Director::getInstance().allocateTask(task->getProcessId());
       copy->setFunctionId(task->getFunctionId());
+      copy->setTimingScale(task->getTimingScale());
       iter->second = copy;
     }
 
