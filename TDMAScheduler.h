@@ -70,7 +70,6 @@ namespace SystemC_VPC{
     
     sc_time  tdmaCycle;
     std::map<sc_time, unsigned int> slotOffsets;
-    std::modulus<sc_time> modulus;
 
     sc_time lastassign;
     sc_time remainingSlice;
