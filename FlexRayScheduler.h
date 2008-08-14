@@ -54,6 +54,7 @@ namespace SystemC_VPC{
     void _setProperty(const char* key, const char* value);
     
     sc_time lastassign;
+    sc_time cycle_length;
     sc_time remainingSlice;
     int slicecount;
     int curr_slicecount;
@@ -77,6 +78,8 @@ namespace SystemC_VPC{
     int taskAssignedToA;
     int taskAssignedToB;
     bool dualchannel;
+    bool to_init;
+   // bool firstrun;
     sc_time TimeDynamicSegment;   
     
   };

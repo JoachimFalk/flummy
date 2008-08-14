@@ -55,8 +55,11 @@ namespace SystemC_VPC{
     processcount=0;
     cyclecount=0;
     lastassign=sc_time(0,SC_NS);
+    cycle_length = sc_time(0,SC_NS);
     this->remainingSlice = sc_time(0,SC_NS);
     slicecount=0;
+    to_init=0;
+   // firstrun=true;
     curr_slicecount=-1; 
     curr_slicecountA=0;
     curr_slicecountB=0; 
@@ -176,7 +179,8 @@ namespace SystemC_VPC{
         //cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
         TDMASlot newSlot;
         //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
-        newSlot.length = Director::createSC_Time(param.second.c_str() );        
+        newSlot.length = Director::createSC_Time(param.second.c_str() );  
+        cycle_length += newSlot.length;      
         newSlot.name = param.first;
         TDMA_slots.insert(TDMA_slots.end(), newSlot);
                         
@@ -245,6 +249,7 @@ namespace SystemC_VPC{
     if( fr_Attribute.hasAttribute("dynamic") ){
       Attribute fr_dynamic = fr_Attribute.getAttribute("dynamic");
       this->TimeDynamicSegment = Director::createSC_Time(fr_dynamic.getValue());
+      cycle_length += this->TimeDynamicSegment; 
                 
       for(size_t k=0;k<fr_dynamic.getAttributeSize();k++){
         std::pair<std::string, Attribute >attribute2=fr_dynamic.getNextAttribute(k);
@@ -293,7 +298,7 @@ namespace SystemC_VPC{
                                                 const TaskMap &running_tasks )
   {   
     // keine wartenden + keine aktiven Threads -> ende!
-    if(processcount==0 && running_tasks.size()==0) return 0;   
+    if(processcount==0 && running_tasks.size()==0) return 0;
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
       if(curr_slicecount == -1){
@@ -301,7 +306,7 @@ namespace SystemC_VPC{
       }else{
         //      time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - this->lastassign);  
         time=this->remainingSlice;
-        //              cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
+                     // cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
       }
     }else{
       //Dynamisch
@@ -328,21 +333,28 @@ namespace SystemC_VPC{
   
   void FlexRayScheduler::addedNewTask(Task *task){    
     int index = PIDmap[task->getProcessId()];
-    //      cout<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<endl;
+         // cout<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<endl;
     if(index<StartslotDynamic){
       //TDMA-Task
       TDMA_slots[ index ].pid_fifo.push_back(task->getInstanceId());
       ProcessParams[task->getInstanceId()]=ProcessParams[task->getProcessId()];
-#ifdef VPC_DEBUG     
-      cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
-#endif //VPC_DEBUG
+//#ifdef VPC_DEBUG     
+      //cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
+//#endif //VPC_DEBUG
     
       //cout << "added static Task" <<endl;
     }else{
-      //  cout << "added Dynamic Task at Slot " << index - StartslotDynamic  <<endl;
+        //cout << "added Dynamic Task at Slot " << index - StartslotDynamic  <<endl;
       Dynamic_slots[ index - StartslotDynamic ].pid_fifo.push_back(task->getInstanceId());
     }
-    processcount++;
+    
+    if(processcount==0 /*&& firstrun == false */){
+	    cyclecount = sc_time_stamp() / cycle_length;
+	    to_init=true;
+	   // cout<<"new cyclecount: "<<cyclecount<<endl;
+     }
+     //firstrun=false;
+     processcount++;
   }
   
   void FlexRayScheduler::removedTask(Task *task){ 
@@ -381,8 +393,7 @@ namespace SystemC_VPC{
                                        const TaskMap &ready_tasks,
                                        const TaskMap &running_tasks )
   {
-    scheduling_decision ret_decision = NOCHANGE;;
-    
+    scheduling_decision ret_decision = NOCHANGE;
     //statischer oder dynamischer Teil?
     if(curr_slicecount+1<StartslotDynamic){
       //     cout<<"Static! @ "<< sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< endl;
@@ -399,7 +410,33 @@ namespace SystemC_VPC{
         curr_slicecount++; // Wechsel auf die naechste Zeitscheibe noetig!
         //neue Timeslice laden
         this->remainingSlice = TDMA_slots[curr_slicecount].length;
+        
+        //Korrekturfaktor falls mitten im Slot
+        if(to_init == true && running_tasks.size()==0) {
+        //	cout<<"FIXME - curr_slicecount: "<< curr_slicecount <<endl;
+        	to_init=false;
+	//	cout<<"remainingSlice: " << this->remainingSlice <<"  "<<sc_time_stamp()<<" - "<< cycle_length <<" * "<< cyclecount<<endl;
+		
+		if(sc_time_stamp() < cycle_length * cyclecount){
+			//Quick-FIX: Bug if last Slot is completely empty
+			this->remainingSlice = sc_time_stamp() - cycle_length * (cyclecount-1);
+		}else{
+        		this->remainingSlice = sc_time_stamp() - cycle_length * cyclecount;
+		}
+        //	cout<<"new temp value: "<<this->remainingSlice<<endl;
+        	for(int i_fix = 0; i_fix < StartslotDynamic; i_fix++){
+        		if( this->remainingSlice > TDMA_slots[i_fix].length){
+        			this->remainingSlice = this->remainingSlice  - TDMA_slots[i_fix].length;
+        //			cout<<"new value: " << i_fix << "with: "<< TDMA_slots[i_fix].length <<" = "<<this->remainingSlice<<endl;
+        		}else{
+       				this->remainingSlice = TDMA_slots[i_fix].length - this->remainingSlice;
+       				curr_slicecount = i_fix;
+       				break;
+        		}
+        	}
 
+        	//cout<<"new value: "<<this->remainingSlice<<endl; 
+        }
         if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
           unsigned int tempcount=0;
           bool found=false;
@@ -414,7 +451,7 @@ namespace SystemC_VPC{
               if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
                 /* cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
                    cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
-                   cout<< " MOD= " << cyclecount % mux_value <<endl;
+                   cout<< " MOD= " << cyclecount % mux_value <<" @ "<< sc_time_stamp()<<endl;
                 */
                 found=true;
               }
@@ -486,10 +523,10 @@ namespace SystemC_VPC{
                 int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
                 //no multiplex - run it  -- 
                 if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
-                  /*  cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
+                    /*cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
                       cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
-                      cout<< " MOD= " << cyclecount % mux_value <<endl;
-                  */
+                      cout<< " MOD= " << cyclecount % mux_value <<" @ "<< sc_time_stamp()<<endl;
+					*/                  
                   found=true;
                 }
               }
@@ -823,7 +860,7 @@ namespace SystemC_VPC{
     
     /* if(ret_decision != NOCHANGE){
        cout << sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<endl;
-       }
+      }
     */
 
 #ifdef VPC_DEBUG  
