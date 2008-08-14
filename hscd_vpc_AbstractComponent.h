@@ -96,6 +96,7 @@ class ComponentObserver;
 
     // points to direct associated controlling instance
     ProcessEventListener* parentControlUnit;
+    std::map<PowerMode, sc_time> transactionDelays;
   
   public:
   
@@ -174,6 +175,7 @@ class ComponentObserver;
       FunctionTimingPool * pool = this->timingPools[mode];
       if(pool->find(pid) == pool->end()){
         (*pool)[pid] = new FunctionTiming();
+        (*pool)[pid]->setBaseDelay(this->transactionDelays[mode]);
       }
       return (*pool)[pid];
     }

@@ -295,6 +295,11 @@ namespace SystemC_VPC{
         const double value = atof(v.c_str());
         powerTable[ComponentState::STALLED] = value;
       }
+      if(powerAtt.hasParameter("transaction_delay")) {
+      this->transactionDelays[power] =
+        Director::createSC_Time(powerAtt.getParameter("transaction_delay"));
+      }
+
     }
         
     return true;
