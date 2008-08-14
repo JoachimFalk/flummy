@@ -350,10 +350,10 @@ namespace SystemC_VPC{
     
     // cout<<"Task entfernt! @ "<< sc_time_stamp() << "  " << index << endl;
       
-    std::deque<ProcessId>::iterator iter;
+    std::deque<int>::iterator iter;
     if(index<StartslotDynamic){
       for(iter = TDMA_slots[ index ].pid_fifo.begin(); iter!=TDMA_slots[index].pid_fifo.end() ;iter++){
-        if( *iter == (unsigned int)task->getInstanceId()){
+        if( *iter == task->getInstanceId()){
           TDMA_slots[index].pid_fifo.erase(iter);
           break;
         }
@@ -361,7 +361,7 @@ namespace SystemC_VPC{
     }else{
       index -= StartslotDynamic;
       for(iter = Dynamic_slots[index].pid_fifo.begin(); iter!=Dynamic_slots[index].pid_fifo.end() ;iter++){
-        if( *iter == (unsigned int)task->getInstanceId()){
+        if( *iter == task->getInstanceId()){
           Dynamic_slots[index].pid_fifo.erase(iter);
           break;
         }

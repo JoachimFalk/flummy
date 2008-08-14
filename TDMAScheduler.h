@@ -18,13 +18,14 @@ namespace SystemC_VPC{
   struct TDMASlot{
     sc_time length;
     std::string name;
-    std::deque<ProcessId> pid_fifo;
+    std::deque<int> pid_fifo;
   };
   
   class TDMAScheduler : public Scheduler{
   public:
     
-    TDMAScheduler(){
+    TDMAScheduler()
+      : tdmaCycle(SC_ZERO_TIME) {
       this->lastassign=sc_time(0,SC_NS);
       this->remainingSlice=sc_time(0,SC_NS);
       slicecount=0;
@@ -67,6 +68,10 @@ namespace SystemC_VPC{
   private:
     void _setProperty(const char* key, const char* value);
     
+    sc_time  tdmaCycle;
+    std::map<sc_time, unsigned int> slotOffsets;
+    std::modulus<sc_time> modulus;
+
     sc_time lastassign;
     sc_time remainingSlice;
     int slicecount;

@@ -17,6 +17,8 @@
 */
 #include <utility>
 
+#include <CoSupport/SystemC/algorithm.hpp>
+
 #include <TDMAScheduler.h>
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_Component.h>
@@ -26,8 +28,8 @@ namespace SystemC_VPC{
   TDMAScheduler::TDMAScheduler(const char *schedulername)
     : _properties() {
     processcount=0;
-    lastassign=sc_time(0,SC_NS);
-    this->remainingSlice = sc_time(0,SC_NS);
+    lastassign=SC_ZERO_TIME;
+    this->remainingSlice = SC_ZERO_TIME;
     slicecount=0;
     curr_slicecount=-1;  
   }
@@ -60,12 +62,18 @@ namespace SystemC_VPC{
         sscanf(domain,"%d",&slot);
         domain=strstr(value,"ns");
         if(domain!=NULL){
+          unsigned int slotId = TDMA_slots.size();
+          // at this time tdmaCycle corresponds to the end of the last slot 
+          slotOffsets[tdmaCycle] = slotId;//slot slotId starts at time tdmaCyle
+
           //Erstellen der TDMA-Struktur
           TDMASlot newSlot;
           newSlot.length = Director::createSC_Time(value);      
           newSlot.name = key;
           TDMA_slots.insert(TDMA_slots.end(), newSlot);
           slicecount++;
+
+          tdmaCycle += newSlot.length;
           /*Erzeugen einer Info-Ausgabe         
             domain[0]='\0';
             sscanf(value,"%lf",&slottime);
@@ -98,9 +106,21 @@ namespace SystemC_VPC{
   {      
     // keine wartenden + keine aktiven Threads -> ende!
     if(processcount==0 && running_tasks.size()==0) return false;   
-    //ansonsten: Restlaufzeit der Zeitscheibe
-    time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - lastassign);  
-    return true;   
+
+
+    sc_time cycleTime =
+      CoSupport::SystemC::modulus(sc_time_stamp(), tdmaCycle);
+    std::map<sc_time, unsigned int>::iterator it =
+      slotOffsets.upper_bound(cycleTime);
+    if(it == slotOffsets.end()){
+      remainingSlice  = tdmaCycle - cycleTime;
+    } else {
+      // difference to start of next slot
+      remainingSlice  = it->first - cycleTime;
+    }
+
+    time = remainingSlice;
+    return true;
   }
   
   
@@ -116,11 +136,11 @@ namespace SystemC_VPC{
   
   
   void TDMAScheduler::removedTask(Task *task){  
-    std::deque<ProcessId>::iterator iter;
+    std::deque<int>::iterator iter;
     for(iter = TDMA_slots[ PIDmap[task->getProcessId()] ].pid_fifo.begin();
         iter!=TDMA_slots[PIDmap[task->getProcessId()]].pid_fifo.end();
         ++iter){
-      if( *iter == (unsigned int)task->getInstanceId()){
+      if( *iter == task->getInstanceId()){
         TDMA_slots[PIDmap[task->getProcessId()]].pid_fifo.erase(iter);
         break;
       }
@@ -139,73 +159,56 @@ namespace SystemC_VPC{
                                     const TaskMap &ready_tasks,
                                     const TaskMap &running_tasks )
   {
-    scheduling_decision ret_decision=NOCHANGE;
-    //Zeitscheibe abgelaufen?
-    if(remainingSlice < (sc_time_stamp() - lastassign))
-      remainingSlice=SC_ZERO_TIME;
-    else{
-      remainingSlice = remainingSlice - (sc_time_stamp() - lastassign);  
+
+    sc_time cycleTime =
+      CoSupport::SystemC::modulus(sc_time_stamp(), tdmaCycle);
+    std::map<sc_time, unsigned int>::iterator it =
+      slotOffsets.upper_bound(cycleTime); // upper_bound is the very next slot
+    if(it == slotOffsets.end()){ //
+      remainingSlice  = tdmaCycle - cycleTime;
+    } else {
+      // difference to start of next slot (which is the end of current slot)
+      remainingSlice  = it->first - cycleTime;
     }
-    this->lastassign = sc_time_stamp();
-    
-    if(this->remainingSlice <= sc_time(0,SC_NS)){
-      //Zeitscheibe wirklich abgelaufen!
-      curr_slicecount = (curr_slicecount + 1)%slicecount;
-      // Wechsel auf die naechste Zeitscheibe noetig!
-      //neue Timeslice laden
-      this->remainingSlice = TDMA_slots[curr_slicecount].length;
 
-      if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
-        task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
-        //      cout<<"Scheduler:new task: " << task_to_assign << "..." <<endl;
-        
-        //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
-        // -> kein preemption!
-        ret_decision= ONLY_ASSIGN;
-        
-        if(running_tasks.size()!=0){  // alten Task entfernen
-          TaskMap::const_iterator iter;
-          iter=running_tasks.begin();
-          Task *task=iter->second;
-          task_to_resign=task->getInstanceId();
-          ret_decision= PREEMPT;  
-        }
-        // else{}    ->
-        //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
-      }else{
-        //kein neuer Task da.. aber Zeitscheibe trotzdem abgelaufen =>
-        //Prozess verdraengen und "idle" werden!
-        if(running_tasks.size()!=0){  // alten Task entfernen
-          TaskMap::const_iterator iter;
-          iter=running_tasks.begin();
-          Task *task=iter->second;
-          task_to_resign=task->getInstanceId();
-          ret_decision=RESIGNED;
-        }else{
-          //war keiner da... und ist auch kein Neuer da -> keine AEnderung      
-          ret_decision=NOCHANGE;
-        }       
-      }    
-    }else{
-      //neuer Task hinzugefuegt -> nichts tun 
-      //oder alter entfernt    -> neuen setzen
-      //neuen setzen:
-      if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-        if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){ // neuer task da?
-          task_to_assign = TDMA_slots[curr_slicecount].pid_fifo.front();
+    --it; // switch to actual slot
+    assert(it != slotOffsets.end());
+    curr_slicecount = it->second ; // retrieve actual slot count
+    const TDMASlot &currentSlot = TDMA_slots[curr_slicecount];
 
-          //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
-          // -> kein preemption!
-          ret_decision= ONLY_ASSIGN;
+    scheduling_decision ret_decision=NOCHANGE;
+
+    // running task available ?
+    if( running_tasks.begin() != running_tasks.end() ){
+      int runningTask = running_tasks.begin()->first;
+
+      // running task == next task ?
+      if( TDMA_slots[curr_slicecount].pid_fifo.front() == runningTask){
+        //cerr << "TDMA: NOCHANGE " << endl;
+        return NOCHANGE; // no task switch needed
+      }else{ //running task != next task 
+        //resign running task
+        task_to_resign = runningTask;
+        //cerr << "TDMA: RESIGNED?? " << endl;
+        ret_decision = RESIGNED;
+        if( ! currentSlot.pid_fifo.empty() ){
+          //assign next task if available
+          task_to_assign = currentSlot.pid_fifo.front();
+          //cerr << "TDMA: PREEMPT " << endl;
+          ret_decision = PREEMPT;
         }
+        return ret_decision;
       }
-      //neuer Task hinzugefuegt, aber ein anderer laeuft noch -> nichts tun
-    } 
+    } else { // no running task available !
 
-#ifdef VPC_DEBUG  
-    cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
-         << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << endl;
-#endif //VPC_DEBUG  
+      //assign next task if available
+      if( ! currentSlot.pid_fifo.empty() ){
+        task_to_assign = currentSlot.pid_fifo.front();
+        //cerr << "TDMA: ASSIGN " << endl;
+        return ONLY_ASSIGN;;
+      }
+    }
+    //cerr << "TDMA: NOCHANGE " << endl;
     return ret_decision;
   }
 
