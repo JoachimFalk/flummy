@@ -393,6 +393,6 @@ namespace SystemC_VPC{
       this->reconfigurationBlockedUntil += newSetupTime;
       return waitIntervall;
     }
-    //return SC_ZERO_TIME;
+    return SC_ZERO_TIME;
   }  
 }
