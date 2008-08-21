@@ -55,6 +55,10 @@ namespace SystemC_VPC {
       };
        
       vector<slotTable_entry> slotTable;
+      
+      sc_time minSetuptime;
+      
+      char RCressource[1000000];
        
     public:
        
@@ -70,6 +74,8 @@ namespace SystemC_VPC {
       
       sc_time getSetuptime(ProcessControlBlock);
       sc_time getRuntime(ProcessControlBlock);
+      void updateTimesTable(std::string, sc_time);
+      
   };
 
 }

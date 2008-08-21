@@ -226,7 +226,7 @@ namespace SystemC_VPC{
     
     ReconfigurableComponent* getCompByName(std::string);
 
-    sc_time getReconfigurationWaitInterval(sc_time);
+    sc_time getReconfigurationWaitInterval(sc_time, ReconfigurableComponent*);
         
   private:
 

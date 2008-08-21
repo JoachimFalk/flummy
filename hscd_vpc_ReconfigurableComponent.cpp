@@ -248,7 +248,7 @@ namespace SystemC_VPC{
 #endif //VPC_DEBUG
         
         //wait() blockedtime cause of other reconfiguration is activ
-        sc_time reconfigurationManagerWaitInterval = Director::getInstance().getReconfigurationWaitInterval(nextConfig->getLoadTime());
+        sc_time reconfigurationManagerWaitInterval = Director::getInstance().getReconfigurationWaitInterval(nextConfig->getLoadTime(),this);
         wait(reconfigurationManagerWaitInterval);
         //assert(reconfigurationManagerWaitInterval == SC_ZERO_TIME);
         // perform reconfiguration
