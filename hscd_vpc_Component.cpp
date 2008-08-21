@@ -296,8 +296,8 @@ namespace SystemC_VPC{
         powerTable[ComponentState::STALLED] = value;
       }
       if(powerAtt.hasParameter("transaction_delay")) {
-      this->transactionDelays[power] =
-        Director::createSC_Time(powerAtt.getParameter("transaction_delay"));
+        this->transactionDelays[power] =
+          Director::createSC_Time(powerAtt.getParameter("transaction_delay"));
       }
 
     }
@@ -316,6 +316,13 @@ namespace SystemC_VPC{
     if(processPower(attributes)){
       return;
     }
+
+    if(attributes.isType("transaction_delay")) {
+      this->transactionDelays[*this->getPowerMode()] =
+        Director::createSC_Time(attributes.getValue());
+      return;
+    }
+    
     scheduler->setAttribute(attributes);
   }
 
