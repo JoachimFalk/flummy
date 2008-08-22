@@ -59,6 +59,8 @@ namespace SystemC_VPC {
       sc_time minSetuptime;
       
       char RCressource[1000000];
+      
+      int toReserve;
        
     public:
        
