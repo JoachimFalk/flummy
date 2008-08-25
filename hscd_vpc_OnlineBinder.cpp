@@ -208,10 +208,9 @@ if(strcmp(algorithm,"List") == 0){
       if(timesTable[i].time < timesTable[chosen].time)
         chosen = i;
     }
-    if(sc_time_stamp() < timesTable[chosen].time){
-      RCWaitInterval = timesTable[chosen].time;
-    //std::cerr << "OnlineBinder> RCWaitInterval: " << RCWaitInterval << std::endl;
-    }
+    
+    RCWaitInterval = timesTable[chosen].time;
+    
     timesTable[chosen].time += getSetuptime(task);
     
     //set all Slottimes to new border
@@ -396,6 +395,13 @@ if(strcmp(algorithm,"List") == 0){
     int lowestLi = (int)floor(0.445 * numberofcomp);
 
     if(toReserve == -1) toReserve = lowestLi;
+    else if(toReserve > 0){
+      for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[lowestLi].time.to_double()/1e9) ; x++){
+        if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
+        else toReserve--;
+        if(toReserve == 0) break;
+      }
+    }
 
     //Calculate A(Ri)
     sc_time ARi = SC_ZERO_TIME;
@@ -460,17 +466,20 @@ if(strcmp(algorithm,"List") == 0){
       Aall += timesTable[i].time;
     }
     
-    int zero_slots = 0;
-    
     sc_time Ai;
     for(int i = numberofcomp-1; i > 0; i--){
       Ai = Aall / i;
       
-      if(timesTable[i].time == SC_ZERO_TIME)
-        ++zero_slots;
+      //calculate toReserve for slot i
+      toReserve = i;
+      for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
+        if(RCressource[x] == 'X') continue;
+        else toReserve--;
+        if(toReserve == 0) break;
+      }
       
       //h(k)+j <= alpha * A(tk)
-      if(timesTable[i].time + job <= alpha * Ai){
+      if( timesTable[i].time + job + toReserve * getSetuptime(task) <= alpha * Ai){
         #ifdef DETAILS
         std::cerr << "OnlineBinder> Karger Slot " << i << std::endl;
         #endif    
@@ -505,19 +514,11 @@ if(strcmp(algorithm,"List") == 0){
         std::cerr << "OnlineBinder> Karger Slot 0" << std::endl;
         #endif    
         chosen = timesTable[0].recomponentnumber;
-        if(zero_slots > 0){
-          RCWaitInterval = zero_slots * getSetuptime(task);
-          for(int x=0; x < zero_slots; x++){
-            RCressource[(int)( timesTable[0].time.to_double()/1e9)] = 'd';
-            timesTable[0].time += getSetuptime(task);
-          }
-        }else{
-          RCWaitInterval = timesTable[0].time;
-        }
+        RCWaitInterval = timesTable[0].time;
         RCressource[(int)(timesTable[0].time.to_double()/1e9)] = 'X';
         timesTable[0].time += job;
     }
-    
+    // set border of all slot to new value
     for(int i = 0; i < numberofcomp; i++){
       while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
         timesTable[i].time += getSetuptime(task);
@@ -538,8 +539,15 @@ if(strcmp(algorithm,"List") == 0){
     
     sc_time job = getSetuptime(task) + getRuntime(task);
 
-    if(toReserve == -1)
+    if(toReserve == -1){
       toReserve = i;
+    }else if(toReserve > 0){
+      for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
+        if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
+        else toReserve--;
+        if(toReserve == 0) break;
+      }
+    }
 
     //add job to lowest and resort
     vector<timesTable_entry> timesTableTemp = timesTable;
