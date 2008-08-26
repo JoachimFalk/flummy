@@ -35,6 +35,7 @@ compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
 
 AM_LDFLAGS =			\
 	@AM_LDFLAGS@		\
+	@COSUPPORT_LDFLAGS@	\
 	@SYSTEMC_LDFLAGS@	\
 	@XERCES_LDFLAGS@
 
@@ -43,35 +44,17 @@ AM_LDFLAGS =			\
 #        restore thread based compute interface to SystemC-VPC
 AM_CPPFLAGS =			\
 	@AM_CPPFLAGS@		\
+	@COSUPPORT_INCLUDE@	\
 	@SYSTEMC_INCLUDE@	\
 	@XERCES_INCLUDE@	\
 	-Ipkginclude		\
 	-I$(srcdir)/pkginclude
-
-#AM_LDFLAGS=
-
-#noinst_SCRIPTS  = test_pathstuff.sh
-#noinst_PROGRAMS = test_pathstuff
-
-EXTRA_DIST	=
-
-PROGLDFLAGS=
 
 lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_CH_LTOBJS=			\
 	$(hscd_op_hpp_CH_LTOBJS)		\
 	$(hscd_pggen_hpp_CH_LTOBJS)
-
-libsystemcvpc_la_LDFLAGS =			\
-	-version-info 0:0:0 			\
-	-no-undefined 				\
-	-lsystemc 				\
-	-lxerces-c
-libsystemcvpc_la_DEPENDENCIES = 		\
-	compileheader-libsystemcvpc.stamp
-libsystemcvpc_la_LIBADD = 			\
-	$(libsystemcvpc_CH_LTOBJS)
 
 libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
@@ -98,3 +81,14 @@ libsystemcvpc_la_SOURCES =			\
 	FastLink.cpp				\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
+
+libsystemcvpc_la_LDFLAGS =				\
+	-version-info 0:0:0 				\
+	-no-undefined
+libsystemcvpc_la_DEPENDENCIES = 			\
+	compileheader-libsystemcvpc.stamp
+libsystemcvpc_la_LIBADD = 				\
+	$(libsystemcvpc_CH_LTOBJS)			\
+	@COSUPPORT_LIBPATH@/libcosupport-systemc.la	\
+	-lxerces-c					\
+	-lsystemc
