@@ -30,9 +30,6 @@ SUBDIRS = pkginclude
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
-compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
-	@date > $@
-
 AM_LDFLAGS =			\
 	@AM_LDFLAGS@		\
 	@COSUPPORT_LDFLAGS@	\
@@ -51,10 +48,6 @@ AM_CPPFLAGS =			\
 	-I$(srcdir)/pkginclude
 
 lib_LTLIBRARIES = libsystemcvpc.la
-
-libsystemcvpc_CH_LTOBJS=			\
-	$(hscd_op_hpp_CH_LTOBJS)		\
-	$(hscd_pggen_hpp_CH_LTOBJS)
 
 libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
@@ -85,10 +78,7 @@ libsystemcvpc_la_SOURCES =			\
 libsystemcvpc_la_LDFLAGS =				\
 	-version-info 0:0:0 				\
 	-no-undefined
-libsystemcvpc_la_DEPENDENCIES = 			\
-	compileheader-libsystemcvpc.stamp
 libsystemcvpc_la_LIBADD = 				\
-	$(libsystemcvpc_CH_LTOBJS)			\
 	@COSUPPORT_LIBPATH@/libcosupport-systemc.la	\
 	-lxerces-c					\
 	-lsystemc
