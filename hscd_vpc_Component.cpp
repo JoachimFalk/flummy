@@ -323,6 +323,23 @@ namespace SystemC_VPC{
       return;
     }
     
+    if(attributes.isType("transaction")) {
+      unsigned int transactionSize = 1;
+      sc_time transactionDelay     = SC_ZERO_TIME;
+      if(attributes.hasParameter("delay")){
+        transactionDelay =
+          Director::createSC_Time(attributes.getParameter("delay"));
+      }
+
+      if(attributes.hasParameter("size")){
+        transactionSize = atoi(attributes.getParameter("size").c_str());
+      }
+
+      this->transactionDelays[*this->getPowerMode()] = transactionDelay;
+      // FIXME: add transactionSize
+      return;
+    }
+    
     scheduler->setAttribute(attributes);
   }
 
