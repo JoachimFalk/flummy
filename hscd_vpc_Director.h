@@ -236,7 +236,9 @@ namespace SystemC_VPC{
     // time of latest acknowledge simulated task
     double end;
 
+#ifndef NO_POWER_SUM
     std::ofstream powerConsStream;
+#endif // NO_POWER_SUM
 
     typedef std::map<std::string, ProcessId>   ProcessIdMap;
     typedef std::map<std::string, ComponentId> ComponentIdMap;

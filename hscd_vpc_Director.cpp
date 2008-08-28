@@ -55,7 +55,9 @@ namespace SystemC_VPC{
       mappings(),
       reverseMapping(),
       end(0),
+#ifndef NO_POWER_SUM
       powerConsStream("powerconsumption.dat"),
+#endif // NO_POWER_SUM
       componentIdMap(),
       globalProcessId(0)
   {
@@ -74,6 +76,7 @@ namespace SystemC_VPC{
       exit(-1);
     }
 
+#ifndef NO_POWER_SUM
     powerSumming = new PowerSumming(powerConsStream);
     for( Components::iterator it = components.begin();
          it != components.end();
@@ -83,6 +86,8 @@ namespace SystemC_VPC{
         (*it)->addObserver(powerSumming);
       }
     }
+#endif // NO_POWER_SUM
+
   }
 
   /**
