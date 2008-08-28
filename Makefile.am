@@ -30,9 +30,6 @@ SUBDIRS=
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
-compileheader-libsystemcvpc.stamp: $(libsystemcvpc_CH_LTOBJS)
-	@date > $@
-
 # FIXME: Decouple SystemC-VPC and SysteMoC by moving SysteMoC
 #        dependant code from SystemC-VPC into SysteMoC
 #        restore thread based compute interface to SystemC-VPC
@@ -71,17 +68,10 @@ pkginclude_HEADERS =				\
 
 #noinst_HEADERS=	oneof.hpp
 
-libsystemcvpc_CH_LTOBJS=			\
-	$(hscd_op_hpp_CH_LTOBJS)		\
-	$(hscd_pggen_hpp_CH_LTOBJS)
-
 ## DISABLE -lefence because is causes crashes on systemc where libefence is linked with -lpthread
 ## because of quick-thread (SystemC) pthread incompatibilities
 #libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++ -lefence
 libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++
-
-libsystemcvpc_la_LIBADD = $(libsystemcvpc_CH_LTOBJS)
-libsystemcvpc_la_DEPENDENCIES = compileheader-libsystemcvpc.stamp include
 
 libsystemcvpc_la_SOURCES =			\
 	debug_config.cpp			\
@@ -109,7 +99,7 @@ libsystemcvpc_la_SOURCES =			\
 
 
 # Need pkinclude files in include/$(pkgincludeprefix)
-$(libsystemcvpc_la_OBJECTS) $(libsystemcvpc_CH_LTOBJS): include
+$(libsystemcvpc_la_OBJECTS): include
 
 #test_pathstuff_LDADD = libsystemcvpc.la
 #test_pathstuff_SOURCES = test_pathstuff.C
