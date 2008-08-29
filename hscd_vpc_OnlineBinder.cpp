@@ -8,7 +8,6 @@ namespace SystemC_VPC {
   OnlineBinder::OnlineBinder(char* algorithm) : DynamicBinder() {
     this->algorithm = algorithm;
     numberofcomp = 0;
-    toReserve = -1;
     minSetuptime = SC_ZERO_TIME;
     std::cerr << "OnlineAlgorithmBinder> Chosen algorithm: " << this->algorithm << std::endl;
   }
@@ -56,7 +55,6 @@ namespace SystemC_VPC {
 #endif
     
 int chosen = 0;
-
 sc_time RCWaitInterval = SC_ZERO_TIME;
 //********************************************************************************
 //Following Online-Scheduling-Algorithms
@@ -73,6 +71,7 @@ if(strcmp(algorithm,"List") == 0){
       if(timesTable[i].time < timesTable[chosen].time)
         chosen = i;
     }
+    //add job to lowest Slot
     timesTable[chosen].time += getSetuptime(task) + getRuntime(task);
 
 //End Algorithm List
@@ -83,7 +82,6 @@ if(strcmp(algorithm,"List") == 0){
     
     sc_time job = getSetuptime(task) + getRuntime(task);
     
-    //Calculate lowest in Li 44,5%
     int lowestLi = (int)floor(0.445 * numberofcomp);
 
     //Calculate A(Ri)
@@ -119,14 +117,16 @@ if(strcmp(algorithm,"List") == 0){
     sc_time job = getSetuptime(task) + getRuntime(task);
     
     chosen = -1;    
+    //calculate sum of all slot heights
     sc_time Aall = SC_ZERO_TIME;
     for(int i = 0; i < numberofcomp-1; i++){
       Aall += timesTable[i].time;
     }
     sc_time Ai;
+    //for each machine check if equation is true
     for(int i = numberofcomp-1; i > 0; i--){
       Ai = Aall / i;
-      //h(k)+j <= alpha * A(tk)
+      // h(k)+j <= alpha * A(tk)
       if(timesTable[i].time + job <= alpha * Ai){
         #ifdef DETAILS
         std::cerr << "OnlineBinder> Karger Slot " << i << std::endl;
@@ -137,7 +137,7 @@ if(strcmp(algorithm,"List") == 0){
       }
       Aall -= timesTable[i-1].time;
     }
-    if(chosen == -1){
+    if(chosen == -1){//if equation fails, choose 0 slot
         #ifdef DETAILS
         std::cerr << "OnlineBinder> Karger Slot 0" <<  std::endl;
         #endif    
@@ -157,17 +157,20 @@ if(strcmp(algorithm,"List") == 0){
     double alpha = ( (c-1)*i-j/2 ) / ( (c-1)*(m-i) );
     
     sc_time job = getSetuptime(task) + getRuntime(task);
-
-    //add job to lowest machine and resort
-    vector<timesTable_entry> timesTableTemp = timesTable;
-    timesTableTemp[0].time += job;
     
+    //make copy of timesTable
+    vector<timesTable_entry> timesTableTemp = timesTable;
+    
+    //add job to lowest machine of timesTable-copy and resort
+    timesTableTemp[0].time += job;
     sort(timesTableTemp.begin(), timesTableTemp.end());
     
+    //calculate Ll, sum of heights of the lower slots
     sc_time Ll = SC_ZERO_TIME;
     for(int l=0; l < i;l++){
       Ll += timesTableTemp[l].time;
     }
+    //calculate Lh, sum of heights of the heigher slots
     sc_time Lh = SC_ZERO_TIME;
     for(int l=i; l < m;l++){
       Lh += timesTableTemp[l].time;
@@ -200,7 +203,7 @@ if(strcmp(algorithm,"List") == 0){
     }
 //End Algorithm Albers
 
-}else if(strcmp(algorithm,"ListMod1") == 0){
+}else if(strcmp(algorithm,"ListMod1") == 0 || strcmp(algorithm,"ListMod2") == 0){
     chosen = 0;
     
     //find lowest Slot
@@ -208,9 +211,9 @@ if(strcmp(algorithm,"List") == 0){
       if(timesTable[i].time < timesTable[chosen].time)
         chosen = i;
     }
-    
+    //set WaitInterval for ReconfigurableComponent to avoid concurrent reconfiguration
     RCWaitInterval = timesTable[chosen].time;
-    
+    //add job to lowest Slot
     timesTable[chosen].time += getSetuptime(task);
     
     //set all Slottimes to new border
@@ -225,9 +228,9 @@ if(strcmp(algorithm,"List") == 0){
 }else if(strcmp(algorithm,"BartalMod1") == 0){
     
     sort(timesTable.begin(), timesTable.end());
+    
     sc_time job = getSetuptime(task) + getRuntime(task);
     
-    //Calculate lowest in Li 44,5%
     int lowestLi = (int)floor(0.445 * numberofcomp);
 
     //Calculate A(Ri)
@@ -255,6 +258,7 @@ if(strcmp(algorithm,"List") == 0){
       std::cerr << "OnlineBinder> Bartal Rule 0" << std::endl;
       #endif    
     }
+    //set all Slottimes to new border
     for(int i = 0; i < numberofcomp; i++){
       while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
         timesTable[i].time += getSetuptime(task);
@@ -267,14 +271,18 @@ if(strcmp(algorithm,"List") == 0){
     sort(timesTable.begin(), timesTable.end());
   
     double alpha = 1.945;
+    
     sc_time job = getSetuptime(task) + getRuntime(task);
     
-    chosen = -1;    
+    chosen = -1;
+    
+    //calculate sum of all slot heights
     sc_time Aall = SC_ZERO_TIME;
     for(int i = 0; i < numberofcomp-1; i++){
       Aall += timesTable[i].time;
     }
     sc_time Ai;
+    //for each machine check if equation is true
     for(int i = numberofcomp-1; i > 0; i--){
       Ai = Aall / i;
       //h(k)+j <= alpha * A(tk)
@@ -290,7 +298,7 @@ if(strcmp(algorithm,"List") == 0){
       }
       Aall -= timesTable[i-1].time;
     }
-    if(chosen == -1){
+    if(chosen == -1){//if equation fails, choose 0 slot
         #ifdef DETAILS
         std::cerr << "OnlineBinder> Karger Slot 0" << std::endl;
         #endif    
@@ -319,11 +327,11 @@ if(strcmp(algorithm,"List") == 0){
     
     sc_time job = getSetuptime(task) + getRuntime(task);
 
-    //add job to lowest and resort
+    //make copy of timesTable
     vector<timesTable_entry> timesTableTemp = timesTable;
-    
+     
+     //add job to lowest machine of timesTable-copy
     RCressource[(int)(timesTableTemp[0].time.to_double()/1e9)] = 'X';
-
     timesTableTemp[0].time += job;
     
     //set all slots to new border
@@ -331,13 +339,15 @@ if(strcmp(algorithm,"List") == 0){
       while( RCressource[(int)(timesTableTemp[i].time.to_double()/1e9)] == 'X' )
         timesTableTemp[i].time += getSetuptime(task);
     }
-    
+    //resort copy of timesTable
     sort(timesTableTemp.begin(), timesTableTemp.end());
     
+    //calculate Ll, sum of heights of the lower slots
     sc_time Ll = SC_ZERO_TIME;
     for(int l=0; l < i;l++){
       Ll += timesTableTemp[l].time;
     }
+    //calculate Lh, sum of heights of the higher slots
     sc_time Lh = SC_ZERO_TIME;
     for(int l=i; l < m;l++){
       Lh += timesTableTemp[l].time;
@@ -370,16 +380,15 @@ if(strcmp(algorithm,"List") == 0){
       RCressource[(int)(timesTable[0].time.to_double()/1e9)] = ' ';
       RCressource[(int)(timesTable[i].time.to_double()/1e9)] = 'X';
       timesTable[i].time += job;
+      #ifdef DETAILS
+      std::cerr << "OnlineBinder> Albers Rule 3 " << std::endl;
+      #endif
+      //set all timesTable entries to new border
       for(int k = 0; k < numberofcomp; k++){
         while( RCressource[(int)(timesTable[k].time.to_double()/1e9)] == 'X' )
           timesTable[k].time += getSetuptime(task);
       }
-      #ifdef DETAILS
-      std::cerr << "OnlineBinder> Albers Rule 3 " << std::endl;
-      #endif
     }
-
-    
 //End Algorithm AlbersMod1
 
 //*****************************************************************************************
@@ -391,18 +400,23 @@ if(strcmp(algorithm,"List") == 0){
     
     sc_time job = getSetuptime(task) + getRuntime(task);
     
-    //Calculate lowest in Li 44,5%
     int lowestLi = (int)floor(0.445 * numberofcomp);
 
-    if(toReserve == -1) toReserve = lowestLi;
-    else if(toReserve > 0){
-      for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[lowestLi].time.to_double()/1e9) ; x++){
-        if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
-        else toReserve--;
-        if(toReserve == 0) break;
-      }
+    //calculate toReserve
+    int toReserve = lowestLi;
+    //check for already reserved time steps
+    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[numberofcomp-1].time.to_double()/1e9) ; x++){
+      if(RCressource[x] == 'X') continue;
+      else if(RCressource[x] == 'd') toReserve--;
+      if(toReserve == 0) break;
     }
-
+    //check for time steps with only runtime, so reservation is not nessesary
+    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[lowestLi].time.to_double()/1e9) ; x++){
+      if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
+      else toReserve--;
+      if(toReserve == 0) break;
+    }
+  
     //Calculate A(Ri)
     sc_time ARi = SC_ZERO_TIME;
     for(int i=0; i < lowestLi; i++){
@@ -419,9 +433,8 @@ if(strcmp(algorithm,"List") == 0){
       }
       if(toReserve > 0){
         while(toReserve > 0){
-          if(RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] == 'X'){
+          while(RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] == 'X'){
             timesTable[lowestLi].time += getSetuptime(task);
-            continue;
           }
           RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] = 'd';
           timesTable[lowestLi].time += getSetuptime(task);
@@ -440,38 +453,40 @@ if(strcmp(algorithm,"List") == 0){
       chosen = timesTable[0].recomponentnumber;
       RCWaitInterval = timesTable[0].time;
       RCressource[(int)(timesTable[0].time.to_double()/1e9)] = 'X';
-      toReserve++;
       timesTable[0].time += job;
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Bartal Rule 0" << std::endl;
       #endif    
     }
+    //set all Slottimes to new border
     for(int i = 0; i < numberofcomp; i++){
       while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
         timesTable[i].time += getSetuptime(task);
     }          
-  
 //End Algorithm BartalMod2
 
 }else if(strcmp(algorithm,"KargerMod2") == 0){
 
-  sort(timesTable.begin(), timesTable.end());
+    sort(timesTable.begin(), timesTable.end());
   
     double alpha = 1.945;
+    
     sc_time job = getSetuptime(task) + getRuntime(task);
     
     chosen = -1;    
+    
+    //calculate sum of all slot heights
     sc_time Aall = SC_ZERO_TIME;
     for(int i = 0; i < numberofcomp-1; i++){
       Aall += timesTable[i].time;
     }
-    
+
     sc_time Ai;
     for(int i = numberofcomp-1; i > 0; i--){
       Ai = Aall / i;
       
       //calculate toReserve for slot i
-      toReserve = i;
+      int toReserve = i;
       for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
         if(RCressource[x] == 'X') continue;
         else toReserve--;
@@ -479,7 +494,10 @@ if(strcmp(algorithm,"List") == 0){
       }
       
       //h(k)+j <= alpha * A(tk)
+      //std::cerr <<"timesTable[i].time + job+ toReserve * getSetuptime(task)"<< (timesTable[i].time + job + toReserve * getSetuptime(task)) << std::endl;
+      //std::cerr <<"alpha * Ai"<< (alpha * Ai)  << std::endl;
       if( timesTable[i].time + job + toReserve * getSetuptime(task) <= alpha * Ai){
+      
         #ifdef DETAILS
         std::cerr << "OnlineBinder> Karger Slot " << i << std::endl;
         #endif    
@@ -490,9 +508,8 @@ if(strcmp(algorithm,"List") == 0){
         }
         if(toReserve > 0){
           while(toReserve > 0){
-            if(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
+            while(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
               timesTable[i].time += getSetuptime(task); 
-              continue;
             }
             RCressource[ (int)(timesTable[i].time.to_double()/1e9)] = 'd';
             timesTable[i].time += getSetuptime(task); 
@@ -509,7 +526,7 @@ if(strcmp(algorithm,"List") == 0){
       Aall -= timesTable[i-1].time;
     }//end for loop
     
-    if(chosen == -1){
+    if(chosen == -1){ //equation failed
         #ifdef DETAILS
         std::cerr << "OnlineBinder> Karger Slot 0" << std::endl;
         #endif    
@@ -523,7 +540,6 @@ if(strcmp(algorithm,"List") == 0){
       while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
         timesTable[i].time += getSetuptime(task);
     }          
-
 //End Algorithm KargerMod2
 
 }else if(strcmp(algorithm,"AlbersMod2") == 0){
@@ -532,41 +548,48 @@ if(strcmp(algorithm,"List") == 0){
     
     int m = numberofcomp;
     double c = 1.923;
-    int i = (int)floor(0.5 * m);
+    int i = (int)floor(m/2);
     double j = 0.29 * m;
     double alpha = ( (c-1)*i-(j/2) ) / ( (c-1)*(m-i) );
-    //if(alpha < 0.5) alpha = 0.636224587;
     
     sc_time job = getSetuptime(task) + getRuntime(task);
 
-    if(toReserve == -1){
-      toReserve = i;
-    }else if(toReserve > 0){
-      for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
-        if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
-        else toReserve--;
-        if(toReserve == 0) break;
-      }
+    //calculate toReserve
+    int toReserve = i;
+    //check for already reserved time steps
+    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[m-1].time.to_double()/1e9) ; x++){
+      if(RCressource[x] == 'X') continue;
+      else if(RCressource[x] == 'd') toReserve--;
+      if(toReserve == 0) break;
     }
-
-    //add job to lowest and resort
+    //check for time steps with only runtime, so reservation is not nessesary
+    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
+      if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
+      else toReserve--;
+      if(toReserve == 0) break;
+    }
+    //make copy of timesTable
     vector<timesTable_entry> timesTableTemp = timesTable;
     
+    //add job to lowest slot
     char RCBackup = RCressource[(int)(timesTableTemp[0].time.to_double()/1e9)];
     RCressource[(int)(timesTableTemp[0].time.to_double()/1e9)] = 'X';
     timesTableTemp[0].time += job;
     
+    //set new border for slottimes
     for(int i = 0; i < numberofcomp; i++){
       while( RCressource[(int)(timesTableTemp[i].time.to_double()/1e9)] == 'X' )
         timesTableTemp[i].time += getSetuptime(task);
     }
-    
+    //resort
     sort(timesTableTemp.begin(), timesTableTemp.end());
     
+    //calculate Ll, sum of heights of the lower slots
     sc_time Ll = SC_ZERO_TIME;
     for(int l=0; l < i;l++){
       Ll += timesTableTemp[l].time;
     }
+    //calculate Lh, sum of heights of the heigher slots
     sc_time Lh = SC_ZERO_TIME;
     for(int l=i; l < m;l++){
       Lh += timesTableTemp[l].time;
@@ -575,14 +598,14 @@ if(strcmp(algorithm,"List") == 0){
     std::cerr << "OnlineBinder> Job " << job << std::endl;
     std::cerr << "OnlineBinder> Ll " << Ll << std::endl;
     std::cerr << "OnlineBinder> Lh " << Lh << std::endl;    
+    std::cerr << "OnlineBinder> toReserve"<<toReserve<<std::endl ;
     #endif
-  
+    
     //Make decision
     if( Ll <= alpha * Lh ){ //least loaded
       chosen = timesTable[0].recomponentnumber;
       RCWaitInterval = timesTable[0].time;
       timesTable = timesTableTemp;
-      toReserve++;
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Albers Rule 1 " << std::endl;
       #endif
@@ -592,7 +615,6 @@ if(strcmp(algorithm,"List") == 0){
       chosen = timesTable[0].recomponentnumber;
       RCWaitInterval = timesTable[0].time;      
       timesTable = timesTableTemp;
-      toReserve++;
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Albers Rule 2 " << std::endl;
       #endif
@@ -610,9 +632,8 @@ if(strcmp(algorithm,"List") == 0){
       }
       if(toReserve > 0){
         while(toReserve > 0){
-            if(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
+            while(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
               timesTable[i].time += getSetuptime(task); 
-              continue;
             }
             RCressource[ (int)(timesTable[i].time.to_double()/1e9)] = 'd';
             timesTable[i].time += getSetuptime(task); 
@@ -624,6 +645,7 @@ if(strcmp(algorithm,"List") == 0){
       RCWaitInterval = timesTable[i].time;
       RCressource[(int)( timesTable[i].time.to_double()/1e9)] = 'X';
       timesTable[i].time += job;
+      
       //set all machine to new time border
       for(int k = 0; k < numberofcomp; k++){
         while( RCressource[(int)(timesTable[k].time.to_double()/1e9)] == 'X' )
