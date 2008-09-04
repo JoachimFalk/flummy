@@ -66,19 +66,16 @@ namespace SystemC_VPC{
         return powerConsumption;
       }
 
-      PowerMode getPowerMode() const
-      {
-        return powerMode;
-      }
+      virtual const PowerMode* getPowerMode() const = 0;
 
-      PowerMode translatePowerMode(std::string mode)
+      const PowerMode* translatePowerMode(std::string mode)
       {
         PowerModes::const_iterator i = powerModes.find(mode);
         if(i == powerModes.end()) {
           size_t id = powerModes.size();
           powerModes[mode] = PowerMode(id, mode);
         }
-        return powerModes[mode];
+        return &powerModes[mode];
       }
 
       ComponentModel * getModel(){
@@ -88,7 +85,6 @@ namespace SystemC_VPC{
       ComponentState componentState;
       double         powerConsumption;
       PowerModes     powerModes;
-      PowerMode      powerMode;
       ComponentModel *model;
   };
 } //namespace SystemC_VPC

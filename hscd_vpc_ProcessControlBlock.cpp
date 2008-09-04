@@ -176,31 +176,31 @@ namespace SystemC_VPC{
   }
 
   void ProcessControlBlock::setTiming(const Timing& timing){
-    PowerMode mode = this->component->translatePowerMode(timing.powerMode);
+    const PowerMode *mode = this->component->translatePowerMode(timing.powerMode);
     FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
     ft->setTiming(timing);
   }
 
   void ProcessControlBlock::setBaseDelay(sc_time delay){
-    PowerMode mode = this->component->translatePowerMode("FAST");
+    const PowerMode *mode = this->component->translatePowerMode("FAST");
     FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
     ft->setBaseDelay(delay);
   }
 
   void ProcessControlBlock::setBaseLatency(sc_time latency){
-    PowerMode mode = this->component->translatePowerMode("FAST");
+    const PowerMode *mode = this->component->translatePowerMode("FAST");
     FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
     ft->setBaseLatency(latency);
   }
 
   void ProcessControlBlock::addDelay(FunctionId fid, sc_time delay){
-    PowerMode mode = this->component->translatePowerMode("FAST");
+    const PowerMode *mode = this->component->translatePowerMode("FAST");
     FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
     ft->addDelay(fid, delay);
   }
 
   void ProcessControlBlock::addLatency(FunctionId fid, sc_time latency){
-    PowerMode mode = this->component->translatePowerMode("FAST");
+    const PowerMode *mode = this->component->translatePowerMode("FAST");
     FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
     ft->addLatency(fid, latency);
   }

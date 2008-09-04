@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "PowerSumming.h"
+#include "hscd_vpc_Director.h"
 
 namespace SystemC_VPC{
 
@@ -17,7 +18,16 @@ PowerSumming::PowerSumming(std::ostream &os) :
 
 PowerSumming::~PowerSumming()
 {
-  printPowerChange();
+  m_changedTime = Director::getInstance().getEnd();
+
+  if(m_changedTime <= m_lastChangedTime)
+    return;
+
+  unsigned long long timeStamp = m_changedTime.to_seconds() * 1000000000.0;
+  double duration = (m_changedTime - m_lastChangedTime).to_seconds();
+  m_energySum += m_lastPowerSum * duration;
+
+  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << std::endl;
 }
 
 void PowerSumming::notify(ComponentInfo *ci)

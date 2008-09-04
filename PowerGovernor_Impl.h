@@ -10,36 +10,40 @@
 
 namespace SystemC_VPC{
 
-class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<PowerMode>
+class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<const PowerMode*>
 {
   public:
-    SelectFastestPowerModeGovernor()
+    SelectFastestPowerModeGovernor() :
+      m_lastMode(NULL)
     {}
 
-    void notify_top(ComponentInfo *ci, PowerMode newMode)
+    void notify_top(ComponentInfo *ci, const PowerMode *newMode)
     {
-//    std::cerr << "SelectFastestPowerModeGovernor::notify_top newMode = " << newMode.mode << std::endl;
+      if(m_lastMode == NULL)
+        m_lastMode = newMode;
 
-      if(m_components.find(ci) == m_components.end())
+      if(m_components.find(ci) == m_components.end()) {
+        std::cerr << "@" << sc_time_stamp() << ": setPowerMode(" << newMode->getName() << ");" << std::endl;
         ci->getModel()->setPowerMode(m_lastMode);
+      }
 
       m_components[ci] = newMode;
 
-      if(newMode < m_lastMode) {
-        for(std::map<ComponentInfo*, PowerMode>::iterator
+      if(*newMode < *m_lastMode) {
+        for(std::map<ComponentInfo*, const PowerMode*>::iterator
           iter  = m_components.begin();
           iter != m_components.end();
           iter++)
         {
-          if(iter->second > newMode)
+          if(*iter->second > *newMode)
             newMode = iter->second;
         }
       }
 
-//    std::cerr << "SelectFastestPowerModeGovernor::notify_top setPowerMode(" << newMode.mode << ")" << std::endl;
+      if(*newMode != *m_lastMode) {
+        std::cerr << "@" << sc_time_stamp() << ": for all components setPowerMode(" << newMode->getName() << ");" << std::endl;
 
-      if(newMode != m_lastMode) {
-        for(std::map<ComponentInfo*, PowerMode>::iterator
+        for(std::map<ComponentInfo*, const PowerMode*>::iterator
           iter  = m_components.begin();
           iter != m_components.end();
           iter++)
@@ -51,23 +55,24 @@ class SelectFastestPowerModeGovernor : public GlobalPowerGovernor<PowerMode>
     }
 
   private:
-    PowerMode                           m_lastMode;
-    std::map<ComponentInfo*, PowerMode> m_components;
+    const PowerMode                           *m_lastMode;
+    std::map<ComponentInfo*, const PowerMode*> m_components;
 };
 
-class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
+class LoadHysteresisGovernor : public LocalPowerGovernor<const PowerMode*>,
                                public sc_module
 {
   public:
-    LoadHysteresisGovernor(GlobalPowerGovernor<PowerMode> *tpg,
+    LoadHysteresisGovernor(GlobalPowerGovernor<const PowerMode*> *tpg,
                            const sc_time windowTime,
                            const sc_time fastTime,
                            const sc_time slowTime) :
-      LocalPowerGovernor<PowerMode>(tpg),
+      LocalPowerGovernor<const PowerMode*>(tpg),
       sc_module(sc_module_name("LoadHysteresisGovernor")),
       m_windowTime(windowTime),
       m_fastTime(fastTime),
       m_slowTime(slowTime),
+      m_mode(NULL),
       m_ci(NULL),
       m_lastState(ComponentState::IDLE)
     {
@@ -87,13 +92,16 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
 
       const ComponentState newState = ci->getComponentState();
 
-      if(m_ci == NULL) {
+      if(m_mode == NULL) {
+        assert(m_ci == NULL);
         m_ci = ci;
+        m_mode = m_ci->getPowerMode();
+        m_tpg->notify_top(m_ci, m_mode);
         m_wakeup_ev.notify(SC_ZERO_TIME);
       }
-      
+
       assert(m_ci == ci);
-      
+
       if(newState != m_lastState) {
         m_stateHistory.push_back(std::pair<ComponentState, sc_time>(m_lastState, sc_time_stamp()));
         m_lastState = newState;
@@ -105,9 +113,9 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
     const sc_time                                   m_windowTime;
     const sc_time                                   m_fastTime;
     const sc_time                                   m_slowTime;
+    const PowerMode                                *m_mode;
     ComponentInfo                                  *m_ci;
     ComponentState                                  m_lastState;
-    PowerMode                                       m_mode;
     std::deque<std::pair<ComponentState, sc_time> > m_stateHistory;
     sc_event                                        m_wakeup_ev;
 
@@ -115,8 +123,8 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<PowerMode>,
     {
 //    std::cerr << "LoadHysteresisGovernor::process() @ " << sc_time_stamp() << std::endl;
 
-      const PowerMode FAST = m_ci->translatePowerMode("FAST");
-      const PowerMode SLOW = m_ci->translatePowerMode("SLOW");
+      const PowerMode *SLOW = m_ci->translatePowerMode("SLOW");
+      const PowerMode *FAST = m_ci->translatePowerMode("FAST");
 
       sc_time execTime(SC_ZERO_TIME);
       sc_time startTime(SC_ZERO_TIME);

@@ -36,7 +36,7 @@ namespace SystemC_VPC{
   class Scheduler;
 
   typedef std::map<ComponentState, double> PowerTable;
-  typedef std::map<PowerMode, PowerTable>  PowerTables;
+  typedef std::map<const PowerMode*, PowerTable>  PowerTables;
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -70,6 +70,11 @@ namespace SystemC_VPC{
     virtual void abortBlockingCompute(Task* task, Event* blocker);
     
     /**
+     *
+     */
+    virtual void updatePowerConsumption();
+
+    /**
      * \brief Used to create the Tracefiles.
      *
      * To create a vcd-trace-file in SystemC all the signals to 
@@ -90,20 +95,20 @@ namespace SystemC_VPC{
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
-      this->setPowerMode(this->translatePowerMode("FAST"));
+      this->setPowerMode(this->translatePowerMode("SLOW"));
       setScheduler(schedulername);
 
       midPowerGov = new LoadHysteresisGovernor(
         director->topPowerGov,
-        sc_time(20,  SC_MS),
-        sc_time(10, SC_MS),
-        sc_time(2, SC_MS));
+        sc_time(12.5, SC_MS),
+        sc_time(12.1, SC_MS),
+        sc_time( 4.0, SC_MS));
 
-      if(powerTables.find(*getPowerMode()) == powerTables.end()){
-        powerTables[*getPowerMode()] = PowerTable();
+      if(powerTables.find(getPowerMode()) == powerTables.end()){
+        powerTables[getPowerMode()] = PowerTable();
       }
 
-      PowerTable &powerTable=powerTables[*getPowerMode()];
+      PowerTable &powerTable=powerTables[getPowerMode()];
       powerTable[ComponentState::IDLE]    = 0.0;
       powerTable[ComponentState::RUNNING] = 1.0;
 
@@ -137,6 +142,8 @@ namespace SystemC_VPC{
       
     virtual ~Component()
     {
+      this->setPowerConsumption(0.0);
+      this->fireNotification(this);
 #ifndef NO_POWER_SUM
       this->removeObserver(powerSumming);
       delete powerSumming;
@@ -153,7 +160,7 @@ namespace SystemC_VPC{
     virtual void processAndForwardParameter(char *sType,char *sValue);
     virtual void setAttribute(Attribute& fr_Attributes);
     
-    void addPowerGovernor(LocalPowerGovernor<PowerMode> * gov){
+    void addPowerGovernor(LocalPowerGovernor<const PowerMode*> * gov){
       this->addObserver(gov);
     }
 

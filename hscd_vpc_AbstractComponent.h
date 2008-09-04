@@ -96,7 +96,7 @@ class ComponentObserver;
 
     // points to direct associated controlling instance
     ProcessEventListener* parentControlUnit;
-    std::map<PowerMode, sc_time> transactionDelays;
+    std::map<const PowerMode*, sc_time> transactionDelays;
   
   public:
   
@@ -153,22 +153,29 @@ class ComponentObserver;
     /**
      * 
      */
-    void setPowerMode(const PowerMode& mode){
-      if(timingPools.find(mode) == timingPools.end()){
-        timingPools[mode] = new FunctionTimingPool();
+    virtual void updatePowerConsumption() = 0;
+
+    /**
+     * 
+     */
+    void setPowerMode(const PowerMode* mode){
+      this->powerMode = translatePowerMode(mode->getName());
+      this->updatePowerConsumption();
+
+      if(timingPools.find(powerMode) == timingPools.end()){
+        timingPools[powerMode] = new FunctionTimingPool();
       }
-      this->timingPool = timingPools[mode];
-      this->powerMode = new PowerMode(mode);
+      this->timingPool = timingPools[powerMode];
     }
 
-    const PowerMode* getPowerMode(){
+    const PowerMode* getPowerMode() const {
       return this->powerMode;
     }
 
     /**
      *
      */
-    FunctionTiming * getTiming(PowerMode mode, ProcessId pid){
+    FunctionTiming * getTiming(const PowerMode *mode, ProcessId pid){
       if(timingPools.find(mode) == timingPools.end()){
         timingPools[mode] = new FunctionTimingPool();
       }
@@ -185,7 +192,7 @@ class ComponentObserver;
      */
     PCBPool pcbPool;
     FunctionTimingPool * timingPool;
-    std::map<PowerMode, FunctionTimingPool*> timingPools;
+    std::map<const PowerMode*, FunctionTimingPool*> timingPools;
     const PowerMode *powerMode;
   };
   

@@ -48,11 +48,11 @@ namespace SystemC_VPC{
     
     void fireNotification(ComponentInfo *compInf);
 
+    virtual ~Delayer() {}
+
   protected:
 
     Delayer(): componentId(globalComponentId++) {}
-
-    virtual ~Delayer() {}
 
     typedef std::vector<ComponentObserver *> Observers;
     

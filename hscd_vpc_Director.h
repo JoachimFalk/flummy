@@ -196,6 +196,10 @@ namespace SystemC_VPC{
     std::string getTaskName(ProcessId id) {
       return debugProcessNames[id];
     }
+    
+    sc_time getEnd() const {
+      return end;
+    }
   private:
 
     Task * preCompute( FastLink fLink,
@@ -234,7 +238,7 @@ namespace SystemC_VPC{
     std::string vpc_result_file;
     
     // time of latest acknowledge simulated task
-    double end;
+    sc_time end;
 
 #ifndef NO_POWER_SUM
     std::ofstream powerConsStream;

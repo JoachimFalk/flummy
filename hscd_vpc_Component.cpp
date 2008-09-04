@@ -60,9 +60,6 @@ namespace SystemC_VPC{
     fireStateChanged(ComponentState::IDLE);
     
     while(1){
-      // Notify observers (e.g. powersum)
-      this->fireNotification(this);
-
       //determine the time slice for next scheduling descission and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
                                                            readyTasks,
@@ -272,7 +269,7 @@ namespace SystemC_VPC{
     for(size_t i=0; i<att.getAttributeSize();++i){
       Attribute powerAtt = att.getNextAttribute(i).second;
       std::string powerMode = att.getNextAttribute(i).first;
-      PowerMode power = this->translatePowerMode(powerMode);
+      const PowerMode *power = this->translatePowerMode(powerMode);
 
       if(powerTables.find(power) == powerTables.end()){
         powerTables[power] = PowerTable();
@@ -318,7 +315,7 @@ namespace SystemC_VPC{
     }
 
     if(attributes.isType("transaction_delay")) {
-      this->transactionDelays[*this->getPowerMode()] =
+      this->transactionDelays[this->getPowerMode()] =
         Director::createSC_Time(attributes.getValue());
       return;
     }
@@ -335,7 +332,7 @@ namespace SystemC_VPC{
         transactionSize = atoi(attributes.getParameter("size").c_str());
       }
 
-      this->transactionDelays[*this->getPowerMode()] = transactionDelay;
+      this->transactionDelays[this->getPowerMode()] = transactionDelay;
       // FIXME: add transactionSize
       return;
     }
@@ -413,7 +410,7 @@ namespace SystemC_VPC{
     assert(pool.find(pid) != pool.end());
     ProcessControlBlock* pcb = pool[pid];
     actualTask->setPCB(pcb);
-    actualTask->setTiming(this->getTiming(*this->getPowerMode(), pid));
+    actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
             << " ) at time: " << sc_time_stamp()
@@ -534,10 +531,17 @@ namespace SystemC_VPC{
     remainingPipelineStages_WakeUp.notify();
   }
 
+  void Component::updatePowerConsumption()
+  {
+    this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
+    // Notify observers (e.g. powersum)
+    this->fireNotification(this);
+  }
+
   void Component::fireStateChanged(const ComponentState &state)
   {
     this->setComponentState(state);
-    this->setPowerConsumption(powerTables[*getPowerMode()][state]);
+    this->updatePowerConsumption();
   }
 
   void Component::addTasks(){

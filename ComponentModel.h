@@ -17,10 +17,8 @@ namespace SystemC_VPC{
       return runningTasks;
     }
 
-    virtual void setPowerMode(const PowerMode& mode)
-    {
-      powerMode = mode;
-    }
+    virtual void setPowerMode(const PowerMode *mode) = 0;
+
   protected:
     void setComponentState(const ComponentState cs)
     {

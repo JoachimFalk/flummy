@@ -52,14 +52,12 @@ namespace SystemC_VPC{
 
     bool operator<(const PowerMode &rhs) const
     {
-      // FIXME !!
-      return mode > rhs.mode;
+      return mode < rhs.mode;
     }
 
     bool operator>(const PowerMode &rhs) const
     {
-      // FIXME !!
-      return mode < rhs.mode;
+      return mode > rhs.mode;
     }
 
     std::string getName() const {

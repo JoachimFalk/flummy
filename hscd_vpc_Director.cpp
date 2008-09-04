@@ -54,7 +54,7 @@ namespace SystemC_VPC{
     : FALLBACKMODE(false),
       mappings(),
       reverseMapping(),
-      end(0),
+      end(SC_ZERO_TIME),
 #ifndef NO_POWER_SUM
       powerConsStream("powerconsumption.dat"),
 #endif // NO_POWER_SUM
@@ -95,8 +95,8 @@ namespace SystemC_VPC{
    */
   Director::~Director(){
 
-    double start = 0;
-    double end   = this->end;
+    sc_time start = SC_ZERO_TIME;
+    sc_time end = this->end;
 #ifdef VPC_DEBUG
     std::cerr << "start: " << start << " end: " << end  << std::endl;
 #endif //VPC_DEBUG
@@ -109,7 +109,7 @@ namespace SystemC_VPC{
       ofstream resultFile;
       resultFile.open(this->vpc_result_file.c_str());
       if(resultFile){
-        resultFile << (end-start);
+        resultFile << (end-start).to_default_time_units();
       }
       resultFile.flush();
       resultFile.close();
@@ -122,7 +122,9 @@ namespace SystemC_VPC{
          it != components.end();
          ++it ){
       // FIXME: find the bug
-      //delete *it;
+      if(*it != NULL) {
+        delete *it;
+      }
     }
     
     componentIdMap.clear();
@@ -310,7 +312,7 @@ namespace SystemC_VPC{
     if(NULL != task->getBlockEvent().latency)
       task->getBlockEvent().latency->notify();
     // remember last acknowledged task time
-    this->end = sc_time_stamp().to_default_time_units();
+    this->end = sc_time_stamp();
     
     // free allocated task
     task->release();
