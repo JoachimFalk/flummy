@@ -56,6 +56,9 @@ namespace SystemC_VPC {
     
 int chosen = 0;
 sc_time RCWaitInterval = SC_ZERO_TIME;
+//calculate setuptime steps
+int setupsteps = (int)(getSetuptime(task).to_double()/1e9);
+sc_time step = sc_time(1,SC_MS);
 //********************************************************************************
 //Following Online-Scheduling-Algorithms
 //********************************************************************************
@@ -188,6 +191,9 @@ if(strcmp(algorithm,"List") == 0){
       std::cerr << "OnlineBinder> Albers Rule 1 " << std::endl;
       #endif
     }else //least loaded again
+   /*std::cerr << "OnlineBinder> timesTable[i].time + job  " << timesTable[i].time + job  << std::endl;
+    std::cerr << "OnlineBinder> timesTable[m-1].time  " << timesTable[m-1].time  << std::endl;
+    std::cerr << "OnlineBinder> (c *(Ll+Lh)/m)  " << (c *(Ll+Lh)/m)  << std::endl;*/
     if( (timesTable[i].time + job > timesTable[m-1].time) && (timesTable[i].time + job > (c *(Ll+Lh)/m)) ){
       chosen = timesTable[0].recomponentnumber;
       timesTable = timesTableTemp;
@@ -201,6 +207,7 @@ if(strcmp(algorithm,"List") == 0){
       std::cerr << "OnlineBinder> Albers Rule 3 " << std::endl;
       #endif
     }
+  
 //End Algorithm Albers
 
 }else if(strcmp(algorithm,"ListMod1") == 0 || strcmp(algorithm,"ListMod2") == 0){
@@ -244,25 +251,35 @@ if(strcmp(algorithm,"List") == 0){
     if( (timesTable[lowestLi].time + job) <= (1.986 * ARi) ){
       chosen = timesTable[lowestLi].recomponentnumber;
       RCWaitInterval = timesTable[lowestLi].time;
-      RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] = 'X';
-      timesTable[lowestLi].time += job;
+      for(int z = 0; z < setupsteps ;z++){
+        RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] = 'X';
+        timesTable[lowestLi].time += step;
+      }
+      timesTable[lowestLi].time += getRuntime(task);
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Bartal Rule lowestLi" << std::endl;
       #endif    
     }else{
       chosen = timesTable[0].recomponentnumber;
       RCWaitInterval = timesTable[0].time;
-      RCressource[(int)(timesTable[0].time.to_double()/1e9)] = 'X';
-      timesTable[0].time += job;
+      for(int z = 0; z < setupsteps ;z++){
+        RCressource[(int)(timesTable[0].time.to_double()/1e9)] = 'X';
+        timesTable[0].time += step;
+      }
+      timesTable[0].time += getRuntime(task);
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Bartal Rule 0" << std::endl;
       #endif    
     }
-    //set all Slottimes to new border
-    for(int i = 0; i < numberofcomp; i++){
-      while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
-        timesTable[i].time += getSetuptime(task);
-    }          
+   // set border of all slot to new value
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTable[k].time.to_double()/1e9)] == 'X'){
+          timesTable[k].time += step;
+          z = -1;
+        }
+      }
+    }           
 
 //End Algorithm BartalMod1
 
@@ -292,7 +309,9 @@ if(strcmp(algorithm,"List") == 0){
         #endif    
         chosen = timesTable[i].recomponentnumber;
         RCWaitInterval = timesTable[i].time;
-        RCressource[(int)(timesTable[i].time.to_double()/1e9)] = 'X';
+        for(int z = 0; z < setupsteps; z++){
+          RCressource[z + (int)(timesTable[i].time.to_double()/1e9)] = 'X';
+        }
         timesTable[i].time += job;
         break;
       }
@@ -304,14 +323,21 @@ if(strcmp(algorithm,"List") == 0){
         #endif    
         chosen = timesTable[0].recomponentnumber;
         RCWaitInterval = timesTable[0].time;
-        RCressource[(int)(timesTable[0].time.to_double()/1e9)] = 'X';
+        for(int z = 0; z < setupsteps; z++){
+          RCressource[z + (int)(timesTable[0].time.to_double()/1e9)] = 'X';
+        }
         timesTable[0].time += job;
     }
     
-    for(int i = 0; i < numberofcomp; i++){
-      while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
-        timesTable[i].time += getSetuptime(task);
-    }          
+   // set border of all slot to new value
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTable[k].time.to_double()/1e9)] == 'X'){
+          timesTable[k].time += step;
+          z = -1;
+        }
+      }
+    }         
 //End Algorithm KargerMod1
 
 }else if(strcmp(algorithm,"AlbersMod1") == 0){
@@ -323,7 +349,6 @@ if(strcmp(algorithm,"List") == 0){
     int i = (int)floor(0.5 * m);
     double j = 0.29 * m;
     double alpha = ( (c-1)*i-j/2 ) / ( (c-1)*(m-i) );
-    //if(alpha < 0.5) alpha = 0.636224587;
     
     sc_time job = getSetuptime(task) + getRuntime(task);
 
@@ -331,13 +356,16 @@ if(strcmp(algorithm,"List") == 0){
     vector<timesTable_entry> timesTableTemp = timesTable;
      
      //add job to lowest machine of timesTable-copy
-    RCressource[(int)(timesTableTemp[0].time.to_double()/1e9)] = 'X';
-    timesTableTemp[0].time += job;
+    for(int z = 0; z < setupsteps; z++){  
+      RCressource[(int)(timesTableTemp[0].time.to_double()/1e9)] = 'X';
+      timesTableTemp[0].time += step;
+    }
+    timesTableTemp[0].time += getRuntime(task);
     
     //set all slots to new border
     for(int i = 0; i < numberofcomp; i++){
       while( RCressource[(int)(timesTableTemp[i].time.to_double()/1e9)] == 'X' )
-        timesTableTemp[i].time += getSetuptime(task);
+        timesTableTemp[i].time += step;
     }
     //resort copy of timesTable
     sort(timesTableTemp.begin(), timesTableTemp.end());
@@ -377,17 +405,25 @@ if(strcmp(algorithm,"List") == 0){
     }else{ //i+1 loaded
       chosen = timesTable[i].recomponentnumber;
       RCWaitInterval = timesTable[i].time;
-      RCressource[(int)(timesTable[0].time.to_double()/1e9)] = ' ';
-      RCressource[(int)(timesTable[i].time.to_double()/1e9)] = 'X';
+      for(int z = 0; z < setupsteps; z++){
+        RCressource[z + (int)(timesTable[0].time.to_double()/1e9)] = ' ';
+      }
+      for(int z = 0; z < setupsteps; z++){
+        RCressource[z + (int)(timesTable[i].time.to_double()/1e9)] = 'X';
+      }
       timesTable[i].time += job;
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Albers Rule 3 " << std::endl;
       #endif
-      //set all timesTable entries to new border
-      for(int k = 0; k < numberofcomp; k++){
-        while( RCressource[(int)(timesTable[k].time.to_double()/1e9)] == 'X' )
-          timesTable[k].time += getSetuptime(task);
+   // set border of all slot to new value
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTable[k].time.to_double()/1e9)] == 'X'){
+          timesTable[k].time += step;
+          z = -1;
+        }
       }
+    }        
     }
 //End Algorithm AlbersMod1
 
@@ -402,21 +438,23 @@ if(strcmp(algorithm,"List") == 0){
     
     int lowestLi = (int)floor(0.445 * numberofcomp);
 
-    //calculate toReserve
-    int toReserve = lowestLi;
-    //check for already reserved time steps
-    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[numberofcomp-1].time.to_double()/1e9) ; x++){
-      if(RCressource[x] == 'X') continue;
-      else if(RCressource[x] == 'd') toReserve--;
-      if(toReserve == 0) break;
+    //calculate timesteps to reserve
+    int toReserve = 0;
+    for(int y = 0; y < lowestLi; y++){
+      int thisFree = 0;
+      for(int x = (int)(timesTable[y].time.to_double()/1e9); x < (int)(timesTable[lowestLi].time.to_double()/1e9) ; x++){
+        if(RCressource[x] == 'X') continue;
+        else thisFree++;
+      }
+      if( (int)(timesTable[y].time.to_double()/1e9) == (int)(timesTable[lowestLi].time.to_double()/1e9) )
+        for(int z = (int)(timesTable[y].time.to_double()/1e9); z < (int)(timesTable[numberofcomp-1].time.to_double()/1e9) ; z++){
+          if(RCressource[z] == 'd')
+            thisFree++;
+        }
+      if( (thisFree + toReserve) < ((lowestLi - y)*setupsteps) )
+        toReserve += (lowestLi - y)*setupsteps - thisFree - toReserve;
     }
-    //check for time steps with only runtime, so reservation is not nessesary
-    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[lowestLi].time.to_double()/1e9) ; x++){
-      if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
-      else toReserve--;
-      if(toReserve == 0) break;
-    }
-  
+    
     //Calculate A(Ri)
     sc_time ARi = SC_ZERO_TIME;
     for(int i=0; i < lowestLi; i++){
@@ -429,22 +467,30 @@ if(strcmp(algorithm,"List") == 0){
       chosen = timesTable[lowestLi].recomponentnumber;
       while( (RCressource[ (int)(timesTable[lowestLi].time.to_double()/1e9) ] == 'X')
                 || (RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9) ] == 'd') ){ //shift
-        timesTable[lowestLi].time += getSetuptime(task);
+        timesTable[lowestLi].time += step;
       }
+
+      #ifdef DETAILS
+      std::cerr << "OnlineBinder> toReserve: " << toReserve << std::endl;
+      #endif    
       if(toReserve > 0){
         while(toReserve > 0){
           while(RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] == 'X'){
-            timesTable[lowestLi].time += getSetuptime(task);
+            timesTable[lowestLi].time += step;
           }
-          RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] = 'd';
-          timesTable[lowestLi].time += getSetuptime(task);
-          toReserve--;
+          for(int z = 0; z < setupsteps; z++){
+            RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] = 'd';
+            timesTable[lowestLi].time += step;
+            toReserve--;
+          }
         }
         while( RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] == 'X' )
-          timesTable[lowestLi].time += getSetuptime(task);
+          timesTable[lowestLi].time += step;
       }
       RCWaitInterval = timesTable[lowestLi].time;
-      RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] = 'X';
+      for(int z = 0; z < setupsteps; z++){  
+        RCressource[z + (int)(timesTable[lowestLi].time.to_double()/1e9)] = 'X';
+      }
       timesTable[lowestLi].time += job;
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Bartal Rule lowestLi" << std::endl;
@@ -452,17 +498,23 @@ if(strcmp(algorithm,"List") == 0){
     }else{
       chosen = timesTable[0].recomponentnumber;
       RCWaitInterval = timesTable[0].time;
-      RCressource[(int)(timesTable[0].time.to_double()/1e9)] = 'X';
+      for(int z = 0; z < setupsteps; z++){    
+        RCressource[z + (int)(timesTable[0].time.to_double()/1e9)] = 'X';
+      }
       timesTable[0].time += job;
       #ifdef DETAILS
       std::cerr << "OnlineBinder> Bartal Rule 0" << std::endl;
       #endif    
     }
-    //set all Slottimes to new border
-    for(int i = 0; i < numberofcomp; i++){
-      while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
-        timesTable[i].time += getSetuptime(task);
-    }          
+   // set border of all slot to new value
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTable[k].time.to_double()/1e9)] == 'X'){
+          timesTable[k].time += step;
+          z = -1;
+        }
+      }
+    }         
 //End Algorithm BartalMod2
 
 }else if(strcmp(algorithm,"KargerMod2") == 0){
@@ -484,19 +536,25 @@ if(strcmp(algorithm,"List") == 0){
     sc_time Ai;
     for(int i = numberofcomp-1; i > 0; i--){
       Ai = Aall / i;
-      
-      //calculate toReserve for slot i
-      int toReserve = i;
-      for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
-        if(RCressource[x] == 'X') continue;
-        else toReserve--;
-        if(toReserve == 0) break;
+      //calculate toReserve
+      int toReserve = 0;
+      for(int y = 0; y < i; y++){
+        int thisFree = 0;
+        for(int x = (int)(timesTable[y].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
+          if(RCressource[x] == 'X') continue;
+          else thisFree++;
+        }
+        if( (int)(timesTable[y].time.to_double()/1e9) == (int)(timesTable[i].time.to_double()/1e9) )
+          for(int z = (int)(timesTable[y].time.to_double()/1e9); z < (int)(timesTable[numberofcomp-1].time.to_double()/1e9) ; z++){
+            if(RCressource[z] == 'd')
+              thisFree++;
+          }
+        if(thisFree + toReserve < (i - y)*setupsteps) toReserve += (i - y)*setupsteps - thisFree - toReserve;
       }
-      
+      //std::cerr <<"timesTable[i].time: "<< i <<" toReserve: "<< toReserve << std::endl;
+
       //h(k)+j <= alpha * A(tk)
-      //std::cerr <<"timesTable[i].time + job+ toReserve * getSetuptime(task)"<< (timesTable[i].time + job + toReserve * getSetuptime(task)) << std::endl;
-      //std::cerr <<"alpha * Ai"<< (alpha * Ai)  << std::endl;
-      if( timesTable[i].time + job + toReserve * getSetuptime(task) <= alpha * Ai){
+      if( timesTable[i].time + job + toReserve * step <= alpha * Ai){
       
         #ifdef DETAILS
         std::cerr << "OnlineBinder> Karger Slot " << i << std::endl;
@@ -504,22 +562,26 @@ if(strcmp(algorithm,"List") == 0){
         chosen = timesTable[i].recomponentnumber;
         while( (RCressource[ (int)(timesTable[i].time.to_double()/1e9) ] == 'X')
                 || (RCressource[(int)(timesTable[i].time.to_double()/1e9) ] == 'd') ){ //shift
-          timesTable[i].time += getSetuptime(task);
+          timesTable[i].time += step;
         }
         if(toReserve > 0){
           while(toReserve > 0){
             while(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
-              timesTable[i].time += getSetuptime(task); 
+              timesTable[i].time += step; 
             }
-            RCressource[ (int)(timesTable[i].time.to_double()/1e9)] = 'd';
-            timesTable[i].time += getSetuptime(task); 
-            toReserve--;
+            for(int z = 0; z < setupsteps; z++){  
+              RCressource[ (int)(timesTable[i].time.to_double()/1e9)] = 'd';
+              timesTable[i].time += step;
+              toReserve--;
+            }
           }
           while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
-            timesTable[i].time += getSetuptime(task);
+            timesTable[i].time += step;
         }
         RCWaitInterval = timesTable[i].time;
-        RCressource[(int)( timesTable[i].time.to_double()/1e9)] = 'X';
+        for(int z = 0; z < setupsteps; z++){  
+          RCressource[z+(int)(timesTable[i].time.to_double()/1e9)] = 'X';
+        }
         timesTable[i].time += job;
         break;
       }
@@ -532,13 +594,19 @@ if(strcmp(algorithm,"List") == 0){
         #endif    
         chosen = timesTable[0].recomponentnumber;
         RCWaitInterval = timesTable[0].time;
-        RCressource[(int)(timesTable[0].time.to_double()/1e9)] = 'X';
+        for(int z = 0; z < setupsteps; z++){    
+          RCressource[z+(int)(timesTable[0].time.to_double()/1e9)] = 'X';
+        }
         timesTable[0].time += job;
     }
     // set border of all slot to new value
-    for(int i = 0; i < numberofcomp; i++){
-      while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
-        timesTable[i].time += getSetuptime(task);
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTable[k].time.to_double()/1e9)] == 'X'){
+          timesTable[k].time += step;
+          z = -1;
+        }
+      }
     }          
 //End Algorithm KargerMod2
 
@@ -553,33 +621,37 @@ if(strcmp(algorithm,"List") == 0){
     double alpha = ( (c-1)*i-(j/2) ) / ( (c-1)*(m-i) );
     
     sc_time job = getSetuptime(task) + getRuntime(task);
-
-    //calculate toReserve
-    int toReserve = i;
-    //check for already reserved time steps
-    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[m-1].time.to_double()/1e9) ; x++){
-      if(RCressource[x] == 'X') continue;
-      else if(RCressource[x] == 'd') toReserve--;
-      if(toReserve == 0) break;
-    }
-    //check for time steps with only runtime, so reservation is not nessesary
-    for(int x = (int)(timesTable[0].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
-      if(RCressource[x] == 'X' || RCressource[x] == 'd') continue;
-      else toReserve--;
-      if(toReserve == 0) break;
+    
+     //calculate toReserve
+    int toReserve = 0;
+    for(int y = 0; y < i; y++){
+      int thisFree = 0;
+      for(int x = (int)(timesTable[y].time.to_double()/1e9); x < (int)(timesTable[i].time.to_double()/1e9) ; x++){
+        if(RCressource[x] == 'X') continue;
+        else thisFree++;
+      }
+      if( (int)(timesTable[y].time.to_double()/1e9) == (int)(timesTable[i].time.to_double()/1e9) )
+        for(int z = (int)(timesTable[y].time.to_double()/1e9); z < (int)(timesTable[numberofcomp-1].time.to_double()/1e9) ; z++){
+          if(RCressource[z] == 'd')
+            thisFree++;
+        }
+      if(thisFree + toReserve < (i - y)*setupsteps) toReserve += (i - y)*setupsteps - thisFree - toReserve;
     }
     //make copy of timesTable
     vector<timesTable_entry> timesTableTemp = timesTable;
     
     //add job to lowest slot
-    char RCBackup = RCressource[(int)(timesTableTemp[0].time.to_double()/1e9)];
-    RCressource[(int)(timesTableTemp[0].time.to_double()/1e9)] = 'X';
+    string RCBackup;
+    for(int z = 0; z < setupsteps; z++){
+      RCBackup += RCressource[z + (int)(timesTableTemp[0].time.to_double()/1e9)];
+      RCressource[z + (int)(timesTableTemp[0].time.to_double()/1e9)] = 'X';
+    }
     timesTableTemp[0].time += job;
     
     //set new border for slottimes
-    for(int i = 0; i < numberofcomp; i++){
-      while( RCressource[(int)(timesTableTemp[i].time.to_double()/1e9)] == 'X' )
-        timesTableTemp[i].time += getSetuptime(task);
+    for(int x = 0; x < numberofcomp; x++){
+      while( RCressource[(int)(timesTableTemp[x].time.to_double()/1e9)] == 'X' )
+        timesTableTemp[x].time += step;
     }
     //resort
     sort(timesTableTemp.begin(), timesTableTemp.end());
@@ -624,33 +696,42 @@ if(strcmp(algorithm,"List") == 0){
       std::cerr << "OnlineBinder> Albers Rule 3 " << std::endl;
       #endif
       chosen = timesTable[i].recomponentnumber;
-      RCressource[(int)(timesTable[0].time.to_double()/1e9)] = RCBackup; //undo temp changes
-
+      for(int z = 0; z < setupsteps; z++){
+        RCressource[z + (int)(timesTable[0].time.to_double()/1e9)] = RCBackup[z]; //undo temp changes
+      }
       while( (RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'd')
           || (RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X') ){ //shift
-        timesTable[i].time += getSetuptime(task);
+        timesTable[i].time += step;
       }
       if(toReserve > 0){
         while(toReserve > 0){
             while(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
-              timesTable[i].time += getSetuptime(task); 
+              timesTable[i].time += step; 
             }
-            RCressource[ (int)(timesTable[i].time.to_double()/1e9)] = 'd';
-            timesTable[i].time += getSetuptime(task); 
-            toReserve--;
+            for(int z = 0; z < setupsteps; z++){
+              RCressource[z + (int)(timesTable[i].time.to_double()/1e9)] = 'd';
+              timesTable[i].time += step; 
+              toReserve--;
+            }
         }
         while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
-            timesTable[i].time += getSetuptime(task);
+            timesTable[i].time += step;
       }
       RCWaitInterval = timesTable[i].time;
-      RCressource[(int)( timesTable[i].time.to_double()/1e9)] = 'X';
+      for(int z = 0; z < setupsteps; z++){  
+        RCressource[z + (int)( timesTable[i].time.to_double()/1e9)] = 'X';
+      }
       timesTable[i].time += job;
       
-      //set all machine to new time border
-      for(int k = 0; k < numberofcomp; k++){
-        while( RCressource[(int)(timesTable[k].time.to_double()/1e9)] == 'X' )
-          timesTable[k].time += getSetuptime(task);
+      // set border of all slot to new value
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTable[k].time.to_double()/1e9)] == 'X'){
+          timesTable[k].time += step;
+          z = -1;
+        }
       }
+    }        
     }//end else i+1 loaded
 
 //End Algorithm AlbersMod2
