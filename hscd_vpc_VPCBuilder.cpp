@@ -664,7 +664,7 @@ namespace SystemC_VPC{
     Timing t;
     sc_time sc_latency = SC_ZERO_TIME;
     sc_time sc_dii     = SC_ZERO_TIME;
-    t.powerMode        = "FAST";
+    t.powerMode        = "SLOW";
   
     if(latency != NULL) sc_latency = Director::createSC_Time(latency);
     if(dii != NULL) sc_dii = Director::createSC_Time(dii);
