@@ -58,8 +58,13 @@ namespace SystemC_VPC{
   {
     DBG_OUT( "::getDelay(" << fid << ") " << funcDelays.size()
              << std::endl);
-    assert(fid < funcDelays.size());
-    sc_time ret = funcDelays[fid];
+
+    sc_time ret;
+    if(fid < funcDelays.size()){
+      ret = funcDelays[fid];
+    }else{
+      ret = getBaseDelay();
+    }
     return ret;
   }
 
@@ -82,8 +87,12 @@ namespace SystemC_VPC{
   sc_time FunctionTiming::getLatency(
     FunctionId fid) const
   {
-    assert(fid < funcLatencies.size());
-    sc_time ret = funcLatencies[fid];
+    sc_time ret;
+    if(fid < funcLatencies.size()){
+      ret = funcLatencies[fid];
+    }else{
+      ret = getBaseLatency();
+    }
     return ret;
   }
 
