@@ -610,14 +610,32 @@ namespace SystemC_VPC{
                   timingNode != NULL;
                   timingNode = timingNode->getNextSibling()){
                 const XMLCh* xmlName = timingNode->getNodeName();
-              
+                DOMNamedNodeMap* atts=timingNode->getAttributes();
                 if( 0==XMLString::compareNString( xmlName,
                                                   timingStr,
                                                   sizeof(timingStr) ) ){
                   Timing t = this->parseTiming( timingNode );
                   //pcb.addDelay( t.fid, t.dii );
                   //pcb.addLatency( t.fid, t.latency );
+                 // pcb.setPriority(5);
                   pcb.setTiming(t);
+                }else if( 0==XMLString::compareNString( xmlName,
+                                                    attributeStr,
+                                                    sizeof(attributeStr))){
+                  char *sType, *sValue;
+                  sType=XMLString::transcode(
+                    atts->getNamedItem(typeAttrStr)->getNodeValue());
+                  sValue=XMLString::transcode(
+                    atts->getNamedItem(valueAttrStr)->getNodeValue());
+    
+                  if( 0 == strncmp(sType,
+                                  STR_VPC_PRIORITY,
+                                  sizeof(STR_VPC_PRIORITY) )){
+                    int priority = 0;
+                    sscanf(sValue, "%d", &priority);
+                    
+                    pcb.setPriority(priority);
+                  }
                 }
               }
             }
