@@ -26,6 +26,7 @@ namespace SystemC_VPC{
     sc_core::sc_time m_lastChangedTime;
     double           m_lastPowerSum;
     double           m_energySum;
+    const PowerMode* m_lastPowerMode;
 
     void printPowerChange();
   };

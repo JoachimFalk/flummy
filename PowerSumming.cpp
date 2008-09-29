@@ -11,7 +11,8 @@ PowerSumming::PowerSumming(std::ostream &os) :
   m_powerSum(0.0),
   m_lastChangedTime(sc_core::SC_ZERO_TIME),
   m_lastPowerSum(0.0),
-  m_energySum(0.0)
+  m_energySum(0.0),
+  m_lastPowerMode(NULL)
 {
   assert(m_output.good());
 }
@@ -27,7 +28,8 @@ PowerSumming::~PowerSumming()
   double duration = (m_changedTime - m_lastChangedTime).to_seconds();
   m_energySum += m_lastPowerSum * duration;
 
-  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << std::endl;
+  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << '\t'
+           << m_lastPowerMode->getName() << std::endl;
 }
 
 void PowerSumming::notify(ComponentInfo *ci)
@@ -35,7 +37,10 @@ void PowerSumming::notify(ComponentInfo *ci)
   double old_powerConsumption = m_powerConsumption[ci];
   double new_powerConsumption = ci->getPowerConsumption();
 
-  if(old_powerConsumption == new_powerConsumption)
+  const PowerMode* old_powerMode = m_lastPowerMode;
+  const PowerMode* new_powerMode = ci->getPowerMode();
+
+  if((old_powerConsumption == new_powerConsumption) && (old_powerMode == new_powerMode))
     return;
 
   sc_core::sc_time new_changedTime = sc_core::sc_time_stamp();
@@ -47,6 +52,7 @@ void PowerSumming::notify(ComponentInfo *ci)
   m_powerSum -= old_powerConsumption;
   m_powerSum += new_powerConsumption;
   m_powerConsumption[ci] = new_powerConsumption;
+  m_lastPowerMode = new_powerMode;
 }
 
 void PowerSumming::printPowerChange()
@@ -62,7 +68,8 @@ void PowerSumming::printPowerChange()
   m_lastPowerSum    = m_powerSum;
   m_lastChangedTime = m_changedTime;
 
-  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << std::endl;
+  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << '\t'
+           << m_lastPowerMode->getName() << std::endl;
 }
 
 } //namespace SystemC_VPC
