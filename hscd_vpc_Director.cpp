@@ -117,6 +117,19 @@ namespace SystemC_VPC{
       std::cerr << "latency: " << end - start << std::endl;
     }
 
+#ifndef NO_POWER_SUM
+    for( Components::iterator it = components.begin();
+         it != components.end();
+         ++it )
+    {
+      if(*it != NULL) {
+        (*it)->removeObserver(powerSumming);
+      }
+    }
+
+    delete powerSumming;
+#endif // NO_POWER_SUM
+
     // clear components
     for( Components::iterator it = components.begin();
          it != components.end();
@@ -126,10 +139,8 @@ namespace SystemC_VPC{
         delete *it;
       }
     }
-    
+
     componentIdMap.clear();
-    
-    delete powerSumming;
   }
 
   //
