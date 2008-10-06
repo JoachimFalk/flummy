@@ -59,6 +59,7 @@ namespace SystemC_VPC{
       powerConsStream("powerconsumption.dat"),
 #endif // NO_POWER_SUM
       componentIdMap(),
+      globalFunctionId(1),
       globalProcessId(0)
   {
     topPowerGov = new SelectFastestPowerModeGovernor;
