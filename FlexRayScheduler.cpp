@@ -264,7 +264,7 @@ namespace SystemC_VPC{
         std::string temp = param.second;
         if(temp==""){
           //Default-Value fuer eine Dynamic-Slot-Laenge
-          param.second="30ns";
+          param.second="30us";
         }
         newSlot.length = Director::createSC_Time(param.second.c_str() );        
         newSlot.name = param.first;
@@ -298,7 +298,7 @@ namespace SystemC_VPC{
                                                 const TaskMap &running_tasks )
   {   
     // keine wartenden + keine aktiven Threads -> ende!
-    if(processcount==0 && running_tasks.size()==0) return 0;
+/*    if(processcount==0 && running_tasks.size()==0)   {cout<<"return 0"<<endl; return 0;} */
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
       if(curr_slicecount == -1){
@@ -314,7 +314,7 @@ namespace SystemC_VPC{
       if(running_tasks.size()<=1){
         //gerade kein (dynamic) Task aktiv.. -> naechster Schedulevorgang!
         //oder nur einer -> ein Kanal frei!
-        time=sc_time(1,SC_NS); //sofortiges Reschedule bewirken!
+        time=sc_time(1,SC_US); //sofortiges Reschedule im nächsten Microtick bewirken!
       }else{
         //beide Kanaele voll.. -> naechster Schedulevorgang nach Ende von einem...
         if(remainingSliceA < remainingSliceB)
@@ -333,7 +333,7 @@ namespace SystemC_VPC{
   
   void FlexRayScheduler::addedNewTask(Task *task){    
     int index = PIDmap[task->getProcessId()];
-         // cout<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<endl;
+         // cerr<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<" name:"<<task->getName()<<endl;
     if(index<StartslotDynamic){
       //TDMA-Task
       TDMA_slots[ index ].pid_fifo.push_back(task->getInstanceId());
@@ -413,7 +413,7 @@ namespace SystemC_VPC{
         
         //Korrekturfaktor falls mitten im Slot
         if(to_init == true && running_tasks.size()==0) {
-        //	cout<<"FIXME - curr_slicecount: "<< curr_slicecount <<endl;
+        //	cout<<"FIXME - curr_slicecount: "<< curr_slicecount<<" curr_remaining_slice="<< this->remainingSlice<< " @" <<sc_time_stamp()<<endl;
         	to_init=false;
 	//	cout<<"remainingSlice: " << this->remainingSlice <<"  "<<sc_time_stamp()<<" - "<< cycle_length <<" * "<< cyclecount<<endl;
 		
@@ -435,7 +435,7 @@ namespace SystemC_VPC{
         		}
         	}
 
-        	//cout<<"new value: "<<this->remainingSlice<<endl; 
+         	//cout<<"new value: "<<this->remainingSlice<<endl; 
         }
         if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
           unsigned int tempcount=0;
@@ -580,7 +580,6 @@ namespace SystemC_VPC{
         }else{  
           //Zeitscheibe abgelaufen? -> ende des dyn. Teils.. und Wechsel zurueck zum statischen
           if(this->remainingSlice <=(sc_time_stamp() - this->lastassign)){
-        
             if(running_tasks.size()!=0){  // alten Task entfernen
               TaskMap::const_iterator iter;
               iter=running_tasks.begin();
