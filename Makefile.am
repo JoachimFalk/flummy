@@ -79,6 +79,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
 	hscd_vpc_Director.cpp			\
 	hscd_vpc_PriorityScheduler.cpp		\
+	hscd_vpc_PrioritySchedulerNoPreempt.cpp		\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
 	hscd_vpc_Tracing.cpp			\

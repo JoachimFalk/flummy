@@ -22,6 +22,7 @@
 #include <FlexRayScheduler.h>
 #include <TimeTriggeredCCScheduler.h>
 #include <hscd_vpc_RoundRobinScheduler.h>
+#include <hscd_vpc_PrioritySchedulerNoPreempt.h>
 #include <hscd_vpc_PriorityScheduler.h>
 #include <hscd_vpc_RateMonotonicScheduler.h>
 #include <hscd_vpc_datatypes.h>
@@ -347,7 +348,10 @@ namespace SystemC_VPC{
     if( 0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN))
         || 0==strncmp(schedulername,STR_RR,strlen(STR_RR)) ){
       scheduler=new RoundRobinScheduler((const char*)schedulername);
-
+      }else if( 0==strncmp(schedulername,
+                         STR_PRIORITYSCHEDULERNOPREEMPT,strlen(STR_PRIORITYSCHEDULERNOPREEMPT))
+              || 0==strncmp(schedulername,STR_PSNOPRE,strlen(STR_PSNOPRE)) ){
+      scheduler=new PrioritySchedulerNoPreempt((const char*)schedulername);
     }else if( 0==strncmp(schedulername,
                          STR_PRIORITYSCHEDULER,strlen(STR_PRIORITYSCHEDULER))
               || 0==strncmp(schedulername,STR_PS,strlen(STR_PS)) ){

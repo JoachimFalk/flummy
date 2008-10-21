@@ -16,6 +16,8 @@ namespace SystemC_VPC {
 #define STR_RR "RR"
 #define STR_PRIORITYSCHEDULER "PriorityScheduler"
 #define STR_PS "PS"
+#define STR_PRIORITYSCHEDULERNOPREEMPT "PrioritySchedulerNoPreempt"
+#define STR_PSNOPRE "PSNOPRE"
 #define STR_RATEMONOTONIC "RateMonotonic"
 #define STR_RM "RM"
 #define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServe"
