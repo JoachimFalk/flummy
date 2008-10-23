@@ -30,7 +30,7 @@ namespace SystemC_VPC {
       iter->second = copy;
     }
 
-    assert(!unblockedComponents.empty());
+    //assert(!unblockedComponents.empty());
     BlockingTransport * route = new BlockingTransport(*this);
     route->route( EventPair(taskEvents.dii, route) );
   }
