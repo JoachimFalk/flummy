@@ -52,6 +52,7 @@ namespace SystemC_VPC{
    */
   Director::Director()
     : FALLBACKMODE(false),
+      globalFunctionId(1),
       mappings(),
       reverseMapping(),
       end(SC_ZERO_TIME),
@@ -59,7 +60,6 @@ namespace SystemC_VPC{
       powerConsStream("powerconsumption.dat"),
 #endif // NO_POWER_SUM
       componentIdMap(),
-      globalFunctionId(1),
       globalProcessId(0)
   {
     topPowerGov = new SelectFastestPowerModeGovernor;
