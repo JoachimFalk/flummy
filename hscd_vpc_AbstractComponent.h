@@ -80,9 +80,10 @@ class ComponentObserver;
      */
     ProcessControlBlock& createPCB(ProcessId pid){
       PCBPool& pool = this->getPCBPool();
-      assert(pool.find(pid) == pool.end());
-      pool[pid] = new ProcessControlBlock( this );
-      pool[pid]->setPid(pid);
+      if(pool.find(pid) == pool.end()){
+        pool[pid] = new ProcessControlBlock( this );
+        pool[pid]->setPid(pid);
+      }
       return *(pool[pid]);
     }
 
