@@ -81,6 +81,14 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<const PowerMode*>,
       dont_initialize();
     }
 
+    void setParams(const sc_time windowTime,
+                   const sc_time fastTime,
+                   const sc_time slowTime){
+      m_windowTime = windowTime;
+      m_fastTime   = fastTime;
+      m_slowTime   = slowTime;
+    }
+
     ~LoadHysteresisGovernor()
     {}
 
@@ -110,9 +118,9 @@ class LoadHysteresisGovernor : public LocalPowerGovernor<const PowerMode*>,
     }
 
   private:
-    const sc_time                                   m_windowTime;
-    const sc_time                                   m_fastTime;
-    const sc_time                                   m_slowTime;
+    sc_time                                         m_windowTime;
+    sc_time                                         m_fastTime;
+    sc_time                                         m_slowTime;
     const PowerMode                                *m_mode;
     ComponentInfo                                  *m_ci;
     ComponentState                                  m_lastState;

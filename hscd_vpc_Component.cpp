@@ -269,6 +269,30 @@ namespace SystemC_VPC{
 
     for(size_t i=0; i<att.getAttributeSize();++i){
       Attribute powerAtt = att.getNextAttribute(i).second;
+      if(powerAtt.isType("governor")){
+        sc_time window    = sc_time(12.5, SC_MS);
+        sc_time upperTime = sc_time(12.1, SC_MS);
+        sc_time lowerTime = sc_time( 4.0, SC_MS);
+        if(powerAtt.hasParameter("sliding_window")){
+          std::string v = powerAtt.getParameter("sliding_window");
+          window = Director::createSC_Time(v.c_str());
+        }
+        if(powerAtt.hasParameter("upper_threshold")){
+          std::string v = powerAtt.getParameter("upper_threshold");
+          upperTime = window*atof(v.c_str());
+        }
+        if(powerAtt.hasParameter("lower_threshold")){
+          std::string v = powerAtt.getParameter("lower_threshold");
+          lowerTime = window*atof(v.c_str());
+        }
+        midPowerGov->setParams(window,
+                               upperTime,
+                               lowerTime);
+        continue;
+      }
+
+
+
       std::string powerMode = att.getNextAttribute(i).first;
       const PowerMode *power = this->translatePowerMode(powerMode);
 
