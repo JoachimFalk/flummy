@@ -37,10 +37,10 @@ void PowerSumming::notify(ComponentInfo *ci)
   double old_powerConsumption = m_powerConsumption[ci];
   double new_powerConsumption = ci->getPowerConsumption();
 
-  if(old_powerConsumption == new_powerConsumption) {
-    m_lastPowerMode = ci->getPowerMode();
-    return;
-  }
+  //if(old_powerConsumption == new_powerConsumption) {
+  //    m_lastPowerMode = ci->getPowerMode();
+  //    return;
+  //}
 
   sc_core::sc_time new_changedTime = sc_core::sc_time_stamp();
   if(m_changedTime != new_changedTime) {
