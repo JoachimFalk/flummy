@@ -24,7 +24,7 @@
 #include "FastLink.h"
 #include "TaskPool.h"
 #include "PowerGovernor_Impl.h"
-#include <hscd_vpc_InvalidArgumentException.h>
+#include "hscd_vpc_InvalidArgumentException.h"
 
 // provide compatibility with other compilers then gcc, hopefully
 //#include <ansidecl.h>

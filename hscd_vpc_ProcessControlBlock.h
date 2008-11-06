@@ -13,8 +13,6 @@
 #include "hscd_vpc_Tracing.h"
 #include "hscd_vpc_datatypes.h"
 #include "FastLink.h"
-#include "PCBPool.h"
-#include "Pool.h"
 #include "PowerMode.h"
 #include "Timing.h"
 

@@ -55,6 +55,7 @@ pkgincludeprefix=systemcvpc/
 lib_LTLIBRARIES = libsystemcvpc.la
 pkginclude_HEADERS =				\
 	hscd_vpc_Tracing.h			\
+	Delayer.h				\
 	hscd_vpc_AbstractComponent.h            \
 	hscd_vpc_datatypes.h                    \
 	hscd_vpc_Director.h                     \
@@ -64,6 +65,18 @@ pkginclude_HEADERS =				\
 	Pool.h					\
 	hscd_vpc_EventPair.h			\
 	FastLink.h				\
+	Timing.h				\
+	ComponentInfo.h				\
+	ComponentObserver.h			\
+	PowerMode.h				\
+	Task.h					\
+	TaskPool.h				\
+	FunctionTimingPool.h			\
+	PCBPool.h				\
+	ComponentModel.h			\
+	Attribute.h				\
+	PowerGovernor_Impl.h			\
+	hscd_vpc_InvalidArgumentException.h	\
 	PowerGovernor.h
 
 #noinst_HEADERS=	oneof.hpp

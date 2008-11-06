@@ -2,9 +2,11 @@
 #define HSCD_VPC_PROCESSEVENTLISTENER_
 
 #include "hscd_vpc_datatypes.h"
-#include "Task.h"
+//#include "Task.h"
 
 namespace SystemC_VPC{
+
+  class Task;
 
   /**
    * ProcessEventListener defines common interface used for communicating task state
