@@ -10,7 +10,7 @@ name CDATA #REQUIRED>
 
 <!ELEMENT resources (component)*>
 
-<!ELEMENT component ((configuration*, defaultconfiguration?)?, (attribute)*)>
+<!ELEMENT component ((attribute)*)>
 <!ATTLIST component
 name ID #REQUIRED
 type CDATA #IMPLIED
@@ -25,16 +25,6 @@ value CDATA #IMPLIED>
 <!ATTLIST parameter
 type CDATA #REQUIRED
 value CDATA #REQUIRED>
-
-<!ELEMENT configuration (component)*>
-<!ATTLIST configuration
-name ID #REQUIRED
-loadtime CDATA "0 ns"
-storetime CDATA "0 ns">
-
-<!ELEMENT defaultconfiguration EMPTY>
-<!ATTLIST defaultconfiguration
-name CDATA #REQUIRED>
 
 <!ELEMENT mappings (mapping)*>
 
