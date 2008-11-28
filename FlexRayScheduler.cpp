@@ -349,7 +349,7 @@ namespace SystemC_VPC{
     }
     
     if(processcount==0 /*&& firstrun == false */){
-	    cyclecount = sc_time_stamp() / cycle_length;
+	    cyclecount = (int) (sc_time_stamp() / cycle_length);
 	    to_init=true;
 	   // cout<<"new cyclecount: "<<cyclecount<<endl;
      }
