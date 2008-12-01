@@ -18,6 +18,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <CoSupport/SystemC/systemc_time.hpp>
+
 #include <hscd_vpc_Director.h>
 #include <hscd_vpc_AbstractComponent.h>
 #include <hscd_vpc_VPCBuilder.h>
@@ -25,6 +27,8 @@
 #include "hscd_vpc_InvalidArgumentException.h"
 #include "PowerSumming.h"
 #include "Task.h"
+
+#include <dlfcn.h>
 
 #include <systemc.h>
 #include <map>
@@ -52,6 +56,8 @@ namespace SystemC_VPC{
    */
   Director::Director()
     : FALLBACKMODE(false),
+      topPowerGov(new InternalSelectFastestPowerModeGovernor),
+      topPowerGovFactory(NULL),
       globalFunctionId(1),
       mappings(),
       reverseMapping(),
@@ -62,7 +68,9 @@ namespace SystemC_VPC{
       componentIdMap(),
       globalProcessId(0)
   {
-    topPowerGov = new SelectFastestPowerModeGovernor;
+    //sc_report_handler::set_actions(SC_ID_OBJECT_EXISTS_,
+    //                               SC_DO_NOTHING);
+    sc_report_handler::set_actions(SC_WARNING, SC_DO_NOTHING);
 
     try{
       VPCBuilder builder((Director*)this);
@@ -79,15 +87,19 @@ namespace SystemC_VPC{
 
 #ifndef NO_POWER_SUM
     powerSumming = new PowerSumming(powerConsStream);
+#endif // NO_POWER_SUM
     for( Components::iterator it = components.begin();
          it != components.end();
          ++it )
     {
       if(*it != NULL) {
+#ifndef NO_POWER_SUM
         (*it)->addObserver(powerSumming);
+#endif // NO_POWER_SUM
+        (*it)->initialize(this);
+
       }
     }
-#endif // NO_POWER_SUM
 
   }
 
@@ -401,56 +413,32 @@ namespace SystemC_VPC{
 
   
   sc_time Director::createSC_Time(const char* timeString)
-    throw(InvalidArgumentException){
-    assert(timeString != NULL);
-    double value = -1;
-    std::string unit;
-
-    sc_time_unit scUnit = SC_NS;
-
-    std::stringstream data(timeString);
-    if(data.good()){
-      data >> value;
-    }else{
-      std::string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
+    throw(InvalidArgumentException)
+  {
+    try{
+      return CoSupport::SystemC::createSCTime(timeString);
+    } catch(std::string msg){
       throw InvalidArgumentException(msg);
     }
-    if( data.fail() ){
-      std::string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
-      throw InvalidArgumentException(msg);
-    }
-    if(data.good()){
-      data >> unit;
-      if(data.fail()){
-#ifdef VPC_DEBUG
-        std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!"
-                  << std::endl;
-#endif //VPC_DEBUG
-        scUnit = SC_NS;
-      }else{
-        std::transform (unit.begin(),
-                        unit.end(),
-                        unit.begin(),
-                        (int(*)(int))tolower);
-        if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
-        else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
-        else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
-        else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
-        else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
-        else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
-      }
-    }
-
-    return sc_time(value, scUnit);
   }
 
   sc_time Director::createSC_Time(std::string timeString)
-    throw(InvalidArgumentException){
+    throw(InvalidArgumentException)
+  {
     return Director::createSC_Time( timeString.c_str());
+  }
+
+  void Director::loadGlobalGovernorPlugin(std::string plugin, Attribute att){
+    //std::cerr << "Director::loadGlobalGovernorPlugin" << std::endl;
+    topPowerGovFactory =
+      new DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >
+        (plugin.c_str());
+    if( topPowerGovFactory->factory){
+      delete topPowerGov;
+
+      topPowerGovFactory->factory->processAttributes(att);
+      topPowerGov = topPowerGovFactory->factory->createPlugIn();
+    }
   }
 
 std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
@@ -458,5 +446,6 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
   return reverseMapping[cid];
 }  
   
+
 }
 

@@ -1,0 +1,97 @@
+<HTML>
+<HEAD>
+   <TITLE>Dynamically Loaded C++ Plugins for all platforms
+</TITLE>
+</HEAD>
+
+<H1>
+Dynamically Loaded C++ Plugins for all platforms</H1>
+Mar 24, 2002
+<BR>By Alex Holkner, xander@yifan.net
+<BR>Building on work by Jeff Koftinoff, jeffk@jdkoftinoff.com
+
+<P>
+<HR>All the source code in this package is released for no charge into
+the community. You may do whatever you want with it, except limit
+its distribution.
+
+<P>You can download the source package <A HREF="dynload.tar.gz">here</A>
+<HR>
+<CENTER>
+<H2>
+- OVERVIEW -</H2></CENTER>
+Dynamically extend a c++ program with new subclasses after the program has been
+compiled.  On unix systems this takes advantage of ELF file format and shared
+libraries (.so); on Windows regular DLLs are used.  A simple, common API allows
+developers to write once for all platforms (a compile is required on each
+destination platform, however).
+	
+<P>This was originally a demonstration of ELF capabilities, and the architecture
+is exactly what Jeff Koftinoff provides at <a 
+href="http://www.jdkoftinoff.com/linux1.html">http://www.jdkoftinoff.com/linux1.html</a>
+To this I have added conditional compilation for Windows (using the Windows DLL API) and
+redone the Makefile to compile on Solaris as well as Linux (hopefully some other Unixes
+as well - though I haven't access to any other flavours).
+	
+<P>Take a look at dll.h and plugin.h. This stuff is really quite straightforward.
+<CENTER>
+<H2>
+- COMPILING AND RUNNING -</H2></CENTER>
+To compile, edit the <b>Makefile.config</b> and follow the instructions contained within
+to select your platform.  Then run:
+
+<ul>
+<li><b>make</b> on Linux and possibly most other Unixes
+<li><b>gmake</b> on Solaris
+<li><b>make</b> on Windows either under Cygwin or using GNU make.  Do not attempt to
+use MSVC++'s nmake (this requires a different Makefile format).
+</ul>
+
+It will make the executable "plugtest" as well as the two plug in libraries "PlugInFun.so"
+ and "PlugInHappy.so" (or PlugInFun.dll and PlugInHappy.dll on Windows)
+
+<P>To run the test program, type "./plugtest"
+
+<P>It will ask you for a name of a dll. You may give the full path name
+of one of the previously made plug in libraires. If you want, you can
+<BLOCKQUOTE><TT>export LD_LIBRARY_PATH=".:$LD_LIBRARY_PATH"</TT></BLOCKQUOTE>
+This will allow you to enter in the file name of the plug in library you
+want without the full path name. Probably it is best to give the full path
+name or put your plugins in a special place.
+
+<P>Once you give it a valid name, it will attempt to open that library
+file and create an object from the class defined within. It will then call
+the Show() method of that object, and then will display the C++ RTTI typeid
+name. After all this it will destroy all the objects created.
+<CENTER>
+<H2>
+- GUIDELINES -</H2></CENTER>
+The key for this whole system to work is to:
+<UL>
+<LI>
+Have good abstract base classes/factory classes in your application for
+the libraries to inherit from</LI>
+
+<LI>
+compile everything with "-fPIC"</LI>
+
+<LI>
+link the executable with the "-rdynamic" flag and the dl library</LI>
+
+<LI>
+create the shared libraries with the "-shared" flag</LI>
+
+<LI>
+be wary of RTTI and exception handling - newer versions of compilers may
+do internal things differently and cause big problems if you compile your
+application with one version and the shared libraries with another.</LI>
+
+<LI>
+Solaris users - see <a href="http://realm.progsoc.uts.edu.au/~subtle/solaris28_link.html">
+this page</a> which describes the necessity of the -mimpure-text flag (basically,
+it does not link without it).
+</UL>
+
+
+</BODY>
+</HTML>

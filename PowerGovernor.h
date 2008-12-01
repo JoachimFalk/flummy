@@ -1,11 +1,12 @@
-#ifndef POWERGOVERNOR_H_
-#define POWERGOVERNOR_H_
+#ifndef __INCLUDED_POWERGOVERNOR_H_
+#define __INCLUDED_POWERGOVERNOR_H_
 
 #include "ComponentObserver.h"
+#include "Attribute.h"
 
 namespace SystemC_VPC{
 
-template <class T>
+template <typename T>
 class GlobalPowerGovernor
 {
   public:
@@ -22,8 +23,8 @@ template <class T>
 class LocalPowerGovernor : public ComponentObserver
 {
   public:
-    LocalPowerGovernor(GlobalPowerGovernor<T> *tpg) :
-      m_tpg(tpg)
+    LocalPowerGovernor() :
+      m_tpg(NULL)
     {}
 
     virtual ~LocalPowerGovernor()
@@ -31,28 +32,17 @@ class LocalPowerGovernor : public ComponentObserver
 
     virtual void notify(ComponentInfo *ci) = 0;
 
+    void setGlobalGovernor(GlobalPowerGovernor<T> *tpg)
+    {
+      //std::cerr << "LocalPowerGovernor::setGlobalGovernor" << std::endl;
+      this->m_tpg = tpg;
+    }
+
   protected:
     GlobalPowerGovernor<T> *m_tpg;
 };
 
-// Convenience class for non-hierarchical governors
-class PowerGovernor : public GlobalPowerGovernor<int>,
-                      public LocalPowerGovernor<int>
-{
-  public:
-    PowerGovernor() : LocalPowerGovernor<int>(
-      static_cast<GlobalPowerGovernor<int>*>(this))
-    {}
-
-    virtual ~PowerGovernor()
-    {}
-
-    virtual void notify(const ComponentInfo *ci) = 0;
-
-    virtual void notify_top(const ComponentInfo *ci, int val)
-    {}
-};
 
 }
 
-#endif // POWERGOVERNOR_H_
+#endif // __INCLUDED_POWERGOVERNOR_H_

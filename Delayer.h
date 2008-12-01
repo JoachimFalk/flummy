@@ -26,6 +26,8 @@
 
 namespace SystemC_VPC{
 
+  class Director;
+
   /**
    * \brief Interface for classes implementing delay simulation.
    */
@@ -47,6 +49,8 @@ namespace SystemC_VPC{
     void removeObserver(ComponentObserver *obs);
     
     void fireNotification(ComponentInfo *compInf);
+
+    virtual void initialize(const Director* d) {};
 
     virtual ~Delayer() {}
 

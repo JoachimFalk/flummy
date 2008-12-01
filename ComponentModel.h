@@ -1,10 +1,12 @@
 #ifndef HSCD_VPC_COMPONENT_MODEL_H
 #define HSCD_VPC_COMPONENT_MODEL_H
 
-#include "Task.h"
 #include "ComponentInfo.h"
 
 namespace SystemC_VPC{
+  class Task;
+  typedef std::map<int, Task*>  TaskMap;
+
   class ComponentModel : public ComponentInfo {
   public:
     ComponentModel() : ComponentInfo(this){}

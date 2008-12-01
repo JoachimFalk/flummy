@@ -8,7 +8,7 @@ name CDATA #REQUIRED>
 <!ATTLIST measurefile
 name CDATA #REQUIRED>
 
-<!ELEMENT resources (component)*>
+<!ELEMENT resources ((attribute)*, (component)*)>
 
 <!ELEMENT component ((attribute)*)>
 <!ATTLIST component

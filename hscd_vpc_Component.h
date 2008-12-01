@@ -91,18 +91,15 @@ namespace SystemC_VPC{
                const char *schedulername,
                Director *director )
       : AbstractComponent(name),
-        blockMutex(0)
+        blockMutex(0),
+        localGovernorFactory(NULL),
+        midPowerGov(NULL),
+        powerAttribute("", "")
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
       this->setPowerMode(this->translatePowerMode("SLOW"));
       setScheduler(schedulername);
-
-      midPowerGov = new LoadHysteresisGovernor(
-        director->topPowerGov,
-        sc_time(12.5, SC_MS),
-        sc_time(12.1, SC_MS),
-        sc_time( 4.0, SC_MS));
 
       if(powerTables.find(getPowerMode()) == powerTables.end()){
         powerTables[getPowerMode()] = PowerTable();
@@ -160,7 +157,7 @@ namespace SystemC_VPC{
     virtual void processAndForwardParameter(char *sType,char *sValue);
     virtual void setAttribute(Attribute& fr_Attributes);
     
-    void addPowerGovernor(LocalPowerGovernor<const PowerMode*> * gov){
+    void addPowerGovernor(PluggableLocalPowerGovernor * gov){
       this->addObserver(gov);
     }
 
@@ -193,9 +190,18 @@ namespace SystemC_VPC{
     PowerSumming  *powerSumming;
 #endif // NO_POWER_SUM
 
-    LoadHysteresisGovernor *midPowerGov;
+    PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
+    PluggableLocalPowerGovernor *midPowerGov;
+    Attribute powerAttribute;
+    typedef std::map<std::string,
+                     DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
+      Factories;
+    static Factories factories;
+    
 
     bool processPower(Attribute att);
+
+    void initialize(const Director* d);
 
     // time last task started
     sc_time startTime;
@@ -207,6 +213,8 @@ namespace SystemC_VPC{
     void fireStateChanged(const ComponentState &state);
 
     void addTasks();
+
+    void loadLocalGovernorPlugin(std::string plugin);
   };
 
 } 

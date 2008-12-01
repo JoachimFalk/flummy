@@ -23,8 +23,10 @@
 #include "hscd_vpc_EventPair.h"
 #include "FastLink.h"
 #include "TaskPool.h"
-#include "PowerGovernor_Impl.h"
+#include "SelectFastestPowerModeGlobalGovernor.hpp"
+#include "HysteresisLocalGovernor.hpp"
 #include "hscd_vpc_InvalidArgumentException.h"
+#include "PluggablePowerGovernor.hpp"
 
 // provide compatibility with other compilers then gcc, hopefully
 //#include <ansidecl.h>
@@ -191,7 +193,10 @@ namespace SystemC_VPC{
     }
 
     // FIXME !!!
-    SelectFastestPowerModeGovernor *topPowerGov;
+    PluggableGlobalPowerGovernor   *topPowerGov;
+    DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >
+                                   *topPowerGovFactory;
+    void loadGlobalGovernorPlugin(std::string plugin, Attribute att);
 
     std::string getTaskName(ProcessId id) {
       return debugProcessNames[id];

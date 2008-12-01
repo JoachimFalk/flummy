@@ -69,13 +69,15 @@ pkginclude_HEADERS =				\
 	ComponentInfo.h				\
 	ComponentObserver.h			\
 	PowerMode.h				\
+	HysteresisLocalGovernor.hpp		\
+	SelectFastestPowerModeGlobalGovernor.hpp\
+	PluggablePowerGovernor.hpp		\
 	Task.h					\
 	TaskPool.h				\
 	FunctionTimingPool.h			\
 	PCBPool.h				\
 	ComponentModel.h			\
 	Attribute.h				\
-	PowerGovernor_Impl.h			\
 	hscd_vpc_InvalidArgumentException.h	\
 	PowerGovernor.h
 
@@ -92,7 +94,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Component.cpp			\
 	hscd_vpc_Director.cpp			\
 	hscd_vpc_PriorityScheduler.cpp		\
-	hscd_vpc_PrioritySchedulerNoPreempt.cpp		\
+	hscd_vpc_PrioritySchedulerNoPreempt.cpp	\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
 	hscd_vpc_Tracing.cpp			\
@@ -107,6 +109,10 @@ libsystemcvpc_la_SOURCES =			\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
 	PowerSumming.cpp                        \
+	HysteresisLocalGovernor.cpp		\
+	SelectFastestPowerModeGlobalGovernor.cpp\
+	PluggablePowerGovernor.cpp		\
+	dynload/dll-elf.cpp			\
 	ComponentInfo.cpp			\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		

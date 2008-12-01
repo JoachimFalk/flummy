@@ -1,4 +1,5 @@
-#include "PowerGovernor_Impl.h"
+#include "SelectFastestPowerModeGlobalGovernor.hpp"
+#include "HysteresisLocalGovernor.hpp"
 #include "hscd_vpc_Component.h"
 
 using namespace SystemC_VPC;

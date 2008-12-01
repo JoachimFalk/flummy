@@ -158,22 +158,54 @@ namespace SystemC_VPC{
             AbstractComponent* comp;
             // init all components
             for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
+              const XMLCh* xmlName = node->getNodeName();
               try{
-                //comp = initComponent(node);
-                comp = initComponent();
+                if( 0==XMLString::compareNString(
+                         xmlName,
+                         VPCBuilder::componentStr,
+                         sizeof(VPCBuilder::componentStr))) {
+                  comp = initComponent();
+                  DBG_OUT("VPCBuilder> registering component: "
+                          << comp->getName() << " to Director" << std::endl);
+                  // register "upper-layer" components to Director
+                  this->director->registerComponent(comp);
+                  comp->setParentController(this->director);
+
+
+                }else{
+                  if( 0==XMLString::compareNString( xmlName,
+                                                    attributeStr,
+                                                    sizeof(attributeStr))){
+
+                    char* sType = XMLString::transcode(
+                      node->getAttributes()->getNamedItem(typeAttrStr)->getNodeValue());
+                    char* sValue = "";
+                    DOMNode * value = node->getAttributes()->getNamedItem(valueAttrStr);
+                    if( value  != NULL){
+                      sValue= XMLString::transcode(
+                        node->getAttributes()->getNamedItem(valueAttrStr)->getNodeValue());
+                    }
+
+                    if( 0==XMLString::compareNString( sType,
+                                                       "global_governor",
+                                                       sizeof("global_governor"))){
+                       Attribute gov("global_governor", sValue);
+                       nextAttribute(gov, node->getFirstChild());
+                       director->loadGlobalGovernorPlugin(sValue, gov);
+                     }
+
+                    
+                    
+                    XMLString::release(&sType);
+                  }
+ 
+                }
               }catch(InvalidArgumentException &e){
                 std::cerr << "VPCBuilder> " << e.what() << std::endl;
                 std::cerr << "VPCBuilder> ignoring specification of component,"
                   " going on with initialization" << std::endl;
                 continue;
               }
-
-              DBG_OUT("VPCBuilder> registering component: "
-                      << comp->getName() << " to Director" << std::endl);
-              // register "upper-layer" components to Director
-              this->director->registerComponent(comp);
-              comp->setParentController(this->director);
-
             }
 
             node = vpcConfigTreeWalker->parentNode();

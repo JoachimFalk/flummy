@@ -56,7 +56,7 @@ namespace SystemC_VPC{
     int actualRunningIID;
     bool newTaskDuringOverhead=false;
     //wait(SC_ZERO_TIME);
-    
+
     scheduler->initialize();
     fireStateChanged(ComponentState::IDLE);
     
@@ -265,33 +265,13 @@ namespace SystemC_VPC{
       return false;
     }
     
-    this->addPowerGovernor(midPowerGov);
-
     for(size_t i=0; i<att.getAttributeSize();++i){
       Attribute powerAtt = att.getNextAttribute(i).second;
       if(powerAtt.isType("governor")){
-        sc_time window    = sc_time(12.5, SC_MS);
-        sc_time upperTime = sc_time(12.1, SC_MS);
-        sc_time lowerTime = sc_time( 4.0, SC_MS);
-        if(powerAtt.hasParameter("sliding_window")){
-          std::string v = powerAtt.getParameter("sliding_window");
-          window = Director::createSC_Time(v.c_str());
-        }
-        if(powerAtt.hasParameter("upper_threshold")){
-          std::string v = powerAtt.getParameter("upper_threshold");
-          upperTime = window*atof(v.c_str());
-        }
-        if(powerAtt.hasParameter("lower_threshold")){
-          std::string v = powerAtt.getParameter("lower_threshold");
-          lowerTime = window*atof(v.c_str());
-        }
-        midPowerGov->setParams(window,
-                               upperTime,
-                               lowerTime);
+        this->loadLocalGovernorPlugin(powerAtt.getValue());
+        powerAttribute = powerAtt;
         continue;
       }
-
-
 
       std::string powerMode = att.getNextAttribute(i).first;
       const PowerMode *power = this->translatePowerMode(powerMode);
@@ -597,4 +577,36 @@ namespace SystemC_VPC{
     }
 
   }
+
+  void Component::initialize(const Director* d){
+    //std::cerr << "Component::initialize" << std::endl;
+    if(NULL == localGovernorFactory){
+      localGovernorFactory = new InternalLoadHysteresisGovernorFactory();
+    }
+
+    // governor parameter
+    localGovernorFactory->processAttributes(powerAttribute);
+
+    //create local governor
+    midPowerGov=localGovernorFactory->createPlugIn();
+    midPowerGov->setGlobalGovernor(d->topPowerGov);
+    this->addPowerGovernor(midPowerGov);
+    
+  }
+
+  void Component::loadLocalGovernorPlugin(std::string plugin){
+    //std::cerr << "Component::loadLocalGovernorPlugin" << std::endl;
+
+    if(plugin == "") return;
+
+    if(Component::factories.find(plugin) == Component::factories.end()){
+      Component::factories[plugin] =
+        new DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >
+          (plugin.c_str());
+    }
+
+    localGovernorFactory = Component::factories[plugin]->factory;
+  }
+
+  Component::Factories Component::factories;
 } //namespace SystemC_VPC
