@@ -72,6 +72,7 @@ pkginclude_HEADERS =				\
 	HysteresisLocalGovernor.hpp		\
 	SelectFastestPowerModeGlobalGovernor.hpp\
 	PluggablePowerGovernor.hpp		\
+	dynload/dll.h				\
 	Task.h					\
 	TaskPool.h				\
 	FunctionTimingPool.h			\
@@ -80,6 +81,7 @@ pkginclude_HEADERS =				\
 	Attribute.h				\
 	hscd_vpc_InvalidArgumentException.h	\
 	PowerGovernor.h
+
 
 #noinst_HEADERS=	oneof.hpp
 
