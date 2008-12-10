@@ -5,11 +5,25 @@ namespace SystemC_VPC {
   /**
    * \brief Implementation of OnlineBinder constructor
    */
-  OnlineBinder::OnlineBinder(char* algorithm) : DynamicBinder() {
+  OnlineBinder::OnlineBinder(char* algorithm, char* parameter) : DynamicBinder() {
+    for(int i = 0; algorithm[i] != '\0'; i++)
+    {
+      algorithm[i] = tolower(algorithm[i]);
+    }
     this->algorithm = algorithm;
+    parameterset = false;
+    if(parameter){
+      this->parameter = atof(parameter);
+      if(this->parameter == 0.0){
+        std::cerr << "OnlineBinder> Chosen parameter: " << parameter << " FAILED"<< std::endl;
+      }else{
+        parameterset = true;
+      }
+    }
     numberofcomp = 0;
     minSetuptime = SC_ZERO_TIME;
-    std::cerr << "OnlineAlgorithmBinder> Chosen algorithm: " << this->algorithm << std::endl;
+    std::cerr << "OnlineBinder> Chosen algorithm: " << this->algorithm << std::endl;
+    if(parameterset) std::cerr << "OnlineBinder> Chosen parameter: " << this->parameter << std::endl;
   }
   
   /**
@@ -65,7 +79,7 @@ sc_time step = sc_time(1,SC_MS);
 
 #define DETAILS
 
-if(strcmp(algorithm,"List") == 0){
+if(strcmp(algorithm,"list") == 0){
     
     chosen = 0;
    
@@ -79,7 +93,9 @@ if(strcmp(algorithm,"List") == 0){
 
 //End Algorithm List
 
-}else if(strcmp(algorithm,"Bartal") == 0){
+}else if(strcmp(algorithm,"bartal") == 0){
+
+    if(!parameterset) parameter = 1.986;
     
     sort(timesTable.begin(), timesTable.end());
     
@@ -95,7 +111,7 @@ if(strcmp(algorithm,"List") == 0){
     ARi = ARi / lowestLi;
     
     //Make decision
-    if( (timesTable[lowestLi].time + job) <= (1.986 * ARi) ){
+    if( (timesTable[lowestLi].time + job) <= (parameter * ARi) ){
       chosen = timesTable[lowestLi].recomponentnumber;
       timesTable[lowestLi].time += job;
       #ifdef DETAILS
@@ -112,11 +128,13 @@ if(strcmp(algorithm,"List") == 0){
     
 //End Algorithm Bartal
 
-}else if(strcmp(algorithm,"Karger") == 0){
+}else if(strcmp(algorithm,"karger") == 0){
+
+    if(!parameterset) parameter = 1.945;
 
     sort(timesTable.begin(), timesTable.end());
   
-    double alpha = 1.945;
+    double alpha = parameter;
     sc_time job = getSetuptime(task) + getRuntime(task);
     
     chosen = -1;    
@@ -149,12 +167,14 @@ if(strcmp(algorithm,"List") == 0){
     }
 //End Algorithm Karger
 
-}else if(strcmp(algorithm,"Albers") == 0){
+}else if(strcmp(algorithm,"albers") == 0){
+
+    if(!parameterset) parameter = 1.923;
     
     sort(timesTable.begin(), timesTable.end());
     
     int m = numberofcomp;
-    double c = 1.923;
+    double c = parameter;
     int i = (int)floor(0.5 * m);
     double j = 0.29 * m;
     double alpha = ( (c-1)*i-j/2 ) / ( (c-1)*(m-i) );
@@ -210,7 +230,7 @@ if(strcmp(algorithm,"List") == 0){
   
 //End Algorithm Albers
 
-}else if(strcmp(algorithm,"ListMod1") == 0 || strcmp(algorithm,"ListMod2") == 0){
+}else if(strcmp(algorithm,"listmod1") == 0 || strcmp(algorithm,"listmod2") == 0){
     chosen = 0;
     
     //find lowest Slot
@@ -232,7 +252,9 @@ if(strcmp(algorithm,"List") == 0){
     
 //End Algorithm List
 
-}else if(strcmp(algorithm,"BartalMod1") == 0){
+}else if(strcmp(algorithm,"bartalmod1") == 0){
+
+    if(!parameterset) parameter = 1.986;
     
     sort(timesTable.begin(), timesTable.end());
     
@@ -248,7 +270,7 @@ if(strcmp(algorithm,"List") == 0){
     ARi = ARi / lowestLi;
     
     //Make decision
-    if( (timesTable[lowestLi].time + job) <= (1.986 * ARi) ){
+    if( (timesTable[lowestLi].time + job) <= (parameter * ARi) ){//1.986
       chosen = timesTable[lowestLi].recomponentnumber;
       RCWaitInterval = timesTable[lowestLi].time;
       for(int z = 0; z < setupsteps ;z++){
@@ -283,11 +305,13 @@ if(strcmp(algorithm,"List") == 0){
 
 //End Algorithm BartalMod1
 
-}else if(strcmp(algorithm,"KargerMod1") == 0){
+}else if(strcmp(algorithm,"kargermod1") == 0){
+
+    if(!parameterset) parameter = 1.945;
 
     sort(timesTable.begin(), timesTable.end());
   
-    double alpha = 1.945;
+    double alpha = parameter; //original 1,945
     
     sc_time job = getSetuptime(task) + getRuntime(task);
     
@@ -340,12 +364,14 @@ if(strcmp(algorithm,"List") == 0){
     }         
 //End Algorithm KargerMod1
 
-}else if(strcmp(algorithm,"AlbersMod1") == 0){
+}else if(strcmp(algorithm,"albersmod1") == 0){
+
+    if(!parameterset) parameter = 1.923;
     
     sort(timesTable.begin(), timesTable.end());
     
     int m = numberofcomp;
-    double c = 1.923;
+    double c = parameter; //original 1,923
     int i = (int)floor(0.5 * m);
     double j = 0.29 * m;
     double alpha = ( (c-1)*i-j/2 ) / ( (c-1)*(m-i) );
@@ -362,11 +388,15 @@ if(strcmp(algorithm,"List") == 0){
     }
     timesTableTemp[0].time += getRuntime(task);
     
-    //set all slots to new border
-    for(int i = 0; i < numberofcomp; i++){
-      while( RCressource[(int)(timesTableTemp[i].time.to_double()/1e9)] == 'X' )
-        timesTableTemp[i].time += step;
-    }
+   // set border of all slot to new value
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTableTemp[k].time.to_double()/1e9)] == 'X'){
+          timesTableTemp[k].time += step;
+          z = -1;
+        }
+      }
+    }         
     //resort copy of timesTable
     sort(timesTableTemp.begin(), timesTableTemp.end());
     
@@ -430,7 +460,9 @@ if(strcmp(algorithm,"List") == 0){
 //*****************************************************************************************
 // Following Algorithms were modified by slot time reservation
 //*****************************************************************************************
-}else if(strcmp(algorithm,"BartalMod2") == 0){
+}else if(strcmp(algorithm,"bartalmod2") == 0){
+
+    if(!parameterset) parameter = 1.986;
 
     sort(timesTable.begin(), timesTable.end());
     
@@ -463,7 +495,7 @@ if(strcmp(algorithm,"List") == 0){
     ARi = ARi / lowestLi;
     
     //Make decision
-    if( (timesTable[lowestLi].time + job) <= (1.986 * ARi) ){
+    if( (timesTable[lowestLi].time + job) <= (parameter * ARi) ){
       chosen = timesTable[lowestLi].recomponentnumber;
       while( (RCressource[ (int)(timesTable[lowestLi].time.to_double()/1e9) ] == 'X')
                 || (RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9) ] == 'd') ){ //shift
@@ -478,11 +510,11 @@ if(strcmp(algorithm,"List") == 0){
           while(RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] == 'X'){
             timesTable[lowestLi].time += step;
           }
-          for(int z = 0; z < setupsteps; z++){
+          //for(int z = 0; z < setupsteps; z++){
             RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] = 'd';
             timesTable[lowestLi].time += step;
             toReserve--;
-          }
+          //}
         }
         while( RCressource[(int)(timesTable[lowestLi].time.to_double()/1e9)] == 'X' )
           timesTable[lowestLi].time += step;
@@ -517,11 +549,13 @@ if(strcmp(algorithm,"List") == 0){
     }         
 //End Algorithm BartalMod2
 
-}else if(strcmp(algorithm,"KargerMod2") == 0){
+}else if(strcmp(algorithm,"kargermod2") == 0){
+
+    if(!parameterset) parameter = 1.945;
 
     sort(timesTable.begin(), timesTable.end());
   
-    double alpha = 1.945;
+    double alpha = parameter;
     
     sc_time job = getSetuptime(task) + getRuntime(task);
     
@@ -551,8 +585,9 @@ if(strcmp(algorithm,"List") == 0){
           }
         if(thisFree + toReserve < (i - y)*setupsteps) toReserve += (i - y)*setupsteps - thisFree - toReserve;
       }
-      //std::cerr <<"timesTable[i].time: "<< i <<" toReserve: "<< toReserve << std::endl;
-
+      #ifdef DETAILS
+      std::cerr <<"timesTable[i].time: "<< i <<" toReserve: "<< toReserve << std::endl;
+      #endif
       //h(k)+j <= alpha * A(tk)
       if( timesTable[i].time + job + toReserve * step <= alpha * Ai){
       
@@ -569,11 +604,11 @@ if(strcmp(algorithm,"List") == 0){
             while(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
               timesTable[i].time += step; 
             }
-            for(int z = 0; z < setupsteps; z++){  
+            //for(int z = 0; z < setupsteps; z++){  
               RCressource[ (int)(timesTable[i].time.to_double()/1e9)] = 'd';
               timesTable[i].time += step;
               toReserve--;
-            }
+            //}
           }
           while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
             timesTable[i].time += step;
@@ -610,12 +645,14 @@ if(strcmp(algorithm,"List") == 0){
     }          
 //End Algorithm KargerMod2
 
-}else if(strcmp(algorithm,"AlbersMod2") == 0){
+}else if(strcmp(algorithm,"albersmod2") == 0){
+
+    if(!parameterset) parameter = 1.923;
     
     sort(timesTable.begin(), timesTable.end());
     
     int m = numberofcomp;
-    double c = 1.923;
+    double c = parameter;
     int i = (int)floor(m/2);
     double j = 0.29 * m;
     double alpha = ( (c-1)*i-(j/2) ) / ( (c-1)*(m-i) );
@@ -648,11 +685,15 @@ if(strcmp(algorithm,"List") == 0){
     }
     timesTableTemp[0].time += job;
     
-    //set new border for slottimes
-    for(int x = 0; x < numberofcomp; x++){
-      while( RCressource[(int)(timesTableTemp[x].time.to_double()/1e9)] == 'X' )
-        timesTableTemp[x].time += step;
-    }
+   // set border of all slot to new value
+    for(int k = 0; k < numberofcomp; k++){
+      for(int z = 0; z < setupsteps; ++z){
+        if( RCressource[z+(int)(timesTableTemp[k].time.to_double()/1e9)] == 'X'){
+          timesTableTemp[k].time += step;
+          z = -1;
+        }
+      }
+    }         
     //resort
     sort(timesTableTemp.begin(), timesTableTemp.end());
     
@@ -708,11 +749,11 @@ if(strcmp(algorithm,"List") == 0){
             while(RCressource[ (int)(timesTable[i].time.to_double()/1e9)] == 'X'){
               timesTable[i].time += step; 
             }
-            for(int z = 0; z < setupsteps; z++){
-              RCressource[z + (int)(timesTable[i].time.to_double()/1e9)] = 'd';
+            //for(int z = 0; z < setupsteps; z++){
+              RCressource[(int)(timesTable[i].time.to_double()/1e9)] = 'd';
               timesTable[i].time += step; 
               toReserve--;
-            }
+            //}
         }
         while( RCressource[(int)(timesTable[i].time.to_double()/1e9)] == 'X' )
             timesTable[i].time += step;
@@ -735,13 +776,16 @@ if(strcmp(algorithm,"List") == 0){
     }//end else i+1 loaded
 
 //End Algorithm AlbersMod2
+}
+    else{
+      std::string myException = "OnlineBinder> FATAL ERROR: Algorithm ";
+      myException += algorithm;
+      myException += " not found!";
+      std::cerr << std::endl << myException << std::endl << std::endl;;
+      //throw myException;
+      exit(1);
+    }
 
-}else{
-  std::cerr << std::endl << "OnlineBinder> Algorithm ";
-  std::cerr << algorithm;
-  std::cerr << " not found!" << std::endl << std::endl;
-  exit(1);
-  }
     #ifdef DETAILS
     std::cerr << "OnlineBinder> TimesTable" ;
     for(int k = 0; k < numberofcomp; k++){

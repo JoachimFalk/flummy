@@ -1,7 +1,6 @@
 #ifndef HSCD_VPC_ONLINEBINDER_H_
 #define HSCD_VPC_ONLINEBINDER_H_
-
-#include <systemc.h>
+#include <string>
 #include "hscd_vpc_AbstractController.h"
 #include "hscd_vpc_AbstractBinder.h"
 #include "hscd_vpc_AbstractAllocator.h"
@@ -20,7 +19,9 @@ namespace SystemC_VPC {
     
       int numberofcomp;
 
-      char* algorithm;      
+      char* algorithm;
+      double parameter;
+      bool parameterset;
 
       class timesTable_entry{
       public:
@@ -62,7 +63,7 @@ namespace SystemC_VPC {
        
     public:
        
-      OnlineBinder(char*);
+      OnlineBinder(char*, char*);
 
       ~OnlineBinder();
 

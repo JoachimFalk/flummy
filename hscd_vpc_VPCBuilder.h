@@ -121,7 +121,8 @@ namespace SystemC_VPC{
     Director* director;
     
     // pointer to schedulefile for OfflineBinder
-    char *OfflineFileName;
+    char* OfflineFileName;
+    char* OnlineAlgorithmParameter;
     
   public:
     

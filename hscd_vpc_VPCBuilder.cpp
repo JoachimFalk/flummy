@@ -45,6 +45,7 @@ namespace SystemC_VPC{
     char* vpc_evaluator_prefix = getenv("VPC_EVALUATOR");
     char vpc_conf_file[VPC_MAX_STRING_LENGTH];
     char* vpc_measure_file = NULL;
+    OnlineAlgorithmParameter = NULL;
     
     FALLBACKMODE=false;
     
@@ -241,6 +242,10 @@ namespace SystemC_VPC{
                 }
                 if(strcmp(sName,"ONLINE") == 0 || strcmp(sName,"OnlineBinder") == 0){
                   this->OfflineFileName=XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+                  if(atts->getNamedItem(valueAttrStr)){
+                    this->OnlineAlgorithmParameter=XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+                    cerr<<"VPCBuilder> OnlineAlgorithmParameter: "<< this->OnlineAlgorithmParameter <<endl;
+                  }
                 }
                 try{
                   this->director->setBinder(this->generateBinder(sName, node, NULL));
@@ -1196,7 +1201,7 @@ namespace SystemC_VPC{
       }else
       if(0==strncmp(type, STR_VPC_ONLINEBINDER, strlen(STR_VPC_ONLINEBINDER))
           || 0==strncmp(type, STR_VPC_ONLINE, strlen(STR_VPC_ONLINE))){
-        binder = new OnlineBinder(this->OfflineFileName);
+        binder = new OnlineBinder(this->OfflineFileName, this->OnlineAlgorithmParameter);
       }else{
         std::string msg("Unkown bindertype ");
         msg += type;
