@@ -69,8 +69,6 @@ class ComponentObserver;
     /**
      * \brief Set parameter for Component and Scheduler.
      */
-    virtual void processAndForwardParameter(char *sType,char *sValue)=0;
-    
     virtual void setAttribute(Attribute& fr_Attribute)=0;
 
     const char* getName() const;

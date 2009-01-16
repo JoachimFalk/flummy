@@ -154,7 +154,6 @@ namespace SystemC_VPC{
     /**
      * \brief Set parameter for Component and Scheduler.
      */
-    virtual void processAndForwardParameter(char *sType,char *sValue);
     virtual void setAttribute(Attribute& fr_Attributes);
     
     void addPowerGovernor(PluggableLocalPowerGovernor * gov){

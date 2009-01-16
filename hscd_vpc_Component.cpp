@@ -310,10 +310,6 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::processAndForwardParameter(char *sType,char *sValue){
-    scheduler->setProperty(sType,sValue);
-  }
-  
   void Component::setAttribute(Attribute& attributes){
     if(processPower(attributes)){
       return;

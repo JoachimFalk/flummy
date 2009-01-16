@@ -391,7 +391,6 @@ namespace SystemC_VPC{
 
           nextAttribute(attributes, node->getFirstChild());
 
-          //comp->processAndForwardParameter(sType,sValue);
           comp->setAttribute(attributes);
         }
       }
