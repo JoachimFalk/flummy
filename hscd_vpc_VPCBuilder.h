@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_Component.h"
 
 #include "hscd_vpc_InvalidArgumentException.h"
 
