@@ -4,6 +4,8 @@
 #include <cctype>
 #include <string>
 
+#include "hscd_vpc_Component.h"
+#include "FCFSComponent.h"
 #include "BlockingTransport.h"
 #include "hscd_vpc_VPCBuilder.h"
 #include "hscd_vpc_Director.h"
@@ -309,7 +311,16 @@ namespace SystemC_VPC{
         //std::map<std::string, AbstractComponent* >::iterator iter
         //  = this->knownComps.find(sName);
         //if(iter == this->knownComps.end()){ 
+        if( 0==strncmp(sScheduler, STR_FIRSTCOMEFIRSTSERVE,
+                       strlen(STR_FIRSTCOMEFIRSTSERVE))
+            || 0==strncmp(sScheduler,STR_FCFS,strlen(STR_FCFS))){
+
+          // ** FIXME: here we add the new FCFSComponent
+          //comp = new FCFSComponent(sName, director);
+          comp = new Component(sName, sScheduler, director);
+        }else{
           comp = new Component(sName,sScheduler,director);
+        }
           this->knownComps.insert(
             std::pair<std::string, AbstractComponent* >(sName, comp));
         //}else{

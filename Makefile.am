@@ -116,6 +116,7 @@ libsystemcvpc_la_SOURCES =			\
 	PluggablePowerGovernor.cpp		\
 	dynload/dll-elf.cpp			\
 	ComponentInfo.cpp			\
+	FCFSComponent.cpp			\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 

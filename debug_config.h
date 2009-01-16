@@ -22,6 +22,9 @@ extern CoSupport::Streams::DebugOStream dbgout;
 /** enable/disable debugging for Component */
 //#define DBG_COMPONENT
 
+/** enable/disable debugging for Component */
+//#define DBG_FCFSCOMPONENT
+
 /** enable/disable debugging for ProcessControlBlock */
 //#define DBG_PCB
 

@@ -68,6 +68,8 @@ namespace SystemC_VPC{
       componentIdMap(),
       globalProcessId(0)
   {
+     sc_report_handler::set_actions(SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
+                                    SC_DO_NOTHING);
     //sc_report_handler::set_actions(SC_ID_OBJECT_EXISTS_,
     //                               SC_DO_NOTHING);
     sc_report_handler::set_actions(SC_WARNING, SC_DO_NOTHING);
