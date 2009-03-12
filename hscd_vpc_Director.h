@@ -144,7 +144,7 @@ namespace SystemC_VPC{
     void registerComponent(Delayer* comp);
     
     /**
-     * \brief Registers mapping between task and component to Director
+     * \brief Register mapping between task and component to Director
      * \param taskName specifies name of task
      * \param compName specifies name of component
      */
@@ -164,6 +164,7 @@ namespace SystemC_VPC{
     ProcessId uniqueProcessId();
 
     ProcessId getProcessId(std::string process);
+    ProcessId getProcessId(std::string source, std::string destination);
 
     ComponentId getComponentId(std::string component);
 
@@ -199,7 +200,12 @@ namespace SystemC_VPC{
     void loadGlobalGovernorPlugin(std::string plugin, Attribute att);
 
     std::string getTaskName(ProcessId id) {
-      return debugProcessNames[id];
+      if(debugProcessNames.find(id) != debugProcessNames.end()){
+        return debugProcessNames[id];
+      }else{
+        return "Route from " + debugRouteNames[id].first +
+          " to: " + debugRouteNames[id].first;
+      }
     }
     
     sc_time getEnd() const {
@@ -212,6 +218,8 @@ namespace SystemC_VPC{
 
     void postCompute( Task *task,
                       EventPair endPair );
+
+    void debugUnknownNames( );
 
     /**
      * Singleton design pattern
@@ -255,6 +263,7 @@ namespace SystemC_VPC{
     ProcessIdMap    processIdMap;
     ComponentIdMap  componentIdMap;
     std::map<ProcessId, std::string> debugProcessNames;
+    std::map<ProcessId, std::pair<std::string, std::string> > debugRouteNames;
 
     ProcessId       globalProcessId;
 

@@ -66,12 +66,14 @@ namespace SystemC_VPC {
 
     ~PrototypedPool(){
       if(this->usedObjects.size() != 0){
+        /*
         std::cerr << "WARNING: PrototypedPool for "
                   << this->prototype->getName()
                   << " still used instances exist!" << std::endl
                   << "Assuming interruption by sc_stop happend."
                   << " Cleaning up all instances of "
                   << this->prototype->getName() << std::endl;
+        */
       }
 
       for(typename std::map<int, OBJECT* >::iterator iter

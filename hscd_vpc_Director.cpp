@@ -201,6 +201,8 @@ namespace SystemC_VPC{
     } catch (NotAllocatedException e){
       cerr << "Unknown Task: ID = " << fLink.process
            << " name = " << this->getTaskName(fLink.process)  << std::endl;
+
+      debugUnknownNames();
     }
     throw NotAllocatedException(this->getTaskName(fLink.process));
   }
@@ -360,6 +362,18 @@ namespace SystemC_VPC{
     return iter->second;
   }
 
+  ProcessId Director::getProcessId(std::string source, std::string dest) {
+    std::string name_hack = "msg_" + source + "_2_" + dest;
+    ProcessIdMap::const_iterator iter = processIdMap.find(name_hack);
+    if( iter == processIdMap.end() ) {
+      ProcessId id = this->uniqueProcessId();
+      processIdMap[name_hack] = id;
+      debugRouteNames[id] = make_pair(source, dest);
+    }
+    iter = processIdMap.find(name_hack);
+    return iter->second;
+  }
+
   ComponentId Director::getComponentId(std::string component) {
 #ifdef VPC_DEBUG
     cerr << " Director::getComponentId(" << component
@@ -409,8 +423,11 @@ namespace SystemC_VPC{
   FastLink Director::getFastLink(std::string source,
                                  std::string destination,
                                  std::string function){
-    std::string name_hack = "msg_" + source + "_2_" + destination;
-    return this->getFastLink(name_hack, function);
+    //    std::string name_hack = "msg_" + source + "_2_" + destination;
+    //    return this->getFastLink(name_hack, function);
+    ProcessId       pid = getProcessId( source, destination );
+    FunctionId      fid = getFunctionId( function );
+    return FastLink(pid, fid);
   }
 
   
@@ -448,6 +465,53 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
   return reverseMapping[cid];
 }  
   
+  void Director::debugUnknownNames( ){
+    bool route = false;
+    bool mappings = false;
+    for(std::map<ProcessId, std::pair<std::string, std::string> >::iterator
+          iter = debugRouteNames.begin();
+        iter != debugRouteNames.end();
+        ++iter){
+      if( !taskPool.contains( iter->first ) ){
+           if(!route){
+             std::cout << "Found unknown routes.\n"
+                       <<" Please add the following routes to the config file:"
+                       << std::endl;
+             route = true;
+           }
+
+        std::cout << "  <route  source=\""
+                  << iter->second.first
+                  << "\" destination=\""
+                  << iter->second.second
+                  << "\">\n   <hop name=\"?\">  </hop>\n  </route>"
+                  << std::endl;
+      }
+    }
+    for(std::map<ProcessId, std::string>::iterator iter =
+          debugProcessNames.begin();
+        iter != debugProcessNames.end();
+        ++iter){
+      if( !taskPool.contains( iter->first ) ){
+        if(!mappings){
+          std::cout << "\n" << std::endl;
+          std::cout << "Unknown mapping for tasks.\n"
+                    <<" Please add the following mapping to the config file:"
+                    << std::endl;
+          mappings = true;
+        }        
+        std::cout << "  <mapping source=\""
+                  << iter->second
+                  << "\" target=\"??\">\n"
+                  << "    <timing delay=\"?? us\" />\n  </mapping>"
+                  << std::endl;
+      }
+    }
+    if(route || mappings){
+      std::cout << "\n" << std::endl;
+    }
+    exit(-1);
+  }
 
 }
 
