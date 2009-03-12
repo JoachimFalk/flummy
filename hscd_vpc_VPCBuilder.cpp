@@ -619,9 +619,6 @@ namespace SystemC_VPC{
             throw InvalidArgumentException(msg);
           }
 
-          this->director->registerComponent(route);
-          this->director->registerMapping(route->getName(), route->getName());
-
           // add <hop>s
           for(DOMNode * hopNode = routeNode->getFirstChild();
               hopNode != NULL;
@@ -682,6 +679,10 @@ namespace SystemC_VPC{
               }
             }
           }
+          //this->director->registerComponent(route);
+          //this->director->registerMapping(route->getName(), route->getName());
+          this->director->registerRoute(route);
+
         }
       }
     }catch(InvalidArgumentException &e){

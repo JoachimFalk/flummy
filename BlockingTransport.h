@@ -53,6 +53,8 @@ namespace SystemC_VPC{
 
     void addHop(std::string name, AbstractComponent * hop);
 
+    const ComponentList& getHops();
+
     BlockingTransport( std::string source, std::string dest );
 
     BlockingTransport( const BlockingTransport & route );
@@ -65,6 +67,8 @@ namespace SystemC_VPC{
 
     Components                             unblockedComponents;
     Components                             blockedComponents;
+
+    ComponentList                          components;
 
     Task*                                  task;
     EventPair                              taskEvents;

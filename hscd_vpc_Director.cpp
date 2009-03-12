@@ -324,7 +324,50 @@ namespace SystemC_VPC{
     if(reverseMapping[cid] == NULL) reverseMapping[cid] = new ProcessList();
     reverseMapping[cid]->push_back(pid);
   }
+   
+  /**
+   *
+   */ 
+  void Director::registerRoute(Route* route){
+    assert(!FALLBACKMODE);
+    this->registerComponent(route);
+    const char * taskName = route->getName();
+    const char * compName = route->getName();
+
+    ProcessId       pid = getProcessId( taskName );
+    if( pid >= mappings.size() ){
+      mappings.resize( pid + 100, NULL );
+    }
+    DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< endl);
+
+    if( !taskPool.contains( pid ) ){
+      Task &task = taskPool.createObject( pid );
+      task.setProcessId( pid );
+      task.setName( taskName );
+    }
+
+    assert(pid <= mappings.size());
     
+    ComponentId cid = this->getComponentId(compName);
+
+    Delayer * comp = components[cid];
+
+    assert( comp != NULL );
+    mappings[pid] = comp;
+    const ComponentList& hops = route->getHops();
+    for(ComponentList::const_iterator iter = hops.begin();
+        iter != hops.end();
+        ++iter){
+      ComponentId hid = this->getComponentId((*iter)->getName());
+      if(reverseMapping[hid] == NULL) reverseMapping[hid] = new ProcessList();
+      DBG_OUT("register reverse Route-mapping: " << (*iter)->getName()
+                << " " << hid << " -> "
+                << pid << std::endl);
+      reverseMapping[hid]->push_back(pid);
+    }
+
+  }
+
   /**
    * \brief Implementation of Director::signalProcessEvent
    */

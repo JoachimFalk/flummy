@@ -51,6 +51,8 @@ namespace SystemC_VPC{
 
     void addHop(std::string name, AbstractComponent * hop);
 
+    const ComponentList& getHops();
+
     StaticRoute( std::string source, std::string dest );
 
     StaticRoute( const StaticRoute & route );

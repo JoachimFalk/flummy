@@ -68,6 +68,11 @@ namespace SystemC_VPC {
   }
 
   //
+  const ComponentList& StaticRoute::getHops(){
+    return components;
+  }
+
+  //
   StaticRoute::StaticRoute( std::string source, std::string dest ) {
     this->name = "msg_" + source + "_2_" + dest;
 

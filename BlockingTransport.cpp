@@ -113,6 +113,23 @@ namespace SystemC_VPC {
   }
 
   //
+  const ComponentList& BlockingTransport::getHops(){
+    if(components.empty()){
+      for(Components::const_iterator iter = unblockedComponents.begin();
+          iter != unblockedComponents.end();
+          ++iter){
+        components.push_back(iter->first);
+      }
+      for(Components::const_iterator iter = blockedComponents.begin();
+          iter != blockedComponents.end();
+          ++iter){
+        components.push_back(iter->first);
+      }
+    }
+    return components;
+  }
+
+  //
   BlockingTransport::BlockingTransport( std::string source, std::string dest ) {
     this->name = "msg_" + source + "_2_" + dest;
 
@@ -124,6 +141,7 @@ namespace SystemC_VPC {
   BlockingTransport::BlockingTransport( const BlockingTransport & route ) :
     unblockedComponents(),
     blockedComponents(),
+    components(),
     task(route.task),
     taskEvents(route.taskEvents),
     dummy(),

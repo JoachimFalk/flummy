@@ -24,12 +24,16 @@
 
 namespace SystemC_VPC{
 
+  typedef std::list<AbstractComponent *> ComponentList;
+
   /**
    * \brief Interface for classes implementing routing simulation.
    */
   class Route : public Delayer {
   public:
     virtual void addHop(std::string name, AbstractComponent * hop) = 0;
+
+    virtual const ComponentList& getHops() = 0;
 
     Route() : Delayer() {}
 

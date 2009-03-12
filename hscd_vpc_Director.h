@@ -19,6 +19,7 @@
 #define HSCD_VPC_DIRECTOR_H
 
 #include "hscd_vpc_AbstractComponent.h"
+#include "Route.h"
 #include "hscd_vpc_ProcessEventListener.h"
 #include "hscd_vpc_EventPair.h"
 #include "FastLink.h"
@@ -149,6 +150,12 @@ namespace SystemC_VPC{
      * \param compName specifies name of component
      */
     void registerMapping(const char* taskName, const char* compName);
+
+    /**
+     * \brief Register a communication route.
+     * \param route the route
+     */
+    void registerRoute(Route* route);
     
     void signalProcessEvent(Task* task);
 
