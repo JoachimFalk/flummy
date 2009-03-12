@@ -47,7 +47,7 @@ namespace SystemC_VPC{
 
   public:
     InternalLoadHysteresisGovernorFactory()
-      : windowTime( sc_time(12.5, SC_MS) ),
+      : windowTime( SC_ZERO_TIME ),
         fastTime(   sc_time(12.1, SC_MS) ),
         slowTime(   sc_time( 4.0, SC_MS) )
     {

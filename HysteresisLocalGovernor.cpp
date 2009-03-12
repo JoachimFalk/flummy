@@ -15,9 +15,11 @@ namespace SystemC_VPC{
     m_lastState(ComponentState::IDLE)
   {
     //std::cout << "InternalLoadHysteresisGovernor" << std::endl;
-    SC_METHOD(process);
-    sensitive << m_wakeup_ev;
-    dont_initialize();
+    if(m_windowTime > SC_ZERO_TIME){
+      SC_METHOD(process);
+      sensitive << m_wakeup_ev;
+      dont_initialize();
+    }
   }
 
 
