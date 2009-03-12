@@ -20,7 +20,7 @@ namespace SystemC_VPC{
       m_lastMode = newMode;
 
     if(m_components.find(ci) == m_components.end()) {
-      std::cerr << "@" << sc_time_stamp() << ": setPowerMode(" << newMode->getName() << ");" << std::endl;
+      //std::cerr << "@" << sc_time_stamp() << ": setPowerMode(" << newMode->getName() << ");" << std::endl;
       ci->getModel()->setPowerMode(m_lastMode);
     }
 
