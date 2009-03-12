@@ -88,7 +88,7 @@ pkginclude_HEADERS =				\
 ## DISABLE -lefence because is causes crashes on systemc where libefence is linked with -lpthread
 ## because of quick-thread (SystemC) pthread incompatibilities
 #libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++ -lefence
-libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++
+libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++ -ldl -rdynamic
 
 libsystemcvpc_la_SOURCES =			\
 	debug_config.cpp			\
