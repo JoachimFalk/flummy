@@ -127,6 +127,22 @@ namespace SystemC_VPC{
   void TDMAScheduler::addedNewTask(Task *task){    
     //Neu fuer TDMA: Task der entsprechenden Liste des passenden
     //TDMA-Slots hinzufuegen
+    if(PIDmap.find(task->getProcessId()) == PIDmap.end()){
+      std::cerr << "No TDMA slot for " << task->getName()
+                << " please add a TDMA slot maping e.g.:\n"
+                << "    <attribute type=\"slot?\" value=\"?? ns\"/>\n"
+                << "    <attribute type=\"" << task->getName()
+                << "\" value=\"slot?\"/>\n"
+                << std::endl;
+
+
+      if(0==TDMA_slots.size()){
+        this->_setProperty("slot0","10 ns");
+      }
+
+      this->_setProperty(task->getName().c_str(),"slot0");
+    }
+
     TDMA_slots[ PIDmap[task->getProcessId()] ].pid_fifo.push_back(task->getInstanceId());
 #ifdef VPC_DEBUG     
     cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
@@ -159,6 +175,8 @@ namespace SystemC_VPC{
                                     const TaskMap &ready_tasks,
                                     const TaskMap &running_tasks )
   {
+
+    assert(tdmaCycle != SC_ZERO_TIME);
 
     sc_time cycleTime =
       CoSupport::SystemC::modulus(sc_time_stamp(), tdmaCycle);
