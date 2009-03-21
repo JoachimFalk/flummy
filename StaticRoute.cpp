@@ -1,4 +1,5 @@
 #include "StaticRoute.h"
+#include "RoutePool.h"
 #include "hscd_vpc_Director.h"
 
 #include "debug_config.h"
@@ -18,6 +19,9 @@ namespace SystemC_VPC {
 
   //
   void StaticRoute::compute( Task* _task ) {
+    // reset hop list
+    nextHop = components.begin();
+
     task = _task;
     taskEvents = task->getBlockEvent();
     if(components.empty()){
@@ -26,13 +30,12 @@ namespace SystemC_VPC {
       Director::getInstance().signalProcessEvent(task);
       return;
     }
-    StaticRoute * route = new StaticRoute(*this);
-    route->route( EventPair(taskEvents.dii, route) );
+    this->route( EventPair(taskEvents.dii, this) );
   }
 
   //
   void StaticRoute::route( EventPair np ){
-    if(!components.empty()){
+    if(nextHop != components.end()){
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
       Task *newTask =
         Director::getInstance().allocateTask(task->getProcessId());
@@ -40,11 +43,11 @@ namespace SystemC_VPC {
       newTask->setBlockEvent(np);
       newTask->setFunctionId(task->getFunctionId());
       DBG_OUT("route on: " << components.front()->getName() << endl);
-      components.front()->compute(newTask);
-      components.pop_front();
+      (*nextHop)->compute(newTask);
+      ++nextHop;
     } else {
       Director::getInstance().signalProcessEvent(task);
-      //taskEvents.latency->notify();
+      this->pool->free(this);
     }
   }
 
@@ -68,7 +71,13 @@ namespace SystemC_VPC {
   }
 
   //
-  const ComponentList& StaticRoute::getHops(){
+  void StaticRoute::setPool(RoutePool<StaticRoute> * pool)
+  {
+    this->pool = pool;
+  }
+
+  //
+  const ComponentList& StaticRoute::getHops() const {
     return components;
   }
 
@@ -93,9 +102,12 @@ namespace SystemC_VPC {
         ++iter){
       components.push_back(*iter);
     }
+    nextHop = components.begin();
   }
 
   StaticRoute::~StaticRoute( ){
+    this->delListener(this);
+    components.clear();
     DBG_OUT("StaticRoute::~StaticRoute( )" << endl);
   }
 

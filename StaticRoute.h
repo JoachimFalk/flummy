@@ -30,6 +30,9 @@
 #include "Timing.h"
 
 namespace SystemC_VPC{
+  template<class ROUTE>
+  class RoutePool;
+
   /**
    *
    */
@@ -51,7 +54,9 @@ namespace SystemC_VPC{
 
     void addHop(std::string name, AbstractComponent * hop);
 
-    const ComponentList& getHops();
+    void setPool(RoutePool<StaticRoute> * pool);
+
+    const ComponentList& getHops() const;
 
     StaticRoute( std::string source, std::string dest );
 
@@ -68,7 +73,8 @@ namespace SystemC_VPC{
     EventPair                              taskEvents;
     CoSupport::SystemC::Event              dummy;
     std::string                            name;
-
+    Components::iterator                   nextHop;
+    RoutePool<StaticRoute>                *pool;
     
   };
 }

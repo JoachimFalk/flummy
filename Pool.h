@@ -59,9 +59,17 @@ namespace SystemC_VPC {
     /**
      * \brief Default constructor of PrototypedPool
      */
-    template<typename KEY>
-    PrototypedPool( AssociativePrototypedPool<KEY, OBJECT> *parent ) {
-      prototype = new OBJECT(parent);
+    template<typename P1>
+    PrototypedPool( P1 p1 ) {
+      prototype = new OBJECT(p1);
+    }
+
+    /**
+     * \brief constructor of PrototypedPool with parameter support
+     */
+    template<typename P1, typename P2>
+    PrototypedPool( P1 p1, P2 p2 ) {
+      prototype = new OBJECT(p1, p2);
     }
 
     ~PrototypedPool(){
@@ -87,7 +95,7 @@ namespace SystemC_VPC {
     /**
      * \brief Gets prototype instance of managed type
      */ 
-    OBJECT& getPrototype(){
+    OBJECT& getPrototype() const {
       return *prototype;
     }
 
@@ -100,6 +108,9 @@ namespace SystemC_VPC {
 
       OBJECT* instance = NULL;
 
+      //      typename std::map<int, OBJECT* >::iterator iter
+      //        = this->freeObjects.begin();
+      //      if( iter != this->freeObjects.end() ){
       if(this->freeObjects.size() > 0){
         typename std::map<int, OBJECT* >::iterator iter;
         iter = this->freeObjects.begin();

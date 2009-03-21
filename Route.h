@@ -33,11 +33,20 @@ namespace SystemC_VPC{
   public:
     virtual void addHop(std::string name, AbstractComponent * hop) = 0;
 
-    virtual const ComponentList& getHops() = 0;
+    virtual const ComponentList& getHops() const = 0;
 
-    Route() : Delayer() {}
+    Route() : Delayer(), instanceId(++instanceCounter) {}
 
     virtual ~Route(){}
+
+    int getInstanceId() const
+    {
+      return instanceId;
+    }
+
+  private:
+    const int instanceId;
+    static int instanceCounter;
   };
 
 }

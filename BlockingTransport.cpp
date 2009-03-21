@@ -1,4 +1,5 @@
 #include "BlockingTransport.h"
+#include "RoutePool.h"
 #include "hscd_vpc_Director.h"
 
 #include "debug_config.h"
@@ -19,6 +20,9 @@ namespace SystemC_VPC {
   //
   void BlockingTransport::compute( Task* _task ) {
     task = _task;
+    this->resetLists();
+    this->reset();
+
     taskEvents = task->getBlockEvent();
     for(Components::iterator iter = this->unblockedComponents.begin();
         iter != this->unblockedComponents.end();
@@ -31,8 +35,9 @@ namespace SystemC_VPC {
     }
 
     //assert(!unblockedComponents.empty());
-    BlockingTransport * route = new BlockingTransport(*this);
-    route->route( EventPair(taskEvents.dii, route) );
+    //BlockingTransport * route = new BlockingTransport(*this);
+    //route->route( EventPair(taskEvents.dii, route) );
+    this->route( EventPair(taskEvents.dii, this) );
   }
 
   //
@@ -54,21 +59,27 @@ namespace SystemC_VPC {
         unblockedComponents.pop_back();
         blockedComponents.push_back(std::make_pair(comp, actualTask));
       }
+
+      // reset hop list
+      nextHop = blockedComponents.end();
+
       DBG_OUT("b_transport (" << actualTask->getName()
               << ") on: " << comp->getName() << std::endl);
       actualTask->setBlockEvent(np);
 
       comp->requestBlockingCompute(actualTask, this);
-    } else if(!blockedComponents.empty()){
+    } else if( nextHop != blockedComponents.begin() ){
+      --nextHop;
       DBG_OUT("blocked all resources" << std::endl);
-      AbstractComponent * comp = blockedComponents.back().first;
-      Task* actualTask = blockedComponents.back().second;
+      AbstractComponent * comp = nextHop->first;
+      Task* actualTask = nextHop->second;
       actualTask->setBlockEvent(np);
       comp->execBlockingCompute(actualTask, this);
-      blockedComponents.pop_back();
     } else {
       Director::getInstance().signalProcessEvent(task);
-      //taskEvents.latency->notify();
+      this->resetLists();
+      //FIXME: something went wrong when a BlockingTransport is reused
+      //this->pool->free(this);
     }
   }
 
@@ -82,18 +93,8 @@ namespace SystemC_VPC {
         //AbstractComponent * comp = blockedComponents.back().first;
         Task* actualTask = blockedComponents.back().second;
         if( !actualTask->isAckedBlocking()){
-          while(!blockedComponents.empty()){
-            Task* task = blockedComponents.back().second;
-            AbstractComponent * c = blockedComponents.back().first;
-            task->resetBlockingCompute();
-            c->abortBlockingCompute(task, this);
-            if(this->task->isWrite()){
-              unblockedComponents.push_front(blockedComponents.back());
-            } else {
-              unblockedComponents.push_back(blockedComponents.back());
-            }
-            blockedComponents.pop_back();
-          }
+          this->resetHops();
+          this->resetLists();
           return;
         }
       }
@@ -110,22 +111,17 @@ namespace SystemC_VPC {
   void BlockingTransport::addHop(std::string name, AbstractComponent * hop){
     Task * dummy = NULL;
     unblockedComponents.push_back(std::make_pair(hop, dummy));
+    components.push_back(hop);
   }
 
   //
-  const ComponentList& BlockingTransport::getHops(){
-    if(components.empty()){
-      for(Components::const_iterator iter = unblockedComponents.begin();
-          iter != unblockedComponents.end();
-          ++iter){
-        components.push_back(iter->first);
-      }
-      for(Components::const_iterator iter = blockedComponents.begin();
-          iter != blockedComponents.end();
-          ++iter){
-        components.push_back(iter->first);
-      }
-    }
+  void BlockingTransport::setPool(RoutePool<BlockingTransport> * pool)
+  {
+    this->pool = pool;
+  }
+
+  //
+  const ComponentList& BlockingTransport::getHops() const {
     return components;
   }
 
@@ -152,14 +148,53 @@ namespace SystemC_VPC {
         ++iter){
       unblockedComponents.push_back(*iter);
     }
+    nextHop = blockedComponents.end();
+
   }
 
   BlockingTransport::~BlockingTransport( ){
+    this->delListener(this);
     DBG_OUT("BlockingTransport::~BlockingTransport( )" << endl);
   }
 
   //
   const char* BlockingTransport::getName() const {
     return this->name.c_str();
+  }
+
+  //
+  void BlockingTransport::resetHops(){
+    for(Components::iterator iter = blockedComponents.begin();
+        iter != blockedComponents.end();
+        ++iter){
+      Task* task = iter->second;
+      AbstractComponent * c = iter->first;
+      task->resetBlockingCompute();
+      c->abortBlockingCompute(task, this);
+      /*
+      if(this->task->isWrite()){
+        unblockedComponents.push_front(blockedComponents.back());
+      } else {
+        unblockedComponents.push_back(blockedComponents.back());
+      }
+      blockedComponents.pop_back();
+      */
+    }
+  }
+
+  //
+  void BlockingTransport::resetLists(){
+    while(!blockedComponents.empty()){
+      //Task* task = blockedComponents.back().second;
+      //      AbstractComponent * c = blockedComponents.back().first;
+      //      task->resetBlockingCompute();
+      //      c->abortBlockingCompute(task, this);
+      if(this->task->isWrite()){
+        unblockedComponents.push_front(blockedComponents.back());
+      } else {
+        unblockedComponents.push_back(blockedComponents.back());
+      }
+      blockedComponents.pop_back();
+    }
   }
 }

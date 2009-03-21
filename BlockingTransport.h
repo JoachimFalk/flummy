@@ -32,6 +32,9 @@
 #include "Timing.h"
 
 namespace SystemC_VPC{
+  template<class ROUTE>
+  class RoutePool;
+
   /**
    *
    */
@@ -53,7 +56,9 @@ namespace SystemC_VPC{
 
     void addHop(std::string name, AbstractComponent * hop);
 
-    const ComponentList& getHops();
+    void setPool(RoutePool<BlockingTransport> * pool);
+
+    const ComponentList& getHops() const;
 
     BlockingTransport( std::string source, std::string dest );
 
@@ -62,6 +67,10 @@ namespace SystemC_VPC{
     ~BlockingTransport( );
 
     const char* getName() const;
+  private:
+    void resetHops();
+    void resetLists();
+
   private:
     typedef std::list<std::pair<AbstractComponent *, Task *> > Components;
 
@@ -74,6 +83,8 @@ namespace SystemC_VPC{
     EventPair                              taskEvents;
     CoSupport::SystemC::Event              dummy;
     std::string                            name;
+    Components::iterator                   nextHop;
+    RoutePool<BlockingTransport>          *pool;
 
     
   };

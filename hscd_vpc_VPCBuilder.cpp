@@ -12,6 +12,7 @@
 #include "hscd_vpc_VpcDomErrorHandler.h"
 #include "hscd_vpc_datatypes.h"
 #include "StaticRoute.h"
+#include "RoutePool.h"
 
 #include "debug_config.h"
 // if compiled with DBG_COMPONENT create stream and include debug macros
@@ -609,9 +610,9 @@ namespace SystemC_VPC{
 
           Route * route = NULL;
           if(type == B_TRANSPORT){
-            route = new BlockingTransport(src, dest);
+            route = new RoutePool<BlockingTransport>(src, dest);
           } else if(type == STATIC_ROUTE) {
-            route = new StaticRoute(src, dest);
+            route = new RoutePool<StaticRoute>(src, dest);
           } else{
             std::string msg("Unknown Routing type: type=");
             msg += type;

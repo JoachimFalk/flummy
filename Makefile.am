@@ -110,6 +110,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_ProcessControlBlock.cpp	\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
+	Route.cpp				\
 	PowerSumming.cpp                        \
 	HysteresisLocalGovernor.cpp		\
 	SelectFastestPowerModeGlobalGovernor.cpp\
