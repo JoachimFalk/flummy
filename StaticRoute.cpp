@@ -84,6 +84,7 @@ namespace SystemC_VPC {
   //
   StaticRoute::StaticRoute( std::string source, std::string dest ) {
     this->name = "msg_" + source + "_2_" + dest;
+    this->addListener(this);
 
     //components.push_back(comp);
     //components.push_back(bus);
