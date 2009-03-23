@@ -137,19 +137,7 @@ namespace SystemC_VPC{
 #endif //NO_VCD_TRACES      
     }
       
-    virtual ~Component()
-    {
-      this->setPowerConsumption(0.0);
-      this->fireNotification(this);
-#ifndef NO_POWER_SUM
-      this->removeObserver(powerSumming);
-      delete powerSumming;
-      delete powerSumStream;
-#endif // NO_POWER_SUM
-#ifndef NO_VCD_TRACES
-      sc_close_vcd_trace_file(traceFile);
-#endif //NO_VCD_TRACES      
-    }
+    virtual ~Component();
 
     /**
      * \brief Set parameter for Component and Scheduler.

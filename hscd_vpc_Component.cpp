@@ -604,5 +604,26 @@ namespace SystemC_VPC{
     localGovernorFactory = Component::factories[plugin]->factory;
   }
 
+  Component::~Component(){
+    this->setPowerConsumption(0.0);
+    this->fireNotification(this);
+#ifndef NO_POWER_SUM
+    this->removeObserver(powerSumming);
+    delete powerSumming;
+    delete powerSumStream;
+#endif // NO_POWER_SUM
+#ifndef NO_VCD_TRACES
+    for(std::map<std::string, Tracing* >::iterator iter
+          = trace_map_by_name.begin();
+        iter != trace_map_by_name.end();
+        ++iter){
+      delete iter->second;
+    }
+    trace_map_by_name.clear();
+    sc_close_vcd_trace_file(traceFile);
+#endif //NO_VCD_TRACES      
+  }
+
+
   Component::Factories Component::factories;
 } //namespace SystemC_VPC
