@@ -72,18 +72,29 @@ namespace SystemC_VPC{
     void resetLists();
 
   private:
+    enum Phase {
+      LOCK_ROUTE,
+      COMPUTE_ROUTE
+    };
     typedef std::list<std::pair<AbstractComponent *, Task *> > Components;
 
-    Components                             unblockedComponents;
-    Components                             blockedComponents;
-
+    Components                             hopList;
+    Components                             lockList;
+    Components::iterator                   nextHop;
     ComponentList                          components;
+
+    // blocking transport has two phases:
+    // - lock the route
+    // - apply the route
+    Phase                                  phase;
+
+    // a rout is either input (read) or output (write)
+    bool                                   isWrite;
 
     Task*                                  task;
     EventPair                              taskEvents;
     CoSupport::SystemC::Event              dummy;
     std::string                            name;
-    Components::iterator                   nextHop;
     RoutePool<BlockingTransport>          *pool;
 
     
