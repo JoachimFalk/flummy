@@ -90,6 +90,15 @@ namespace SystemC_VPC {
           ++iter){
         delete iter->second;
       }
+
+      for(typename std::map<int, OBJECT* >::iterator iter
+            = this->usedObjects.begin(); 
+          iter != this->usedObjects.end();
+          ++iter){
+        delete iter->second;
+      }
+      
+      delete prototype;
     }
 
     /**
