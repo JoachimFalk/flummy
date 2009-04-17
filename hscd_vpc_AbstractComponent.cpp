@@ -15,9 +15,9 @@
  * ----------------------------------------------------------------------------
  * $log$
  *****************************************************************************/
-#include "hscd_vpc_AbstractComponent.h"
-#include "ComponentObserver.h"
-#include "ComponentInfo.h"
+#include "systemcvpc/hscd_vpc_AbstractComponent.h"
+#include "systemcvpc/ComponentObserver.h"
+#include "systemcvpc/ComponentInfo.h"
 
 namespace SystemC_VPC{
 

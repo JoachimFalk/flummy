@@ -1,9 +1,9 @@
 #ifndef __INCLUDED_PLUGGABLEPOWERGOVERNOR_H_
 #define __INCLUDED_PLUGGABLEPOWERGOVERNOR_H_
 
-#include "PowerGovernor.h"
-#include "PowerMode.h"
-#include "dynload/dll.h"
+#include "systemcvpc/PowerGovernor.h"
+#include "systemcvpc/PowerMode.h"
+#include "systemcvpc/dynload/dll.h"
 
 namespace SystemC_VPC{
 

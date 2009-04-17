@@ -4,8 +4,8 @@
 #include <sstream>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
-#include "FastLink.h"
-#include "hscd_vpc_ProcessControlBlock.h"
+#include "systemcvpc/FastLink.h"
+#include "systemcvpc/hscd_vpc_ProcessControlBlock.h"
 #include "TaskPool.h"
 
 namespace SystemC_VPC {

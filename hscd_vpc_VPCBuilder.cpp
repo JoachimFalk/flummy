@@ -4,17 +4,17 @@
 #include <cctype>
 #include <string>
 
-#include "hscd_vpc_Component.h"
-#include "FCFSComponent.h"
-#include "BlockingTransport.h"
-#include "hscd_vpc_VPCBuilder.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_VpcDomErrorHandler.h"
-#include "hscd_vpc_datatypes.h"
-#include "StaticRoute.h"
-#include "RoutePool.h"
+#include "systemcvpc/hscd_vpc_Component.h"
+#include "systemcvpc/FCFSComponent.h"
+#include "systemcvpc/BlockingTransport.h"
+#include "systemcvpc/hscd_vpc_VPCBuilder.h"
+#include "systemcvpc/hscd_vpc_Director.h"
+#include "systemcvpc/hscd_vpc_VpcDomErrorHandler.h"
+#include "systemcvpc/hscd_vpc_datatypes.h"
+#include "systemcvpc/StaticRoute.h"
+#include "systemcvpc/RoutePool.h"
 
-#include "debug_config.h"
+#include "systemcvpc/debug_config.h"
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_VPCBUILDER
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -23,9 +23,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include "debug_on.h"
+  #include "systemcvpc/debug_on.h"
 #else
-  #include "debug_off.h"
+  #include "systemcvpc/debug_off.h"
 #endif
 
 namespace SystemC_VPC{

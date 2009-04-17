@@ -1,5 +1,5 @@
-#include "ComponentInfo.h"
-#include "PowerSumming.h"
+#include "systemcvpc/ComponentInfo.h"
+#include "systemcvpc/PowerSumming.h"
 
 #include <fstream>
 #include <systemc.h>

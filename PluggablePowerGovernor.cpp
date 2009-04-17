@@ -1,4 +1,4 @@
-#include "PluggablePowerGovernor.hpp"
+#include "systemcvpc/PluggablePowerGovernor.hpp"
 
 namespace SystemC_VPC{
   GenericParameter::~GenericParameter() {}

@@ -15,10 +15,10 @@
  * ----------------------------------------------------------------------------
  * $log$
  *****************************************************************************/
-#include "FCFSComponent.h"
+#include "systemcvpc/FCFSComponent.h"
 //#include "hscd_vpc_Scheduler.h"
-#include "hscd_vpc_datatypes.h"
-#include "Task.h"
+#include "systemcvpc/hscd_vpc_datatypes.h"
+#include "systemcvpc/Task.h"
 
 #include <float.h>
 

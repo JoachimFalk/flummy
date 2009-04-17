@@ -1,8 +1,8 @@
-#include "BlockingTransport.h"
-#include "RoutePool.h"
-#include "hscd_vpc_Director.h"
+#include "systemcvpc/BlockingTransport.h"
+#include "systemcvpc/RoutePool.h"
+#include "systemcvpc/hscd_vpc_Director.h"
 
-#include "debug_config.h"
+#include "systemcvpc/debug_config.h"
 // if compiled with DBG_STATIC_ROUTE create stream and include debug macros
 #ifdef DBG_BLOCKING_TRANSPORT
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -10,9 +10,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include "debug_on.h"
+  #include "systemcvpc/debug_on.h"
 #else
-  #include "debug_off.h"
+  #include "systemcvpc/debug_off.h"
 #endif
 
 namespace SystemC_VPC {

@@ -1,5 +1,5 @@
-#include "SelectFastestPowerModeGlobalGovernor.hpp"
-#include "ComponentModel.h"
+#include "systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp"
+#include "systemcvpc/ComponentModel.h"
 
 namespace SystemC_VPC{
 

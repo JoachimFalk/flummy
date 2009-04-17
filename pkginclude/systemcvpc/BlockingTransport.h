@@ -25,9 +25,9 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
-#include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_EventPair.h"
-#include "hscd_vpc_ProcessControlBlock.h"
+#include "systemcvpc/hscd_vpc_AbstractComponent.h"
+#include "systemcvpc/hscd_vpc_EventPair.h"
+#include "systemcvpc/hscd_vpc_ProcessControlBlock.h"
 #include "Route.h"
 #include "Timing.h"
 

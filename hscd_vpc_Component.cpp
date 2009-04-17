@@ -15,22 +15,22 @@
  * ----------------------------------------------------------------------------
  * $log$
  *****************************************************************************/
-#include "hscd_vpc_Component.h"
-#include "hscd_vpc_Scheduler.h"
-#include "hscd_vpc_FCFSScheduler.h"
-#include "TDMAScheduler.h"
-#include "FlexRayScheduler.h"
-#include "TimeTriggeredCCScheduler.h"
-#include "hscd_vpc_RoundRobinScheduler.h"
-#include "hscd_vpc_PrioritySchedulerNoPreempt.h"
-#include "hscd_vpc_PriorityScheduler.h"
-#include "hscd_vpc_RateMonotonicScheduler.h"
-#include "hscd_vpc_datatypes.h"
-#include "Task.h"
+#include "systemcvpc/hscd_vpc_Component.h"
+#include "systemcvpc/hscd_vpc_Scheduler.h"
+#include "systemcvpc/hscd_vpc_FCFSScheduler.h"
+#include "systemcvpc/TDMAScheduler.h"
+#include "systemcvpc/FlexRayScheduler.h"
+#include "systemcvpc/TimeTriggeredCCScheduler.h"
+#include "systemcvpc/hscd_vpc_RoundRobinScheduler.h"
+#include "systemcvpc/hscd_vpc_PrioritySchedulerNoPreempt.h"
+#include "systemcvpc/hscd_vpc_PriorityScheduler.h"
+#include "systemcvpc/hscd_vpc_RateMonotonicScheduler.h"
+#include "systemcvpc/hscd_vpc_datatypes.h"
+#include "systemcvpc/Task.h"
 
 #include <float.h>
 
-#include "debug_config.h"
+#include "systemcvpc/debug_config.h"
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_COMPONENT
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -39,9 +39,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include "debug_on.h"
+  #include "systemcvpc/debug_on.h"
 #else
-  #include "debug_off.h"
+  #include "systemcvpc/debug_off.h"
 #endif
 
 namespace SystemC_VPC{

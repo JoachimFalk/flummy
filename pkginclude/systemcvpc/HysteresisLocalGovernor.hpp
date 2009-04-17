@@ -7,9 +7,9 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
-#include "PowerMode.h"
-#include "hscd_vpc_Director.h"
-#include "PluggablePowerGovernor.hpp"
+#include "systemcvpc/PowerMode.h"
+#include "systemcvpc/hscd_vpc_Director.h"
+#include "systemcvpc/PluggablePowerGovernor.hpp"
 
 namespace SystemC_VPC{
 

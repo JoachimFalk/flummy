@@ -1,7 +1,7 @@
-#include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_ProcessControlBlock.h"
+#include "systemcvpc/hscd_vpc_AbstractComponent.h"
+#include "systemcvpc/hscd_vpc_ProcessControlBlock.h"
 
-#include "debug_config.h"
+#include "systemcvpc/debug_config.h"
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_PCB
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -10,9 +10,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include "debug_on.h"
+  #include "systemcvpc/debug_on.h"
 #else
-  #include "debug_off.h"
+  #include "systemcvpc/debug_off.h"
 #endif
 
 namespace SystemC_VPC{
