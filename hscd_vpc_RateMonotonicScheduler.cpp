@@ -1,7 +1,7 @@
-#include <hscd_vpc_RateMonotonicScheduler.h>
-#include <hscd_vpc_Director.h>
-#include <hscd_vpc_Component.h>
-#include <hscd_vpc_datatypes.h>
+#include "hscd_vpc_RateMonotonicScheduler.h"
+#include "hscd_vpc_Director.h"
+#include "hscd_vpc_Component.h"
+#include "hscd_vpc_datatypes.h"
 
 namespace SystemC_VPC{
   RateMonotonicScheduler::RateMonotonicScheduler(const char *schedulername){

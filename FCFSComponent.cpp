@@ -15,9 +15,9 @@
  * ----------------------------------------------------------------------------
  * $log$
  *****************************************************************************/
-#include <FCFSComponent.h>
-//#include <hscd_vpc_Scheduler.h>
-#include <hscd_vpc_datatypes.h>
+#include "FCFSComponent.h"
+//#include "hscd_vpc_Scheduler.h"
+#include "hscd_vpc_datatypes.h"
 #include "Task.h"
 
 #include <float.h>

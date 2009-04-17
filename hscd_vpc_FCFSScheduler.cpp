@@ -1,6 +1,6 @@
-#include <hscd_vpc_FCFSScheduler.h>
-#include <hscd_vpc_Director.h>
-#include <hscd_vpc_Component.h>
+#include "hscd_vpc_FCFSScheduler.h"
+#include "hscd_vpc_Director.h"
+#include "hscd_vpc_Component.h"
 
 namespace SystemC_VPC{
 

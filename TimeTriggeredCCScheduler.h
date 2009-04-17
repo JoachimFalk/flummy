@@ -1,12 +1,13 @@
 #ifndef TIMETRIGGEREDCCSCHEDULER_H
 #define TIMETRIGGEREDCCSCHEDULER_H
 #include <systemc.h>
-#include <hscd_vpc_Scheduler.h>
-#include <hscd_vpc_datatypes.h>
 #include <map>
 #include <deque>
-#include <TDMAScheduler.h>
-#include <FlexRayScheduler.h>
+
+#include "hscd_vpc_Scheduler.h"
+#include "hscd_vpc_datatypes.h"
+#include "TDMAScheduler.h"
+#include "FlexRayScheduler.h"
 
 
 namespace SystemC_VPC{

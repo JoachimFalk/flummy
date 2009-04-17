@@ -1,12 +1,13 @@
 #ifndef HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
 #define HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
 #include <systemc.h>
-#include <hscd_vpc_Scheduler.h>
-#include <hscd_vpc_datatypes.h>
 #include <map>
 #include <queue>
 #include <vector>
-#include <hscd_vpc_PriorityScheduler.h>
+
+#include "hscd_vpc_Scheduler.h"
+#include "hscd_vpc_datatypes.h"
+#include "hscd_vpc_PriorityScheduler.h"
 
 namespace SystemC_VPC{
   class Component;

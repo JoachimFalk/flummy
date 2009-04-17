@@ -20,10 +20,10 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
-#include <hscd_vpc_Director.h>
-#include <hscd_vpc_AbstractComponent.h>
-#include <hscd_vpc_VPCBuilder.h>
-#include <StaticRoute.h>
+#include "hscd_vpc_Director.h"
+#include "hscd_vpc_AbstractComponent.h"
+#include "hscd_vpc_VPCBuilder.h"
+#include "StaticRoute.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 #include "PowerSumming.h"
 #include "Task.h"
