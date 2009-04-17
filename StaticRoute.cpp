@@ -92,6 +92,7 @@ namespace SystemC_VPC {
 
   //
   StaticRoute::StaticRoute( const StaticRoute & route ) :
+    Route(route),
     components(),
     task(route.task),
     taskEvents(route.taskEvents),
