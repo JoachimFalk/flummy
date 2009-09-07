@@ -164,7 +164,7 @@ namespace SystemC_VPC {
   }
 
   //
-  void BlockingTransport::addHop(std::string name, AbstractComponent * hop){
+  void BlockingTransport::addHop(std::string name, AbstractComponent * hop, FunctionId* layer){
     components.push_back(hop);
   }
 

@@ -52,7 +52,7 @@ namespace SystemC_VPC{
 
     void eventDestroyed(EventWaiter *e);
 
-    void addHop(std::string name, AbstractComponent * hop);
+    void addHop(std::string name, AbstractComponent * hop, FunctionId *layer = 0);
 
     void setPool(RoutePool<StaticRoute> * pool);
 
@@ -66,14 +66,17 @@ namespace SystemC_VPC{
 
     const char* getName() const;
   private:
+    typedef std::list<FunctionId> Components_fid;
     typedef std::list<AbstractComponent *> Components;
 
+    Components_fid                             components_fid;
     Components                             components;
     Task*                                  task;
     EventPair                              taskEvents;
     CoSupport::SystemC::Event              dummy;
     std::string                            name;
     Components::iterator                   nextHop;
+    Components_fid::iterator                   nextHop_fid;
     RoutePool<StaticRoute>                *pool;
     
   };

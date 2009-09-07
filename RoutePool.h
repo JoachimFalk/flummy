@@ -35,9 +35,9 @@ namespace SystemC_VPC{
   {
   public:
 
-    void addHop(std::string name, AbstractComponent * hop)
+    void addHop(std::string name, AbstractComponent * hop, FunctionId *layer = 0)
     {
-      return this->getPrototype().addHop(name, hop);
+      return this->getPrototype().addHop(name, hop, layer);
     }
 
     const ComponentList& getHops() const

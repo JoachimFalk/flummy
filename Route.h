@@ -31,7 +31,8 @@ namespace SystemC_VPC{
    */
   class Route : public Delayer {
   public:
-    virtual void addHop(std::string name, AbstractComponent * hop) = 0;
+
+    virtual void addHop(std::string name, AbstractComponent * hop, FunctionId *layer = 0) = 0;
 
     virtual const ComponentList& getHops() const = 0;
 

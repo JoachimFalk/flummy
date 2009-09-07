@@ -21,6 +21,7 @@ namespace SystemC_VPC {
   void StaticRoute::compute( Task* _task ) {
     // reset hop list
     nextHop = components.begin();
+    nextHop_fid = components_fid.begin();
 
     task = _task;
     taskEvents = task->getBlockEvent();
@@ -41,10 +42,11 @@ namespace SystemC_VPC {
         Director::getInstance().allocateTask(task->getProcessId());
       newTask->setTimingScale(task->getTimingScale());
       newTask->setBlockEvent(np);
-      newTask->setFunctionId(task->getFunctionId());
+      newTask->setFunctionId(*nextHop_fid);
       DBG_OUT("route on: " << components.front()->getName() << endl);
       (*nextHop)->compute(newTask);
       ++nextHop;
+      ++nextHop_fid;
     } else {
       Director::getInstance().signalProcessEvent(task);
       this->pool->free(this);
@@ -66,9 +68,17 @@ namespace SystemC_VPC {
   }
 
   //
-  void StaticRoute::addHop(std::string name, AbstractComponent * hop){
+  void StaticRoute::addHop(std::string name, AbstractComponent * hop, FunctionId *layer){
+      if(layer!= NULL){
+	components_fid.push_back(*layer);
+	hop->setLayer(*layer);
+      }else{
+        hop->setLayer(0);
+        components_fid.push_back(0);
+      }
     components.push_back(hop);
   }
+
 
   //
   void StaticRoute::setPool(RoutePool<StaticRoute> * pool)
@@ -94,14 +104,18 @@ namespace SystemC_VPC {
   StaticRoute::StaticRoute( const StaticRoute & route ) :
     Route(route),
     components(),
+    components_fid(),
     task(route.task),
     taskEvents(route.taskEvents),
     dummy(),
     name(route.name) {
     this->addListener(this);
+    Components_fid::const_iterator iter2 = route.components_fid.begin();
     for(Components::const_iterator iter = route.components.begin();
         iter != route.components.end();
         ++iter){
+      components_fid.push_back(*iter2);
+      ++iter2;
       components.push_back(*iter);
     }
     nextHop = components.begin();
@@ -110,6 +124,7 @@ namespace SystemC_VPC {
   StaticRoute::~StaticRoute( ){
     this->delListener(this);
     components.clear();
+    components_fid.clear();
     DBG_OUT("StaticRoute::~StaticRoute( )" << endl);
   }
 

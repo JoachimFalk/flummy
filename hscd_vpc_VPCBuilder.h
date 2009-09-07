@@ -66,6 +66,7 @@ namespace SystemC_VPC{
     XMLCh *powerModeStr;
     
     XMLCh* nameAttrStr;
+    XMLCh* layerAttrStr;
     XMLCh* countAttrStr;
     XMLCh* typeAttrStr;
     XMLCh* dividerAttrStr;
@@ -123,6 +124,7 @@ namespace SystemC_VPC{
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");
+      layerAttrStr    = XMLString::transcode("layer");
       countAttrStr  = XMLString::transcode("count");
       typeAttrStr    = XMLString::transcode("type");
       dividerAttrStr  = XMLString::transcode("divider");

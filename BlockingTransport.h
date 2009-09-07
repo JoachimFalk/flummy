@@ -54,7 +54,7 @@ namespace SystemC_VPC{
 
     void eventDestroyed(EventWaiter *e);
 
-    void addHop(std::string name, AbstractComponent * hop);
+    void addHop(std::string name, AbstractComponent * hop, FunctionId *layer = 0);
 
     void setPool(RoutePool<BlockingTransport> * pool);
 

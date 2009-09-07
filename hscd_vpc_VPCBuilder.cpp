@@ -636,13 +636,22 @@ namespace SystemC_VPC{
               std::map<std::string, AbstractComponent* >::iterator iterComp =
                 this->knownComps.find(name);
               assert( iterComp != this->knownComps.end() );
-              AbstractComponent* hop = iterComp->second; 
+              AbstractComponent* hop = iterComp->second;
+	      std::string route_name(route->getName());
               ProcessControlBlock& pcb =
-                hop->createPCB(this->director->getProcessId(route->getName()));
-              pcb.setName(route->getName());
-
-              
-              route->addHop( name, hop );
+                hop->createPCB(this->director->getProcessId(route_name));
+              pcb.setName(route_name);
+	      
+	      //is there a layerAttrStr?
+	      std::string layer = "";
+	      if(hopNode->getAttributes()->getNamedItem(layerAttrStr)!=0)
+		{
+		  layer = XMLString::transcode(hopNode->getAttributes()->getNamedItem(layerAttrStr)->getNodeValue());
+		  FunctionId fid = this->director->createFunctionId(layer);
+		  route->addHop( name, hop, &fid);
+		}else{
+		  route->addHop( name, hop );
+		}
               (iterComp->second)->informAboutMapping(route->getName());
 
               // parse <timing>s
@@ -658,7 +667,10 @@ namespace SystemC_VPC{
                   //pcb.addDelay( t.fid, t.dii );
                   //pcb.addLatency( t.fid, t.latency );
                  // pcb.setPriority(5);
-                  pcb.setTiming(t);
+		 if(layer!=""){
+		    t.fid = this->director->createFunctionId(layer);
+		    }
+		  pcb.setTiming(t);
                 }else if( 0==XMLString::compareNString( xmlName,
                                                     attributeStr,
                                                     sizeof(attributeStr))){

@@ -185,11 +185,19 @@ class ComponentObserver;
       }
       return (*pool)[pid];
     }
+    
+    void setLayer(FunctionId new_layer){
+      layer = new_layer;
+      }
+    FunctionId getLayer(void){
+      return layer;
+      }
     private:
     /**
      *
      */
     PCBPool pcbPool;
+    FunctionId layer;
     FunctionTimingPool * timingPool;
     std::map<const PowerMode*, FunctionTimingPool*> timingPools;
     const PowerMode *powerMode;
