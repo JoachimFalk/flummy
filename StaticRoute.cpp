@@ -28,6 +28,7 @@ namespace SystemC_VPC {
       taskEvents.dii->notify();
       //taskEvents.latency->notify();
       Director::getInstance().signalProcessEvent(task);
+      this->pool->free(this);
       return;
     }
     this->route( EventPair(taskEvents.dii, this) );
