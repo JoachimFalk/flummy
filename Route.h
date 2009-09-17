@@ -37,6 +37,8 @@ namespace SystemC_VPC{
 
     Route() : Delayer(), instanceId(++instanceCounter) {}
 
+    Route(const Route & orig) : Delayer(orig), instanceId(++instanceCounter) {}
+
     virtual ~Route(){}
 
     int getInstanceId() const
