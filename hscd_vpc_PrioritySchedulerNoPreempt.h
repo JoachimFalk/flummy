@@ -17,6 +17,7 @@ namespace SystemC_VPC{
 
     PrioritySchedulerNoPreempt(){
       order_counter=0;
+      current_task=NULL;
     }
     PrioritySchedulerNoPreempt(const char *schedulername);
     virtual ~PrioritySchedulerNoPreempt(){}
@@ -36,6 +37,9 @@ namespace SystemC_VPC{
     int order_counter;
     p_queue_compare comp;
     std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,p_queue_compare> pqueue;
+    
+    private:
+    Task *current_task;
 
   };
 }

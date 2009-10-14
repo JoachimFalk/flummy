@@ -10,6 +10,7 @@ namespace SystemC_VPC{
       pqueue(comp);
 
     order_counter=0;
+    current_task=NULL;
   }
 
   void PrioritySchedulerNoPreempt::setProperty(const char* key, const char* value){
@@ -35,6 +36,8 @@ namespace SystemC_VPC{
    *
    */
   void PrioritySchedulerNoPreempt::removedTask(Task *task){
+    assert (current_task == task);
+    current_task=NULL;
   }
 
   /**
@@ -47,6 +50,12 @@ namespace SystemC_VPC{
      const  TaskMap &running_tasks)
    {
      scheduling_decision ret_decision=NOCHANGE;
+     
+     //added due to usability in AutosarScheduler
+     if(current_task != NULL && running_tasks.size()==0){
+	task_to_assign=current_task->getInstanceId();
+	ret_decision=ONLY_ASSIGN;
+     }else{     
      if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
 
      // hoechste prioritaet�der ready tasks
@@ -55,9 +64,12 @@ namespace SystemC_VPC{
 
      if(running_tasks.size()!=0){
         //nothing to do, NO PREEMPTIVE-Scheduler
+	ret_decision=NOCHANGE;
      }else{
        pqueue.pop();
        ret_decision=ONLY_ASSIGN;  
+       current_task=prior_ready.task;
+     }
      }
 
      return ret_decision;
