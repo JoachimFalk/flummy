@@ -11,6 +11,7 @@ namespace SystemC_VPC {
 #define VPC_MAX_STRING_LENGTH 128
 #define STR_TDMA "TDMA"
 #define STR_FLEXRAY "FlexRay"
+#define STR_AUTOSAR "Autosar"
 #define STR_TTCC "TTCC"
 #define STR_ROUNDROBIN "RoundRobin"
 #define STR_RR "RR"

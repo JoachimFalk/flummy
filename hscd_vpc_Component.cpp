@@ -20,6 +20,7 @@
 #include "hscd_vpc_FCFSScheduler.h"
 #include "TDMAScheduler.h"
 #include "FlexRayScheduler.h"
+#include "AutosarScheduler.h"
 #include "TimeTriggeredCCScheduler.h"
 #include "hscd_vpc_RoundRobinScheduler.h"
 #include "hscd_vpc_PrioritySchedulerNoPreempt.h"
@@ -375,6 +376,9 @@ namespace SystemC_VPC{
     }else if( 0==strncmp(schedulername,STR_FLEXRAY,
                          strlen(STR_FLEXRAY))){
       scheduler=new FlexRayScheduler((const char*)schedulername);
+    }else if( 0==strncmp(schedulername,STR_AUTOSAR,
+                         strlen(STR_AUTOSAR))){
+      scheduler=new AutosarScheduler((const char*)schedulername);
     }else if( 0==strncmp(schedulername,STR_TTCC,
                          strlen(STR_TTCC))){
       scheduler=new TimeTriggeredCCScheduler((const char*)schedulername);

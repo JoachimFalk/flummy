@@ -102,6 +102,7 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_Tracing.cpp			\
 	TDMAScheduler.cpp			\
 	FlexRayScheduler.cpp			\
+	AutosarScheduler.cpp			\
 	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\
 	Task.cpp				\
