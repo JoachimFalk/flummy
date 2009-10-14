@@ -26,6 +26,7 @@ namespace SystemC_VPC {
     task = _task;
     taskEvents = task->getBlockEvent();
     if(components.empty()){
+      wait(SC_ZERO_TIME);
       taskEvents.dii->notify();
       //taskEvents.latency->notify();
       Director::getInstance().signalProcessEvent(task);
