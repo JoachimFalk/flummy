@@ -271,6 +271,7 @@ namespace SystemC_VPC{
     ComponentIdMap  componentIdMap;
     std::map<ProcessId, std::string> debugProcessNames;
     std::map<ProcessId, std::pair<std::string, std::string> > debugRouteNames;
+    std::map<ProcessId, std::set<std::string> > debugFunctionNames;
 
     ProcessId       globalProcessId;
 

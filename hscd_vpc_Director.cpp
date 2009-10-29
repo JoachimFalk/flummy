@@ -460,6 +460,7 @@ namespace SystemC_VPC{
 
     ProcessId       pid = getProcessId(  process  );
     FunctionId      fid = getFunctionId( function );
+    debugFunctionNames[pid].insert(function);
     return FastLink(pid, fid);
   }
 
@@ -545,9 +546,28 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
         }        
         std::cout << "  <mapping source=\""
                   << iter->second
-                  << "\" target=\"??\">\n"
-                  << "    <timing delay=\"?? us\" />\n  </mapping>"
+                  << "\" target=\"?\">\n"
+                  << "    <!-- we may use a default delay: "
+                  << "    <timing delay=\"? us\""
+                  << " dii=\"? us\" />"
+                  << " --> "
                   << std::endl;
+        
+        for(std::set<std::string>::iterator fiter =
+              debugFunctionNames[iter->first].begin();
+            fiter != debugFunctionNames[iter->first].end();
+            ++fiter){
+          if(0 == fiter->compare("???")){
+            std::cout << "    <!-- the \"???\" is caused by a SysteMoC"
+                      << " transition without function CALL  -->" << std::endl;
+          }
+          std::cout << "    <timing fname=\""
+                    << *fiter
+                    << "\" delay=\"? us\""
+                    << " dii=\"? us\" />"
+                    << std::endl;
+        }
+        std::cout <<"  </mapping>" << std::endl;
       }
     }
     if(route || mappings){
