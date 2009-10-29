@@ -576,6 +576,11 @@ namespace SystemC_VPC{
 
   void Component::initialize(const Director* d){
     //std::cerr << "Component::initialize" << std::endl;
+    if(powerAttribute.isType("")){
+      //std::cerr << "disabled local power governor" << std::endl;
+      return;
+    }
+
     if(NULL == localGovernorFactory){
       localGovernorFactory = new InternalLoadHysteresisGovernorFactory();
     }
