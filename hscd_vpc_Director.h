@@ -211,7 +211,7 @@ namespace SystemC_VPC{
         return debugProcessNames[id];
       }else{
         return "Route from " + debugRouteNames[id].first +
-          " to: " + debugRouteNames[id].first;
+          " to: " + debugRouteNames[id].second;
       }
     }
     
