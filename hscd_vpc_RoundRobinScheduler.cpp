@@ -1,6 +1,6 @@
-#include "hscd_vpc_RoundRobinScheduler.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
+#include <systemcvpc/hscd_vpc_RoundRobinScheduler.h>
+#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_Component.h>
 
 namespace SystemC_VPC{
   RoundRobinScheduler::RoundRobinScheduler(const char *schedulername){

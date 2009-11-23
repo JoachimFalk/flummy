@@ -1,4 +1,4 @@
-#include "HysteresisLocalGovernor.hpp"
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
 
 namespace SystemC_VPC{
 

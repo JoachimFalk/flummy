@@ -20,8 +20,8 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
-#include "Route.h"
-#include "Pool.h"
+#include <systemcvpc/Route.h>
+#include <systemcvpc/PCBPool.h>
 
 namespace SystemC_VPC{
 

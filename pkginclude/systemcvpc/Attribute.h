@@ -4,7 +4,7 @@
 #include <deque>
 #include <utility>
 #include <iostream>
-#include "hscd_vpc_InvalidArgumentException.h"
+#include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
 
 
 namespace SystemC_VPC{

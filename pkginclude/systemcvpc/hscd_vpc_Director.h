@@ -18,16 +18,16 @@
 #ifndef HSCD_VPC_DIRECTOR_H
 #define HSCD_VPC_DIRECTOR_H
 
-#include "hscd_vpc_AbstractComponent.h"
-#include "Route.h"
-#include "hscd_vpc_ProcessEventListener.h"
-#include "hscd_vpc_EventPair.h"
-#include "FastLink.h"
-#include "TaskPool.h"
-#include "SelectFastestPowerModeGlobalGovernor.hpp"
-#include "HysteresisLocalGovernor.hpp"
-#include "hscd_vpc_InvalidArgumentException.h"
-#include "PluggablePowerGovernor.hpp"
+#include <systemcvpc/hscd_vpc_AbstractComponent.h>
+#include <systemcvpc/Route.h>
+#include <systemcvpc/hscd_vpc_ProcessEventListener.h>
+#include <systemcvpc/hscd_vpc_EventPair.h>
+#include <systemcvpc/FastLink.h>
+#include <systemcvpc/TaskPool.h>
+#include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
+#include <systemcvpc/PluggablePowerGovernor.hpp>
 
 // provide compatibility with other compilers then gcc, hopefully
 //#include <ansidecl.h>

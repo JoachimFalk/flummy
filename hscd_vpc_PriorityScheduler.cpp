@@ -1,7 +1,7 @@
-#include "hscd_vpc_PriorityScheduler.h"
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_Component.h"
-#include "hscd_vpc_datatypes.h"
+#include <systemcvpc/hscd_vpc_PriorityScheduler.h>
+#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_Component.h>
+#include <systemcvpc/hscd_vpc_datatypes.h>
 
 namespace SystemC_VPC{
   PriorityScheduler::PriorityScheduler(const char *schedulername){

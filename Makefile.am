@@ -25,70 +25,29 @@ root_builddir := $(shell cd $(top_builddir)/.. && pwd)
 include $(auxdir)/jfrules.mk
 include ../BuildSystem/doxygen.am
 
-SUBDIRS=
+SUBDIRS = pkginclude
 
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
+
+AM_LDFLAGS =			\
+	@AM_LDFLAGS@		\
+	@COSUPPORT_LDFLAGS@	\
+	@SYSTEMC_LDFLAGS@	\
+	@XERCES_LDFLAGS@
 
 # FIXME: Decouple SystemC-VPC and SysteMoC by moving SysteMoC
 #        dependant code from SystemC-VPC into SysteMoC
 #        restore thread based compute interface to SystemC-VPC
 AM_CPPFLAGS =			\
 	@AM_CPPFLAGS@		\
+	@COSUPPORT_INCLUDE@	\
 	@SYSTEMC_INCLUDE@	\
 	@XERCES_INCLUDE@	\
-	-I./include		\
-	-I$(srcdir)
-
-#AM_LDFLAGS=
-
-#noinst_SCRIPTS  = test_pathstuff.sh
-
-EXTRA_DIST	=
-
-#noinst_PROGRAMS = test_pathstuff
-
-PROGLDFLAGS=
-
-pkgincludeprefix=systemcvpc/
+	-Ipkginclude		\
+	-I$(srcdir)/pkginclude
 
 lib_LTLIBRARIES = libsystemcvpc.la
-pkginclude_HEADERS =				\
-	hscd_vpc_Tracing.h			\
-	Delayer.h				\
-	hscd_vpc_AbstractComponent.h            \
-	hscd_vpc_datatypes.h                    \
-	hscd_vpc_Director.h                     \
-	hscd_vpc_ProcessEventListener.h		\
-	hscd_vpc_Director.h			\
-	hscd_vpc_ProcessControlBlock.h		\
-	Pool.h					\
-	hscd_vpc_EventPair.h			\
-	FastLink.h				\
-	Timing.h				\
-	ComponentInfo.h				\
-	ComponentObserver.h			\
-	PowerMode.h				\
-	HysteresisLocalGovernor.hpp		\
-	SelectFastestPowerModeGlobalGovernor.hpp\
-	PluggablePowerGovernor.hpp		\
-	dynload/dll.h				\
-	Task.h					\
-	TaskPool.h				\
-	FunctionTimingPool.h			\
-	PCBPool.h				\
-	ComponentModel.h			\
-	Attribute.h				\
-	hscd_vpc_InvalidArgumentException.h	\
-	PowerGovernor.h
-
-
-#noinst_HEADERS=	oneof.hpp
-
-## DISABLE -lefence because is causes crashes on systemc where libefence is linked with -lpthread
-## because of quick-thread (SystemC) pthread incompatibilities
-#libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++ -lefence
-libsystemcvpc_la_LDFLAGS = -version-info 0:0:0 -no-undefined @SYSTEMC_LDFLAGS@ @XERCES_LDFLAGS@ -lsystemc -lxerces-c -lstdc++ -ldl -rdynamic
 
 libsystemcvpc_la_SOURCES =			\
 	debug_config.cpp			\
@@ -121,9 +80,14 @@ libsystemcvpc_la_SOURCES =			\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 
+libsystemcvpc_la_LDFLAGS =				\
+	-version-info 0:0:0 				\
+	-no-undefined						\
+	-rdynamic
 
-# Need pkinclude files in include/$(pkgincludeprefix)
-$(libsystemcvpc_la_OBJECTS): include
-
-#test_pathstuff_LDADD = libsystemcvpc.la
-#test_pathstuff_SOURCES = test_pathstuff.C
+libsystemcvpc_la_LIBADD = 				\
+	@COSUPPORT_LIBPATH@/libcosupport-systemc.la	\
+	-lxerces-c					\
+	-lsystemc					\
+	-lstdc++					\
+	-ldl

@@ -1,9 +1,9 @@
 #ifndef WIN32
 
-#include "world.h"
+#include <systemcvpc/dynload/world.h>
 
 #include <dlfcn.h>
-#include "dll.h"
+#include <systemcvpc/dynload/dll.h>
 
 
 

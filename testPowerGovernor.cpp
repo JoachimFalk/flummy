@@ -1,6 +1,6 @@
-#include "SelectFastestPowerModeGlobalGovernor.hpp"
-#include "HysteresisLocalGovernor.hpp"
-#include "hscd_vpc_Component.h"
+#include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include <systemcvpc/hscd_vpc_Component.h>
 
 using namespace SystemC_VPC;
 

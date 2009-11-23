@@ -20,20 +20,20 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
-#include "hscd_vpc_Director.h"
-#include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_VPCBuilder.h"
-#include "StaticRoute.h"
-#include "hscd_vpc_InvalidArgumentException.h"
-#include "PowerSumming.h"
-#include "Task.h"
+#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/hscd_vpc_AbstractComponent.h>
+#include <systemcvpc/hscd_vpc_VPCBuilder.h>
+#include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
+#include <systemcvpc/StaticRoute.h>
+#include <systemcvpc/PowerSumming.h>
+#include <systemcvpc/Task.h>
 
 #include <dlfcn.h>
 
 #include <systemc.h>
 #include <map>
 
-#include "debug_config.h"
+#include <systemcvpc/debug_config.h>
 // if compiled with DBG_DIRECTOR create stream and include debug macros
 #ifdef DBG_DIRECTOR
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -41,9 +41,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include "debug_on.h"
+  #include <systemcvpc/debug_on.h>
 #else
-  #include "debug_off.h"
+  #include <systemcvpc/debug_off.h>
 #endif
 
 namespace SystemC_VPC{

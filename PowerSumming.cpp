@@ -1,7 +1,7 @@
 #include <cassert>
 
-#include "PowerSumming.h"
-#include "hscd_vpc_Director.h"
+#include <systemcvpc/PowerSumming.h>
+#include <systemcvpc/hscd_vpc_Director.h>
 
 namespace SystemC_VPC{
 
