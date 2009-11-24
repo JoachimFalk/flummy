@@ -1,7 +1,7 @@
 
 #include <typeinfo>
 #include <iostream>
-#include "plugin.h"
+#include <systemcvpc/dynload/plugin.h>
 
 //
 // Announce to the world that the PlugIn base
