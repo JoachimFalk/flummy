@@ -52,7 +52,7 @@ namespace SystemC_VPC{
   
  
   void TDMAScheduler::_setProperty(const char* key, const char* value){
-    char *domain;
+    const char *domain;
     int slot;
     //Herausfinden, welcher Slot genannt ist + welche Zeit ihm zugeordnet wird
     if(0==strncmp(key,"slot",strlen("slot"))){

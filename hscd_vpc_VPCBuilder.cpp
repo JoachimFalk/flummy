@@ -1,5 +1,5 @@
 #include <iostream>
-#include <values.h> 
+#include <limits.h> 
 #include <algorithm>
 #include <cctype>
 #include <string>
@@ -76,8 +76,8 @@ namespace SystemC_VPC{
       DBG_OUT("running fallbackmode" << std::endl);
     }else{
       // process xml
-      DOMDocument* vpcConfigDoc;
-      DOMBuilder* configParser;
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* vpcConfigDoc;
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMBuilder* configParser;
       static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
       DOMImplementation* configImpl =
         DOMImplementationRegistry::getDOMImplementation(gLS);

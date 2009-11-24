@@ -28,8 +28,6 @@
 #include <systemcvpc/PowerSumming.h>
 #include <systemcvpc/Task.h>
 
-#include <dlfcn.h>
-
 #include <systemc.h>
 #include <map>
 

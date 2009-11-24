@@ -11,10 +11,10 @@ namespace SystemC_VPC{
 
   void RoundRobinScheduler::setProperty(const char* key, const char* value){
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
-      char *domain;
+      const char *domain;
       domain=strstr(value,"ns");
       if(domain!=NULL){
-        domain[0]='\0';
+        //domain[0]='\0';
         sscanf(value,"%lf",&TIMESLICE);
       }
 
