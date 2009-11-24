@@ -48,7 +48,7 @@ namespace SystemC_VPC{
     
     void setProperty(const char* key, const char* value);
     
-    void setAttribute(Attribute& fr_Attribute);
+    void setAttribute(AttributePtr attributePtr);
     
     sc_time* schedulingOverhead();
     

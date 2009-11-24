@@ -73,7 +73,7 @@ namespace SystemC_VPC{
       //std::cout << "PlugInFactory Destroy" << std::endl;		
     }
 
-    virtual void processAttributes(Attribute att) = 0;
+    virtual void processAttributes(AttributePtr attPtr) = 0;
 	
     virtual PlugIn * createPlugIn() = 0;
   };

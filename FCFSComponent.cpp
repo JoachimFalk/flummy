@@ -66,21 +66,21 @@ namespace SystemC_VPC{
     this->addPowerGovernor(midPowerGov);
 
     for(size_t i=0; i<att.getAttributeSize();++i){
-      Attribute powerAtt = att.getNextAttribute(i).second;
-      if(powerAtt.isType("governor")){
+      AttributePtr powerAttPtr = att.getNextAttribute(i).second;
+      if(powerAttPtr->isType("governor")){
         sc_time window    = sc_time(12.5, SC_MS);
         sc_time upperTime = sc_time(12.1, SC_MS);
         sc_time lowerTime = sc_time( 4.0, SC_MS);
-        if(powerAtt.hasParameter("sliding_window")){
-          std::string v = powerAtt.getParameter("sliding_window");
+        if(powerAttPtr->hasParameter("sliding_window")){
+          std::string v = powerAttPtr->getParameter("sliding_window");
           window = Director::createSC_Time(v.c_str());
         }
-        if(powerAtt.hasParameter("upper_threshold")){
-          std::string v = powerAtt.getParameter("upper_threshold");
+        if(powerAttPtr->hasParameter("upper_threshold")){
+          std::string v = powerAttPtr->getParameter("upper_threshold");
           upperTime = window*atof(v.c_str());
         }
-        if(powerAtt.hasParameter("lower_threshold")){
-          std::string v = powerAtt.getParameter("lower_threshold");
+        if(powerAttPtr->hasParameter("lower_threshold")){
+          std::string v = powerAttPtr->getParameter("lower_threshold");
           lowerTime = window*atof(v.c_str());
         }
         /* FIXME:
@@ -102,24 +102,24 @@ namespace SystemC_VPC{
 
       PowerTable &powerTable=powerTables[power];
 
-      if(powerAtt.hasParameter("IDLE")){
-        std::string v = powerAtt.getParameter("IDLE");
+      if(powerAttPtr->hasParameter("IDLE")){
+        std::string v = powerAttPtr->getParameter("IDLE");
         const double value = atof(v.c_str());
         powerTable[ComponentState::IDLE] = value;
       }
-      if(powerAtt.hasParameter("RUNNING")){
-        std::string v = powerAtt.getParameter("RUNNING");
+      if(powerAttPtr->hasParameter("RUNNING")){
+        std::string v = powerAttPtr->getParameter("RUNNING");
         const double value = atof(v.c_str());
         powerTable[ComponentState::RUNNING] = value;
       }
-      if(powerAtt.hasParameter("STALLED")){
-        std::string v = powerAtt.getParameter("STALLED");
+      if(powerAttPtr->hasParameter("STALLED")){
+        std::string v = powerAttPtr->getParameter("STALLED");
         const double value = atof(v.c_str());
         powerTable[ComponentState::STALLED] = value;
       }
-      if(powerAtt.hasParameter("transaction_delay")) {
+      if(powerAttPtr->hasParameter("transaction_delay")) {
         this->transactionDelays[power] =
-          Director::createSC_Time(powerAtt.getParameter("transaction_delay"));
+          Director::createSC_Time(powerAttPtr->getParameter("transaction_delay"));
       }
 
     }

@@ -260,22 +260,22 @@ namespace SystemC_VPC{
   }
 
 
-  bool Component::processPower(Attribute att)
+  bool Component::processPower(AttributePtr attPtr)
   {
     // hierarchical format
-    if(!att.isType("powermode")) {
+    if(!attPtr->isType("powermode")) {
       return false;
     }
     
-    for(size_t i=0; i<att.getAttributeSize();++i){
-      Attribute powerAtt = att.getNextAttribute(i).second;
-      if(powerAtt.isType("governor")){
-        this->loadLocalGovernorPlugin(powerAtt.getValue());
+    for(size_t i=0; i<attPtr->getAttributeSize();++i){
+      AttributePtr powerAtt = attPtr->getNextAttribute(i).second;
+      if(powerAtt->isType("governor")){
+        this->loadLocalGovernorPlugin(powerAtt->getValue());
         powerAttribute = powerAtt;
         continue;
       }
 
-      std::string powerMode = att.getNextAttribute(i).first;
+      std::string powerMode = attPtr->getNextAttribute(i).first;
       const PowerMode *power = this->translatePowerMode(powerMode);
 
       if(powerTables.find(power) == powerTables.end()){
@@ -284,24 +284,24 @@ namespace SystemC_VPC{
 
       PowerTable &powerTable=powerTables[power];
 
-      if(powerAtt.hasParameter("IDLE")){
-        std::string v = powerAtt.getParameter("IDLE");
+      if(powerAtt->hasParameter("IDLE")){
+        std::string v = powerAtt->getParameter("IDLE");
         const double value = atof(v.c_str());
         powerTable[ComponentState::IDLE] = value;
       }
-      if(powerAtt.hasParameter("RUNNING")){
-        std::string v = powerAtt.getParameter("RUNNING");
+      if(powerAtt->hasParameter("RUNNING")){
+        std::string v = powerAtt->getParameter("RUNNING");
         const double value = atof(v.c_str());
         powerTable[ComponentState::RUNNING] = value;
       }
-      if(powerAtt.hasParameter("STALLED")){
-        std::string v = powerAtt.getParameter("STALLED");
+      if(powerAtt->hasParameter("STALLED")){
+        std::string v = powerAtt->getParameter("STALLED");
         const double value = atof(v.c_str());
         powerTable[ComponentState::STALLED] = value;
       }
-      if(powerAtt.hasParameter("transaction_delay")) {
+      if(powerAtt->hasParameter("transaction_delay")) {
         this->transactionDelays[power] =
-          Director::createSC_Time(powerAtt.getParameter("transaction_delay"));
+          Director::createSC_Time(powerAtt->getParameter("transaction_delay"));
       }
 
     }
@@ -312,27 +312,27 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::setAttribute(Attribute& attributes){
-    if(processPower(attributes)){
+  void Component::setAttribute(AttributePtr attribute){
+    if(processPower(attribute)){
       return;
     }
 
-    if(attributes.isType("transaction_delay")) {
+    if(attribute->isType("transaction_delay")) {
       this->transactionDelays[this->getPowerMode()] =
-        Director::createSC_Time(attributes.getValue());
+        Director::createSC_Time(attribute->getValue());
       return;
     }
     
-    if(attributes.isType("transaction")) {
+    if(attribute->isType("transaction")) {
       unsigned int transactionSize = 1;
       sc_time transactionDelay     = SC_ZERO_TIME;
-      if(attributes.hasParameter("delay")){
+      if(attribute->hasParameter("delay")){
         transactionDelay =
-          Director::createSC_Time(attributes.getParameter("delay"));
+          Director::createSC_Time(attribute->getParameter("delay"));
       }
 
-      if(attributes.hasParameter("size")){
-        transactionSize = atoi(attributes.getParameter("size").c_str());
+      if(attribute->hasParameter("size")){
+        transactionSize = atoi(attribute->getParameter("size").c_str());
       }
 
       this->transactionDelays[this->getPowerMode()] = transactionDelay;
@@ -340,7 +340,7 @@ namespace SystemC_VPC{
       return;
     }
     
-    scheduler->setAttribute(attributes);
+    scheduler->setAttribute(attribute);
   }
 
   /**
@@ -578,7 +578,7 @@ namespace SystemC_VPC{
 
   void Component::initialize(const Director* d){
     //std::cerr << "Component::initialize" << std::endl;
-    if(powerAttribute.isType("")){
+    if(powerAttribute->isType("")){
       //std::cerr << "disabled local power governor" << std::endl;
       return;
     }

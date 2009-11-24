@@ -183,7 +183,7 @@ namespace SystemC_VPC{
     /**
     * \brief Used to create the Attribute-Object recursively
     */
-    void nextAttribute(Attribute &fr_Attribute, DOMNode* node);
+    void nextAttribute(AttributePtr attributePtr, DOMNode* node);
      
     /**
     * \brief Topology parsing related code

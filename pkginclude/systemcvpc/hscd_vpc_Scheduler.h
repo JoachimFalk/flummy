@@ -70,7 +70,7 @@ namespace SystemC_VPC{
      */
     virtual void setProperty(const char* key, const char* value){}
     
-    virtual void setAttribute(Attribute& fr_Attribute){}
+    virtual void setAttribute(AttributePtr attributePtr){}
 
     /**************************/
     /*   EXTENSION SECTION    */

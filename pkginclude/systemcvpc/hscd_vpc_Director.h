@@ -204,7 +204,7 @@ namespace SystemC_VPC{
     PluggableGlobalPowerGovernor   *topPowerGov;
     DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >
                                    *topPowerGovFactory;
-    void loadGlobalGovernorPlugin(std::string plugin, Attribute att);
+    void loadGlobalGovernorPlugin(std::string plugin, AttributePtr attPtr);
 
     std::string getTaskName(ProcessId id) {
       if(debugProcessNames.find(id) != debugProcessNames.end()){

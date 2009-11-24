@@ -69,7 +69,7 @@ class ComponentObserver;
     /**
      * \brief Set parameter for Component and Scheduler.
      */
-    virtual void setAttribute(Attribute& fr_Attribute)=0;
+    virtual void setAttribute(AttributePtr attributePtr)=0;
 
     const char* getName() const;
 

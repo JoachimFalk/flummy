@@ -491,7 +491,8 @@ namespace SystemC_VPC{
     return Director::createSC_Time( timeString.c_str());
   }
 
-  void Director::loadGlobalGovernorPlugin(std::string plugin, Attribute att){
+  void Director::loadGlobalGovernorPlugin(std::string plugin,
+                                          AttributePtr attPtr){
     //std::cerr << "Director::loadGlobalGovernorPlugin" << std::endl;
     topPowerGovFactory =
       new DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >
@@ -499,7 +500,7 @@ namespace SystemC_VPC{
     if( topPowerGovFactory->factory){
       delete topPowerGov;
 
-      topPowerGovFactory->factory->processAttributes(att);
+      topPowerGovFactory->factory->processAttributes(attPtr);
       topPowerGov = topPowerGovFactory->factory->createPlugIn();
     }
   }

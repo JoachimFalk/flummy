@@ -1,17 +1,19 @@
 #ifndef ATTRIBUTE_H
 #define ATTRIBUTE_H
 
+#include <boost/shared_ptr.hpp>
+
 #include <deque>
 #include <utility>
 #include <iostream>
 #include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
 
-
 namespace SystemC_VPC{
 
   class Attribute;
 
-  typedef std::deque<std::pair<std::string, Attribute > >  Attributes;
+  typedef boost::shared_ptr<Attribute> AttributePtr;
+  typedef std::deque<std::pair<std::string, AttributePtr> >  Attributes;
   typedef std::deque<std::pair<std::string, std::string>  >  Parameters;
 
   class Attribute{
@@ -39,13 +41,13 @@ namespace SystemC_VPC{
 
     void addParameter(std::string type, std::string value);
 
-    std::pair<std::string, Attribute > getNextAttribute(size_t pos)
+    std::pair<std::string, AttributePtr > getNextAttribute(size_t pos)
       throw (InvalidArgumentException);
 
     /**
      *
      */
-    Attribute getAttribute(const std::string name)
+    AttributePtr getAttribute(const std::string name)
       throw (InvalidArgumentException);
 
     /**
@@ -55,7 +57,7 @@ namespace SystemC_VPC{
 
     void addAttribute( std::string type, std::string value);
 
-    void addAttribute( std::string type, Attribute& att );
+    void addAttribute( std::string type, AttributePtr att );
 
     size_t getParameterSize();
     size_t getAttributeSize();

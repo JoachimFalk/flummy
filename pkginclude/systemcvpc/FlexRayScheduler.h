@@ -14,6 +14,10 @@ namespace SystemC_VPC{
     pid_fifo enthaelt die laufbereiten Prozesse  
   */
   struct SlotParameters{
+	SlotParameters(int offset, int multiplex)
+		: offset(offset), multiplex(multiplex){}
+	SlotParameters()
+		: offset(0), multiplex(0){}
     int offset; //in cycles
     int multiplex; //in 2^multiplex - cycles
   };
@@ -44,7 +48,7 @@ namespace SystemC_VPC{
     
     void setProperty(const char* key, const char* value);
     
-    void setAttribute(Attribute& fr_Attribute);
+    void setAttribute(AttributePtr attributePtr);
     
     sc_time* schedulingOverhead();
     

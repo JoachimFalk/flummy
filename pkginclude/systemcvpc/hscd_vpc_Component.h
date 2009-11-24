@@ -94,7 +94,7 @@ namespace SystemC_VPC{
         blockMutex(0),
         localGovernorFactory(NULL),
         midPowerGov(NULL),
-        powerAttribute("", "")
+        powerAttribute(new Attribute("",""))
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
@@ -142,7 +142,7 @@ namespace SystemC_VPC{
     /**
      * \brief Set parameter for Component and Scheduler.
      */
-    virtual void setAttribute(Attribute& fr_Attributes);
+    virtual void setAttribute(AttributePtr attribute);
     
     void addPowerGovernor(PluggableLocalPowerGovernor * gov){
       this->addObserver(gov);
@@ -179,14 +179,14 @@ namespace SystemC_VPC{
 
     PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
     PluggableLocalPowerGovernor *midPowerGov;
-    Attribute powerAttribute;
+    AttributePtr powerAttribute;
     typedef std::map<std::string,
                      DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
       Factories;
     static Factories factories;
     
 
-    bool processPower(Attribute att);
+    bool processPower(AttributePtr att);
 
     void initialize(const Director* d);
 

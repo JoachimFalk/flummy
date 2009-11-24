@@ -192,7 +192,7 @@ namespace SystemC_VPC{
                     if( 0==XMLString::compareNString( sType,
                                                        "global_governor",
                                                        sizeof("global_governor"))){
-                       Attribute gov("global_governor", sValue);
+                       AttributePtr gov(new Attribute("global_governor", sValue));
                        nextAttribute(gov, node->getFirstChild());
                        director->loadGlobalGovernorPlugin(sValue, gov);
                      }
@@ -383,7 +383,7 @@ namespace SystemC_VPC{
               atts->getNamedItem(valueAttrStr)->getNodeValue());
           }
 
-          Attribute attributes( sType, sValue);
+          AttributePtr attributes(new Attribute( sType, sValue));
 
           XMLString::release(&sType);
           if( value  != NULL){
@@ -549,7 +549,8 @@ namespace SystemC_VPC{
     }
   }
 
-  void VPCBuilder::nextAttribute(Attribute& fr_Attribute, DOMNode* node){
+  void VPCBuilder::nextAttribute(SystemC_VPC::AttributePtr attribute,
+                                 DOMNode* node){
         //walk down hierarchy to attributes             
         for(; node != NULL; node = node->getNextSibling()){
         const XMLCh* xmlName = node->getNodeName();
@@ -564,12 +565,12 @@ namespace SystemC_VPC{
                 sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
           }
           
-          Attribute fr_Attribute2( sType, sValue);
+          AttributePtr fr_Attribute2(new Attribute(sType, sValue));
 
           //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
           // XMLString::release(&sValue);
           nextAttribute(fr_Attribute2,node->getFirstChild());
-          fr_Attribute.addAttribute(sType, fr_Attribute2);
+          attribute->addAttribute(sType, fr_Attribute2);
         }
         // check if its an Parameter to add
         if( 0==XMLString::compareNString( xmlName, parameterStr,sizeof(parameterStr))){
@@ -577,7 +578,7 @@ namespace SystemC_VPC{
           char* sValue;
           sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
           sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
-          fr_Attribute.addParameter( sType, sValue);
+          attribute->addParameter( sType, sValue);
         }
         }
   }

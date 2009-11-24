@@ -94,34 +94,34 @@ namespace SystemC_VPC{
     //  cout<<"add Function " <<  key << " to " << value<<endl; 
   }
 
-  void TimeTriggeredCCScheduler::setAttribute(Attribute& fr_Attribute){
-    std::string value = fr_Attribute.getType();
+  void TimeTriggeredCCScheduler::setAttribute(AttributePtr attributePtr){
+    std::string value = attributePtr->getType();
 
     if( value!="FlexRayParams" )
       return;
 
-    if(fr_Attribute.getParameterSize()!=0){
+    if(attributePtr->getParameterSize()!=0){
       //es gibt folglich globale FlexRay-Parameter!
-      for(size_t j=0;j<fr_Attribute.getParameterSize();j++){
-        std::pair<std::string, std::string > param2 =fr_Attribute.getNextParameter(j);
+      for(size_t j=0;j<attributePtr->getParameterSize();j++){
+        std::pair<std::string, std::string > param2 =attributePtr->getNextParameter(j);
         if(param2.first == "dualchannel")
           dualchannel=(param2.second == "true");
       }
     }
 
-    for(size_t i=0;i<fr_Attribute.getAttributeSize();i++){
-      std::pair<std::string, Attribute >attribute=fr_Attribute.getNextAttribute(i);
+    for(size_t i=0;i<attributePtr->getAttributeSize();i++){
+      std::pair<std::string, AttributePtr >attribute=attributePtr->getNextAttribute(i);
         
       if(attribute.first=="static"){
         StartslotDynamic=0;
-        for(size_t k=0;k<attribute.second.getAttributeSize();k++){
-          std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(k);
+        for(size_t k=0;k<attribute.second->getAttributeSize();k++){
+          std::pair<std::string, AttributePtr >attribute2=attribute.second->getNextAttribute(k);
           //Slot einrichten
           StartslotDynamic++;
           slicecount++;
           std::pair<std::string, std::string > param;
-          param.first=attribute2.second.getType();
-          param.second=attribute2.second.getValue();
+          param.first=attribute2.second->getType();
+          param.second=attribute2.second->getValue();
 
           //                         cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
           TDMASlot newSlot;
@@ -132,23 +132,23 @@ namespace SystemC_VPC{
 
           //jetzt noch die Task-mappings!
           //für jeden Attribute-Eintrag Parameter verarbeiten
-          for(size_t l=0;l<attribute2.second.getAttributeSize();l++){
-            std::pair<std::string, Attribute >attribute3=attribute2.second.getNextAttribute(l);
+          for(size_t l=0;l<attribute2.second->getAttributeSize();l++){
+            std::pair<std::string, AttributePtr >attribute3=attribute2.second->getNextAttribute(l);
             std::pair<std::string, std::string > param3;
             if(attribute3.first=="mapping"){
 
-              param3.first=attribute3.second.getValue();
+              param3.first=attribute3.second->getValue();
               param3.second=param.first;
               //                    cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<endl;
                             
               this->_properties.push_back(param3);
-              ProcessParams_string[param3.first]=(struct SlotParameters){0,0};
-              if(attribute3.second.getParameterSize()==0){
+              ProcessParams_string[param3.first]=SlotParameters(0,0);
+              if(attribute3.second->getParameterSize()==0){
                 //we don't have further Parameters, so let them as they are
               }else{
                 //parse parameters
-                for(size_t m=0;m<attribute3.second.getParameterSize();m++){
-                  std::pair<std::string, std::string > param4 =attribute3.second.getNextParameter(m);
+                for(size_t m=0;m<attribute3.second->getParameterSize();m++){
+                  std::pair<std::string, std::string > param4 =attribute3.second->getNextParameter(m);
                   if(param4.first=="offset"){
                     ProcessParams_string[param3.first].offset=atoi(param4.second.c_str());
                     //                                  cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
