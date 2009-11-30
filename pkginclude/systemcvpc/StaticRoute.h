@@ -38,7 +38,7 @@ namespace SystemC_VPC{
    */
   class StaticRoute :
     public Route,
-    public CoSupport::SystemC::Event,
+    public CoSupport::SystemC::RefCountEvent,
     protected CoSupport::SystemC::EventListener {
   public:
 
@@ -71,7 +71,7 @@ namespace SystemC_VPC{
     Components                             components;
     Task*                                  task;
     EventPair                              taskEvents;
-    CoSupport::SystemC::Event              dummy;
+    CoSupport::SystemC::RefCountEvent      dummy;
     std::string                            name;
     Components::iterator                   nextHop;
     RoutePool<StaticRoute>                *pool;

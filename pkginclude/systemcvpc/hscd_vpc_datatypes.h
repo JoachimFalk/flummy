@@ -24,7 +24,7 @@ namespace SystemC_VPC {
 #define STR_FCFS "FCFS"
 
 // definition for hiding cosupport as vpc_event
-typedef CoSupport::SystemC::Event         VPC_Event;
+typedef CoSupport::SystemC::RefCountEvent         VPC_Event;
   
 // set for debugging output
 //#define VPC_DEBUG true;

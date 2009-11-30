@@ -215,8 +215,8 @@ namespace SystemC_VPC{
       EventPair blockEvent =  task->getBlockEvent();
 
       CoSupport::SystemC::wait(*blockEvent.dii);
-      delete blockEvent.dii;
-      delete blockEvent.latency;
+      blockEvent.dii = NULL;
+      blockEvent.latency = NULL;
     }
   }
 

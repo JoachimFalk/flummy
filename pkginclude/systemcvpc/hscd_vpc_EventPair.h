@@ -32,13 +32,15 @@ namespace SystemC_VPC {
    * If latency is notified the hole execution time is over.
    */
   struct EventPair{
-    CoSupport::SystemC::Event* dii;     //data introduction intervall
-    CoSupport::SystemC::Event* latency; //latency
+    CoSupport::SystemC::RefCountEventPtr dii;     //data introduction interval
+    CoSupport::SystemC::RefCountEventPtr latency; //latency
 
     /**
      * Sloth constructor.
      */
-    EventPair( CoSupport::SystemC::Event* dii, CoSupport::SystemC::Event* latency ) : dii(dii), latency(latency){}
+    EventPair( CoSupport::SystemC::RefCountEventPtr dii,
+               CoSupport::SystemC::RefCountEventPtr latency )
+      : dii(dii), latency(latency){}
     EventPair() : dii(NULL), latency(NULL){}
   };
 
