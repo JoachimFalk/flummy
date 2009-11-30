@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <stdlib.h>
 
 #include <systemcvpc/hscd_vpc_VPCBuilder.h>
 #include <systemcvpc/hscd_vpc_VpcDomErrorHandler.h>

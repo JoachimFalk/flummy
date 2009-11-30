@@ -1,7 +1,7 @@
 #ifdef WIN32
 
-#include "world.h"
-#include "dll.h"
+#include <systemcvpc/dynload/world.h>
+#include <systemcvpc/dynload/dll.h>
 
 
 DLLManager::DLLManager( const char *fname )
@@ -22,7 +22,7 @@ DLLManager::DLLManager( const char *fname )
 					  err,  			/* Buffer */
 					  0,    			/* Min/Max Buffer size */
 					  NULL);  			/* Arguments */
-		cout << err << endl;
+		std::cout << err << std::endl;
 	}
 	else
 	{
@@ -83,7 +83,7 @@ const char * DLLManager::GetDLLExtension()
 
 DLLFactoryBase::DLLFactoryBase(
 			       const char *fname,
-			       const char *factory=0
+			       const char *factory
 			       ) : DLLManager(fname)
 {
 	// try get the factory function if there is no error yet
