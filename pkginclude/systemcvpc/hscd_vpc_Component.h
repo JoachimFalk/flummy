@@ -19,6 +19,7 @@
 #define HSCD_VPC_COMPONENT_H
 #include <systemc.h>
 
+#include <systemcvpc/vpc_config.h>
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_AbstractComponent.h"
 #include "ComponentInfo.h"
