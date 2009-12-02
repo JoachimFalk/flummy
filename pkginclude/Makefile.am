@@ -25,6 +25,8 @@ include $(auxdir)/jfrules.mk
 SUBDIRS=
 
 nobase_include_HEADERS =				\
+	systemcvpc/vpc_config.h \
+	\
 	systemcvpc/Attribute.h 				\
 	systemcvpc/BlockingTransport.h 			\
 	systemcvpc/ComponentInfo.h 			\
