@@ -454,7 +454,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::requestBlockingCompute(Task* task, Event* blocker){
+  void Component::requestBlockingCompute(Task* task, RefCountEventPtr blocker){
     task->setExec(false);
     task->setBlockingCompute( blocker );
     this->compute( task );
@@ -463,7 +463,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::execBlockingCompute(Task* task, Event* blocker){
+  void Component::execBlockingCompute(Task* task, RefCountEventPtr blocker){
     task->setExec(true);
     blockCompute.notify();
   }
@@ -472,7 +472,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::abortBlockingCompute(Task* task, Event* blocker){
+  void Component::abortBlockingCompute(Task* task, RefCountEventPtr blocker){
     task->resetBlockingCompute();
     blockCompute.notify();
   }
