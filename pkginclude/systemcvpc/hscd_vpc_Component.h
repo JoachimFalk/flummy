@@ -58,17 +58,17 @@ namespace SystemC_VPC{
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, Event* blocker);
+    virtual void requestBlockingCompute(Task* task, RefCountEventPtr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, Event* blocker);
+    virtual void execBlockingCompute(Task* task, RefCountEventPtr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, Event* blocker);
+    virtual void abortBlockingCompute(Task* task, RefCountEventPtr blocker);
     
     /**
      *

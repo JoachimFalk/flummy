@@ -40,7 +40,7 @@ namespace SystemC_VPC{
    */
   class BlockingTransport :
     public Route,
-    public CoSupport::SystemC::RefCountEvent,
+    public CoSupport::SystemC::Event,
     protected CoSupport::SystemC::EventListener {
   public:
 
@@ -93,7 +93,8 @@ namespace SystemC_VPC{
 
     Task*                                  task;
     EventPair                              taskEvents;
-    CoSupport::SystemC::RefCountEvent      dummy;
+    CoSupport::SystemC::RefCountEventPtr   dummyDii;
+    CoSupport::SystemC::RefCountEventPtr   routeLat;
     std::string                            name;
     RoutePool<BlockingTransport>          *pool;
 

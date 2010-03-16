@@ -11,6 +11,7 @@
 namespace SystemC_VPC {
 
   using CoSupport::SystemC::Event;
+  using CoSupport::SystemC::RefCountEventPtr;
   class Task{
   public:
     Task(TaskPool * pool)
@@ -46,7 +47,8 @@ namespace SystemC_VPC {
     }
 
     void       resetBlockingCompute(){this->setBlockingCompute(NULL);}
-    void       setBlockingCompute(Event* blocker){blockingCompute = blocker;}
+    void       setBlockingCompute(RefCountEventPtr blocker)
+      { blockingCompute = blocker; }
     bool       isBlocking()
       { return blockingCompute != NULL; }
     bool       isAckedBlocking()
@@ -90,6 +92,7 @@ namespace SystemC_VPC {
       {assert(pcb != NULL); return pcb->getPeriod();}
 
     void release() {
+      //this->setBlockEvent(EventPair(NULL, NULL));
       pool->free(this->getProcessId(), this);
     }
 
@@ -120,7 +123,7 @@ namespace SystemC_VPC {
     FunctionId fid;
     EventPair  blockEvent;
 
-    Event*     blockingCompute;
+    RefCountEventPtr blockingCompute;
     bool       blockAck;
     bool       exec;
     bool       write;

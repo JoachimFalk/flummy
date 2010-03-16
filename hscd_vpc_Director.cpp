@@ -110,15 +110,15 @@ namespace SystemC_VPC{
 
     sc_time start = SC_ZERO_TIME;
     sc_time end = this->end;
-#ifdef VPC_DEBUG
+#ifdef DBG_DIRECTOR
     std::cerr << "start: " << start << " end: " << end  << std::endl;
-#endif //VPC_DEBUG
+#endif //DBG_DIRECTOR
 
     if(0 != this->vpc_result_file.compare("")) {
-#ifdef VPC_DEBUG
+#ifdef DBG_DIRECTOR
       std::cerr << "Director> result_file: "
                 << this->vpc_result_file << std::endl;
-#endif //VPC_DEBUG
+#endif //DBG_DIRECTOR
       ofstream resultFile;
       resultFile.open(this->vpc_result_file.c_str());
       if(resultFile){
@@ -372,12 +372,12 @@ namespace SystemC_VPC{
   void Director::signalProcessEvent(Task* task){
     assert(!FALLBACKMODE);
 
-#ifdef VPC_DEBUG
+#ifdef DBG_DIRECTOR
     std::cerr << "Director> got notified from: " << task->getName()
               << std::endl;
     std::cerr << "Director> task successful finished: " << task->getName()
               << std::endl;
-#endif //VPC_DEBUG
+#endif //DBG_DIRECTOR
     if(NULL != task->getBlockEvent().latency)
       task->getBlockEvent().latency->notify();
     // remember last acknowledged task time
@@ -416,11 +416,11 @@ namespace SystemC_VPC{
   }
 
   ComponentId Director::getComponentId(std::string component) {
-#ifdef VPC_DEBUG
+#ifdef DBG_DIRECTOR
     cerr << " Director::getComponentId(" << component
          << ") # " << componentIdMap.size()
          << endl;
-#endif //VPC_DEBUG
+#endif //DBG_DIRECTOR
 
     ComponentIdMap::const_iterator iter = componentIdMap.find(component);
     assert( iter != componentIdMap.end() );

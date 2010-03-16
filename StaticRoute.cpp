@@ -31,7 +31,7 @@ namespace SystemC_VPC {
       this->pool->free(this);
       return;
     }
-    this->route( EventPair(taskEvents.dii, this) );
+    this->route( EventPair(taskEvents.dii, routeLat) );
   }
 
   //
@@ -56,8 +56,8 @@ namespace SystemC_VPC {
   void StaticRoute::signaled(EventWaiter *e) {
     if(e->isActive()){
       DBG_OUT("signaled @ " << sc_time_stamp() << endl);
-      this->reset();
-      route( EventPair(&dummy, this) );
+      routeLat->reset();
+      route( EventPair(dummyDii, routeLat) );
     }
   }
 
@@ -83,9 +83,12 @@ namespace SystemC_VPC {
   }
 
   //
-  StaticRoute::StaticRoute( std::string source, std::string dest ) {
+  StaticRoute::StaticRoute( std::string source, std::string dest ) :
+    dummyDii(new CoSupport::SystemC::RefCountEvent()),
+    routeLat(new CoSupport::SystemC::RefCountEvent())
+  {
     this->name = "msg_" + source + "_2_" + dest;
-    this->addListener(this);
+    routeLat->addListener(this);
 
     //components.push_back(comp);
     //components.push_back(bus);
@@ -97,9 +100,10 @@ namespace SystemC_VPC {
     components(),
     task(route.task),
     taskEvents(route.taskEvents),
-    dummy(),
+    dummyDii(new CoSupport::SystemC::RefCountEvent()),
+    routeLat(new CoSupport::SystemC::RefCountEvent()),
     name(route.name) {
-    this->addListener(this);
+    routeLat->addListener(this);
     for(Components::const_iterator iter = route.components.begin();
         iter != route.components.end();
         ++iter){
@@ -109,7 +113,7 @@ namespace SystemC_VPC {
   }
 
   StaticRoute::~StaticRoute( ){
-    this->delListener(this);
+    routeLat->delListener(this);
     components.clear();
     DBG_OUT("StaticRoute::~StaticRoute( )" << endl);
   }

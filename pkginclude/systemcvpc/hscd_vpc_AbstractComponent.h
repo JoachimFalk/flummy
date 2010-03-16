@@ -43,6 +43,7 @@ namespace SystemC_VPC{
 class ComponentObserver;
 
   using CoSupport::SystemC::Event;
+  using CoSupport::SystemC::RefCountEventPtr;
   /**
    * \brief The interface definition to a Virtual-Processing-Component (VPC).
    * 
@@ -114,17 +115,17 @@ class ComponentObserver;
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, Event* blocker)=0;
+    virtual void requestBlockingCompute(Task* task, RefCountEventPtr blocker)=0;
 
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, Event* blocker)=0;
+    virtual void execBlockingCompute(Task* task, RefCountEventPtr blocker)=0;
 
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, Event* blocker)=0;
+    virtual void abortBlockingCompute(Task* task, RefCountEventPtr blocker)=0;
 
     /**
      * \brief Sets next controlling instance of component

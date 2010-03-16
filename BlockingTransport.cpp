@@ -60,7 +60,7 @@ namespace SystemC_VPC {
     //assert(!unblockedComponents.empty());
     //BlockingTransport * route = new BlockingTransport(*this);
     //route->route( EventPair(taskEvents.dii, route) );
-    this->route( EventPair(taskEvents.dii, this) );
+    this->route( EventPair(taskEvents.dii, routeLat) );
   }
 
   //
@@ -93,7 +93,7 @@ namespace SystemC_VPC {
       }
       */
 
-      comp->requestBlockingCompute(actualTask, this);
+      comp->requestBlockingCompute(actualTask, routeLat);
     } else if( phase == COMPUTE_ROUTE && nextHop != hopList.end() ){
       AbstractComponent * comp = nextHop->first;
       Task* actualTask = nextHop->second;
@@ -102,7 +102,7 @@ namespace SystemC_VPC {
               << std::endl);
 
       actualTask->setBlockEvent(np);
-      comp->execBlockingCompute(actualTask, this);
+      comp->execBlockingCompute(actualTask, routeLat);
 
       ++nextHop;
     } else {
@@ -126,7 +126,8 @@ namespace SystemC_VPC {
                << (nextHop != lockList.end()) << ", "
                << (phase == COMPUTE_ROUTE) << ", "
                << (nextHop != hopList.end())  << std::endl);
-      this->reset();
+
+      routeLat->reset();      
 
       if( phase == LOCK_ROUTE && nextHop != lockList.end() ){
         assert(!hopList.empty());
@@ -154,7 +155,7 @@ namespace SystemC_VPC {
           return;
         }
       }
-      route( EventPair(&dummy, this) );
+      route( EventPair(dummyDii, routeLat) );
     }
   }
 
@@ -182,10 +183,12 @@ namespace SystemC_VPC {
   //
   BlockingTransport::BlockingTransport( std::string source, std::string dest )
     : components(),
+      dummyDii(new CoSupport::SystemC::RefCountEvent()),
+      routeLat(new CoSupport::SystemC::RefCountEvent()),
       phase(LOCK_ROUTE)
   {
     this->name = "msg_" + source + "_2_" + dest;
-    this->addListener(this);
+    routeLat->addListener(this);
 
     //components.push_back(comp);
     //components.push_back(bus);
@@ -196,10 +199,11 @@ namespace SystemC_VPC {
     components(),
     task(route.task),
     taskEvents(route.taskEvents),
-    dummy(),
+    dummyDii(new CoSupport::SystemC::RefCountEvent()),
+    routeLat(new CoSupport::SystemC::RefCountEvent()),
     name(route.name) {
     DBG_OUT("copy a BlockingTransport orig=" << &route << std::endl);
-    this->addListener(this);
+    routeLat->addListener(this);
     for(ComponentList::const_iterator iter = route.components.begin();
         iter != route.components.end();
         ++iter){
@@ -208,7 +212,7 @@ namespace SystemC_VPC {
   }
 
   BlockingTransport::~BlockingTransport( ){
-    this->delListener(this);
+    routeLat->delListener(this);
     DBG_OUT("BlockingTransport::~BlockingTransport( )" << endl);
   }
 
@@ -228,7 +232,7 @@ namespace SystemC_VPC {
       Task* task = iter->second;
       AbstractComponent * c = iter->first;
       task->resetBlockingCompute();
-      c->abortBlockingCompute(task, this);
+      c->abortBlockingCompute(task, routeLat);
     }
   }
 
