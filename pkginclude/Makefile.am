@@ -59,6 +59,7 @@ nobase_include_HEADERS =				\
 	systemcvpc/hscd_vpc_VPCBuilder.h 		\
 	systemcvpc/hscd_vpc_VpcDomErrorHandler.h 	\
 	systemcvpc/PCBPool.h 				\
+	systemcvpc/PluggablePowerGovernor.hpp		\
 	systemcvpc/Pool.h 				\
 	systemcvpc/PowerGovernor.h 			\
 	systemcvpc/PowerMode.h 				\

@@ -19,10 +19,73 @@
 //#include "hscd_vpc_Scheduler.h>
 #include <systemcvpc/hscd_vpc_datatypes.h>
 #include <systemcvpc/Task.h>
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
 
 #include <float.h>
 
 namespace SystemC_VPC{
+
+  /**
+   *
+   */
+  FCFSComponent::FCFSComponent( sc_module_name name, Director *director )
+      : AbstractComponent(name),
+        runningTask(NULL),
+        blockMutex(0)
+    {
+      SC_METHOD(schedule_method);
+      sensitive << notify_scheduler_thread;
+      dont_initialize();
+
+      //SC_THREAD(remainingPipelineStages);
+
+      this->setPowerMode(this->translatePowerMode("SLOW"));
+
+      midPowerGov = new InternalLoadHysteresisGovernor(
+        sc_time(12.5, SC_MS),
+        sc_time(12.1, SC_MS),
+        sc_time( 4.0, SC_MS));
+      midPowerGov->setGlobalGovernor(director->topPowerGov);
+
+
+      if(powerTables.find(getPowerMode()) == powerTables.end()){
+        powerTables[getPowerMode()] = PowerTable();
+      }
+
+      PowerTable &powerTable=powerTables[getPowerMode()];
+      powerTable[ComponentState::IDLE]    = 0.0;
+      powerTable[ComponentState::RUNNING] = 1.0;
+
+#ifndef NO_POWER_SUM
+      std::string powerSumFileName(this->getName());
+      powerSumFileName += ".dat";
+
+      powerSumStream = new std::ofstream(powerSumFileName.c_str());
+      powerSumming   = new PowerSumming(*powerSumStream);
+      this->addObserver(powerSumming);
+#endif // NO_POWER_SUM
+
+#ifndef NO_VCD_TRACES
+      std::string tracefilename=this->getName(); //componentName;
+      char tracefilechar[VPC_MAX_STRING_LENGTH];
+      char* traceprefix= getenv("VPCTRACEFILEPREFIX");
+      if(0!=traceprefix){
+        tracefilename.insert(0,traceprefix);
+      }
+      strcpy(tracefilechar,tracefilename.c_str());
+      vcd_trace_file *vcd = new vcd_trace_file(tracefilechar);
+      //sc_create_vcd_trace_file(tracefilechar);
+      this->traceFile = vcd;
+      sc_get_curr_simcontext()->add_trace_file(this->traceFile);
+      vcd->sc_set_vcd_time_unit(-9);
+
+      // FIXME: disabled Scheduler tracing (there is no scheduling overhead)
+      //sc_trace(this->traceFile,schedulerTrace,schedulername);
+#endif //NO_VCD_TRACES      
+
+      fireStateChanged(ComponentState::IDLE);
+    }
+
 
   /**
    *

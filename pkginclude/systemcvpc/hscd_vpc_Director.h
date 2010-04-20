@@ -25,8 +25,6 @@
 #include <systemcvpc/hscd_vpc_EventPair.h>
 #include <systemcvpc/FastLink.h>
 #include <systemcvpc/TaskPool.h>
-#include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
-#include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 

@@ -27,6 +27,9 @@
 #include <systemcvpc/StaticRoute.h>
 #include <systemcvpc/PowerSumming.h>
 #include <systemcvpc/Task.h>
+#include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include <systemcvpc/PluggablePowerGovernor.hpp>
 
 #include <systemc.h>
 #include <map>

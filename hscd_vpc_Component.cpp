@@ -28,6 +28,8 @@
 #include <systemcvpc/TimeTriggeredCCScheduler.h>
 #include <systemcvpc/hscd_vpc_PrioritySchedulerNoPreempt.h>
 #include <systemcvpc/hscd_vpc_datatypes.h>
+#include <systemcvpc/PluggablePowerGovernor.hpp>
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/Task.h>
 
 #include <float.h>
