@@ -42,12 +42,10 @@ typedef CoSupport::SystemC::RefCountEvent         VPC_Event;
   };
 
   struct timeCompare{
-    bool operator()(const timePcbPair& tpp1,
-        const timePcbPair& tpp2) const
+    bool operator()(const timePcbPair& left,
+                    const timePcbPair& right) const
     {
-      sc_time p1=tpp1.time;
-      sc_time p2=tpp2.time;
-      if (p1 >= p2)
+      if (left.time > right.time)
         return true;
       else
         return false;
