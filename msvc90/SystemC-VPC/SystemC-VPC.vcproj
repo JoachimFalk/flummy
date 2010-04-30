@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP20"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;..\..\pkginclude;..\..\..\Support\pkginclude"
+				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;XML_LIBRARY"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -107,7 +107,7 @@
 				AdditionalOptions="/MP20"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..;..\..\pkginclude;..\..\..\Support\pkginclude"
+				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;XML_LIBRARY"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
@@ -170,7 +170,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP20"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;..\..\pkginclude;..\..\..\Support\pkginclude"
+				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;XML_LIBRARY"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -178,6 +178,71 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release-VPC|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP20"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;XML_LIBRARY"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
