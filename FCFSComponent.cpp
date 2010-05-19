@@ -232,7 +232,7 @@ namespace SystemC_VPC{
    */
   void FCFSComponent::informAboutMapping(std::string module){
 #ifndef NO_VCD_TRACES
-    Tracing *newsignal = new Tracing();
+    Tracing *newsignal = new Tracing( getName(), module );
     trace_map_by_name.insert(std::pair<std::string,Tracing* >(module, newsignal));
     sc_trace(this->traceFile, *newsignal->traceSignal, module.c_str());
     newsignal->traceSleeping();
