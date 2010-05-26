@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--multihop--0.6--patch-21
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Sebastian Graf <graf@codesign.informatik.uni-erlangen.de>
+Date: Wed Jun  4 16:11:52 CEST 2008
+Standard-date: 2008-06-04 14:11:52 GMT
+Modified-files: FlexRayScheduler.cpp
+    TimeTriggeredCCScheduler.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-21
+Summary: 
+  - Bugfix in FlexRayScheduler and in TimeTriggeredCCScheduler
+Keywords: 
+
+
+

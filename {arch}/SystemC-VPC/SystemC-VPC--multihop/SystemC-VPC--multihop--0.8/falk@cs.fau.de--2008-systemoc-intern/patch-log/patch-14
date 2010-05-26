@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.8--patch-14
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Feb 22 09:09:29 CET 2010
+Standard-date: 2010-02-22 08:09:29 GMT
+Modified-files: configure.in.frag
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-14
+Summary: 
+ - removed "--enable-vpc" option
+Keywords: 
+
+
+

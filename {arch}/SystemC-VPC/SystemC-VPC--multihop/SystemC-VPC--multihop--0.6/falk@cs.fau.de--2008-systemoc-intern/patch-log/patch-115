@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-115
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Mar 23 14:04:27 CET 2009
+Standard-date: 2009-03-23 13:04:27 GMT
+Modified-files: BlockingTransport.cpp StaticRoute.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-115
+Summary: 
+ - ensure a save destruction of StaticRoute and Blocking Transport (especially Pool prototype)
+Keywords: 
+
+
+

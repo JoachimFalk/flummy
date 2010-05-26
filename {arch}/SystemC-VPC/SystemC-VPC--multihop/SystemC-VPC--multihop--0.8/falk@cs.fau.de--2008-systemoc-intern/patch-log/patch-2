@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.8--patch-2
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Tue Nov 24 11:01:59 CET 2009
+Standard-date: 2009-11-24 10:01:59 GMT
+Modified-files: dynload/plugin.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-2
+Summary: 
+ - fixed vpc header include
+Keywords: 
+
+
+

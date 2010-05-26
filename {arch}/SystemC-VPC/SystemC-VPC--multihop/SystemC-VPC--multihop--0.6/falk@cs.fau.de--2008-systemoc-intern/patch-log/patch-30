@@ -1,0 +1,19 @@
+Revision: SystemC-VPC--multihop--0.6--patch-30
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jun 18 17:04:38 CEST 2008
+Standard-date: 2008-06-18 15:04:38 GMT
+Modified-files: Attribute.cpp Attribute.h
+    FlexRayScheduler.cpp FlexRayScheduler.h
+    TDMAScheduler.cpp TDMAScheduler.h
+    TimeTriggeredCCScheduler.cpp TimeTriggeredCCScheduler.h
+    hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Director.cpp hscd_vpc_Tracing.h
+    hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-30
+Summary: 
+ - untabified files and fixed indent
+Keywords: 
+
+
+

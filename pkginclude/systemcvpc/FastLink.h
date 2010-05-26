@@ -35,6 +35,16 @@ namespace SystemC_VPC{
      */
     void compute( EventPair p ) const;
 
+    /**
+     *
+     */
+    void write( size_t quantum, EventPair p ) const;
+
+    /**
+     *
+     */
+    void read( size_t quantum, EventPair p ) const;
+
 
     FastLink(ProcessId pid, FunctionId fid)
       : process(pid),
@@ -47,6 +57,8 @@ namespace SystemC_VPC{
     ProcessId            process;
     FunctionId           func;
   };
+
+  static const FunctionId defaultFunctionId = 0;
 }
 
 #endif // __INCLUDED__FASTLINK__H__

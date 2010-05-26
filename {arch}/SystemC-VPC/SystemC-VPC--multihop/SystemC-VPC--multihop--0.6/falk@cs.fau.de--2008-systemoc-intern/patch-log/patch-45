@@ -1,0 +1,21 @@
+Revision: SystemC-VPC--multihop--0.6--patch-45
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Thomas Schlichter <schlichter@cs.fau.de>
+Date: Fri Jul  4 15:37:58 CEST 2008
+Standard-date: 2008-07-04 13:37:58 GMT
+New-files: .arch-ids/ComponentInfo.cpp.id
+    .arch-ids/PowerGovernor.h.id
+    .arch-ids/PowerGovernor_Impl.h.id
+    .arch-ids/testPowerGovernor.cpp.id ComponentInfo.cpp
+    PowerGovernor.h PowerGovernor_Impl.h
+    testPowerGovernor.cpp
+Modified-files: ComponentInfo.h ComponentObserver.h
+    Makefile.am PowerMode.h PowerSumming.cpp PowerSumming.h
+    hscd_vpc_Component.cpp hscd_vpc_Component.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-45
+Summary: Add PowerGovernor
+ - Changed Powermode ist not yet used by Component...
+Keywords: 
+
+
+

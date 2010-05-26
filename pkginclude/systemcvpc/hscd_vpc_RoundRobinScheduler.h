@@ -20,16 +20,19 @@ namespace SystemC_VPC{
     }
     RoundRobinScheduler(const char *schedulername);
     virtual ~RoundRobinScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,const std::map<int,ProcessControlBlock*> &ready_tasks,const std::map<int,ProcessControlBlock*> &running_tasks);
-    void addedNewTask(ProcessControlBlock *pcb);
-    void removedTask(ProcessControlBlock *pcb);
+    bool getSchedulerTimeSlice(sc_time &time,
+                               const TaskMap &ready_tasks,
+                               const TaskMap &running_tasks);
+    void addedNewTask(Task *task);
+    void removedTask(Task *task);
     sc_event& getNotifyEvent();
-    scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  std::map<int,ProcessControlBlock*> &ready_tasks,const  std::map<int,ProcessControlBlock*> &running_tasks);
+    scheduling_decision
+    schedulingDecision(int& task_to_resign,
+                       int& task_to_assign,
+                       const  TaskMap &ready_tasks,
+                       const  TaskMap &running_tasks);
     void setProperty(const char* key, const char* value);
     sc_time* schedulingOverhead();
-    
-    void signalDeallocation(bool kill);
-    void signalAllocation();
     
   protected:
     std::deque<int> rr_fifo;

@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--multihop--0.6--patch-54
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jul 14 14:39:35 CEST 2008
+Standard-date: 2008-07-14 12:39:35 GMT
+Modified-files: Attribute.h hscd_vpc_Component.cpp
+    hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-54
+Summary: 
+ - removed debug output
+Keywords: 
+
+
+

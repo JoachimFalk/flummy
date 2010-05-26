@@ -50,35 +50,44 @@ AM_CPPFLAGS =			\
 lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_la_SOURCES =			\
+	debug_config.cpp			\
+	BlockingTransport.cpp			\
 	hscd_vpc_Component.cpp			\
 	hscd_vpc_Director.cpp			\
 	hscd_vpc_PriorityScheduler.cpp		\
+	hscd_vpc_PrioritySchedulerNoPreempt.cpp	\
 	hscd_vpc_RoundRobinScheduler.cpp	\
 	hscd_vpc_FCFSScheduler.cpp		\
+	hscd_vpc_Tracing.cpp			\
 	TDMAScheduler.cpp			\
 	FlexRayScheduler.cpp			\
+	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\
+	Task.cpp				\
 	hscd_vpc_RateMonotonicScheduler.cpp	\
-	hscd_vpc_XmlHelper.cpp			\
-	hscd_vpc_Configuration.cpp		\
-	hscd_vpc_Controller.cpp			\
-	hscd_vpc_EDFController.cpp		\
-	hscd_vpc_FCFSController.cpp		\
-	hscd_vpc_PriorityController.cpp		\
-	hscd_vpc_RoundRobinController.cpp	\
-	hscd_vpc_ReconfigurableComponent.cpp	\
 	hscd_vpc_VPCBuilder.cpp			\
 	hscd_vpc_ProcessControlBlock.cpp	\
-	hscd_vpc_PCBPool.cpp			\
-	hscd_vpc_Term.cpp			\
 	FastLink.cpp				\
+	StaticRoute.cpp				\
+	Route.cpp				\
+	PowerSumming.cpp                        \
+	HysteresisLocalGovernor.cpp		\
+	SelectFastestPowerModeGlobalGovernor.cpp\
+	PluggablePowerGovernor.cpp		\
+	dynload/dll-elf.cpp			\
+	ComponentInfo.cpp			\
+	FCFSComponent.cpp			\
 	hscd_vpc_AbstractComponent.cpp
 #	hscd_vpc_SchedulerProxy.cpp		
 
 libsystemcvpc_la_LDFLAGS =				\
 	-version-info 0:0:0 				\
-	-no-undefined
+	-no-undefined						\
+	-rdynamic
+
 libsystemcvpc_la_LIBADD = 				\
 	@COSUPPORT_LIBPATH@/libcosupport-systemc.la	\
 	-lxerces-c					\
-	-lsystemc
+	-lsystemc					\
+	-lstdc++					\
+	-ldl

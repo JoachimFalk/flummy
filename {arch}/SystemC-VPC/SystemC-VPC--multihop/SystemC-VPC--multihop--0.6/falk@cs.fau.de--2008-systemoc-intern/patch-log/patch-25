@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--multihop--0.6--patch-25
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Sebastian Graf <graf@codesign.informatik.uni-erlangen.de>
+Date: Wed Jun 11 10:58:34 CEST 2008
+Standard-date: 2008-06-11 08:58:34 GMT
+Modified-files: FlexRayScheduler.cpp TDMAScheduler.cpp
+    TimeTriggeredCCScheduler.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-25
+Summary: 
+  - removed compile-warnings
+Keywords: 
+
+
+

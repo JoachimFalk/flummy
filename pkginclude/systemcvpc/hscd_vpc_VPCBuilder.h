@@ -22,17 +22,10 @@
 #include <vector>
 
 #include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_Component.h"
-#include "hscd_vpc_ReconfigurableComponent.h"
 
-#include "hscd_vpc_AbstractController.h"
-#include "hscd_vpc_FCFSController.h"
-#include "hscd_vpc_RoundRobinController.h"
-#include "hscd_vpc_PriorityController.h"
-#include "hscd_vpc_EDFController.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
-#include "hscd_vpc_Configuration.h"
+#include "Timing.h"
 #include "Attribute.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -45,10 +38,19 @@ namespace SystemC_VPC{
    * simulation start.
    */
   class VPCBuilder{
+
+    static const char* B_TRANSPORT;
+    static const char* STATIC_ROUTE;
+    static const char* STR_VPC_THREADEDCOMPONENTSTRING;
+    static const char* STR_VPC_DELAY;
+    static const char* STR_VPC_LATENCY;
+    static const char* STR_VPC_PRIORITY;
+    static const char* STR_VPC_PERIOD;
+    static const char* STR_VPC_DEADLINE;
+
     /*
      * SECTION: init tag values for comparison while initializing
      */
-    XMLCh* constraintStr;
     XMLCh* measurefileStr;
     XMLCh* resultfileStr;
     XMLCh* resourcesStr;
@@ -56,16 +58,12 @@ namespace SystemC_VPC{
     XMLCh* componentStr;
     XMLCh* mappingStr;
     XMLCh* attributeStr;
-    XMLCh* configurationStr;
-    XMLCh* switchtimesStr;
-    XMLCh* switchtimeStr;
-    XMLCh* defaultConfStr;
-    XMLCh* templateSectionStr;
-    XMLCh* templateStr;
-    XMLCh* refTemplateStr;
     XMLCh* timingStr;
     XMLCh* parameterStr;
-    //XMLCh *Str;
+    XMLCh* topologyStr;
+    XMLCh *hopStr;
+    XMLCh *routeStr;
+    XMLCh *powerModeStr;
     
     XMLCh* nameAttrStr;
     XMLCh* countAttrStr;
@@ -75,45 +73,21 @@ namespace SystemC_VPC{
     XMLCh* valueAttrStr;
     XMLCh* targetAttrStr;
     XMLCh* sourceAttrStr;
-    XMLCh* loadTimeAttrStr;
-    XMLCh* storeTimeAttrStr;
     XMLCh *delayAttrStr;
     XMLCh *diiAttrStr;
     XMLCh *latencyAttrStr;
     XMLCh *fnameAttrStr;
-    //XMLCh *AttrStr;
-    
-    /*
-     * END OF SECTION: init tag values for comparison while initializing
-     */
+    XMLCh *destinationAttrStr;
     
     // walker over parsed configure file
     // used as instance variable to enable code modularization
     DOMTreeWalker* vpcConfigTreeWalker;
-    
     
     /*
      * HELPER STRUCTURES FOR INITIALIZATION
      */
     // map of all created components
     std::map<std::string, AbstractComponent* > knownComps;
-    // map of all created configs
-    std::map<std::string, Configuration* > knownConfigs;
-    // map from all subComponents to their configs
-    std::multimap<std::string, std::string > subComp_to_Config;
-    // map from all configs to their parents components
-    std::map<std::string, std::string > config_to_ParentComp;
-    // map containing specified templates
-    std::map<std::string, std::vector<std::pair<char*, char* > > > templates;
-
-    //helper struct
-    struct Timing{
-      sc_time dii;
-      sc_time latency;
-      char*   fname;
-    };
-    // map containing template Timings
-    std::map<std::string, std::vector<Timing> > timingTemplates;
 
     // pointer to Director to be initialized
     Director* director;
@@ -128,28 +102,24 @@ namespace SystemC_VPC{
         XMLPlatformUtils::Initialize();
       }
       catch(const XMLException& e){
-        cerr << VPC_ERROR<<"Director> Error initializing Xerces:\n"<<XMLString::transcode(e.getMessage())<<NENDL; // << endl;
+        cerr << "Director> Error initializing Xerces:\n"
+             << XMLString::transcode(e.getMessage()) << std::endl;
       }
       /*
        * SECTION: initialization of init tag values for comparison while initializing
        */
-      constraintStr   = XMLString::transcode("constraint");
-      measurefileStr  = XMLString::transcode("measurefile");
       resultfileStr   = XMLString::transcode("resultfile");
       resourcesStr    = XMLString::transcode("resources");
       mappingsStr     = XMLString::transcode("mappings");
       componentStr    = XMLString::transcode("component");
       mappingStr      = XMLString::transcode("mapping");
       attributeStr    = XMLString::transcode("attribute");
-      configurationStr= XMLString::transcode("configuration");
-      switchtimesStr  = XMLString::transcode("switchtimes");
-      switchtimeStr   = XMLString::transcode("switchtime");
-      defaultConfStr  = XMLString::transcode("defaultconfiguration");
-      templateSectionStr    = XMLString::transcode("templates");
-      templateStr     = XMLString::transcode("template");
-      refTemplateStr  = XMLString::transcode("reftemplate");
       timingStr       = XMLString::transcode("timing");
       parameterStr    = XMLString::transcode("parameter");
+      topologyStr     = XMLString::transcode("topology");
+      hopStr          = XMLString::transcode("hop");
+      routeStr        = XMLString::transcode("route");
+      powerModeStr    = XMLString::transcode("powermode");
       //XMLCh* VPCBuilder::Str = XMLString::transcode("");
       
       nameAttrStr    = XMLString::transcode("name");
@@ -160,12 +130,11 @@ namespace SystemC_VPC{
       valueAttrStr  = XMLString::transcode("value");
       targetAttrStr  = XMLString::transcode("target");
       sourceAttrStr  = XMLString::transcode("source");
-      loadTimeAttrStr  = XMLString::transcode("loadtime");
-      storeTimeAttrStr= XMLString::transcode("storetime");
       delayAttrStr        = XMLString::transcode("delay");
       diiAttrStr          = XMLString::transcode("dii");
       latencyAttrStr      = XMLString::transcode("latency");
       fnameAttrStr        = XMLString::transcode("fname");
+      destinationAttrStr  = XMLString::transcode("destination");
       //XMLCh* VPCBuilder::AttrStr   = XMLString::transcode("");
       
       /*
@@ -199,62 +168,11 @@ namespace SystemC_VPC{
     AbstractComponent* initComponent() throw(InvalidArgumentException);
     
     /**
-     * \brief initializes specified templates
-     * \param tid specifies the id for an template
-     * \param specifies the current position within dom tree
-     */
-    //void initTemplateSpecifications(char* tid, DOMNode* node);
-    void initTemplateSpecifications(char* tid);
-    
-    /**
      * \brief Performs initialization of attribute values for a component
      * \param comp specifies the component to set attributes for
      */
     //void initCompAttributes(AbstractComponent* comp, DOMNode* node);
     void initCompAttributes(AbstractComponent* comp);
-    
-    /**
-     * \brief Initializes the Configurations of an ReconfigurableComponent
-     * As long as there are defined Configurations, they will be register and
-     * added to the given component.
-     * \param comp represents the component for which to initialize the configurations
-     * \param node specifies current position within dom tree
-     */
-    //void initConfigurations(ReconfigurableComponent* comp, DOMNode* node);
-    void initConfigurations(ReconfigurableComponent* comp);
-    
-    /**
-     * \brief Initializes one Configuration of an ReconfigurableComponent
-     * As long as there are defined inner Components, they will be register and
-     * added to the given Configuration.
-     * \param comp represents the component for which to initialize the configurations
-     * \param node specifies current postion within dom tree
-     */
-    //void initConfiguration(ReconfigurableComponent* comp, Configuration* conf, DOMNode* node);
-    void initConfiguration(ReconfigurableComponent* comp, Configuration* conf);
-    
-    /**
-     * \brief Initializes the Configuration switch times for a component
-     * As long as there are defined switch times, they will be
-     * added to the associated Controller of the ReconfigurableComponent.
-     * \param comp represents the component for which to initialize the switch times
-     */
-    void initSwitchTimesOfComponent(ReconfigurableComponent* comp);
-    
-    /**
-     * \brief Passes attributes of a specified template to a given component instance
-     * \param comp represents the component to apply the attributes on
-     * \param key references the key of the template to apply
-     */
-    void applyTemplateOnComponent(AbstractComponent* comp, std::string key);
-    
-    /**
-     * \brief Interprets template for setting up parameter for a given ProcessControlBlock
-     * \param p represents the ProcessControlBlock to be updated
-     * \param target specifies the target of mapping
-     * \param key references the key of the template to apply
-     */
-    void applyTemplateOnPStruct(ProcessControlBlock* p, const char* target, std::string key);
     
     /**
      * \brief Initializes mapping between tasks and components
@@ -263,22 +181,19 @@ namespace SystemC_VPC{
     void initMappingAPStruct();
 
     /**
-     * \brief Used to build up bind hierarchy within vpc framework
-     * This method is used to add corresponding binding information at each
-     * level within the control hierarchy of vpc
-     */
-    void buildUpBindHierarchy(const char* source, const char* target);
-    
-    /**
-     * \brief Generate pcb for internal use in VPC Framework
-     */
-    AbstractController* generateController(const char* type, const char* id) throw(InvalidArgumentException);
-   
-    /**
     * \brief Used to create the Attribute-Object recursively
     */
-    void nextAttribute(Attribute &fr_Attribute, DOMNode* node);
+    void nextAttribute(AttributePtr attributePtr, DOMNode* node);
      
+    /**
+    * \brief Topology parsing related code
+    */
+    void parseTopology(DOMNode* node);
+
+    /**
+    * \brief Parsing helper for <timing>
+    */
+    Timing parseTiming(DOMNode* node);
   };
     
 }

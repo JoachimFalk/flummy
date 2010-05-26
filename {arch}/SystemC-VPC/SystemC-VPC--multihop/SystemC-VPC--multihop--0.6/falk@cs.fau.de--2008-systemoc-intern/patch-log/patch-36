@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--multihop--0.6--patch-36
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jun 30 12:19:52 CEST 2008
+Standard-date: 2008-06-30 10:19:52 GMT
+Modified-files: hscd_vpc_AbstractComponent.h
+    hscd_vpc_Component.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-36
+Summary: 
+ - basic support for power mode switching
+Keywords: 
+
+
+

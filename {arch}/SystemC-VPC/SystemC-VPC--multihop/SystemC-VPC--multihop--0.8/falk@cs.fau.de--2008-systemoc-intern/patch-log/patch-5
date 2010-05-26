@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--multihop--0.8--patch-5
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Nov 30 10:58:53 CET 2009
+Standard-date: 2009-11-30 09:58:53 GMT
+Modified-files: dynload/dll-win32.cpp
+    hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-5
+Summary: 
+ - fixed includes, namespaces, default parameter (required for msvc90)
+Keywords: 
+
+
+

@@ -1,0 +1,188 @@
+Revision: SystemC-VPC--multihop--0.8--patch-1
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Nov 23 13:58:12 CET 2009
+Standard-date: 2009-11-23 12:58:12 GMT
+New-files: .arch-ids/configure.in.frag.id configure.in.frag
+    pkginclude/.arch-ids/=id
+    pkginclude/.arch-ids/Makefile.am.id
+    pkginclude/Makefile.am
+    pkginclude/systemcvpc/.arch-ids/=id
+    pkginclude/systemcvpc/dynload/.arch-ids/=id
+New-directories: pkginclude pkginclude/.arch-ids
+    pkginclude/systemcvpc pkginclude/systemcvpc/.arch-ids
+    pkginclude/systemcvpc/dynload
+    pkginclude/systemcvpc/dynload/.arch-ids
+Renamed-files: .arch-ids/Attribute.h.id pkginclude/systemcvpc/.arch-ids/Attribute.h.id
+    .arch-ids/BlockingTransport.h.id pkginclude/systemcvpc/.arch-ids/BlockingTransport.h.id
+    .arch-ids/ComponentInfo.h.id pkginclude/systemcvpc/.arch-ids/ComponentInfo.h.id
+    .arch-ids/ComponentModel.h.id pkginclude/systemcvpc/.arch-ids/ComponentModel.h.id
+    .arch-ids/ComponentObserver.h.id pkginclude/systemcvpc/.arch-ids/ComponentObserver.h.id
+    .arch-ids/Delayer.h.id pkginclude/systemcvpc/.arch-ids/Delayer.h.id
+    .arch-ids/FCFSComponent.h.id pkginclude/systemcvpc/.arch-ids/FCFSComponent.h.id
+    .arch-ids/FastLink.h.id pkginclude/systemcvpc/.arch-ids/FastLink.h.id
+    .arch-ids/FlexRayScheduler.h.id pkginclude/systemcvpc/.arch-ids/FlexRayScheduler.h.id
+    .arch-ids/FunctionTimingPool.h.id pkginclude/systemcvpc/.arch-ids/FunctionTimingPool.h.id
+    .arch-ids/HysteresisLocalGovernor.hpp.id pkginclude/systemcvpc/.arch-ids/HysteresisLocalGovernor.hpp.id
+    .arch-ids/PCBPool.h.id pkginclude/systemcvpc/.arch-ids/PCBPool.h.id
+    .arch-ids/PluggablePowerGovernor.hpp.id pkginclude/systemcvpc/.arch-ids/PluggablePowerGovernor.hpp.id
+    .arch-ids/Pool.h.id pkginclude/systemcvpc/.arch-ids/Pool.h.id
+    .arch-ids/PowerGovernor.h.id pkginclude/systemcvpc/.arch-ids/PowerGovernor.h.id
+    .arch-ids/PowerMode.h.id pkginclude/systemcvpc/.arch-ids/PowerMode.h.id
+    .arch-ids/PowerSumming.h.id pkginclude/systemcvpc/.arch-ids/PowerSumming.h.id
+    .arch-ids/Route.h.id pkginclude/systemcvpc/.arch-ids/Route.h.id
+    .arch-ids/RoutePool.h.id pkginclude/systemcvpc/.arch-ids/RoutePool.h.id
+    .arch-ids/SelectFastestPowerModeGlobalGovernor.hpp.id pkginclude/systemcvpc/.arch-ids/SelectFastestPowerModeGlobalGovernor.hpp.id
+    .arch-ids/StaticRoute.h.id pkginclude/systemcvpc/.arch-ids/StaticRoute.h.id
+    .arch-ids/TDMAScheduler.h.id pkginclude/systemcvpc/.arch-ids/TDMAScheduler.h.id
+    .arch-ids/Task.h.id pkginclude/systemcvpc/.arch-ids/Task.h.id
+    .arch-ids/TaskPool.h.id pkginclude/systemcvpc/.arch-ids/TaskPool.h.id
+    .arch-ids/TimeTriggeredCCScheduler.h.id pkginclude/systemcvpc/.arch-ids/TimeTriggeredCCScheduler.h.id
+    .arch-ids/Timing.h.id pkginclude/systemcvpc/.arch-ids/Timing.h.id
+    .arch-ids/debug.h.id pkginclude/systemcvpc/.arch-ids/debug.h.id
+    .arch-ids/debug_config.h.id pkginclude/systemcvpc/.arch-ids/debug_config.h.id
+    .arch-ids/debug_off.h.id pkginclude/systemcvpc/.arch-ids/debug_off.h.id
+    .arch-ids/debug_on.h.id pkginclude/systemcvpc/.arch-ids/debug_on.h.id
+    .arch-ids/hscd_vpc_AbstractComponent.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_AbstractComponent.h.id
+    .arch-ids/hscd_vpc_Component.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_Component.h.id
+    .arch-ids/hscd_vpc_Director.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_Director.h.id
+    .arch-ids/hscd_vpc_EventPair.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_EventPair.h.id
+    .arch-ids/hscd_vpc_FCFSScheduler.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_FCFSScheduler.h.id
+    .arch-ids/hscd_vpc_InvalidArgumentException.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_InvalidArgumentException.h.id
+    .arch-ids/hscd_vpc_PriorityScheduler.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_PriorityScheduler.h.id
+    .arch-ids/hscd_vpc_PrioritySchedulerNoPreempt.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_PrioritySchedulerNoPreempt.h.id
+    .arch-ids/hscd_vpc_ProcessControlBlock.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_ProcessControlBlock.h.id
+    .arch-ids/hscd_vpc_ProcessEventListener.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_ProcessEventListener.h.id
+    .arch-ids/hscd_vpc_RateMonotonicScheduler.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_RateMonotonicScheduler.h.id
+    .arch-ids/hscd_vpc_RoundRobinScheduler.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_RoundRobinScheduler.h.id
+    .arch-ids/hscd_vpc_Scheduler.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_Scheduler.h.id
+    .arch-ids/hscd_vpc_Tracing.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_Tracing.h.id
+    .arch-ids/hscd_vpc_VPCBuilder.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_VPCBuilder.h.id
+    .arch-ids/hscd_vpc_VpcDomErrorHandler.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_VpcDomErrorHandler.h.id
+    .arch-ids/hscd_vpc_datatypes.h.id pkginclude/systemcvpc/.arch-ids/hscd_vpc_datatypes.h.id
+    Attribute.h pkginclude/systemcvpc/Attribute.h
+    BlockingTransport.h pkginclude/systemcvpc/BlockingTransport.h
+    ComponentInfo.h pkginclude/systemcvpc/ComponentInfo.h
+    ComponentModel.h pkginclude/systemcvpc/ComponentModel.h
+    ComponentObserver.h pkginclude/systemcvpc/ComponentObserver.h
+    Delayer.h pkginclude/systemcvpc/Delayer.h
+    FCFSComponent.h pkginclude/systemcvpc/FCFSComponent.h
+    FastLink.h pkginclude/systemcvpc/FastLink.h
+    FlexRayScheduler.h pkginclude/systemcvpc/FlexRayScheduler.h
+    FunctionTimingPool.h pkginclude/systemcvpc/FunctionTimingPool.h
+    HysteresisLocalGovernor.hpp pkginclude/systemcvpc/HysteresisLocalGovernor.hpp
+    PCBPool.h pkginclude/systemcvpc/PCBPool.h
+    PluggablePowerGovernor.hpp pkginclude/systemcvpc/PluggablePowerGovernor.hpp
+    Pool.h pkginclude/systemcvpc/Pool.h
+    PowerGovernor.h pkginclude/systemcvpc/PowerGovernor.h
+    PowerMode.h pkginclude/systemcvpc/PowerMode.h
+    PowerSumming.h pkginclude/systemcvpc/PowerSumming.h
+    Route.h pkginclude/systemcvpc/Route.h
+    RoutePool.h pkginclude/systemcvpc/RoutePool.h
+    SelectFastestPowerModeGlobalGovernor.hpp pkginclude/systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp
+    StaticRoute.h pkginclude/systemcvpc/StaticRoute.h
+    TDMAScheduler.h pkginclude/systemcvpc/TDMAScheduler.h
+    Task.h pkginclude/systemcvpc/Task.h
+    TaskPool.h pkginclude/systemcvpc/TaskPool.h
+    TimeTriggeredCCScheduler.h pkginclude/systemcvpc/TimeTriggeredCCScheduler.h
+    Timing.h pkginclude/systemcvpc/Timing.h
+    debug.h pkginclude/systemcvpc/debug.h
+    debug_config.h pkginclude/systemcvpc/debug_config.h
+    debug_off.h pkginclude/systemcvpc/debug_off.h
+    debug_on.h pkginclude/systemcvpc/debug_on.h
+    dynload/.arch-ids/dll.h.id pkginclude/systemcvpc/dynload/.arch-ids/dll.h.id
+    dynload/.arch-ids/plugin.h.id pkginclude/systemcvpc/dynload/.arch-ids/plugin.h.id
+    dynload/.arch-ids/world.h.id pkginclude/systemcvpc/dynload/.arch-ids/world.h.id
+    dynload/dll.h pkginclude/systemcvpc/dynload/dll.h
+    dynload/plugin.h pkginclude/systemcvpc/dynload/plugin.h
+    dynload/world.h pkginclude/systemcvpc/dynload/world.h
+    hscd_vpc_AbstractComponent.h pkginclude/systemcvpc/hscd_vpc_AbstractComponent.h
+    hscd_vpc_Component.h pkginclude/systemcvpc/hscd_vpc_Component.h
+    hscd_vpc_Director.h pkginclude/systemcvpc/hscd_vpc_Director.h
+    hscd_vpc_EventPair.h pkginclude/systemcvpc/hscd_vpc_EventPair.h
+    hscd_vpc_FCFSScheduler.h pkginclude/systemcvpc/hscd_vpc_FCFSScheduler.h
+    hscd_vpc_InvalidArgumentException.h pkginclude/systemcvpc/hscd_vpc_InvalidArgumentException.h
+    hscd_vpc_PriorityScheduler.h pkginclude/systemcvpc/hscd_vpc_PriorityScheduler.h
+    hscd_vpc_PrioritySchedulerNoPreempt.h pkginclude/systemcvpc/hscd_vpc_PrioritySchedulerNoPreempt.h
+    hscd_vpc_ProcessControlBlock.h pkginclude/systemcvpc/hscd_vpc_ProcessControlBlock.h
+    hscd_vpc_ProcessEventListener.h pkginclude/systemcvpc/hscd_vpc_ProcessEventListener.h
+    hscd_vpc_RateMonotonicScheduler.h pkginclude/systemcvpc/hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_RoundRobinScheduler.h pkginclude/systemcvpc/hscd_vpc_RoundRobinScheduler.h
+    hscd_vpc_Scheduler.h pkginclude/systemcvpc/hscd_vpc_Scheduler.h
+    hscd_vpc_Tracing.h pkginclude/systemcvpc/hscd_vpc_Tracing.h
+    hscd_vpc_VPCBuilder.h pkginclude/systemcvpc/hscd_vpc_VPCBuilder.h
+    hscd_vpc_VpcDomErrorHandler.h pkginclude/systemcvpc/hscd_vpc_VpcDomErrorHandler.h
+    hscd_vpc_datatypes.h pkginclude/systemcvpc/hscd_vpc_datatypes.h
+Modified-files: Attribute.cpp BlockingTransport.cpp
+    ComponentInfo.cpp FCFSComponent.cpp FastLink.cpp
+    FlexRayScheduler.cpp HysteresisLocalGovernor.cpp
+    Makefile.am PluggablePowerGovernor.cpp PowerSumming.cpp
+    Route.cpp SelectFastestPowerModeGlobalGovernor.cpp
+    StaticRoute.cpp TDMAScheduler.cpp Task.cpp
+    TimeTriggeredCCScheduler.cpp configure.in
+    debug_config.cpp dynload/dll-elf.cpp
+    hscd_vpc_AbstractComponent.cpp hscd_vpc_Component.cpp
+    hscd_vpc_Director.cpp hscd_vpc_FCFSScheduler.cpp
+    hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_PrioritySchedulerNoPreempt.cpp
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_RateMonotonicScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.cpp hscd_vpc_Tracing.cpp
+    hscd_vpc_VPCBuilder.cpp
+    pkginclude/systemcvpc/Attribute.h
+    pkginclude/systemcvpc/HysteresisLocalGovernor.hpp
+    pkginclude/systemcvpc/RoutePool.h
+    pkginclude/systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp
+    pkginclude/systemcvpc/Task.h
+    pkginclude/systemcvpc/TaskPool.h
+    pkginclude/systemcvpc/hscd_vpc_Director.h
+    testPowerGovernor.cpp testPowerSumming.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-2
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-3
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-4
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-5
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-6
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-7
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-8
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-1
+Summary: 
+ - replayed patches patch-2 to patch-8 of SystemC-VPC--mainline--0.8
+ - this VPC branch works with SysteMoC 0.8
+Keywords: 
+
+
+
+Patches applied:
+
+ * falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-2
+   
+  * fixed header includes (there is a reason why both #include "..." and
+    #include <...> exist!!!)
+
+ * falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-3
+   
+  * use pkginclude dir
+
+ * falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-4
+   
+  * print name on NotAllocatedException
+
+ * falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-5
+   
+ * Added configure.in.frag for top level configure.in containing --enable-vpc
+   option definition and conditional build code for SystemC-VPC.
+
+ * falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-6
+   
+ * --enable-vpc fixup
+
+ * falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-7
+   
+  * updated configure.in / Makefile.am for compilation with installed
+    dependent packages 
+
+ * falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-8
+   Compileheader feature not used, so drop dependencies for it
+ - This also fixes missing build-dependencies.
+   If *_DEPENDENCIES is defined, _all_ dependencies must be listed!
+

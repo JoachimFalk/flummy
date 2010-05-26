@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--multihop--0.6--patch-27
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Thomas Schlichter <schlichter@cs.fau.de>
+Date: Thu Jun 12 17:20:45 CEST 2008
+Standard-date: 2008-06-12 15:20:45 GMT
+Modified-files: ComponentInfo.h PowerSumming.cpp
+    PowerSumming.h hscd_vpc_Component.cpp
+    hscd_vpc_Component.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-27
+Summary: Support floating point power values.
+ - Fix PowerSumming Observer for more than one instance (get rid of static variables)
+
+Keywords: 
+
+
+

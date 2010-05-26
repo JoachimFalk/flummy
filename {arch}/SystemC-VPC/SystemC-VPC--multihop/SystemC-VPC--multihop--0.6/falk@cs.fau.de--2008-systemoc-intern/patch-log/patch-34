@@ -1,0 +1,19 @@
+Revision: SystemC-VPC--multihop--0.6--patch-34
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun 26 11:34:06 CEST 2008
+Standard-date: 2008-06-26 09:34:06 GMT
+New-files: .arch-ids/Task.h.id Task.h
+Modified-files: FastLink.h StaticRoute.cpp StaticRoute.h
+    Timing.h debug_config.h hscd_vpc_AbstractComponent.h
+    hscd_vpc_Component.cpp hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_PCBPool.cpp
+    hscd_vpc_PCBPool.h hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-34
+Summary: 
+ - moved global PCBPool @Director to local pools located at Component
+Keywords: 
+
+
+

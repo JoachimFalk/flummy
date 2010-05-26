@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--multihop--0.6--patch-109
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Mar 12 15:18:44 CET 2009
+Standard-date: 2009-03-12 14:18:44 GMT
+Modified-files: BlockingTransport.cpp BlockingTransport.h
+    Route.h StaticRoute.cpp StaticRoute.h
+    hscd_vpc_Director.cpp hscd_vpc_Director.h
+    hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-109
+Summary: 
+ - support "reverse mapping" for failure injection in routes
+Keywords: 
+
+
+

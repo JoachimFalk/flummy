@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--multihop--0.8--patch-22
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed May 19 10:33:26 CEST 2010
+Standard-date: 2010-05-19 08:33:26 GMT
+Modified-files: FCFSComponent.cpp hscd_vpc_Component.cpp
+    hscd_vpc_Tracing.cpp
+    pkginclude/systemcvpc/hscd_vpc_Tracing.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-22
+Summary: 
+ - added "plain" tracing (in addition to VCD tracing)
+Keywords: 
+
+
+

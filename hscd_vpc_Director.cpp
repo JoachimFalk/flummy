@@ -18,37 +18,63 @@
 #include <iostream>
 #include <sstream>
 
+#include <CoSupport/SystemC/systemc_time.hpp>
+
 #include <systemcvpc/hscd_vpc_Director.h>
 #include <systemcvpc/hscd_vpc_AbstractComponent.h>
-#include <systemcvpc/hscd_vpc_Term.h>
 #include <systemcvpc/hscd_vpc_VPCBuilder.h>
 #include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
+#include <systemcvpc/StaticRoute.h>
+#include <systemcvpc/PowerSumming.h>
+#include <systemcvpc/Task.h>
+#include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include <systemcvpc/PluggablePowerGovernor.hpp>
 
 #include <systemc.h>
 #include <map>
 
+#include <systemcvpc/debug_config.h>
+// if compiled with DBG_DIRECTOR create stream and include debug macros
+#ifdef DBG_DIRECTOR
+#include <CoSupport/Streams/DebugOStream.hpp>
+  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
+  //  with this name exists when DBG.. is used. here every actor creates its
+  //  own stream.
+  #define DBGOUT_STREAM dbgout
+  #include <systemcvpc/debug_on.h>
+#else
+  #include <systemcvpc/debug_off.h>
+#endif
+
 namespace SystemC_VPC{
 
   //
-  //std::auto_ptr<Director> Director::singleton(new Director());
-
-  //
-  Director& Director::getResource( const char* name){
-    //return *(this->singleton);
-    return getInstance();
-  }
+  std::auto_ptr<Director> Director::singleton(new Director());
 
   /**
    *
    */
   Director::Director()
     : FALLBACKMODE(false),
+      topPowerGov(new InternalSelectFastestPowerModeGovernor),
+      topPowerGovFactory(NULL),
+      globalFunctionId(1),
       mappings(),
       reverseMapping(),
-      end(0),
+      end(SC_ZERO_TIME),
+#ifndef NO_POWER_SUM
+      powerConsStream("powerconsumption.dat"),
+#endif // NO_POWER_SUM
       componentIdMap(),
       globalProcessId(0)
   {
+     sc_report_handler::set_actions(SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
+                                    SC_DO_NOTHING);
+    //sc_report_handler::set_actions(SC_ID_OBJECT_EXISTS_,
+    //                               SC_DO_NOTHING);
+    sc_report_handler::set_actions(SC_WARNING, SC_DO_NOTHING);
+
     try{
       VPCBuilder builder((Director*)this);
       builder.buildVPC();
@@ -61,60 +87,23 @@ namespace SystemC_VPC{
                 << e.what() << std::endl;
       exit(-1);
     }
-  }
 
-  /**
-   *
-   */
-  void Director::checkConstraints() {
-    std::vector<Constraint*>::const_iterator iter=constraints.begin();
-    for(;iter!=constraints.end();iter++){
-      (*iter)->isSatisfied();
-    }
-  }
+#ifndef NO_POWER_SUM
+    powerSumming = new PowerSumming(powerConsStream);
+#endif // NO_POWER_SUM
+    for( Components::iterator it = components.begin();
+         it != components.end();
+         ++it )
+    {
+      if(*it != NULL) {
+#ifndef NO_POWER_SUM
+        (*it)->addObserver(powerSumming);
+#endif // NO_POWER_SUM
+        (*it)->initialize(this);
 
-  /**
-   *
-   */
-  void Director::getReport(){
-    std::vector<Constraint*>::const_iterator iter=constraints.begin();
-    char *cons_name;
-    double start=-1;
-    double end=-1;
-    // if there are any constaints to be viewed calculate time
-    if(this->constraints.size() > 0){
-      for(;iter!=constraints.end();iter++){
-        cons_name=(*iter)->getName();
-        if(0==strncmp("start",cons_name,5))
-          start=(*iter)->getSatisfiedTime();
-        else if(0==strncmp("end",cons_name,3))
-          end=(*iter)->getSatisfiedTime();
-      }
-    }else{ // else take total simulation time
-      start = 0;
-      end = this->end;
-    }
-#ifdef VPC_DEBUG
-    std::cerr << "start: " << start << " end: " << end  << std::endl;
-#endif //VPC_DEBUG
-    if ((start != -1) && (end != -1)){
-      if(0 != this->vpc_result_file.compare("")){
-
-#ifdef VPC_DEBUG
-        std::cerr << "Director> result_file: "
-                  << this->vpc_result_file << std::endl;
-#endif //VPC_DEBUG
-        ofstream resultFile;
-        resultFile.open(this->vpc_result_file.c_str());
-        if(resultFile){
-          resultFile << (end-start);
-        }
-        resultFile.flush();
-        resultFile.close();
-      }else{
-        std::cerr << "latency: " << end - start << std::endl;
       }
     }
+
   }
 
   /**
@@ -122,65 +111,57 @@ namespace SystemC_VPC{
    */
   Director::~Director(){
 
-    getReport();
-    
+    sc_time start = SC_ZERO_TIME;
+    sc_time end = this->end;
+#ifdef DBG_DIRECTOR
+    std::cerr << "start: " << start << " end: " << end  << std::endl;
+#endif //DBG_DIRECTOR
+
+    if(0 != this->vpc_result_file.compare("")) {
+#ifdef DBG_DIRECTOR
+      std::cerr << "Director> result_file: "
+                << this->vpc_result_file << std::endl;
+#endif //DBG_DIRECTOR
+      ofstream resultFile;
+      resultFile.open(this->vpc_result_file.c_str());
+      if(resultFile){
+        resultFile << (end-start).to_default_time_units();
+      }
+      resultFile.flush();
+      resultFile.close();
+    }else{
+      std::cerr << "latency: " << end - start << std::endl;
+    }
+
+#ifndef NO_POWER_SUM
+    for( Components::iterator it = components.begin();
+         it != components.end();
+         ++it )
+    {
+      if(*it != NULL) {
+        (*it)->removeObserver(powerSumming);
+      }
+    }
+
+    delete powerSumming;
+#endif // NO_POWER_SUM
+
     // clear components
     for( Components::iterator it = components.begin();
          it != components.end();
          ++it ){
-      delete *it;
+      // FIXME: find the bug
+      if(*it != NULL) {
+        delete *it;
+      }
     }
-    
+
     componentIdMap.clear();
   }
 
   //
-  ProcessControlBlock* Director::getProcessControlBlock( const char *name ){
-    ProcessId pid = getProcessId(name);
-    return this->getProcessControlBlock( pid );
-  }
-
-  //
-  ProcessControlBlock* Director::getProcessControlBlock( ProcessId pid ){
-
-    assert(!FALLBACKMODE);
-
-    try{
-      return this->pcbPool.allocate( pid );
-    }catch(NotAllocatedException& e){
-      
-      std::string name;
-
-      for(ProcessIdMap::const_iterator iter = processIdMap.begin();
-          iter != processIdMap.end();
-          ++iter)
-      {
-        if(iter->second == pid) {
-          name = iter->first;
-          break;
-        }
-      }
-
-      std::cerr << "Director> getProcessControlBlock failed due to"
-                << std::endl << e.what() << std::endl;
-      std::cerr << "HINT: probably actor binding not specified in"
-                << " configuration file! (PID: " << pid
-                << "; NAME: " << name << ")" << std::endl;
-      assert(0);
-    }
-
-  }
-
-  //
-  PCBPool& Director::getPCBPool(){
-    return this->pcbPool;
-  }
-
-
-  //
-  void Director::compute( FastLink fLink,
-                          EventPair endPair ){
-
+  Task* Director::preCompute( FastLink fLink,
+                              EventPair endPair ){
     if(FALLBACKMODE){
       // create Fallback behavior for active and passive mode!
       if( endPair.dii != NULL )
@@ -189,69 +170,101 @@ namespace SystemC_VPC{
         endPair.latency->notify();  // passive mode: notify end
 
       // do nothing, just return
-      return;
+      return NULL;
     }
 
-
-    ProcessControlBlock* pcb = this->getProcessControlBlock(fLink.process);
-    pcb->setFunctionId(fLink.func);
-    
-    int lockid = -1;
-    
-    //HINT: also treat mode!!
-    //if( endPair.latency != NULL ) endPair.latency->notify();
-
+    EventPair blockEvent = endPair;
     if( endPair.dii == NULL ){
       // prepare active mode
-      pcb->setBlockEvent(EventPair(new VPC_Event(), new VPC_Event()));
+      blockEvent=EventPair(new VPC_Event(), new VPC_Event());
       // we could use a pool of VPC_Events instead of new/delete
-      lockid = this->pcbPool.lock(pcb);
-    }else{
-      // prepare passiv mode
-      pcb->setBlockEvent(endPair);
     }
 
+    try{
+      //Task *task = new Task(fLink, endPair);
+      Task *task = this->allocateTask( fLink.process );
+      task->setFunctionId( fLink.func );
+      task->setBlockEvent( endPair );
     
-    if (mappings.size() < fLink.process ||
-        mappings[fLink.process] == NULL) {
-      cerr << "Unknown mapping <" << pcb->getName() << "> to ??" << std::endl;
+    
+      //HINT: also treat mode!!
+      //if( endPair.latency != NULL ) endPair.latency->notify();
+    
+      if (mappings.size() < fLink.process ||
+          mappings[fLink.process] == NULL) {
+        cerr << "Unknown mapping <" << task->getName() << "> to ??" << std::endl;
       
-      assert(mappings.size() >= fLink.process &&
-             mappings[fLink.process] != NULL);
-    }
+        assert(mappings.size() >= fLink.process &&
+               mappings[fLink.process] != NULL);
+      }
     
-    // get Component
-    AbstractComponent* comp = mappings[fLink.process];
+      return task;
+    } catch (NotAllocatedException e){
+      cerr << "Unknown Task: ID = " << fLink.process
+           << " name = " << this->getTaskName(fLink.process)  << std::endl;
 
-    // compute task on found component
-    assert(!FALLBACKMODE);
-    comp->compute(pcb);
+      debugUnknownNames();
+    }
+    throw NotAllocatedException(this->getTaskName(fLink.process));
+  }
+
+  //
+  void Director::postCompute( Task * task,
+                              EventPair endPair ){
 
     if( endPair.dii == NULL){
       // active mode -> waits until simulated delay time has expired
       
-      CoSupport::SystemC::wait(*(pcb->getBlockEvent().dii));
-      delete pcb->getBlockEvent().dii;
-      delete pcb->getBlockEvent().latency;
-      pcb->setBlockEvent(EventPair());
-      // as psb has been locked -> unlock it
-      this->pcbPool.unlock(pcb->getPid(), lockid);
-      // and free it
-      this->pcbPool.free(pcb);
+      EventPair blockEvent =  task->getBlockEvent();
+
+      CoSupport::SystemC::wait(*blockEvent.dii);
+      blockEvent.dii = NULL;
+      blockEvent.latency = NULL;
     }
-    
   }
 
-  void Director::compute(const char* name,
-                         const char* funcname,
-                         VPC_Event* end)
-  {
-    //HINT: treat mode!!
-    //if (mode) { ....
-    compute(name, funcname, EventPair(end, NULL));
-    //} else{
-    //  compute(name, funcname, EventPair(NULL, end));
-    //}
+  //
+  void Director::compute( FastLink fLink, EventPair endPair ){
+    Task * task = preCompute(fLink, endPair);
+    if(task == NULL) return;
+    task->setTimingScale(1);
+    assert(!FALLBACKMODE);
+
+    Delayer* comp = mappings[fLink.process];
+    comp->compute(task);
+    postCompute(task, endPair);
+  }
+
+  //
+  void Director::read( FastLink fLink,
+                       size_t quantum,
+                       EventPair endPair ) {
+    // FIXME: treat quantum
+    Task * task = preCompute(fLink, endPair);
+    if(task == NULL) return;
+    task->setWrite(false);
+    task->setTimingScale(quantum);
+    assert(!FALLBACKMODE);
+
+    Delayer* comp = mappings[fLink.process];
+    comp->compute(task);
+    postCompute(task, endPair);
+  }
+
+  //
+  void Director::write( FastLink fLink,
+                        size_t quantum,
+                        EventPair endPair ) {
+    // FIXME: treat quantum
+    Task * task = preCompute(fLink, endPair);
+    if(task == NULL) return;
+    task->setWrite(true);
+    task->setTimingScale(quantum);
+    assert(!FALLBACKMODE);
+
+    Delayer* comp = mappings[fLink.process];
+    comp->compute(task);
+    postCompute(task, endPair);
   }
 
   void Director::compute(const char* name,
@@ -266,36 +279,22 @@ namespace SystemC_VPC{
   void Director::compute(const char *name, EventPair endPair){
     compute( name, "", endPair);
   }
-
-  //
-  void Director::compute(const char* name, VPC_Event* end){
-    this->compute(name, "", end);
-  }
     
-  /**
-   * \brief Implementation of Director::addConstraint
-   */
-  void Director::addConstraint(Constraint* cons){
-    this->constraints.push_back(cons);
-  }
-
   /**
    * \brief Implementation of Director::registerComponent
    */
-  void Director::registerComponent(AbstractComponent* comp){
+  void Director::registerComponent(Delayer* comp){
     ComponentId cid = comp->getComponentId();
     if(cid >= components.size())
       components.resize(cid+100, NULL);
 
-    this->componentIdMap[comp->basename()] = cid;
+    this->componentIdMap[comp->getName()] = cid;
 
     this->components[cid] = comp;
 
-#ifdef VPC_DEBUG
-    cerr << " Director::registerComponent(" << comp->basename()
-         << ") [" << comp->getComponentId() << "] # " << components.size()
-         << endl;
-#endif //VPC_DEBUG
+    DBG_OUT(" Director::registerComponent(" << comp->getName()
+            << ") [" << comp->getComponentId() << "] # " << components.size()
+            << endl);
   }
     
   /**
@@ -303,71 +302,92 @@ namespace SystemC_VPC{
    */
   void Director::registerMapping(const char* taskName, const char* compName){
     assert(!FALLBACKMODE);
-
+    DBG_OUT("registerMapping( " << taskName<< ", " << compName << " )"<< endl);
     ProcessId       pid = getProcessId( taskName );
     if( pid >= mappings.size() ){
       mappings.resize( pid + 100, NULL );
+    }
+
+    if( !taskPool.contains( pid ) ){
+      Task &task = taskPool.createObject( pid );
+      task.setProcessId( pid );
+      task.setName( taskName );
     }
 
     assert(pid <= mappings.size());
     
     ComponentId cid = this->getComponentId(compName);
 
-    AbstractComponent * comp = components[cid];
+    Delayer * comp = components[cid];
 
     assert( comp != NULL );
     mappings[pid] = comp;
     if(reverseMapping[cid] == NULL) reverseMapping[cid] = new ProcessList();
     reverseMapping[cid]->push_back(pid);
   }
-    
+   
   /**
-   * \brief Implementation of  Director::generatePCB
-   */
-  ProcessControlBlock& Director::generatePCB(const char* name){
+   *
+   */ 
+  void Director::registerRoute(Route* route){
     assert(!FALLBACKMODE);
+    this->registerComponent(route);
+    const char * taskName = route->getName();
+    const char * compName = route->getName();
 
-    //cerr << "generatePCB( " << name << ")" << endl;
+    ProcessId       pid = getProcessId( taskName );
+    if( pid >= mappings.size() ){
+      mappings.resize( pid + 100, NULL );
+    }
+    DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< endl);
 
-    ProcessId       pid = getProcessId( name );
+    if( !taskPool.contains( pid ) ){
+      Task &task = taskPool.createObject( pid );
+      task.setProcessId( pid );
+      task.setName( taskName );
+    }
+
+    assert(pid <= mappings.size());
     
-    ProcessControlBlock& pcb = this->pcbPool.registerPCB( pid );
-    pcb.setName(name);
-    pcb.setPid( pid );
-    return pcb;
+    ComponentId cid = this->getComponentId(compName);
+
+    Delayer * comp = components[cid];
+
+    assert( comp != NULL );
+    mappings[pid] = comp;
+    const ComponentList& hops = route->getHops();
+    for(ComponentList::const_iterator iter = hops.begin();
+        iter != hops.end();
+        ++iter){
+      ComponentId hid = this->getComponentId((*iter)->getName());
+      if(reverseMapping[hid] == NULL) reverseMapping[hid] = new ProcessList();
+      DBG_OUT("register reverse Route-mapping: " << (*iter)->getName()
+                << " " << hid << " -> "
+                << pid << std::endl);
+      reverseMapping[hid]->push_back(pid);
+    }
+
   }
 
   /**
    * \brief Implementation of Director::signalProcessEvent
    */
-  void Director::signalProcessEvent(ProcessControlBlock* pcb){
+  void Director::signalProcessEvent(Task* task){
     assert(!FALLBACKMODE);
 
-#ifdef VPC_DEBUG
-    std::cerr << "Director> got notified from: " << pcb->getName()
+#ifdef DBG_DIRECTOR
+    std::cerr << "Director> got notified from: " << task->getName()
               << std::endl;
-#endif //VPC_DEBUG
-    if(pcb->getState() != activation_state(aborted)){
-#ifdef VPC_DEBUG
-      std::cerr << "Director> task successful finished: " << pcb->getName()
-                << std::endl;
-#endif //VPC_DEBUG
-      if(NULL != pcb->getBlockEvent().latency)
-        pcb->getBlockEvent().latency->notify();
-      // remember last acknowledged task time
-      this->end = sc_time_stamp().to_default_time_units();
-      
-      // free allocated pcb
-      this->pcbPool.free(pcb);
-    }else{
-#ifdef VPC_DEBUG
-      std::cerr << "Director> re-compute: " << pcb->getName() << std::endl;
-#endif //VPC_DEBUG
-      // get Component
-      AbstractComponent* comp = mappings[pcb->getPid()];
-      comp->compute(pcb);
-    }
-    wait(SC_ZERO_TIME);
+    std::cerr << "Director> task successful finished: " << task->getName()
+              << std::endl;
+#endif //DBG_DIRECTOR
+    if(NULL != task->getBlockEvent().latency)
+      task->getBlockEvent().latency->notify();
+    // remember last acknowledged task time
+    this->end = sc_time_stamp();
+    
+    // free allocated task
+    task->release();
   }
 
 
@@ -378,18 +398,32 @@ namespace SystemC_VPC{
   ProcessId Director::getProcessId(std::string process) {
     ProcessIdMap::const_iterator iter = processIdMap.find(process);
     if( iter == processIdMap.end() ) {
-      processIdMap[process] = this->uniqueProcessId();
+      ProcessId id = this->uniqueProcessId();
+      processIdMap[process] = id;
+      debugProcessNames[id] = process;
     }
     iter = processIdMap.find(process);
     return iter->second;
   }
 
+  ProcessId Director::getProcessId(std::string source, std::string dest) {
+    std::string name_hack = "msg_" + source + "_2_" + dest;
+    ProcessIdMap::const_iterator iter = processIdMap.find(name_hack);
+    if( iter == processIdMap.end() ) {
+      ProcessId id = this->uniqueProcessId();
+      processIdMap[name_hack] = id;
+      debugRouteNames[id] = make_pair(source, dest);
+    }
+    iter = processIdMap.find(name_hack);
+    return iter->second;
+  }
+
   ComponentId Director::getComponentId(std::string component) {
-#ifdef VPC_DEBUG
+#ifdef DBG_DIRECTOR
     cerr << " Director::getComponentId(" << component
          << ") # " << componentIdMap.size()
          << endl;
-#endif //VPC_DEBUG
+#endif //DBG_DIRECTOR
 
     ComponentIdMap::const_iterator iter = componentIdMap.find(component);
     assert( iter != componentIdMap.end() );
@@ -397,70 +431,79 @@ namespace SystemC_VPC{
       
   }
 
+  FunctionId Director::createFunctionId(std::string function) {
+    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
+    if( iter == functionIdMap.end() ) {
+      functionIdMap[function] = this->uniqueFunctionId();
+    }
+    iter = functionIdMap.find(function);
+    return iter->second;
+  }
+
+  FunctionId Director::getFunctionId(std::string function) {
+    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
+
+    // the function name was not set in configuration
+    // -> we have to use default delay
+    if( iter == functionIdMap.end() ) {
+      return defaultFunctionId;
+    }
+    return iter->second;
+    
+  }
+
+  FunctionId Director::uniqueFunctionId() {
+    return globalFunctionId++;
+  }
 
   FastLink Director::getFastLink(std::string process, std::string function) {
-    //cerr << "getFastLink( " << process << ", " << function << ")" << endl;
     if(FALLBACKMODE) return FastLink();
-    assert(!FALLBACKMODE);
 
     ProcessId       pid = getProcessId(  process  );
+    FunctionId      fid = getFunctionId( function );
+    debugFunctionNames[pid].insert(function);
+    return FastLink(pid, fid);
+  }
 
-    ProcessControlBlock* pcb = getProcessControlBlock( pid );
-    FunctionId           fid = pcb->DelayMapper::getFunctionId( function );
-
-    // pcb has been allocated by calling "getProcessControlBlock"-> free it
-    this->pcbPool.free(pcb);
-
+  FastLink Director::getFastLink(std::string source,
+                                 std::string destination,
+                                 std::string function){
+    //    std::string name_hack = "msg_" + source + "_2_" + destination;
+    //    return this->getFastLink(name_hack, function);
+    ProcessId       pid = getProcessId( source, destination );
+    FunctionId      fid = getFunctionId( function );
     return FastLink(pid, fid);
   }
 
   
   sc_time Director::createSC_Time(const char* timeString)
-    throw(InvalidArgumentException){
-    assert(timeString != NULL);
-    double value = -1;
-    string unit;
-
-    sc_time_unit scUnit = SC_NS;
-
-    std::stringstream data(timeString);
-    if(data.good()){
-      data >> value;
-    }else{
-      string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
+    throw(InvalidArgumentException)
+  {
+    try{
+      return CoSupport::SystemC::createSCTime(timeString);
+    } catch(std::string msg){
       throw InvalidArgumentException(msg);
     }
-    if( data.fail() ){
-      string msg("Parsing Error: Unknown argument: <");
-      msg += timeString;
-      msg += "> How to creating a sc_string from?";
-      throw InvalidArgumentException(msg);
-    }
-    if(data.good()){
-      data >> unit;
-      if(data.fail()){
-#ifdef VPC_DEBUG
-	std::cerr << "VPCBuilder> No time unit, taking default: SC_NS!"
-                  << std::endl;
-#endif //VPC_DEBUG
-	scUnit = SC_NS;
-      }else{
-	std::transform (unit.begin(),
-                        unit.end(),
-                        unit.begin(),
-                        (int(*)(int))tolower);
-	if(      0==unit.compare(0, 2, "fs") ) scUnit = SC_FS;
-	else if( 0==unit.compare(0, 2, "ps") ) scUnit = SC_PS;
-	else if( 0==unit.compare(0, 2, "ns") ) scUnit = SC_NS;
-	else if( 0==unit.compare(0, 2, "us") ) scUnit = SC_US;
-	else if( 0==unit.compare(0, 2, "ms") ) scUnit = SC_MS;
-	else if( 0==unit.compare(0, 1, "s" ) ) scUnit = SC_SEC;
-      }
-    }
+  }
 
-    return sc_time(value, scUnit);
+  sc_time Director::createSC_Time(std::string timeString)
+    throw(InvalidArgumentException)
+  {
+    return Director::createSC_Time( timeString.c_str());
+  }
+
+  void Director::loadGlobalGovernorPlugin(std::string plugin,
+                                          AttributePtr attPtr){
+    //std::cerr << "Director::loadGlobalGovernorPlugin" << std::endl;
+    topPowerGovFactory =
+      new DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >
+        (plugin.c_str());
+    if( topPowerGovFactory->factory){
+      delete topPowerGov;
+
+      topPowerGovFactory->factory->processAttributes(attPtr);
+      topPowerGov = topPowerGovFactory->factory->createPlugIn();
+    }
   }
 
 std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
@@ -468,5 +511,72 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
   return reverseMapping[cid];
 }  
   
+  void Director::debugUnknownNames( ){
+    bool route = false;
+    bool mappings = false;
+    for(std::map<ProcessId, std::pair<std::string, std::string> >::iterator
+          iter = debugRouteNames.begin();
+        iter != debugRouteNames.end();
+        ++iter){
+      if( !taskPool.contains( iter->first ) ){
+           if(!route){
+             std::cout << "Found unknown routes.\n"
+                       <<" Please add the following routes to the config file:"
+                       << std::endl;
+             route = true;
+           }
+
+        std::cout << "  <route  source=\""
+                  << iter->second.first
+                  << "\" destination=\""
+                  << iter->second.second
+                  << "\">\n   <hop name=\"?\">  </hop>\n  </route>"
+                  << std::endl;
+      }
+    }
+    for(std::map<ProcessId, std::string>::iterator iter =
+          debugProcessNames.begin();
+        iter != debugProcessNames.end();
+        ++iter){
+      if( !taskPool.contains( iter->first ) ){
+        if(!mappings){
+          std::cout << "\n" << std::endl;
+          std::cout << "Unknown mapping for tasks.\n"
+                    <<" Please add the following mapping to the config file:"
+                    << std::endl;
+          mappings = true;
+        }        
+        std::cout << "  <mapping source=\""
+                  << iter->second
+                  << "\" target=\"?\">\n"
+                  << "    <!-- we may use a default delay: "
+                  << "    <timing delay=\"? us\""
+                  << " dii=\"? us\" />"
+                  << " --> "
+                  << std::endl;
+        
+        for(std::set<std::string>::iterator fiter =
+              debugFunctionNames[iter->first].begin();
+            fiter != debugFunctionNames[iter->first].end();
+            ++fiter){
+          if(0 == fiter->compare("???")){
+            std::cout << "    <!-- the \"???\" is caused by a SysteMoC"
+                      << " transition without function CALL  -->" << std::endl;
+          }
+          std::cout << "    <timing fname=\""
+                    << *fiter
+                    << "\" delay=\"? us\""
+                    << " dii=\"? us\" />"
+                    << std::endl;
+        }
+        std::cout <<"  </mapping>" << std::endl;
+      }
+    }
+    if(route || mappings){
+      std::cout << "\n" << std::endl;
+    }
+    exit(-1);
+  }
+
 }
 

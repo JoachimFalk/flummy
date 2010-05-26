@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--multihop--0.6--patch-48
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jul  9 10:04:05 CEST 2008
+Standard-date: 2008-07-09 08:04:05 GMT
+Modified-files: hscd_vpc_Component.cpp
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-48
+Summary: 
+ - removed unused blockEvent-EventPair from PCB
+Keywords: 
+
+
+

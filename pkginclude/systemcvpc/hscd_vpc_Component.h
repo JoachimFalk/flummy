@@ -19,8 +19,13 @@
 #define HSCD_VPC_COMPONENT_H
 #include <systemc.h>
 
+#include <systemcvpc/vpc_config.h>
 #include "hscd_vpc_datatypes.h"
 #include "hscd_vpc_AbstractComponent.h"
+#include "ComponentInfo.h"
+#include "PowerSumming.h"
+#include "PowerMode.h"
+#include "hscd_vpc_Director.h"
 
 #include <vector>
 #include <map>
@@ -30,6 +35,9 @@
 namespace SystemC_VPC{
 
   class Scheduler;
+
+  typedef std::map<ComponentState, double> PowerTable;
+  typedef std::map<const PowerMode*, PowerTable>  PowerTables;
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -42,25 +50,31 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * \brief Preempts execution of component
-     * Used to deallocate the current execution of a component.
-     * \sa AbstractComponent::deallocate
-     */
-    virtual void deallocate(bool kill);
-
-    /**
-     * \brief Resumes deallocated execution
-     * Used to allocate execution of deallocated component.
-     * \sa AbstractComponent
-     */
-    virtual void allocate();
-
-    /**
      * implementation of AbstractComponent::compute(ProcessControlBlock*)
      */
-    virtual void compute(ProcessControlBlock* pcb);
+    virtual void compute(Task* task);
 
+
+    /**
+     *
+     */
+    virtual void requestBlockingCompute(Task* task, RefCountEventPtr blocker);
     
+    /**
+     *
+     */
+    virtual void execBlockingCompute(Task* task, RefCountEventPtr blocker);
+    
+    /**
+     *
+     */
+    virtual void abortBlockingCompute(Task* task, RefCountEventPtr blocker);
+    
+    /**
+     *
+     */
+    virtual void updatePowerConsumption();
+
     /**
      * \brief Used to create the Tracefiles.
      *
@@ -75,19 +89,42 @@ namespace SystemC_VPC{
      * passive actors and global SMoC v2 Schedulers.
      */
     Component( sc_module_name name,
-	       const char *schedulername )
-      : AbstractComponent(name)
+               const char *schedulername,
+               Director *director )
+      : AbstractComponent(name),
+        blockMutex(0),
+        localGovernorFactory(NULL),
+        midPowerGov(NULL),
+        powerAttribute(new Attribute("",""))
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
+      this->setPowerMode(this->translatePowerMode("SLOW"));
       setScheduler(schedulername);
 
+      if(powerTables.find(getPowerMode()) == powerTables.end()){
+        powerTables[getPowerMode()] = PowerTable();
+      }
+
+      PowerTable &powerTable=powerTables[getPowerMode()];
+      powerTable[ComponentState::IDLE]    = 0.0;
+      powerTable[ComponentState::RUNNING] = 1.0;
+
+#ifndef NO_POWER_SUM
+      std::string powerSumFileName(this->getName());
+      powerSumFileName += ".dat";
+
+      powerSumStream = new std::ofstream(powerSumFileName.c_str());
+      powerSumming   = new PowerSumming(*powerSumStream);
+      this->addObserver(powerSumming);
+#endif // NO_POWER_SUM
+
 #ifndef NO_VCD_TRACES
-      std::string tracefilename=this->basename(); //componentName;
+      std::string tracefilename=this->getName(); //componentName;
       char tracefilechar[VPC_MAX_STRING_LENGTH];
       char* traceprefix= getenv("VPCTRACEFILEPREFIX");
       if(0!=traceprefix){
-	tracefilename.insert(0,traceprefix);
+        tracefilename.insert(0,traceprefix);
       }
       strcpy(tracefilechar,tracefilename.c_str());
       vcd_trace_file *vcd = new vcd_trace_file(tracefilechar);
@@ -99,93 +136,73 @@ namespace SystemC_VPC{
       // FIXME: disabled Scheduler tracing (there is no scheduling overhead)
       //sc_trace(this->traceFile,schedulerTrace,schedulername);
 #endif //NO_VCD_TRACES      
-
-          /**************************/
-          /*  EXTENSION SECTION     */
-          /**************************/
-      if(!this->activ){
-#ifdef VPC_DEBUG
-	std::cerr << VPC_GREEN(this->basename() << "> Activating")
-		  << std::endl;
-#endif //VPC_DEBUG
-	this->setActiv(true);
-      }
-          /**************************/
-          /*  END OF EXTENSION      */
-          /**************************/
     }
       
-    virtual ~Component(){}
+    virtual ~Component();
 
     /**
      * \brief Set parameter for Component and Scheduler.
      */
-    virtual void processAndForwardParameter(char *sType,char *sValue);
-    virtual void processAndForwardAttribute(Attribute& fr_Attributes);
+    virtual void setAttribute(AttributePtr attribute);
     
+    void addPowerGovernor(PluggableLocalPowerGovernor * gov){
+      this->addObserver(gov);
+    }
+
   protected:
 
-    /**
-     * implementation of AbstractComponent::compute(const char *, const char *,
-     * VPC_Event)
-     */
-    virtual void _compute( const char *name,
-                           const char *funcname=NULL,
-                           VPC_Event *end=NULL )
-      __attribute__ ((deprecated));
-    
-    /**
-     * implementation of AbstractComponent::compute(const char *, VPC_Event)
-     */
-    virtual void _compute( const char *name, VPC_Event *end=NULL)
-      __attribute__ ((deprecated));
-    
     virtual void schedule_thread(); 
 
     virtual void remainingPipelineStages(); 
-
-    // used to indicate deallocation request
-    sc_event notify_deallocate;
-
-    // used to indicate allocate request
-    sc_event notify_allocate;
 
   private:
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair, std::vector<timePcbPair>,timeCompare> pqueue;
 
+#ifndef NO_VCD_TRACES
     sc_trace_file *traceFile;
     std::map<std::string, Tracing* > trace_map_by_name;
+    sc_signal<trace_value> schedulerTrace;
+#endif //NO_VCD_TRACES      
+
     Scheduler *scheduler;
-    std::deque<ProcessControlBlock*>      newTasks;
-    std::map<int,ProcessControlBlock*> readyTasks,runningTasks;
+    std::deque<Task*>      newTasks;
+    
+    PowerTables powerTables;
     
     sc_event notify_scheduler_thread;
-    sc_signal<trace_value> schedulerTrace;
+    Event blockCompute;
+    size_t   blockMutex;
+#ifndef NO_POWER_SUM
+    std::ofstream *powerSumStream;
+    PowerSumming  *powerSumming;
+#endif // NO_POWER_SUM
+
+    PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
+    PluggableLocalPowerGovernor *midPowerGov;
+    AttributePtr powerAttribute;
+    typedef std::map<std::string,
+                     DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
+      Factories;
+    static Factories factories;
     
-    inline void resignTask( int &taskToResign,
-                            sc_time &actualRemainingDelay,
-                            int &actualRunningIID );
-    inline void assignTask( int &taskToAssign,
-                            sc_time &actualRemainingDelay,
-                            int &actualRunningIID );
-    
+
+    bool processPower(AttributePtr att);
+
+    void initialize(const Director* d);
+
     // time last task started
     sc_time startTime;
 
-    void moveToRemainingPipelineStages(ProcessControlBlock* task);
+    void moveToRemainingPipelineStages(Task* task);
     
     void setScheduler(const char *schedulername);
     
-    
-    void interuptPipeline(bool);
+    void fireStateChanged(const ComponentState &state);
 
-    void resumePipeline();
+    void addTasks();
 
-    void killAllTasks();
-
-    void setTraceSignalReadyTasks(trace_value value);
-
+    void loadLocalGovernorPlugin(std::string plugin);
   };
 
 } 

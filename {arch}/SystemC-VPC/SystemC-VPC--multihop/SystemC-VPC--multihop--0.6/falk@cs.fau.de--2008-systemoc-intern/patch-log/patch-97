@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--multihop--0.6--patch-97
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Nov  6 15:26:08 CET 2008
+Standard-date: 2008-11-06 14:26:08 GMT
+Modified-files: Makefile.am hscd_vpc_Director.h
+    hscd_vpc_ProcessControlBlock.h
+    hscd_vpc_ProcessEventListener.h
+    {arch}/SystemC-VPC/SystemC-VPC--mainline/SystemC-VPC--mainline--0.5/joachim.falk@gmx.de--2005-systemc-stuff/patch-log/patch-39
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-97
+Summary: 
+ - fixed includes for final delivery
+Keywords: 
+
+
+

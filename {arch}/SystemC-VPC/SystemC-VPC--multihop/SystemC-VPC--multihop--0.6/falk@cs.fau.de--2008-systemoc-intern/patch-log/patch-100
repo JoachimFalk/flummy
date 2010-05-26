@@ -1,0 +1,47 @@
+Revision: SystemC-VPC--multihop--0.6--patch-100
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Dec  1 13:09:02 CET 2008
+Standard-date: 2008-12-01 12:09:02 GMT
+New-files: .arch-ids/HysteresisLocalGovernor.cpp.id
+    .arch-ids/HysteresisLocalGovernor.hpp.id
+    .arch-ids/PluggablePowerGovernor.cpp.id
+    .arch-ids/PluggablePowerGovernor.hpp.id
+    .arch-ids/SelectFastestPowerModeGlobalGovernor.cpp.id
+    .arch-ids/SelectFastestPowerModeGlobalGovernor.hpp.id
+    HysteresisLocalGovernor.cpp HysteresisLocalGovernor.hpp
+    PluggablePowerGovernor.cpp PluggablePowerGovernor.hpp
+    SelectFastestPowerModeGlobalGovernor.cpp
+    SelectFastestPowerModeGlobalGovernor.hpp
+    dynload/.arch-ids/=id
+    dynload/.arch-ids/Makefile.config.id
+    dynload/.arch-ids/PlugInFun.cpp.id
+    dynload/.arch-ids/PlugInHappy.cpp.id
+    dynload/.arch-ids/README.html.id
+    dynload/.arch-ids/dll-elf.cpp.id
+    dynload/.arch-ids/dll-win32.cpp.id
+    dynload/.arch-ids/dll.h.id
+    dynload/.arch-ids/plugin.cpp.id
+    dynload/.arch-ids/plugin.h.id
+    dynload/.arch-ids/plugtest.cpp.id
+    dynload/.arch-ids/world.h.id dynload/Makefile.config
+    dynload/PlugInFun.cpp dynload/PlugInHappy.cpp
+    dynload/README.html dynload/config/.arch-ids/=id
+    dynload/dll-elf.cpp dynload/dll-win32.cpp dynload/dll.h
+    dynload/plugin.cpp dynload/plugin.h dynload/plugtest.cpp
+    dynload/world.h
+New-directories: dynload dynload/.arch-ids dynload/config
+    dynload/config/.arch-ids
+Removed-files: .arch-ids/PowerGovernor_Impl.h.id
+    PowerGovernor_Impl.h
+Modified-files: ComponentModel.h Delayer.h Makefile.am
+    PowerGovernor.h cmx.dtd hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_VPCBuilder.cpp
+    testPowerGovernor.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-100
+Summary: 
+Keywords: 
+
+
+

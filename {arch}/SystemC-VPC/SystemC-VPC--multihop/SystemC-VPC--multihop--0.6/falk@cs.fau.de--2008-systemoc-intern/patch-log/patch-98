@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-98
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Nov 27 13:28:12 CET 2008
+Standard-date: 2008-11-27 12:28:12 GMT
+Modified-files: cmx.dtd
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-98
+Summary: 
+ - removed unused elements from cmx.dtd (reconf stuff)
+Keywords: 
+
+
+

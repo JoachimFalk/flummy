@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--multihop--0.6--patch-19
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jun  2 10:20:37 CEST 2008
+Standard-date: 2008-06-02 08:20:37 GMT
+Modified-files: Attribute.cpp Attribute.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-19
+Summary: 
+ - fixed warning
+ - fixed indent
+ @Attribute.cpp
+Keywords: 
+
+
+

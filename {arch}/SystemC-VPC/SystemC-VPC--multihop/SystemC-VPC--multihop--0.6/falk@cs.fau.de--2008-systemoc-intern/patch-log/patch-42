@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-42
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jul  3 10:39:45 CEST 2008
+Standard-date: 2008-07-03 08:39:45 GMT
+Modified-files: Pool.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-42
+Summary: 
+ - slightly renaming @Pool.
+Keywords: 
+
+
+

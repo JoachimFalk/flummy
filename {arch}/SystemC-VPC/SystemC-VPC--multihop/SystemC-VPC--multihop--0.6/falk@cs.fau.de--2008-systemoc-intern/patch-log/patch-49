@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-49
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jul  9 10:54:36 CEST 2008
+Standard-date: 2008-07-09 08:54:36 GMT
+Modified-files: cmx.dtd
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-49
+Summary: 
+ - removed "template" in cmx.dtd
+Keywords: 
+
+
+

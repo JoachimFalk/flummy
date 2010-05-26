@@ -1,4 +1,4 @@
-<!ELEMENT vpcconfiguration (resultfile?,measurefile?,templates?, resources,mappings)>
+<!ELEMENT vpcconfiguration (resultfile?,measurefile?, resources,mappings, topology?)>
 
 <!ELEMENT resultfile EMPTY>
 <!ATTLIST resultfile
@@ -8,23 +8,12 @@ name CDATA #REQUIRED>
 <!ATTLIST measurefile
 name CDATA #REQUIRED>
 
-<!ELEMENT templates (template+)>
+<!ELEMENT resources ((attribute)*, (component)*)>
 
-<!ELEMENT template ((attribute|timing)*)>
-<!ATTLIST template
-  name ID #REQUIRED>
-
-<!ELEMENT reftemplate EMPTY>
-<!ATTLIST reftemplate
-  name IDREF #REQUIRED
->
-
-<!ELEMENT resources (component)*>
-
-<!ELEMENT component ((configuration*, defaultconfiguration?)?, (attribute|reftemplate)*)>
+<!ELEMENT component ((attribute)*)>
 <!ATTLIST component
 name ID #REQUIRED
-type CDATA #REQUIRED
+type CDATA #IMPLIED
 scheduler CDATA #REQUIRED>
 
 <!ELEMENT attribute (attribute|parameter)*>
@@ -37,27 +26,30 @@ value CDATA #IMPLIED>
 type CDATA #REQUIRED
 value CDATA #REQUIRED>
 
-<!ELEMENT configuration (component)*>
-<!ATTLIST configuration
-name ID #REQUIRED
-loadtime CDATA "0 ns"
-storetime CDATA "0 ns">
-
-<!ELEMENT defaultconfiguration EMPTY>
-<!ATTLIST defaultconfiguration
-name CDATA #REQUIRED>
-
 <!ELEMENT mappings (mapping)*>
 
-<!ELEMENT mapping (attribute|reftemplate|timing)*>
+<!ELEMENT mapping (attribute|timing)*>
 <!ATTLIST mapping
 source CDATA #REQUIRED
 target IDREF #REQUIRED>
 
 <!ELEMENT timing EMPTY>
 <!ATTLIST timing
+powermode CDATA #IMPLIED
 delay   CDATA #IMPLIED
 dii     CDATA #IMPLIED
 latency CDATA #IMPLIED
 fname   CDATA #IMPLIED>
 
+<!ELEMENT topology (route)*>
+
+<!ELEMENT route (hop)*>
+<!ATTLIST route
+source      CDATA #REQUIRED
+destination CDATA #REQUIRED
+type        CDATA #IMPLIED
+>
+
+<!ELEMENT hop (timing)*>
+<!ATTLIST hop
+name    CDATA #IMPLIED>

@@ -1,0 +1,22 @@
+Revision: SystemC-VPC--multihop--0.6--patch-2
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Apr 28 16:30:57 CEST 2008
+Standard-date: 2008-04-28 14:30:57 GMT
+Modified-files: hscd_vpc_IDeallocatable.h
+    hscd_vpc_ProcessEventListener.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-36
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-2
+Summary: 
+ - applied SystemC-VPC--mainline--0.6--patch-36:
+ * added some virtual destructors because GCC complains
+Keywords: 
+
+
+
+Patches applied:
+
+ * falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-36
+   
+  * added some virtual destructors because GCC complains 
+

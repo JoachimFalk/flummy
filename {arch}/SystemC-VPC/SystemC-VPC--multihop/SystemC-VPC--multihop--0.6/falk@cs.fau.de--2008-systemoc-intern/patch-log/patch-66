@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--multihop--0.6--patch-66
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Tue Aug 12 11:00:27 CEST 2008
+Standard-date: 2008-08-12 09:00:27 GMT
+Modified-files: ComponentInfo.h PowerMode.h
+    hscd_vpc_Component.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-66
+Summary: 
+ - added debug code for PowerMode
+Keywords: 
+
+
+

@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-101
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Tue Dec  2 14:06:19 CET 2008
+Standard-date: 2008-12-02 13:06:19 GMT
+Modified-files: Makefile.am
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-101
+Summary: 
+ - copy dll.h header to include (install)
+Keywords: 
+
+
+

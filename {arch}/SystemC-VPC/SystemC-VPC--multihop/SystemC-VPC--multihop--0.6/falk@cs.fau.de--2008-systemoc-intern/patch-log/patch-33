@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-33
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun 26 10:51:17 CEST 2008
+Standard-date: 2008-06-26 08:51:17 GMT
+Modified-files: debug_config.cpp debug_config.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-33
+Summary: 
+ - fixed namespace (CoSupport) @debug_config.{h|cpp}
+Keywords: 
+
+
+

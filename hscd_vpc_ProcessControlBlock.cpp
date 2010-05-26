@@ -1,44 +1,75 @@
+#include <systemcvpc/hscd_vpc_AbstractComponent.h>
 #include <systemcvpc/hscd_vpc_ProcessControlBlock.h>
 #include <systemcvpc/hscd_vpc_Director.h>
 
+#include <systemcvpc/debug_config.h>
+// if compiled with DBG_COMPONENT create stream and include debug macros
+#ifdef DBG_PCB
+#include <CoSupport/Streams/DebugOStream.hpp>
+#include <CoSupport/Streams/FilterOStream.hpp>
+  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
+  //  with this name exists when DBG.. is used. here every actor creates its
+  //  own stream.
+  #define DBGOUT_STREAM dbgout
+  #include <systemcvpc/debug_on.h>
+#else
+  #include <systemcvpc/debug_off.h>
+#endif
+
 namespace SystemC_VPC{
 
-  int ProcessControlBlock::globalInstanceId = 0;
-
-  DelayMapper::ComponentDelay::ComponentDelay( ComponentId cid )
-    : cid(cid),
-      funcDelays(1, SC_ZERO_TIME),
+  FunctionTiming::FunctionTiming( )
+    : funcDelays(1, SC_ZERO_TIME),
       funcLatencies(1, SC_ZERO_TIME)
   {
     setBaseDelay(SC_ZERO_TIME);
     setBaseLatency(SC_ZERO_TIME);
   }
 
-  void DelayMapper::ComponentDelay::addDelay( FunctionId fid,
-                                                      sc_time delay ){
+  FunctionTiming::FunctionTiming( const FunctionTiming &delay )
+    : funcDelays(    delay.funcDelays    ),
+      funcLatencies( delay.funcLatencies )
+  {
+    setBaseDelay(   delay.getBaseDelay()   );
+    setBaseLatency( delay.getBaseLatency() );
+  }
+
+  void FunctionTiming::addDelay( FunctionId fid,
+                                              sc_time delay ){
+    DBG_OUT( "::addDelay(" << fid << ") " << delay
+             << std::endl);
     if( fid >= funcDelays.size()){
       funcDelays.resize( fid + 100, SC_ZERO_TIME );
     }
     this->funcDelays[fid] = delay;
   }
 
-  void DelayMapper::ComponentDelay::setBaseDelay( sc_time delay ){
+  void FunctionTiming::setBaseDelay( sc_time delay ){
+    DBG_OUT( "::setBaseDelay() " << delay
+             << std::endl);
     this->funcDelays[defaultFunctionId] = delay;
   }
 
-  sc_time DelayMapper::ComponentDelay::getBaseDelay( ) const {
+  sc_time FunctionTiming::getBaseDelay( ) const {
     return this->funcDelays[defaultFunctionId];
   }
 
-  sc_time DelayMapper::ComponentDelay::getDelay(
+  sc_time FunctionTiming::getDelay(
     FunctionId fid) const
   {
-    assert(fid < funcDelays.size());
-    sc_time ret = funcDelays[fid];
+    DBG_OUT( "::getDelay(" << fid << ") " << funcDelays.size()
+             << std::endl);
+
+    sc_time ret;
+    if(fid < funcDelays.size()){
+      ret = funcDelays[fid];
+    }else{
+      ret = getBaseDelay();
+    }
     return ret;
   }
 
-  void DelayMapper::ComponentDelay::addLatency( FunctionId fid,
+  void FunctionTiming::addLatency( FunctionId fid,
                                                         sc_time latency ){
     if( fid >= funcLatencies.size())
       funcLatencies.resize( fid + 100, SC_ZERO_TIME );
@@ -46,212 +77,47 @@ namespace SystemC_VPC{
     this->funcLatencies[fid] = latency;
   }
 
-  void DelayMapper::ComponentDelay::setBaseLatency( sc_time latency ){
+  void FunctionTiming::setBaseLatency( sc_time latency ){
     this->funcLatencies[defaultFunctionId] = latency;
   }
 
-  sc_time DelayMapper::ComponentDelay::getBaseLatency( ) const {
+  sc_time FunctionTiming::getBaseLatency( ) const {
     return this->funcLatencies[defaultFunctionId];
   }
 
-  sc_time DelayMapper::ComponentDelay::getLatency(
+  sc_time FunctionTiming::getLatency(
     FunctionId fid) const
   {
-    assert(fid < funcLatencies.size());
-    sc_time ret = funcLatencies[fid];
+    sc_time ret;
+    if(fid < funcLatencies.size()){
+      ret = funcLatencies[fid];
+    }else{
+      ret = getBaseLatency();
+    }
     return ret;
   }
 
-  DelayMapper::~DelayMapper(){}
-
-  DelayMapper::DelayMapper(const DelayMapper & dm)
-    : functionIdMap(dm.functionIdMap),
-      globalFunctionId(dm.globalFunctionId),
-      compDelays(dm.compDelays) {}
-
-  DelayMapper::DelayMapper()
-    : functionIdMap(),
-      globalFunctionId( defaultFunctionId + 1 ),
-      compDelays() {}
-
-  void DelayMapper::addFuncDelay( Director* director,
-                                  std::string comp,
-                                  const char* funcname,
-                                  sc_time delay ){
-    
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Adding Function Delay for " << comp;
-    if(funcname != NULL){
-      std::cerr << " function " << funcname;
-    }
-    std::cerr << " delay " << delay << std::endl;
-#endif //VPC_DEBUG
-
-    ComponentId cid = director->getComponentId(comp);
-
-    if(cid >= compDelays.size()){
-      compDelays.resize( cid + 100, NULL );
-    }
-
-    if( this->compDelays[cid] == NULL ){
-      this->compDelays[cid] = new ComponentDelay(cid);
-    }
-
-    ComponentDelay *cd = this->compDelays[cid];
-
-    if(funcname != NULL){
-      FunctionId  fid = this->createFunctionId(funcname);
-      cd->addDelay(fid, delay);
-    } else {
-      cd->setBaseDelay(delay);
-    }
+  void FunctionTiming::setTiming(const Timing& timing){
+    this->addDelay(timing.fid,   timing.dii);
+    this->addLatency(timing.fid, timing.latency);
   }
-
-  sc_time DelayMapper::getFuncDelay( ComponentId cid,
-                                     FunctionId  fid ) const
-  {
-    ComponentDelay * cd = this->compDelays[cid];
-
-    assert( cd != NULL );
-    sc_time ret = cd->getDelay(fid);
-
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Delay for " << cid;
-    std::cerr << "->" << fid;
-    std::cerr << " is " << ret << std::endl;
-#endif //VPC_DEBUG 
-    
-    return ret;
-  }
-
-  void DelayMapper::addFuncLatency( Director* director,
-                                    std::string comp,
-                                    const char* funcname,
-                                    sc_time latency ){
-    
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Adding Function Latency for -" << comp << "-";
-    if(funcname != NULL){
-      std::cerr << " function " << funcname;
-    }
-    std::cerr << " latency " << latency << std::endl;
-#endif //VPC_DEBUG
-
-    ComponentId cid = director->getComponentId(comp);
-
-    if(cid >= compDelays.size()){
-      compDelays.resize( cid + 100, NULL );
-    }
-
-    if( this->compDelays[cid] == NULL ){
-      this->compDelays[cid] = new ComponentDelay(cid);
-    }
-
-    ComponentDelay *cd = this->compDelays[cid];
-
-    if(funcname != NULL){
-      FunctionId  fid = this->createFunctionId(funcname);
-      cd->addLatency(fid, latency);
-    } else {
-      cd->setBaseLatency(latency);
-    }
-
-  }
-
-  sc_time DelayMapper::getFuncLatency( ComponentId cid,
-                                       FunctionId  fid ) const
-  {
-    ComponentDelay * cd = this->compDelays[cid];
-
-    assert( cd != NULL );
-    sc_time ret = cd->getLatency(fid);
-
-#ifdef VPC_DEBUG
-    std::cerr << "DelayMapper> Latency for " << cid;
-    std::cerr << "->" << fid;
-    std::cerr << " is " << ret << std::endl;
-#endif //VPC_DEBUG 
-
-    return ret;
-  }
-
-
-  ProcessControlBlock::ActivationCounter::ActivationCounter() :
-    activation_count(0){}
-
-  void ProcessControlBlock::ActivationCounter::increment(){
-    this->activation_count++;
-  }
-
-  unsigned int ProcessControlBlock::ActivationCounter::getActivationCount(){
-    return this->activation_count;
-  }
-
 
   /**
    * SECTION ProcessControlBlock
    */
   
   
-  ProcessControlBlock::ProcessControlBlock(): name("NN"){
+  ProcessControlBlock::ProcessControlBlock( AbstractComponent * component )
+    : name("NN"), component(component) {
     this->init();
-  }
-  
-  ProcessControlBlock::ProcessControlBlock(std::string name): name(name){
-    this->init();
-  }
-
-  ProcessControlBlock::~ProcessControlBlock(){
-    if(*(this->copyCount) == 0){
-      delete this->activationCount;
-      delete this->copyCount; 
-    }else{
-      (*(this->copyCount))--;
-    }
-  }
-  
-  ProcessControlBlock::ProcessControlBlock(const ProcessControlBlock& pcb)
-    : DelayMapper(pcb){
-
-    this->setName(pcb.getName());
-    this->setDeadline(pcb.getDeadline());
-    this->setPeriod(pcb.getPeriod());
-    this->instanceId = ProcessControlBlock::globalInstanceId++;
-    this->setPriority(pcb.getPriority());
-    
-   
-    this->blockEvent = EventPair();
-    this->setDelay(SC_ZERO_TIME);
-    this->setLatency(SC_ZERO_TIME);
-    this->setInterrupt(NULL);
-    this->setRemainingDelay(SC_ZERO_TIME);
-    this->setTraceSignal(NULL);
-
-    this->activationCount = pcb.activationCount;
-
-    this->setPid(pcb.getPid());
-
-    // remember amount of copies for later clean up 
-    this->copyCount = pcb.copyCount;
-    (*(this->copyCount))++;
   }
 
   void ProcessControlBlock::init(){
 
-    this->blockEvent = EventPair();
     this->deadline = sc_time(DBL_MAX, SC_SEC);
-    this->delay = SC_ZERO_TIME;
-    this->latency = SC_ZERO_TIME;
-    this->interrupt = NULL;
-    this->remainingDelay = SC_ZERO_TIME;
     this->period = sc_time(DBL_MAX, SC_SEC);
-    this->instanceId = ProcessControlBlock::globalInstanceId++;
     this->priority = 0;
     this->traceSignal = NULL;
-
-    this->activationCount = new ActivationCounter();
-
-    this->copyCount = new int(0);
   }
 
   void ProcessControlBlock::setName(std::string name){
@@ -277,54 +143,10 @@ namespace SystemC_VPC{
   FunctionId ProcessControlBlock::getFunctionId( ) const{
     return this->fid;
   }
-      
-  int ProcessControlBlock::getInstanceId() const{
-    return this->instanceId;
-  }
 
   const char* ProcessControlBlock::getFuncName() const{
     assert(0);
     return "";
-  }
-
-  void ProcessControlBlock::setInterrupt(sc_event* interrupt){
-    this->interrupt = interrupt;
-  }
-
-  sc_event* ProcessControlBlock::getInterrupt() const{
-    return this->interrupt;
-  }
-
-  void ProcessControlBlock::setBlockEvent(EventPair blockEvent){
-    this->blockEvent = blockEvent;
-  }
-
-  EventPair ProcessControlBlock::getBlockEvent() const{
-    return this->blockEvent;
-  }
-
-  void ProcessControlBlock::setDelay(sc_time delay){
-    this->delay = delay;
-  }
-
-  sc_time ProcessControlBlock::getDelay() const{
-    return this->delay;
-  }
-
-  void ProcessControlBlock::setLatency(sc_time latency){
-    this->latency = latency;
-  }
-
-  sc_time ProcessControlBlock::getLatency() const{
-    return this->latency;
-  }
-
-  void ProcessControlBlock::setRemainingDelay(sc_time delay){
-    this->remainingDelay = delay;
-  }
-
-  sc_time ProcessControlBlock::getRemainingDelay() const{
-    return this->remainingDelay;
   }
 
   void ProcessControlBlock::setPeriod(sc_time period){
@@ -355,22 +177,6 @@ namespace SystemC_VPC{
     return this->deadline;
   }
 
-  void ProcessControlBlock::incrementActivationCount(){
-    this->activationCount->increment();
-  }
-
-  unsigned int ProcessControlBlock::getActivationCount() const{
-    return this->activationCount->getActivationCount();
-  }
-
-  void ProcessControlBlock::setState(activation_state state){
-    this->state = state;
-  }
-
-  activation_state ProcessControlBlock::getState() const{
-    return this->state;
-  }
-
   void ProcessControlBlock::setTraceSignal(Tracing* signal){
     this->traceSignal = signal;
   }
@@ -379,31 +185,34 @@ namespace SystemC_VPC{
     return this->traceSignal;
   }
 
-  FunctionId DelayMapper::createFunctionId(std::string function) {
-    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
-    if( iter == functionIdMap.end() ) {
-      functionIdMap[function] = this->uniqueFunctionId();
-    }
-    iter = functionIdMap.find(function);
-    return iter->second;
+  void ProcessControlBlock::setTiming(const Timing& timing){
+    const PowerMode *mode = this->component->translatePowerMode(timing.powerMode);
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->setTiming(timing);
   }
 
-  FunctionId DelayMapper::getFunctionId(std::string function) {
-    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
-
-    // the function name was not set in configuration
-    // -> we have to use default delay
-    if( iter == functionIdMap.end() ) {
-      return defaultFunctionId;
-    }
-    return iter->second;
-    
+  void ProcessControlBlock::setBaseDelay(sc_time delay){
+    const PowerMode *mode = this->component->translatePowerMode("SLOW");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->setBaseDelay(delay);
   }
 
-  FunctionId DelayMapper::uniqueFunctionId() {
-    return globalFunctionId++;
+  void ProcessControlBlock::setBaseLatency(sc_time latency){
+    const PowerMode *mode = this->component->translatePowerMode("SLOW");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->setBaseLatency(latency);
   }
 
-  const FunctionId DelayMapper::defaultFunctionId = 0;
+  void ProcessControlBlock::addDelay(FunctionId fid, sc_time delay){
+    const PowerMode *mode = this->component->translatePowerMode("SLOW");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->addDelay(fid, delay);
+  }
+
+  void ProcessControlBlock::addLatency(FunctionId fid, sc_time latency){
+    const PowerMode *mode = this->component->translatePowerMode("SLOW");
+    FunctionTiming *ft =this->component->getTiming(mode, this->getPid());
+    ft->addLatency(fid, latency);
+  }
 
 }

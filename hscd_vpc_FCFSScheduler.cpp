@@ -6,17 +6,17 @@ namespace SystemC_VPC{
 
   bool FCFSScheduler::getSchedulerTimeSlice(
     sc_time& time,
-    const  std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks ){
+    const  TaskMap &ready_tasks,
+    const  TaskMap &running_tasks ){
     return false;
   }
-  void FCFSScheduler::addedNewTask(ProcessControlBlock *pcb){
-    fcfs_fifo.push_back(pcb->getInstanceId());
+  void FCFSScheduler::addedNewTask(Task *task){
+    fcfs_fifo.push_back(task->getInstanceId());
   }
-  void FCFSScheduler::removedTask(ProcessControlBlock *pcb){
+  void FCFSScheduler::removedTask(Task *task){
     std::deque<int>::iterator iter;
     for(iter=fcfs_fifo.begin();iter!=fcfs_fifo.end();iter++){
-      if( *iter == pcb->getInstanceId()){
+      if( *iter == task->getInstanceId()){
   fcfs_fifo.erase(iter);
   break;
       }
@@ -25,8 +25,8 @@ namespace SystemC_VPC{
   scheduling_decision FCFSScheduler::schedulingDecision(
     int& task_to_resign,
     int& task_to_assign,
-    const  std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks ){
+    const  TaskMap &ready_tasks,
+    const  TaskMap &running_tasks ){
     if(running_tasks.size()==0){
       if(fcfs_fifo.size()>0){
         //      cerr << "only_assign" << endl;

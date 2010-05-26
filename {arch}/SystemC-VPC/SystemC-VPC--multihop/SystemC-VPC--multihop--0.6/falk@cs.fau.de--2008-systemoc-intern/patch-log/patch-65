@@ -1,0 +1,19 @@
+Revision: SystemC-VPC--multihop--0.6--patch-65
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Tue Aug 12 08:08:31 CEST 2008
+Standard-date: 2008-08-12 06:08:31 GMT
+Modified-files: FlexRayScheduler.cpp FlexRayScheduler.h
+    TDMAScheduler.cpp TDMAScheduler.h
+    TimeTriggeredCCScheduler.cpp TimeTriggeredCCScheduler.h
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-65
+Summary: 
+ - removed unused code: signalAllocation/signalDeallocation
+Keywords: 
+
+
+

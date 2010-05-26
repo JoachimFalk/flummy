@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-96
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Nov  5 15:46:01 CET 2008
+Standard-date: 2008-11-05 14:46:01 GMT
+Modified-files: PowerSumming.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-96
+Summary: 
+ - bugfixed power summing (dat files)
+Keywords: 
+
+
+

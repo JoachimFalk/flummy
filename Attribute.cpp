@@ -3,67 +3,112 @@
 
 namespace SystemC_VPC{
 
-Attribute::Attribute(){
-	type=NULL;
-	value=NULL;
-}
+  //
+  Attribute::Attribute() : type(), value() {}
 
-Attribute::Attribute( char* newType, char* newValue){
-	type=newType;
-	value=newValue;
-}
+  //
+  Attribute::Attribute( std::string type, std::string value)
+    : type(type), value(value){}
 
-std::pair<std::string, std::string> Attribute::getNextParameter(int pos)throw(InvalidArgumentException){
-	if(pos<=parameters.size()) return parameters[pos];
-	throw new InvalidArgumentException("getNextParameter");
-}
+  std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos)
+    throw(InvalidArgumentException){
+    if(pos<=parameters.size()) return parameters[pos];
+    throw new InvalidArgumentException("getNextParameter");
+  }
 
-void Attribute::addNewParameter(char* newType,char* newValue){
-	std::pair<std::string, std::string> toadd(newType,newValue);
-  	this->parameters.push_back(toadd);
-}
+  //
+  std::string Attribute::getParameter(const std::string type)
+    throw (InvalidArgumentException){
+    for(unsigned int i=0;
+        i<this->getParameterSize();
+        ++i){
+      if(parameters[i].first == type){
+        return parameters[i].second;
+      }
+    }
+    throw new InvalidArgumentException("getParameter> unknown parameter:"
+                                       + type);
+  }
 
-std::pair<std::string, Attribute > Attribute::getNextAttribute(int pos)throw(InvalidArgumentException){
-	if(pos<=attributes.size()) return attributes[pos];
-	throw new InvalidArgumentException("getNextAttribute");
-	
-}
+  //
+  bool Attribute::hasParameter(const std::string type){
+    for(unsigned int i=0;
+        i<this->getParameterSize();
+        ++i){
+      if(parameters[i].first == type){
+        return true;
+      }
+    }
+    return false;
+  }
 
-void Attribute::addNewAttribute( char* newType, char* newValue){
-	Attribute toadd1(newType, newValue);
-	std::pair<std::string, SystemC_VPC::Attribute > toadd(newValue,toadd1);		
-  	attributes.push_back(toadd);
-}
+  void Attribute::addParameter(std::string type,std::string value){
+    this->parameters.push_back( std::make_pair(type, value) );
+  }
 
-void Attribute::addNewAttribute( Attribute& toadd1, char* newType){
-	std::pair<std::string, SystemC_VPC::Attribute > toadd(newType,toadd1);		
-	attributes.push_back(toadd);
-}
+  std::pair<std::string, AttributePtr > Attribute::getNextAttribute(size_t pos)
+    throw(InvalidArgumentException){
+    if(pos<=attributes.size()) return attributes[pos];
+    throw new InvalidArgumentException("getNextAttribute");
+        
+  }
 
-int Attribute::getParameterSize(){
-	return parameters.size();
-}
+  //
+  AttributePtr Attribute::getAttribute(const std::string name)
+    throw(InvalidArgumentException){
+    for(unsigned int i=0;
+        i<this->getAttributeSize();
+        ++i)
+      {
+        if(attributes[i].first == name)
+          return attributes[i].second;
+      }
+    throw new InvalidArgumentException("getAttribute> Unknown Attribute:"
+                                       + name);
+  }
 
-int Attribute::getAttributeSize(){
-	return attributes.size();
-}
+  //
+  bool Attribute::hasAttribute(const std::string name) {
+    for(unsigned int i=0;
+        i<this->getAttributeSize();
+        ++i)
+      {
+        if(attributes[i].first == name)
+          return true;
+      }
+    return false;
+  }
 
-char* Attribute::getValue(){
-	return value;
-}
+  void Attribute::addAttribute( std::string type, std::string value){
+    AttributePtr toadd(new Attribute(type, value));
+    attributes.push_back( std::make_pair(type, toadd) );
+  }
 
-char* Attribute::getType(){
-	return type;
-}
+  void Attribute::addAttribute( std::string type, AttributePtr att ){
+    attributes.push_back( std::make_pair(type, att) );
+  }
 
-void Attribute::setValue(char* newValue){
-	value=newValue;
-}
+  size_t Attribute::getParameterSize(){
+    return parameters.size();
+  }
 
-void Attribute::setType(char* newType){
-	type=newType;
-}
-		
-	
+  size_t Attribute::getAttributeSize(){
+    return attributes.size();
+  }
 
+  std::string Attribute::getValue(){
+    return value;
+  }
+
+  std::string Attribute::getType(){
+    return type;
+  }
+
+  void Attribute::setValue(std::string newValue){
+    value=newValue;
+  }
+
+  void Attribute::setType(std::string newType){
+    type=newType;
+  }
 }

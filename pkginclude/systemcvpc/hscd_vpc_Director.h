@@ -18,73 +18,43 @@
 #ifndef HSCD_VPC_DIRECTOR_H
 #define HSCD_VPC_DIRECTOR_H
 
-#include "hscd_vpc_AbstractDirector.h"
-#include "hscd_vpc_AbstractComponent.h"
-#include "hscd_vpc_ProcessEventListener.h"
-#include "hscd_vpc_EventPair.h"
-#include "FastLink.h"
-#include "hscd_vpc_InvalidArgumentException.h"
+#include <systemcvpc/vpc_config.h>
+#include <systemcvpc/hscd_vpc_AbstractComponent.h>
+#include <systemcvpc/Route.h>
+#include <systemcvpc/hscd_vpc_ProcessEventListener.h>
+#include <systemcvpc/hscd_vpc_EventPair.h>
+#include <systemcvpc/FastLink.h>
+#include <systemcvpc/TaskPool.h>
+#include <systemcvpc/hscd_vpc_InvalidArgumentException.h>
+#include <systemcvpc/PluggablePowerGovernor.hpp>
 
 // provide compatibility with other compilers then gcc, hopefully
-#include <ansidecl.h>
+//#include <ansidecl.h>
 
 #include <string>
 #include <map>
 #include <vector>
-
-#include "hscd_vpc_PCBPool.h"
+#include <fstream>
+#include <stdio.h>
 
 namespace SystemC_VPC{
 
-  class ProcessControlBlock;
-//  class PCBPool;  
-  class Constraint;
-
+  class PowerSumming;
+ 
   /**
    * \brief Director knowes all (Abstract-)Components, all mappings (task -> component).
    *
    * Direktor reads allokation and binding from file.
    */
-  class Director : public AbstractDirector{
+  class Director : public ProcessEventListener{
   public:
     bool FALLBACKMODE;
-
-    /**
-     * \brief A task (identifikation by name) calling this Funktion gets the 
-     * AbstractComponent where he is binded to.
-     * \note Re-added for downward compatibility
-     */
-    //AbstractComponent& getResource( const char *name );
-    //  AbstractComponent& getResource(int process);
-     Director& getResource( const char* name)
-       __attribute__((deprecated));
-     
-    /**
-     * \brief Get the process control block used within SystemC-VPC Modell.
-     */
-    ProcessControlBlock* getProcessControlBlock( const char *name );
-
-    /**
-     * \brief Get the process control block used within SystemC-VPC Modell.
-     */
-    ProcessControlBlock* getProcessControlBlock(  ProcessId pid );
-
-    /**
-     *
-     */
-    void checkConstraints();
-
-    /**
-     *
-     */
-    void getReport();
 
     /**
      * \brief Access to singleton Director. 
      */
     static Director& getInstance(){
-      //return *singleton;
-      static Director d; return d;
+      return *singleton;
     }
 
     virtual ~Director();
@@ -103,6 +73,41 @@ namespace SystemC_VPC{
      */
     void compute(FastLink fLink,
                  EventPair endPair = EventPair(NULL, NULL));
+
+    /**
+     * \brief Simulates communication delay of a given task
+     * 
+     * Determines the component from FastLink.
+     * Supports pipelining!
+     * \param fLink FastLink for task and function to execute.
+     * \param quantum Number of read data tokens.
+     * \param endPair EventPair to signal finishing of data introduction 
+     * intervall (dii) and lateny.
+     * If dii == latency no pipelinig is assumed and both events are notified
+     * at same time!
+     * \sa EventPair
+     */
+    void read( FastLink fLink,
+               size_t quantum,
+               EventPair endPair = EventPair(NULL, NULL) );
+
+    /**
+     * \brief Simulates communication delay of a given task
+     * 
+     * Determines the component from FastLink.
+     * Supports pipelining!
+     * \param fLink FastLink for task and function to execute.
+     * \param quantum Number of written data tokens.
+     * \param endPair EventPair to signal finishing of data introduction 
+     * intervall (dii) and lateny.
+     * If dii == latency no pipelinig is assumed and both events are notified
+     * at same time!
+     * \sa EventPair
+     */
+    void write( FastLink fLink,
+                size_t quantum,
+                EventPair endPair = EventPair(NULL, NULL) );
+
 
     /**
      * \brief Simulates computation of a given task
@@ -130,124 +135,148 @@ namespace SystemC_VPC{
     void compute(const char *name, EventPair endPair = EventPair(NULL, NULL));
 
     /**
-     * \brief Simulates computation of a given task
-     * 
-     * Determines for a given task the component to run on and delegates it.
-     * \param name of task
-     * \param funcname of function
-     * \param end to signal finished request
-     */
-    void compute(const char* name, const char* funcname, VPC_Event* end) 
-      __attribute__((__deprecated__));
-   
-    /**
-     * \brief Simulates computation of a given task
-     *
-     * Determines for a given task the component to run on and delegates it.
-     * \param name of task
-     * \param end to signal finished request
-     */
-    void compute(const char *name, VPC_Event *end)
-      __attribute__((__deprecated__));
- 
-    /**
-     * \brief Adds new constraint to Director
-     * \param constraint points to the constraint to be added
-     */
-    void addConstraint(Constraint* constraint);
-    
-    /**
      * \brief Register component to Director
      * Used to register a component to the Director for
      * later computation of task on it. The components name
      * is used as identifier for it.
      * \param comp points to component instance to be registered
      */
-    void registerComponent(AbstractComponent* comp);
+    void registerComponent(Delayer* comp);
     
     /**
-     * \brief Registers mapping between task and component to Director
+     * \brief Register mapping between task and component to Director
      * \param taskName specifies name of task
      * \param compName specifies name of component
      */
     void registerMapping(const char* taskName, const char* compName);
-    
-    /**
-     * \brief Generates and registers new PCB to Director
-     * Generates a new PCB or returns a already registered one
-     * form the Director.
-     * \param name specifies name of actor/task/process for PCB
-     * \return ProcessControlBlock representing default initialized 
-     * PCB for given task or if PCB already exists the initialized one;
-     */
-    ProcessControlBlock& generatePCB(const char* name);
-    
-    PCBPool& getPCBPool(); 
 
-    void signalProcessEvent(ProcessControlBlock* pcb);
+    /**
+     * \brief Register a communication route.
+     * \param route the route
+     */
+    void registerRoute(Route* route);
+    
+    void signalProcessEvent(Task* task);
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;
+      remove(vpc_result_file.c_str());
     }
     
-    string getResultFile(){
+    std::string getResultFile(){
       return this->vpc_result_file;
     }
 
     ProcessId uniqueProcessId();
 
     ProcessId getProcessId(std::string process);
+    ProcessId getProcessId(std::string source, std::string destination);
 
     ComponentId getComponentId(std::string component);
 
     FastLink getFastLink(std::string process, std::string function);
 
+    FastLink getFastLink(std::string source,
+                         std::string destination,
+                         std::string function);
+
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
      */
     static sc_time createSC_Time(const char* timeString) throw(InvalidArgumentException);
+
+    /**
+     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
+     */
+    static sc_time createSC_Time(std::string timeString) throw(InvalidArgumentException);
     
     std::vector<ProcessId> * getTaskAnnotation(std::string compName);
 
+    FunctionId getFunctionId(std::string function);
+    FunctionId createFunctionId(std::string function);
+
+    Task* allocateTask(ProcessId pid){
+      return this->taskPool.allocate( pid );
+    }
+
+    // FIXME !!!
+    PluggableGlobalPowerGovernor   *topPowerGov;
+    DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >
+                                   *topPowerGovFactory;
+    void loadGlobalGovernorPlugin(std::string plugin, AttributePtr attPtr);
+
+    std::string getTaskName(ProcessId id) {
+      if(debugProcessNames.find(id) != debugProcessNames.end()){
+        return debugProcessNames[id];
+      }else{
+        return "Route from " + debugRouteNames[id].first +
+          " to: " + debugRouteNames[id].second;
+      }
+    }
+    
+    sc_time getEnd() const {
+      return end;
+    }
   private:
+
+    Task * preCompute( FastLink fLink,
+                       EventPair endPair );
+
+    void postCompute( Task *task,
+                      EventPair endPair );
+
+    void debugUnknownNames( );
 
     /**
      * Singleton design pattern
      */
-    //static std::auto_ptr<Director> singleton; 
+    static std::auto_ptr<Director> singleton; 
 
     /**
-     * \brief Reads allokation and binding from file.
+     * \brief Reads allocation and binding from file.
      */
     Director();
 
-    typedef std::vector<AbstractComponent* >  Components;
+    typedef std::map<std::string, FunctionId>  FunctionIdMap;
+    FunctionId uniqueFunctionId();
+
+    FunctionIdMap   functionIdMap;
+    FunctionId      globalFunctionId;
+
+    typedef std::vector<Delayer* >  Components;
     Components                           components;
     
-    typedef std::vector<AbstractComponent* >  Mappings;
+    typedef std::vector<Delayer* >  Mappings;
     Mappings                             mappings;
 
     typedef std::vector<ProcessId>                ProcessList;  
     typedef std::map<ComponentId, ProcessList* >  ReverseMapping;
     ReverseMapping reverseMapping;
 
-    PCBPool pcbPool;
-
-    std::vector<Constraint*> constraints;
-
     // output file to write result to
     std::string vpc_result_file;
     
     // time of latest acknowledge simulated task
-    double end;
+    sc_time end;
+
+#ifndef NO_POWER_SUM
+    std::ofstream powerConsStream;
+#endif // NO_POWER_SUM
 
     typedef std::map<std::string, ProcessId>   ProcessIdMap;
     typedef std::map<std::string, ComponentId> ComponentIdMap;
 
     ProcessIdMap    processIdMap;
     ComponentIdMap  componentIdMap;
+    std::map<ProcessId, std::string> debugProcessNames;
+    std::map<ProcessId, std::pair<std::string, std::string> > debugRouteNames;
+    std::map<ProcessId, std::set<std::string> > debugFunctionNames;
 
     ProcessId       globalProcessId;
+
+    PowerSumming    *powerSumming;
+
+    TaskPool        taskPool;
   };
 
 }

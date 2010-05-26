@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--multihop--0.6--patch-31
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jun 18 17:16:16 CEST 2008
+Standard-date: 2008-06-18 15:16:16 GMT
+Modified-files: Attribute.cpp Attribute.h
+    FlexRayScheduler.cpp TimeTriggeredCCScheduler.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-31
+Summary: 
+ - fixed some warnings
+Keywords: 
+
+
+

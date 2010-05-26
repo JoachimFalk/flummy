@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--multihop--0.6--patch-22
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun  5 12:56:03 CEST 2008
+Standard-date: 2008-06-05 10:56:03 GMT
+Removed-files: .arch-ids/hscd_vpc_AbstractDirector.h.id
+    hscd_vpc_AbstractDirector.h
+Modified-files: Makefile.am hscd_vpc_Director.h
+    hscd_vpc_ProcessEventListener.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-22
+Summary: 
+ - removed AbstractDirector and unused functions
+Keywords: 
+
+
+

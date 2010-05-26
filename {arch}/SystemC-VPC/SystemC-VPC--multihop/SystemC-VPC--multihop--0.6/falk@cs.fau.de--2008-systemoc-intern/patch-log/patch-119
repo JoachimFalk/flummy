@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-119
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Sebastian Graf <graf@codesign.informatik.uni-erlangen.de>
+Date: Thu Sep 17 15:59:34 CEST 2009
+Standard-date: 2009-09-17 13:59:34 GMT
+Modified-files: StaticRoute.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-119
+Summary: 
+ - bugfix: free/deallocate empty StaticRoute
+Keywords: 
+
+
+

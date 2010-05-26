@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--multihop--0.8--patch-18
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Tue Apr 20 13:43:54 CEST 2010
+Standard-date: 2010-04-20 11:43:54 GMT
+Modified-files: FCFSComponent.cpp hscd_vpc_Component.cpp
+    hscd_vpc_Director.cpp pkginclude/Makefile.am
+    pkginclude/systemcvpc/FCFSComponent.h
+    pkginclude/systemcvpc/hscd_vpc_Director.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-18
+Summary: 
+ - fixed header includes for binary release
+Keywords: 
+
+
+

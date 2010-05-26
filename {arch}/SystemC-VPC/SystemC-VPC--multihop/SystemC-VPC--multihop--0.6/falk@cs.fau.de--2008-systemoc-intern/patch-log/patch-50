@@ -1,0 +1,21 @@
+Revision: SystemC-VPC--multihop--0.6--patch-50
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jul 10 13:14:51 CEST 2008
+Standard-date: 2008-07-10 11:14:51 GMT
+New-files: .arch-ids/FunctionTimingPool.h.id
+    FunctionTimingPool.h
+Modified-files: PCBPool.h StaticRoute.cpp Task.h Timing.h
+    cmx.dtd debug_config.h hscd_vpc_AbstractComponent.h
+    hscd_vpc_Component.cpp hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_VPCBuilder.cpp
+    hscd_vpc_VPCBuilder.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-50
+Summary: 
+ - separate FunctionTimings and PCB
+ - made parsing of Timing powermode aware
+Keywords: 
+
+
+

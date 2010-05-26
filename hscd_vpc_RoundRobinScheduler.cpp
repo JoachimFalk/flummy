@@ -7,53 +7,14 @@ namespace SystemC_VPC{
     TIMESLICE=5;
     lastassign=0;
     this->remainingSlice = 0;
-    char rest[VPC_MAX_STRING_LENGTH];
-    //      char muell[VPC_MAX_STRING_LENGTH];
-    /*
-       if(0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN))){
-       cerr << "Scheduler: "<< STR_ROUNDROBIN <<" - "<< schedulername <<endl;
-       sscanf(schedulername,"%s-%s",muell,rest);
-       cerr << "----- Rest: "<<rest<< " muell: "<<muell<<endl;
-       }else if(0==strncmp(schedulername,STR_RR,strlen(STR_RR))){
-       cerr << "Scheduler: "<< STR_RR << endl;
-       }
-       */
-    int sublength;
-    char *secondindex;
-
-    //':' finden -> ':' trennt key-value Paare 
-    char *firstindex=strchr(schedulername,':');
-    while(firstindex!=NULL){
-
-      //':' überspringen und nächste ':' finden
-      secondindex=strchr(firstindex+1,':');
-      if(secondindex!=NULL)
-        sublength=secondindex-firstindex;          //Länge bestimmen
-      else
-        sublength=strlen(firstindex);              
-      strncpy(rest,firstindex+1,sublength-1);      //key-value extrahieren
-      rest[sublength-1]='\0';
-      firstindex=secondindex;                     
-
-      // key und value trennen und Property setzen
-      char *key, *value;
-      value=strstr(rest,"-");
-      if(value!=NULL){
-        value[0]='\0';
-        value++;
-        key=rest;
-        setProperty(key,value);
-      }
-
-    }
   }
 
   void RoundRobinScheduler::setProperty(const char* key, const char* value){
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){
-      char *domain;
+      const char *domain;
       domain=strstr(value,"ns");
       if(domain!=NULL){
-        domain[0]='\0';
+        //domain[0]='\0';
         sscanf(value,"%lf",&TIMESLICE);
       }
 
@@ -62,20 +23,20 @@ namespace SystemC_VPC{
 
   bool RoundRobinScheduler::getSchedulerTimeSlice(
     sc_time& time,
-    const std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks )
+    const TaskMap &ready_tasks,
+    const  TaskMap &running_tasks )
   {
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
     time=sc_time(TIMESLICE,SC_NS);
     return true;
   }
-  void RoundRobinScheduler::addedNewTask(ProcessControlBlock *pcb){
-    rr_fifo.push_back(pcb->getInstanceId());
+  void RoundRobinScheduler::addedNewTask(Task *task){
+    rr_fifo.push_back(task->getInstanceId());
   }
-  void RoundRobinScheduler::removedTask(ProcessControlBlock *pcb){
+  void RoundRobinScheduler::removedTask(Task *task){
     std::deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
-      if( *iter == pcb->getInstanceId()){
+      if( *iter == task->getInstanceId()){
         rr_fifo.erase(iter);
         break;
       }
@@ -84,8 +45,8 @@ namespace SystemC_VPC{
   scheduling_decision RoundRobinScheduler::schedulingDecision(
     int& task_to_resign,
     int& task_to_assign,
-    const  std::map<int,ProcessControlBlock*> &ready_tasks,
-    const  std::map<int,ProcessControlBlock*> &running_tasks )
+    const  TaskMap &ready_tasks,
+    const  TaskMap &running_tasks )
   {
 
     scheduling_decision ret_decision=NOCHANGE;
@@ -103,11 +64,11 @@ namespace SystemC_VPC{
         // -> kein preemption!
         ret_decision= ONLY_ASSIGN;
         if(running_tasks.size()!=0){  // alten Task entfernen
-          std::map<int,ProcessControlBlock*>::const_iterator iter;
+          TaskMap::const_iterator iter;
           iter=running_tasks.begin();
-          ProcessControlBlock *pcb=iter->second;
-          task_to_resign=pcb->getInstanceId();
-          rr_fifo.push_back(pcb->getInstanceId());
+          Task *task=iter->second;
+          task_to_resign=task->getInstanceId();
+          rr_fifo.push_back(task->getInstanceId());
           ret_decision= PREEMPT;  
         }
         // else{}    ->
@@ -158,21 +119,5 @@ namespace SystemC_VPC{
    */
   sc_time* RoundRobinScheduler::schedulingOverhead(){
     return NULL; //new sc_time(1,SC_NS);
-  }
-
-  /**
-   * \brief Implementation of RoundRobinScheduler::signalDeallocation
-   */
-  void RoundRobinScheduler::signalDeallocation(bool kill){
-    this->remainingSlice =
-      this->remainingSlice - ( sc_time_stamp().to_default_time_units()
-                               - this->lastassign );
-  }
-  
-  /**
-   * \brief Implementation of RoundRobinScheduler::signalAllocation
-   */  
-  void RoundRobinScheduler::signalAllocation(){
-    this->lastassign = sc_time_stamp().to_default_time_units();
   }
 }

@@ -1,0 +1,27 @@
+Revision: SystemC-VPC--multihop--0.6--patch-8
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Thomas Schlichter <schlichter@cs.fau.de>
+Date: Thu May 15 14:02:21 CEST 2008
+Standard-date: 2008-05-15 12:02:21 GMT
+New-files: .arch-ids/ComponentInfo.h.id
+    .arch-ids/ComponentObserver.h.id
+    .arch-ids/PowerSumming.cpp.id
+    .arch-ids/PowerSumming.h.id
+    .arch-ids/testPowerSumming.cpp.id ComponentInfo.h
+    ComponentObserver.h PowerSumming.cpp PowerSumming.h
+    testPowerSumming.cpp
+Modified-files: Makefile.am hscd_vpc_AbstractComponent.cpp
+    hscd_vpc_AbstractComponent.h hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_Director.cpp
+    hscd_vpc_Director.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-8
+Summary: Add PowerSumming to VPC
+  - Introduce ComponentInfo class
+  - Introduce ComponentObserver class
+  - Add PowerSumming Observer
+  - The PowerSumming Observer generates a powerconsumption.dat file. Its first column contains the time in nano seconds, the second column contains the actual power consumption, and the third column contains the energy consumed up to now
+
+Keywords: 
+
+
+

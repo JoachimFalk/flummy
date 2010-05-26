@@ -1,0 +1,22 @@
+Revision: SystemC-VPC--multihop--0.6--patch-1
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Feb 13 08:39:33 CET 2008
+Standard-date: 2008-02-13 07:39:33 GMT
+Modified-files: TDMAScheduler.cpp TDMAScheduler.h
+    hscd_vpc_ProcessControlBlock.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-34
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-1
+Summary: 
+ - merged patch-34 from SystemC-VPC--mainline--0.6
+ - formatting for presentation of TDMAScheduler
+Keywords: 
+
+
+
+Patches applied:
+
+ * falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-34
+   
+ - formatting for presentation of TDMAScheduler
+

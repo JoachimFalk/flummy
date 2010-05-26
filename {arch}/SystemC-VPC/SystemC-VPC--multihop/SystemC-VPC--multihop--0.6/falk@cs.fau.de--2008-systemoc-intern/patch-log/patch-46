@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--multihop--0.6--patch-46
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jul  9 09:09:09 CEST 2008
+Standard-date: 2008-07-09 07:09:09 GMT
+Modified-files: ComponentInfo.cpp ComponentInfo.h
+    PowerMode.h hscd_vpc_AbstractComponent.h
+    hscd_vpc_Component.cpp hscd_vpc_Component.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-46
+Summary: 
+ - parsing power values from hierarichal attributes in CMX
+Keywords: 
+
+
+

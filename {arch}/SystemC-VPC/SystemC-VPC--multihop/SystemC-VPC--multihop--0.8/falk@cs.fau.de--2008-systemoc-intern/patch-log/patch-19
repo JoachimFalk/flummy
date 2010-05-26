@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.8--patch-19
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Apr 28 16:45:33 CEST 2010
+Standard-date: 2010-04-28 14:45:33 GMT
+Modified-files: pkginclude/systemcvpc/hscd_vpc_datatypes.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-19
+Summary: 
+ - fixed timeCompare::operator() to be "LessThan Comparable"
+Keywords: 
+
+
+

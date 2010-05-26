@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-70
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Aug 13 11:34:13 CEST 2008
+Standard-date: 2008-08-13 09:34:13 GMT
+Modified-files: hscd_vpc_Director.cpp hscd_vpc_Director.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-70
+Summary: 
+ - added debugging code: print out task names
+Keywords: 
+
+
+

@@ -21,9 +21,8 @@
 #include <xercesc/dom/DOMErrorHandler.hpp>
 #include <xercesc/util/XMLString.hpp>
 #include <iostream>
-using namespace std;
 
-XERCES_CPP_NAMESPACE_USE
+//XERCES_CPP_NAMESPACE_USE
 using namespace xercesc;
 
 /**
@@ -35,29 +34,25 @@ public:
   ~VpcDomErrorHandler(){}
 
   /**
-   * Getter methods
-   */
-  //bool getSawErrors() {return fSawErrors;}
-
-  /**
    * Implementation of the DOM ErrorHandler interface
    */
   bool handleError(const DOMError& domError){
-    cerr<< VPC_ERROR << "DOMError";
+    std::cerr<< "DOMError";
     if (domError.getSeverity() == DOMError::DOM_SEVERITY_WARNING){
-        cerr << "\nWarning at file ";
+        std::cerr << "\nWarning at file ";
     }else if (domError.getSeverity() == DOMError::DOM_SEVERITY_ERROR){
         this->failed = true;
-        cerr << "\nError at file ";
+        std::cerr << "\nError at file ";
     }else{
         this->failed = true;
-        cerr << "\nFatal Error at file ";
+        std::cerr << "\nFatal Error at file ";
     }
     
-    cerr << XMLString::transcode( domError.getLocation()->getURI())
+    std::cerr << XMLString::transcode( domError.getLocation()->getURI())
          << ", line " << domError.getLocation()->getLineNumber()
          << ", char " << domError.getLocation()->getColumnNumber()
-         << "\n  Message: " << XMLString::transcode( domError.getMessage()) <<VPC_NORMAL<<endl;
+         << "\n  Message: " << XMLString::transcode( domError.getMessage())
+         << std::endl;
     
     return !failed;
     
@@ -66,28 +61,9 @@ public:
   bool parseFailed(){
     return this->failed;
   }
-  
-  //void resetErrors();
 
 private :
   bool failed;
-  
-  /**
-   * Unimplemented constructor
-   */
-  //VpcDomErrorHandler(const VpcDomErrorHandler&);
-
-  /**
-   * Unimplemented operator
-   */
-  //void operator=(const VpcDomErrorHandler&);
-
-  /**
-   * This is set if we get any errors, and is queryable via a getter
-   * method. Its used by the main code to suppress output if there are
-   * errors.
-   */
-  //bool    fSawErrors;
 };
 
 #endif

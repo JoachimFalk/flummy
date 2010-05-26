@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-68
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Aug 13 11:29:49 CEST 2008
+Standard-date: 2008-08-13 09:29:49 GMT
+Modified-files: StaticRoute.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-68
+Summary: 
+ - support "empty" static routes
+Keywords: 
+
+
+

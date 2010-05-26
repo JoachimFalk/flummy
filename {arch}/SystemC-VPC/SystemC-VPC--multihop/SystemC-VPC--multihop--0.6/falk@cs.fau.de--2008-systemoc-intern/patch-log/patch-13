@@ -1,0 +1,32 @@
+Revision: SystemC-VPC--multihop--0.6--patch-13
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Tue May 27 13:06:27 CEST 2008
+Standard-date: 2008-05-27 11:06:27 GMT
+Modified-files: hscd_vpc_ProcessControlBlock.h
+    hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-40
+    falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-41
+    falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-42
+    falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-13
+Summary: 
+ - applied patch 40-42 from SystemC-VPC--mainline--0.6
+Keywords: 
+
+
+
+Patches applied:
+
+ * falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-40
+   
+  * fixed cryptic measurefile warnings
+
+ * falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-41
+   
+ * Added missing #include <vector> to hscd_vpc_ProcessControlBlock.h
+
+ * falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-42
+   
+  * output non-cryptic message when configuration file is invalid
+    and use fallback mode 
+

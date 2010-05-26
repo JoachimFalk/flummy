@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-92
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Oct 23 13:48:12 CEST 2008
+Standard-date: 2008-10-23 11:48:12 GMT
+Modified-files: BlockingTransport.cpp
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-92
+Summary: 
+ - support an empty blocking transport route (zero delay)
+Keywords: 
+
+
+

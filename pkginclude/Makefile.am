@@ -25,37 +25,52 @@ include $(auxdir)/jfrules.mk
 SUBDIRS=
 
 nobase_include_HEADERS =				\
+	systemcvpc/vpc_config.h \
+	\
 	systemcvpc/Attribute.h 				\
-	systemcvpc/FastLink.h				\
-	systemcvpc/FlexRayScheduler.h			\
-	systemcvpc/hscd_vpc_AbstractComponent.h		\
-	systemcvpc/hscd_vpc_AbstractController.h	\
-	systemcvpc/hscd_vpc_AbstractDirector.h		\
-	systemcvpc/hscd_vpc_Component.h			\
-	systemcvpc/hscd_vpc_Configuration.h		\
-	systemcvpc/hscd_vpc_Controller.h		\
-	systemcvpc/hscd_vpc_datatypes.h			\
-	systemcvpc/hscd_vpc_Director.h			\
-	systemcvpc/hscd_vpc_EDFController.h		\
-	systemcvpc/hscd_vpc_EventPair.h			\
-	systemcvpc/hscd_vpc_FCFSController.h		\
-	systemcvpc/hscd_vpc_FCFSScheduler.h		\
-	systemcvpc/hscd_vpc_IDeallocatable.h		\
+	systemcvpc/BlockingTransport.h 			\
+	systemcvpc/ComponentInfo.h 			\
+	systemcvpc/ComponentModel.h 			\
+	systemcvpc/ComponentObserver.h 			\
+	systemcvpc/debug_config.h 			\
+	systemcvpc/debug.h 				\
+	systemcvpc/debug_off.h 				\
+	systemcvpc/debug_on.h 				\
+	systemcvpc/Delayer.h 				\
+	systemcvpc/FastLink.h 				\
+	systemcvpc/FCFSComponent.h 			\
+	systemcvpc/FlexRayScheduler.h 			\
+	systemcvpc/FunctionTimingPool.h 		\
+	systemcvpc/hscd_vpc_AbstractComponent.h 	\
+	systemcvpc/hscd_vpc_Component.h 		\
+	systemcvpc/hscd_vpc_datatypes.h 		\
+	systemcvpc/hscd_vpc_Director.h 			\
+	systemcvpc/hscd_vpc_EventPair.h 		\
+	systemcvpc/hscd_vpc_FCFSScheduler.h 		\
 	systemcvpc/hscd_vpc_InvalidArgumentException.h	\
-	systemcvpc/hscd_vpc_PCBPool.h			\
-	systemcvpc/hscd_vpc_PriorityController.h	\
-	systemcvpc/hscd_vpc_PriorityScheduler.h		\
-	systemcvpc/hscd_vpc_ProcessControlBlock.h	\
+	systemcvpc/hscd_vpc_PriorityScheduler.h 	\
+	systemcvpc/hscd_vpc_PrioritySchedulerNoPreempt.h	\
+	systemcvpc/hscd_vpc_ProcessControlBlock.h 	\
 	systemcvpc/hscd_vpc_ProcessEventListener.h	\
 	systemcvpc/hscd_vpc_RateMonotonicScheduler.h	\
-	systemcvpc/hscd_vpc_ReconfigurableComponent.h	\
-	systemcvpc/hscd_vpc_RoundRobinController.h	\
-	systemcvpc/hscd_vpc_RoundRobinScheduler.h	\
+	systemcvpc/hscd_vpc_RoundRobinScheduler.h 	\
 	systemcvpc/hscd_vpc_Scheduler.h			\
-	systemcvpc/hscd_vpc_Term.h			\
-	systemcvpc/hscd_vpc_Tracing.h			\
-	systemcvpc/hscd_vpc_VPCBuilder.h		\
-	systemcvpc/hscd_vpc_VpcDomErrorHandler.h	\
-	systemcvpc/hscd_vpc_XmlHelper.h			\
-	systemcvpc/TDMAScheduler.h
-
+	systemcvpc/hscd_vpc_Tracing.h 			\
+	systemcvpc/hscd_vpc_VPCBuilder.h 		\
+	systemcvpc/hscd_vpc_VpcDomErrorHandler.h 	\
+	systemcvpc/PCBPool.h 				\
+	systemcvpc/PluggablePowerGovernor.hpp		\
+	systemcvpc/Pool.h 				\
+	systemcvpc/PowerGovernor.h 			\
+	systemcvpc/PowerMode.h 				\
+	systemcvpc/PowerSumming.h 			\
+	systemcvpc/Route.h 				\
+	systemcvpc/RoutePool.h 				\
+	systemcvpc/StaticRoute.h 			\
+	systemcvpc/Task.h 				\
+	systemcvpc/TaskPool.h 				\
+	systemcvpc/TDMAScheduler.h 			\
+	systemcvpc/TimeTriggeredCCScheduler.h 		\
+	systemcvpc/Timing.h				\
+	systemcvpc/dynload/dll.h			\
+	systemcvpc/dynload/world.h

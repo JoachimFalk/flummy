@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.8--patch-10
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Dec  2 09:04:02 CET 2009
+Standard-date: 2009-12-02 08:04:02 GMT
+Modified-files: msvc90/SystemC-VPC/SystemC-VPC.vcproj
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-10
+Summary: 
+ - fixed compilation of "Release" version (msvc90)
+Keywords: 
+
+
+

@@ -1,0 +1,17 @@
+Revision: SystemC-VPC--multihop--0.6--patch-60
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jul 28 08:37:08 CEST 2008
+Standard-date: 2008-07-28 06:37:08 GMT
+Modified-files: BlockingTransport.cpp BlockingTransport.h
+    Task.h debug_config.h hscd_vpc_AbstractComponent.h
+    hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Director.cpp hscd_vpc_Director.h
+    hscd_vpc_Tracing.cpp hscd_vpc_Tracing.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-60
+Summary: 
+ - added blocking transport support
+Keywords: 
+
+
+

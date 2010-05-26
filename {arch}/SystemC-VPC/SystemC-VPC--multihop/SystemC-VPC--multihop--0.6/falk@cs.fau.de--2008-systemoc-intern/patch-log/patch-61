@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.6--patch-61
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jul 28 08:41:58 CEST 2008
+Standard-date: 2008-07-28 06:41:58 GMT
+Modified-files: cmx.dtd
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.6--patch-61
+Summary: 
+ - added attribute "type" to element "route": used for blocking transport
+Keywords: 
+
+
+
