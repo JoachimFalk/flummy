@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.4--patch-3
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Wed Jan  4 11:59:32 CET 2006
+Standard-date: 2006-01-04 10:59:32 GMT
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--base-0
+    joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-3
+Summary: 
+ * Fixed archive, damm buggy gnu arch, readded base-0
+Keywords: 
+
+
+

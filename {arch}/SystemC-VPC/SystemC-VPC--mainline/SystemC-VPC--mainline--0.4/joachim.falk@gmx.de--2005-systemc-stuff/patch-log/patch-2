@@ -1,0 +1,335 @@
+Revision: SystemC-VPC--mainline--0.4--patch-2
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Tue Dec  6 10:10:43 CET 2005
+Standard-date: 2005-12-06 09:10:43 GMT
+Modified-files: Makefile.am configure.in
+    hscd_vpc_AbstractComponent.h hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-23
+    joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-24
+    joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-25
+    joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-2
+Removed-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--base-0
+Summary: 
+ * Syncup to SystemC-VPC--mainline--0.3 branch
+Keywords: 
+
+
+Patches applied:
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--base-0
+   initial import
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-1
+   
+  - Added initial VPC source code:
+    - hscd_vpc_Component.cpp hscd_vpc_Director.cpp hscd_vpc_Scheduler.h
+    - hscd_vpc_PriorityScheduler.cpp hscd_vpc_RateMonotonicScheduler.cpp
+    - hscd_vpc_RoundRobinScheduler.cpp hscd_vpc_Component.h 
+    - hscd_vpc_datatypes.h hscd_vpc_Director.h hscd_vpc_PriorityScheduler.h 
+    - hscd_vpc_RateMonotonicScheduler.h hscd_vpc_RoundRobinScheduler.h 
+  - Using a fixed time of 10 ns to wait for each transact or choice
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-2
+   
+  -  change interface between Component and Scheduler
+     now using the SchedulerProxy
+     -> changing the Scheduler during simulation 
+     schould be possible
+  -  added a FCFS scheduler which uses this interface
+  -  other Schedulers have to be changed to use the
+     new interface
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-3
+   
+ - add some example mapping files
+   to use them set the environment "VPCCONFIGURATION"
+   to one of them
+ - created a "fall back" mode:
+   - if no mapping file is given a single component 
+     is created, all processes are mapped to this
+     using a delay of 10 ns
+   - using an illegal mapping file will cause an 
+     error! >>>>Expertensystem<<<<<
+   - in "fall back" mode tracing is impossible
+ - changed enum names to upper case
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-4
+   
+ - disable libefence linking
+   Linking libefence causes crashes on systemc where libefence is linked
+   with libpthread because of quick-thread (SystemC) pthread incompatibilities !
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-5
+   
+ - No longer log heavily to stderr if no tracefile is generated
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-6
+   
+ - RoundRobinScheduler now works
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-7
+   
+ - removed some old-fashioned test schedulers
+   they do not match with the new SchedulerProxy interface
+ - put all classes and files in own namespace: SystemC_VPC
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-8
+   
+ - fixing code
+ - added some doxygen documentation
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-9
+   
+ - Added a mapping configuration file "mapping-h261" 
+   used with vpc-example h261 video coder 
+   from SystemC-Examples/h261
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-10
+   
+ - redefinition of Fallback mode:
+    - if no configuration is given compute() returns immediately
+      no simulation time is consumed and no scheduling is done
+ - warning: an invalid but existing configuration leeds to an error
+   -> no validation of the configuration but an assert() "Expertensystem"
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-11
+   
+ - added TIMER component for use with new timer
+   needed for time outs
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-12
+   
+ - code maintenance
+ - reactivated PriorityScheduler
+ - added and modified configuration files priority needed
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-13
+   
+ - code maintenance
+ - moved application specific code from SystemC-VPC
+   to demo application h261
+ - call Destructors
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-14
+   
+ - improved configuration names
+ - fit configurations to new infiniband 
+   two-in-one mode "--mode-double"
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-15
+   
+ - added documentation and figures
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-16
+   
+ - some more doxygen documentation
+ - revitalised RateMonotonicScheduler
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-17
+   changed VPC Configuration file 
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-18
+   
+ - extend documentation
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-19
+   
+ * Mappins for InfiniBand migrated to InfiniBand--mainline--0.2
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-20
+   
+ - added ifndef MODES_EVALUATOR 
+   to use no trace-files
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-21
+   
+ * fixed typo in docu
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-22
+   
+ * Introduced Section 'Resourcen-Konfigurationsdatei' in docu
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-23
+   
+ - documentation: 
+   - typos, failures, missing
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-24
+   
+ - typos
+ - small changes
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-25
+   *added label for referencing
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-26
+   
+ - typos
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-27
+   
+ - improved figures and text
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-28
+   
+ - typos
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-29
+   
+ * Corrected Docu/vpc-framework.fig
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-30
+   
+ - added XML processing support
+ - prepared to run in exploration
+ - added support to measure latency 
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-31
+   
+ - added missing files
+ - last patch wouldn't run without these
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-32
+   
+ - changed some namings
+ - typos 
+ - compiler warnings
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-33
+   
+ - added ThreadedComponent to support global SMoC-Scheduler
+   - yet just basic support to test the compute interface
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-34
+   
+ - now using smoc_event for global smoc2 scheduling
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-35
+   
+ * Use ACJF_CHECK_LIB_XERCES macro
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--base-0
+   tag of joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-29
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-1
+   
+ * Merged changes from SystemC-VPC--mainline--0.1 branch
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-2
+   
+ - tagged debug output
+ - fixed doxygen typo
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-3
+   
+ - bugfix
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-4
+   
+ - better debug output
+ - designed compute() interface to use function names
+ - basic handling of forwarded function names 
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-5
+   
+  * set down delay in ThreadedComponent::schedule_thread() from 10 ns to 2 ns @hscd_vpc_Component.cpp
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-6
+   
+ - preparation needed to implement ThreadedComponent:
+   - using two "compute" interfaces now
+   - added member in p_struct (smoc_event)
+   - modified mapping-h261
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-7
+   
+ - some more interface changes
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-8
+   
+ - implementation of ThreadedComponet completed
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-9
+   
+ - Now ThreadedComponent also simulates a scheduling overhead.
+ - RoundRobin provides an overhead for testing issues.
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-10
+   
+ * Changed some include directives to allow to more include options, e.g.,
+   #include <systemcvpc/xxx.h> or #include <xxx.h>
+  
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-11
+   
+ - added support for xml mappings
+ - added support for scheduling overhead
+ - changed derivation structure for ThreadedComponent
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-12
+   
+ - tagged another debuging statement
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-13
+   
+ - solved "notify an event" bug by waiting for SC_ZERO_TIME in compute
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-14
+   
+ - cleanup code
+ - added missing function to trace last 
+   activation time in ThreadedComponent
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-15
+   
+ - solved another "notify an event" bug by removing SC_ZERO_TIME-waiting in scheduler_thread
+ - removed stupid debug output
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-16
+   
+ - assert that a task does not call compute twice
+   while computation wasn't finished
+ - more verbose debugging scheduling mechanisms 
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-17
+   
+ - added assertion requested by Joachim
+ - tagged possible memory (will repair later)
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-18
+   
+ - changed headers to get a better library:
+   -> do not include internal stuff like hscd_vpc_datatypes
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-19
+   
+ - undo/removed waiting for SC_ZERO_TIME introduced in patch 13
+   because of this waiting leeds to faulty smoc2 behavior
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-20
+   
+ - improved assertion introduced in patch 17
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-21
+   
+ * values.h and MAXDOUBLE obsolete use float.h and DBL_MAX
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-22
+   
+ * Quoted arguments to ACJF_ARG_DEBUG and moved it after compiler toolchain detection
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-23
+   
+ * Merge from SystemC-VPC--mainline--0.4 branch
+ - SysteMoC in SysteMoC subdir not in SysteMoC-v0.3
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-24
+   
+ * Now use CoSupport::SystemC::Event instead of smoc_event
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-25
+   
+ * jf-libs => cosupport
+

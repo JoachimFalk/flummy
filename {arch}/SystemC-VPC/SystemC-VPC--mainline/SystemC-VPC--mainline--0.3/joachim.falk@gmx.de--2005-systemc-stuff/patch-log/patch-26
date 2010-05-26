@@ -1,0 +1,21 @@
+Revision: SystemC-VPC--mainline--0.3--patch-26
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Wed Dec 14 15:06:41 CET 2005
+Standard-date: 2005-12-14 14:06:41 GMT
+Removed-files: .arch-ids/hscd_vpc_SchedulerProxy.cpp.id
+    .arch-ids/hscd_vpc_SchedulerProxy.h.id
+    hscd_vpc_SchedulerProxy.cpp hscd_vpc_SchedulerProxy.h
+Modified-files: Makefile.am hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_Director.cpp
+    hscd_vpc_FCFSScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_Term.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-26
+Summary: 
+ - removed old Component and SchedulerProxy
+ - changed measurement file location
+ - typos
+Keywords: 
+
+
+

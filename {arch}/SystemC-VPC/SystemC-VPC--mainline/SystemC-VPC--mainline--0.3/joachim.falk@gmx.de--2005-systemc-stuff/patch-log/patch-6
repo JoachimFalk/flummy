@@ -1,0 +1,17 @@
+Revision: SystemC-VPC--mainline--0.3--patch-6
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Tue Aug 30 16:49:29 CEST 2005
+Standard-date: 2005-08-30 14:49:29 GMT
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_datatypes.h mapping-h261
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-6
+Summary: 
+ - preparation needed to implement ThreadedComponent:
+   - using two "compute" interfaces now
+   - added member in p_struct (smoc_event)
+   - modified mapping-h261
+Keywords: 
+
+
+

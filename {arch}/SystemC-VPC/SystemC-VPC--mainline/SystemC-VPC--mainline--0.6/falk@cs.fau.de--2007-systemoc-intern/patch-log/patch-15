@@ -1,0 +1,23 @@
+Revision: SystemC-VPC--mainline--0.6--patch-15
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jun 27 16:20:32 CEST 2007
+Standard-date: 2007-06-27 14:20:32 GMT
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Director.cpp hscd_vpc_Director.h
+    hscd_vpc_FCFSScheduler.cpp hscd_vpc_FCFSScheduler.h
+    hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RateMonotonicScheduler.cpp
+    hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_ReconfigurableComponent.cpp
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_Term.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-15
+Summary: 
+ - fixed gcc4.1 warnings (stl): using "std::" prefix and includes without ".h"
+Keywords: 
+
+
+

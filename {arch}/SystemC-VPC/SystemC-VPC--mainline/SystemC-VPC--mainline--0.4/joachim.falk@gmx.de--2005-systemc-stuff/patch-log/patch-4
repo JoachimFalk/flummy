@@ -1,0 +1,35 @@
+Revision: SystemC-VPC--mainline--0.4--patch-4
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Wed Jan  4 12:01:58 CET 2006
+Standard-date: 2006-01-04 11:01:58 GMT
+Removed-files: .arch-ids/hscd_vpc_SchedulerProxy.cpp.id
+    .arch-ids/hscd_vpc_SchedulerProxy.h.id
+    hscd_vpc_SchedulerProxy.cpp hscd_vpc_SchedulerProxy.h
+Modified-files: Makefile.am hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_Director.cpp
+    hscd_vpc_FCFSScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_Term.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-26
+    joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-27
+    joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-4
+Summary: 
+ * Syncup to SystemC-VPC--mainline--0.3 branch
+ - removed old Component and SchedulerProxy
+ - renamed ThreadedComponent to Component
+ - changed measurement file location
+Keywords: 
+
+
+Patches applied:
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-26
+   
+ - removed old Component and SchedulerProxy
+ - changed measurement file location
+ - typos
+
+ * joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-27
+   
+ - renamed ThreadedComponent to Component
+

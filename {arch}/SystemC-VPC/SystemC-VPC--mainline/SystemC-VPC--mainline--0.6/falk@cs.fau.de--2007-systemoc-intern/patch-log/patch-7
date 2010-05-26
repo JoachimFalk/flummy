@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.6--patch-7
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun 21 10:06:10 CEST 2007
+Standard-date: 2007-06-21 08:06:10 GMT
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_EventPair.h
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_Tracing.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-7
+Summary: 
+ - removed twice checking "hasDelay"
+Keywords: 
+
+
+

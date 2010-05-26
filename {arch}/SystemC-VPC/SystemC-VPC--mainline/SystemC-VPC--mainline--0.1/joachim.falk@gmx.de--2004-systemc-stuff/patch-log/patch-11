@@ -1,0 +1,18 @@
+Revision: SystemC-VPC--mainline--0.1--patch-11
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Fri Jun 10 12:48:24 CEST 2005
+Standard-date: 2005-06-10 10:48:24 GMT
+Modified-files: mapping-mixed-components-delay-10-ns
+    mapping-mixed-components-mixed-delays
+    mapping-one-comp-delay-0-ns
+    mapping-one-comp-delay-10-ns
+    mapping-one-comp-mixed-delays
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-11
+Summary:
+ - added TIMER component for use with new timer
+   needed for time outs
+Keywords: 
+
+
+

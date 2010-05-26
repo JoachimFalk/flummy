@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.5--patch-1
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Tue Apr 11 14:29:02 CEST 2006
+Standard-date: 2006-04-11 12:29:02 GMT
+Modified-files: hscd_vpc_Component.cpp
+    hscd_vpc_TaskEventListener.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-1
+Summary: 
+  * applied patch joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-17 to branch
+Keywords: 
+
+
+

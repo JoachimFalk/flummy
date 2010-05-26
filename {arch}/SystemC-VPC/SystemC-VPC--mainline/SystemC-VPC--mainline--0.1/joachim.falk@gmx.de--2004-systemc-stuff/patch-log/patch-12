@@ -1,0 +1,31 @@
+Revision: SystemC-VPC--mainline--0.1--patch-12
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Tue Jun 14 16:43:30 CEST 2005
+Standard-date: 2005-06-14 14:43:30 GMT
+New-files: .arch-ids/mapping-2-comp-mixed-delay.id
+    .arch-ids/mapping-h261-2comp.id
+    .arch-ids/mapping-infiniband-test.id
+    mapping-2-comp-mixed-delay mapping-h261-2comp
+    mapping-infiniband-test
+Modified-files: Makefile.am hscd_vpc_Component.cpp
+    hscd_vpc_Director.cpp hscd_vpc_FCFSScheduler.cpp
+    hscd_vpc_FCFSScheduler.h hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_SchedulerProxy.cpp hscd_vpc_datatypes.h
+    mapping-h261 mapping-mixed-components-delay-10-ns
+    mapping-mixed-components-mixed-delays
+    mapping-one-comp-delay-0-ns
+    mapping-one-comp-delay-10-ns
+    mapping-one-comp-mixed-delays
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-12
+Summary: 
+ - code maintenance
+ - reactivated PriorityScheduler
+ - added and modified configuration files priority needed
+Keywords: 
+
+
+

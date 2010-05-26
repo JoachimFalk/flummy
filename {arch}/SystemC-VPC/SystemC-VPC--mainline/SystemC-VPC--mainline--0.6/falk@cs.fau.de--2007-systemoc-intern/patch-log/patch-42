@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.6--patch-42
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Christian Zebelein <christian.zebelein@cs.fau.de>
+Date: Fri May  9 14:06:35 CEST 2008
+Standard-date: 2008-05-09 12:06:35 GMT
+Modified-files: hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-42
+Summary:
+  * output non-cryptic message when configuration file is invalid
+    and use fallback mode 
+Keywords: 
+
+
+

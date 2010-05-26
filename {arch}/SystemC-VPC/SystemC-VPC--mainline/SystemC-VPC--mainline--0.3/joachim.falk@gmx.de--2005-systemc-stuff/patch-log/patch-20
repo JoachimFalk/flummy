@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.3--patch-20
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Sun Oct 16 16:00:40 CEST 2005
+Standard-date: 2005-10-16 14:00:40 GMT
+Modified-files: hscd_vpc_Director.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-20
+Summary: 
+ - improved assertion introduced in patch 17
+Keywords: 
+
+
+

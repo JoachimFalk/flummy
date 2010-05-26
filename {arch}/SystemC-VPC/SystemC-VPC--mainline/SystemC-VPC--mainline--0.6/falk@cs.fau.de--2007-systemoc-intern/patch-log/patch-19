@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.6--patch-19
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jul 11 10:52:40 CEST 2007
+Standard-date: 2007-07-11 08:52:40 GMT
+Modified-files: hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-19
+Summary: 
+ - fixed handling of default delays/latencies:
+ -> using special fid "0" for default 
+Keywords: 
+
+
+

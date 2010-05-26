@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--mainline--0.3--patch-10
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Thu Sep  8 13:36:00 CEST 2005
+Standard-date: 2005-09-08 11:36:00 GMT
+Modified-files: hscd_vpc_Component.h
+    hscd_vpc_SchedulerProxy.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-10
+Summary: 
+ * Changed some include directives to allow to more include options, e.g.,
+   #include <systemcvpc/xxx.h> or #include <xxx.h>
+  
+Keywords: 
+
+
+

@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.6--patch-24
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Aug  8 15:24:49 CEST 2007
+Standard-date: 2007-08-08 13:24:49 GMT
+Modified-files: hscd_vpc_ProcessControlBlock.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-24
+Summary: 
+ - another compile fix for gcc4.x
+Keywords: 
+
+
+

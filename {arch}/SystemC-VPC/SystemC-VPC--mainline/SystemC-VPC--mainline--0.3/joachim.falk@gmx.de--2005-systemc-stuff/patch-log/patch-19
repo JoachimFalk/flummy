@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.3--patch-19
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Sun Oct 16 15:59:05 CEST 2005
+Standard-date: 2005-10-16 13:59:05 GMT
+Modified-files: hscd_vpc_Component.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-19
+Summary: 
+ - undo/removed waiting for SC_ZERO_TIME introduced in patch 13
+   because of this waiting leeds to faulty smoc2 behavior
+Keywords: 
+
+
+

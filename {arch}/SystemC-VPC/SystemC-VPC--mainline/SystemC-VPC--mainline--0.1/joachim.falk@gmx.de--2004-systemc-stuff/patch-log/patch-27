@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.1--patch-27
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Sat Jul  9 00:06:21 CEST 2005
+Standard-date: 2005-07-08 22:06:21 GMT
+Modified-files: Docu/ib_spec_graph.fig
+    Docu/ib_vpc_framework.fig
+    Docu/ressourcenbeschraenkung.tex Docu/vpc-framework.fig
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-27
+Summary: 
+ - improved figures and text
+Keywords: 
+
+
+

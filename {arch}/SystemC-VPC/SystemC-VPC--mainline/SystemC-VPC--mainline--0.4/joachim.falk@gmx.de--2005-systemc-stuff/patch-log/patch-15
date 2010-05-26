@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.4--patch-15
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Tue Mar 28 09:31:16 CEST 2006
+Standard-date: 2006-03-28 07:31:16 GMT
+Modified-files: hscd_vpc_AbstractController.h
+    hscd_vpc_ReconfigurableComponent.h
+    hscd_vpc_VPCBuilder.cpp hscd_vpc_VPCBuilder.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-15
+Summary: 
+  * added some comments to source code
+Keywords: 
+
+
+

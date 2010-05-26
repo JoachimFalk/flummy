@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--mainline--0.5--patch-33
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun 29 13:53:19 CEST 2006
+Standard-date: 2006-06-29 11:53:19 GMT
+Modified-files: Makefile.am hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-33
+Summary: 
+ - improved tracing by switch between lower and upper case letters
+   instead of tracing the same signal
+Keywords: 
+
+
+

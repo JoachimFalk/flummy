@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.6--patch-4
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jun 18 10:24:01 CEST 2007
+Standard-date: 2007-06-18 08:24:01 GMT
+New-files: .arch-ids/doxygen.cfg.id doxygen.cfg
+Modified-files: Makefile.am configure.in
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-4
+Summary: 
+ - added doxygen-doc target
+Keywords: 
+
+
+

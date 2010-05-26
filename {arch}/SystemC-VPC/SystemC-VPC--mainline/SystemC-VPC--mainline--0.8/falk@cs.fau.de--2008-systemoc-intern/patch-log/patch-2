@@ -1,0 +1,19 @@
+Revision: SystemC-VPC--mainline--0.8--patch-2
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Christian Zebelein <christian.zebelein@cs.fau.de>
+Date: Fri May 16 12:31:44 CEST 2008
+Standard-date: 2008-05-16 10:31:44 GMT
+Modified-files: FlexRayScheduler.h Makefile.am
+    TDMAScheduler.h hscd_vpc_AbstractController.h
+    hscd_vpc_Director.h hscd_vpc_FCFSScheduler.h
+    hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-2
+Summary:
+  * fixed header includes (there is a reason why both #include "..." and
+    #include <...> exist!!!)
+Keywords: 
+
+
+

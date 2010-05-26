@@ -1,0 +1,23 @@
+Revision: SystemC-VPC--mainline--0.4--patch-11
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Thu Feb  2 15:24:16 CET 2006
+Standard-date: 2006-02-02 14:24:16 GMT
+Modified-files: hscd_vpc_AbstractComponent.h
+    hscd_vpc_Component.cpp hscd_vpc_Configuration.cpp
+    hscd_vpc_Configuration.h hscd_vpc_Controller.cpp
+    hscd_vpc_IPreemptable.h
+    hscd_vpc_ReconfigurableComponent.cpp
+    hscd_vpc_ReconfigurableComponent.h
+    hscd_vpc_RoundRobinController.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-11
+Summary: 
+  * changed method signatures of IPreemptable
+    - timeToPreempt now returns sc_time instead of sc_time*
+    - timeToResume now returns sc_time instead of sc_time*
+  * adapted classes realizing interface IPreemptable
+  * again adapted some missing indentation of hscd_vpc_Component for late merge
+Keywords: 
+
+
+

@@ -1,0 +1,42 @@
+Revision: SystemC-VPC--mainline--0.5--patch-36
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Mon Jul 31 12:02:58 CEST 2006
+Standard-date: 2006-07-31 10:02:58 GMT
+Renamed-files: .arch-ids/hscd_vpc_IPreemptable.h.id .arch-ids/hscd_vpc_IDeallocatable.h.id
+    .arch-ids/hscd_vpc_TaskEventListener.h.id .arch-ids/hscd_vpc_ProcessEventListener.h.id
+    hscd_vpc_IPreemptable.h hscd_vpc_IDeallocatable.h
+    hscd_vpc_TaskEventListener.h hscd_vpc_ProcessEventListener.h
+Modified-files: Makefile.am hscd_vpc_AbstractComponent.h
+    hscd_vpc_AbstractController.h
+    hscd_vpc_AbstractDirector.h hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_Configuration.cpp
+    hscd_vpc_Configuration.h hscd_vpc_Controller.cpp
+    hscd_vpc_Controller.h hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_EDFController.cpp
+    hscd_vpc_EDFController.h hscd_vpc_FCFSController.cpp
+    hscd_vpc_FCFSController.h hscd_vpc_IDeallocatable.h
+    hscd_vpc_PCBPool.cpp hscd_vpc_PriorityController.cpp
+    hscd_vpc_PriorityController.h
+    hscd_vpc_ProcessEventListener.h
+    hscd_vpc_ReconfigurableComponent.cpp
+    hscd_vpc_ReconfigurableComponent.h
+    hscd_vpc_RoundRobinController.cpp
+    hscd_vpc_RoundRobinController.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-36
+Summary: 
+  * renamed methods to fit to nomenclature of elobartion:
+    preempt -> deallocate
+    resume -> allocate
+    timeToPreempt -> timeToDeallocate
+    timeToResume -> timeToAllocate
+  * renamed internal variable to fit to changes of methodnames
+  * renamed TaskEventListener to ProcessEventListener and adapted interface names
+  * NOTE: This patch will be equivalent to patch 31 of branch joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.6
+  * Additionally added WARNING instead of ASSERTION within TypePool destructor within PCBPool
+Keywords: 
+
+
+

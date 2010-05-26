@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.5--patch-12
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Fri May 12 09:48:33 CEST 2006
+Standard-date: 2006-05-12 07:48:33 GMT
+New-files: .arch-ids/hscd_vpc_EventPair.h.id
+    hscd_vpc_EventPair.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-12
+Summary: 
+ - forgot to add new file hscd_vpc_EventPair.h
+Keywords: 
+
+
+

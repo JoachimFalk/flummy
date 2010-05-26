@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.5--patch-11
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Fri May 12 09:47:48 CEST 2006
+Standard-date: 2006-05-12 07:47:48 GMT
+Modified-files: Makefile.am hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_ProcessControlBlock.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-11
+Summary: 
+ - introduced struct EventPair
+ - marked old compute interface deprecated
+ - introduced new interface (runs partially)
+Keywords: 
+

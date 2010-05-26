@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.6--patch-34
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Feb 13 08:37:56 CET 2008
+Standard-date: 2008-02-13 07:37:56 GMT
+Modified-files: TDMAScheduler.cpp TDMAScheduler.h
+    hscd_vpc_ProcessControlBlock.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-34
+Summary: 
+ - formatting for presentation of TDMAScheduler
+Keywords: 
+
+
+

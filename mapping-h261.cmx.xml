@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<!DOCTYPE configuration SYSTEM "cmx.dtd">
+<configuration>
+ <resultfile name=""/>
+ <measurefile name=""/>
+
+ <resources>
+  <component name="HWM1" type="threaded" scheduler="RR">
+   <attribute type="timeslice" value="20ns"/>
+  </component>
+ </resources>
+
+ <mappings>
+
+  <mapping source="IN" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_IN_RF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_IN_BM" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_IN_DIFF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="RF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_RF_BM" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="BM" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_BM_LF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="LF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_LF_DIFF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_LF_REC" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="DIFF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_DIFF_DCT" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="DCT" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_DCT_Q" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="Q" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_Q_RLC" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_Q_IQ" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="IQ" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_IQ_IDCT" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="IDCT" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_IDCT_REC" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="REC_ID" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_REC_SF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="SF" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="C_SF_RLC" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+  <mapping source="RLC" target="HWM1">
+    <attribute type="delay" value="100"/>
+  </mapping>
+
+ </mappings>
+
+</configuration>

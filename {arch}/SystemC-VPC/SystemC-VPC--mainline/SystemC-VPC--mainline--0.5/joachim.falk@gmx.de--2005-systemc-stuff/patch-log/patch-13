@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.5--patch-13
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu May 18 18:27:01 CEST 2006
+Standard-date: 2006-05-18 16:27:01 GMT
+Modified-files: hscd_vpc_PCBPool.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-13
+Summary: 
+ - bugfix in PCBPool (management of used PCB objects)
+Keywords: 
+
+
+

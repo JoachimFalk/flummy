@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.6--patch-36
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Christian Zebelein <christian.zebelein@cs.fau.de>
+Date: Mon Apr 28 10:35:20 CEST 2008
+Standard-date: 2008-04-28 08:35:20 GMT
+Modified-files: hscd_vpc_IDeallocatable.h
+    hscd_vpc_ProcessEventListener.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-36
+Summary:
+  * added some virtual destructors because GCC complains 
+Keywords: 
+
+
+

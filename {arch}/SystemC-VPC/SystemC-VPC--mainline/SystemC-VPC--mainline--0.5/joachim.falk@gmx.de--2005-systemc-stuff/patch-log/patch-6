@@ -1,0 +1,17 @@
+Revision: SystemC-VPC--mainline--0.5--patch-6
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Fri Apr 21 13:04:06 CEST 2006
+Standard-date: 2006-04-21 11:04:06 GMT
+Modified-files: hscd_vpc_Director.cpp hscd_vpc_Director.h
+    hscd_vpc_PCBPool.cpp hscd_vpc_PCBPool.h
+    hscd_vpc_Term.cpp hscd_vpc_Term.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-6
+Summary: 
+  * removed pcb map from Director
+  * adapted Director to provide access to currently managed pcbs through PCBPool
+  * added Iterators to PCBPool to enable walking over currently managed pcb instances
+Keywords: 
+
+
+

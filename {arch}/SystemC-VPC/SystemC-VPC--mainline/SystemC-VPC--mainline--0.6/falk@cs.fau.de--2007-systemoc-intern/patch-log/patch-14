@@ -1,0 +1,17 @@
+Revision: SystemC-VPC--mainline--0.6--patch-14
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jun 27 09:54:43 CEST 2007
+Standard-date: 2007-06-27 07:54:43 GMT
+New-files: .arch-ids/FastLink.cpp.id
+    .arch-ids/FastLink.h.id
+    .arch-ids/hscd_vpc_AbstractComponent.cpp.id
+    FastLink.cpp FastLink.h hscd_vpc_AbstractComponent.cpp
+Modified-files: hscd_vpc_Director.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-14
+Summary: 
+ - forgot to add files needed in previous patch
+Keywords: 
+
+
+

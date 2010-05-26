@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.6--patch-20
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Jul 11 11:33:55 CEST 2007
+Standard-date: 2007-07-11 09:33:55 GMT
+Modified-files: hscd_vpc_ProcessControlBlock.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-20
+Summary: 
+ - fixed debug code (ifdef VPC_DEBUG)
+Keywords: 
+
+
+

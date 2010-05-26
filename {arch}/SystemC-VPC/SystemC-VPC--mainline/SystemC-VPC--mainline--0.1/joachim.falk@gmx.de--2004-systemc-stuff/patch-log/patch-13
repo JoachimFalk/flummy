@@ -1,0 +1,18 @@
+Revision: SystemC-VPC--mainline--0.1--patch-13
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Wed Jun 15 11:12:45 CEST 2005
+Standard-date: 2005-06-15 09:12:45 GMT
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Director.cpp hscd_vpc_Director.h mapping-h261
+    mapping-h261-2comp
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-13
+Summary: 
+ - code maintenance
+ - moved application specific code from SystemC-VPC
+   to demo application h261
+ - call Destructors
+Keywords: 
+
+
+

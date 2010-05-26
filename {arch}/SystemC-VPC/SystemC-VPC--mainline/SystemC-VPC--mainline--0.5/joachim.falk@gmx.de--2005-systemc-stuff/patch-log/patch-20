@@ -1,0 +1,18 @@
+Revision: SystemC-VPC--mainline--0.5--patch-20
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon May 22 16:10:41 CEST 2006
+Standard-date: 2006-05-22 14:10:41 GMT
+Modified-files: hscd_vpc_Component.cpp
+    hscd_vpc_Director.cpp hscd_vpc_EDFController.cpp
+    hscd_vpc_EDFController.h
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_VPCBuilder.cpp
+    hscd_vpc_VPCBuilder.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-20
+Summary: 
+ - now using sc_time for storing delays, period, deadlines, ... instead of double
+Keywords: 
+
+
+

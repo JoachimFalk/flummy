@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.5--patch-28
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Tue Jun 13 14:15:18 CEST 2006
+Standard-date: 2006-06-13 12:15:18 GMT
+Modified-files: hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-28
+Summary: 
+ * Fixed old fashioned header inclusion #include <map.h> => #include <map>
+Keywords: 
+
+
+

@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.6--patch-23
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Wed Aug  8 15:23:56 CEST 2007
+Standard-date: 2007-08-08 13:23:56 GMT
+Modified-files: hscd_vpc_VPCBuilder.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-23
+Summary: 
+ - bugfix using compatibility interpretation of <attribute="delay" ...>
+Keywords: 
+
+
+

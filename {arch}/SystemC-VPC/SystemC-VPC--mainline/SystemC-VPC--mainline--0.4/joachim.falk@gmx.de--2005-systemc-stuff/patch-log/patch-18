@@ -1,0 +1,21 @@
+Revision: SystemC-VPC--mainline--0.4--patch-18
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Fri May 19 10:17:45 CEST 2006
+Standard-date: 2006-05-19 08:17:45 GMT
+Modified-files: hscd_vpc_AbstractController.h
+    hscd_vpc_Controller.cpp hscd_vpc_Controller.h
+    hscd_vpc_FCFSController.cpp hscd_vpc_FCFSController.h
+    hscd_vpc_ReconfigurableComponent.cpp
+    hscd_vpc_RoundRobinController.cpp
+    hscd_vpc_RoundRobinController.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-18
+Summary: 
+  * BUGFIX: added missing notification to controller due to preemption while loading or storing
+    - adapted interface AbstractController and subclasses
+    - added missing method calls to ReconfigurableComponent
+    - added missing method signalPreemption(bool kill) to FCFSController for proper handling preemption by kill
+Keywords: 
+
+
+

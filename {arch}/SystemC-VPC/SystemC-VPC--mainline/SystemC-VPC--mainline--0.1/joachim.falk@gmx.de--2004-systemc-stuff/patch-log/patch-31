@@ -1,0 +1,20 @@
+Revision: SystemC-VPC--mainline--0.1--patch-31
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Fri Aug 12 10:49:01 CEST 2005
+Standard-date: 2005-08-12 08:49:01 GMT
+New-files: .arch-ids/hscd_vpc_Term.cpp.id
+    .arch-ids/hscd_vpc_Term.h.id
+    .arch-ids/hscd_vpc_VpcDomErrorHandler.h.id
+    .arch-ids/hscd_vpc_XmlHelper.cpp.id
+    .arch-ids/hscd_vpc_XmlHelper.h.id hscd_vpc_Term.cpp
+    hscd_vpc_Term.h hscd_vpc_VpcDomErrorHandler.h
+    hscd_vpc_XmlHelper.cpp hscd_vpc_XmlHelper.h
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-31
+Summary: 
+ - added missing files
+ - last patch wouldn't run without these
+Keywords: 
+
+
+

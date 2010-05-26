@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.6--patch-21
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Thu Jul 12 16:01:33 CEST 2007
+Standard-date: 2007-07-12 14:01:33 GMT
+Modified-files: hscd_vpc_ProcessControlBlock.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-21
+Summary: 
+ - fixed copy and paste bug: use latency and not delay
+Keywords: 
+
+
+

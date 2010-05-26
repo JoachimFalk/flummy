@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.4--patch-19
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Fri May 19 12:59:58 CEST 2006
+Standard-date: 2006-05-19 10:59:58 GMT
+Modified-files: hscd_vpc_Component.cpp
+    hscd_vpc_EDFController.h hscd_vpc_PriorityController.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-19
+Summary: 
+  * removed unnecessary data structures within EDF- and PriorityController
+  * extended Component to handle preemption correctly
+Keywords: 
+
+
+

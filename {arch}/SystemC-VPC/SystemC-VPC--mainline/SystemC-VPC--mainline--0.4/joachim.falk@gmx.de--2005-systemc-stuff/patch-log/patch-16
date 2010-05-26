@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.4--patch-16
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Thu Apr  6 15:50:46 CEST 2006
+Standard-date: 2006-04-06 13:50:46 GMT
+Modified-files: hscd_vpc_Controller.h
+    hscd_vpc_FCFSController.h hscd_vpc_VPCBuilder.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-16
+Summary: 
+  * fixed parse bug in VPCBuilder
+  * modified FCFSController to always not preempt
+Keywords: 
+
+
+

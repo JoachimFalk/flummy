@@ -1,0 +1,12 @@
+Revision: SystemC-VPC--mainline--0.8--patch-8
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Thomas Schlichter <schlichter@cs.fau.de>
+Date: Thu Aug 28 14:49:20 CEST 2008
+Standard-date: 2008-08-28 12:49:20 GMT
+Modified-files: Makefile.am
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-8
+Summary: Compileheader feature not used, so drop dependencies for it
+ - This also fixes missing build-dependencies.
+   If *_DEPENDENCIES is defined, _all_ dependencies must be listed!
+Keywords: 
+

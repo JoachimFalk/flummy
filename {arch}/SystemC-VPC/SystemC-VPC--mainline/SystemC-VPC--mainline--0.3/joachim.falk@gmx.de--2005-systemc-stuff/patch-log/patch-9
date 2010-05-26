@@ -1,0 +1,19 @@
+Revision: SystemC-VPC--mainline--0.3--patch-9
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Mon Sep  5 15:22:11 CEST 2005
+Standard-date: 2005-09-05 13:22:11 GMT
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_FCFSScheduler.h hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+    mapping-h261
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-9
+Summary: 
+ - Now ThreadedComponent also simulates a scheduling overhead.
+ - RoundRobin provides an overhead for testing issues.
+Keywords: 
+
+
+

@@ -1,0 +1,19 @@
+Revision: SystemC-VPC--mainline--0.5--patch-7
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Tue May  9 09:18:38 CEST 2006
+Standard-date: 2006-05-09 07:18:38 GMT
+Modified-files: hscd_vpc_AbstractComponent.h
+    hscd_vpc_PCBPool.cpp hscd_vpc_PCBPool.h
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-7
+Summary: 
+  * marked compute( const char *name, const char *funcname, VPC_Event* end=NULL) and
+    compute( const char *name, VPC_Event *end=NULL) as deprecated, internally currently only
+    compute( ProcessControlBlock* pcb) is used and updated.
+  * added missing destructor to ProcessControlBlock and PCBPool
+Keywords: 
+
+
+

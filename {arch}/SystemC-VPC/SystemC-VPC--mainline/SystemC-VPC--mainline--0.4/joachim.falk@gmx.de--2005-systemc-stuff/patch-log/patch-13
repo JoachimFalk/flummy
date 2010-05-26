@@ -1,0 +1,21 @@
+Revision: SystemC-VPC--mainline--0.4--patch-13
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Tue Mar  7 11:51:20 CET 2006
+Standard-date: 2006-03-07 10:51:20 GMT
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Controller.cpp hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_FCFSController.cpp
+    hscd_vpc_FCFSController.h
+    hscd_vpc_PriorityController.cpp hscd_vpc_VPCBuilder.cpp
+    hscd_vpc_XmlHelper.cpp hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-13
+Summary:
+  * adapted VPCBuilder to be able to handle measure files correctly 
+  * modified Director to perform time logging without given set of constaints
+  * fixed severe bug in FCFSController
+  * modified constructor of base class Controller to handle parameter prasing from sgEdit
+Keywords: 
+
+
+

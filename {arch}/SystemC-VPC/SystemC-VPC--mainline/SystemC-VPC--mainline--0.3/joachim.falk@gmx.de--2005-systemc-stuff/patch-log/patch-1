@@ -1,0 +1,68 @@
+Revision: SystemC-VPC--mainline--0.3--patch-1
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Sat Aug 13 20:52:09 CEST 2005
+Standard-date: 2005-08-13 18:52:09 GMT
+New-files: .arch-ids/hscd_vpc_Term.cpp.id
+    .arch-ids/hscd_vpc_Term.h.id
+    .arch-ids/hscd_vpc_VpcDomErrorHandler.h.id
+    .arch-ids/hscd_vpc_XmlHelper.cpp.id
+    .arch-ids/hscd_vpc_XmlHelper.h.id hscd_vpc_Term.cpp
+    hscd_vpc_Term.h hscd_vpc_VpcDomErrorHandler.h
+    hscd_vpc_XmlHelper.cpp hscd_vpc_XmlHelper.h
+Modified-files: Docu/director_getinstance.fig Makefile.am
+    configure.in hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Director.cpp hscd_vpc_Director.h
+    hscd_vpc_FCFSScheduler.cpp hscd_vpc_FCFSScheduler.h
+    hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RateMonotonicScheduler.cpp
+    hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_SchedulerProxy.cpp hscd_vpc_SchedulerProxy.h
+    hscd_vpc_datatypes.h mapping-h261-2comp
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-30
+    joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-31
+    joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-32
+    joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-33
+    joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-34
+    joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-35
+    joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-1
+Summary: 
+ * Merged changes from SystemC-VPC--mainline--0.1 branch
+Keywords: 
+
+
+Patches applied:
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-30
+   
+ - added XML processing support
+ - prepared to run in exploration
+ - added support to measure latency 
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-31
+   
+ - added missing files
+ - last patch wouldn't run without these
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-32
+   
+ - changed some namings
+ - typos 
+ - compiler warnings
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-33
+   
+ - added ThreadedComponent to support global SMoC-Scheduler
+   - yet just basic support to test the compute interface
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-34
+   
+ - now using smoc_event for global smoc2 scheduling
+
+ * joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-35
+   
+ * Use ACJF_CHECK_LIB_XERCES macro
+

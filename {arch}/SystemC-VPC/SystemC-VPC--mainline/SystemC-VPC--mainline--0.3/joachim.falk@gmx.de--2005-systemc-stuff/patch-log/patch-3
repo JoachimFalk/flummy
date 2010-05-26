@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.3--patch-3
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Wed Aug 17 15:15:37 CEST 2005
+Standard-date: 2005-08-17 13:15:37 GMT
+Modified-files: hscd_vpc_Director.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-3
+Summary: 
+ - bugfix
+Keywords: 
+
+
+

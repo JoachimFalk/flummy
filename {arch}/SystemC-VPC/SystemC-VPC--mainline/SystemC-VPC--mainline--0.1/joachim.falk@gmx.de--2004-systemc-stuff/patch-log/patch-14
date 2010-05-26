@@ -1,0 +1,33 @@
+Revision: SystemC-VPC--mainline--0.1--patch-14
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Wed Jun 15 15:49:03 CEST 2005
+Standard-date: 2005-06-15 13:49:03 GMT
+Renamed-files: .arch-ids/mapping-2-comp-mixed-delay.id .arch-ids/mapping-infiniband-two-c-mixed-d.id
+    .arch-ids/mapping-mixed-components-delay-10-ns.id .arch-ids/mapping-infiniband-mixed-c-10ns-d.id
+    .arch-ids/mapping-mixed-components-mixed-delays.id .arch-ids/mapping-infiniband-mixed-c-mixed-d.id
+    .arch-ids/mapping-one-comp-delay-0-ns.id .arch-ids/mapping-infiniband-one-c-nodelay.id
+    .arch-ids/mapping-one-comp-delay-10-ns.id .arch-ids/mapping-infiniband-one-c-10ns-d.id
+    .arch-ids/mapping-one-comp-mixed-delays.id .arch-ids/mapping-infiniband-one-c-mixed-d.id
+    mapping-2-comp-mixed-delay mapping-infiniband-two-c-mixed-d
+    mapping-mixed-components-delay-10-ns mapping-infiniband-mixed-c-10ns-d
+    mapping-mixed-components-mixed-delays mapping-infiniband-mixed-c-mixed-d
+    mapping-one-comp-delay-0-ns mapping-infiniband-one-c-nodelay
+    mapping-one-comp-delay-10-ns mapping-infiniband-one-c-10ns-d
+    mapping-one-comp-mixed-delays mapping-infiniband-one-c-mixed-d
+Modified-files: mapping-infiniband-mixed-c-10ns-d
+    mapping-infiniband-mixed-c-mixed-d
+    mapping-infiniband-one-c-10ns-d
+    mapping-infiniband-one-c-mixed-d
+    mapping-infiniband-one-c-nodelay
+    mapping-infiniband-test
+    mapping-infiniband-two-c-mixed-d
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-14
+Summary: 
+ - improved configuration names
+ - fit configurations to new infiniband 
+   two-in-one mode "--mode-double"
+Keywords: 
+
+
+

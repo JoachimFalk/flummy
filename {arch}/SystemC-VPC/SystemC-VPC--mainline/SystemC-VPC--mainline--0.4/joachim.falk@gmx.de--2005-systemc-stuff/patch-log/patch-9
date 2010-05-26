@@ -1,0 +1,22 @@
+Revision: SystemC-VPC--mainline--0.4--patch-9
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Tue Jan 31 15:26:34 CET 2006
+Standard-date: 2006-01-31 14:26:34 GMT
+Modified-files: Makefile.am hscd_vpc_AbstractComponent.h
+    hscd_vpc_AbstractController.h
+    hscd_vpc_AbstractDirector.h hscd_vpc_Configuration.h
+    hscd_vpc_Controller.h hscd_vpc_Director.h
+    hscd_vpc_EDFController.cpp hscd_vpc_EDFController.h
+    hscd_vpc_FCFSController.h hscd_vpc_PriorityController.h
+    hscd_vpc_ReconfigurableComponent.h
+    hscd_vpc_RoundRobinController.h
+    hscd_vpc_TaskEventListener.h hscd_vpc_VPCBuilder.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-9
+Summary: 
+  * modified Makefile to fit requirements for building together with SysteMoC
+  * modified Headerfiles to fit requirements for building together with SysteMoC
+Keywords: 
+
+
+

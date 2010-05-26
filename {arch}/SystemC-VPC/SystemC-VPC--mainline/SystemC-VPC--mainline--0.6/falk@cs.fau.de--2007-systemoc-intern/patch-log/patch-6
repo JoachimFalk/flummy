@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.6--patch-6
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun 21 09:52:38 CEST 2007
+Standard-date: 2007-06-21 07:52:38 GMT
+Modified-files: hscd_vpc_datatypes.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-6
+Summary: 
+ - removed unused action_struct
+Keywords: 
+
+
+

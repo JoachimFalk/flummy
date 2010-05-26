@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.8--patch-1
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Thu May 15 16:27:36 CEST 2008
+Standard-date: 2008-05-15 14:27:36 GMT
+Modified-files: configure.in hscd_vpc_AbstractDirector.h
+    hscd_vpc_EventPair.h hscd_vpc_PCBPool.h
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_datatypes.h
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--mainline--0.8--patch-1
+Summary: 
+ * Changes to accomodate HscdSupport--mainline--0.8
+Keywords: 
+
+
+

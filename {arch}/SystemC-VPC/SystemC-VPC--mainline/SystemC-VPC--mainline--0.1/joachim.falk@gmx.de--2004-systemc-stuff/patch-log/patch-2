@@ -1,0 +1,71 @@
+Revision: SystemC-VPC--mainline--0.1--patch-2
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Wed May 18 12:00:59 CEST 2005
+Standard-date: 2005-05-18 10:00:59 GMT
+New-files: .arch-ids/hscd_vpc_FCFSScheduler.cpp.id
+    .arch-ids/hscd_vpc_FCFSScheduler.h.id
+    .arch-ids/hscd_vpc_SchedulerProxy.cpp.id
+    .arch-ids/hscd_vpc_SchedulerProxy.h.id
+    .arch-ids/hscd_vpc_SimpleScheduler.cpp.id
+    .arch-ids/hscd_vpc_SimpleScheduler.h.id
+    .arch-ids/hscd_vpc_SpecialTestScheduler.cpp.id
+    .arch-ids/hscd_vpc_SpecialTestScheduler.h.id
+    .arch-ids/hscd_vpc_TestScheduler.cpp.id
+    .arch-ids/hscd_vpc_TestScheduler.h.id
+    hscd_vpc_FCFSScheduler.cpp hscd_vpc_FCFSScheduler.h
+    hscd_vpc_SchedulerProxy.cpp hscd_vpc_SchedulerProxy.h
+    hscd_vpc_SimpleScheduler.cpp hscd_vpc_SimpleScheduler.h
+    hscd_vpc_SpecialTestScheduler.cpp
+    hscd_vpc_SpecialTestScheduler.h
+    hscd_vpc_TestScheduler.cpp hscd_vpc_TestScheduler.h
+Modified-files: Makefile.am hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RateMonotonicScheduler.cpp
+    hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-2
+Summary: 
+  -  change interface between Component and Scheduler
+     now using the SchedulerProxy
+     -> changing the Scheduler during simulation 
+     schould be possible
+  -  added a FCFS scheduler which uses this interface
+  -  other Schedulers have to be changed to use the
+     new interface
+
+  -  also made a simple configuration file for mapping
+  -  using an environment variable "VPCCONFIGURATION" to
+     locate file
+  -  Syntax is:
+     component: HWM1 FCFS -> allokate a resource named "HWM1" 
+                             using an "FCFS" Scheduler
+     sim_mod.h_hca.qpc_manager HWM1 10 -> map "sim_mod.h_hca.qpc_manager"
+                                          to "HWM1" using a
+                                          delay of "10" ns
+      - do not use comments!!!!!
+      - and allokation before mapping!!!
+      - uncomplete allokation or mapping maintains to
+      broken assertions
+     Simple example:
+     ---
+        component: HWM1 FCFS
+        component: HWM2 FCFS
+        component: HWM3 FCFS
+        bla.foo1 HWM1 12
+        bla.foo2 HWM2 111
+        foobar HWM1 33
+        ...
+     ---
+ 
+ -  another environment variable "VPCTRACEFILEPREFIX"
+     is used as file name prefix of trace files
+      - necessary while using two parallel simulator instances
+Keywords: 
+
+
+

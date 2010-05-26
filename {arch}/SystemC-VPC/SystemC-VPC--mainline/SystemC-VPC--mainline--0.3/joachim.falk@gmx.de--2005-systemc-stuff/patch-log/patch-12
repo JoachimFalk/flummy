@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.3--patch-12
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Thu Sep 15 10:38:53 CEST 2005
+Standard-date: 2005-09-15 08:38:53 GMT
+Modified-files: hscd_vpc_Director.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.3--patch-12
+Summary: 
+ - tagged another debuging statement
+Keywords: 
+
+
+

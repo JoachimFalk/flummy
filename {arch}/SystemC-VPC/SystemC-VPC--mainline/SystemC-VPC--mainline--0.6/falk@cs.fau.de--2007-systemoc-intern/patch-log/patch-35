@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.6--patch-35
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Sebastian Graf <graf@codesign.informatik.uni-erlangen.de>
+Date: Thu Apr  3 14:03:38 CEST 2008
+Standard-date: 2008-04-03 12:03:38 GMT
+Modified-files: FlexRayScheduler.cpp hscd_vpc_Director.cpp
+    hscd_vpc_Director.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-35
+Summary: 
+   - Added getTaskAnnotation() to Director, needed by DefectChannel 
+Keywords: 
+
+
+

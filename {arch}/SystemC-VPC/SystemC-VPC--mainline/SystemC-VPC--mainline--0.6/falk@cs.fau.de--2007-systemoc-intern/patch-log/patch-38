@@ -1,0 +1,12 @@
+Revision: SystemC-VPC--mainline--0.6--patch-38
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Joachim Keinert <keinert@codesign.informatik.uni-erlangen.de>
+Date: Tue Apr 29 14:39:06 CEST 2008
+Standard-date: 2008-04-29 12:39:06 GMT
+Modified-files: hscd_vpc_PCBPool.h
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-38
+Summary:  - Bugfix in NotAllocatedException
+Keywords: 
+
+ - Bugfix in NotAllocatedException
+

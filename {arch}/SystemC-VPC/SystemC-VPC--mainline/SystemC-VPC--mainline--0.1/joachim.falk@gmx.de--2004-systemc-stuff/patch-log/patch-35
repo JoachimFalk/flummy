@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.1--patch-35
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Sat Aug 13 15:42:02 CEST 2005
+Standard-date: 2005-08-13 13:42:02 GMT
+Modified-files: Makefile.am configure.in
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-35
+Summary: 
+ * Use ACJF_CHECK_LIB_XERCES macro
+Keywords: 
+
+
+

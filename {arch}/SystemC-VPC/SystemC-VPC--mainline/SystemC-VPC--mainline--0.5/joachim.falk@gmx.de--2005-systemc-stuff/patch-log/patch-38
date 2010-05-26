@@ -1,0 +1,16 @@
+Revision: SystemC-VPC--mainline--0.5--patch-38
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Tue Aug  8 16:53:34 CEST 2006
+Standard-date: 2006-08-08 14:53:34 GMT
+Modified-files: hscd_vpc_Configuration.h
+    hscd_vpc_Director.cpp hscd_vpc_Director.h
+    hscd_vpc_ProcessControlBlock.h
+    hscd_vpc_ReconfigurableComponent.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-38
+Summary: 
+ - fixed doxygen warnings
+Keywords: 
+
+
+

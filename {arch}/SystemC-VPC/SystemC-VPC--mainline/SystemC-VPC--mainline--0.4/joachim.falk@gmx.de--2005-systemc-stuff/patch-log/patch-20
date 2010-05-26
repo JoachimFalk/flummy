@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.4--patch-20
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Tue Jun 20 14:28:25 CEST 2006
+Standard-date: 2006-06-20 12:28:25 GMT
+Modified-files: hscd_vpc_VPCBuilder.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-20
+Summary: 
+  * ensured compatibility to sgEdit parameter passing for controller
+Keywords: 
+
+
+

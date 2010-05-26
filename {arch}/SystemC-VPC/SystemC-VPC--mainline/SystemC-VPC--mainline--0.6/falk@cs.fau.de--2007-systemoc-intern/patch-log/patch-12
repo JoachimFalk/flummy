@@ -1,0 +1,21 @@
+Revision: SystemC-VPC--mainline--0.6--patch-12
+Archive: falk@cs.fau.de--2007-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jun 25 11:04:30 CEST 2007
+Standard-date: 2007-06-25 09:04:30 GMT
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Director.h hscd_vpc_FCFSController.cpp
+    hscd_vpc_FCFSScheduler.cpp hscd_vpc_PCBPool.cpp
+    hscd_vpc_PCBPool.h hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h
+    hscd_vpc_RateMonotonicScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.cpp
+New-patches: falk@cs.fau.de--2007-systemoc-intern/SystemC-VPC--mainline--0.6--patch-12
+Summary: 
+ - code clean up: renamed process id (pid) to instance id (iid)
+ - introduced typedef TypePools
+Keywords: 
+
+
+

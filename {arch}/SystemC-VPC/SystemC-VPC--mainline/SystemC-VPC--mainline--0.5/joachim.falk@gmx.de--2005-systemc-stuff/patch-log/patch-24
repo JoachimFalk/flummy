@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.5--patch-24
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Joachim Falk <falk@cs.fau.de>
+Date: Wed Jun  7 16:56:10 CEST 2006
+Standard-date: 2006-06-07 14:56:10 GMT
+Modified-files: hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-24
+Summary: 
+ * Modified SystemC-VPC to compile with Support from HscdSupport--mainline--0.3
+Keywords: 
+
+
+

@@ -1,0 +1,41 @@
+Revision: SystemC-VPC--mainline--0.5--patch-4
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Wed Apr 19 13:16:30 CEST 2006
+Standard-date: 2006-04-19 11:16:30 GMT
+New-files: .arch-ids/hscd_vpc_ProcessControlBlock.cpp.id
+    .arch-ids/hscd_vpc_ProcessControlBlock.h.id
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h
+Modified-files: Makefile.am hscd_vpc_AbstractComponent.h
+    hscd_vpc_AbstractController.h hscd_vpc_Component.cpp
+    hscd_vpc_Component.h hscd_vpc_Controller.cpp
+    hscd_vpc_Controller.h hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_EDFController.cpp
+    hscd_vpc_EDFController.h hscd_vpc_FCFSController.cpp
+    hscd_vpc_FCFSController.h hscd_vpc_FCFSScheduler.cpp
+    hscd_vpc_FCFSScheduler.h
+    hscd_vpc_PriorityController.cpp
+    hscd_vpc_PriorityController.h
+    hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RateMonotonicScheduler.cpp
+    hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_ReconfigurableComponent.cpp
+    hscd_vpc_ReconfigurableComponent.h
+    hscd_vpc_RoundRobinController.cpp
+    hscd_vpc_RoundRobinController.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_TaskEventListener.h hscd_vpc_Term.cpp
+    hscd_vpc_Term.h hscd_vpc_VPCBuilder.cpp
+    hscd_vpc_VPCBuilder.h hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-4
+Summary: 
+  * introduced class ProcessControlBlock replacing p_struct into VPC Framework
+  * adapted necessary classes to use ProcessControlBlock now
+  * Reverted VPCBuilder to use only TreeWalker for parsing due to strange behaviour of earlies modification
+Keywords: 
+
+
+

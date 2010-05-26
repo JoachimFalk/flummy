@@ -1,0 +1,26 @@
+Revision: SystemC-VPC--mainline--0.4--patch-12
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Wed Feb 15 13:06:24 CET 2006
+Standard-date: 2006-02-15 12:06:24 GMT
+Modified-files: cmx.dtd hscd_vpc_AbstractController.h
+    hscd_vpc_AbstractDirector.h hscd_vpc_Controller.cpp
+    hscd_vpc_Controller.h hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_EDFController.cpp
+    hscd_vpc_FCFSController.cpp
+    hscd_vpc_PriorityController.cpp
+    hscd_vpc_ReconfigurableComponent.cpp
+    hscd_vpc_ReconfigurableComponent.h
+    hscd_vpc_RoundRobinController.cpp
+    hscd_vpc_RoundRobinController.h hscd_vpc_VPCBuilder.cpp
+    hscd_vpc_VpcDomErrorHandler.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-12
+Summary: 
+  * changed value type of component::name and configuration::name to ID within DTD of configuration file
+  * changed inheritance hierarchy -> now AbstractDirector inherits from TaskEventListener and not its subclasses separatly
+  * changed access of some attributes of Controller, so subclasses have to use getter- and setter-methods for access
+  * modified VPCBuilder::buildVPC to stop initializing on fatal parse errors of configuration
+Keywords: 
+
+
+

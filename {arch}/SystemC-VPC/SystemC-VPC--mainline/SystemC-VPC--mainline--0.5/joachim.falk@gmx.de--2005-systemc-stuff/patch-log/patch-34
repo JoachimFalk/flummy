@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.5--patch-34
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun 29 13:53:46 CEST 2006
+Standard-date: 2006-06-29 11:53:46 GMT
+New-files: .arch-ids/hscd_vpc_Tracing.h.id
+    hscd_vpc_Tracing.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-34
+Summary: 
+ - missing file
+Keywords: 
+
+
+

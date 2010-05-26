@@ -1,0 +1,21 @@
+Revision: SystemC-VPC--mainline--0.5--patch-5
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Wed Apr 19 16:41:23 CEST 2006
+Standard-date: 2006-04-19 14:41:23 GMT
+New-files: .arch-ids/hscd_vpc_PCBPool.cpp.id
+    .arch-ids/hscd_vpc_PCBPool.h.id hscd_vpc_PCBPool.cpp
+    hscd_vpc_PCBPool.h
+Modified-files: Makefile.am hscd_vpc_Director.cpp
+    hscd_vpc_Director.h hscd_vpc_InvalidArgumentException.h
+    hscd_vpc_ProcessControlBlock.cpp
+    hscd_vpc_ProcessControlBlock.h hscd_vpc_VPCBuilder.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-5
+Summary: 
+  * added PCBPool to VPC Framework
+  * adapted Director and VPCBuilder to use PCBPool
+  * TODO: finish adding comments in new code
+Keywords: 
+
+
+

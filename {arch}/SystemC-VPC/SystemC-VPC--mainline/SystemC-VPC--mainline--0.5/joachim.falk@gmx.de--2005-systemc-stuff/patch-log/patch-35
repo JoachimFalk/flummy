@@ -1,0 +1,14 @@
+Revision: SystemC-VPC--mainline--0.5--patch-35
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jun 29 14:08:42 CEST 2006
+Standard-date: 2006-06-29 12:08:42 GMT
+Modified-files: hscd_vpc_Component.h hscd_vpc_Director.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-35
+Summary: 
+ - disabled debug statement
+ - disabled unused scheduler tracing signal
+Keywords: 
+
+
+

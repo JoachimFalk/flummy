@@ -1,0 +1,15 @@
+Revision: SystemC-VPC--mainline--0.4--patch-10
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Thu Feb  2 13:26:08 CET 2006
+Standard-date: 2006-02-02 12:26:08 GMT
+Modified-files: hscd_vpc_RoundRobinController.cpp
+    hscd_vpc_RoundRobinController.h
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.4--patch-10
+Summary:
+  * fixed potential segfault in RoundRobinController::updateUsedConfigurations
+  * renamed member variable of RoundRobinController 
+Keywords: 
+
+
+

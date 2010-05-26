@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--mainline--0.5--patch-17
+Archive: joachim.falk@gmx.de--2005-systemc-stuff
+Creator: Carsten Riedel <carsten.riedel@gmx.net>
+Date: Fri May 19 12:20:35 CEST 2006
+Standard-date: 2006-05-19 10:20:35 GMT
+Modified-files: hscd_vpc_ProcessControlBlock.cpp
+New-patches: joachim.falk@gmx.de--2005-systemc-stuff/SystemC-VPC--mainline--0.5--patch-17
+Summary:
+  * corrected error in ProcessControlBlock now destructor should work correctly 
+Keywords: 
+
+
+

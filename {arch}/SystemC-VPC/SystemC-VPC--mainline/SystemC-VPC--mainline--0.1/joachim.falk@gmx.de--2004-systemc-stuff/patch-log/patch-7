@@ -1,0 +1,35 @@
+Revision: SystemC-VPC--mainline--0.1--patch-7
+Archive: joachim.falk@gmx.de--2004-systemc-stuff
+Creator: Martin Streubuehr <martin.streubuehr@web.de>
+Date: Tue May 31 12:06:32 CEST 2005
+Standard-date: 2005-05-31 10:06:32 GMT
+Removed-files: .arch-ids/hscd_vpc_SimpleScheduler.cpp.id
+    .arch-ids/hscd_vpc_SimpleScheduler.h.id
+    .arch-ids/hscd_vpc_SpecialTestScheduler.cpp.id
+    .arch-ids/hscd_vpc_SpecialTestScheduler.h.id
+    .arch-ids/hscd_vpc_TestScheduler.cpp.id
+    .arch-ids/hscd_vpc_TestScheduler.h.id
+    hscd_vpc_SimpleScheduler.cpp hscd_vpc_SimpleScheduler.h
+    hscd_vpc_SpecialTestScheduler.cpp
+    hscd_vpc_SpecialTestScheduler.h
+    hscd_vpc_TestScheduler.cpp hscd_vpc_TestScheduler.h
+Modified-files: hscd_vpc_Component.cpp hscd_vpc_Component.h
+    hscd_vpc_Director.cpp hscd_vpc_Director.h
+    hscd_vpc_FCFSScheduler.cpp hscd_vpc_FCFSScheduler.h
+    hscd_vpc_PriorityScheduler.cpp
+    hscd_vpc_PriorityScheduler.h
+    hscd_vpc_RateMonotonicScheduler.cpp
+    hscd_vpc_RateMonotonicScheduler.h
+    hscd_vpc_RoundRobinScheduler.cpp
+    hscd_vpc_RoundRobinScheduler.h hscd_vpc_Scheduler.h
+    hscd_vpc_SchedulerProxy.cpp hscd_vpc_SchedulerProxy.h
+    hscd_vpc_datatypes.h
+New-patches: joachim.falk@gmx.de--2004-systemc-stuff/SystemC-VPC--mainline--0.1--patch-7
+Summary: 
+ - removed some old-fashioned test schedulers
+   they do not match with the new SchedulerProxy interface
+ - put all classes and files in own namespace: SystemC_VPC
+Keywords: 
+
+
+
