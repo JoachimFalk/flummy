@@ -25,9 +25,6 @@
 #include "FastLink.h"
 #include "hscd_vpc_InvalidArgumentException.h"
 
-// provide compatibility with other compilers then gcc, hopefully
-#include <ansidecl.h>
-
 #include <string>
 #include <map>
 #include <vector>

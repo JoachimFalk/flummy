@@ -2,9 +2,6 @@
 #define HSCD_VPC_P_STRUCT_H
 #include <systemc.h>
 
-// provide compatibility with other compilers then gcc, hopefully
-#include <ansidecl.h>
-
 #include <string>
 #include <map>
 
