@@ -83,11 +83,6 @@ namespace SystemC_VPC{
     Components::iterator                   nextHop;
     ComponentList                          components;
 
-    // blocking transport has two phases:
-    // - lock the route
-    // - apply the route
-    Phase                                  phase;
-
     // a rout is either input (read) or output (write)
     bool                                   isWrite;
 
@@ -97,6 +92,11 @@ namespace SystemC_VPC{
     CoSupport::SystemC::RefCountEventPtr   routeLat;
     std::string                            name;
     RoutePool<BlockingTransport>          *pool;
+
+    // blocking transport has two phases:
+    // - lock the route
+    // - apply the route
+    Phase                                  phase;
 
     
   };

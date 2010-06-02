@@ -17,6 +17,8 @@
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
 
+#include <CoSupport/XML/xerces_support.hpp>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -30,7 +32,7 @@
 
 XERCES_CPP_NAMESPACE_USE
 namespace SystemC_VPC{
-
+  namespace CX = CoSupport::XML::Xerces;
   class Director;
 
   /**
@@ -51,33 +53,33 @@ namespace SystemC_VPC{
     /*
      * SECTION: init tag values for comparison while initializing
      */
-    XMLCh* measurefileStr;
-    XMLCh* resultfileStr;
-    XMLCh* resourcesStr;
-    XMLCh* mappingsStr;
-    XMLCh* componentStr;
-    XMLCh* mappingStr;
-    XMLCh* attributeStr;
-    XMLCh* timingStr;
-    XMLCh* parameterStr;
-    XMLCh* topologyStr;
-    XMLCh *hopStr;
-    XMLCh *routeStr;
-    XMLCh *powerModeStr;
+    CX::XStr measurefileStr;
+    CX::XStr resultfileStr;
+    CX::XStr resourcesStr;
+    CX::XStr mappingsStr;
+    CX::XStr componentStr;
+    CX::XStr mappingStr;
+    CX::XStr attributeStr;
+    CX::XStr timingStr;
+    CX::XStr parameterStr;
+    CX::XStr topologyStr;
+    CX::XStr hopStr;
+    CX::XStr routeStr;
+    CX::XStr powerModeStr;
     
-    XMLCh* nameAttrStr;
-    XMLCh* countAttrStr;
-    XMLCh* typeAttrStr;
-    XMLCh* dividerAttrStr;
-    XMLCh* schedulerAttrStr;
-    XMLCh* valueAttrStr;
-    XMLCh* targetAttrStr;
-    XMLCh* sourceAttrStr;
-    XMLCh *delayAttrStr;
-    XMLCh *diiAttrStr;
-    XMLCh *latencyAttrStr;
-    XMLCh *fnameAttrStr;
-    XMLCh *destinationAttrStr;
+    CX::XStr nameAttrStr;
+    CX::XStr countAttrStr;
+    CX::XStr typeAttrStr;
+    CX::XStr dividerAttrStr;
+    CX::XStr schedulerAttrStr;
+    CX::XStr valueAttrStr;
+    CX::XStr targetAttrStr;
+    CX::XStr sourceAttrStr;
+    CX::XStr delayAttrStr;
+    CX::XStr diiAttrStr;
+    CX::XStr latencyAttrStr;
+    CX::XStr fnameAttrStr;
+    CX::XStr destinationAttrStr;
     
     // walker over parsed configure file
     // used as instance variable to enable code modularization
@@ -102,40 +104,37 @@ namespace SystemC_VPC{
         XMLPlatformUtils::Initialize();
       }
       catch(const XMLException& e){
-        cerr << "Director> Error initializing Xerces:\n"
-             << XMLString::transcode(e.getMessage()) << std::endl;
+        std::cerr << "Director> Error initializing Xerces:\n"
+             << e.getMessage() << std::endl;
       }
       /*
        * SECTION: initialization of init tag values for comparison while initializing
        */
-      resultfileStr   = XMLString::transcode("resultfile");
-      resourcesStr    = XMLString::transcode("resources");
-      mappingsStr     = XMLString::transcode("mappings");
-      componentStr    = XMLString::transcode("component");
-      mappingStr      = XMLString::transcode("mapping");
-      attributeStr    = XMLString::transcode("attribute");
-      timingStr       = XMLString::transcode("timing");
-      parameterStr    = XMLString::transcode("parameter");
-      topologyStr     = XMLString::transcode("topology");
-      hopStr          = XMLString::transcode("hop");
-      routeStr        = XMLString::transcode("route");
-      powerModeStr    = XMLString::transcode("powermode");
-      //XMLCh* VPCBuilder::Str = XMLString::transcode("");
-      
-      nameAttrStr    = XMLString::transcode("name");
-      countAttrStr  = XMLString::transcode("count");
-      typeAttrStr    = XMLString::transcode("type");
-      dividerAttrStr  = XMLString::transcode("divider");
-      schedulerAttrStr= XMLString::transcode("scheduler");
-      valueAttrStr  = XMLString::transcode("value");
-      targetAttrStr  = XMLString::transcode("target");
-      sourceAttrStr  = XMLString::transcode("source");
-      delayAttrStr        = XMLString::transcode("delay");
-      diiAttrStr          = XMLString::transcode("dii");
-      latencyAttrStr      = XMLString::transcode("latency");
-      fnameAttrStr        = XMLString::transcode("fname");
-      destinationAttrStr  = XMLString::transcode("destination");
-      //XMLCh* VPCBuilder::AttrStr   = XMLString::transcode("");
+      resultfileStr       = "resultfile";
+      resourcesStr        = "resources";
+      mappingsStr         = "mappings";
+      componentStr        = "component";
+      mappingStr          = "mapping";
+      attributeStr        = "attribute";
+      timingStr           = "timing";
+      parameterStr        = "parameter";
+      topologyStr         = "topology";
+      hopStr              = "hop";
+      routeStr            = "route";
+      powerModeStr        = "powermode";
+      nameAttrStr         = "name";
+      countAttrStr        = "count";
+      typeAttrStr         = "type";
+      dividerAttrStr      = "divider";
+      schedulerAttrStr    = "scheduler";
+      valueAttrStr        = "value";
+      targetAttrStr       = "target";
+      sourceAttrStr       = "source";
+      delayAttrStr        = "delay";
+      diiAttrStr          = "dii";
+      latencyAttrStr      = "latency";
+      fnameAttrStr        = "fname";
+      destinationAttrStr  = "destination";
       
       /*
        * END OF SECTION: init tag values for comparison while initializing
@@ -193,7 +192,7 @@ namespace SystemC_VPC{
     /**
     * \brief Parsing helper for <timing>
     */
-    Timing parseTiming(DOMNode* node);
+    Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
   };
     
 }
