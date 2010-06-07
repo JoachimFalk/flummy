@@ -88,10 +88,10 @@ namespace SystemC_VPC{
      * \brief An implementation of AbstractComponent used together with
      * passive actors and global SMoC v2 Schedulers.
      */
-    Component( sc_module_name name,
-               const char *schedulername,
+    Component( std::string name,
+               std::string schedulername,
                Director *director )
-      : AbstractComponent(name),
+      : AbstractComponent(name.c_str()),
         blockMutex(0),
         localGovernorFactory(NULL),
         midPowerGov(NULL),
@@ -100,7 +100,7 @@ namespace SystemC_VPC{
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
       this->setPowerMode(this->translatePowerMode("SLOW"));
-      setScheduler(schedulername);
+      setScheduler(schedulername.c_str());
 
       if(powerTables.find(getPowerMode()) == powerTables.end()){
         powerTables[getPowerMode()] = PowerTable();
