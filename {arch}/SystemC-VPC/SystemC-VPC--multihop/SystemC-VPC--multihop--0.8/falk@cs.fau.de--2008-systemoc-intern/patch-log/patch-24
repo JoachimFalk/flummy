@@ -1,0 +1,13 @@
+Revision: SystemC-VPC--multihop--0.8--patch-24
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Mon Jun  7 13:36:45 CEST 2010
+Standard-date: 2010-06-07 11:36:45 GMT
+Modified-files: {arch}/=tagging-method
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-24
+Summary: 
+ - unified taging methods
+Keywords: 
+
+
+
