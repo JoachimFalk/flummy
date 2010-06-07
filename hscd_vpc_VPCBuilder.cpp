@@ -5,6 +5,8 @@
 #include <string>
 #include <stdlib.h>
 
+#include <CoSupport/XML/xerces_support.hpp>
+
 #include <systemcvpc/hscd_vpc_VPCBuilder.h>
 #include <systemcvpc/hscd_vpc_VpcDomErrorHandler.h>
 #include <systemcvpc/hscd_vpc_datatypes.h>
@@ -30,6 +32,9 @@
 #endif
 
 namespace SystemC_VPC{
+
+using namespace CoSupport::XML::Xerces;
+
 #define MAX(x,y) ((x > y) ? x : y)
 
   const char* VPCBuilder::B_TRANSPORT =                      "blocking";
@@ -100,7 +105,7 @@ namespace SystemC_VPC{
         std::cerr << "\nVPCBuilder> Error while parsing xml file: '"
                   << cfile << "'\n"
           << "Exception message is:  \n"
-          << XMLString::transcode( toCatch.getMessage()) << "\n" << std::endl;
+          << NStr( toCatch.getMessage()) << "\n" << std::endl;
           return;
       }
       catch (const DOMException& toCatch) {
@@ -110,13 +115,13 @@ namespace SystemC_VPC{
         std::cerr << "\nVPCBuilder> DOM Error while parsing xml file: '"
                   << cfile << "'\n"
                   << "DOMException code is:  "
-                  << XMLString::transcode( toCatch.msg) << std::endl;
+                  << NStr( toCatch.msg) << std::endl;
           
         if (DOMImplementation::loadDOMExceptionMsg(toCatch.code,
                                                    errText,
                                                    maxChars))
           std::cerr << "Message is: "
-                    << XMLString::transcode( errText) << std::endl;
+                    << NStr( errText) << std::endl;
         return;
       }
       catch (...) {
@@ -145,15 +150,13 @@ namespace SystemC_VPC{
       // moves the Treewalker to the first Child 
       DOMNode* node = vpcConfigTreeWalker->firstChild(); 
       // name of xmlTag
-      const XMLCh* xmlName;
-      
+      XStr xmlName;
+
       while(node!=0){
         xmlName = node->getNodeName();
         
         // find resources tag
-        if( 0==XMLString::compareNString( xmlName,
-                                          resourcesStr,
-                                          sizeof(resourcesStr) ) ){
+        if( xmlName == resourcesStr ){
         
           // walk down hierachy to components
           node = vpcConfigTreeWalker->firstChild();
@@ -162,12 +165,9 @@ namespace SystemC_VPC{
             AbstractComponent* comp;
             // init all components
             for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
-              const XMLCh* xmlName = node->getNodeName();
+              const XStr xmlName = node->getNodeName();
               try{
-                if( 0==XMLString::compareNString(
-                         xmlName,
-                         VPCBuilder::componentStr,
-                         sizeof(VPCBuilder::componentStr))) {
+                if( xmlName == VPCBuilder::componentStr ) {
                   comp = initComponent();
                   DBG_OUT("VPCBuilder> registering component: "
                           << comp->getName() << " to Director" << std::endl);
@@ -177,32 +177,24 @@ namespace SystemC_VPC{
 
 
                 }else{
-                  if( 0==XMLString::compareNString( xmlName,
-                                                    attributeStr,
-                                                    sizeof(attributeStr))){
+                  if( xmlName == attributeStr ){
 
-                    char* sType = XMLString::transcode(
-                      node->getAttributes()->getNamedItem(typeAttrStr)->getNodeValue());
-                    char* sValue = "";
+                    XStr sType = 
+                      node->getAttributes()->getNamedItem(typeAttrStr)->getNodeValue();
+                    XStr sValue = "";
                     DOMNode * value = node->getAttributes()->getNamedItem(valueAttrStr);
                     if( value  != NULL){
-                      sValue= XMLString::transcode(
-                        node->getAttributes()->getNamedItem(valueAttrStr)->getNodeValue());
+                      sValue=
+                        node->getAttributes()->getNamedItem(valueAttrStr)->getNodeValue();
                     }
 
-                    if( 0==XMLString::compareNString( sType,
-                                                       "global_governor",
-                                                       sizeof("global_governor"))){
-                       AttributePtr gov(new Attribute("global_governor", sValue));
-                       nextAttribute(gov, node->getFirstChild());
-                       director->loadGlobalGovernorPlugin(sValue, gov);
-                     }
-
-                    
-                    
-                    XMLString::release(&sType);
+                    if( sType == "global_governor" ){
+                      AttributePtr gov(new Attribute("global_governor",
+                                                     sValue));
+                      nextAttribute(gov, node->getFirstChild());
+                      director->loadGlobalGovernorPlugin(sValue, gov);
+                    }
                   }
- 
                 }
               }catch(InvalidArgumentException &e){
                 std::cerr << "VPCBuilder> " << e.what() << std::endl;
@@ -215,9 +207,7 @@ namespace SystemC_VPC{
             node = vpcConfigTreeWalker->parentNode();
           }
         // find mappings tag (not mapping)
-        }else if( 0==XMLString::compareNString( xmlName,
-                                                mappingsStr,
-                                                sizeof(mappingsStr) ) ){
+        }else if( xmlName == mappingsStr ){
 
           DBG_OUT("VPCBuilder> processing mappings " << std::endl);
             
@@ -232,19 +222,14 @@ namespace SystemC_VPC{
             node = vpcConfigTreeWalker->parentNode();
           }
 
-        }else if( 0==XMLString::compareNString( xmlName,
-                                                resultfileStr,
-                                                sizeof(resultfileStr) ) ){
+        }else if( xmlName == resultfileStr ){
            
            DOMNamedNodeMap * atts=node->getAttributes();
-            std::string vpc_result_file =
-              XMLString::transcode(
-                atts->getNamedItem(nameAttrStr)->getNodeValue());
-            this->director->setResultFile(vpc_result_file);
+           XStr vpc_result_file =
+             atts->getNamedItem(nameAttrStr)->getNodeValue();
+           this->director->setResultFile(vpc_result_file);
         
-        }else if( 0==XMLString::compareNString( xmlName,
-                                                topologyStr,
-                                                sizeof(resourcesStr) ) ){
+        }else if( xmlName == topologyStr ){
           node = vpcConfigTreeWalker->getCurrentNode();
           parseTopology( node );
         }else{
@@ -273,38 +258,30 @@ namespace SystemC_VPC{
   {
  
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
-    const XMLCh* xmlName = node->getNodeName(); 
+    const XStr xmlName = node->getNodeName(); 
 
     // check for component tag
-    if( 0==XMLString::compareNString( xmlName,
-                                      VPCBuilder::componentStr,
-                                      sizeof(VPCBuilder::componentStr))){
+    if( xmlName == VPCBuilder::componentStr ){
       
       DOMNamedNodeMap* atts = node->getAttributes();
-      char* sName;
-      const char* sType = STR_VPC_THREADEDCOMPONENTSTRING;
-      char* sScheduler;
       AbstractComponent* comp = NULL;
   
-      sName = XMLString::transcode(
-        atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue());
+      XStr sScheduler =
+        atts->getNamedItem(VPCBuilder::schedulerAttrStr)->getNodeValue();
+      XStr sName = atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue();
+      XStr sType = STR_VPC_THREADEDCOMPONENTSTRING;
 
       DOMNode * value = atts->getNamedItem(VPCBuilder::typeAttrStr);
       if( value  != NULL){
-        sType = XMLString::transcode(
-            atts->getNamedItem(VPCBuilder::typeAttrStr)->getNodeValue());
+        sType = atts->getNamedItem(VPCBuilder::typeAttrStr)->getNodeValue();
       }
 
-      sScheduler = XMLString::transcode(
-            atts->getNamedItem(VPCBuilder::schedulerAttrStr)->getNodeValue());
   
       DBG_OUT("VPCBuilder> initComponent: " << sName << std::endl);
 
       // check which kind of component is defined
       // standard component
-      if(0==strncmp(sType,
-                    STR_VPC_THREADEDCOMPONENTSTRING,
-                    sizeof(STR_VPC_THREADEDCOMPONENTSTRING))){
+      if( sType == STR_VPC_THREADEDCOMPONENTSTRING){
 
         DBG_OUT("VPCBuilder> Found Component name=" << sName << " type="
                   << sType << std::endl);
@@ -313,13 +290,12 @@ namespace SystemC_VPC{
         //std::map<std::string, AbstractComponent* >::iterator iter
         //  = this->knownComps.find(sName);
         //if(iter == this->knownComps.end()){ 
-        if( 0==strncmp(sScheduler, STR_FIRSTCOMEFIRSTSERVE,
-                       strlen(STR_FIRSTCOMEFIRSTSERVE))
-            || 0==strncmp(sScheduler,STR_FCFS,strlen(STR_FCFS))){
+        if( (sScheduler == STR_FIRSTCOMEFIRSTSERVE)
+            || (sScheduler == STR_FCFS) ){
 
           // ** FIXME: here we add the new FCFSComponent
           //comp = new FCFSComponent(sName, director);
-          comp = new Component(sName, sScheduler, director);
+          comp = new Component(sName,sScheduler,director);
         }else{
           comp = new Component(sName,sScheduler,director);
         }
@@ -346,9 +322,7 @@ namespace SystemC_VPC{
     }
 
     std::string msg("Unknown configuration tag: ");
-    char *name = XMLString::transcode(xmlName);
-    msg.append(name, std::strlen (name));
-    XMLString::release(&name);
+    msg += NStr(xmlName);
     throw InvalidArgumentException(msg);
 
   }
@@ -365,31 +339,22 @@ namespace SystemC_VPC{
     if(node != NULL){
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
-        const XMLCh* xmlName = node->getNodeName();
+        const XStr xmlName = node->getNodeName();
         DOMNamedNodeMap * atts = node->getAttributes();
 
         // check if its an attribute to add
-        if( 0==XMLString::compareNString( xmlName,
-                                          attributeStr,
-                                          sizeof(attributeStr))){
+        if( xmlName == attributeStr ){
 
-          char* sType;
-          char* sValue = "";
-          sType = XMLString::transcode(
-            atts->getNamedItem(typeAttrStr)->getNodeValue());
+          //NStr sType;
+          NStr sValue = "";
+          NStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
 
           DOMNode * value = atts->getNamedItem(valueAttrStr);
           if( value  != NULL){
-            sValue= XMLString::transcode(
-              atts->getNamedItem(valueAttrStr)->getNodeValue());
+            sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
           }
 
           AttributePtr attributes(new Attribute( sType, sValue));
-
-          XMLString::release(&sType);
-          if( value  != NULL){
-            XMLString::release(&sValue);
-          }
 
           nextAttribute(attributes, node->getFirstChild());
 
@@ -408,22 +373,16 @@ namespace SystemC_VPC{
 
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     
-    const XMLCh* xmlName=node->getNodeName();
+    XStr xmlName=node->getNodeName();
 
     DBG_OUT("VPCBuilder> entering initMappingAPStruct"<< std::endl);    
    
     // find mapping tag (not mappings)
-    if( 0==XMLString::compareNString( xmlName,
-                                      mappingStr,
-                                      sizeof(mappingStr))){
+    if( xmlName == mappingStr ){
       DOMNamedNodeMap* atts=node->getAttributes();
-      const char* sTarget;
-      const char* sSource;
-      sTarget=XMLString::transcode(
-        atts->getNamedItem(targetAttrStr)->getNodeValue());
+      NStr sTarget = atts->getNamedItem(targetAttrStr)->getNodeValue();
 
-      sSource=XMLString::transcode(
-        atts->getNamedItem(sourceAttrStr)->getNodeValue());
+      NStr sSource = atts->getNamedItem(sourceAttrStr)->getNodeValue();
 
 
       DBG_OUT( "VPCBuilder> Found mapping attribute: source=" << sSource
@@ -463,54 +422,44 @@ namespace SystemC_VPC{
             xmlName=attnode->getNodeName();
             DOMNamedNodeMap * atts=attnode->getAttributes();
 
-            if( 0==XMLString::compareNString( xmlName,
-                                              timingStr,
-                                              sizeof(timingStr))){
-              Timing t = this->parseTiming( attnode );
+            if( xmlName == timingStr ){
+              try {
+                Timing t = this->parseTiming( attnode );
 
-              DBG_OUT( "PCB: " << sSource
-                       << " " << t.fid
-                       << " " << t.latency
-                       << " " << t.dii
-                       << std::endl);
+                DBG_OUT( "PCB: " << sSource
+                         << " " << t.fid
+                         << " " << t.latency
+                         << " " << t.dii
+                         << std::endl);
               //p.addLatency( t.fid, t.latency );
               //p.addDelay( t.fid, t.dii );
-              p.setTiming(t);
+                p.setTiming(t);
+              } catch(InvalidArgumentException &e) {
+                std::string msg("Error with mapping: ");
+                msg += sSource + " -> " + sTarget + "\n";
+                msg += e.what();
+                throw InvalidArgumentException(msg);
+              }
               
-            }else if( 0==XMLString::compareNString( xmlName,
-                                                    attributeStr,
-                                                    sizeof(attributeStr))){
-              char *sType, *sValue;
-              sType=XMLString::transcode(
-                atts->getNamedItem(typeAttrStr)->getNodeValue());
-              sValue=XMLString::transcode(
-                atts->getNamedItem(valueAttrStr)->getNodeValue());
+            }else if( xmlName == attributeStr ){
+              XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
+              XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
 
               DBG_OUT("attribute values are: " <<sType
                       << " and " << sValue << std::endl);
           
-              if( 0 == strncmp(sType,
-                               STR_VPC_PRIORITY,
-                               sizeof(STR_VPC_PRIORITY) )){
+              if( sType == STR_VPC_PRIORITY){
                 int priority = 0;
-                sscanf(sValue, "%d", &priority);
+                sscanf(NStr(sValue), "%d", &priority);
                 p.setPriority(priority);
-              }else if( 0 == strncmp(sType,
-                                     STR_VPC_DEADLINE,
-                                     sizeof(STR_VPC_DEADLINE) )){
+              }else if( sType == STR_VPC_DEADLINE){
                 p.setDeadline(Director::createSC_Time(sValue));
-              }else if( 0 == strncmp(sType,
-                                     STR_VPC_PERIOD,
-                                     sizeof(STR_VPC_PERIOD) )){
+              }else if( sType == STR_VPC_PERIOD){
                 p.setPeriod(Director::createSC_Time(sValue));
-              }else if( 0 == strncmp(sType,
-                                     STR_VPC_DELAY,
-                                     sizeof(STR_VPC_DELAY) )){
+              }else if( sType == STR_VPC_DELAY){
                 sc_time delay = Director::createSC_Time(sValue);
                 p.setBaseDelay( delay );
-              }else if( 0 == strncmp(sType,
-                                     STR_VPC_LATENCY,
-                                     sizeof(STR_VPC_LATENCY) )){
+              }else if( sType == STR_VPC_LATENCY){
                 sc_time latency = Director::createSC_Time(sValue);
                 p.setBaseLatency( latency );
               }else{
@@ -537,9 +486,6 @@ namespace SystemC_VPC{
                   DBG_OUT("VPCBuilder> Mapping realy unknown!" << std::endl);
                 }
               }
-
-              XMLString::release(&sType);
-              XMLString::release(&sValue);
             }
           }
         }else{
@@ -554,34 +500,30 @@ namespace SystemC_VPC{
                                  DOMNode* node){
         //walk down hierarchy to attributes             
         for(; node != NULL; node = node->getNextSibling()){
-        const XMLCh* xmlName = node->getNodeName();
+        const XStr xmlName = node->getNodeName();
         DOMNamedNodeMap * atts = node->getAttributes();
                 
         // check if its an attribute to add
-        if( 0==XMLString::compareNString( xmlName, attributeStr,sizeof(attributeStr))){
-          char* sType;
-          char* sValue="";
-          sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
+        if( xmlName == attributeStr ){
+          XStr sValue="";
+          XStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
           if(atts->getNamedItem(valueAttrStr)!=NULL){
-                sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+                sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
           }
           
           AttributePtr fr_Attribute2(new Attribute(sType, sValue));
 
           //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
-          // XMLString::release(&sValue);
           nextAttribute(fr_Attribute2,node->getFirstChild());
           attribute->addAttribute(sType, fr_Attribute2);
         }
         // check if its an Parameter to add
-        if( 0==XMLString::compareNString( xmlName, parameterStr,sizeof(parameterStr))){
-          char* sType;
-          char* sValue;
-          sType = XMLString::transcode(atts->getNamedItem(typeAttrStr)->getNodeValue());
-          sValue = XMLString::transcode(atts->getNamedItem(valueAttrStr)->getNodeValue());
+        if( xmlName == parameterStr ){
+          XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
+          XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
           attribute->addParameter( sType, sValue);
         }
-        }
+     }
   }
 
   void VPCBuilder::parseTopology( DOMNode* top ){
@@ -591,23 +533,20 @@ namespace SystemC_VPC{
           routeNode != NULL;
           routeNode = routeNode->getNextSibling()){
         
-        const XMLCh* xmlName = routeNode->getNodeName();
+        const XStr xmlName = routeNode->getNodeName();
 
-        if( 0==XMLString::compareNString( xmlName,
-                                          routeStr,
-                                          sizeof(routeStr))){
+        if( xmlName == routeStr ){
           
           // scan <route>
           DOMNamedNodeMap * atts = routeNode->getAttributes();
-          std::string src = XMLString::transcode(
+          std::string src = NStr(
             atts->getNamedItem(sourceAttrStr)->getNodeValue() );
-          std::string dest = XMLString::transcode(
+          std::string dest = NStr(
             atts->getNamedItem(destinationAttrStr)->getNodeValue() );
 
           std::string type = STATIC_ROUTE;
           if(atts->getNamedItem(typeAttrStr)!=NULL){
-            type = XMLString::transcode(
-                      atts->getNamedItem(typeAttrStr)->getNodeValue() );
+            type = NStr(atts->getNamedItem(typeAttrStr)->getNodeValue() );
           }
 
           Route * route = NULL;
@@ -626,14 +565,11 @@ namespace SystemC_VPC{
           for(DOMNode * hopNode = routeNode->getFirstChild();
               hopNode != NULL;
               hopNode = hopNode->getNextSibling()){
-            const XMLCh* xmlName = hopNode->getNodeName();
-            if( 0==XMLString::compareNString( xmlName,
-                                              hopStr,
-                                              sizeof(hopStr) ) ){
+            const XStr xmlName = hopNode->getNodeName();
+            if( xmlName == hopStr ){
               std::string name =
-                XMLString::transcode(hopNode->getAttributes()->
-                                     getNamedItem(nameAttrStr)->
-                                     getNodeValue() );
+                NStr( hopNode->getAttributes()->getNamedItem(nameAttrStr)->
+                      getNodeValue() );
 
               std::map<std::string, AbstractComponent* >::iterator iterComp =
                 this->knownComps.find(name);
@@ -651,30 +587,30 @@ namespace SystemC_VPC{
               for(DOMNode * timingNode = hopNode->getFirstChild();
                   timingNode != NULL;
                   timingNode = timingNode->getNextSibling()){
-                const XMLCh* xmlName = timingNode->getNodeName();
+                const XStr xmlName = timingNode->getNodeName();
                 DOMNamedNodeMap* atts=timingNode->getAttributes();
-                if( 0==XMLString::compareNString( xmlName,
-                                                  timingStr,
-                                                  sizeof(timingStr) ) ){
-                  Timing t = this->parseTiming( timingNode );
+                if( xmlName == timingStr ){
+                  try {
+                    Timing t = this->parseTiming( timingNode );
                   //pcb.addDelay( t.fid, t.dii );
                   //pcb.addLatency( t.fid, t.latency );
-                 // pcb.setPriority(5);
-                  pcb.setTiming(t);
-                }else if( 0==XMLString::compareNString( xmlName,
-                                                    attributeStr,
-                                                    sizeof(attributeStr))){
-                  char *sType, *sValue;
-                  sType=XMLString::transcode(
-                    atts->getNamedItem(typeAttrStr)->getNodeValue());
-                  sValue=XMLString::transcode(
-                    atts->getNamedItem(valueAttrStr)->getNodeValue());
+                  //pcb.setPriority(5);
+                    pcb.setTiming(t);
+                  } catch(InvalidArgumentException &e) {
+                    std::string msg("Error with route: ");
+                    msg += src + " -> " + dest + " (" + name +")\n";
+                    msg += e.what();
+                    throw InvalidArgumentException(msg);
+              }
+                }else if( xmlName == attributeStr ){
+                  XStr sType =
+                    atts->getNamedItem(typeAttrStr)->getNodeValue();
+                  XStr sValue =
+                    atts->getNamedItem(valueAttrStr)->getNodeValue();
     
-                  if( 0 == strncmp(sType,
-                                  STR_VPC_PRIORITY,
-                                  sizeof(STR_VPC_PRIORITY) )){
+                  if( sType == STR_VPC_PRIORITY ){
                     int priority = 0;
-                    sscanf(sValue, "%d", &priority);
+                    sscanf(NStr(sValue).c_str(), "%d", &priority);
                     
                     pcb.setPriority(priority);
                   }
@@ -690,71 +626,50 @@ namespace SystemC_VPC{
       }
     }catch(InvalidArgumentException &e){
       std::cerr << "VPCBuilder> " << e.what() << std::endl;
-      std::cerr << "VPCBuilder> ignoring topology section,"
-        " continue initialization" << std::endl;
+      exit(-1);
     }
   }
 
   //
-  Timing VPCBuilder::parseTiming(DOMNode* node){
-    char *delay=NULL, *dii=NULL, *latency=NULL, *fname=NULL;
-    char *powerMode=NULL;
+  Timing VPCBuilder::parseTiming(DOMNode* node) throw(InvalidArgumentException){
+    Timing t;
+    t.powerMode        = "SLOW";
+    t.fid = defaultFunctionId;
           
     DOMNamedNodeMap* atts = node->getAttributes();
-    for(unsigned int i=0; i<atts->getLength(); i++){
-      DOMNode* a=atts->item(i);
-      if(0==XMLString::compareNString( a->getNodeName(),
-                                       delayAttrStr,
-                                       sizeof(delayAttrStr))){
-        delay = XMLString::transcode(a->getNodeValue());
-      }else if(0==XMLString::compareNString( a->getNodeName(),
-                                             latencyAttrStr,
-                                             sizeof(latencyAttrStr))){
-        latency = XMLString::transcode(a->getNodeValue());
-      }else if(0==XMLString::compareNString( a->getNodeName(),
-                                             diiAttrStr,
-                                             sizeof(diiAttrStr))){
-        dii   = XMLString::transcode(a->getNodeValue());
-      }else if(0==XMLString::compareNString( a->getNodeName(),
-                                             fnameAttrStr,
-                                             sizeof(fnameAttrStr))){
-        fname = XMLString::transcode(a->getNodeValue());
-      }else if(0==XMLString::compareNString( a->getNodeName(),
-                                             powerModeStr,
-                                             sizeof(powerModeStr))){
-        powerMode = XMLString::transcode(a->getNodeValue());
+    if( NULL != atts->getNamedItem(powerModeStr) ) {
+      t.powerMode = NStr(atts->getNamedItem(powerModeStr)->getNodeValue());
+    }
+    if( NULL != atts->getNamedItem(fnameAttrStr) ) {
+      XStr attribute = atts->getNamedItem(fnameAttrStr)->getNodeValue();
+      t.fid = this->director->createFunctionId(attribute);
+    }
+
+    DOMNode* dii     = atts->getNamedItem(diiAttrStr);
+    DOMNode* delay   = atts->getNamedItem(delayAttrStr);
+    DOMNode* latency = atts->getNamedItem(latencyAttrStr);
+
+    bool hasDii     = (dii != NULL);
+    bool hasDelay   = (delay != NULL);
+    bool hasLatency = (latency != NULL);
+
+    if (hasDelay && !hasDii && !hasLatency) {
+      t.dii = t.latency = Director::createSC_Time(NStr(delay->getNodeValue()));
+    } else if (!hasDelay && hasDii && hasLatency) {
+      t.dii     = Director::createSC_Time(NStr(dii->getNodeValue()));
+      t.latency = Director::createSC_Time(NStr(latency->getNodeValue()));
+    } else {
+      std::string msg("Invalid timing annotation.\n");
+      for(unsigned int i=0; i<atts->getLength(); i++){
+        DOMNode* a=atts->item(i);
+        XStr val  = a->getNodeValue();
+        XStr name = a->getNodeName();
+        msg += "timing: " + NStr(name) + " = " + NStr(val) + "\n";
       }
-    }
-    Timing t;
-    sc_time sc_latency = SC_ZERO_TIME;
-    sc_time sc_dii     = SC_ZERO_TIME;
-    t.powerMode        = "SLOW";
-  
-    if(latency != NULL) sc_latency = Director::createSC_Time(latency);
-    if(dii != NULL) sc_dii = Director::createSC_Time(dii);
-    { // latency and delay are synonym -> take maximum if they differ
-      sc_time sc_delay = SC_ZERO_TIME;
-      if(delay != NULL) sc_delay = Director::createSC_Time(delay);
-      sc_latency = MAX(sc_latency,sc_delay);
-    }
+      msg += "Please specify values for dii and latency only. Alternatively, specify only the delay value. (E.g. use a delay when having identical values for dii and latency.)";
 
-    t.fid = defaultFunctionId;
-    if(fname != NULL){
-      t.fid = this->director->createFunctionId(fname);
-    }
-
-    if(powerMode != NULL){
-      t.powerMode = powerMode;
-    }
-    
-    //per default latency is used as vpc-delay as well as vpc-latency
-    // (vpc-delay == dii)
-    t.latency = sc_latency;
-    t.dii   = sc_latency;
-    if( dii != NULL ){
-      t.dii   = sc_dii;
-    }
-    
+      throw InvalidArgumentException(msg);
+    }    
     return t;
   }
 
