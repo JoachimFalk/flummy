@@ -7,7 +7,7 @@
  * Title: SystemC-VPC
  * Comment:
  * ----------------------------------------------------------------------------
- * hscd_vpc_Component.cpp
+ * Component.cpp
  * ----------------------------------------------------------------------------
  * Modifications History:
  * ----------------------------------------------------------------------------
@@ -15,10 +15,9 @@
  * ----------------------------------------------------------------------------
  * $log$
  *****************************************************************************/
-#include <systemcvpc/FCFSComponent.h>
-//#include "hscd_vpc_Scheduler.h>
-#include <systemcvpc/hscd_vpc_datatypes.h>
-#include <systemcvpc/Task.h>
+#include <systemcvpc/FCFSComponent.hpp>
+#include <systemcvpc/datatypes.hpp>
+#include <systemcvpc/Task.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 
 #include <float.h>

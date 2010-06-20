@@ -19,9 +19,9 @@
 
 #include <CoSupport/SystemC/algorithm.hpp>
 
-#include <systemcvpc/TDMAScheduler.h>
-#include <systemcvpc/hscd_vpc_Director.h>
-#include <systemcvpc/hscd_vpc_Component.h>
+#include <systemcvpc/TDMAScheduler.hpp>
+#include <systemcvpc/Director.hpp>
+#include <systemcvpc/Component.hpp>
 
 namespace SystemC_VPC{
 

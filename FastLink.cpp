@@ -1,5 +1,5 @@
-#include <systemcvpc/FastLink.h>
-#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/FastLink.hpp>
+#include <systemcvpc/Director.hpp>
 
 namespace SystemC_VPC{
 

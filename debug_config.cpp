@@ -1,4 +1,4 @@
-#include <systemcvpc/debug_config.h>
+#include <systemcvpc/debug_config.hpp>
 #include <iostream>
 
 #ifdef DBG_ENABLE

@@ -52,21 +52,21 @@ lib_LTLIBRARIES = libsystemcvpc.la
 libsystemcvpc_la_SOURCES =			\
 	debug_config.cpp			\
 	BlockingTransport.cpp			\
-	hscd_vpc_Component.cpp			\
-	hscd_vpc_Director.cpp			\
-	hscd_vpc_PriorityScheduler.cpp		\
-	hscd_vpc_PrioritySchedulerNoPreempt.cpp	\
-	hscd_vpc_RoundRobinScheduler.cpp	\
-	hscd_vpc_FCFSScheduler.cpp		\
-	hscd_vpc_Tracing.cpp			\
+	Component.cpp				\
+	Director.cpp				\
+	PriorityScheduler.cpp			\
+	PrioritySchedulerNoPreempt.cpp		\
+	RoundRobinScheduler.cpp			\
+	FCFSScheduler.cpp			\
+	Tracing.cpp				\
 	TDMAScheduler.cpp			\
 	FlexRayScheduler.cpp			\
 	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\
 	Task.cpp				\
-	hscd_vpc_RateMonotonicScheduler.cpp	\
-	hscd_vpc_VPCBuilder.cpp			\
-	hscd_vpc_ProcessControlBlock.cpp	\
+	RateMonotonicScheduler.cpp		\
+	VPCBuilder.cpp				\
+	ProcessControlBlock.cpp			\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
 	Route.cpp				\
@@ -77,12 +77,11 @@ libsystemcvpc_la_SOURCES =			\
 	dynload/dll-elf.cpp			\
 	ComponentInfo.cpp			\
 	FCFSComponent.cpp			\
-	hscd_vpc_AbstractComponent.cpp
-#	hscd_vpc_SchedulerProxy.cpp		
+	AbstractComponent.cpp
 
 libsystemcvpc_la_LDFLAGS =				\
 	-version-info 0:0:0 				\
-	-no-undefined						\
+	-no-undefined					\
 	-rdynamic
 
 libsystemcvpc_la_LIBADD = 				\

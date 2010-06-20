@@ -5,7 +5,7 @@
 #include <deque>
 #include <systemc.h>
 
-#include <systemcvpc/PowerMode.h>
+#include <systemcvpc/PowerMode.hpp>
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 
 namespace SystemC_VPC{
