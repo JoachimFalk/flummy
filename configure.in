@@ -5,7 +5,7 @@ AC_INIT(SystemC-VPC, 0.8, streubuehr@cs.fau.de)
 AC_PREREQ(2.57)
 ACJF_INIT
 
-AC_CONFIG_SRCDIR([hscd_vpc_Director.cpp])
+AC_CONFIG_SRCDIR([Director.cpp])
 AC_CONFIG_AUX_DIR([../BuildSystem])
 
 AC_CANONICAL_BUILD

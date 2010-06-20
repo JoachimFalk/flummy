@@ -1,8 +1,8 @@
-#include <systemcvpc/StaticRoute.h>
-#include <systemcvpc/RoutePool.h>
-#include <systemcvpc/hscd_vpc_Director.h>
+#include <systemcvpc/StaticRoute.hpp>
+#include <systemcvpc/RoutePool.hpp>
+#include <systemcvpc/Director.hpp>
 
-#include <systemcvpc/debug_config.h>
+#include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_STATIC_ROUTE create stream and include debug macros
 #ifdef DBG_STATIC_ROUTE
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -10,9 +10,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include <systemcvpc/debug_on.h>
+  #include <systemcvpc/debug_on.hpp>
 #else
-  #include <systemcvpc/debug_off.h>
+  #include <systemcvpc/debug_off.hpp>
 #endif
 
 namespace SystemC_VPC {
