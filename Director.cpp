@@ -173,12 +173,12 @@ namespace SystemC_VPC{
       return NULL;
     }
 
-    EventPair blockEvent = endPair;
-    if( endPair.dii == NULL ){
-      // prepare active mode
-      blockEvent=EventPair(new VPC_Event(), new VPC_Event());
-      // we could use a pool of VPC_Events instead of new/delete
-    }
+//    EventPair blockEvent = endPair;
+//    if( endPair.dii == NULL ){
+//      // prepare active mode
+//      blockEvent=EventPair(new VPC_Event(), new VPC_Event());
+//      // we could use a pool of VPC_Events instead of new/delete
+//    }
 
     try{
       //Task *task = new Task(fLink, endPair);
