@@ -26,7 +26,7 @@
 namespace SystemC_VPC {
 
   /**
-   * Pairing two Events to realise simulation of pipelinig!
+   * Pairing two Events to realize simulation of pipelining!
    *
    * dii is notified if the "first pipeline stage" becomes empty. Possibly the actor can start again.
    * If latency is notified the hole execution time is over.
