@@ -47,6 +47,7 @@ namespace SystemC_VPC {
       (*nextHop)->compute(newTask);
       ++nextHop;
     } else {
+      assert(dummyDii == np.dii);
       Director::getInstance().signalProcessEvent(task);
       this->pool->free(this);
     }
