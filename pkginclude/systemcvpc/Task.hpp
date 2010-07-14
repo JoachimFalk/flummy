@@ -16,8 +16,8 @@ namespace SystemC_VPC {
   public:
     Task(TaskPool * pool)
       : blockingCompute(NULL),
-      timing(NULL),
-      pcb(NULL),
+      timing(),
+      pcb(),
       pool(pool),
       name("NN"),
       timingScale(1)
@@ -34,8 +34,8 @@ namespace SystemC_VPC {
     void       setFunctionId(FunctionId fid)     {this->fid = fid;}
     EventPair  getBlockEvent()                   {return blockEvent;}
     void       setBlockEvent(EventPair p)        {blockEvent = p;}
-    void       setPCB(ProcessControlBlock* pcb)  {this->pcb = pcb;}
-    void       setTiming(FunctionTiming* timing) {this->timing = timing;}
+    void       setPCB(ProcessControlBlockPtr pcb)  {this->pcb = pcb;}
+    void       setTiming(FunctionTimingPtr timing) {this->timing = timing;}
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -93,6 +93,8 @@ namespace SystemC_VPC {
 
     void release() {
       //this->setBlockEvent(EventPair(NULL, NULL));
+      this->getBlockEvent().dii     = NULL;
+      this->getBlockEvent().latency = NULL;
       pool->free(this->getProcessId(), this);
     }
 
@@ -133,8 +135,8 @@ namespace SystemC_VPC {
     sc_time remainingDelay;
 
     
-    FunctionTiming      *timing;
-    ProcessControlBlock *pcb;
+    FunctionTimingPtr       timing;
+    ProcessControlBlockPtr  pcb;
     TaskPool            *pool;
 
     static int globalInstanceId;

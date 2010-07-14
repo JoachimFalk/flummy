@@ -37,6 +37,7 @@
 #include "ComponentInfo.hpp"
 #include "ComponentModel.hpp"
 #include "Attribute.hpp"
+#include "FunctionTimingPool.hpp"
 
 namespace SystemC_VPC{
 
@@ -80,7 +81,7 @@ class ComponentObserver;
     ProcessControlBlock& createPCB(ProcessId pid){
       PCBPool& pool = this->getPCBPool();
       if(pool.find(pid) == pool.end()){
-        pool[pid] = new ProcessControlBlock( this );
+        pool[pid].reset(new ProcessControlBlock( this ));
         pool[pid]->setPid(pid);
       }
       return *(pool[pid]);
@@ -163,7 +164,7 @@ class ComponentObserver;
       this->updatePowerConsumption();
 
       if(timingPools.find(powerMode) == timingPools.end()){
-        timingPools[powerMode] = new FunctionTimingPool();
+        timingPools[powerMode].reset(new FunctionTimingPool());
       }
       this->timingPool = timingPools[powerMode];
     }
@@ -175,13 +176,13 @@ class ComponentObserver;
     /**
      *
      */
-    FunctionTiming * getTiming(const PowerMode *mode, ProcessId pid){
+    FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid){
       if(timingPools.find(mode) == timingPools.end()){
-        timingPools[mode] = new FunctionTimingPool();
+        timingPools[mode].reset(new FunctionTimingPool());
       }
-      FunctionTimingPool * pool = this->timingPools[mode];
+      FunctionTimingPoolPtr pool = this->timingPools[mode];
       if(pool->find(pid) == pool->end()){
-        (*pool)[pid] = new FunctionTiming();
+        (*pool)[pid].reset(new FunctionTiming());
         (*pool)[pid]->setBaseDelay(this->transactionDelays[mode]);
       }
       return (*pool)[pid];
@@ -191,8 +192,8 @@ class ComponentObserver;
      *
      */
     PCBPool pcbPool;
-    FunctionTimingPool * timingPool;
-    std::map<const PowerMode*, FunctionTimingPool*> timingPools;
+    FunctionTimingPoolPtr timingPool;
+    std::map<const PowerMode*, FunctionTimingPoolPtr> timingPools;
     const PowerMode *powerMode;
   };
   
