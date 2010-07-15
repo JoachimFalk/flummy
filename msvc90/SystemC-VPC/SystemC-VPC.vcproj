@@ -375,47 +375,47 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_AbstractComponent.cpp"
+				RelativePath="..\..\AbstractComponent.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_Component.cpp"
+				RelativePath="..\..\Component.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_Director.cpp"
+				RelativePath="..\..\Director.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_FCFSScheduler.cpp"
+				RelativePath="..\..\FCFSScheduler.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_PriorityScheduler.cpp"
+				RelativePath="..\..\PriorityScheduler.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_PrioritySchedulerNoPreempt.cpp"
+				RelativePath="..\..\PrioritySchedulerNoPreempt.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_ProcessControlBlock.cpp"
+				RelativePath="..\..\ProcessControlBlock.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_RateMonotonicScheduler.cpp"
+				RelativePath="..\..\RateMonotonicScheduler.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_RoundRobinScheduler.cpp"
+				RelativePath="..\..\RoundRobinScheduler.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_Tracing.cpp"
+				RelativePath="..\..\Tracing.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\hscd_vpc_VPCBuilder.cpp"
+				RelativePath="..\..\VPCBuilder.cpp"
 				>
 			</File>
 			<File
@@ -529,71 +529,71 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_AbstractComponent.h"
+				RelativePath="..\..\pkginclude\systemcvpc\AbstractComponent.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_Component.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Component.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_datatypes.h"
+				RelativePath="..\..\pkginclude\systemcvpc\datatypes.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_Director.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Director.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_EventPair.h"
+				RelativePath="..\..\pkginclude\systemcvpc\EventPair.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_FCFSScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\FCFSScheduler.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_InvalidArgumentException.h"
+				RelativePath="..\..\pkginclude\systemcvpc\InvalidArgumentException.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_PriorityScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\PriorityScheduler.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_PrioritySchedulerNoPreempt.h"
+				RelativePath="..\..\pkginclude\systemcvpc\PrioritySchedulerNoPreempt.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_ProcessControlBlock.h"
+				RelativePath="..\..\pkginclude\systemcvpc\ProcessControlBlock.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_ProcessEventListener.h"
+				RelativePath="..\..\pkginclude\systemcvpc\ProcessEventListener.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_RateMonotonicScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\RateMonotonicScheduler.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_RoundRobinScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\RoundRobinScheduler.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_Scheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Scheduler.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_Tracing.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Tracing.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_VPCBuilder.h"
+				RelativePath="..\..\pkginclude\systemcvpc\VPCBuilder.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\hscd_vpc_VpcDomErrorHandler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\VpcDomErrorHandler.h"
 				>
 			</File>
 			<File
