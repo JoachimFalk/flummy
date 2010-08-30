@@ -19,6 +19,7 @@ namespace SystemC_VPC {
 #define STR_RM "RM"
 #define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServed"
 #define STR_FCFS "FCFS"
+#define STR_AVB "AVB"
 
 // definition for hiding cosupport as vpc_event
 typedef CoSupport::SystemC::RefCountEvent         VPC_Event;

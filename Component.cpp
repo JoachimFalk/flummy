@@ -20,6 +20,7 @@
 #include <systemcvpc/FCFSScheduler.hpp>
 #include <systemcvpc/TDMAScheduler.hpp>
 #include <systemcvpc/FlexRayScheduler.hpp>
+#include <systemcvpc/AVBScheduler.hpp>
 #include <systemcvpc/RoundRobinScheduler.hpp>
 #include <systemcvpc/PriorityScheduler.hpp>
 #include <systemcvpc/RateMonotonicScheduler.hpp>
@@ -389,6 +390,9 @@ namespace SystemC_VPC{
     }else if( 0==strncmp(schedulername,STR_FLEXRAY,
                          strlen(STR_FLEXRAY))){
       scheduler=new FlexRayScheduler((const char*)schedulername);
+    }else if( 0==strncmp(schedulername,STR_AVB,
+                             strlen(STR_AVB))){
+          scheduler=new AVBScheduler((const char*)schedulername);
     }else if( 0==strncmp(schedulername,STR_TTCC,
                          strlen(STR_TTCC))){
       scheduler=new TimeTriggeredCCScheduler((const char*)schedulername);
