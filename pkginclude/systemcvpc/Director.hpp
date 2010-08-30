@@ -155,6 +155,11 @@ namespace SystemC_VPC{
      * \param route the route
      */
     void registerRoute(Route* route);
+
+    /**
+     * \brief resolve mapping
+     */
+    const Delayer * getComponent(const FastLink vpcLink) const ;
     
     void signalProcessEvent(Task* task);
 

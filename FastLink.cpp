@@ -21,4 +21,10 @@ namespace SystemC_VPC{
     SystemC_VPC::Director::getInstance()
       .read( *this, quantum, p );
   }
+
+  //
+  ComponentId FastLink::getComponentId() const{
+    SystemC_VPC::Director::getInstance()
+      .getComponent( *this )->getComponentId();
+  }
 }

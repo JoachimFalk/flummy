@@ -42,7 +42,7 @@ namespace SystemC_VPC{
 
     virtual const char* getName() const = 0;
 
-    ComponentId getComponentId();
+    const ComponentId getComponentId() const;
 
     void addObserver(ComponentObserver *obs);
 

@@ -22,6 +22,7 @@
 
 typedef size_t ProcessId;
 typedef size_t FunctionId;
+typedef size_t ComponentId;
 
 namespace SystemC_VPC{
   /**
@@ -45,6 +46,10 @@ namespace SystemC_VPC{
      */
     void read( size_t quantum, EventPair p ) const;
 
+    /**
+     *
+     */
+    ComponentId getComponentId() const;
 
     FastLink(ProcessId pid, FunctionId fid)
       : process(pid),
