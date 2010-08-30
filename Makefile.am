@@ -60,6 +60,7 @@ libsystemcvpc_la_SOURCES =			\
 	FCFSScheduler.cpp			\
 	Tracing.cpp				\
 	TDMAScheduler.cpp			\
+	AVBScheduler.cpp			\
 	FlexRayScheduler.cpp			\
 	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\
@@ -86,6 +87,7 @@ libsystemcvpc_la_LDFLAGS =				\
 
 libsystemcvpc_la_LIBADD = 				\
 	@COSUPPORT_LIBPATH@/libcosupport-systemc.la	\
+	@COSUPPORT_LIBPATH@/libcosupport-tracing.la	\
 	-lxerces-c					\
 	-lsystemc					\
 	-lstdc++					\
