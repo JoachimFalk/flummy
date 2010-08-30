@@ -25,7 +25,7 @@ namespace SystemC_VPC{
   ComponentId Delayer::globalComponentId = 0;
 
   //
-  ComponentId Delayer::getComponentId(){
+  const ComponentId Delayer::getComponentId() const{
     return this->componentId;
   }
 

@@ -369,6 +369,11 @@ namespace SystemC_VPC{
 
   }
 
+  //
+  const Delayer * Director::getComponent(const FastLink vpcLink) const {
+    return mappings[vpcLink.process];
+  }
+
   /**
    * \brief Implementation of Director::signalProcessEvent
    */
