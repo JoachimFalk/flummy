@@ -37,6 +37,8 @@ namespace SystemC_VPC {
     void       setPCB(ProcessControlBlockPtr pcb)  {this->pcb = pcb;}
     void       setTiming(FunctionTimingPtr timing) {this->timing = timing;}
 
+    void       setExtraDelay(const sc_time & ed) { this->extraDelay = ed;}
+
     void       ackBlockingCompute(){
       blockAck = true;
       blockingCompute->notify();
@@ -76,9 +78,12 @@ namespace SystemC_VPC {
     void initDelays(){
       assert(pcb != NULL);
       FunctionId fid = this->getFunctionId();
-      this->setRemainingDelay( this->timingScale * timing->getDelay(fid));
-      this->setDelay(          this->timingScale * timing->getDelay(fid));
-      this->setLatency(        this->timingScale * timing->getLatency(fid));
+      this->setRemainingDelay(this->timingScale * timing->getDelay(fid)
+          + this->extraDelay);
+      this->setDelay(this->timingScale * timing->getDelay(fid)
+          + this->extraDelay);
+      this->setLatency(this->timingScale * timing->getLatency(fid)
+          + this->extraDelay);
     }
 
     // Adaptor setter / getter for ProcessControlBlock
@@ -111,6 +116,7 @@ namespace SystemC_VPC {
       delay(task.delay),
       latency(task.latency),
       remainingDelay(task.remainingDelay),
+      extraDelay(task.extraDelay),
       timing(task.timing),
       pcb(task.pcb),
       pool(task.pool),
@@ -133,7 +139,7 @@ namespace SystemC_VPC {
     sc_time delay;
     sc_time latency;
     sc_time remainingDelay;
-
+    sc_time extraDelay;
     
     FunctionTimingPtr       timing;
     ProcessControlBlockPtr  pcb;

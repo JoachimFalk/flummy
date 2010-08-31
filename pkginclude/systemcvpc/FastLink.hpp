@@ -51,16 +51,35 @@ namespace SystemC_VPC{
      */
     ComponentId getComponentId() const;
 
+    /**
+     *
+     */
+    void addDelay(size_t delay_ns){
+      addDelay(sc_time(delay_ns, SC_NS));
+    }
+
+    /**
+     *
+     */
+    void addDelay(sc_time delay);
+
     FastLink(ProcessId pid, FunctionId fid)
       : process(pid),
-      func(fid) { }
+      func(fid),
+      extraDelay(SC_ZERO_TIME)
+    { }
 
     FastLink()
       : process(),
-      func() { }
+      func(),
+      extraDelay(SC_ZERO_TIME)
+    { }
 
     ProcessId            process;
     FunctionId           func;
+
+  private:
+    mutable sc_time      extraDelay;
   };
 
   static const FunctionId defaultFunctionId = 0;

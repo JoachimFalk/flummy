@@ -72,7 +72,8 @@ namespace SystemC_VPC{
      * \sa EventPair
      */
     void compute(FastLink fLink,
-                 EventPair endPair = EventPair(NULL, NULL));
+                 EventPair endPair = EventPair(NULL, NULL),
+                 const sc_time & extraDelay = SC_ZERO_TIME);
 
     /**
      * \brief Simulates communication delay of a given task
