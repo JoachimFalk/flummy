@@ -305,6 +305,10 @@ namespace SystemC_VPC{
         this->transactionDelays[power] =
           Director::createSC_Time(powerAtt->getParameter("transaction_delay"));
       }
+      if(powerAtt->hasParameter("transfer_delay")) {
+        this->transactionDelays[power] =
+          Director::createSC_Time(powerAtt->getParameter("transfer_delay"));
+      }
 
     }
         
@@ -325,6 +329,12 @@ namespace SystemC_VPC{
       return;
     }
     
+    if(attribute->isType("transfer_delay")) {
+      this->transactionDelays[this->getPowerMode()] =
+        Director::createSC_Time(attribute->getValue());
+      return;
+    }
+
     if(attribute->isType("transaction")) {
       unsigned int transactionSize = 1;
       sc_time transactionDelay     = SC_ZERO_TIME;

@@ -183,6 +183,10 @@ namespace SystemC_VPC{
         this->transactionDelays[power] =
           Director::createSC_Time(powerAttPtr->getParameter("transaction_delay"));
       }
+      if(powerAttPtr->hasParameter("transfer_delay")) {
+        this->transactionDelays[power] =
+          Director::createSC_Time(powerAttPtr->getParameter("transfer_delay"));
+      }
 
     }
         
@@ -194,7 +198,7 @@ namespace SystemC_VPC{
       return;
     }
 
-    if(attributes.isType("transaction_delay")) {
+    if(attributes.isType("transfer_delay")) {
       this->transactionDelays[this->getPowerMode()] =
         Director::createSC_Time(attributes.getValue());
       return;

@@ -130,7 +130,7 @@ namespace SystemC_VPC{
       resultFile.flush();
       resultFile.close();
     }else{
-      std::cerr << "latency: " << end - start << std::endl;
+      std::cerr << "[VPC] overall simulated time: " << end - start << std::endl;
     }
 
 #ifndef NO_POWER_SUM
@@ -550,8 +550,8 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
                   << iter->second
                   << "\" target=\"?\">\n"
                   << "    <!-- we may use a default delay: "
-                  << "    <timing delay=\"? us\""
-                  << " dii=\"? us\" />"
+                  << "    <timing dii=\"? us\""
+                  << " latency=\"? us\" />"
                   << " --> "
                   << std::endl;
         

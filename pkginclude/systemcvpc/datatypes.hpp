@@ -2,9 +2,6 @@
 #define HSCD_VPC_P_STRUCT_H
 #include <systemc.h>
 
-// provide compatibility with other compilers then gcc, hopefully
-//#include <ansidecl.h>
-
 #include <CoSupport/SystemC/systemc_support.hpp>
 
 namespace SystemC_VPC {
@@ -20,7 +17,7 @@ namespace SystemC_VPC {
 #define STR_PSNOPRE "PSNOPRE"
 #define STR_RATEMONOTONIC "RateMonotonic"
 #define STR_RM "RM"
-#define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServe"
+#define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServed"
 #define STR_FCFS "FCFS"
 
 // definition for hiding cosupport as vpc_event
