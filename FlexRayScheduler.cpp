@@ -159,7 +159,7 @@ namespace SystemC_VPC{
     if(attributePtr->getParameterSize()!=0){
       //es gibt folglich globale FlexRay-Parameter!
       if(attributePtr->hasParameter("duachannel")){
-        dualchannel=(attributePtr->getParameter("duachannel") == "true");
+        dualchannel=(attributePtr->getParameter("dualchannel") == "true");
       }
     }
         

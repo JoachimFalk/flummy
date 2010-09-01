@@ -224,10 +224,12 @@ namespace SystemC_VPC{
   }
 
   //
-  void Director::compute( FastLink fLink, EventPair endPair ){
+  void Director::compute( FastLink fLink, EventPair endPair,
+      const sc_time & extraDelay ){
     Task * task = preCompute(fLink, endPair);
     if(task == NULL) return;
     task->setTimingScale(1);
+    task->setExtraDelay(extraDelay);
     assert(!FALLBACKMODE);
 
     Delayer* comp = mappings[fLink.process];
@@ -367,6 +369,11 @@ namespace SystemC_VPC{
       reverseMapping[hid]->push_back(pid);
     }
 
+  }
+
+  //
+  const Delayer * Director::getComponent(const FastLink vpcLink) const {
+    return mappings[vpcLink.process];
   }
 
   /**

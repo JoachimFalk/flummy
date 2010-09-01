@@ -60,6 +60,7 @@ libsystemcvpc_la_SOURCES =			\
 	FCFSScheduler.cpp			\
 	Tracing.cpp				\
 	TDMAScheduler.cpp			\
+	AVBScheduler.cpp			\
 	FlexRayScheduler.cpp			\
 	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\

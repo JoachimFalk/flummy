@@ -72,7 +72,8 @@ namespace SystemC_VPC{
      * \sa EventPair
      */
     void compute(FastLink fLink,
-                 EventPair endPair = EventPair(NULL, NULL));
+                 EventPair endPair = EventPair(NULL, NULL),
+                 const sc_time & extraDelay = SC_ZERO_TIME);
 
     /**
      * \brief Simulates communication delay of a given task
@@ -155,6 +156,11 @@ namespace SystemC_VPC{
      * \param route the route
      */
     void registerRoute(Route* route);
+
+    /**
+     * \brief resolve mapping
+     */
+    const Delayer * getComponent(const FastLink vpcLink) const ;
     
     void signalProcessEvent(Task* task);
 
