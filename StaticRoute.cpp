@@ -1,3 +1,6 @@
+#include <CoSupport/Tracing/TracingFactory.hpp>
+#include <CoSupport/Tracing/PtpTracer.hpp>
+
 #include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/RoutePool.hpp>
 #include <systemcvpc/Director.hpp>
@@ -31,6 +34,9 @@ namespace SystemC_VPC {
       this->pool->free(this);
       return;
     }
+
+    ticket = ptpTracer->startOoo();
+
     this->route( EventPair(taskEvents.dii, routeLat) );
   }
 
@@ -47,6 +53,8 @@ namespace SystemC_VPC {
       (*nextHop)->compute(newTask);
       ++nextHop;
     } else {
+      ptpTracer->stopOoo(ticket);
+
       assert(dummyDii == np.dii);
       Director::getInstance().signalProcessEvent(task);
       this->pool->free(this);
@@ -91,8 +99,8 @@ namespace SystemC_VPC {
     this->name = "msg_" + source + "_2_" + dest;
     routeLat->addListener(this);
 
-    //components.push_back(comp);
-    //components.push_back(bus);
+    ptpTracer = CoSupport::Tracing::TracingFactory::getInstance()
+                         .createPtpTracer(this->name);
   }
 
   //
@@ -103,7 +111,9 @@ namespace SystemC_VPC {
     taskEvents(route.taskEvents),
     dummyDii(new CoSupport::SystemC::RefCountEvent()),
     routeLat(new CoSupport::SystemC::RefCountEvent()),
-    name(route.name) {
+    name(route.name),
+    ptpTracer(route.ptpTracer)
+  {
     routeLat->addListener(this);
     for(Components::const_iterator iter = route.components.begin();
         iter != route.components.end();

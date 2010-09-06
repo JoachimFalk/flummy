@@ -23,6 +23,7 @@
 #include <systemc.h>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
+#include <CoSupport/Tracing/TracingFactory.hpp>
 
 #include "EventPair.hpp"
 #include "ProcessControlBlock.hpp"
@@ -76,7 +77,8 @@ namespace SystemC_VPC{
     std::string                            name;
     Components::iterator                   nextHop;
     RoutePool<StaticRoute>                *pool;
-    
+    CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
+    CoSupport::Tracing::PtpTracer::Ticket  ticket;
   };
 }
 
