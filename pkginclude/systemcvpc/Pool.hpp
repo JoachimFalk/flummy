@@ -44,13 +44,13 @@ namespace SystemC_VPC {
   template<class OBJECT>
   class PrototypedPool{
   private:
-
+    typedef std::map<size_t, OBJECT* > Objects;
     // references prototype instance of Object 
     OBJECT* prototype;
     // list of currently used Objects
-    std::map<int, OBJECT* > usedObjects;
+    Objects usedObjects;
     // list of currently available Objects
-    std::map<int, OBJECT* > freeObjects;
+    Objects freeObjects;
     // reference to "parent" PrototypedPool
     //PrototypedPool *parentPool;
 
@@ -84,14 +84,14 @@ namespace SystemC_VPC {
         */
       }
 
-      for(typename std::map<int, OBJECT* >::iterator iter
+      for(typename Objects::iterator iter
             = this->freeObjects.begin(); 
           iter != this->freeObjects.end();
           ++iter){
         delete iter->second;
       }
 
-      for(typename std::map<int, OBJECT* >::iterator iter
+      for(typename Objects::iterator iter
             = this->usedObjects.begin(); 
           iter != this->usedObjects.end();
           ++iter){
@@ -117,11 +117,11 @@ namespace SystemC_VPC {
 
       OBJECT* instance = NULL;
 
-      //      typename std::map<int, OBJECT* >::iterator iter
+      //      typename Objects::iterator iter
       //        = this->freeObjects.begin();
       //      if( iter != this->freeObjects.end() ){
       if(this->freeObjects.size() > 0){
-        typename std::map<int, OBJECT* >::iterator iter;
+        typename Objects::iterator iter;
         iter = this->freeObjects.begin();
         instance = iter->second;
         this->usedObjects[iter->first] = instance;
@@ -140,7 +140,7 @@ namespace SystemC_VPC {
      */
     void free(OBJECT* p){
 
-      typename std::map<int, OBJECT* >::iterator iter;
+      typename Objects::iterator iter;
       iter = this->usedObjects.find(p->getInstanceId());
       if(iter != this->usedObjects.end()){
         this->usedObjects.erase(iter);

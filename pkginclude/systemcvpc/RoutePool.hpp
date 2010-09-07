@@ -58,6 +58,10 @@ namespace SystemC_VPC{
       return this->getPrototype().getName();
     }
 
+    virtual void enableTracing(bool enable){
+      this->getPrototype().enableTracing(enable);
+    }
+
     RoutePool( std::string source, std::string dest )
       : PrototypedPool<ROUTE>(source, dest), Route()
     {

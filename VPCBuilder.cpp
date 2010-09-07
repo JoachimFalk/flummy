@@ -169,7 +169,7 @@ using namespace CoSupport::XML::Xerces;
               try{
                 if( xmlName == VPCBuilder::componentStr ) {
                   comp = initComponent();
-                  DBG_OUT("VPCBuilder> registering component: "
+                  DBG_OUT("VPCBuilder> register component: "
                           << comp->getName() << " to Director" << std::endl);
                   // register "upper-layer" components to Director
                   this->director->registerComponent(comp);
@@ -528,6 +528,12 @@ using namespace CoSupport::XML::Xerces;
   void VPCBuilder::parseTopology( DOMNode* top ){
     // iterate children of <topology>
     try{
+      // scan <topology>
+      DOMNamedNodeMap * atts = top->getAttributes();
+      DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
+      bool topologyTracing = (tracingAtt != NULL) &&
+          (std::string("true") == NStr(tracingAtt->getNodeValue()) );
+
       for(DOMNode * routeNode = top->getFirstChild();
           routeNode != NULL;
           routeNode = routeNode->getNextSibling()){
@@ -548,6 +554,14 @@ using namespace CoSupport::XML::Xerces;
             type = NStr(atts->getNamedItem(typeAttrStr)->getNodeValue() );
           }
 
+          //copy default value from <route>
+          bool tracing = topologyTracing;
+          DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
+          if (tracingAtt != NULL){
+            tracing = std::string("true") == NStr(tracingAtt->getNodeValue());
+            std::cerr << "overwite " << topologyTracing << " " << tracing << std::endl;
+          }
+
           Route * route = NULL;
           if(type == B_TRANSPORT){
             route = new RoutePool<BlockingTransport>(src, dest);
@@ -559,6 +573,7 @@ using namespace CoSupport::XML::Xerces;
             std::cerr << msg << endl;
             throw InvalidArgumentException(msg);
           }
+          route->enableTracing(tracing);
 
           // add <hop>s
           for(DOMNode * hopNode = routeNode->getFirstChild();

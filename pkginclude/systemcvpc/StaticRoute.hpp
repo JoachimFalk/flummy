@@ -77,8 +77,6 @@ namespace SystemC_VPC{
     std::string                            name;
     Components::iterator                   nextHop;
     RoutePool<StaticRoute>                *pool;
-    CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
-    CoSupport::Tracing::PtpTracer::Ticket  ticket;
   };
 }
 
