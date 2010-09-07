@@ -26,7 +26,7 @@ namespace SystemC_VPC {
     if(hopList.empty()){
       if(components.empty()){
         // this route is empty -> return immediately
-        Director::getInstance().signalProcessEvent(task);
+        Director::getInstance().signalLatencyEvent(task);
         DBG_OUT("EMPTY" << std::endl);
         this->pool->free(this);
         return;
@@ -107,7 +107,7 @@ namespace SystemC_VPC {
       ++nextHop;
     } else {
       assert( nextHop == hopList.end() );
-      Director::getInstance().signalProcessEvent(task);
+      Director::getInstance().signalLatencyEvent(task);
       this->resetLists();
       this->pool->free(this);
       return; // paranoia

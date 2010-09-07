@@ -521,7 +521,7 @@ namespace SystemC_VPC{
           //<< sc_time_stamp() << endl;
 
           // Latency over -> remove Task
-          this->notifyParentController(front.task);
+          Director::getInstance().signalLatencyEvent(front.task);
 
           //wait(SC_ZERO_TIME);
           pqueue.pop();
@@ -541,7 +541,7 @@ namespace SystemC_VPC{
     if(end <= now){
       //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
-      this->notifyParentController(task);
+      Director::getInstance().signalLatencyEvent(task);
       return;
     }
     timePcbPair pair;

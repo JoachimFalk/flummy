@@ -36,7 +36,7 @@ namespace SystemC_VPC{
     /**
        * \brief Simulate the delay caused by this Delayer.
        *
-       * While this simulation is running SystemC simulation time is consumed.
+       * While the simulation is running SystemC simulation time is consumed.
        */
     virtual void compute(Task* task) = 0;
 

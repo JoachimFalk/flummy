@@ -28,7 +28,6 @@
 
 #include "datatypes.hpp"
 #include "Delayer.hpp"
-#include "ProcessEventListener.hpp"
 #include "ProcessControlBlock.hpp"
 #include "FunctionTimingPool.hpp"
 #include "PCBPool.hpp"
@@ -46,9 +45,7 @@ class ComponentObserver;
   using CoSupport::SystemC::Event;
   using CoSupport::SystemC::RefCountEventPtr;
   /**
-   * \brief The interface definition to a Virtual-Processing-Component (VPC).
-   * 
-   * An application using this Framework should call the AbstractComponent::compute(const char *, const char *, sc_event) Funktion.
+   * \brief The interface of a Virtual-Processing-Component (VPC).
    */
   class AbstractComponent:
     public sc_module, public Delayer, public ComponentModel {
@@ -60,7 +57,7 @@ class ComponentObserver;
     }
 
     /**
-     * \brief Used to create the Tracefiles.
+     * \brief Used to create the trace files.
      *
      * To create a vcd-trace-file in SystemC all the signals to 
      * trace have to be in a "global" scope. The signals have to 
@@ -95,8 +92,6 @@ class ComponentObserver;
     }
   protected:
 
-    // points to direct associated controlling instance
-    ProcessEventListener* parentControlUnit;
     std::map<const PowerMode*, sc_time> transactionDelays;
   
   public:
@@ -127,29 +122,6 @@ class ComponentObserver;
      *
      */
     virtual void abortBlockingCompute(Task* task, RefCountEventPtr blocker)=0;
-
-    /**
-     * \brief Sets next controlling instance of component
-     * Used for callback mechanism to store pointer to "direct" controlling instance
-     * for later infroming about finished or killed tasks.
-     * \param controller points to controlling instance which is
-     * responsible for component.
-     */
-    virtual void setParentController(ProcessEventListener* controller){
-    
-      this->parentControlUnit = controller;
-    
-    }
-    
-    /**
-     * \brief Notifies parent controlling instance about task event
-     * This mehtod is used to inform "direct" controlling instance about
-     * finished or killed tasks.
-     * \param task points to the finished or killed task
-     */
-    virtual void notifyParentController(Task* task){
-      this->parentControlUnit->signalProcessEvent(task);
-    }
 
     /**
      * 

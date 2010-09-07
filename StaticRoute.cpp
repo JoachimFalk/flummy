@@ -30,7 +30,7 @@ namespace SystemC_VPC {
     if(components.empty()){
       taskEvents.dii->notify();
       //taskEvents.latency->notify();
-      Director::getInstance().signalProcessEvent(task);
+      Director::getInstance().signalLatencyEvent(task);
       this->pool->free(this);
       return;
     }
@@ -56,7 +56,7 @@ namespace SystemC_VPC {
       ptpTracer->stopOoo(ticket);
 
       assert(dummyDii == np.dii);
-      Director::getInstance().signalProcessEvent(task);
+      Director::getInstance().signalLatencyEvent(task);
       this->pool->free(this);
     }
   }
