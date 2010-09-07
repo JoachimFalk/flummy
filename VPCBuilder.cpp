@@ -173,7 +173,6 @@ using namespace CoSupport::XML::Xerces;
                           << comp->getName() << " to Director" << std::endl);
                   // register "upper-layer" components to Director
                   this->director->registerComponent(comp);
-                  comp->setParentController(this->director);
 
 
                 }else{

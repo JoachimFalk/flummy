@@ -112,7 +112,7 @@ namespace SystemC_VPC {
       AbstractComponent * component;
 
       /**
-       * \brief Initializes a newly created intance of ProcessControlBlock
+       * \brief Initialize a newly created instance of ProcessControlBlock
        */
       void init();
  

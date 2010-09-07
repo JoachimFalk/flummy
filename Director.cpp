@@ -66,8 +66,7 @@ namespace SystemC_VPC{
 #ifndef NO_POWER_SUM
       powerConsStream("powerconsumption.dat"),
 #endif // NO_POWER_SUM
-      componentIdMap(),
-      globalProcessId(0)
+      componentIdMap()
   {
      sc_report_handler::set_actions(SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
                                     SC_DO_NOTHING);
@@ -269,19 +268,6 @@ namespace SystemC_VPC{
     postCompute(task, endPair);
   }
 
-  void Director::compute(const char* name,
-                         const char* funcname,
-                         EventPair endPair)
-  {
-    this->compute( this->getFastLink(name, funcname),
-                   endPair );
-  }
-
-  //
-  void Director::compute(const char *name, EventPair endPair){
-    compute( name, "", endPair);
-  }
-    
   /**
    * \brief Implementation of Director::registerComponent
    */
@@ -376,10 +362,8 @@ namespace SystemC_VPC{
     return mappings[vpcLink.process];
   }
 
-  /**
-   * \brief Implementation of Director::signalProcessEvent
-   */
-  void Director::signalProcessEvent(Task* task){
+  //
+  void Director::signalLatencyEvent(Task* task){
     assert(!FALLBACKMODE);
 
 #ifdef DBG_DIRECTOR
@@ -399,6 +383,7 @@ namespace SystemC_VPC{
 
 
   ProcessId Director::uniqueProcessId() {
+    static ProcessId       globalProcessId = 0;
     return globalProcessId++;
   }
 

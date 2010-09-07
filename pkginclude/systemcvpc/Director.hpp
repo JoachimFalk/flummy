@@ -21,15 +21,11 @@
 #include <systemcvpc/vpc_config.h>
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/Route.hpp>
-#include <systemcvpc/ProcessEventListener.hpp>
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/TaskPool.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/PluggablePowerGovernor.hpp>
-
-// provide compatibility with other compilers then gcc, hopefully
-//#include <ansidecl.h>
 
 #include <string>
 #include <map>
@@ -42,11 +38,11 @@ namespace SystemC_VPC{
   class PowerSumming;
  
   /**
-   * \brief Director knowes all (Abstract-)Components, all mappings (task -> component).
+   * \brief Director knows all (Abstract-)Components, all mappings (task -> component).
    *
-   * Direktor reads allokation and binding from file.
+   * Director reads allocation and binding from file.
    */
-  class Director : public ProcessEventListener{
+  class Director {
   public:
     bool FALLBACKMODE;
 
@@ -57,7 +53,7 @@ namespace SystemC_VPC{
       return *singleton;
     }
 
-    virtual ~Director();
+    ~Director();
 
     /**
      * \brief Simulates computation of a given task
@@ -66,8 +62,8 @@ namespace SystemC_VPC{
      * Supports pipelining!
      * \param fLink FastLink for task and function to execute.
      * \param endPair EventPair to signal finishing of data introduction 
-     * intervall (dii) and lateny.
-     * If dii == latency no pipelinig is assumed and both events are notified
+     * interval (dii) and latency.
+     * If dii == latency no pipelining is assumed and both events are notified
      * at same time!
      * \sa EventPair
      */
@@ -83,8 +79,8 @@ namespace SystemC_VPC{
      * \param fLink FastLink for task and function to execute.
      * \param quantum Number of read data tokens.
      * \param endPair EventPair to signal finishing of data introduction 
-     * intervall (dii) and lateny.
-     * If dii == latency no pipelinig is assumed and both events are notified
+     * interval (dii) and latency.
+     * If dii == latency no pipelining is assumed and both events are notified
      * at same time!
      * \sa EventPair
      */
@@ -100,40 +96,14 @@ namespace SystemC_VPC{
      * \param fLink FastLink for task and function to execute.
      * \param quantum Number of written data tokens.
      * \param endPair EventPair to signal finishing of data introduction 
-     * intervall (dii) and lateny.
-     * If dii == latency no pipelinig is assumed and both events are notified
+     * interval (dii) and latency.
+     * If dii == latency no pipelining is assumed and both events are notified
      * at same time!
      * \sa EventPair
      */
     void write( FastLink fLink,
                 size_t quantum,
                 EventPair endPair = EventPair(NULL, NULL) );
-
-
-    /**
-     * \brief Simulates computation of a given task
-     * 
-     * Determines the component for a given task and delegates it for execution time simulation.
-     * Supports pipelining!
-     * \param name Name of task to execute.
-     * \param funcname Name of executed function within task.
-     * \param endPair EventPair to signal finishing of data introduction intervall (dii) and lateny.
-     * If dii == latency no pipelinig is assumed and both events are notified at same time!
-     * \sa EventPair
-     */
-    void compute(const char* name, const char* funcname, EventPair endPair = EventPair(NULL, NULL));
-   
-    /**
-     * \brief Simulates computation of a given task
-     *
-     * Determines the component for a given task and delegates it for execution time simulation.
-     * Supports pipelining!
-     * \param name Name of task to execute.
-     * \param endPair EventPair to signal finishing of data introduction intervall (dii) and lateny.
-     * If dii == latency no pipelinig is assumed and both events are notified at same time!
-     * \sa EventPair
-     */
-    void compute(const char *name, EventPair endPair = EventPair(NULL, NULL));
 
     /**
      * \brief Register component to Director
@@ -162,7 +132,7 @@ namespace SystemC_VPC{
      */
     const Delayer * getComponent(const FastLink vpcLink) const ;
     
-    void signalProcessEvent(Task* task);
+    void signalLatencyEvent(Task* task);
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;
@@ -277,8 +247,6 @@ namespace SystemC_VPC{
     std::map<ProcessId, std::string> debugProcessNames;
     std::map<ProcessId, std::pair<std::string, std::string> > debugRouteNames;
     std::map<ProcessId, std::set<std::string> > debugFunctionNames;
-
-    ProcessId       globalProcessId;
 
     PowerSumming    *powerSumming;
 

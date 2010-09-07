@@ -52,7 +52,6 @@ nobase_include_HEADERS =				\
 	systemcvpc/PriorityScheduler.hpp 		\
 	systemcvpc/PrioritySchedulerNoPreempt.hpp	\
 	systemcvpc/ProcessControlBlock.hpp 		\
-	systemcvpc/ProcessEventListener.hpp		\
 	systemcvpc/RateMonotonicScheduler.hpp		\
 	systemcvpc/RoundRobinScheduler.hpp 		\
 	systemcvpc/Scheduler.hpp			\

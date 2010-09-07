@@ -192,7 +192,7 @@ namespace SystemC_VPC{
                 << std::endl);
       
         runningTask->getBlockEvent().dii->notify();
-        this->notifyParentController(runningTask);
+        Director::getInstance().signalLatencyEvent(runningTask);
         //TODO: PIPELINING
         runningTask = NULL;
     }
