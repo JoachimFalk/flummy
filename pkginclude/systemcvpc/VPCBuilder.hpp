@@ -80,6 +80,7 @@ namespace SystemC_VPC{
     CX::XStr latencyAttrStr;
     CX::XStr fnameAttrStr;
     CX::XStr destinationAttrStr;
+    CX::XStr tracingAttrStr;
     
     // walker over parsed configure file
     // used as instance variable to enable code modularization
@@ -135,6 +136,7 @@ namespace SystemC_VPC{
       latencyAttrStr      = "latency";
       fnameAttrStr        = "fname";
       destinationAttrStr  = "destination";
+      tracingAttrStr      = "tracing";
       
       /*
        * END OF SECTION: init tag values for comparison while initializing

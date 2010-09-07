@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <CoSupport/Tracing/TracingFactory.hpp>
+
 #include "AbstractComponent.hpp"
 
 namespace SystemC_VPC{
@@ -35,9 +37,10 @@ namespace SystemC_VPC{
 
     virtual const ComponentList& getHops() const = 0;
 
-    Route() : Delayer(), instanceId(++instanceCounter) {}
+    Route() : Delayer(), instanceId(createRouteId()), enableTracer(false){}
 
-    Route(const Route & orig) : Delayer(orig), instanceId(++instanceCounter) {}
+    Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
+        enableTracer(orig.enableTracer), ptpTracer(orig.ptpTracer) {}
 
     virtual ~Route(){}
 
@@ -46,9 +49,31 @@ namespace SystemC_VPC{
       return instanceId;
     }
 
+    virtual void enableTracing(bool enable){
+      enableTracer = enable && ptpTracer != NULL;
+    }
+
+  protected:
+    void traceStart() {
+      assert(ptpTracer != NULL);
+      if (enableTracer) ticket = ptpTracer->startOoo();
+    }
+
+    void traceStop() {
+      assert(ptpTracer != NULL);
+      if (enableTracer) ptpTracer->stopOoo(ticket);
+    }
+
+    void setPtpTracer(CoSupport::Tracing::PtpTracer::Ptr     ptpTracer){
+      this->ptpTracer = ptpTracer;
+    }
   private:
+    size_t createRouteId();
+
     const int instanceId;
-    static int instanceCounter;
+    bool enableTracer;
+    CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
+    CoSupport::Tracing::PtpTracer::Ticket  ticket;
   };
 
 }

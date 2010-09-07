@@ -35,7 +35,7 @@ namespace SystemC_VPC {
       return;
     }
 
-    ticket = ptpTracer->startOoo();
+    this->traceStart();
 
     this->route( EventPair(taskEvents.dii, routeLat) );
   }
@@ -53,7 +53,7 @@ namespace SystemC_VPC {
       (*nextHop)->compute(newTask);
       ++nextHop;
     } else {
-      ptpTracer->stopOoo(ticket);
+      this->traceStop();
 
       assert(dummyDii == np.dii);
       Director::getInstance().signalLatencyEvent(task);
@@ -99,8 +99,8 @@ namespace SystemC_VPC {
     this->name = "msg_" + source + "_2_" + dest;
     routeLat->addListener(this);
 
-    ptpTracer = CoSupport::Tracing::TracingFactory::getInstance()
-                         .createPtpTracer(this->name);
+    this->setPtpTracer(CoSupport::Tracing::TracingFactory::getInstance()
+                         .createPtpTracer(this->name));
   }
 
   //
@@ -111,8 +111,7 @@ namespace SystemC_VPC {
     taskEvents(route.taskEvents),
     dummyDii(new CoSupport::SystemC::RefCountEvent()),
     routeLat(new CoSupport::SystemC::RefCountEvent()),
-    name(route.name),
-    ptpTracer(route.ptpTracer)
+    name(route.name)
   {
     routeLat->addListener(this);
     for(Components::const_iterator iter = route.components.begin();
