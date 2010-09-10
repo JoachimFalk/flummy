@@ -30,8 +30,8 @@ namespace SystemC_VPC {
     void setName(std::string name){this->name = name;}
     ProcessId  getProcessId()                    {return pid;}
     void       setProcessId(ProcessId pid)       {this->pid = pid;}
-    FunctionId getFunctionId()                   {return fid;}
-    void       setFunctionId(FunctionId fid)     {this->fid = fid;}
+    FunctionIds getFunctionIds()                   {return fid;}
+    void        setFunctionIds(FunctionIds fid)  {this->fid = fid;}
     EventPair  getBlockEvent()                   {return blockEvent;}
     void       setBlockEvent(EventPair p)        {blockEvent = p;}
     void       setPCB(ProcessControlBlockPtr pcb)  {this->pcb = pcb;}
@@ -77,12 +77,11 @@ namespace SystemC_VPC {
      */
     void initDelays(){
       assert(pcb != NULL);
-      FunctionId fid = this->getFunctionId();
-      this->setRemainingDelay(this->timingScale * timing->getDelay(fid)
+      FunctionIds fids = this->getFunctionIds();
+      this->setDelay(this->timingScale * timing->getDelay(fids)
           + this->extraDelay);
-      this->setDelay(this->timingScale * timing->getDelay(fid)
-          + this->extraDelay);
-      this->setLatency(this->timingScale * timing->getLatency(fid)
+      this->setRemainingDelay(this->getDelay());
+      this->setLatency(this->timingScale * timing->getLatency(fids)
           + this->extraDelay);
     }
 
@@ -127,9 +126,9 @@ namespace SystemC_VPC {
     }
         
 
-    ProcessId  pid;
-    FunctionId fid;
-    EventPair  blockEvent;
+    ProcessId        pid;
+    FunctionIds      fid;
+    EventPair        blockEvent;
 
     RefCountEventPtr blockingCompute;
     bool       blockAck;

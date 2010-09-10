@@ -441,11 +441,8 @@ namespace SystemC_VPC{
 
     // reset the execution delay
     actualTask->initDelays();
-    DBG_OUT("Using " << actualTask->getRemainingDelay()
-         << " as delay for function " << actualTask->getFunctionId() << "!"
-         << std::endl);
-    DBG_OUT("And " << actualTask->getLatency() << " as latency for function "
-         << actualTask->getFunctionId() << "!" << std::endl);
+    DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
+    DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
     
 #ifndef NO_VCD_TRACES
     {

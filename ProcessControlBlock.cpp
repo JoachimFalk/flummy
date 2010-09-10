@@ -54,19 +54,26 @@ namespace SystemC_VPC{
     return this->funcDelays[defaultFunctionId];
   }
 
-  sc_time FunctionTiming::getDelay(
-    FunctionId fid) const
-  {
-    DBG_OUT( "::getDelay(" << fid << ") " << funcDelays.size()
-             << std::endl);
-
-    sc_time ret;
-    if(fid < funcDelays.size()){
-      ret = funcDelays[fid];
-    }else{
-      ret = getBaseDelay();
+  sc_time summarizeFunctionTimes(const FunctionIds& functions,
+      const FunctionTimes& functionTimes){
+    sc_time ret = SC_ZERO_TIME;
+    for(FunctionIds::const_iterator iter = functions.begin();
+        iter != functions.end();
+        ++iter) {
+      FunctionId fid = *iter;
+      assert(fid < functionTimes.size());
+      ret += functionTimes[fid];
     }
     return ret;
+  }
+
+  sc_time FunctionTiming::getDelay(
+    FunctionIds functions) const
+  {
+    if (functions.begin() == functions.end()){
+      return getBaseDelay();
+    }
+    return summarizeFunctionTimes(functions, funcDelays);
   }
 
   void FunctionTiming::addLatency( FunctionId fid,
@@ -86,15 +93,12 @@ namespace SystemC_VPC{
   }
 
   sc_time FunctionTiming::getLatency(
-    FunctionId fid) const
+    FunctionIds functions) const
   {
-    sc_time ret;
-    if(fid < funcLatencies.size()){
-      ret = funcLatencies[fid];
-    }else{
-      ret = getBaseLatency();
+    if (functions.begin() == functions.end()){
+      return getBaseLatency();
     }
-    return ret;
+   return summarizeFunctionTimes(functions, funcLatencies);
   }
 
   void FunctionTiming::setTiming(const Timing& timing){

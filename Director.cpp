@@ -182,7 +182,7 @@ namespace SystemC_VPC{
     try{
       //Task *task = new Task(fLink, endPair);
       Task *task = this->allocateTask( fLink.process );
-      task->setFunctionId( fLink.func );
+      task->setFunctionIds( fLink.functions );
       task->setBlockEvent( endPair );
     
     
@@ -423,7 +423,8 @@ namespace SystemC_VPC{
       
   }
 
-  FunctionId Director::createFunctionId(std::string function) {
+  // FunctionIds are created by VPC during XML parsing.
+  FunctionId Director::createFunctionId(const std::string& function) {
     FunctionIdMap::const_iterator iter = functionIdMap.find(function);
     if( iter == functionIdMap.end() ) {
       functionIdMap[function] = this->uniqueFunctionId();
@@ -432,11 +433,19 @@ namespace SystemC_VPC{
     return iter->second;
   }
 
-  FunctionId Director::getFunctionId(std::string function) {
+  bool Director::hasFunctionId(const std::string& function) const {
+    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
+    return (iter != functionIdMap.end());
+  }
+
+  // FunctionIds are used (get) by SysteMoC.
+  // The default ID (and a default timing) is used if no ID was created during
+  // parsing. (The function name was not given in the XM.L)
+  FunctionId Director::getFunctionId(const std::string& function) const {
     FunctionIdMap::const_iterator iter = functionIdMap.find(function);
 
     // the function name was not set in configuration
-    // -> we have to use default delay
+    // -> we have to use the default delay
     if( iter == functionIdMap.end() ) {
       return defaultFunctionId;
     }
@@ -448,23 +457,47 @@ namespace SystemC_VPC{
     return globalFunctionId++;
   }
 
-  FastLink Director::getFastLink(std::string process, std::string function) {
+  FastLink Director::registerActor(std::string actorName,
+                                      const FunctionNames &functionNames){
+    //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
 
-    ProcessId       pid = getProcessId(  process  );
-    FunctionId      fid = getFunctionId( function );
-    debugFunctionNames[pid].insert(function);
-    return FastLink(pid, fid);
+    ProcessId       pid = getProcessId(  actorName  );
+    FunctionIds     functionIds;
+    for(FunctionNames::const_iterator iter = functionNames.begin();
+        iter != functionNames .end();
+        ++iter){
+      //check if we have timing data for this function in the XML configuration
+      if(hasFunctionId(*iter)){
+        functionIds.push_back( getFunctionId(*iter) );
+      }
+      debugFunctionNames[pid].insert(*iter);
+    }
+
+    return FastLink(pid, functionIds);
+  }
+
+  FastLink Director::registerRoute(std::string source,
+                                      std::string destination){
+    //TODO: check if this is really required.
+    if(FALLBACKMODE) return FastLink();
+
+    ProcessId       pid = getProcessId( source, destination );
+    FunctionIds     fids; // empty functionIds
+    fids.push_back( getFunctionId("1") );
+    return FastLink(pid, fids);
+  }
+
+  FastLink Director::getFastLink(std::string process, std::string function) {
+    FunctionNames functions;
+    functions.push_back(function);
+    return registerActor(process, functions);
   }
 
   FastLink Director::getFastLink(std::string source,
                                  std::string destination,
                                  std::string function){
-    //    std::string name_hack = "msg_" + source + "_2_" + destination;
-    //    return this->getFastLink(name_hack, function);
-    ProcessId       pid = getProcessId( source, destination );
-    FunctionId      fid = getFunctionId( function );
-    return FastLink(pid, fid);
+    return registerRoute(source, destination);
   }
 
   
@@ -557,8 +590,8 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
           }
           std::cout << "    <timing fname=\""
                     << *fiter
-                    << "\" delay=\"? us\""
-                    << " dii=\"? us\" />"
+                    << "\" dii=\"? us\""
+                    << " latency=\"? us\" />"
                     << std::endl;
         }
         std::cout <<"  </mapping>" << std::endl;

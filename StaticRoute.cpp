@@ -48,7 +48,7 @@ namespace SystemC_VPC {
         Director::getInstance().allocateTask(task->getProcessId());
       newTask->setTimingScale(task->getTimingScale());
       newTask->setBlockEvent(np);
-      newTask->setFunctionId(task->getFunctionId());
+      newTask->setFunctionIds(task->getFunctionIds());
       DBG_OUT("route on: " << components.front()->getName() << endl);
       (*nextHop)->compute(newTask);
       ++nextHop;
