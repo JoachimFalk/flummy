@@ -20,9 +20,12 @@
 #include <systemc.h>
 #include "EventPair.hpp"
 
+#include <vector>
+
 typedef size_t ProcessId;
 typedef size_t FunctionId;
 typedef size_t ComponentId;
+typedef std::vector<FunctionId> FunctionIds;
 
 namespace SystemC_VPC{
   /**
@@ -63,20 +66,20 @@ namespace SystemC_VPC{
      */
     void addDelay(sc_time delay);
 
-    FastLink(ProcessId pid, FunctionId fid)
+    FastLink(ProcessId pid, FunctionIds fid)
       : process(pid),
-      func(fid),
+      functions(fid),
       extraDelay(SC_ZERO_TIME)
     { }
 
     FastLink()
       : process(),
-      func(),
+      functions(),
       extraDelay(SC_ZERO_TIME)
     { }
 
     ProcessId            process;
-    FunctionId           func;
+    FunctionIds          functions;
 
   private:
     mutable sc_time      extraDelay;

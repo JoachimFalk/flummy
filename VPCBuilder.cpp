@@ -467,7 +467,9 @@ using namespace CoSupport::XML::Xerces;
                 DBG_OUT("VPCBuilder> Try to interpret as function"
                   " specific delay!!" << std::endl);
 
-                try{  
+                try{
+                  assert(0); // FIXME: remove this bit of code
+
                   sc_time delay = Director::createSC_Time(sValue);
                   DBG_OUT("VPCBuilder> Try to interpret as"
                           " function specific delay!!" << std::endl);
@@ -559,7 +561,6 @@ using namespace CoSupport::XML::Xerces;
           DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
           if (tracingAtt != NULL){
             tracing = std::string("true") == NStr(tracingAtt->getNodeValue());
-            std::cerr << "overwite " << topologyTracing << " " << tracing << std::endl;
           }
 
           Route * route = NULL;

@@ -8,6 +8,8 @@
 
 namespace SystemC_VPC {
 
+  typedef std::vector<sc_time> FunctionTimes;
+
   /**
    * Internal helper class to manage  function specific delays.
    */
@@ -44,12 +46,10 @@ namespace SystemC_VPC {
 
     /**
      * \brief Used to access delay
-     * \param funcname specifies a possible function if given
-     * \return delay required for a function execution  on the associated
-     * component of the process. If no function name is given or there is
-     * no corresponding entry registered the default delay is returned.
+     * \return Returns the sum of function delays. The default delay is
+     * returned if no function names are given.
      */
-    sc_time getDelay(FunctionId fid) const;
+    sc_time getDelay(FunctionIds functions) const;
 
     /**
      * \brief Adds a new function latency to the instance
@@ -69,13 +69,10 @@ namespace SystemC_VPC {
 
     /**
      * \brief Used to access latency
-     * \param funcname specifies a possible function if given
-     * \return latency required for a function execution  on the
-     * associated component of the process. If no function name is given
-     * or there is no corresponding entry registered the default latency
-     * is returned.
+     * \return Returns the sum of function latencies. The default latency is
+     * returned if no function names are given.
      */
-    sc_time getLatency(FunctionId fid) const;
+    sc_time getLatency(FunctionIds functions) const;
 
 
     /**
@@ -85,7 +82,6 @@ namespace SystemC_VPC {
 
   private:
 
-    typedef std::vector<sc_time> FunctionTimes;
     // map of possible special delay depending on functions
     FunctionTimes funcDelays;
 
