@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include <CoSupport/XML/xerces_support.hpp>
+#include <CoSupport/Tracing/TracingFactory.hpp>
 
 #include <systemcvpc/VPCBuilder.hpp>
 #include <systemcvpc/VpcDomErrorHandler.hpp>
@@ -46,6 +47,13 @@ using namespace CoSupport::XML::Xerces;
   const char* VPCBuilder::STR_VPC_PERIOD =                   "period";
   const char* VPCBuilder::STR_VPC_DEADLINE =                 "deadline";
 
+  void testAndRemoveFile(std::string fileName){
+    std::ofstream file(fileName.c_str());
+    if (file.good()) {
+      file.close();
+      std::remove(fileName.c_str());
+    }
+  }
   /**
    * \brief sets ups VPC Framework
    */
@@ -536,6 +544,9 @@ using namespace CoSupport::XML::Xerces;
       bool topologyTracing = (tracingAtt != NULL) &&
           (std::string("true") == NStr(tracingAtt->getNodeValue()) );
 
+      // check if tracing is enabled for any route -> open trace file
+      bool tracingEnabled = false;
+
       for(DOMNode * routeNode = top->getFirstChild();
           routeNode != NULL;
           routeNode = routeNode->getNextSibling()){
@@ -574,6 +585,8 @@ using namespace CoSupport::XML::Xerces;
             std::cerr << msg << endl;
             throw InvalidArgumentException(msg);
           }
+
+          tracingEnabled |= tracing;
           route->enableTracing(tracing);
 
           // add <hop>s
@@ -639,6 +652,13 @@ using namespace CoSupport::XML::Xerces;
 
         }
       }
+
+      testAndRemoveFile("tracing.log");
+      if (tracingEnabled) {
+        CoSupport::Tracing::TracingFactory::getInstance().setTraceFile(
+            "tracing.log");
+      }
+
     }catch(InvalidArgumentException &e){
       std::cerr << "VPCBuilder> " << e.what() << std::endl;
       exit(-1);
