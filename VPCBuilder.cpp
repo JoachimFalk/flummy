@@ -547,6 +547,11 @@ using namespace CoSupport::XML::Xerces;
       // check if tracing is enabled for any route -> open trace file
       bool tracingEnabled = false;
 
+      // define the empty default route behavior
+      DOMNode    *defaultRouteAttr = atts->getNamedItem(defaultRouteAttrStr);
+      director->defaultRoute = (defaultRouteAttr != NULL) &&
+          (std::string("ignore") == NStr(defaultRouteAttr->getNodeValue()) );
+
       for(DOMNode * routeNode = top->getFirstChild();
           routeNode != NULL;
           routeNode = routeNode->getNextSibling()){

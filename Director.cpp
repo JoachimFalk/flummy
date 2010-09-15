@@ -30,6 +30,8 @@
 #include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/PluggablePowerGovernor.hpp>
+#include <systemcvpc/StaticRoute.hpp>
+#include <systemcvpc/RoutePool.hpp>
 
 #include <systemc.h>
 #include <map>
@@ -57,6 +59,7 @@ namespace SystemC_VPC{
    */
   Director::Director()
     : FALLBACKMODE(false),
+      defaultRoute(false),
       topPowerGov(new InternalSelectFastestPowerModeGovernor),
       topPowerGovFactory(NULL),
       globalFunctionId(1),
@@ -485,6 +488,16 @@ namespace SystemC_VPC{
     ProcessId       pid = getProcessId( source, destination );
     FunctionIds     fids; // empty functionIds
     fids.push_back( getFunctionId("1") );
+
+    // change default behavior: add empty route
+    if (defaultRoute){
+      if ( !taskPool.contains(pid) ){
+        Route * route = new RoutePool<StaticRoute>(source, destination);
+        route->enableTracing(false);
+        this->registerRoute(route);
+      }
+    }
+
     return FastLink(pid, fids);
   }
 
