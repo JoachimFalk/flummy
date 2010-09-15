@@ -47,6 +47,7 @@ namespace SystemC_VPC{
   class Director {
   public:
     bool FALLBACKMODE;
+    bool defaultRoute;
 
     /**
      * \brief Access to singleton Director. 
