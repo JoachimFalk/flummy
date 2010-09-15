@@ -25,7 +25,7 @@ namespace SystemC_VPC{
 
   //
   ComponentId FastLink::getComponentId() const{
-    SystemC_VPC::Director::getInstance()
+    return SystemC_VPC::Director::getInstance()
       .getComponent( *this )->getComponentId();
   }
 
