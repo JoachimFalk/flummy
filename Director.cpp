@@ -362,6 +362,7 @@ namespace SystemC_VPC{
 
   //
   const Delayer * Director::getComponent(const FastLink vpcLink) const {
+    assert(mappings.size() > vpcLink.process);
     return mappings[vpcLink.process];
   }
 
