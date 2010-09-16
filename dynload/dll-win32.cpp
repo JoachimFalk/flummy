@@ -1,7 +1,7 @@
 #ifdef WIN32
 
-#include <systemcvpc/dynload/world.h>
-#include <systemcvpc/dynload/dll.h>
+#include <systemcvpc/dynload/world.hpp>
+#include <systemcvpc/dynload/dll.hpp>
 
 
 DLLManager::DLLManager( const char *fname )
