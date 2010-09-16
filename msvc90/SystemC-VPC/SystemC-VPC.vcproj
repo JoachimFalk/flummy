@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP20"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
+				AdditionalIncludeDirectories="&quot;..\config-wo-vcd&quot;;..\..\pkginclude;..\..\..\Support\pkginclude;..\..\..\Support\msvc90\config"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;XML_LIBRARY"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -107,7 +107,7 @@
 				AdditionalOptions="/MP20"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
+				AdditionalIncludeDirectories="..\config-wo-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;XML_LIBRARY"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
@@ -170,7 +170,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP20"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
+				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude;..\..\..\Support\msvc90\config"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;XML_LIBRARY"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -347,11 +347,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\AbstractComponent.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Attribute.cpp"
 				>
 			</File>
 			<File
+				RelativePath="..\..\AVBScheduler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\BlockingTransport.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Component.cpp"
 				>
 			</File>
 			<File
@@ -363,6 +375,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Director.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\FastLink.cpp"
 				>
 			</File>
@@ -371,23 +387,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\FCFSScheduler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\FlexRayScheduler.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\AbstractComponent.cpp"
+				RelativePath="..\..\HysteresisLocalGovernor.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Component.cpp"
+				RelativePath="..\..\PluggablePowerGovernor.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Director.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\FCFSScheduler.cpp"
+				RelativePath="..\..\PowerSumming.cpp"
 				>
 			</File>
 			<File
@@ -408,26 +424,6 @@
 			</File>
 			<File
 				RelativePath="..\..\RoundRobinScheduler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Tracing.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\VPCBuilder.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\HysteresisLocalGovernor.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\PluggablePowerGovernor.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\PowerSumming.cpp"
 				>
 			</File>
 			<File
@@ -454,6 +450,14 @@
 				RelativePath="..\..\TimeTriggeredCCScheduler.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\Tracing.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\VPCBuilder.cpp"
+				>
+			</File>
 			<Filter
 				Name="dynload"
 				>
@@ -473,127 +477,87 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Attribute.h"
+				RelativePath="..\..\pkginclude\systemcvpc\AbstractComponent.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\BlockingTransport.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Attribute.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\ComponentInfo.h"
+				RelativePath="..\..\pkginclude\systemcvpc\AVBScheduler.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\ComponentModel.h"
+				RelativePath="..\..\pkginclude\systemcvpc\BlockingTransport.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\ComponentObserver.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Component.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\debug.h"
+				RelativePath="..\..\pkginclude\systemcvpc\ComponentInfo.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\debug_config.h"
+				RelativePath="..\..\pkginclude\systemcvpc\ComponentModel.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\debug_off.h"
+				RelativePath="..\..\pkginclude\systemcvpc\ComponentObserver.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\debug_on.h"
+				RelativePath="..\..\pkginclude\systemcvpc\datatypes.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Delayer.h"
+				RelativePath="..\..\pkginclude\systemcvpc\debug.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\FastLink.h"
+				RelativePath="..\..\pkginclude\systemcvpc\debug_config.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\FCFSComponent.h"
+				RelativePath="..\..\pkginclude\systemcvpc\debug_off.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\FlexRayScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\debug_on.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\FunctionTimingPool.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Delayer.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\AbstractComponent.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Director.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Component.h"
+				RelativePath="..\..\pkginclude\systemcvpc\EventPair.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\datatypes.h"
+				RelativePath="..\..\pkginclude\systemcvpc\FastLink.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Director.h"
+				RelativePath="..\..\pkginclude\systemcvpc\FCFSComponent.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\EventPair.h"
+				RelativePath="..\..\pkginclude\systemcvpc\FCFSScheduler.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\FCFSScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\FlexRayScheduler.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\InvalidArgumentException.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\PriorityScheduler.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\PrioritySchedulerNoPreempt.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\ProcessControlBlock.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\ProcessEventListener.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\RateMonotonicScheduler.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\RoundRobinScheduler.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Scheduler.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Tracing.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\VPCBuilder.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pkginclude\systemcvpc\VpcDomErrorHandler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\FunctionTimingPool.hpp"
 				>
 			</File>
 			<File
@@ -601,7 +565,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\PCBPool.h"
+				RelativePath="..\..\pkginclude\systemcvpc\InvalidArgumentException.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\PCBPool.hpp"
 				>
 			</File>
 			<File
@@ -609,27 +577,55 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Pool.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Pool.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\PowerGovernor.h"
+				RelativePath="..\..\pkginclude\systemcvpc\PowerGovernor.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\PowerMode.h"
+				RelativePath="..\..\pkginclude\systemcvpc\PowerMode.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\PowerSumming.h"
+				RelativePath="..\..\pkginclude\systemcvpc\PowerSumming.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Route.h"
+				RelativePath="..\..\pkginclude\systemcvpc\PriorityScheduler.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\RoutePool.h"
+				RelativePath="..\..\pkginclude\systemcvpc\PrioritySchedulerNoPreempt.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\ProcessControlBlock.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\ProcessEventListener.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\RateMonotonicScheduler.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\RoundRobinScheduler.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\Route.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\RoutePool.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\Scheduler.hpp"
 				>
 			</File>
 			<File
@@ -637,42 +633,54 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\StaticRoute.h"
+				RelativePath="..\..\pkginclude\systemcvpc\StaticRoute.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Task.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Task.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\TaskPool.h"
+				RelativePath="..\..\pkginclude\systemcvpc\TaskPool.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\TDMAScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\TDMAScheduler.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\TimeTriggeredCCScheduler.h"
+				RelativePath="..\..\pkginclude\systemcvpc\TimeTriggeredCCScheduler.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\Timing.h"
+				RelativePath="..\..\pkginclude\systemcvpc\Timing.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\Tracing.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\VPCBuilder.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkginclude\systemcvpc\VpcDomErrorHandler.hpp"
 				>
 			</File>
 			<Filter
 				Name="dynload"
 				>
 				<File
-					RelativePath="..\..\pkginclude\systemcvpc\dynload\dll.h"
+					RelativePath="..\..\pkginclude\systemcvpc\dynload\dll.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\pkginclude\systemcvpc\dynload\plugin.h"
+					RelativePath="..\..\pkginclude\systemcvpc\dynload\plugin.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\pkginclude\systemcvpc\dynload\world.h"
+					RelativePath="..\..\pkginclude\systemcvpc\dynload\world.hpp"
 					>
 				</File>
 			</Filter>
