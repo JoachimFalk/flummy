@@ -210,7 +210,7 @@ namespace SystemC_VPC{
     void postCompute( Task *task,
                       EventPair endPair );
 
-    void debugUnknownNames( );
+    void debugUnknownNames( ) const;
 
     /**
      * Singleton design pattern
