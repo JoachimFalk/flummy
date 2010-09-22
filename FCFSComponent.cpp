@@ -66,20 +66,14 @@ namespace SystemC_VPC{
 
 #ifndef NO_VCD_TRACES
       std::string tracefilename=this->getName(); //componentName;
-      char tracefilechar[VPC_MAX_STRING_LENGTH];
+
       char* traceprefix= getenv("VPCTRACEFILEPREFIX");
       if(0!=traceprefix){
         tracefilename.insert(0,traceprefix);
       }
-      strcpy(tracefilechar,tracefilename.c_str());
-      vcd_trace_file *vcd = new vcd_trace_file(tracefilechar);
-      //sc_create_vcd_trace_file(tracefilechar);
-      this->traceFile = vcd;
-      sc_get_curr_simcontext()->add_trace_file(this->traceFile);
-      vcd->sc_set_vcd_time_unit(-9);
 
-      // FIXME: disabled Scheduler tracing (there is no scheduling overhead)
-      //sc_trace(this->traceFile,schedulerTrace,schedulername);
+      this->traceFile = sc_create_vcd_trace_file(tracefilename.c_str());
+      this->traceFile->set_time_unit(1, SC_NS);
 #endif //NO_VCD_TRACES      
 
       fireStateChanged(ComponentState::IDLE);
