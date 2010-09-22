@@ -362,7 +362,15 @@ namespace SystemC_VPC{
 
   //
   const Delayer * Director::getComponent(const FastLink vpcLink) const {
-    assert(mappings.size() > vpcLink.process);
+    if (mappings.size() < vpcLink.process ||
+        mappings[vpcLink.process] == NULL) {
+      std::map<ProcessId, std::string>::const_iterator iter =
+        debugProcessNames.find(vpcLink.process);
+      std::cerr << "Unknown mapping for task " << iter->second << std::endl;
+
+      debugUnknownNames();
+    }
+
     return mappings[vpcLink.process];
   }
 
@@ -550,10 +558,10 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
   return reverseMapping[cid];
 }  
   
-  void Director::debugUnknownNames( ){
+  void Director::debugUnknownNames( ) const {
     bool route = false;
     bool mappings = false;
-    for(std::map<ProcessId, std::pair<std::string, std::string> >::iterator
+    for(std::map<ProcessId, std::pair<std::string, std::string> >::const_iterator
           iter = debugRouteNames.begin();
         iter != debugRouteNames.end();
         ++iter){
@@ -573,7 +581,7 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
                   << std::endl;
       }
     }
-    for(std::map<ProcessId, std::string>::iterator iter =
+    for(std::map<ProcessId, std::string>::const_iterator iter =
           debugProcessNames.begin();
         iter != debugProcessNames.end();
         ++iter){
@@ -593,10 +601,13 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
                   << " latency=\"? us\" />"
                   << " --> "
                   << std::endl;
+
+        const std::set<std::string>& functionNames =
+          debugFunctionNames.find(iter->first)->second;
         
-        for(std::set<std::string>::iterator fiter =
-              debugFunctionNames[iter->first].begin();
-            fiter != debugFunctionNames[iter->first].end();
+        for(std::set<std::string>::const_iterator fiter =
+            functionNames.begin();
+            fiter != functionNames.end();
             ++fiter){
           if(0 == fiter->compare("???")){
             std::cout << "    <!-- the \"???\" is caused by a SysteMoC"
