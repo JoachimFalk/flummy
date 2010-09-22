@@ -235,7 +235,7 @@
 				AdditionalOptions="/MP20"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude"
+				AdditionalIncludeDirectories="..\config-w-vcd;..\..\pkginclude;..\..\..\Support\pkginclude;..\..\..\Support\msvc90\config"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;XML_LIBRARY"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
