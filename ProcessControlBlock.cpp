@@ -125,11 +125,17 @@ namespace SystemC_VPC{
     this->traceSignal = NULL;
   }
 
-  void ProcessControlBlock::setName(std::string name){
+  void ProcessControlBlock::configure(std::string name, bool tracing,
+      bool vcd){
     this->name = name;
     taskTracer =
         CoSupport::Tracing::TracingFactory::getInstance().createTaskTracer(name,
             component->getName());
+#ifndef NO_VCD_TRACES
+    if (vcd){
+      this->setTraceSignal(component->addToTraceFile(name));
+    }
+#endif //NO_VCD_TRACES
   }
 
   std::string const& ProcessControlBlock::getName() const{

@@ -41,7 +41,7 @@ namespace SystemC_VPC {
       /**
        * \brief Sets name of instance
        */
-      void setName(std::string name);
+      void configure(std::string name, bool tracing, bool vcd);
 
       /**
        * \brief Used to access name of PCB

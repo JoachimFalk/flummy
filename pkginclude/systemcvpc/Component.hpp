@@ -74,15 +74,6 @@ namespace SystemC_VPC{
      *
      */
     virtual void updatePowerConsumption();
-
-    /**
-     * \brief Used to create the Tracefiles.
-     *
-     * To create a vcd-trace-file in SystemC all the signals to 
-     * trace have to be in a "global" scope. The signals have to 
-     * be created in elaboration phase (before first sc_start).
-     */
-    virtual void informAboutMapping(std::string module);
       
     /**
      * \brief An implementation of AbstractComponent used together with
@@ -118,18 +109,6 @@ namespace SystemC_VPC{
       powerSumming   = new PowerSumming(*powerSumStream);
       this->addObserver(powerSumming);
 #endif // NO_POWER_SUM
-
-#ifndef NO_VCD_TRACES
-      std::string tracefilename=this->getName(); //componentName;
-
-      char* traceprefix= getenv("VPCTRACEFILEPREFIX");
-      if(0!=traceprefix){
-        tracefilename.insert(0,traceprefix);
-      }
-
-      this->traceFile = sc_create_vcd_trace_file(tracefilename.c_str());
-      this->traceFile->set_time_unit(1, SC_NS);
-#endif //NO_VCD_TRACES      
     }
       
     virtual ~Component();
@@ -152,12 +131,6 @@ namespace SystemC_VPC{
   private:
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair, std::vector<timePcbPair>,timeCompare> pqueue;
-
-#ifndef NO_VCD_TRACES
-    sc_trace_file *traceFile;
-    std::map<std::string, Tracing* > trace_map_by_name;
-    sc_signal<trace_value> schedulerTrace;
-#endif //NO_VCD_TRACES      
 
     Scheduler *scheduler;
     std::deque<Task*>      newTasks;

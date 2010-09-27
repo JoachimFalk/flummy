@@ -57,15 +57,6 @@ class ComponentObserver;
     }
 
     /**
-     * \brief Used to create the trace files.
-     *
-     * To create a vcd-trace-file in SystemC all the signals to 
-     * trace have to be in a "global" scope. The signals have to 
-     * be created in elaboration phase (before first sc_start).
-     */
-    virtual void informAboutMapping(std::string module)=0;
-
-    /**
      * \brief Set parameter for Component and Scheduler.
      */
     virtual void setAttribute(AttributePtr attributePtr)=0;
@@ -93,12 +84,21 @@ class ComponentObserver;
   protected:
 
     std::map<const PowerMode*, sc_time> transactionDelays;
+
+#ifndef NO_VCD_TRACES
+    sc_trace_file *traceFile;
+    std::map<std::string, Tracing* > trace_map_by_name;
+    sc_signal<trace_value> schedulerTrace;
+#endif //NO_VCD_TRACES
   
   public:
   
     AbstractComponent(sc_module_name name)
       : sc_module(name),
         Delayer(),
+#ifndef NO_VCD_TRACES
+        traceFile(NULL),
+#endif //NO_VCD_TRACES
       powerMode(NULL) {}
             
     /**
@@ -159,7 +159,31 @@ class ComponentObserver;
       }
       return (*pool)[pid];
     }
-    private:
+
+#ifndef NO_VCD_TRACES
+    Tracing * addToTraceFile(std::string name){
+      if (this->traceFile == NULL){
+        std::string tracefilename=this->getName(); //componentName;
+
+        char* traceprefix= getenv("VPCTRACEFILEPREFIX");
+        if(0!=traceprefix){
+          tracefilename.insert(0,traceprefix);
+        }
+
+        this->traceFile = sc_create_vcd_trace_file(tracefilename.c_str());
+        this->traceFile->set_time_unit(1, SC_NS);
+      }
+      Tracing *newsignal = new Tracing(name, this->getName());
+
+      this->trace_map_by_name.insert(std::pair<std::string, Tracing*>(
+          this->getName(), newsignal));
+      sc_trace(this->traceFile, *newsignal->traceSignal, this->getName());
+      newsignal->traceSleeping();
+      return newsignal;
+    }
+#endif //NO_VCD_TRACES
+
+  private:
     /**
      *
      */

@@ -412,13 +412,12 @@ using namespace CoSupport::XML::Xerces;
 
           // adding mapping info
           this->director->registerMapping(sSource, sTarget);
-          comp->informAboutMapping(sSource);
           
           //generate new ProcessControlBlock or get existing one for
           // initialization
           ProcessControlBlock& p =
             comp->createPCB(this->director->getProcessId(sSource));
-          p.setName(sSource);
+          p.configure(sSource.c_str(), true, true);
             
           //walk down hierarchy to attributes
           DOMNode* attnode = node->getFirstChild();
@@ -610,11 +609,9 @@ using namespace CoSupport::XML::Xerces;
               AbstractComponent* hop = iterComp->second; 
               ProcessControlBlock& pcb =
                 hop->createPCB(this->director->getProcessId(route->getName()));
-              pcb.setName(route->getName());
+              pcb.configure(route->getName(), false, true);
 
-              
               route->addHop( name, hop );
-              (iterComp->second)->informAboutMapping(route->getName());
 
               // parse <timing>s
               for(DOMNode * timingNode = hopNode->getFirstChild();
