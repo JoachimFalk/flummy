@@ -8,6 +8,7 @@
 #include <string>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
+#include <CoSupport/Tracing/TaskTracer.hpp>
 
 #include "EventPair.hpp"
 #include "Tracing.hpp"
@@ -30,7 +31,7 @@ namespace SystemC_VPC {
   class ProcessControlBlock {
 
     public:
-      
+    friend class Task;
       /**
        * \brief Default constructor of an PCB instance
        */
@@ -110,7 +111,7 @@ namespace SystemC_VPC {
       sc_time deadline;
       Tracing * traceSignal;
       AbstractComponent * component;
-
+      CoSupport::Tracing::TaskTracer::Ptr taskTracer;
       /**
        * \brief Initialize a newly created instance of ProcessControlBlock
        */

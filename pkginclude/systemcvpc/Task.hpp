@@ -4,6 +4,8 @@
 #include <sstream>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
+#include <CoSupport/Tracing/TaskTracer.hpp>
+
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/TaskPool.hpp>
@@ -86,8 +88,6 @@ namespace SystemC_VPC {
     }
 
     // Adaptor setter / getter for ProcessControlBlock
-    Tracing* getTraceSignal()
-      {assert(pcb != NULL); return pcb->getTraceSignal();}
     void setTraceSignal(Tracing* t)
       {assert(pcb != NULL); return pcb->setTraceSignal(t);}
     int getPriority()
@@ -102,7 +102,52 @@ namespace SystemC_VPC {
       pool->free(this->getProcessId(), this);
     }
 
+    void traceReleaseTask(){
+#ifndef NO_VCD_TRACES
+      if(this->getTraceSignal()!=0)
+        this->getTraceSignal()->traceReady();
+#endif //NO_VCD_TRACES
+      taskTracerTicket = pcb->taskTracer->releaseTask();
+    }
+
+    void traceFinishTaskLatency(){
+      pcb->taskTracer->finishTaskLatency(taskTracerTicket);
+    }
+
+    void traceFinishTaskDii(){
+#ifndef NO_VCD_TRACES
+        if(this->getTraceSignal()!=0)
+          this->getTraceSignal()->traceSleeping();
+#endif //NO_VCD_TRACES
+    }
+
+    void traceAssignTask(){
+#ifndef NO_VCD_TRACES
+      if(this->getTraceSignal()!=0)
+        this->getTraceSignal()->traceRunning();
+#endif //NO_VCD_TRACES
+
+    }
+
+    void traceResignTask(){
+#ifndef NO_VCD_TRACES
+        if(this->getTraceSignal()!=0)
+          this->getTraceSignal()->traceReady();
+#endif //NO_VCD_TRACES
+
+    }
+
+    void traceBlockTask(){
+#ifndef NO_VCD_TRACES
+            if(this->getTraceSignal()!=0)
+              this->getTraceSignal()->traceBlocking();
+#endif //NO_VCD_TRACES
+
+    }
   private:
+    Tracing* getTraceSignal()
+      {assert(pcb != NULL); return pcb->getTraceSignal();}
+
     friend class AssociativePrototypedPool<ProcessId, Task>;
     friend class PrototypedPool<Task>;
 
@@ -148,6 +193,7 @@ namespace SystemC_VPC {
     int instanceId;
     std::string name;
     double timingScale;
+    CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
   };
 
   typedef std::map<int, Task*>  TaskMap;

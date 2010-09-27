@@ -174,19 +174,15 @@ namespace SystemC_VPC{
     void addTask(Task *newTask){
       DBG_OUT(this->getName() << " add Task: " << newTask->getName()
               << " @ " << sc_time_stamp() << std::endl);
-#ifndef NO_VCD_TRACES
-      if(newTask->getTraceSignal()!=0)
-        newTask->getTraceSignal()->traceReady();
-#endif //NO_VCD_TRACES
+      newTask->traceReleaseTask();
       readyTasks.push_back(newTask);
     }
 
     void removeTask(){
         fireStateChanged(ComponentState::IDLE);
-#ifndef NO_VCD_TRACES
-        if(runningTask->getTraceSignal()!=0)
-          runningTask->getTraceSignal()->traceSleeping();
-#endif //NO_VCD_TRACES
+        runningTask->traceFinishTaskDii();
+        runningTask->traceFinishTaskLatency();
+
         DBG_OUT(this->getName() << " resign Task: " << runningTask->getName()
                 << " @ " << sc_time_stamp().to_default_time_units()
                 << std::endl);
@@ -205,10 +201,7 @@ namespace SystemC_VPC{
       DBG_OUT(this->getName() << " schedule Task: " << task->getName()
               << " @ " << sc_time_stamp() << std::endl);
       
-#ifndef NO_VCD_TRACES
-      if(task->getTraceSignal()!=0)
-        task->getTraceSignal()->traceRunning();
-#endif //NO_VCD_TRACES
+      task->traceAssignTask();
       fireStateChanged(ComponentState::RUNNING);
       if(task->isBlocking() /* && !assignedTask->isExec() */) {
         //TODO
