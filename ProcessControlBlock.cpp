@@ -1,6 +1,7 @@
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Director.hpp>
+#include <CoSupport/Tracing/TracingFactory.hpp>
 
 #include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_COMPONENT create stream and include debug macros
@@ -126,6 +127,9 @@ namespace SystemC_VPC{
 
   void ProcessControlBlock::setName(std::string name){
     this->name = name;
+    taskTracer =
+        CoSupport::Tracing::TracingFactory::getInstance().createTaskTracer(name,
+            component->getName());
   }
 
   std::string const& ProcessControlBlock::getName() const{
