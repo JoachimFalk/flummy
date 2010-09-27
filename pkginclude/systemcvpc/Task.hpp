@@ -88,8 +88,6 @@ namespace SystemC_VPC {
     }
 
     // Adaptor setter / getter for ProcessControlBlock
-    void setTraceSignal(Tracing* t)
-      {assert(pcb != NULL); return pcb->setTraceSignal(t);}
     int getPriority()
       {assert(pcb != NULL); return pcb->getPriority();}
     sc_time getPeriod()

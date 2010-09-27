@@ -388,19 +388,6 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::informAboutMapping(std::string module){
-#ifndef NO_VCD_TRACES
-    Tracing *newsignal = new Tracing(getName(), module);
-    trace_map_by_name.insert(std::pair<std::string,Tracing* >(module, newsignal));
-    sc_trace(this->traceFile, *newsignal->traceSignal, module.c_str());
-    newsignal->traceSleeping();
-#endif //NO_VCD_TRACES
-
-  }
-
-  /**
-   *
-   */
   void Component::compute(Task* actualTask){
 
     /* * /
@@ -427,16 +414,6 @@ namespace SystemC_VPC{
     DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
     DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
     
-#ifndef NO_VCD_TRACES
-    {
-      std::map<std::string, Tracing* >::iterator iter
-        = trace_map_by_name.find(actualTask->getName());
-      if( iter != trace_map_by_name.end() ){
-        actualTask->setTraceSignal(iter->second);
-      }
-    }
-#endif //NO_VCD_TRACES
-
     //store added task
     newTasks.push_back(actualTask);
 
