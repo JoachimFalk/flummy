@@ -1,0 +1,17 @@
+Revision: SystemC-VPC--multihop--0.8--patch-25
+Archive: falk@cs.fau.de--2008-systemoc-intern
+Creator: Martin Streubuehr <streubuehr@cs.fau.de>
+Date: Thu Jul 15 10:07:38 CEST 2010
+Standard-date: 2010-07-15 08:07:38 GMT
+New-files: msvc90/config-wo-vcd/systemcvpc/.arch-ids/=id
+    msvc90/config-wo-vcd/systemcvpc/.arch-ids/vpc_config.h.id
+    msvc90/config-wo-vcd/systemcvpc/vpc_config.h
+New-directories: msvc90/config-wo-vcd/systemcvpc
+    msvc90/config-wo-vcd/systemcvpc/.arch-ids
+New-patches: falk@cs.fau.de--2008-systemoc-intern/SystemC-VPC--multihop--0.8--patch-25
+Summary: 
+ - added *-noVCD config header
+Keywords: 
+
+
+
