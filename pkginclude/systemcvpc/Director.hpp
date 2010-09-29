@@ -35,6 +35,8 @@
 
 namespace SystemC_VPC{
 
+  typedef std::vector<std::string> FunctionNames;
+
   class PowerSumming;
  
   /**
@@ -45,6 +47,7 @@ namespace SystemC_VPC{
   class Director {
   public:
     bool FALLBACKMODE;
+    bool defaultRoute;
 
     /**
      * \brief Access to singleton Director. 
@@ -150,6 +153,11 @@ namespace SystemC_VPC{
 
     ComponentId getComponentId(std::string component);
 
+    FastLink registerActor(std::string actorName,
+                             const FunctionNames& functionNames);
+
+    FastLink registerRoute(std::string source, std::string destination);
+
     FastLink getFastLink(std::string process, std::string function);
 
     FastLink getFastLink(std::string source,
@@ -168,8 +176,9 @@ namespace SystemC_VPC{
     
     std::vector<ProcessId> * getTaskAnnotation(std::string compName);
 
-    FunctionId getFunctionId(std::string function);
-    FunctionId createFunctionId(std::string function);
+    bool hasFunctionId(const std::string& function) const;
+    FunctionId getFunctionId(const std::string& function) const;
+    FunctionId createFunctionId(const std::string& function);
 
     Task* allocateTask(ProcessId pid){
       return this->taskPool.allocate( pid );
@@ -201,7 +210,7 @@ namespace SystemC_VPC{
     void postCompute( Task *task,
                       EventPair endPair );
 
-    void debugUnknownNames( );
+    void debugUnknownNames( ) const;
 
     /**
      * Singleton design pattern

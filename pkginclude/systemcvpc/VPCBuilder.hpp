@@ -81,6 +81,7 @@ namespace SystemC_VPC{
     CX::XStr fnameAttrStr;
     CX::XStr destinationAttrStr;
     CX::XStr tracingAttrStr;
+    CX::XStr defaultRouteAttrStr;
     
     // walker over parsed configure file
     // used as instance variable to enable code modularization
@@ -137,6 +138,7 @@ namespace SystemC_VPC{
       fnameAttrStr        = "fname";
       destinationAttrStr  = "destination";
       tracingAttrStr      = "tracing";
+      defaultRouteAttrStr = "default";
       
       /*
        * END OF SECTION: init tag values for comparison while initializing

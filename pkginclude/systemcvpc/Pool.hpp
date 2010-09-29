@@ -222,7 +222,7 @@ namespace SystemC_VPC {
     /**
      *
      */
-    bool contains( KEY key ){
+    bool contains( KEY key ) const {
       return ( pools.find(key)!= pools.end() );
     }
 

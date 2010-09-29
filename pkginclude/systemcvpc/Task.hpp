@@ -4,6 +4,8 @@
 #include <sstream>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
+#include <CoSupport/Tracing/TaskTracer.hpp>
+
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/TaskPool.hpp>
@@ -30,8 +32,8 @@ namespace SystemC_VPC {
     void setName(std::string name){this->name = name;}
     ProcessId  getProcessId()                    {return pid;}
     void       setProcessId(ProcessId pid)       {this->pid = pid;}
-    FunctionId getFunctionId()                   {return fid;}
-    void       setFunctionId(FunctionId fid)     {this->fid = fid;}
+    FunctionIds getFunctionIds()                   {return fid;}
+    void        setFunctionIds(FunctionIds fid)  {this->fid = fid;}
     EventPair  getBlockEvent()                   {return blockEvent;}
     void       setBlockEvent(EventPair p)        {blockEvent = p;}
     void       setPCB(ProcessControlBlockPtr pcb)  {this->pcb = pcb;}
@@ -77,18 +79,15 @@ namespace SystemC_VPC {
      */
     void initDelays(){
       assert(pcb != NULL);
-      FunctionId fid = this->getFunctionId();
-      this->setRemainingDelay(this->timingScale * timing->getDelay(fid)
+      FunctionIds fids = this->getFunctionIds();
+      this->setDelay(this->timingScale * timing->getDelay(fids)
           + this->extraDelay);
-      this->setDelay(this->timingScale * timing->getDelay(fid)
-          + this->extraDelay);
-      this->setLatency(this->timingScale * timing->getLatency(fid)
+      this->setRemainingDelay(this->getDelay());
+      this->setLatency(this->timingScale * timing->getLatency(fids)
           + this->extraDelay);
     }
 
     // Adaptor setter / getter for ProcessControlBlock
-    Tracing* getTraceSignal()
-      {assert(pcb != NULL); return pcb->getTraceSignal();}
     void setTraceSignal(Tracing* t)
       {assert(pcb != NULL); return pcb->setTraceSignal(t);}
     int getPriority()
@@ -103,7 +102,52 @@ namespace SystemC_VPC {
       pool->free(this->getProcessId(), this);
     }
 
+    void traceReleaseTask(){
+#ifndef NO_VCD_TRACES
+      if(this->getTraceSignal()!=0)
+        this->getTraceSignal()->traceReady();
+#endif //NO_VCD_TRACES
+      taskTracerTicket = pcb->taskTracer->releaseTask();
+    }
+
+    void traceFinishTaskLatency(){
+      pcb->taskTracer->finishTaskLatency(taskTracerTicket);
+    }
+
+    void traceFinishTaskDii(){
+#ifndef NO_VCD_TRACES
+        if(this->getTraceSignal()!=0)
+          this->getTraceSignal()->traceSleeping();
+#endif //NO_VCD_TRACES
+    }
+
+    void traceAssignTask(){
+#ifndef NO_VCD_TRACES
+      if(this->getTraceSignal()!=0)
+        this->getTraceSignal()->traceRunning();
+#endif //NO_VCD_TRACES
+
+    }
+
+    void traceResignTask(){
+#ifndef NO_VCD_TRACES
+        if(this->getTraceSignal()!=0)
+          this->getTraceSignal()->traceReady();
+#endif //NO_VCD_TRACES
+
+    }
+
+    void traceBlockTask(){
+#ifndef NO_VCD_TRACES
+            if(this->getTraceSignal()!=0)
+              this->getTraceSignal()->traceBlocking();
+#endif //NO_VCD_TRACES
+
+    }
   private:
+    Tracing* getTraceSignal()
+      {assert(pcb != NULL); return pcb->getTraceSignal();}
+
     friend class AssociativePrototypedPool<ProcessId, Task>;
     friend class PrototypedPool<Task>;
 
@@ -127,9 +171,9 @@ namespace SystemC_VPC {
     }
         
 
-    ProcessId  pid;
-    FunctionId fid;
-    EventPair  blockEvent;
+    ProcessId        pid;
+    FunctionIds      fid;
+    EventPair        blockEvent;
 
     RefCountEventPtr blockingCompute;
     bool       blockAck;
@@ -149,6 +193,7 @@ namespace SystemC_VPC {
     int instanceId;
     std::string name;
     double timingScale;
+    CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
   };
 
   typedef std::map<int, Task*>  TaskMap;
