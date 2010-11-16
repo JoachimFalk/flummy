@@ -54,6 +54,6 @@ type        CDATA #IMPLIED
 tracing     CDATA #IMPLIED
 >
 
-<!ELEMENT hop (attribute|timing)*>
+<!ELEMENT hop (timing|attribute)*>
 <!ATTLIST hop
 name    CDATA #IMPLIED>
