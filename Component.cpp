@@ -246,99 +246,6 @@ namespace SystemC_VPC{
   }
 
 
-  bool Component::processPower(AttributePtr attPtr)
-  {
-    // hierarchical format
-    if(!attPtr->isType("powermode")) {
-      return false;
-    }
-    
-    for(size_t i=0; i<attPtr->getAttributeSize();++i){
-      AttributePtr powerAtt = attPtr->getNextAttribute(i).second;
-      if(powerAtt->isType("governor")){
-        this->loadLocalGovernorPlugin(powerAtt->getValue());
-        powerAttribute = powerAtt;
-        continue;
-      }
-
-      std::string powerMode = attPtr->getNextAttribute(i).first;
-      const PowerMode *power = this->translatePowerMode(powerMode);
-
-      if(powerTables.find(power) == powerTables.end()){
-        powerTables[power] = PowerTable();
-      }
-
-      PowerTable &powerTable=powerTables[power];
-
-      if(powerAtt->hasParameter("IDLE")){
-        std::string v = powerAtt->getParameter("IDLE");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::IDLE] = value;
-      }
-      if(powerAtt->hasParameter("RUNNING")){
-        std::string v = powerAtt->getParameter("RUNNING");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::RUNNING] = value;
-      }
-      if(powerAtt->hasParameter("STALLED")){
-        std::string v = powerAtt->getParameter("STALLED");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::STALLED] = value;
-      }
-      if(powerAtt->hasParameter("transaction_delay")) {
-        this->transactionDelays[power] =
-          Director::createSC_Time(powerAtt->getParameter("transaction_delay"));
-      }
-      if(powerAtt->hasParameter("transfer_delay")) {
-        this->transactionDelays[power] =
-          Director::createSC_Time(powerAtt->getParameter("transfer_delay"));
-      }
-
-    }
-        
-    return true;
-  }
-
-  /**
-   *
-   */
-  void Component::setAttribute(AttributePtr attribute){
-    if(processPower(attribute)){
-      return;
-    }
-
-    if(attribute->isType("transaction_delay")) {
-      this->transactionDelays[this->getPowerMode()] =
-        Director::createSC_Time(attribute->getValue());
-      return;
-    }
-    
-    if(attribute->isType("transfer_delay")) {
-      this->transactionDelays[this->getPowerMode()] =
-        Director::createSC_Time(attribute->getValue());
-      return;
-    }
-
-    if(attribute->isType("transaction")) {
-      unsigned int transactionSize = 1;
-      sc_time transactionDelay     = SC_ZERO_TIME;
-      if(attribute->hasParameter("delay")){
-        transactionDelay =
-          Director::createSC_Time(attribute->getParameter("delay"));
-      }
-
-      if(attribute->hasParameter("size")){
-        transactionSize = atoi(attribute->getParameter("size").c_str());
-      }
-
-      this->transactionDelays[this->getPowerMode()] = transactionDelay;
-      // FIXME: add transactionSize
-      return;
-    }
-    
-    scheduler->setAttribute(attribute);
-  }
-
   /**
    *
    */
@@ -570,20 +477,12 @@ namespace SystemC_VPC{
     
   }
 
-  void Component::loadLocalGovernorPlugin(std::string plugin){
-    //std::cerr << "Component::loadLocalGovernorPlugin" << std::endl;
-
-    if(plugin == "") return;
-
-    if(Component::factories.find(plugin) == Component::factories.end()){
-      Component::factories[plugin] =
-        new DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >
-          (plugin.c_str());
+  bool Component::setAttribute(AttributePtr attribute){
+    bool isComponentAttribute = AbstractComponent::setAttribute(attribute);
+    if (!isComponentAttribute){
+      scheduler->setAttribute(attribute);
     }
-
-    localGovernorFactory = Component::factories[plugin]->factory;
   }
-
   Component::~Component(){
     this->setPowerConsumption(0.0);
     this->fireNotification(this);
@@ -592,18 +491,5 @@ namespace SystemC_VPC{
     delete powerSumming;
     delete powerSumStream;
 #endif // NO_POWER_SUM
-#ifndef NO_VCD_TRACES
-    for(std::map<std::string, Tracing* >::iterator iter
-          = trace_map_by_name.begin();
-        iter != trace_map_by_name.end();
-        ++iter){
-      delete iter->second;
-    }
-    trace_map_by_name.clear();
-    sc_close_vcd_trace_file(traceFile);
-#endif //NO_VCD_TRACES      
   }
-
-
-  Component::Factories Component::factories;
 } //namespace SystemC_VPC

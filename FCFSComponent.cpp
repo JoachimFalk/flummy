@@ -27,8 +27,8 @@ namespace SystemC_VPC{
   /**
    *
    */
-  FCFSComponent::FCFSComponent( sc_module_name name, Director *director )
-      : AbstractComponent(name),
+  FCFSComponent::FCFSComponent( std::string name, Director *director )
+      : AbstractComponent(name.c_str()),
         runningTask(NULL),
         blockMutex(0)
     {
@@ -63,18 +63,6 @@ namespace SystemC_VPC{
       powerSumming   = new PowerSumming(*powerSumStream);
       this->addObserver(powerSumming);
 #endif // NO_POWER_SUM
-
-#ifndef NO_VCD_TRACES
-      std::string tracefilename=this->getName(); //componentName;
-
-      char* traceprefix= getenv("VPCTRACEFILEPREFIX");
-      if(0!=traceprefix){
-        tracefilename.insert(0,traceprefix);
-      }
-
-      this->traceFile = sc_create_vcd_trace_file(tracefilename.c_str());
-      this->traceFile->set_time_unit(1, SC_NS);
-#endif //NO_VCD_TRACES      
 
       fireStateChanged(ComponentState::IDLE);
     }
@@ -111,112 +99,6 @@ namespace SystemC_VPC{
     }
   }
 
-
-  bool FCFSComponent::processPower(Attribute att)
-  {
-    // hierarchical format
-    if(!att.isType("powermode")) {
-      return false;
-    }
-    
-    this->addPowerGovernor(midPowerGov);
-
-    for(size_t i=0; i<att.getAttributeSize();++i){
-      AttributePtr powerAttPtr = att.getNextAttribute(i).second;
-      if(powerAttPtr->isType("governor")){
-        sc_time window    = sc_time(12.5, SC_MS);
-        sc_time upperTime = sc_time(12.1, SC_MS);
-        sc_time lowerTime = sc_time( 4.0, SC_MS);
-        if(powerAttPtr->hasParameter("sliding_window")){
-          std::string v = powerAttPtr->getParameter("sliding_window");
-          window = Director::createSC_Time(v.c_str());
-        }
-        if(powerAttPtr->hasParameter("upper_threshold")){
-          std::string v = powerAttPtr->getParameter("upper_threshold");
-          upperTime = window*atof(v.c_str());
-        }
-        if(powerAttPtr->hasParameter("lower_threshold")){
-          std::string v = powerAttPtr->getParameter("lower_threshold");
-          lowerTime = window*atof(v.c_str());
-        }
-        /* FIXME:
-        midPowerGov->setParams(window,
-                               upperTime,
-                               lowerTime);
-        */
-        continue;
-      }
-
-
-
-      std::string powerMode = att.getNextAttribute(i).first;
-      const PowerMode *power = this->translatePowerMode(powerMode);
-
-      if(powerTables.find(power) == powerTables.end()){
-        powerTables[power] = PowerTable();
-      }
-
-      PowerTable &powerTable=powerTables[power];
-
-      if(powerAttPtr->hasParameter("IDLE")){
-        std::string v = powerAttPtr->getParameter("IDLE");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::IDLE] = value;
-      }
-      if(powerAttPtr->hasParameter("RUNNING")){
-        std::string v = powerAttPtr->getParameter("RUNNING");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::RUNNING] = value;
-      }
-      if(powerAttPtr->hasParameter("STALLED")){
-        std::string v = powerAttPtr->getParameter("STALLED");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::STALLED] = value;
-      }
-      if(powerAttPtr->hasParameter("transaction_delay")) {
-        this->transactionDelays[power] =
-          Director::createSC_Time(powerAttPtr->getParameter("transaction_delay"));
-      }
-      if(powerAttPtr->hasParameter("transfer_delay")) {
-        this->transactionDelays[power] =
-          Director::createSC_Time(powerAttPtr->getParameter("transfer_delay"));
-      }
-
-    }
-        
-    return true;
-  }
-  
-  void FCFSComponent::setAttribute(Attribute& attributes){
-    if(processPower(attributes)){
-      return;
-    }
-
-    if(attributes.isType("transfer_delay")) {
-      this->transactionDelays[this->getPowerMode()] =
-        Director::createSC_Time(attributes.getValue());
-      return;
-    }
-    
-    if(attributes.isType("transaction")) {
-      unsigned int transactionSize = 1;
-      sc_time transactionDelay     = SC_ZERO_TIME;
-      if(attributes.hasParameter("delay")){
-        transactionDelay =
-          Director::createSC_Time(attributes.getParameter("delay"));
-      }
-
-      if(attributes.hasParameter("size")){
-        transactionSize = atoi(attributes.getParameter("size").c_str());
-      }
-
-      this->transactionDelays[this->getPowerMode()] = transactionDelay;
-      // FIXME: add transactionSize
-      return;
-    }
-    
-    //scheduler->setAttribute(attributes);
-  }
 
   /**
    *

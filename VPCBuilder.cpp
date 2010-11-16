@@ -301,8 +301,8 @@ using namespace CoSupport::XML::Xerces;
             || (sScheduler == STR_FCFS) ){
 
           // ** FIXME: here we add the new FCFSComponent
-          //comp = new FCFSComponent(sName, director);
-          comp = new Component(sName,sScheduler,director);
+          comp = new FCFSComponent(sName, director);
+          //comp = new Component(sName,sScheduler,director);
         }else{
           comp = new Component(sName,sScheduler,director);
         }

@@ -19,6 +19,7 @@
 #define HSCD_VPC_ABSTRACTCOMPONENT_H
 
 #include <vector>
+#include <map>
 
 #include <systemc.h>
 
@@ -32,7 +33,9 @@
 #include "FunctionTimingPool.hpp"
 #include "PCBPool.hpp"
 #include "Task.hpp"
+#include "PowerSumming.hpp"
 #include "PowerMode.hpp"
+#include "PluggablePowerGovernor.hpp"
 #include "ComponentInfo.hpp"
 #include "ComponentModel.hpp"
 #include "Attribute.hpp"
@@ -44,6 +47,11 @@ class ComponentObserver;
 
   using CoSupport::SystemC::Event;
   using CoSupport::SystemC::RefCountEventPtr;
+
+  typedef std::map<ComponentState, double> PowerTable;
+  typedef std::map<const PowerMode*, PowerTable>  PowerTables;
+
+
   /**
    * \brief The interface of a Virtual-Processing-Component (VPC).
    */
@@ -53,13 +61,24 @@ class ComponentObserver;
   public:
 
     virtual ~AbstractComponent(){
+#ifndef NO_VCD_TRACES
+      for(std::map<std::string, Tracing* >::iterator iter
+          = trace_map_by_name.begin();
+          iter != trace_map_by_name.end();
+          ++iter){
+        delete iter->second;
+      }
+      trace_map_by_name.clear();
+      sc_close_vcd_trace_file(traceFile);
+#endif //NO_VCD_TRACES
+
       this->timingPools.clear();
     }
 
     /**
      * \brief Set parameter for Component and Scheduler.
      */
-    virtual void setAttribute(AttributePtr attributePtr)=0;
+    virtual bool setAttribute(AttributePtr attributePtr);
 
     const char* getName() const;
 
@@ -99,7 +118,19 @@ class ComponentObserver;
 #ifndef NO_VCD_TRACES
         traceFile(NULL),
 #endif //NO_VCD_TRACES
-      powerMode(NULL) {}
+        powerMode(NULL),
+        localGovernorFactory(NULL),
+        midPowerGov(NULL),
+        powerAttribute(new Attribute("",""))
+    {
+      if(powerTables.find(getPowerMode()) == powerTables.end()){
+        powerTables[getPowerMode()] = PowerTable();
+      }
+
+      PowerTable &powerTable=powerTables[getPowerMode()];
+      powerTable[ComponentState::IDLE]    = 0.0;
+      powerTable[ComponentState::RUNNING] = 1.0;
+    }
             
     /**
        * \brief Simulate an execution on this "Virtual Component".
@@ -184,6 +215,12 @@ class ComponentObserver;
 #endif //NO_VCD_TRACES
 
   private:
+
+    bool processPower(AttributePtr att);
+
+    void loadLocalGovernorPlugin(std::string plugin);
+
+
     /**
      *
      */
@@ -191,8 +228,17 @@ class ComponentObserver;
     FunctionTimingPoolPtr timingPool;
     std::map<const PowerMode*, FunctionTimingPoolPtr> timingPools;
     const PowerMode *powerMode;
-  };
-  
+
+  protected:
+    PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
+    PluggableLocalPowerGovernor *midPowerGov;
+    AttributePtr powerAttribute;
+    typedef std::map<std::string,
+                     DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
+      Factories;
+    static Factories factories;
+    PowerTables powerTables;
+    };
 }
 
 #endif //HSCD_VPC_ABSTRACTCOMPONENT_H
