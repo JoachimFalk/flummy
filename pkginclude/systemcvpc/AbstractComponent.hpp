@@ -177,7 +177,7 @@ class ComponentObserver;
 
       this->trace_map_by_name.insert(std::pair<std::string, Tracing*>(
           this->getName(), newsignal));
-      sc_trace(this->traceFile, *newsignal->traceSignal, this->getName());
+      sc_trace(this->traceFile, *newsignal->traceSignal, name);
       newsignal->traceSleeping();
       return newsignal;
     }
