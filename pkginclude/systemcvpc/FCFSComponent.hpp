@@ -95,7 +95,7 @@ namespace SystemC_VPC{
      * \brief An implementation of AbstractComponent used together with
      * passive actors and global SMoC v2 Schedulers.
      */
-    FCFSComponent( sc_module_name name, Director *director );
+    FCFSComponent( std::string name, Director *director );
       
     virtual ~FCFSComponent()
     {
@@ -106,15 +106,7 @@ namespace SystemC_VPC{
       delete powerSumming;
       delete powerSumStream;
 #endif // NO_POWER_SUM
-#ifndef NO_VCD_TRACES
-      sc_close_vcd_trace_file(traceFile);
-#endif //NO_VCD_TRACES      
     }
-
-    /**
-     * \brief Set parameter for Component and Scheduler.
-     */
-    virtual void setAttribute(Attribute& fr_Attributes);
     
     void addPowerGovernor(PluggableLocalPowerGovernor * gov){
       this->addObserver(gov);
