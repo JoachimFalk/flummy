@@ -482,7 +482,9 @@ namespace SystemC_VPC{
     if (!isComponentAttribute){
       scheduler->setAttribute(attribute);
     }
+    return true;
   }
+
   Component::~Component(){
     this->setPowerConsumption(0.0);
     this->fireNotification(this);
