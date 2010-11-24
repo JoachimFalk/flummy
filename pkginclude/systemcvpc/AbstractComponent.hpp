@@ -50,6 +50,7 @@ class ComponentObserver;
 
   typedef std::map<ComponentState, double> PowerTable;
   typedef std::map<const PowerMode*, PowerTable>  PowerTables;
+  typedef std::vector<ProcessId> ScheduledTasks;
 
 
   /**
@@ -100,9 +101,19 @@ class ComponentObserver;
     PCBPool& getPCBPool(){
       return this->pcbPool;
     }
+
+    /**
+     *
+     */
+    void addScheduledTask(ProcessId pid){
+      if (scheduledTasks.empty() || scheduledTasks.back() != pid){
+        scheduledTasks.push_back(pid);
+      }
+    }
   protected:
 
     std::map<const PowerMode*, sc_time> transactionDelays;
+    ScheduledTasks scheduledTasks;
 
 #ifndef NO_VCD_TRACES
     sc_trace_file *traceFile;
@@ -115,6 +126,8 @@ class ComponentObserver;
     AbstractComponent(sc_module_name name)
       : sc_module(name),
         Delayer(),
+        transactionDelays(),
+        scheduledTasks(),
 #ifndef NO_VCD_TRACES
         traceFile(NULL),
 #endif //NO_VCD_TRACES

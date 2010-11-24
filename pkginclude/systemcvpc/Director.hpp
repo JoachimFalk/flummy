@@ -26,12 +26,14 @@
 #include <systemcvpc/TaskPool.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/PluggablePowerGovernor.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
 
 #include <string>
 #include <map>
 #include <vector>
 #include <fstream>
 #include <stdio.h>
+#include <boost/function.hpp>
 
 namespace SystemC_VPC{
 
@@ -54,6 +56,26 @@ namespace SystemC_VPC{
      */
     static Director& getInstance(){
       return *singleton;
+    }
+
+    /**
+     *
+     */
+    static bool canExecute(ProcessId pid){
+      Task & task = getInstance().taskPool.getPrototype(pid);
+      if (task.hasScheduledTask()){
+        return getInstance().callCanExecute(task.getScheduledTask());
+      }
+      return false;
+    }
+
+    /**
+     *
+     */
+    static void execute(ProcessId pid){
+      Task & task = getInstance().taskPool.getPrototype(pid);
+      assert (task.hasScheduledTask());
+      getInstance().callExecute(task.getScheduledTask());
     }
 
     ~Director();
@@ -153,12 +175,11 @@ namespace SystemC_VPC{
 
     ComponentId getComponentId(std::string component);
 
-    FastLink registerActor(std::string actorName,
+    FastLink registerActor(ScheduledTask * actor,
+                             std::string actorName,
                              const FunctionNames& functionNames);
 
     FastLink registerRoute(std::string source, std::string destination);
-
-    FastLink getFastLink(std::string process, std::string function);
 
     FastLink getFastLink(std::string source,
                          std::string destination,
@@ -202,6 +223,14 @@ namespace SystemC_VPC{
     sc_time getEnd() const {
       return end;
     }
+
+    void registerSysteMoCCallBacks(
+      boost::function<void (SystemC_VPC::ScheduledTask* actor)> execute,
+      boost::function<bool (SystemC_VPC::ScheduledTask* actor)> testExecute){
+
+      callExecute = execute;
+      callCanExecute = testExecute;
+    }
   private:
 
     Task * preCompute( FastLink fLink,
@@ -211,6 +240,21 @@ namespace SystemC_VPC{
                       EventPair endPair );
 
     void debugUnknownNames( ) const;
+
+    void assertMapping(ProcessId & pid){
+      if (mappings.size() < pid ||
+          mappings[pid] == NULL) {
+
+        Task &task = this->taskPool.getPrototype( pid );
+
+        std::cerr << "Unknown mapping <"
+            << task.getName() << "> to ??" << std::endl;
+
+        assert(mappings.size() >= pid &&
+               mappings[pid] != NULL);
+        exit(-1);
+      }
+    }
 
     /**
      * Singleton design pattern
@@ -260,6 +304,11 @@ namespace SystemC_VPC{
     PowerSumming    *powerSumming;
 
     TaskPool        taskPool;
+
+    // callback to SysteMoC
+    boost::function<void (SystemC_VPC::ScheduledTask* actor)> callExecute;
+    boost::function<bool (SystemC_VPC::ScheduledTask* actor)> callCanExecute;
+
   };
 
 }

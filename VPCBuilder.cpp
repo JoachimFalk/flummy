@@ -297,12 +297,12 @@ using namespace CoSupport::XML::Xerces;
         //std::map<std::string, AbstractComponent* >::iterator iter
         //  = this->knownComps.find(sName);
         //if(iter == this->knownComps.end()){ 
-        if( (sScheduler == STR_FIRSTCOMEFIRSTSERVE)
-            || (sScheduler == STR_FCFS) ){
+        if( (sScheduler == STR_ROUNDROBIN)
+            || (sScheduler == STR_RR) ){
 
           // ** FIXME: here we add the new FCFSComponent
-          //comp = new FCFSComponent(sName, director);
-          comp = new Component(sName,sScheduler,director);
+          comp = new FCFSComponent(sName, director);
+          //comp = new Component(sName,sScheduler,director);
         }else{
           comp = new Component(sName,sScheduler,director);
         }

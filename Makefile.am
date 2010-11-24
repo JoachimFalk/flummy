@@ -54,6 +54,7 @@ libsystemcvpc_la_SOURCES =			\
 	BlockingTransport.cpp			\
 	Component.cpp				\
 	Director.cpp				\
+	ScheduledTask.cpp			\
 	PriorityScheduler.cpp			\
 	PrioritySchedulerNoPreempt.cpp		\
 	RoundRobinScheduler.cpp			\

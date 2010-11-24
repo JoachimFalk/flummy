@@ -8,6 +8,7 @@
 
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/TaskPool.hpp>
 
 namespace SystemC_VPC {
@@ -22,7 +23,8 @@ namespace SystemC_VPC {
       pcb(),
       pool(pool),
       name("NN"),
-      timingScale(1)
+      timingScale(1),
+      scheduledTask(NULL)
     {
           this->instanceId = Task::globalInstanceId++;
     }
@@ -73,6 +75,12 @@ namespace SystemC_VPC {
     void setTimingScale( double scale )         {this->timingScale = scale;}
     double getTimingScale()                     {return this->timingScale;}
 
+    void setScheduledTask(ScheduledTask * st)
+      {this->scheduledTask = st;}
+    ScheduledTask * getScheduledTask()
+      {return this->scheduledTask;}
+    bool hasScheduledTask()
+      {return this->scheduledTask != NULL;}
 
     /**
      * 
@@ -163,7 +171,8 @@ namespace SystemC_VPC {
       pcb(task.pcb),
       pool(task.pool),
       name(task.name),
-      timingScale(task.timingScale)
+      timingScale(task.timingScale),
+      scheduledTask(task.scheduledTask)
     {
           this->instanceId = Task::globalInstanceId++;
     }
@@ -192,6 +201,7 @@ namespace SystemC_VPC {
     std::string name;
     double timingScale;
     CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
+    ScheduledTask * scheduledTask;
   };
 
   typedef std::map<int, Task*>  TaskMap;

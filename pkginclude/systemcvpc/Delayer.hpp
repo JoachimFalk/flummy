@@ -27,6 +27,7 @@
 namespace SystemC_VPC{
 
   class Director;
+  class ScheduledTask;
 
   /**
    * \brief Interface for classes implementing delay simulation.
@@ -51,6 +52,9 @@ namespace SystemC_VPC{
     void fireNotification(ComponentInfo *compInf);
 
     virtual void initialize(const Director* d) {};
+
+    virtual void notifyActivation(const ScheduledTask * scheduledTask,
+        bool active) {}
 
     virtual ~Delayer() {}
 

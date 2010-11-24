@@ -17,6 +17,7 @@
  *****************************************************************************/
 #include <systemcvpc/FCFSComponent.hpp>
 #include <systemcvpc/datatypes.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 
@@ -75,27 +76,25 @@ namespace SystemC_VPC{
     DBG_OUT("FCFSComponent::schedule_method (" << this->name()
             << ") triggered @" << sc_time_stamp() << endl);
 
-    if(runningTask != NULL) {
-      if(startTime+runningTask->getRemainingDelay() <= sc_time_stamp()){
-        // remove running task
-        removeTask();
-        // assign new task
-        if(!readyTasks.empty()) {
-          scheduleTask();
-          next_trigger(runningTask->getRemainingDelay(),
-                       notify_scheduler_thread);
-        }else {
-          next_trigger(notify_scheduler_thread);
-        }
-      }else{
-        // blocking compute iterrupt ??
-        DBG_OUT("blocking compute iterrupt ??" << endl);
+    //default trigger
+    next_trigger(notify_scheduler_thread);
+
+    if (runningTask == NULL) {
+      bool released = releaseActor();
+      if (released){
+        //assert(!readyTasks.empty());
       }
 
-    }else{
-      scheduleTask();
-      next_trigger(runningTask->getRemainingDelay(),
-                   notify_scheduler_thread);
+      if (!readyTasks.empty()){
+        scheduleTask();
+        next_trigger(runningTask->getRemainingDelay());
+
+      }
+
+    } else {
+      assert(startTime+runningTask->getRemainingDelay() <= sc_time_stamp());
+      removeTask();
+      schedule_method(); //recursion will release/schedule next task
     }
   }
 
@@ -128,21 +127,22 @@ namespace SystemC_VPC{
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
             << " ) at time: " << sc_time_stamp()
             << " mode: " << this->getPowerMode()->getName()
+            << " schedTask: " << actualTask->getScheduledTask()
             << std::endl);
 
     // reset the execution delay
     actualTask->initDelays();
-    DBG_OUT("Using " << actualTask->getRemainingDelay()
-         << " as delay for function " << actualTask->getFunctionId() << "!"
-         << std::endl);
-    DBG_OUT("And " << actualTask->getLatency() << " as latency for function "
-         << actualTask->getFunctionId() << "!" << std::endl);
+//    DBG_OUT("Using " << actualTask->getRemainingDelay()
+//         << " as delay for function " << actualTask->getFunctionIds()() << "!"
+//         << std::endl);
+//    DBG_OUT("And " << actualTask->getLatency() << " as latency for function "
+//         << actualTask->getFunctionIds()() << "!" << std::endl);
     
     //store added task
     this->addTask(actualTask);
 
     //awake scheduler thread
-    if(runningTask == NULL){
+    if(runningTask == NULL && !actualTask->hasScheduledTask()){
       notify_scheduler_thread.notify();
       //blockCompute.notify();
     }
@@ -248,6 +248,15 @@ namespace SystemC_VPC{
   {
     this->setComponentState(state);
     this->updatePowerConsumption();
+  }
+
+  void FCFSComponent::notifyActivation(const ScheduledTask * scheduledTask,
+      bool active){
+    DBG_OUT(this->name() << " notifyActivation " << active << std::endl);
+    if(runningTask == NULL && active){
+      notify_scheduler_thread.notify(SC_ZERO_TIME);
+      //blockCompute.notify();
+    }
   }
 
 } //namespace SystemC_VPC
