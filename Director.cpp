@@ -192,14 +192,8 @@ namespace SystemC_VPC{
       //HINT: also treat mode!!
       //if( endPair.latency != NULL ) endPair.latency->notify();
     
-      if (mappings.size() < fLink.process ||
-          mappings[fLink.process] == NULL) {
-        cerr << "Unknown mapping <" << task->getName() << "> to ??" << std::endl;
+      assertMapping(fLink.process);
       
-        assert(mappings.size() >= fLink.process &&
-               mappings[fLink.process] != NULL);
-      }
-    
       return task;
     } catch (NotAllocatedException e){
       cerr << "Unknown Task: ID = " << fLink.process
@@ -469,8 +463,10 @@ namespace SystemC_VPC{
     return globalFunctionId++;
   }
 
-  FastLink Director::registerActor(std::string actorName,
-                                      const FunctionNames &functionNames){
+  FastLink Director::registerActor(ScheduledTask * actor,
+      std::string actorName,
+      const FunctionNames &functionNames)
+  {
     //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
 
@@ -485,6 +481,24 @@ namespace SystemC_VPC{
       }
       debugFunctionNames[pid].insert(*iter);
     }
+
+    if (!taskPool.contains( pid )){
+      cerr << "Unknown Task: name = " << actorName  << std::endl;
+      return FastLink(pid, functionIds);
+
+      //debugUnknownNames();
+      //throw NotAllocatedException(actorName);
+    }
+    Task &task = taskPool.getPrototype(pid);
+    task.setScheduledTask(actor);
+
+    assertMapping(pid);
+    Delayer* delayer = mappings[pid];
+    AbstractComponent * component = dynamic_cast<AbstractComponent*>(delayer);
+    if (component != NULL){
+      component->addScheduledTask(pid);
+    }
+    actor->setDelayer(delayer);
 
     return FastLink(pid, functionIds);
   }
@@ -508,12 +522,6 @@ namespace SystemC_VPC{
     }
 
     return FastLink(pid, fids);
-  }
-
-  FastLink Director::getFastLink(std::string process, std::string function) {
-    FunctionNames functions;
-    functions.push_back(function);
-    return registerActor(process, functions);
   }
 
   FastLink Director::getFastLink(std::string source,

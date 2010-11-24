@@ -148,6 +148,9 @@ namespace SystemC_VPC{
     
     void fireStateChanged(const ComponentState &state);
 
+    virtual void notifyActivation(const ScheduledTask * scheduledTask,
+        bool active);
+
     void addTask(Task *newTask){
       DBG_OUT(this->getName() << " add Task: " << newTask->getName()
               << " @ " << sc_time_stamp() << std::endl);
@@ -165,7 +168,21 @@ namespace SystemC_VPC{
                 << std::endl);
       
         runningTask->getBlockEvent().dii->notify();
+
+        // signalLatencyEvent will release runningTask (back to TaskPool)
+        bool hasScheduledTask = runningTask->hasScheduledTask();
+        ProcessId pid = runningTask->getProcessId();
+
         Director::getInstance().signalLatencyEvent(runningTask);
+
+        DBG_OUT("remove Task " << runningTask->getName() << std::endl);
+        if (hasScheduledTask){
+          // reflect comm_state -> execute _communicate transition
+          // FIXME: redesign
+          assert(Director::canExecute(pid));
+          Director::execute(pid);
+        }
+
         //TODO: PIPELINING
         runningTask = NULL;
     }
@@ -184,6 +201,22 @@ namespace SystemC_VPC{
         //TODO
       }
       runningTask = task;
+    }
+
+    bool releaseActor(){
+      for(ScheduledTasks::iterator iter = scheduledTasks.begin();
+          iter != scheduledTasks.end();
+          ++iter)
+      {
+        bool canExec = Director::canExecute(*iter);
+        DBG_OUT("FCFS test task: " << *iter
+            << " -> " << canExec << std::endl);
+        if(canExec){
+          Director::execute(*iter);
+          return true;
+        }
+      }
+      return false;
     }
   };
 

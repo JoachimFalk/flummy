@@ -67,6 +67,7 @@ nobase_include_HEADERS =				\
 	systemcvpc/Route.hpp 				\
 	systemcvpc/RoutePool.hpp 			\
 	systemcvpc/StaticRoute.hpp 			\
+	systemcvpc/ScheduledTask.hpp 		\
 	systemcvpc/Task.hpp 				\
 	systemcvpc/TaskPool.hpp 			\
 	systemcvpc/TDMAScheduler.hpp 			\
