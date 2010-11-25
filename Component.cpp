@@ -267,8 +267,8 @@ namespace SystemC_VPC{
               || 0==strncmp(schedulername,STR_RM,strlen(STR_RM))){
       scheduler=new RateMonotonicScheduler((const char*)schedulername);
 
-    }else if( 0==strncmp(schedulername,STR_FIRSTCOMEFIRSTSERVE,
-                         strlen(STR_FIRSTCOMEFIRSTSERVE))
+    }else if( 0==strncmp(schedulername,STR_FIRSTCOMEFIRSTSERVED,
+                         strlen(STR_FIRSTCOMEFIRSTSERVED))
               || 0==strncmp(schedulername,STR_FCFS,strlen(STR_FCFS))){
       scheduler=new FCFSScheduler();
       
@@ -287,7 +287,7 @@ namespace SystemC_VPC{
                          strlen(STR_TTCC))){
       scheduler=new TimeTriggeredCCScheduler((const char*)schedulername);
     }else{
-      //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVE << endl;
+      //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVED << endl;
       scheduler=new FCFSScheduler();
     }
   }
