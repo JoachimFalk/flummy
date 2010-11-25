@@ -12,7 +12,7 @@
 #include <systemcvpc/VpcDomErrorHandler.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Component.hpp>
-#include <systemcvpc/FCFSComponent.hpp>
+#include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/BlockingTransport.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/StaticRoute.hpp>
@@ -297,12 +297,10 @@ using namespace CoSupport::XML::Xerces;
         //std::map<std::string, AbstractComponent* >::iterator iter
         //  = this->knownComps.find(sName);
         //if(iter == this->knownComps.end()){ 
-        if( (sScheduler == STR_ROUNDROBIN)
-            || (sScheduler == STR_RR) ){
+        if ( (sScheduler == STR_FIRSTCOMEFIRSTSERVED)
+            || (sScheduler == STR_FCFS) ){
 
-          // ** FIXME: here we add the new FCFSComponent
-          comp = new FCFSComponent(sName, director);
-          //comp = new Component(sName,sScheduler,director);
+          comp = new FcfsComponent(sName, director);
         }else{
           comp = new Component(sName,sScheduler,director);
         }

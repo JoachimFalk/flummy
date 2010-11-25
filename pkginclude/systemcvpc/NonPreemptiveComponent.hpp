@@ -7,7 +7,7 @@
  * Title: SystemC-VPC
  * Comment:
  * ----------------------------------------------------------------------------
- * FCFSComponent.h
+ * NonPreemptiveComponent.hpp
  * ----------------------------------------------------------------------------
  * Modifications History:
  * ----------------------------------------------------------------------------
@@ -60,9 +60,9 @@ namespace SystemC_VPC{
    * \brief An implementation of AbstractComponent.
    * 
    */
-  class FCFSComponent : public AbstractComponent{
+  class NonPreemptiveComponent : public AbstractComponent{
     
-    SC_HAS_PROCESS(FCFSComponent);
+    SC_HAS_PROCESS(NonPreemptiveComponent);
 
   public:
 
@@ -96,9 +96,9 @@ namespace SystemC_VPC{
      * \brief An implementation of AbstractComponent used together with
      * passive actors and global SMoC v2 Schedulers.
      */
-    FCFSComponent( std::string name, Director *director );
+    NonPreemptiveComponent( std::string name, Director *director );
       
-    virtual ~FCFSComponent()
+    virtual ~NonPreemptiveComponent()
     {
       this->setPowerConsumption(0.0);
       this->fireNotification(this);
@@ -119,17 +119,19 @@ namespace SystemC_VPC{
 
     void remainingPipelineStages();
 
+    void fireStateChanged(const ComponentState &state);
+
+    Task*                  runningTask;
+    sc_event notify_scheduler_thread;
+
+    // time last task started
+    sc_time startTime;
   private:
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
-    std::list<ScheduledTask *>       fcfsQueue;
-
-    std::deque<Task*>      readyTasks;
-    Task*                  runningTask;
 
     PowerTables powerTables;
     
-    sc_event notify_scheduler_thread;
     Event blockCompute;
     size_t   blockMutex;
 #ifndef NO_POWER_SUM
@@ -141,24 +143,9 @@ namespace SystemC_VPC{
 
     bool processPower(Attribute att);
 
-    // time last task started
-    sc_time startTime;
-
     void moveToRemainingPipelineStages(Task* task);
     
     void setScheduler(const char *schedulername);
-    
-    void fireStateChanged(const ComponentState &state);
-
-    virtual void notifyActivation(ScheduledTask * scheduledTask,
-        bool active);
-
-    void addTask(Task *newTask){
-      DBG_OUT(this->getName() << " add Task: " << newTask->getName()
-              << " @ " << sc_time_stamp() << std::endl);
-      newTask->traceReleaseTask();
-      readyTasks.push_back(newTask);
-    }
 
     void removeTask(){
         fireStateChanged(ComponentState::IDLE);
@@ -191,40 +178,44 @@ namespace SystemC_VPC{
         runningTask = NULL;
     }
 
-    void scheduleTask(){
-      assert(!readyTasks.empty());
-      Task* task = readyTasks.front();
-      readyTasks.pop_front();
-      startTime = sc_time_stamp();
-      DBG_OUT(this->getName() << " schedule Task: " << task->getName()
-              << " @ " << sc_time_stamp() << std::endl);
-      
-      task->traceAssignTask();
-      fireStateChanged(ComponentState::RUNNING);
-      if(task->isBlocking() /* && !assignedTask->isExec() */) {
-        //TODO
-      }
-      runningTask = task;
-    }
+    virtual void addTask(Task *newTask) = 0;
 
-    bool releaseActor(){
-      while(!fcfsQueue.empty()){
-        ScheduledTask * scheduledTask = fcfsQueue.front();
-        fcfsQueue.pop_front();
+    virtual void scheduleTask() = 0;
 
-        bool canExec = Director::canExecute(scheduledTask);
-        DBG_OUT("FCFS test task: " << scheduledTask
-            << " -> " << canExec << std::endl);
-        if(canExec){
-          Director::execute(scheduledTask);
-          return true;
-        }
-      }
+    virtual void notifyActivation(ScheduledTask * scheduledTask,
+        bool active) = 0;
 
-      return false;
-    }
+    virtual bool releaseActor() = 0;
+
+    virtual bool hasReadyTask() = 0;
   };
 
+  class FcfsComponent : public NonPreemptiveComponent {
+  public:
+    FcfsComponent( std::string name, Director *director ) :
+      NonPreemptiveComponent(name, director)
+    {
+    }
+
+    virtual ~FcfsComponent() {}
+
+    void addTask(Task *newTask);
+
+    void scheduleTask();
+
+    void notifyActivation(ScheduledTask * scheduledTask,
+        bool active);
+
+    bool releaseActor();
+
+    bool hasReadyTask(){
+      return !readyTasks.empty();
+    }
+  private:
+    std::list<ScheduledTask *>       fcfsQueue;
+    std::deque<Task*>                readyTasks;
+
+  };
 } 
 
 #endif //__INCLUDED_FCFSCOMPONENT_H__

@@ -383,7 +383,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\FCFSComponent.cpp"
+				RelativePath="..\..\NonPreemptiveComponent.cpp"
 				>
 			</File>
 			<File
@@ -545,7 +545,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\pkginclude\systemcvpc\FCFSComponent.hpp"
+				RelativePath="..\..\pkginclude\systemcvpc\NonPreemptiveComponent.hpp"
 				>
 			</File>
 			<File
