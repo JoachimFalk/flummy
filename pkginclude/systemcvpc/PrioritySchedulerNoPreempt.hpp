@@ -34,8 +34,7 @@ namespace SystemC_VPC{
     sc_time* schedulingOverhead(){return 0;}//;
   protected:
     int order_counter;
-    p_queue_compare comp;
-    std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,p_queue_compare> pqueue;
+    std::priority_queue<p_queue_entry> pqueue;
 
   };
 }

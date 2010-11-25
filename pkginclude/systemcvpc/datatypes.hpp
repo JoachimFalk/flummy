@@ -27,29 +27,5 @@ typedef CoSupport::SystemC::RefCountEvent         VPC_Event;
 // set for debugging output
 //#define VPC_DEBUG true;
 
-  class Task;
-
-  struct p_queue_entry{
-    int fifo_order;  // sekundärstrategie
-    Task *task;
-  };
-
-  struct timePcbPair{
-    sc_time time;
-    Task *task;
-  };
-
-  struct timeCompare{
-    bool operator()(const timePcbPair& left,
-                    const timePcbPair& right) const
-    {
-      if (left.time > right.time)
-        return true;
-      else
-        return false;
-    }
-
-  };
-
 } // namespace SystemC_VPC
 #endif

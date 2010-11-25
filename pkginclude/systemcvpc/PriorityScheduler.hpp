@@ -10,23 +10,6 @@
 namespace SystemC_VPC{
   class Component;
 
-  struct p_queue_compare{
-    bool operator()(const p_queue_entry& pqe1,
-        const p_queue_entry& pqe2) const
-    {
-      int p1=pqe1.task->getPriority();
-      int p2=pqe2.task->getPriority();
-      if (p1 > p2)
-        return true;
-      else if(p1 == p2)
-        return (pqe1.fifo_order>pqe2.fifo_order);
-      else
-        return false;
-    }
-
-  };
-
-
   class PriorityScheduler : public Scheduler{
   public:
 
@@ -49,8 +32,7 @@ namespace SystemC_VPC{
     sc_time* schedulingOverhead(){return 0;}//;
   protected:
     int order_counter;
-    p_queue_compare comp;
-    std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,p_queue_compare> pqueue;
+    std::priority_queue<p_queue_entry> pqueue;
 
   };
 }
