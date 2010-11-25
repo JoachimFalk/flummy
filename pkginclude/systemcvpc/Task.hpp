@@ -206,5 +206,38 @@ namespace SystemC_VPC {
 
   typedef std::map<int, Task*>  TaskMap;
 
+  struct p_queue_entry{
+    int fifo_order;  // sekundärstrategie
+    Task *task;
+
+    //Threads with smaller priority value have higher priority
+    bool operator<(const p_queue_entry& other) const
+    {
+      int p1=task->getPriority();
+      int p2=other.task->getPriority();
+      if (p1 > p2)
+        return true;
+      else if(p1 == p2)
+        return (fifo_order>other.fifo_order);
+      else
+        return false;
+    }
+
+  };
+
+  struct timePcbPair{
+    sc_time time;
+    Task *task;
+
+    bool operator<(const timePcbPair& right) const
+    {
+      if (time > right.time)
+        return true;
+      else
+        return false;
+    }
+
+  };
+
 }
 #endif // HSCD_VPC_TASK_H_

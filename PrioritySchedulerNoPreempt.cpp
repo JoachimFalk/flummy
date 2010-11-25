@@ -4,11 +4,9 @@
 #include <systemcvpc/datatypes.hpp>
 
 namespace SystemC_VPC{
-  PrioritySchedulerNoPreempt::PrioritySchedulerNoPreempt(const char *schedulername){
-
-    std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,p_queue_compare>
-      pqueue(comp);
-
+  PrioritySchedulerNoPreempt::PrioritySchedulerNoPreempt(
+    const char *schedulername) : pqueue()
+  {
     order_counter=0;
   }
 

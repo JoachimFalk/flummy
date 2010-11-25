@@ -115,7 +115,7 @@ namespace SystemC_VPC{
 
   private:
     sc_event remainingPipelineStages_WakeUp;
-    std::priority_queue<timePcbPair, std::vector<timePcbPair>,timeCompare> pqueue;
+    std::priority_queue<timePcbPair> pqueue;
 
     Scheduler *scheduler;
     std::deque<Task*>      newTasks;
