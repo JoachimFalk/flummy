@@ -24,9 +24,7 @@ namespace SystemC_VPC{
    *
    */
   void PriorityScheduler::addedNewTask(Task *task){
-    p_queue_entry pqe;
-    pqe.fifo_order=order_counter++;
-    pqe.task=task;
+    p_queue_entry pqe(order_counter++,task);
     pqueue.push(pqe);
   }
   /**
@@ -66,7 +64,7 @@ namespace SystemC_VPC{
          ret_decision=PREEMPT;                        //preempt task
          task_to_resign=task->getInstanceId(); 
          pqueue.pop();
-         p_queue_entry pqe={0,task};
+         p_queue_entry pqe(0,task);
          pqueue.push(pqe);
        }
      }else{

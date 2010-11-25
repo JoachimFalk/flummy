@@ -30,4 +30,14 @@ void ScheduledTask::notifyActivation(bool active)
   }
 }
 
+void ScheduledTask::setPid(ProcessId pid)
+{
+  this->pid = pid;
+}
+
+ProcessId ScheduledTask::getPid() const
+{
+  return this->pid;
+}
+
 } // namespace SystemC_VPC

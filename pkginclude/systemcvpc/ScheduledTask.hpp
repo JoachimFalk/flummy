@@ -8,8 +8,12 @@
 #ifndef SCHEDULEDTASK_HPP_
 #define SCHEDULEDTASK_HPP_
 
+#include <cstddef>
+
 namespace SystemC_VPC
 {
+
+typedef size_t ProcessId;
 
 class Delayer;
 
@@ -19,9 +23,12 @@ public:
   ScheduledTask();
   virtual ~ScheduledTask();
   void setDelayer(Delayer *component);
+  void setPid(ProcessId pid);
+  ProcessId getPid() const;
   void notifyActivation(bool active);
 private:
   Delayer *component;
+  ProcessId pid;
 };
 
 }

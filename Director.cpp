@@ -499,6 +499,7 @@ namespace SystemC_VPC{
       component->addScheduledTask(pid);
     }
     actor->setDelayer(delayer);
+    actor->setPid(pid);
 
     return FastLink(pid, functionIds);
   }

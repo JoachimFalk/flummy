@@ -26,6 +26,7 @@
 #include "PowerSumming.hpp"
 #include "PowerMode.hpp"
 #include "Director.hpp"
+#include "Task.hpp"
 
 #include <vector>
 #include <map>
@@ -190,6 +191,8 @@ namespace SystemC_VPC{
     virtual bool hasReadyTask() = 0;
   };
 
+  typedef PriorityFcfsElement<ScheduledTask*>                    QueueElem;
+
   class FcfsComponent : public NonPreemptiveComponent {
   public:
     FcfsComponent( std::string name, Director *director ) :
@@ -214,6 +217,42 @@ namespace SystemC_VPC{
   private:
     std::list<ScheduledTask *>       fcfsQueue;
     std::deque<Task*>                readyTasks;
+
+  };
+
+  class PriorityComponent : public NonPreemptiveComponent {
+  public:
+    PriorityComponent( std::string name, Director *director ) :
+      NonPreemptiveComponent(name, director), fcfsOrder(0)
+    {
+    }
+
+    virtual ~PriorityComponent() {}
+
+    void addTask(Task *newTask);
+
+    void scheduleTask();
+
+    void notifyActivation(ScheduledTask * scheduledTask,
+        bool active);
+
+    bool releaseActor();
+
+    bool hasReadyTask(){
+      return !readyQueue.empty();
+    }
+  private:
+    size_t fcfsOrder;
+    std::priority_queue<PriorityFcfsElement<ScheduledTask *> >    releaseQueue;
+    std::priority_queue<p_queue_entry>                            readyQueue;
+
+    int getPriority(const ScheduledTask * scheduledTask) {
+      ProcessId pid = scheduledTask->getPid();
+      PCBPool &pool = this->getPCBPool();
+      assert(pool.find(pid) != pool.end());
+      ProcessControlBlockPtr pcb = pool[pid];
+      return pcb->getPriority();
+    }
 
   };
 } 
