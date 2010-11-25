@@ -299,9 +299,11 @@ using namespace CoSupport::XML::Xerces;
         //if(iter == this->knownComps.end()){ 
         if ( (sScheduler == STR_FIRSTCOMEFIRSTSERVED)
             || (sScheduler == STR_FCFS) ){
-
           comp = new FcfsComponent(sName, director);
-        }else{
+        } else if ( (sScheduler == STR_PRIORITYSCHEDULER)
+            || (sScheduler == STR_PS) ){
+          comp = new PriorityComponent(sName, director);
+        } else {
           comp = new Component(sName,sScheduler,director);
         }
           this->knownComps.insert(

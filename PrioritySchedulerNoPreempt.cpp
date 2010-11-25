@@ -24,9 +24,7 @@ namespace SystemC_VPC{
    *
    */
   void PrioritySchedulerNoPreempt::addedNewTask(Task *task){
-    p_queue_entry pqe;
-    pqe.fifo_order=order_counter++;
-    pqe.task=task;
+    p_queue_entry pqe(order_counter++, task);
     pqueue.push(pqe);
   }
   /**

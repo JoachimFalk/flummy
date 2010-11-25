@@ -302,4 +302,60 @@ namespace SystemC_VPC{
     runningTask = task;
   }
 
+  void PriorityComponent::notifyActivation(ScheduledTask * scheduledTask,
+      bool active){
+    DBG_OUT(this->name() << " notifyActivation " << scheduledTask
+        << " " << active << std::endl);
+    if (active) {
+      int priority = getPriority(scheduledTask);
+      DBG_OUT("  priority is: "<< priority << std::endl);
+      releaseQueue.push(
+          QueueElem(priority,fcfsOrder++,scheduledTask));
+      if (runningTask == NULL) {
+        notify_scheduler_thread.notify(SC_ZERO_TIME);
+      }
+    }
+  }
+
+  bool PriorityComponent::releaseActor(){
+    while(!releaseQueue.empty()){
+      ScheduledTask * scheduledTask = releaseQueue.top().payload;
+      releaseQueue.pop();
+
+      bool canExec = Director::canExecute(scheduledTask);
+      DBG_OUT("PS test task: " << scheduledTask
+          << " -> " << canExec << std::endl);
+      if(canExec){
+        Director::execute(scheduledTask);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void PriorityComponent::addTask(Task *newTask){
+    DBG_OUT(this->getName() << " add Task: " << newTask->getName()
+            << " @ " << sc_time_stamp() << std::endl);
+    newTask->traceReleaseTask();
+    p_queue_entry entry(fcfsOrder++, newTask);
+    readyQueue.push(entry);
+  }
+
+  void PriorityComponent::scheduleTask(){
+    assert(!readyQueue.empty());
+    Task* task = readyQueue.top().task;
+    readyQueue.pop();
+    startTime = sc_time_stamp();
+    DBG_OUT(this->getName() << " schedule Task: " << task->getName()
+            << " @ " << sc_time_stamp() << std::endl);
+
+    task->traceAssignTask();
+    fireStateChanged(ComponentState::RUNNING);
+    if(task->isBlocking() /* && !assignedTask->isExec() */) {
+      //TODO
+    }
+    runningTask = task;
+  }
+
 } //namespace SystemC_VPC

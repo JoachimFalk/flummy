@@ -206,11 +206,40 @@ namespace SystemC_VPC {
 
   typedef std::map<int, Task*>  TaskMap;
 
-  struct p_queue_entry{
-    int fifo_order;  // sekundärstrategie
-    Task *task;
+  template<typename PAYLOAD>
+  struct PriorityFcfsElement {
+    int     priority;
+    size_t  fcfsOrder;
+    PAYLOAD payload;
 
-    //Threads with smaller priority value have higher priority
+    PriorityFcfsElement(int priority, size_t fcfsOrder, PAYLOAD payload) :
+      priority(priority), fcfsOrder(fcfsOrder), payload(payload)
+    {
+    }
+
+    // lesser value means higher priority
+    bool operator<(const PriorityFcfsElement<PAYLOAD>& other) const
+    {
+      int p1=priority;
+      int p2=other.priority;
+      if (p1 > p2)
+        return true;
+      else if(p1 == p2)
+        return (fcfsOrder>other.fcfsOrder);
+      else
+        return false;
+    }
+  };
+
+  struct p_queue_entry{
+    int fifo_order;  // secondary scheduling policy
+    Task *task;
+    p_queue_entry(int fifo_order, Task *task) :
+      fifo_order(fifo_order), task(task)
+    {
+    }
+
+    //Threads with lesser priority value have higher priority
     bool operator<(const p_queue_entry& other) const
     {
       int p1=task->getPriority();
