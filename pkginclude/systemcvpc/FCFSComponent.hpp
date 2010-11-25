@@ -31,6 +31,7 @@
 #include <map>
 #include <deque>
 #include <queue>
+#include <list>
 
 
 #include "debug_config.hpp"
@@ -114,13 +115,14 @@ namespace SystemC_VPC{
 
   protected:
 
-    virtual void schedule_method(); 
+    void schedule_method();
 
-    virtual void remainingPipelineStages(); 
+    void remainingPipelineStages();
 
   private:
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
+    std::list<ScheduledTask *>       fcfsQueue;
 
     std::deque<Task*>      readyTasks;
     Task*                  runningTask;
@@ -148,7 +150,7 @@ namespace SystemC_VPC{
     
     void fireStateChanged(const ComponentState &state);
 
-    virtual void notifyActivation(const ScheduledTask * scheduledTask,
+    virtual void notifyActivation(ScheduledTask * scheduledTask,
         bool active);
 
     void addTask(Task *newTask){
@@ -179,6 +181,8 @@ namespace SystemC_VPC{
         if (hasScheduledTask){
           // reflect comm_state -> execute _communicate transition
           // FIXME: redesign
+          DBG_OUT(" scheduledTask: " << runningTask->getName()
+                  << " " << Director::canExecute(pid) << std::endl);
           assert(Director::canExecute(pid));
           Director::execute(pid);
         }
@@ -204,18 +208,19 @@ namespace SystemC_VPC{
     }
 
     bool releaseActor(){
-      for(ScheduledTasks::iterator iter = scheduledTasks.begin();
-          iter != scheduledTasks.end();
-          ++iter)
-      {
-        bool canExec = Director::canExecute(*iter);
-        DBG_OUT("FCFS test task: " << *iter
+      while(!fcfsQueue.empty()){
+        ScheduledTask * scheduledTask = fcfsQueue.front();
+        fcfsQueue.pop_front();
+
+        bool canExec = Director::canExecute(scheduledTask);
+        DBG_OUT("FCFS test task: " << scheduledTask
             << " -> " << canExec << std::endl);
         if(canExec){
-          Director::execute(*iter);
+          Director::execute(scheduledTask);
           return true;
         }
       }
+
       return false;
     }
   };
