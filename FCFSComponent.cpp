@@ -250,12 +250,15 @@ namespace SystemC_VPC{
     this->updatePowerConsumption();
   }
 
-  void FCFSComponent::notifyActivation(const ScheduledTask * scheduledTask,
+  void FCFSComponent::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
-    DBG_OUT(this->name() << " notifyActivation " << active << std::endl);
-    if(runningTask == NULL && active){
-      notify_scheduler_thread.notify(SC_ZERO_TIME);
-      //blockCompute.notify();
+    DBG_OUT(this->name() << " notifyActivation " << scheduledTask
+        << " " << active << std::endl);
+    if (active) {
+      fcfsQueue.push_back(scheduledTask);
+      if (runningTask == NULL) {
+        notify_scheduler_thread.notify(SC_ZERO_TIME);
+      }
     }
   }
 

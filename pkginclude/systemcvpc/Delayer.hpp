@@ -53,7 +53,7 @@ namespace SystemC_VPC{
 
     virtual void initialize(const Director* d) {};
 
-    virtual void notifyActivation(const ScheduledTask * scheduledTask,
+    virtual void notifyActivation(ScheduledTask * scheduledTask,
         bool active) {}
 
     virtual ~Delayer() {}

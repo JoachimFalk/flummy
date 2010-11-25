@@ -61,10 +61,23 @@ namespace SystemC_VPC{
     /**
      *
      */
+    static bool canExecute(ScheduledTask * scheduledTask) {
+      return getInstance().callCanExecute(scheduledTask);
+    }
+
+    /**
+     *
+     */
+    static void execute(ScheduledTask * scheduledTask) {
+      getInstance().callExecute(scheduledTask);
+    }
+    /**
+     *
+     */
     static bool canExecute(ProcessId pid){
       Task & task = getInstance().taskPool.getPrototype(pid);
       if (task.hasScheduledTask()){
-        return getInstance().callCanExecute(task.getScheduledTask());
+        return canExecute(task.getScheduledTask());
       }
       return false;
     }
@@ -75,7 +88,7 @@ namespace SystemC_VPC{
     static void execute(ProcessId pid){
       Task & task = getInstance().taskPool.getPrototype(pid);
       assert (task.hasScheduledTask());
-      getInstance().callExecute(task.getScheduledTask());
+      execute(task.getScheduledTask());
     }
 
     ~Director();
