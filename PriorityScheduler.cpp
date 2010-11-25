@@ -47,26 +47,25 @@ namespace SystemC_VPC{
      const  TaskMap &running_tasks)
    {
      scheduling_decision ret_decision=ONLY_ASSIGN;
-     if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
+     if(pqueue.size()<=0) return NOCHANGE;    // no new task -> no change
 
-     // höchste priorität der ready tasks
+     // unassigned task with highest priority
      p_queue_entry prior_ready=pqueue.top();
 
-     // wert der priorität
      double d_prior_ready=prior_ready.task->getPriority();
      task_to_assign=prior_ready.task->getInstanceId();
 
 
-     if(running_tasks.size()!=0){  // läuft noch einer ?
+     if(running_tasks.size()!=0){  // is another task running?
        TaskMap::const_iterator iter;
        iter=running_tasks.begin();
        Task *task=iter->second;
 
-       //laufender mit höherer oder gleicher priorität ->
+       //has running task higher priority (lesser value)
        if(task->getPriority() <= d_prior_ready){
-         ret_decision=NOCHANGE;                       //nicht verdrängen
+         ret_decision=NOCHANGE;
        }else{
-         ret_decision=PREEMPT;                        //verdrängen
+         ret_decision=PREEMPT;                        //preempt task
          task_to_resign=task->getInstanceId(); 
          pqueue.pop();
          p_queue_entry pqe={0,task};
