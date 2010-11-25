@@ -78,7 +78,7 @@ libsystemcvpc_la_SOURCES =			\
 	PluggablePowerGovernor.cpp		\
 	dynload/dll-elf.cpp			\
 	ComponentInfo.cpp			\
-	FCFSComponent.cpp			\
+	NonPreemptiveComponent.cpp			\
 	AbstractComponent.cpp
 
 libsystemcvpc_la_LDFLAGS =				\

@@ -15,7 +15,7 @@
  * ----------------------------------------------------------------------------
  * $log$
  *****************************************************************************/
-#include <systemcvpc/FCFSComponent.hpp>
+#include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/Task.hpp>
@@ -28,7 +28,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  FCFSComponent::FCFSComponent( std::string name, Director *director )
+  NonPreemptiveComponent::NonPreemptiveComponent( std::string name, Director *director )
       : AbstractComponent(name.c_str()),
         runningTask(NULL),
         blockMutex(0)
@@ -72,7 +72,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void FCFSComponent::schedule_method(){
+  void NonPreemptiveComponent::schedule_method(){
     DBG_OUT("FCFSComponent::schedule_method (" << this->name()
             << ") triggered @" << sc_time_stamp() << endl);
 
@@ -85,7 +85,7 @@ namespace SystemC_VPC{
         //assert(!readyTasks.empty());
       }
 
-      if (!readyTasks.empty()){
+      if (hasReadyTask()){
         scheduleTask();
         next_trigger(runningTask->getRemainingDelay());
 
@@ -102,13 +102,13 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void  FCFSComponent::setScheduler(const char *schedulername){
+  void  NonPreemptiveComponent::setScheduler(const char *schedulername){
   }
 
   /**
    *
    */
-  void FCFSComponent::compute(Task* actualTask){
+  void NonPreemptiveComponent::compute(Task* actualTask){
 
     /* * /
     if(blockMutex > 0) {
@@ -153,7 +153,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void FCFSComponent::requestBlockingCompute(Task* task,
+  void NonPreemptiveComponent::requestBlockingCompute(Task* task,
                                              RefCountEventPtr blocker){
     task->setExec(false);
     task->setBlockingCompute( blocker );
@@ -163,7 +163,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void FCFSComponent::execBlockingCompute(Task* task, RefCountEventPtr blocker){
+  void NonPreemptiveComponent::execBlockingCompute(Task* task, RefCountEventPtr blocker){
     task->setExec(true);
     blockCompute.notify();
   }
@@ -172,7 +172,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void FCFSComponent::abortBlockingCompute(Task* task, RefCountEventPtr blocker){
+  void NonPreemptiveComponent::abortBlockingCompute(Task* task, RefCountEventPtr blocker){
     task->resetBlockingCompute();
     blockCompute.notify();
   }
@@ -180,7 +180,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void FCFSComponent::remainingPipelineStages(){
+  void NonPreemptiveComponent::remainingPipelineStages(){
     while(1){
       if(pqueue.size() == 0){
         wait(remainingPipelineStages_WakeUp);
@@ -218,7 +218,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void FCFSComponent::moveToRemainingPipelineStages(Task* task){
+  void NonPreemptiveComponent::moveToRemainingPipelineStages(Task* task){
     sc_time now                 = sc_time_stamp();
     sc_time restOfLatency       = task->getLatency()  - task->getDelay();
     sc_time end                 = now + restOfLatency;
@@ -237,20 +237,20 @@ namespace SystemC_VPC{
     remainingPipelineStages_WakeUp.notify();
   }
 
-  void FCFSComponent::updatePowerConsumption()
+  void NonPreemptiveComponent::updatePowerConsumption()
   {
     this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
     // Notify observers (e.g. powersum)
     this->fireNotification(this);
   }
 
-  void FCFSComponent::fireStateChanged(const ComponentState &state)
+  void NonPreemptiveComponent::fireStateChanged(const ComponentState &state)
   {
     this->setComponentState(state);
     this->updatePowerConsumption();
   }
 
-  void FCFSComponent::notifyActivation(ScheduledTask * scheduledTask,
+  void FcfsComponent::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
     DBG_OUT(this->name() << " notifyActivation " << scheduledTask
         << " " << active << std::endl);
@@ -260,6 +260,46 @@ namespace SystemC_VPC{
         notify_scheduler_thread.notify(SC_ZERO_TIME);
       }
     }
+  }
+
+  bool FcfsComponent::releaseActor(){
+    while(!fcfsQueue.empty()){
+      ScheduledTask * scheduledTask = fcfsQueue.front();
+      fcfsQueue.pop_front();
+
+      bool canExec = Director::canExecute(scheduledTask);
+      DBG_OUT("FCFS test task: " << scheduledTask
+          << " -> " << canExec << std::endl);
+      if(canExec){
+        Director::execute(scheduledTask);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void FcfsComponent::addTask(Task *newTask){
+    DBG_OUT(this->getName() << " add Task: " << newTask->getName()
+            << " @ " << sc_time_stamp() << std::endl);
+    newTask->traceReleaseTask();
+    readyTasks.push_back(newTask);
+  }
+
+  void FcfsComponent::scheduleTask(){
+    assert(!readyTasks.empty());
+    Task* task = readyTasks.front();
+    readyTasks.pop_front();
+    startTime = sc_time_stamp();
+    DBG_OUT(this->getName() << " schedule Task: " << task->getName()
+            << " @ " << sc_time_stamp() << std::endl);
+
+    task->traceAssignTask();
+    fireStateChanged(ComponentState::RUNNING);
+    if(task->isBlocking() /* && !assignedTask->isExec() */) {
+      //TODO
+    }
+    runningTask = task;
   }
 
 } //namespace SystemC_VPC
