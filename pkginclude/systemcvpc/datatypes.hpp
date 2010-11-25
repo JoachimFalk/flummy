@@ -17,7 +17,7 @@ namespace SystemC_VPC {
 #define STR_PSNOPRE "PSNOPRE"
 #define STR_RATEMONOTONIC "RateMonotonic"
 #define STR_RM "RM"
-#define STR_FIRSTCOMEFIRSTSERVE "FirstComeFirstServed"
+#define STR_FIRSTCOMEFIRSTSERVED "FirstComeFirstServed"
 #define STR_FCFS "FCFS"
 #define STR_AVB "AVB"
 
