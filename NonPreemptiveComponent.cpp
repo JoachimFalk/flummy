@@ -80,7 +80,10 @@ namespace SystemC_VPC{
     next_trigger(notify_scheduler_thread);
 
     if (runningTask == NULL) {
+      releasePhase = true; // prevent from re-notifying schedule_method
       bool released = releaseActor();
+      releasePhase = false;
+
       if (released){
         //assert(!readyTasks.empty());
       }
@@ -142,7 +145,7 @@ namespace SystemC_VPC{
     this->addTask(actualTask);
 
     //awake scheduler thread
-    if(runningTask == NULL && !actualTask->hasScheduledTask()){
+    if(runningTask == NULL && !releasePhase){
       notify_scheduler_thread.notify();
       //blockCompute.notify();
     }
