@@ -142,6 +142,8 @@ namespace SystemC_VPC{
 
     InternalLoadHysteresisGovernor *midPowerGov;
 
+    bool releasePhase;
+
     bool processPower(Attribute att);
 
     void moveToRemainingPipelineStages(Task* task);
