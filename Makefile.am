@@ -89,6 +89,7 @@ libsystemcvpc_la_LDFLAGS =				\
 libsystemcvpc_la_LIBADD = 				\
 	@COSUPPORT_LIBPATH@/libcosupport-systemc.la	\
 	@COSUPPORT_LIBPATH@/libcosupport-tracing.la	\
+	@COSUPPORT_LIBPATH@/libcosupport-streams.la     \
 	-lxerces-c					\
 	-lsystemc					\
 	-lstdc++					\
