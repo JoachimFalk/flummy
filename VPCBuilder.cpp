@@ -17,6 +17,7 @@
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/RoutePool.hpp>
+#include "ConfigCheck.hpp"
 
 #include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_COMPONENT create stream and include debug macros
@@ -440,6 +441,10 @@ using namespace CoSupport::XML::Xerces;
               //p.addLatency( t.fid, t.latency );
               //p.addDelay( t.fid, t.dii );
                 p.setTiming(t);
+                if (t.fid != 0){
+                  ConfigCheck::configureTiming(p.getPid(), t.functionName);
+                }
+
               } catch(InvalidArgumentException &e) {
                 std::string msg("Error with mapping: ");
                 msg += sSource + " -> " + sTarget + "\n";
@@ -680,6 +685,7 @@ using namespace CoSupport::XML::Xerces;
     if( NULL != atts->getNamedItem(fnameAttrStr) ) {
       XStr attribute = atts->getNamedItem(fnameAttrStr)->getNodeValue();
       t.fid = this->director->createFunctionId(attribute);
+      t.functionName = attribute;
     }
 
     DOMNode* dii     = atts->getNamedItem(diiAttrStr);

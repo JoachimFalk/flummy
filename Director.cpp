@@ -32,6 +32,7 @@
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 #include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/RoutePool.hpp>
+#include "ConfigCheck.hpp"
 
 #include <systemc.h>
 #include <map>
@@ -60,6 +61,7 @@ namespace SystemC_VPC{
   Director::Director()
     : FALLBACKMODE(false),
       defaultRoute(false),
+      checkVpcConfig(true),
       topPowerGov(new InternalSelectFastestPowerModeGovernor),
       topPowerGovFactory(NULL),
       globalFunctionId(1),
@@ -459,6 +461,14 @@ namespace SystemC_VPC{
     
   }
 
+  //
+void Director::endOfVpcFinalize()
+{
+  if (checkVpcConfig) {
+    ConfigCheck::check();
+  }
+}
+
   FunctionId Director::uniqueFunctionId() {
     return globalFunctionId++;
   }
@@ -480,6 +490,7 @@ namespace SystemC_VPC{
         functionIds.push_back( getFunctionId(*iter) );
       }
       debugFunctionNames[pid].insert(*iter);
+      ConfigCheck::modelTiming(pid, *iter);
     }
 
     if (!taskPool.contains( pid )){
