@@ -53,6 +53,7 @@ libsystemcvpc_la_SOURCES =			\
 	debug_config.cpp			\
 	BlockingTransport.cpp			\
 	Component.cpp				\
+	ConfigCheck.cpp				\
 	Director.cpp				\
 	ScheduledTask.cpp			\
 	PriorityScheduler.cpp			\

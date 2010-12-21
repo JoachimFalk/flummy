@@ -50,6 +50,7 @@ namespace SystemC_VPC{
   public:
     bool FALLBACKMODE;
     bool defaultRoute;
+    bool checkVpcConfig;
 
     /**
      * \brief Access to singleton Director. 
@@ -244,6 +245,8 @@ namespace SystemC_VPC{
       callExecute = execute;
       callCanExecute = testExecute;
     }
+
+    void endOfVpcFinalize();
   private:
 
     Task * preCompute( FastLink fLink,
