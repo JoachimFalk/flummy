@@ -1,9 +1,15 @@
 /*
- * ConfigCheck.cpp
- *
- *  Created on: 21 Dec 2010
- *      Author: streubue
+ * ----------------------------------------------------------------------------
+ *     Copyright (C) 2004-2011 by University of Erlangen-Nuremberg,
+ *     Department of Computer Science,
+ *     Chair of Hardware-Software-Co-Design, Germany.
+ *     All rights reserved.
+ * 
+ * Project title: SystemC-VPC
+ * Comment:
+ * ----------------------------------------------------------------------------
  */
+
 #include "ConfigCheck.hpp"
 
 namespace SystemC_VPC

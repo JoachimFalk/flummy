@@ -1,20 +1,15 @@
-/******************************************************************************
- *                        Copyright 2004
- *                Lehrstuhl fuer Hardware-Software-Codesign
- *                  Universitaet Erlangen-Nuernberg
- *                    All rights reserved
- *
- * Title: SystemC-VPC
+/*
+ * ----------------------------------------------------------------------------
+ *     Copyright (C) 2004-2011 by University of Erlangen-Nuremberg,
+ *     Department of Computer Science,
+ *     Chair of Hardware-Software-Co-Design, Germany.
+ *     All rights reserved.
+ * 
+ * Project title: SystemC-VPC
  * Comment:
  * ----------------------------------------------------------------------------
- * FastLink.h
- * ----------------------------------------------------------------------------
- * Modifications History:
- * ----------------------------------------------------------------------------
- * Notes:
- * ----------------------------------------------------------------------------
- * $log$
- *****************************************************************************/
+ */
+
 #ifndef __INCLUDED__FASTLINK__H__
 #define __INCLUDED__FASTLINK__H__
 #include <systemc.h>

@@ -1,20 +1,15 @@
-/*******************************************************************************
- *                        Copyright 2010
- *                Lehrstuhl fuer Hardware-Software-Codesign
- *                  Universitaet Erlangen-Nuernberg
- *                    All rights reserved
- *
- * Title: SystemC-VPC
+/*
+ * ----------------------------------------------------------------------------
+ *     Copyright (C) 2004-2011 by University of Erlangen-Nuremberg,
+ *     Department of Computer Science,
+ *     Chair of Hardware-Software-Co-Design, Germany.
+ *     All rights reserved.
+ * 
+ * Project title: SystemC-VPC
  * Comment:
- * -----------------------------------------------------------------------------
- * vpc.hpp
- * -----------------------------------------------------------------------------
- * Modifications History:
- * -----------------------------------------------------------------------------
- * Notes:
- * -----------------------------------------------------------------------------
- * $log$
- ******************************************************************************/
+ * ----------------------------------------------------------------------------
+ */
+
 #ifndef __INCLUDED__VPC__HPP__
 #define __INCLUDED__VPC__HPP__
 

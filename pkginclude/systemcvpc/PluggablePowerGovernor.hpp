@@ -1,3 +1,15 @@
+/*
+ * ----------------------------------------------------------------------------
+ *     Copyright (C) 2004-2011 by University of Erlangen-Nuremberg,
+ *     Department of Computer Science,
+ *     Chair of Hardware-Software-Co-Design, Germany.
+ *     All rights reserved.
+ * 
+ * Project title: SystemC-VPC
+ * Comment:
+ * ----------------------------------------------------------------------------
+ */
+
 #ifndef __INCLUDED_PLUGGABLEPOWERGOVERNOR_H_
 #define __INCLUDED_PLUGGABLEPOWERGOVERNOR_H_
 
