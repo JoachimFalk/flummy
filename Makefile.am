@@ -52,7 +52,7 @@ lib_LTLIBRARIES = libsystemcvpc.la
 libsystemcvpc_la_SOURCES =			\
 	debug_config.cpp			\
 	BlockingTransport.cpp			\
-	Component.cpp				\
+	ComponentImpl.cpp			\
 	ConfigCheck.cpp				\
 	Director.cpp				\
 	ScheduledTask.cpp			\

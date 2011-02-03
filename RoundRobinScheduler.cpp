@@ -12,7 +12,7 @@
 
 #include <systemcvpc/RoundRobinScheduler.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ComponentImpl.hpp>
 
 namespace SystemC_VPC{
   RoundRobinScheduler::RoundRobinScheduler(const char *schedulername){

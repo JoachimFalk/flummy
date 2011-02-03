@@ -43,7 +43,6 @@ nobase_include_HEADERS =				\
 	systemcvpc/FlexRayScheduler.hpp 		\
 	systemcvpc/FunctionTimingPool.hpp 		\
 	systemcvpc/AbstractComponent.hpp 		\
-	systemcvpc/Component.hpp 			\
 	systemcvpc/datatypes.hpp 			\
 	systemcvpc/Director.hpp 			\
 	systemcvpc/EventPair.hpp 			\

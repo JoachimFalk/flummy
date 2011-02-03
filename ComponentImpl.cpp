@@ -10,7 +10,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/FCFSScheduler.hpp>
 #include <systemcvpc/TDMAScheduler.hpp>
