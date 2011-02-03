@@ -67,15 +67,14 @@ namespace SystemC_VPC{
       (sc_time_stamp().to_default_time_units() - this->lastassign);
     this->lastassign = sc_time_stamp().to_default_time_units();
 
-    if(this->remainingSlice <= 0){//Zeitscheibe wirklich abgelaufen!
-      if(rr_fifo.size()>0){    // neuen Task bestimmen
+    if(this->remainingSlice <= 0){// time slice expired
+      if(rr_fifo.size()>0){    // select next task
         task_to_assign = rr_fifo.front();
         rr_fifo.pop_front();
         
-        //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
-        // -> kein preemption!
+        // default: old tasks execution delay is expired (no running task)
         ret_decision= ONLY_ASSIGN;
-        if(running_tasks.size()!=0){  // alten Task entfernen
+        if(running_tasks.size()!=0){  // a running task is preempted
           TaskMap::const_iterator iter;
           iter=running_tasks.begin();
           Task *task=iter->second;
@@ -83,45 +82,22 @@ namespace SystemC_VPC{
           rr_fifo.push_back(task->getInstanceId());
           ret_decision= PREEMPT;  
         }
-        // else{}    ->
-        //kein laufender Task (wurde wohl gleichzeitig beendet "BLOCK")
       }    
-    }else{//neuer Task hinzugefügt -> nichts tun 
-      //oder alter entfernt    -> neuen setzen
+    }else{
+      // either a new task was added
+      // or the running tasks delay is expired
 
-      //neuen setzen:
-      if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-        if(rr_fifo.size()>0){            // ist da auch ein neuer da?
+      if(running_tasks.size()==0){       // if running tasks delay has expired
+        if(rr_fifo.size()>0){            // schedule a new task
           task_to_assign = rr_fifo.front();
           rr_fifo.pop_front();
 
-          //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
-          // -> kein preemption!
+          // this is not preemption: the old task BLOCKED
+          // and a new one is assigned
           ret_decision= ONLY_ASSIGN;
         }
       }
-
-      //nichts tun:
-      //     ret_decision=NOCHANGE;
-      //neuer Task hinzugefügt -> nichts tun
     } 
-
-    /*
-       if(ret_decision==ONLY_ASSIGN || ret_decision==PREEMPT){
-       LASTASSIGN=sc_time_stamp().to_default_time_units();
-       }
-       */
-
-    /*if(ret_decision==ONLY_ASSIGN){
-      cerr << "ONLY_ASSIGN" <<endl;
-      }else if(ret_decision==PREEMPT){
-      cerr << "PREEMPT" <<endl;
-      }else if(ret_decision==NOCHANGE){
-      cerr << "NOCHANGE " <<endl;
-      }else if(ret_decision==RESIGNED){
-      cerr << "RESIGNED " <<endl;
-      }*/
-
     return ret_decision;
   }
 
