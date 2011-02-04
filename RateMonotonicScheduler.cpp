@@ -12,7 +12,7 @@
 
 #include <systemcvpc/RateMonotonicScheduler.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/datatypes.hpp>
 
 namespace SystemC_VPC{
