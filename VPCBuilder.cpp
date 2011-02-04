@@ -23,7 +23,7 @@
 #include <systemcvpc/VPCBuilder.hpp>
 #include <systemcvpc/VpcDomErrorHandler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/BlockingTransport.hpp>
 #include <systemcvpc/Director.hpp>

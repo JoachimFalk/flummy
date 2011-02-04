@@ -52,7 +52,7 @@
 
 #include <systemcvpc/FlexRayScheduler.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ComponentImpl.hpp>
 
 namespace SystemC_VPC{
 

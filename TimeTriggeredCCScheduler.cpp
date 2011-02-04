@@ -41,7 +41,7 @@ Sebastian Graf - Mai 2008
 
 #include <systemcvpc/TimeTriggeredCCScheduler.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ComponentImpl.hpp>
 
 namespace SystemC_VPC{
 
