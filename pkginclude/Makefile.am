@@ -26,7 +26,14 @@ SUBDIRS=
 
 nobase_include_HEADERS =				\
 	vpc.hpp					 	\
+	vpc_api.hpp				 	\
+							\
 	systemcvpc/vpc_config.h 			\
+							\
+	systemcvpc/config/Component.hpp			\
+	systemcvpc/config/Timing.hpp			\
+	systemcvpc/config/VpcTask.hpp			\
+	systemcvpc/config/VpcApi.hpp 			\
 							\
 	systemcvpc/Attribute.hpp 			\
 	systemcvpc/BlockingTransport.hpp 		\

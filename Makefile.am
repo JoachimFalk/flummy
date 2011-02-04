@@ -50,6 +50,11 @@ AM_CPPFLAGS =			\
 lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_la_SOURCES =			\
+	config/Component.cpp			\
+	config/Timing.cpp			\
+	config/VpcTask.cpp			\
+	config/VpcApi.cpp			\
+						\
 	debug_config.cpp			\
 	BlockingTransport.cpp			\
 	ComponentImpl.cpp			\
