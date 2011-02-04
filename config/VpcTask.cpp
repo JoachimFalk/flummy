@@ -4,17 +4,36 @@
  *     Department of Computer Science,
  *     Chair of Hardware-Software-Co-Design, Germany.
  *     All rights reserved.
- * 
+ *
  * Project title: SystemC-VPC
  * Comment:
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __INCLUDED__VPC__HPP__
-#define __INCLUDED__VPC__HPP__
+#include <systemcvpc/config/VpcTask.hpp>
+#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
 
-#include <systemcvpc/vpc_config.h>
-#include <systemcvpc/Director.hpp>
-//#include <systemcvpc/config/VpcApi.hpp>
+namespace SystemC_VPC
+{
 
-#endif // __INCLUDED__VPC__HPP__
+namespace Config
+{
+
+//
+VpcTask::VpcTask(const ScheduledTask & actor)
+{
+}
+
+//
+void VpcTask::mapTo(Component::Ptr component)
+{
+}
+
+//
+void VpcTask::setPriority(size_t priority)
+{
+}
+
+} // namespace Config
+} // namespace SystemC_VPC
