@@ -26,7 +26,8 @@ namespace SystemC_VPC{
   NonPreemptiveComponent::NonPreemptiveComponent( std::string name, Director *director )
       : AbstractComponent(name.c_str()),
         runningTask(NULL),
-        blockMutex(0)
+        blockMutex(0),
+        releasePhase(false)
     {
       SC_METHOD(schedule_method);
       sensitive << notify_scheduler_thread;
