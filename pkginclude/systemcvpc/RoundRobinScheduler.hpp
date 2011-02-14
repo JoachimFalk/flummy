@@ -29,7 +29,6 @@ namespace SystemC_VPC{
       this->lastassign=0;
       this->remainingSlice=0;
     }
-    RoundRobinScheduler(const char *schedulername);
     virtual ~RoundRobinScheduler(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,

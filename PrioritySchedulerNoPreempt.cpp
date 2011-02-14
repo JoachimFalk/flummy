@@ -16,11 +16,6 @@
 #include <systemcvpc/datatypes.hpp>
 
 namespace SystemC_VPC{
-  PrioritySchedulerNoPreempt::PrioritySchedulerNoPreempt(
-    const char *schedulername) : pqueue()
-  {
-    order_counter=0;
-  }
 
   void PrioritySchedulerNoPreempt::setProperty(const char* key, const char* value){
   }

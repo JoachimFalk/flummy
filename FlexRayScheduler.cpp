@@ -56,7 +56,7 @@
 
 namespace SystemC_VPC{
 
-  FlexRayScheduler::FlexRayScheduler(const char *schedulername)
+  FlexRayScheduler::FlexRayScheduler()
     : _properties() {
     //neu FlexRay
     //    StartslotDynamic = 3;

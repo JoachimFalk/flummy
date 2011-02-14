@@ -15,11 +15,6 @@
 #include <systemcvpc/ComponentImpl.hpp>
 
 namespace SystemC_VPC{
-  RoundRobinScheduler::RoundRobinScheduler(const char *schedulername){
-    TIMESLICE=5;
-    lastassign=0;
-    this->remainingSlice = 0;
-  }
 
   void RoundRobinScheduler::setProperty(const char* key, const char* value){
     if(0==strncmp(key,"timeslice",strlen("timeslice"))){

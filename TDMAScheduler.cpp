@@ -36,7 +36,7 @@
 
 namespace SystemC_VPC{
 
-  TDMAScheduler::TDMAScheduler(const char *schedulername)
+  TDMAScheduler::TDMAScheduler()
     : _properties() {
     processcount=0;
     lastassign=SC_ZERO_TIME;

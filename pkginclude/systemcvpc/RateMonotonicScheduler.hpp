@@ -41,10 +41,10 @@ namespace SystemC_VPC{
   class RateMonotonicScheduler : public Scheduler{
   public:
 
-    RateMonotonicScheduler(){
-      order_counter=0;
+    RateMonotonicScheduler() : order_counter(0) {
+      std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,rm_queue_compare>
+        pqueue(comp);
     }
-    RateMonotonicScheduler(const char *schedulername);
     virtual ~RateMonotonicScheduler(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,

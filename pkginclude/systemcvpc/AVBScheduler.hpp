@@ -109,10 +109,7 @@ std::cout<<"reset_credit for class " <<get_priority_level() << " to "<< sc_core:
   class AVBScheduler : public Scheduler{
   public:
 
-    AVBScheduler(){
-      
-    }
-    AVBScheduler(const char *schedulername);
+    AVBScheduler();
     virtual ~AVBScheduler(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,
