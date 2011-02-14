@@ -32,14 +32,14 @@ namespace SystemC_VPC{
   class TimeTriggeredCCScheduler : public Scheduler{
   public:
     
-   TimeTriggeredCCScheduler(){
-      this->lastassign=sc_time(0,SC_NS);
-      this->remainingSlice=sc_time(0,SC_NS);
-      slicecount=0;
-      curr_slicecount=0;
-    }
+//   TimeTriggeredCCScheduler(){
+//      this->lastassign=sc_time(0,SC_NS);
+//      this->remainingSlice=sc_time(0,SC_NS);
+//      slicecount=0;
+//      curr_slicecount=0;
+//    }
     
-    TimeTriggeredCCScheduler(const char *schedulername);
+    TimeTriggeredCCScheduler();
     
     virtual ~TimeTriggeredCCScheduler(){}
     

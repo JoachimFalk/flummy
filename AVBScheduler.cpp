@@ -17,7 +17,7 @@
 
 namespace SystemC_VPC{
   
-  AVBScheduler::AVBScheduler(const char *schedulername){
+  AVBScheduler::AVBScheduler(){
     AVBListEntry* newEntry;
     //default-IP-traffic (Priority 0) - is allowed to use LineSpeed
     newEntry = new AVBListEntry( new std::queue<Task*>, 0, 1.0);

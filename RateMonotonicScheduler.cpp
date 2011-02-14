@@ -16,14 +16,6 @@
 #include <systemcvpc/datatypes.hpp>
 
 namespace SystemC_VPC{
-  RateMonotonicScheduler::RateMonotonicScheduler(const char *schedulername){
-
-    std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,rm_queue_compare>
-      pqueue(comp);
-
-    order_counter=0;
-  }
-
   void RateMonotonicScheduler::setProperty(const char* key, const char* value){
   }
 

@@ -16,12 +16,6 @@
 #include <systemcvpc/datatypes.hpp>
 
 namespace SystemC_VPC{
-  PriorityScheduler::PriorityScheduler(const char *schedulername) :
-    pqueue()
-  {
-    order_counter=0;
-  }
-
   void PriorityScheduler::setProperty(const char* key, const char* value){
   }
 

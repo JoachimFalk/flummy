@@ -45,7 +45,7 @@ Sebastian Graf - Mai 2008
 
 namespace SystemC_VPC{
 
-  TimeTriggeredCCScheduler::TimeTriggeredCCScheduler(const char *schedulername)
+  TimeTriggeredCCScheduler::TimeTriggeredCCScheduler()
     : _properties() {
     //Standardmaessig beide Kanaele aktivieren!
     dualchannel=1; 

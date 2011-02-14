@@ -37,14 +37,14 @@ namespace SystemC_VPC{
   class FlexRayScheduler : public Scheduler{
   public:
     
-    FlexRayScheduler(){
-      this->lastassign=sc_time(0,SC_NS);
-      this->remainingSlice=sc_time(0,SC_NS);
-      slicecount=0;
-      curr_slicecount=0;
-    }
+//    FlexRayScheduler(){
+//      this->lastassign=sc_time(0,SC_NS);
+//      this->remainingSlice=sc_time(0,SC_NS);
+//      slicecount=0;
+//      curr_slicecount=0;
+//    }
     
-    FlexRayScheduler(const char *schedulername);
+    FlexRayScheduler();
     
     virtual ~FlexRayScheduler(){}
     

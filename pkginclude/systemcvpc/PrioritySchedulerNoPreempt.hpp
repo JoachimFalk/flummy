@@ -27,10 +27,7 @@ namespace SystemC_VPC{
   class PrioritySchedulerNoPreempt : public Scheduler{
   public:
 
-    PrioritySchedulerNoPreempt(){
-      order_counter=0;
-    }
-    PrioritySchedulerNoPreempt(const char *schedulername);
+    PrioritySchedulerNoPreempt() : order_counter(0) {}
     virtual ~PrioritySchedulerNoPreempt(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,

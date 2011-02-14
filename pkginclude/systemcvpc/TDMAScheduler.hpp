@@ -35,15 +35,15 @@ namespace SystemC_VPC{
   class TDMAScheduler : public Scheduler{
   public:
     
-    TDMAScheduler()
-      : tdmaCycle(SC_ZERO_TIME) {
-      this->lastassign=sc_time(0,SC_NS);
-      this->remainingSlice=sc_time(0,SC_NS);
-      slicecount=0;
-      curr_slicecount=0;
-    }
+//    TDMAScheduler()
+//      : tdmaCycle(SC_ZERO_TIME) {
+//      this->lastassign=sc_time(0,SC_NS);
+//      this->remainingSlice=sc_time(0,SC_NS);
+//      slicecount=0;
+//      curr_slicecount=0;
+//    }
     
-    TDMAScheduler(const char *schedulername);
+    TDMAScheduler();
     
     virtual ~TDMAScheduler(){}
     
