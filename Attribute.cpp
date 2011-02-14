@@ -25,7 +25,7 @@ namespace SystemC_VPC{
   std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos)
     throw(InvalidArgumentException){
     if(pos<=parameters.size()) return parameters[pos];
-    throw new InvalidArgumentException("getNextParameter");
+    throw InvalidArgumentException("getNextParameter");
   }
 
   //
@@ -38,7 +38,7 @@ namespace SystemC_VPC{
         return parameters[i].second;
       }
     }
-    throw new InvalidArgumentException("getParameter> unknown parameter:"
+    throw InvalidArgumentException("getParameter> unknown parameter:"
                                        + type);
   }
 
@@ -61,7 +61,7 @@ namespace SystemC_VPC{
   std::pair<std::string, AttributePtr > Attribute::getNextAttribute(size_t pos)
     throw(InvalidArgumentException){
     if(pos<=attributes.size()) return attributes[pos];
-    throw new InvalidArgumentException("getNextAttribute");
+    throw InvalidArgumentException("getNextAttribute");
         
   }
 
@@ -75,7 +75,7 @@ namespace SystemC_VPC{
         if(attributes[i].first == name)
           return attributes[i].second;
       }
-    throw new InvalidArgumentException("getAttribute> Unknown Attribute:"
+    throw InvalidArgumentException("getAttribute> Unknown Attribute:"
                                        + name);
   }
 
