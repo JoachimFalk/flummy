@@ -114,9 +114,9 @@ namespace SystemC_VPC{
    return summarizeFunctionTimes(functions, funcLatencies);
   }
 
-  void FunctionTiming::setTiming(const Timing& timing){
-    this->addDelay(timing.fid,   timing.dii);
-    this->addLatency(timing.fid, timing.latency);
+  void FunctionTiming::setTiming(const Config::Timing& timing){
+    this->addDelay(timing.getFunctionId(),   timing.getDii());
+    this->addLatency(timing.getFunctionId(), timing.getLatency());
   }
 
   /**
@@ -211,8 +211,8 @@ namespace SystemC_VPC{
     return this->traceSignal;
   }
 
-  void ProcessControlBlock::setTiming(const Timing& timing){
-    const PowerMode *mode = this->component->translatePowerMode(timing.powerMode);
+  void ProcessControlBlock::setTiming(const Config::Timing& timing){
+    const PowerMode *mode = this->component->translatePowerMode(timing.getPowerMode());
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->setTiming(timing);
   }

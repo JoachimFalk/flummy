@@ -4,25 +4,37 @@
  *     Department of Computer Science,
  *     Chair of Hardware-Software-Co-Design, Germany.
  *     All rights reserved.
- * 
+ *
  * Project title: SystemC-VPC
  * Comment:
  * ----------------------------------------------------------------------------
  */
 
-#ifndef HSCD_VPC_P_STRUCT_H
-#define HSCD_VPC_P_STRUCT_H
-#include <systemc.h>
+#ifndef CONFIGEXCEPTION_H_
+#define CONFIGEXCEPTION_H_
 
-#include <CoSupport/SystemC/systemc_support.hpp>
+#include <stdexcept>
+#include <string>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC
+{
 
-// definition for hiding cosupport as vpc_event
-//typedef CoSupport::SystemC::RefCountEvent         VPC_Event;
-  
-// set for debugging output
-//#define VPC_DEBUG true;
+class ScheduledTask;
 
-} // namespace SystemC_VPC
-#endif
+namespace Config
+{
+class ConfigException: public std::runtime_error
+{
+public:
+  ConfigException(std::string msg) :
+    std::runtime_error(msg)
+  {
+
+  }
+};
+
+}
+
+}
+
+#endif /* CONFIGEXCEPTION_H_ */

@@ -16,6 +16,10 @@
 #include <boost/shared_ptr.hpp>
 #include <systemc>
 #include <set>
+#include <string>
+#include <systemcvpc/config/ConfigException.hpp>
+#include <systemcvpc/config/Scheduler.hpp>
+#include <systemcvpc/Attribute.hpp>
 
 namespace SystemC_VPC
 {
@@ -27,28 +31,43 @@ namespace Config
 
 class Timing;
 
-namespace Scheduler{
-enum Scheduler{
-  FCFS,
-  PS
-};
-}
-
 class Component
 {
 public:
   typedef boost::shared_ptr<Component> Ptr;
+  typedef std::set<Timing> Timings;
+  typedef std::set<const ScheduledTask *> MappedTasks;
 
-  Component(std::string name, Scheduler::Scheduler scheduler);
+  Component(std::string name, Scheduler::Type scheduler);
+
+  void setScheduler(Scheduler::Type scheduler);
+
+  Scheduler::Type getScheduler();
 
   void setTransferDelay(sc_core::sc_time transfer_delay);
 
-  void setScheduler(Scheduler::Scheduler scheduler);
-
   void addTask(const ScheduledTask & actor);
+
+  bool hasTask(const ScheduledTask * actor) const;
 
   void setTimings(std::set<Timing> timings);
 
+  void addTimings(std::set<Timing> timings);
+
+  Timings getTimings();
+
+  MappedTasks getMappedTasks();
+
+  std::string getName() const;
+  AttributePtr getAttribute() const;
+  void setAttribute(AttributePtr attribute);
+private:
+  std::string name_;
+  sc_core::sc_time transfer_delay_;
+  Scheduler::Type scheduler_;
+  MappedTasks mappedTasks_;
+  Timings timings_;
+  AttributePtr attribute_;
 };
 } // namespace Config
 } // namespace SystemC_VPC

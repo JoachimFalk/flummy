@@ -51,6 +51,8 @@ lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_la_SOURCES =			\
 	config/Component.cpp			\
+	config/Mappings.cpp			\
+	config/Scheduler.cpp			\
 	config/Timing.cpp			\
 	config/VpcTask.cpp			\
 	config/VpcApi.cpp			\

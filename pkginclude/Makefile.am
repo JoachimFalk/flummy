@@ -31,6 +31,9 @@ nobase_include_HEADERS =				\
 	systemcvpc/vpc_config.h 			\
 							\
 	systemcvpc/config/Component.hpp			\
+	systemcvpc/config/ConfigException.hpp		\
+	systemcvpc/config/Mappings.hpp			\
+	systemcvpc/config/Scheduler.hpp			\
 	systemcvpc/config/Timing.hpp			\
 	systemcvpc/config/VpcTask.hpp			\
 	systemcvpc/config/VpcApi.hpp 			\

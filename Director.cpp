@@ -13,8 +13,13 @@
 #include <iostream>
 #include <sstream>
 
+#include <boost/foreach.hpp>
+
+
 #include <CoSupport/SystemC/systemc_time.hpp>
 
+#include <systemcvpc/ComponentImpl.hpp>
+#include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/VPCBuilder.hpp>
@@ -27,6 +32,8 @@
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 #include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/RoutePool.hpp>
+#include <systemcvpc/config/Mappings.hpp>
+#include <systemcvpc/config/VpcApi.hpp>
 #include "ConfigCheck.hpp"
 
 #include <systemc.h>
@@ -59,7 +66,6 @@ namespace SystemC_VPC{
       checkVpcConfig(true),
       topPowerGov(new InternalSelectFastestPowerModeGovernor),
       topPowerGovFactory(NULL),
-      globalFunctionId(1),
       mappings(),
       reverseMapping(),
       end(SC_ZERO_TIME),
@@ -151,7 +157,7 @@ namespace SystemC_VPC{
          ++it ){
       // FIXME: find the bug
       if(*it != NULL) {
-        delete *it;
+        //delete *it;
       }
     }
 
@@ -426,37 +432,164 @@ namespace SystemC_VPC{
       
   }
 
+  typedef std::map<std::string, FunctionId>  FunctionIdMap;
+
+  FunctionId uniqueFunctionId() {
+    static FunctionId globalFunctionId = 1;
+    return globalFunctionId++;
+  }
+
+
+  FunctionIdMap& getFunctionIdMap(){
+    static FunctionIdMap functionIdMap;
+    return functionIdMap;
+  }
+
   // FunctionIds are created by VPC during XML parsing.
   FunctionId Director::createFunctionId(const std::string& function) {
-    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
-    if( iter == functionIdMap.end() ) {
-      functionIdMap[function] = this->uniqueFunctionId();
+    FunctionIdMap::const_iterator iter = getFunctionIdMap().find(function);
+    if( iter == getFunctionIdMap().end() ) {
+      // map empty function names to default timing
+      if(function == "") {
+        getFunctionIdMap()[function] = defaultFunctionId;
+      }else{
+        getFunctionIdMap()[function] = uniqueFunctionId();
+      }
     }
-    iter = functionIdMap.find(function);
+    iter = getFunctionIdMap().find(function);
     return iter->second;
   }
 
-  bool Director::hasFunctionId(const std::string& function) const {
-    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
-    return (iter != functionIdMap.end());
+  bool Director::hasFunctionId(const std::string& function){
+    FunctionIdMap::const_iterator iter = getFunctionIdMap().find(function);
+    return (iter != getFunctionIdMap().end());
   }
 
   // FunctionIds are used (get) by SysteMoC.
   // The default ID (and a default timing) is used if no ID was created during
   // parsing. (The function name was not given in the XM.L)
-  FunctionId Director::getFunctionId(const std::string& function) const {
-    FunctionIdMap::const_iterator iter = functionIdMap.find(function);
+  FunctionId Director::getFunctionId(const std::string& function){
+    FunctionIdMap::const_iterator iter = getFunctionIdMap().find(function);
 
     // the function name was not set in configuration
     // -> we have to use the default delay
-    if( iter == functionIdMap.end() ) {
+    if( iter == getFunctionIdMap().end() ) {
       return defaultFunctionId;
     }
     return iter->second;
     
   }
 
+  /// begin section: VpcApi.hpp related stuff
+  namespace VC = Config;
+
   //
+  void injectTaskName(const ScheduledTask * actor,
+      std::string actorName)
+  {
+    if (VC::hasTask(actorName) && VC::hasTask(*actor)) {
+      // TODO: Check if a merging strategy is required.
+      throw VC::ConfigException(actorName + " has configuration data from different sources.");
+    } else if (!VC::hasTask(actorName) && !VC::hasTask(*actor)) {
+      throw VC::ConfigException(actorName + " has NO configuration data at all.");
+    } else if (VC::hasTask(actorName)){
+      VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
+      VC::setCachedTask(actor, task);
+      task->inject(actor);
+    } else if (VC::hasTask(*actor)){
+      VC::VpcTask::Ptr task = VC::getCachedTask(*actor);
+      VC::setCachedTask(actorName, task);
+    }
+    assert(VC::hasTask(actorName) && VC::hasTask(*actor));
+  }
+
+  void finalizeMapping(std::string actorName)
+  {
+    VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
+    assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
+    VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
+    assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
+    AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
+    Director::getInstance().registerMapping(actorName.c_str(),
+        comp->getName());
+
+    //generate new ProcessControlBlock or get existing one for
+    // initialization
+    ProcessControlBlock& p =
+      comp->createPCB(Director::getInstance().getProcessId(actorName));
+    p.configure(actorName.c_str(), true, true);
+
+    //TODO: VC::Timing -> Timing
+    const VC::Components & components = VC::getComponents();
+    BOOST_FOREACH(VC::Components::value_type component_pair, components)
+    {
+      std::string componentName = component_pair.first;
+      VC::Component::Ptr component = component_pair.second;
+
+      if (VC::Mappings::isMapped(task, component)) {
+        VC::Component::Timings timings = component->getTimings();
+        BOOST_FOREACH(VC::Timing timing, timings)
+        {
+          p.setTiming(timing);
+          if (timing.getFunctionId() != 0) {
+            ConfigCheck::configureTiming(p.getPid(), timing.getFunction());
+          }
+        }
+      }
+    }
+//    p.setPriority(1);
+//    p.setPeriod(1);
+//    p.setBaseDelay();
+//    p.setBaseLatency();
+
+  }
+  //
+  AbstractComponent * createComponent(std::string name, VC::Component::Ptr component)
+  {
+    AbstractComponent *comp = NULL;
+    switch (component->getScheduler()) {
+      case VC::Scheduler::FCFS:
+        comp = new FcfsComponent(name, &Director::getInstance());
+        break;
+      case VC::Scheduler::StaticPriority_NP:
+        comp = new PriorityComponent(name, &Director::getInstance());
+        break;
+      default:
+        comp = new Component(name, component->getScheduler());
+    }
+
+    //TODO: process attributes
+    //       - processPower()
+    //       - transfer_delay
+    VC::Mappings::getComponents()[component] = comp;
+    Director::getInstance().registerComponent(comp);
+    comp->setAttribute(component->getAttribute());
+    return comp;
+  }
+
+  //
+  void Director::beforeVpcFinalize()
+  {
+    const VC::Components & components = VC::getComponents();
+
+    BOOST_FOREACH(VC::Components::value_type component_pair, components) {
+      std::string componentName = component_pair.first;
+      VC::Component::Ptr component = component_pair.second;
+
+      VC::Component::Timings timings = component->getTimings();
+      VC::Component::MappedTasks tasks = component->getMappedTasks();
+
+      AbstractComponent *comp = createComponent(componentName, component);
+      assert(comp != NULL);
+
+      BOOST_FOREACH(const ScheduledTask* task, tasks) {
+        VC::Mappings::getConfiguredMappings()[VC::getCachedTask(*task)] = component;
+      }
+    }
+  }
+  /// end section: VpcApi.hpp related stuff
+
+//
 void Director::endOfVpcFinalize()
 {
   if (checkVpcConfig) {
@@ -464,16 +597,21 @@ void Director::endOfVpcFinalize()
   }
 }
 
-  FunctionId Director::uniqueFunctionId() {
-    return globalFunctionId++;
-  }
-
   FastLink Director::registerActor(ScheduledTask * actor,
       std::string actorName,
       const FunctionNames &functionNames)
   {
     //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
+
+    try {
+      injectTaskName(actor, actorName);
+      finalizeMapping(actorName);
+    }catch(std::exception & e){
+      std::cerr << "Actor registration failed for \"" << actorName <<
+          "\". Got exception:\n" << e.what() << std::endl;
+      exit(-1);
+    }
 
     ProcessId       pid = getProcessId(  actorName  );
     FunctionIds     functionIds;
@@ -642,6 +780,5 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
     }
     exit(-1);
   }
-
 }
 

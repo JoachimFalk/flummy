@@ -14,6 +14,7 @@
 #define HSCD_VPC_COMPONENT_H
 #include <systemc.h>
 
+#include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/vpc_config.h>
 #include "datatypes.hpp"
 #include "AbstractComponent.hpp"
@@ -76,15 +77,14 @@ namespace SystemC_VPC{
      * passive actors and global SMoC v2 Schedulers.
      */
     Component( std::string name,
-               std::string schedulername,
-               Director *director )
+               Config::Scheduler::Type scheduler)
       : AbstractComponent(name.c_str()),
         blockMutex(0)
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
       this->setPowerMode(this->translatePowerMode("SLOW"));
-      setScheduler(schedulername.c_str());
+      setScheduler(scheduler);
 
 #ifndef NO_POWER_SUM
       std::string powerSumFileName(this->getName());
@@ -130,7 +130,7 @@ namespace SystemC_VPC{
 
     void moveToRemainingPipelineStages(Task* task);
     
-    void setScheduler(const char *schedulername);
+    void setScheduler(Config::Scheduler::Type type);
     
     void fireStateChanged(const ComponentState &state);
 

@@ -39,7 +39,8 @@
 
 #include "InvalidArgumentException.hpp"
 
-#include "Timing.hpp"
+#include "config/Component.hpp"
+#include "config/Timing.hpp"
 #include "Attribute.hpp"
 
 XERCES_CPP_NAMESPACE_USE
@@ -179,15 +180,13 @@ namespace SystemC_VPC{
      * \brief Initialize a component from the configuration file
      * \return pointer to the initialized component
      */
-    //AbstractComponent* initComponent(DOMNode* node) throw(InvalidArgumentException);
-    AbstractComponent* initComponent() throw(InvalidArgumentException);
+    Config::Component::Ptr initComponent() throw(InvalidArgumentException);
     
     /**
      * \brief Performs initialization of attribute values for a component
      * \param comp specifies the component to set attributes for
      */
-    //void initCompAttributes(AbstractComponent* comp, DOMNode* node);
-    void initCompAttributes(AbstractComponent* comp);
+    void initCompAttributes(Config::Component::Ptr comp);
     
     /**
      * \brief Initializes mapping between tasks and components
@@ -208,7 +207,7 @@ namespace SystemC_VPC{
     /**
     * \brief Parsing helper for <timing>
     */
-    Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
+    Config::Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
   };
     
 }

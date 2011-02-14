@@ -17,6 +17,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include "FastLink.hpp"
+#include "config/Timing.hpp"
+
 
 namespace SystemC_VPC {
 
@@ -90,7 +92,7 @@ namespace SystemC_VPC {
     /**
      *
      */
-    void setTiming(const Timing& timing);
+    void setTiming(const Config::Timing& timing);
 
   private:
 

@@ -27,15 +27,33 @@ class ScheduledTask;
 
 namespace Config
 {
-Component::Ptr createComponent(std::string name, Scheduler::Scheduler = Scheduler::FCFS);
+
+typedef std::map<std::string, Component::Ptr> Components;
+
+Component::Ptr createComponent(std::string name, Scheduler::Type =
+    Scheduler::FCFS);
 
 Component::Ptr getComponent(std::string name);
 
 bool hasComponent(std::string name);
 
-VpcTask::Ptr createTask(const ScheduledTask & actor); //smoc_actor is a ScheduledTask
+Components & getComponents();
+
+VpcTask::Ptr getCachedTask(const ScheduledTask & actor); //smoc_actor is a ScheduledTask
+
+VpcTask::Ptr getCachedTask(std::string name);
+
+void setCachedTask(const ScheduledTask * actor, VpcTask::Ptr task);
+
+void setCachedTask(std::string name, VpcTask::Ptr task);
+
+bool hasTask(const ScheduledTask & actor);
+
+bool hasTask(std::string name);
 
 void setPriority(const ScheduledTask & actor, size_t priority);
+
+void ignoreMissingRoutes(bool ignore);
 
 } // namespace Config
 } // namespace SystemC_VPC
