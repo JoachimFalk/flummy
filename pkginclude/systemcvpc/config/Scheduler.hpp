@@ -4,25 +4,41 @@
  *     Department of Computer Science,
  *     Chair of Hardware-Software-Co-Design, Germany.
  *     All rights reserved.
- * 
+ *
  * Project title: SystemC-VPC
  * Comment:
  * ----------------------------------------------------------------------------
  */
 
-#ifndef HSCD_VPC_P_STRUCT_H
-#define HSCD_VPC_P_STRUCT_H
-#include <systemc.h>
+#ifndef SCHEDULER_H_
+#define SCHEDULER_H_
 
-#include <CoSupport/SystemC/systemc_support.hpp>
+#include <systemcvpc/config/ConfigException.hpp>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC
+{
 
-// definition for hiding cosupport as vpc_event
-//typedef CoSupport::SystemC::RefCountEvent         VPC_Event;
-  
-// set for debugging output
-//#define VPC_DEBUG true;
+namespace Config
+{
 
+namespace Scheduler
+{
+enum Type
+{
+  FCFS,
+  StaticPriority_P,
+  StaticPriority_NP,
+  RoundRobin,
+  RateMonotonic,
+  FlexRay,
+  TDMA,
+  TTCC,
+  AVB
+};
+
+Type parseScheduler(std::string name);
+
+} // namespace Scheduler
+} // namespace Config
 } // namespace SystemC_VPC
-#endif
+#endif /* SCHEDULER_H_ */

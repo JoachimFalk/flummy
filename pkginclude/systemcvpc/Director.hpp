@@ -206,9 +206,9 @@ namespace SystemC_VPC{
     
     std::vector<ProcessId> * getTaskAnnotation(std::string compName);
 
-    bool hasFunctionId(const std::string& function) const;
-    FunctionId getFunctionId(const std::string& function) const;
-    FunctionId createFunctionId(const std::string& function);
+    static bool hasFunctionId(const std::string& function);
+    static FunctionId getFunctionId(const std::string& function);
+    static FunctionId createFunctionId(const std::string& function);
 
     Task* allocateTask(ProcessId pid){
       return this->taskPool.allocate( pid );
@@ -241,6 +241,7 @@ namespace SystemC_VPC{
       callCanExecute = testExecute;
     }
 
+    void beforeVpcFinalize();
     void endOfVpcFinalize();
   private:
 
@@ -276,12 +277,6 @@ namespace SystemC_VPC{
      * \brief Reads allocation and binding from file.
      */
     Director();
-
-    typedef std::map<std::string, FunctionId>  FunctionIdMap;
-    FunctionId uniqueFunctionId();
-
-    FunctionIdMap   functionIdMap;
-    FunctionId      globalFunctionId;
 
     typedef std::vector<Delayer* >  Components;
     Components                           components;

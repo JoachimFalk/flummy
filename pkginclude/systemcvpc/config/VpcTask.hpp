@@ -31,11 +31,24 @@ class VpcTask
 public:
   typedef boost::shared_ptr<VpcTask> Ptr;
 
+  VpcTask();
+
   VpcTask(const ScheduledTask & actor);
 
   void mapTo(Component::Ptr component);
 
   void setPriority(size_t priority);
+
+  const ScheduledTask * getActor() const;
+
+//private:
+  void inject(const ScheduledTask * actor);
+
+private:
+  // configured data
+  const ScheduledTask * actor_;
+  Component::Ptr component_;
+  size_t priority_;
 };
 } // namespace Config
 } // namespace SystemC_VPC

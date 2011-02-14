@@ -27,7 +27,7 @@
 #include "datatypes.hpp"
 #include "FastLink.hpp"
 #include "PowerMode.hpp"
-#include "Timing.hpp"
+#include "config/Timing.hpp"
 #include "FunctionTimingPool.hpp"
 
 namespace SystemC_VPC {
@@ -103,7 +103,7 @@ namespace SystemC_VPC {
 
       Tracing* getTraceSignal();
 
-      void setTiming(const Timing& timing);
+      void setTiming(const Config::Timing& timing);
       void setBaseDelay(sc_time delay);
       void setBaseLatency(sc_time latency);
       void addDelay(FunctionId fid, sc_time delay);

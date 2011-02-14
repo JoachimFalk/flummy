@@ -27,6 +27,7 @@
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/Task.hpp>
+#include <systemcvpc/config/Component.hpp>
 
 #include <float.h>
 
@@ -244,46 +245,36 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void  Component::setScheduler(const char *schedulername){
-    if( 0==strncmp(schedulername,STR_ROUNDROBIN,strlen(STR_ROUNDROBIN))
-        || 0==strncmp(schedulername,STR_RR,strlen(STR_RR)) ){
-      scheduler=new RoundRobinScheduler((const char*)schedulername);
-      }else if( 0==strncmp(schedulername,
-                         STR_PRIORITYSCHEDULERNOPREEMPT,strlen(STR_PRIORITYSCHEDULERNOPREEMPT))
-              || 0==strncmp(schedulername,STR_PSNOPRE,strlen(STR_PSNOPRE)) ){
-      scheduler=new PrioritySchedulerNoPreempt((const char*)schedulername);
-    }else if( 0==strncmp(schedulername,
-                         STR_PRIORITYSCHEDULER,strlen(STR_PRIORITYSCHEDULER))
-              || 0==strncmp(schedulername,STR_PS,strlen(STR_PS)) ){
-      scheduler=new PriorityScheduler((const char*)schedulername);
-
-    }else if( 0==strncmp(schedulername,STR_RATEMONOTONIC,
-                         strlen(STR_RATEMONOTONIC))
-              || 0==strncmp(schedulername,STR_RM,strlen(STR_RM))){
-      scheduler=new RateMonotonicScheduler((const char*)schedulername);
-
-    }else if( 0==strncmp(schedulername,STR_FIRSTCOMEFIRSTSERVED,
-                         strlen(STR_FIRSTCOMEFIRSTSERVED))
-              || 0==strncmp(schedulername,STR_FCFS,strlen(STR_FCFS))){
-      scheduler=new FCFSScheduler();
-      
-      // TDMA hat nur einen Namen ;-)
-    }else if( 0==strncmp(schedulername,STR_TDMA,
-                         strlen(STR_TDMA))){
-      scheduler=new TDMAScheduler((const char*)schedulername);
-
-    }else if( 0==strncmp(schedulername,STR_FLEXRAY,
-                         strlen(STR_FLEXRAY))){
-      scheduler=new FlexRayScheduler((const char*)schedulername);
-    }else if( 0==strncmp(schedulername,STR_AVB,
-                             strlen(STR_AVB))){
-          scheduler=new AVBScheduler((const char*)schedulername);
-    }else if( 0==strncmp(schedulername,STR_TTCC,
-                         strlen(STR_TTCC))){
-      scheduler=new TimeTriggeredCCScheduler((const char*)schedulername);
-    }else{
-      //    cerr << "Scheduler: "<< STR_FIRSTCOMEFIRSTSERVED << endl;
-      scheduler=new FCFSScheduler();
+  void Component::setScheduler(Config::Scheduler::Type type)
+  {
+    switch (type) {
+      case Config::Scheduler::RoundRobin:
+        scheduler = new RoundRobinScheduler();
+        break;
+      case Config::Scheduler::StaticPriority_NP:
+        scheduler = new PrioritySchedulerNoPreempt();
+      case Config::Scheduler::StaticPriority_P:
+        scheduler = new PriorityScheduler();
+        break;
+      case Config::Scheduler::RateMonotonic:
+        scheduler = new RateMonotonicScheduler();
+        break;
+      case Config::Scheduler::FCFS:
+        scheduler = new FCFSScheduler();
+        break;
+      case Config::Scheduler::TDMA:
+        scheduler = new TDMAScheduler();
+        break;
+      case Config::Scheduler::FlexRay:
+        scheduler = new FlexRayScheduler();
+        break;
+      case Config::Scheduler::AVB:
+        scheduler = new AVBScheduler();
+        break;
+      case Config::Scheduler::TTCC:
+        scheduler = new TimeTriggeredCCScheduler();
+      default:
+        scheduler = new FCFSScheduler();
     }
   }
 
