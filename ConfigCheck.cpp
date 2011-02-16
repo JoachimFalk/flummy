@@ -42,15 +42,17 @@ void TaskConfig::check()
       std::inserter(underSpecified, underSpecified.begin()));
 
   if (!overSpecified.empty()) {
-    std::cerr << "[VPC warning] These functions are configured in the XML file, but not used in the SysteMoC model:\t";
-    dumpSet(overSpecified);
-    std::cerr << std::endl;
+    //FIXME:
+//    std::cerr << "[VPC warning] These functions are configured in the XML file, but not used in the SysteMoC model:\t";
+//    dumpSet(overSpecified);
+//    std::cerr << std::endl;
   }
 
   if (!underSpecified.empty()) {
-    std::cerr << "[VPC warning] These functions are modelled in SysteMoC, but not configured in the XML file:\t";
-    dumpSet(underSpecified);
-    std::cerr << std::endl;
+    //FIXME:
+//    std::cerr << "[VPC warning] These functions are modelled in SysteMoC, but not configured in the XML file:\t";
+//    dumpSet(underSpecified);
+//    std::cerr << std::endl;
   }
 
 }
