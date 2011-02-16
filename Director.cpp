@@ -488,8 +488,11 @@ namespace SystemC_VPC{
       std::string actorName)
   {
     if (VC::hasTask(actorName) && VC::hasTask(*actor)) {
-      // TODO: Check if a merging strategy is required.
-      throw VC::ConfigException(actorName + " has configuration data from different sources.");
+      if (VC::getCachedTask(actorName) != VC::getCachedTask(*actor)) {
+        // TODO: Check if a merging strategy is required.
+        throw VC::ConfigException(actorName +
+            " has configuration data from XML and from configuration API.");
+      }
     } else if (!VC::hasTask(actorName) && !VC::hasTask(*actor)) {
       throw VC::ConfigException(actorName + " has NO configuration data at all.");
     } else if (VC::hasTask(actorName)){
