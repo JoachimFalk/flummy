@@ -15,6 +15,8 @@
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
+#include <boost/shared_ptr.hpp>
+
 #include <string>
 #include <set>
 
@@ -67,21 +69,32 @@ bool Component::hasTask(const ScheduledTask * actor) const
 }
 
 //
-void Component::setTimings(Timings timings)
+void Component::setTimingsProvider(TimingsProvider::Ptr provider)
 {
-  timings_ = timings;
+  timingsProvider_ = provider;
 }
 
 //
-void Component::addTimings(std::set<Timing> timings)
+TimingsProvider::Ptr Component::getTimingsProvider()
 {
-  timings_.insert(timings.begin(), timings.end());
+  if (timingsProvider_) {
+    return timingsProvider_;
+  } else if (defaultTimingsProvider_) {
+    return defaultTimingsProvider_;
+  }
+  throw ConfigException("\tComponent \"" + this->name_ +
+      "\" has NO timing provider"
+      "\n\tEither set one: Component::setTimingsProvider(TimingsProvider::Ptr )"
+      "\n\tOr use default one: Component::getDefaultTimingsProvider()");
 }
 
 //
-Component::Timings Component::getTimings()
+DefaultTimingsProvider::Ptr Component::getDefaultTimingsProvider()
 {
-  return timings_;
+  if (!defaultTimingsProvider_) {
+    defaultTimingsProvider_.reset(new DefaultTimingsProvider());
+  }
+  return defaultTimingsProvider_;
 }
 
 AttributePtr Component::getAttribute() const

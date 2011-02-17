@@ -32,6 +32,7 @@
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 #include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/RoutePool.hpp>
+#include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/Mappings.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 #include "ConfigCheck.hpp"
@@ -506,7 +507,8 @@ namespace SystemC_VPC{
     assert(VC::hasTask(actorName) && VC::hasTask(*actor));
   }
 
-  void finalizeMapping(std::string actorName)
+  void finalizeMapping(std::string actorName,
+      const FunctionNames &functionNames)
   {
     VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
     assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
@@ -530,12 +532,12 @@ namespace SystemC_VPC{
       VC::Component::Ptr component = component_pair.second;
 
       if (VC::Mappings::isMapped(task, component)) {
-        VC::Component::Timings timings = component->getTimings();
-        BOOST_FOREACH(VC::Timing timing, timings)
+        VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
+        BOOST_FOREACH(std::string function, functionNames)
         {
-          p.setTiming(timing);
-          if (timing.getFunctionId() != 0) {
-            ConfigCheck::configureTiming(p.getPid(), timing.getFunction());
+          if (provider->has(function)) {
+            p.setTiming(provider->get(function));
+            ConfigCheck::configureTiming(p.getPid(), function);
           }
         }
       }
@@ -580,7 +582,6 @@ namespace SystemC_VPC{
       VC::Component::Ptr component = component_pair.second;
       assert(componentName == component->getName());
 
-      VC::Component::Timings timings = component->getTimings();
       VC::Component::MappedTasks tasks = component->getMappedTasks();
 
       AbstractComponent *comp = createComponent(component);
@@ -610,7 +611,7 @@ void Director::endOfVpcFinalize()
 
     try {
       injectTaskName(actor, actorName);
-      finalizeMapping(actorName);
+      finalizeMapping(actorName, functionNames);
     }catch(std::exception & e){
       std::cerr << "Actor registration failed for \"" << actorName <<
           "\". Got exception:\n" << e.what() << std::endl;

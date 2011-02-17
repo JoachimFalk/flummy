@@ -27,7 +27,7 @@ class ConfigException: public std::runtime_error
 {
 public:
   ConfigException(std::string msg) :
-    std::runtime_error(msg)
+    std::runtime_error("[VPC] Got Error:\n" + msg)
   {
 
   }

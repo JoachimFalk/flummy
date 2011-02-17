@@ -85,5 +85,19 @@ void Timing::setPowerMode(std::string powerMode_)
   this->powerMode_ = powerMode_;
 }
 
+Timing DefaultTimingsProvider::get(const std::string &functionName) const{
+  assert(this->has(functionName));
+  return timings_.find(functionName)->second;
+}
+
+bool DefaultTimingsProvider::has(const std::string &functionName) const{
+  return timings_.find(functionName) != timings_.end();
+}
+
+void DefaultTimingsProvider::add(Timing timing){
+  timings_[timing.getFunction()] =timing;
+}
+
+
 } // namespace Config
 } // namespace SystemC_VPC
