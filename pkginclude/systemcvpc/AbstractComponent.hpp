@@ -22,6 +22,7 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
+#include "config/Component.hpp"
 #include "datatypes.hpp"
 #include "Delayer.hpp"
 #include "ProcessControlBlock.hpp"
@@ -118,9 +119,9 @@ class ComponentObserver;
   
   public:
   
-    AbstractComponent(sc_module_name name)
-      : sc_module(name),
-        Delayer(),
+    AbstractComponent(Config::Component::Ptr component)
+      : sc_module(component->getName()),
+        Delayer(component->getComponentId()),
         transactionDelays(),
         scheduledTasks(),
 #ifndef NO_VCD_TRACES

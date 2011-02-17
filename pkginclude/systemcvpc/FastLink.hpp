@@ -14,15 +14,14 @@
 #define __INCLUDED__FASTLINK__H__
 #include <systemc.h>
 #include "EventPair.hpp"
+#include "datatypes.hpp"
 
 #include <vector>
 
-typedef size_t ProcessId;
-typedef size_t FunctionId;
-typedef size_t ComponentId;
+namespace SystemC_VPC{
+
 typedef std::vector<FunctionId> FunctionIds;
 
-namespace SystemC_VPC{
   /**
    *
    */

@@ -15,6 +15,7 @@
 #include <systemc.h>
 
 #include <systemcvpc/vpc_config.h>
+#include "config/Component.hpp"
 #include "datatypes.hpp"
 #include "AbstractComponent.hpp"
 #include "ComponentInfo.hpp"
@@ -92,7 +93,7 @@ namespace SystemC_VPC{
      * \brief An implementation of AbstractComponent used together with
      * passive actors and global SMoC v2 Schedulers.
      */
-    NonPreemptiveComponent( std::string name, Director *director );
+    NonPreemptiveComponent(Config::Component::Ptr component, Director *director);
       
     virtual ~NonPreemptiveComponent()
     {
@@ -192,8 +193,9 @@ namespace SystemC_VPC{
 
   class FcfsComponent : public NonPreemptiveComponent {
   public:
-    FcfsComponent( std::string name, Director *director ) :
-      NonPreemptiveComponent(name, director)
+    FcfsComponent(Config::Component::Ptr component, Director *director =
+      &Director::getInstance()) :
+      NonPreemptiveComponent(component, director)
     {
     }
 
@@ -219,8 +221,9 @@ namespace SystemC_VPC{
 
   class PriorityComponent : public NonPreemptiveComponent {
   public:
-    PriorityComponent( std::string name, Director *director ) :
-      NonPreemptiveComponent(name, director), fcfsOrder(0)
+    PriorityComponent(Config::Component::Ptr component, Director *director  =
+        &Director::getInstance()) :
+      NonPreemptiveComponent(component, director), fcfsOrder(0)
     {
     }
 

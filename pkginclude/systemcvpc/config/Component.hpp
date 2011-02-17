@@ -13,13 +13,15 @@
 #ifndef COMPONENT_H_
 #define COMPONENT_H_
 
+#include "ConfigException.hpp"
+#include "Scheduler.hpp"
+#include "../Attribute.hpp"
+#include "../datatypes.hpp"
+
 #include <boost/shared_ptr.hpp>
 #include <systemc>
 #include <set>
 #include <string>
-#include <systemcvpc/config/ConfigException.hpp>
-#include <systemcvpc/config/Scheduler.hpp>
-#include <systemcvpc/Attribute.hpp>
 
 namespace SystemC_VPC
 {
@@ -31,7 +33,7 @@ namespace Config
 
 class Timing;
 
-class Component
+class Component : protected SequentiallyIdedObject<ComponentId>
 {
 public:
   typedef boost::shared_ptr<Component> Ptr;
@@ -61,6 +63,7 @@ public:
   std::string getName() const;
   AttributePtr getAttribute() const;
   void setAttribute(AttributePtr attribute);
+  ComponentId getComponentId() const;
 private:
   std::string name_;
   sc_core::sc_time transfer_delay_;

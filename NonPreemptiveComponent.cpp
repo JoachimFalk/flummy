@@ -23,8 +23,9 @@ namespace SystemC_VPC{
   /**
    *
    */
-  NonPreemptiveComponent::NonPreemptiveComponent( std::string name, Director *director )
-      : AbstractComponent(name.c_str()),
+  NonPreemptiveComponent::NonPreemptiveComponent(
+    Config::Component::Ptr component, Director *director)
+      : AbstractComponent(component),
         runningTask(NULL),
         blockMutex(0),
         releasePhase(false)

@@ -21,11 +21,8 @@
 namespace SystemC_VPC{
 
   //
-  ComponentId Delayer::globalComponentId = 0;
-
-  //
   const ComponentId Delayer::getComponentId() const{
-    return this->componentId;
+    return this->componentId_;
   }
 
   AbstractComponent::Factories AbstractComponent::factories;

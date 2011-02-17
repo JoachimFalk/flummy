@@ -99,6 +99,14 @@ Component::MappedTasks Component::getMappedTasks()
 {
   return mappedTasks_;
 }
+
+//
+ComponentId Component::getComponentId() const
+{
+  //  std::cerr << " getComponentId() " << this->getSequentialId() << std::endl;
+  return this->getSequentialId();
+}
+
 } // namespace Config
 } // namespace SystemC_VPC
 
