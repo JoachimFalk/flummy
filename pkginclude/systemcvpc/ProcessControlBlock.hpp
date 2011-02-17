@@ -111,9 +111,6 @@ namespace SystemC_VPC {
 
     private:
 
-      typedef std::map<PowerMode, FunctionTiming*> FunctionTimings;
-      FunctionTimings functionTimings;
-
       std::string name;
       ProcessId   pid;
       FunctionId  fid;
