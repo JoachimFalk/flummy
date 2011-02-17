@@ -15,10 +15,12 @@
 
 #include "ConfigException.hpp"
 #include "Scheduler.hpp"
+#include "Timing.hpp"
 #include "../Attribute.hpp"
 #include "../datatypes.hpp"
 
 #include <boost/shared_ptr.hpp>
+
 #include <systemc>
 #include <set>
 #include <string>
@@ -31,13 +33,10 @@ class ScheduledTask;
 namespace Config
 {
 
-class Timing;
-
 class Component : protected SequentiallyIdedObject<ComponentId>
 {
 public:
   typedef boost::shared_ptr<Component> Ptr;
-  typedef std::set<Timing> Timings;
   typedef std::set<const ScheduledTask *> MappedTasks;
 
   Component(std::string name, Scheduler::Type scheduler);
@@ -52,11 +51,11 @@ public:
 
   bool hasTask(const ScheduledTask * actor) const;
 
-  void setTimings(std::set<Timing> timings);
+  void setTimingsProvider(TimingsProvider::Ptr provider);
 
-  void addTimings(std::set<Timing> timings);
+  TimingsProvider::Ptr getTimingsProvider();
 
-  Timings getTimings();
+  DefaultTimingsProvider::Ptr getDefaultTimingsProvider();
 
   MappedTasks getMappedTasks();
 
@@ -69,7 +68,8 @@ private:
   sc_core::sc_time transfer_delay_;
   Scheduler::Type scheduler_;
   MappedTasks mappedTasks_;
-  Timings timings_;
+  TimingsProvider::Ptr timingsProvider_;
+  DefaultTimingsProvider::Ptr defaultTimingsProvider_;
   AttributePtr attribute_;
 };
 } // namespace Config

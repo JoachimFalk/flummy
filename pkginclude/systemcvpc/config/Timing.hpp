@@ -13,8 +13,12 @@
 #ifndef TIMING_H_
 #define TIMING_H_
 
-#include <string>
 #include <systemcvpc/FastLink.hpp>
+
+#include <boost/shared_ptr.hpp>
+
+#include <string>
+#include <map>
 
 #include <systemc>
 
@@ -24,6 +28,9 @@ namespace SystemC_VPC
 namespace Config
 {
 
+/*
+ *
+ */
 class Timing
 {
 public:
@@ -51,6 +58,37 @@ private:
   FunctionId fid_;
   std::string powerMode_;
 };
+
+/*
+ *
+ */
+class TimingsProvider
+{
+public:
+  typedef boost::shared_ptr<TimingsProvider> Ptr;
+
+  virtual bool has(const std::string &functionName) const = 0;
+  virtual Timing get(const std::string &functionName) const = 0;
+  virtual ~TimingsProvider() {}
+};
+
+/*
+ *
+ */
+class DefaultTimingsProvider : public TimingsProvider
+{
+public:
+  typedef boost::shared_ptr<DefaultTimingsProvider> Ptr;
+
+  virtual bool has(const std::string &functionName) const;
+  virtual Timing get(const std::string &functionName) const;
+
+  virtual void add(Timing timing);
+private:
+  std::map<std::string, Timing> timings_;
+};
+
+
 } // namespace Config
 } // namespace SystemC_VPC
 #endif /* TIMING_H_ */

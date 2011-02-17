@@ -379,7 +379,7 @@ namespace VC = Config;
           VC::Component::Ptr comp = VC::getComponent(sTarget);
           VC::VpcTask::Ptr task = VC::getCachedTask(sSource);
           VC::Mappings::getConfiguredMappings()[task] = comp;
-          VC::Component::Timings timings;
+          VC::DefaultTimingsProvider::Ptr provider = comp->getDefaultTimingsProvider();
 
           //walk down hierarchy to attributes
           DOMNode* attnode = node->getFirstChild();
@@ -393,7 +393,7 @@ namespace VC = Config;
             if( xmlName == timingStr ){
               try {
                 VC::Timing t = this->parseTiming( attnode );
-                timings.insert(t);
+                provider->add(t);
 
               } catch(InvalidArgumentException &e) {
                 std::string msg("Error with mapping: ");
@@ -431,7 +431,6 @@ namespace VC = Config;
               }
             }
           }
-          comp->addTimings(timings);
         }else{
           std::cerr << "VPCBuilder> No valid component found for mapping:"
             " source=" << sSource << " target=" << sTarget<< std::endl;
