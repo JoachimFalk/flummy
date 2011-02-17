@@ -32,7 +32,9 @@ namespace SystemC_VPC{
 
     virtual const ComponentList& getHops() const = 0;
 
-    Route() : Delayer(), instanceId(createRouteId()), enableTracer(false){}
+    Route() : Delayer(
+        //FIXME: use Builder from VPC API
+        42), instanceId(createRouteId()), enableTracer(false){}
 
     Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
         enableTracer(orig.enableTracer), ptpTracer(orig.ptpTracer) {}

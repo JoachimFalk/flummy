@@ -245,8 +245,9 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::setScheduler(Config::Scheduler::Type type)
+  void Component::setScheduler(Config::Component::Ptr component)
   {
+    Config::Scheduler::Type type = component->getScheduler();
     switch (type) {
       case Config::Scheduler::RoundRobin:
         scheduler = new RoundRobinScheduler();

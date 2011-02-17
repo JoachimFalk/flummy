@@ -10,19 +10,53 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef HSCD_VPC_P_STRUCT_H
-#define HSCD_VPC_P_STRUCT_H
-#include <systemc.h>
+#ifndef DATATYPES_H_
+#define DATATYPES_H_
 
-#include <CoSupport/SystemC/systemc_support.hpp>
+//#include <systemc.h>
 
-namespace SystemC_VPC {
+//#include <CoSupport/SystemC/systemc_support.hpp>
 
-// definition for hiding cosupport as vpc_event
-//typedef CoSupport::SystemC::RefCountEvent         VPC_Event;
-  
+namespace SystemC_VPC
+{
+
+typedef size_t ComponentId;
+typedef size_t ProcessId;
+typedef size_t FunctionId;
+
 // set for debugging output
 //#define VPC_DEBUG true;
 
+
+/******************************************************************************
+ *
+ */
+template<typename ID_TYPE>
+class SequentiallyIdedObject
+{
+public:
+  typedef ID_TYPE IdType;
+
+  SequentiallyIdedObject() :
+    id_(getNextId())
+  {
+  }
+
+protected:
+  IdType getSequentialId() const
+  {
+    return id_;
+  }
+
+private:
+  const IdType id_;
+
+  static IdType getNextId()
+  {
+    static IdType currentId = 0;
+    return currentId++;
+  }
+};
+
 } // namespace SystemC_VPC
-#endif
+#endif // DATATYPES_H_

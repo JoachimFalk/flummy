@@ -55,18 +55,16 @@ namespace SystemC_VPC{
 
   protected:
 
-    Delayer(): componentId(globalComponentId++) {}
+    Delayer(ComponentId id): componentId_(id) {}
 
     typedef std::vector<ComponentObserver *> Observers;
     
     Observers observers;
     
   private:
-    //
-    static ComponentId globalComponentId;
 
     //
-    ComponentId componentId;
+    ComponentId componentId_;
   };
 }
 

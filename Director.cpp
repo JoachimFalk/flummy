@@ -547,18 +547,18 @@ namespace SystemC_VPC{
 
   }
   //
-  AbstractComponent * createComponent(std::string name, VC::Component::Ptr component)
+  AbstractComponent * createComponent(VC::Component::Ptr component)
   {
     AbstractComponent *comp = NULL;
     switch (component->getScheduler()) {
       case VC::Scheduler::FCFS:
-        comp = new FcfsComponent(name, &Director::getInstance());
+        comp = new FcfsComponent(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
-        comp = new PriorityComponent(name, &Director::getInstance());
+        comp = new PriorityComponent(component);
         break;
       default:
-        comp = new Component(name, component->getScheduler());
+        comp = new Component(component);
     }
 
     //TODO: process attributes
@@ -578,11 +578,12 @@ namespace SystemC_VPC{
     BOOST_FOREACH(VC::Components::value_type component_pair, components) {
       std::string componentName = component_pair.first;
       VC::Component::Ptr component = component_pair.second;
+      assert(componentName == component->getName());
 
       VC::Component::Timings timings = component->getTimings();
       VC::Component::MappedTasks tasks = component->getMappedTasks();
 
-      AbstractComponent *comp = createComponent(componentName, component);
+      AbstractComponent *comp = createComponent(component);
       assert(comp != NULL);
 
       BOOST_FOREACH(const ScheduledTask* task, tasks) {

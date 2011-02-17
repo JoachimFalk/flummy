@@ -76,15 +76,14 @@ namespace SystemC_VPC{
      * \brief An implementation of AbstractComponent used together with
      * passive actors and global SMoC v2 Schedulers.
      */
-    Component( std::string name,
-               Config::Scheduler::Type scheduler)
-      : AbstractComponent(name.c_str()),
+    Component( Config::Component::Ptr component)
+      : AbstractComponent(component),
         blockMutex(0)
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
       this->setPowerMode(this->translatePowerMode("SLOW"));
-      setScheduler(scheduler);
+      setScheduler(component);
 
 #ifndef NO_POWER_SUM
       std::string powerSumFileName(this->getName());
@@ -130,7 +129,7 @@ namespace SystemC_VPC{
 
     void moveToRemainingPipelineStages(Task* task);
     
-    void setScheduler(Config::Scheduler::Type type);
+    void setScheduler(Config::Component::Ptr component);
     
     void fireStateChanged(const ComponentState &state);
 
