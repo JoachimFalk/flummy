@@ -65,7 +65,7 @@ private:
 class TimingsProvider
 {
 public:
-  typedef boost::shared_ptr<TimingsProvider> Ptr;
+  typedef boost::shared_ptr<const TimingsProvider> Ptr;
 
   virtual bool has(const std::string &functionName) const = 0;
   virtual Timing get(const std::string &functionName) const = 0;
