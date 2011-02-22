@@ -515,7 +515,8 @@ ProcessId Director::getProcessId(std::string process_or_source,
   }
 
   void finalizeMapping(std::string actorName,
-      const FunctionNames &functionNames)
+      const FunctionNames &actionNames,
+      const FunctionNames &guardNames)
   {
     VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
     assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
@@ -541,11 +542,18 @@ ProcessId Director::getProcessId(std::string process_or_source,
       if (VC::Mappings::isMapped(task, component)) {
         VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
         pcb.setPriority(task->getPriority());  // GFR BUGFIX
-        BOOST_FOREACH(std::string function, functionNames)
+        BOOST_FOREACH(std::string guard, guardNames)
         {
-          if (provider->has(function)) {
-            pcb.setTiming(provider->get(function));
-            ConfigCheck::configureTiming(pcb.getPid(), function);
+          if (provider->hasGuardTiming(guard)) {
+            pcb.setTiming(provider->getGuardTiming(guard));
+            ConfigCheck::configureTiming(pcb.getPid(), guard);
+          }
+        }
+        BOOST_FOREACH(std::string action, actionNames)
+        {
+          if (provider->hasActionTiming(action)) {
+            pcb.setTiming(provider->getActionTiming(action));
+            ConfigCheck::configureTiming(pcb.getPid(), action);
           }
         }
       }
@@ -612,14 +620,15 @@ void Director::endOfVpcFinalize()
 
   FastLink Director::registerActor(ScheduledTask * actor,
       std::string actorName,
-      const FunctionNames &functionNames)
+      const FunctionNames &actionNames,
+      const FunctionNames &guardNames)
   {
     //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
 
     try {
       injectTaskName(actor, actorName);
-      finalizeMapping(actorName, functionNames);
+      finalizeMapping(actorName, actionNames, guardNames);
     }catch(std::exception & e){
       std::cerr << "Actor registration failed for \"" << actorName <<
           "\". Got exception:\n" << e.what() << std::endl;
@@ -628,6 +637,12 @@ void Director::endOfVpcFinalize()
 
     ProcessId       pid = getProcessId(  actorName  );
     FunctionIds     functionIds;
+
+    //TODO: move this to finalizeMappings ??
+    FunctionNames functionNames;
+    functionNames.insert(functionNames.end(), actionNames.begin(), actionNames.end());
+    functionNames.insert(functionNames.end(), guardNames.begin(), guardNames.end());
+
     for(FunctionNames::const_iterator iter = functionNames.begin();
         iter != functionNames .end();
         ++iter){

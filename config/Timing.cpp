@@ -27,16 +27,15 @@ Timing::Timing(std::string function, sc_core::sc_time dii) :
 {
 }
 
-Timing::Timing(sc_core::sc_time dii,
-    sc_core::sc_time latency) :
-  function_(""), dii_(dii), latency_(latency), fid_(
-      Director::createFunctionId("")), powerMode_("SLOW")
+Timing::Timing(sc_core::sc_time dii, sc_core::sc_time latency) :
+  function_(""), dii_(dii), latency_(latency), fid_(Director::createFunctionId(
+      "")), powerMode_("SLOW")
 {
 }
 
 Timing::Timing(sc_core::sc_time dii) :
-  function_(""), dii_(dii), latency_(dii), fid_(
-      Director::createFunctionId("")), powerMode_("SLOW")
+  function_(""), dii_(dii), latency_(dii),
+      fid_(Director::createFunctionId("")), powerMode_("SLOW")
 {
 }
 
@@ -98,19 +97,35 @@ void Timing::setPowerMode(std::string powerMode_)
   this->powerMode_ = powerMode_;
 }
 
-Timing DefaultTimingsProvider::get(const std::string &functionName) const{
-  assert(this->has(functionName));
-  return timings_.find(functionName)->second;
+bool DefaultTimingsProvider::hasActionTiming(const std::string &functionName) const
+{
+  return functionTimings_.find(functionName) != functionTimings_.end();
 }
 
-bool DefaultTimingsProvider::has(const std::string &functionName) const{
-  return timings_.find(functionName) != timings_.end();
+Timing DefaultTimingsProvider::getActionTiming(const std::string &functionName) const
+{
+  if(this->hasActionTiming(functionName)) {
+    return functionTimings_.find(functionName)->second;
+  }
+
+  throw ConfigException("DefaultTimingsProvider has NO timing for function "
+      + functionName);
 }
 
-void DefaultTimingsProvider::add(Timing timing){
-  timings_[timing.getFunction()] =timing;
+bool DefaultTimingsProvider::hasGuardTiming(const std::string &functionName) const
+{
+  return hasActionTiming(functionName);
 }
 
+Timing DefaultTimingsProvider::getGuardTiming(const std::string &functionName) const
+{
+  return getActionTiming(functionName);
+}
+
+void DefaultTimingsProvider::add(Timing timing)
+{
+  functionTimings_[timing.getFunction()] = timing;
+}
 
 } // namespace Config
 } // namespace SystemC_VPC
