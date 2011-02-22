@@ -527,9 +527,9 @@ ProcessId Director::getProcessId(std::string process_or_source,
 
     //generate new ProcessControlBlock or get existing one for
     // initialization
-    ProcessControlBlock& p =
+    ProcessControlBlock& pcb =
       comp->createPCB(Director::getInstance().getProcessId(actorName));
-    p.configure(actorName.c_str(), true, true);
+    pcb.configure(actorName.c_str(), true, true);
 
     //TODO: VC::Timing -> Timing
     const VC::Components & components = VC::getComponents();
@@ -540,16 +540,17 @@ ProcessId Director::getProcessId(std::string process_or_source,
 
       if (VC::Mappings::isMapped(task, component)) {
         VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
+        pcb.setPriority(task->getPriority());  // GFR BUGFIX
         BOOST_FOREACH(std::string function, functionNames)
         {
           if (provider->has(function)) {
-            p.setTiming(provider->get(function));
-            ConfigCheck::configureTiming(p.getPid(), function);
+            pcb.setTiming(provider->get(function));
+            ConfigCheck::configureTiming(pcb.getPid(), function);
           }
         }
       }
     }
-//    p.setPriority(1);
+//TODO:
 //    p.setPeriod(1);
 //    p.setBaseDelay();
 //    p.setBaseLatency();
