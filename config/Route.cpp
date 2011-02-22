@@ -18,8 +18,8 @@ namespace Config
 
 //
 Hop::Hop(Component::Ptr component) :
-  component_(component), priority_(), transferTiming_(
-      component->getTransferTiming())
+  component_(component), transferTiming_(component->getTransferTiming()),
+      priority_()
 {
 }
 
