@@ -46,6 +46,11 @@ void VpcTask::setPriority(size_t priority)
 }
 
 //
+size_t VpcTask::getPriority() const
+{
+  return priority_;
+}
+//
 const ScheduledTask * VpcTask::getActor() const
 {
   return actor_;

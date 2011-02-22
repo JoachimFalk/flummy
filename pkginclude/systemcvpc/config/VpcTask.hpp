@@ -17,7 +17,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-
 namespace SystemC_VPC
 {
 
@@ -39,9 +38,11 @@ public:
 
   void setPriority(size_t priority);
 
+  size_t getPriority() const;
+
   const ScheduledTask * getActor() const;
 
-//private:
+  //private:
   void inject(const ScheduledTask * actor);
 
 private:
