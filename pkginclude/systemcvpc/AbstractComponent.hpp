@@ -53,7 +53,11 @@ class ComponentObserver;
    * \brief The interface of a Virtual-Processing-Component (VPC).
    */
   class AbstractComponent:
-    public sc_module, public Delayer, public ComponentModel {
+    public sc_module,
+    public Delayer,
+    public ComponentModel,
+    public ComponentInterface
+{
   
   public:
 
@@ -132,6 +136,7 @@ class ComponentObserver;
         midPowerGov(NULL),
         powerAttribute(new Attribute("",""))
     {
+      component->componentInterface_ = this;
       if(powerTables.find(getPowerMode()) == powerTables.end()){
         powerTables[getPowerMode()] = PowerTable();
       }
@@ -183,6 +188,13 @@ class ComponentObserver;
 
     const PowerMode* getPowerMode() const {
       return this->powerMode;
+    }
+
+    /*
+     * from ComponentInterface
+     */
+    void changePowerMode(std::string powerMode) {
+      setPowerMode(translatePowerMode(powerMode));
     }
 
     /**

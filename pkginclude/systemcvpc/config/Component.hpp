@@ -29,6 +29,16 @@ namespace SystemC_VPC
 {
 
 class ScheduledTask;
+class AbstractComponent;
+
+class ComponentInterface
+{
+public:
+  typedef ComponentInterface* Ptr;
+
+  virtual ~ComponentInterface(){}
+  virtual void changePowerMode(std::string powerMode) = 0;
+};
 
 namespace Config
 {
@@ -65,7 +75,11 @@ public:
   AttributePtr getAttribute() const;
   void setAttribute(AttributePtr attribute);
   ComponentId getComponentId() const;
+
+  ComponentInterface::Ptr getComponentInterface() const;
 private:
+  friend class SystemC_VPC::AbstractComponent;
+
   std::string name_;
   Timing transferTiming_;
   Scheduler::Type scheduler_;
@@ -73,6 +87,7 @@ private:
   TimingsProvider::Ptr timingsProvider_;
   DefaultTimingsProvider::Ptr defaultTimingsProvider_;
   AttributePtr attribute_;
+  ComponentInterface::Ptr componentInterface_;
 };
 } // namespace Config
 } // namespace SystemC_VPC

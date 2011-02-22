@@ -28,7 +28,8 @@ namespace Config
 
 //
 Component::Component(std::string name, Scheduler::Type scheduler) :
-  name_(name), scheduler_(scheduler), attribute_(new Attribute())
+  name_(name), scheduler_(scheduler), attribute_(new Attribute()),
+      componentInterface_(NULL)
 {
 }
 
@@ -122,8 +123,16 @@ Component::MappedTasks Component::getMappedTasks()
 //
 ComponentId Component::getComponentId() const
 {
-//  std::cerr << name_ << "->getComponentId() " << this->getSequentialId() << std::endl;
+  //  std::cerr << name_ << "->getComponentId() " << this->getSequentialId() << std::endl;
   return this->getSequentialId();
+}
+
+//
+ComponentInterface::Ptr Component::getComponentInterface() const
+{
+  //TODO: assert simulation phase
+  assert(componentInterface_ != NULL);
+  return componentInterface_;
 }
 
 } // namespace Config
