@@ -14,6 +14,7 @@
 #define MAPPINGS_HPP_
 
 #include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/config/Route.hpp>
 #include <systemcvpc/config/VpcTask.hpp>
 
 #include <map>
@@ -26,6 +27,8 @@ class AbstractComponent;
 namespace Config
 {
 
+typedef std::map<ProcessId, Route::Ptr> Routes;
+
 class Mappings
 {
 public:
@@ -35,6 +38,10 @@ public:
   static std::map<VpcTask::Ptr, Component::Ptr > & getConfiguredMappings();
   static std::map<Component::Ptr, AbstractComponent * > & getComponents();
   static bool isMapped(VpcTask::Ptr task, Component::Ptr component);
+
+  static void addRoute(ProcessId pid, Route::Ptr route);
+  static bool hasRoute(ProcessId pid);
+  static Route::Ptr getRoute(ProcessId pid);
 };
 
 }

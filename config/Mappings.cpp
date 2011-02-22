@@ -10,7 +10,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <systemcvpc/config/Mappings.hpp>
+#include "Mappings.hpp"
 
 namespace SystemC_VPC
 {
@@ -44,6 +44,30 @@ bool Mappings::isMapped(VpcTask::Ptr task, Component::Ptr component)
   return (mappings.find(task) != mappings.end()) && mappings[task] == component;
 }
 
+Routes & getRoutes()
+{
+  static Routes routes;
+  return routes;
 }
 
+//
+void Mappings::addRoute(ProcessId pid, Route::Ptr route)
+{
+  getRoutes()[pid] = route;
 }
+
+//
+bool Mappings::hasRoute(ProcessId pid)
+{
+  return getRoutes().find(pid) != getRoutes().end();
+}
+
+//
+Route::Ptr Mappings::getRoute(ProcessId pid)
+{
+  assert(hasRoute(pid));
+  return getRoutes()[pid];
+}
+} // namespace Config
+} // namespace SystemC_VPC
+

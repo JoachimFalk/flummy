@@ -15,7 +15,7 @@
 
 #include <systemcvpc/vpc_config.h>
 #include <systemcvpc/AbstractComponent.hpp>
-#include <systemcvpc/Route.hpp>
+#include <systemcvpc/RouteImpl.hpp>
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/TaskPool.hpp>
@@ -177,10 +177,8 @@ namespace SystemC_VPC{
       return this->vpc_result_file;
     }
 
-    ProcessId uniqueProcessId();
-
-    ProcessId getProcessId(std::string process);
-    ProcessId getProcessId(std::string source, std::string destination);
+    static ProcessId getProcessId(std::string process_or_source,
+        std::string destination = "");
 
     ComponentId getComponentId(std::string component);
 
@@ -220,14 +218,7 @@ namespace SystemC_VPC{
                                    *topPowerGovFactory;
     void loadGlobalGovernorPlugin(std::string plugin, AttributePtr attPtr);
 
-    std::string getTaskName(ProcessId id) {
-      if(debugProcessNames.find(id) != debugProcessNames.end()){
-        return debugProcessNames[id];
-      }else{
-        return "Route from " + debugRouteNames[id].first +
-          " to: " + debugRouteNames[id].second;
-      }
-    }
+    std::string getTaskName(ProcessId id);
     
     sc_time getEnd() const {
       return end;
@@ -298,13 +289,9 @@ namespace SystemC_VPC{
     std::ofstream powerConsStream;
 #endif // NO_POWER_SUM
 
-    typedef std::map<std::string, ProcessId>   ProcessIdMap;
     typedef std::map<std::string, ComponentId> ComponentIdMap;
 
-    ProcessIdMap    processIdMap;
     ComponentIdMap  componentIdMap;
-    std::map<ProcessId, std::string> debugProcessNames;
-    std::map<ProcessId, std::pair<std::string, std::string> > debugRouteNames;
     std::map<ProcessId, std::set<std::string> > debugFunctionNames;
 
     PowerSumming    *powerSumming;

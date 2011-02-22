@@ -27,6 +27,19 @@ Timing::Timing(std::string function, sc_core::sc_time dii) :
 {
 }
 
+Timing::Timing(sc_core::sc_time dii,
+    sc_core::sc_time latency) :
+  function_(""), dii_(dii), latency_(latency), fid_(
+      Director::createFunctionId("")), powerMode_("SLOW")
+{
+}
+
+Timing::Timing(sc_core::sc_time dii) :
+  function_(""), dii_(dii), latency_(dii), fid_(
+      Director::createFunctionId("")), powerMode_("SLOW")
+{
+}
+
 Timing::Timing() :
   function_(""), dii_(0, SC_NS), latency_(0, SC_NS), fid_(0),
       powerMode_("SLOW")

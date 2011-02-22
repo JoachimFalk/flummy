@@ -15,7 +15,7 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
-#include <systemcvpc/Route.hpp>
+#include <systemcvpc/RouteImpl.hpp>
 #include <systemcvpc/PCBPool.hpp>
 
 namespace SystemC_VPC{

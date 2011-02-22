@@ -32,7 +32,7 @@ nobase_include_HEADERS =				\
 							\
 	systemcvpc/config/Component.hpp			\
 	systemcvpc/config/ConfigException.hpp		\
-	systemcvpc/config/Mappings.hpp			\
+	systemcvpc/config/Route.hpp			\
 	systemcvpc/config/Scheduler.hpp			\
 	systemcvpc/config/Timing.hpp			\
 	systemcvpc/config/VpcTask.hpp			\
@@ -73,7 +73,7 @@ nobase_include_HEADERS =				\
 	systemcvpc/PowerGovernor.hpp 			\
 	systemcvpc/PowerMode.hpp 			\
 	systemcvpc/PowerSumming.hpp 			\
-	systemcvpc/Route.hpp 				\
+	systemcvpc/RouteImpl.hpp 				\
 	systemcvpc/RoutePool.hpp 			\
 	systemcvpc/StaticRoute.hpp 			\
 	systemcvpc/ScheduledTask.hpp 		\

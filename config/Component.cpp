@@ -33,9 +33,15 @@ Component::Component(std::string name, Scheduler::Type scheduler) :
 }
 
 //
-void Component::setTransferDelay(sc_core::sc_time transfer_delay)
+void Component::setTransferTiming(Timing transferTiming)
 {
-  transfer_delay_ = transfer_delay;
+  transferTiming_ = transferTiming;
+}
+
+//
+Timing Component::getTransferTiming() const
+{
+  return transferTiming_;
 }
 
 //
@@ -45,7 +51,7 @@ void Component::setScheduler(Scheduler::Type scheduler)
 }
 
 //
-Scheduler::Type Component::getScheduler()
+Scheduler::Type Component::getScheduler() const
 {
   return scheduler_;
 }
@@ -82,10 +88,10 @@ TimingsProvider::Ptr Component::getTimingsProvider()
   } else if (defaultTimingsProvider_) {
     return defaultTimingsProvider_;
   }
-  throw ConfigException("\tComponent \"" + this->name_ +
-      "\" has NO timing provider"
-      "\n\tEither set one: Component::setTimingsProvider(TimingsProvider::Ptr )"
-      "\n\tOr use default one: Component::getDefaultTimingsProvider()");
+  throw ConfigException("\tComponent \"" + this->name_
+      + "\" has NO timing provider"
+        "\n\tEither set one: Component::setTimingsProvider(TimingsProvider::Ptr )"
+        "\n\tOr use default one: Component::getDefaultTimingsProvider()");
 }
 
 //
@@ -116,7 +122,7 @@ Component::MappedTasks Component::getMappedTasks()
 //
 ComponentId Component::getComponentId() const
 {
-  //  std::cerr << " getComponentId() " << this->getSequentialId() << std::endl;
+//  std::cerr << name_ << "->getComponentId() " << this->getSequentialId() << std::endl;
   return this->getSequentialId();
 }
 

@@ -43,9 +43,11 @@ public:
 
   void setScheduler(Scheduler::Type scheduler);
 
-  Scheduler::Type getScheduler();
+  Scheduler::Type getScheduler() const;
 
-  void setTransferDelay(sc_core::sc_time transfer_delay);
+  void setTransferTiming(Timing transferTiming);
+
+  Timing getTransferTiming() const;
 
   void addTask(const ScheduledTask & actor);
 
@@ -65,7 +67,7 @@ public:
   ComponentId getComponentId() const;
 private:
   std::string name_;
-  sc_core::sc_time transfer_delay_;
+  Timing transferTiming_;
   Scheduler::Type scheduler_;
   MappedTasks mappedTasks_;
   TimingsProvider::Ptr timingsProvider_;

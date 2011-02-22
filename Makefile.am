@@ -52,6 +52,7 @@ lib_LTLIBRARIES = libsystemcvpc.la
 libsystemcvpc_la_SOURCES =			\
 	config/Component.cpp			\
 	config/Mappings.cpp			\
+	config/Route.cpp			\
 	config/Scheduler.cpp			\
 	config/Timing.cpp			\
 	config/VpcTask.cpp			\
@@ -79,7 +80,7 @@ libsystemcvpc_la_SOURCES =			\
 	ProcessControlBlock.cpp			\
 	FastLink.cpp				\
 	StaticRoute.cpp				\
-	Route.cpp				\
+	RouteImpl.cpp				\
 	PowerSumming.cpp                        \
 	HysteresisLocalGovernor.cpp		\
 	SelectFastestPowerModeGlobalGovernor.cpp\

@@ -15,6 +15,8 @@
 #include <systemcvpc/config/VpcApi.hpp>
 #include <systemcvpc/Director.hpp>
 
+#include "Mappings.hpp"
+
 #include <string>
 #include <iostream>
 
@@ -24,13 +26,15 @@ namespace Config
 {
 
 //
-Components & getComponents(){
+Components & getComponents()
+{
   static Components components;
   return components;
 }
 
 //
-std::map<std::string, VpcTask::Ptr>& getVpcTasksByName(){
+std::map<std::string, VpcTask::Ptr>& getVpcTasksByName()
+{
   static std::map<std::string, VpcTask::Ptr> vpcTasksByName;
   return vpcTasksByName;
 }
@@ -61,6 +65,27 @@ Component::Ptr getComponent(std::string name)
 }
 
 //
+Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
+{
+  ProcessId routePid = Director::getProcessId(source, dest);
+  Route::Ptr route(new Route);
+  Mappings::addRoute(routePid, route);
+  return route;
+}
+
+//
+Route::Ptr getRoute(std::string source, std::string dest)
+{
+  ProcessId routePid = Director::getProcessId(source, dest);
+  if (Mappings::hasRoute(routePid)){
+    return Mappings::getRoute(routePid);
+  }
+
+  throw ConfigException(std::string("Cannot get route \"") + source
+      + " -> " + dest + "\" before creation. Use createRoute() first. ");
+}
+
+//
 bool hasComponent(std::string name)
 {
   return getComponents().find(name) != getComponents().end();
@@ -85,14 +110,14 @@ VpcTask::Ptr getCachedTask(const ScheduledTask & actor)
 //
 VpcTask::Ptr getCachedTask(std::string name)
 {
-  if (!hasTask(name)){
+  if (!hasTask(name)) {
     getVpcTasksByName()[name] = VpcTask::Ptr(new VpcTask());
   }
   return getVpcTasksByName()[name];
 }
 
 //
-void setCachedTask(const ScheduledTask * actor, VpcTask::Ptr task )
+void setCachedTask(const ScheduledTask * actor, VpcTask::Ptr task)
 {
   assert( !hasTask(*actor) );
   vpcTasks[actor] = task;
@@ -116,7 +141,6 @@ bool hasTask(std::string name)
 {
   return getVpcTasksByName().find(name) != getVpcTasksByName().end();
 }
-
 
 //
 void setPriority(const ScheduledTask & actor, size_t priority)

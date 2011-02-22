@@ -38,6 +38,10 @@ public:
 
   Timing(std::string function, sc_core::sc_time dii);
 
+  Timing(sc_core::sc_time dii, sc_core::sc_time latency);
+
+  Timing(sc_core::sc_time dii);
+
   Timing();
 
   bool operator<(const Timing & other) const;
