@@ -110,6 +110,17 @@ public:
       iter->second->check();
     }
   }
+
+  static std::map<ProcessId, std::string> & processNames();
+  static std::map<ProcessId, std::pair<std::string, std::string> > & routeNames();
+
+  static void setProcessName(ProcessId pid, std::string name);
+  static void setRouteName(ProcessId pid, std::string src, std::string dest);
+  static bool hasProcessName(ProcessId pid);
+  static bool hasRouteName(ProcessId pid);
+  static std::string getProcessName(ProcessId pid);
+  static std::pair<std::string, std::string> getRouteName(ProcessId pid);
+
 private:
   TaskConfigs taskConfigs;
 };

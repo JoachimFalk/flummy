@@ -24,7 +24,6 @@
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/VPCBuilder.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
-#include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/PowerSumming.hpp>
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
@@ -33,9 +32,10 @@
 #include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/RoutePool.hpp>
 #include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/config/Mappings.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
+
 #include "ConfigCheck.hpp"
+#include "config/Mappings.hpp"
 
 #include <systemc.h>
 #include <map>
@@ -362,9 +362,8 @@ namespace SystemC_VPC{
   const Delayer * Director::getComponent(const FastLink vpcLink) const {
     if (mappings.size() < vpcLink.process ||
         mappings[vpcLink.process] == NULL) {
-      std::map<ProcessId, std::string>::const_iterator iter =
-        debugProcessNames.find(vpcLink.process);
-      std::cerr << "Unknown mapping for task " << iter->second << std::endl;
+      std::string name = ConfigCheck::getProcessName(vpcLink.process);
+      std::cerr << "Unknown mapping for task " << name << std::endl;
 
       debugUnknownNames();
     }
@@ -392,33 +391,41 @@ namespace SystemC_VPC{
   }
 
 
-  ProcessId Director::uniqueProcessId() {
+  ProcessId getNextProcessId() {
     static ProcessId       globalProcessId = 0;
     return globalProcessId++;
   }
 
-  ProcessId Director::getProcessId(std::string process) {
+ProcessId Director::getProcessId(std::string process_or_source,
+    std::string destination)
+{
+  typedef std::map<std::string, ProcessId> ProcessIdMap;
+  static ProcessIdMap processIdMap;
+
+  if (destination == "") {
+    std::string & process = process_or_source;
     ProcessIdMap::const_iterator iter = processIdMap.find(process);
-    if( iter == processIdMap.end() ) {
-      ProcessId id = this->uniqueProcessId();
+    if (iter == processIdMap.end()) {
+      ProcessId id = getNextProcessId();
       processIdMap[process] = id;
-      debugProcessNames[id] = process;
+      ConfigCheck::setProcessName(id, process);
     }
     iter = processIdMap.find(process);
     return iter->second;
-  }
 
-  ProcessId Director::getProcessId(std::string source, std::string dest) {
-    std::string name_hack = "msg_" + source + "_2_" + dest;
+  } else {
+    std::string & source = process_or_source;
+    std::string name_hack = "msg_" + source + "_2_" + destination;
     ProcessIdMap::const_iterator iter = processIdMap.find(name_hack);
-    if( iter == processIdMap.end() ) {
-      ProcessId id = this->uniqueProcessId();
+    if (iter == processIdMap.end()) {
+      ProcessId id = getNextProcessId();
       processIdMap[name_hack] = id;
-      debugRouteNames[id] = make_pair(source, dest);
+      ConfigCheck::setRouteName(id, source, destination);
     }
     iter = processIdMap.find(name_hack);
     return iter->second;
   }
+}
 
   ComponentId Director::getComponentId(std::string component) {
 #ifdef DBG_DIRECTOR
@@ -720,8 +727,8 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
     bool route = false;
     bool mappings = false;
     for(std::map<ProcessId, std::pair<std::string, std::string> >::const_iterator
-          iter = debugRouteNames.begin();
-        iter != debugRouteNames.end();
+          iter = ConfigCheck::routeNames().begin();
+        iter != ConfigCheck::routeNames().end();
         ++iter){
       if( !taskPool.contains( iter->first ) ){
            if(!route){
@@ -740,8 +747,8 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
       }
     }
     for(std::map<ProcessId, std::string>::const_iterator iter =
-          debugProcessNames.begin();
-        iter != debugProcessNames.end();
+          ConfigCheck::processNames().begin();
+        iter != ConfigCheck::processNames().end();
         ++iter){
       if( !taskPool.contains( iter->first ) ){
         if(!mappings){
@@ -750,7 +757,7 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
                     <<" Please add the following mapping to the config file:"
                     << std::endl;
           mappings = true;
-        }        
+        }
         std::cout << "  <mapping source=\""
                   << iter->second
                   << "\" target=\"?\">\n"
@@ -762,7 +769,7 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
 
         const std::set<std::string>& functionNames =
           debugFunctionNames.find(iter->first)->second;
-        
+
         for(std::set<std::string>::const_iterator fiter =
             functionNames.begin();
             fiter != functionNames.end();
@@ -784,6 +791,16 @@ std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
       std::cout << "\n" << std::endl;
     }
     exit(-1);
+  }
+
+  //
+  std::string Director::getTaskName(ProcessId id) {
+    if(ConfigCheck::hasProcessName(id)){
+      return ConfigCheck::getProcessName(id);
+    }else{
+      return "Route from " + ConfigCheck::getRouteName(id).first +
+        " to: " + ConfigCheck::getRouteName(id).second;
+    }
   }
 }
 

@@ -13,9 +13,7 @@
 #ifndef DATATYPES_H_
 #define DATATYPES_H_
 
-//#include <systemc.h>
-
-//#include <CoSupport/SystemC/systemc_support.hpp>
+#include <stddef.h>
 
 namespace SystemC_VPC
 {

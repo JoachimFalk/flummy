@@ -10,7 +10,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <systemcvpc/Route.hpp>
+#include <systemcvpc/RouteImpl.hpp>
 namespace SystemC_VPC {
   size_t Route::createRouteId(){
     static size_t instanceCounter = 0;

@@ -13,8 +13,6 @@
 #ifndef SCHEDULER_H_
 #define SCHEDULER_H_
 
-#include <systemcvpc/config/ConfigException.hpp>
-
 namespace SystemC_VPC
 {
 

@@ -14,8 +14,9 @@
 #define VPC_API_HPP_
 
 #include "Component.hpp"
-#include "VpcTask.hpp"
+#include "Route.hpp"
 #include "Timing.hpp"
+#include "VpcTask.hpp"
 
 #include <string>
 #include <map>
@@ -30,10 +31,15 @@ namespace Config
 
 typedef std::map<std::string, Component::Ptr> Components;
 
-Component::Ptr createComponent(std::string name, Scheduler::Type =
+Component::Ptr createComponent(std::string name, Scheduler::Type scheduler =
     Scheduler::FCFS);
 
 Component::Ptr getComponent(std::string name);
+
+Route::Ptr createRoute(std::string source, std::string dest, Route::Type type =
+    Route::StaticRoute);
+
+Route::Ptr getRoute(std::string source, std::string dest);
 
 bool hasComponent(std::string name);
 

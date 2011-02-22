@@ -10,6 +10,7 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <systemcvpc/config/ConfigException.hpp>
 #include <systemcvpc/config/Scheduler.hpp>
 
 #include <string>
@@ -60,7 +61,8 @@ Type parseScheduler(std::string name)
   } else if (name == STR_AVB) {
     return AVB;
   } else {
-    throw Config::ConfigException("Unknown scheduler for component: " + name);
+    throw Config::ConfigException("Unknown scheduler \"" + name
+        + "\" for component: " + name);
     return FCFS;
   }
 

@@ -21,7 +21,7 @@
 
 #include "EventPair.hpp"
 #include "ProcessControlBlock.hpp"
-#include "Route.hpp"
+#include "RouteImpl.hpp"
 #include "Timing.hpp"
 
 namespace SystemC_VPC{

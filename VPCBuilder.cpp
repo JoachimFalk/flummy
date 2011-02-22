@@ -25,15 +25,13 @@
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/NonPreemptiveComponent.hpp>
-#include <systemcvpc/BlockingTransport.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/StaticRoute.hpp>
-#include <systemcvpc/RoutePool.hpp>
 #include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/Mappings.hpp>
+#include <systemcvpc/config/Route.hpp>
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 #include "ConfigCheck.hpp"
+#include "config/Mappings.hpp"
 
 #include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_COMPONENT create stream and include debug macros
@@ -56,8 +54,6 @@ namespace VC = Config;
 
 #define MAX(x,y) ((x > y) ? x : y)
 
-  const char* VPCBuilder::B_TRANSPORT =                      "blocking";
-  const char* VPCBuilder::STATIC_ROUTE =                     "static_route";
   const char* VPCBuilder::STR_VPC_THREADEDCOMPONENTSTRING =  "threaded";
   const char* VPCBuilder::STR_VPC_DELAY =                    "delay";
   const char* VPCBuilder::STR_VPC_LATENCY =                  "latency";
@@ -193,7 +189,7 @@ namespace VC = Config;
               const XStr xmlName = node->getNodeName();
               try{
                 if( xmlName == VPCBuilder::componentStr ) {
-                  Config::Component::Ptr comp = initComponent();
+                  VC::Component::Ptr comp = initComponent();
                   DBG_OUT("VPCBuilder> register component: "
                           << comp->getName() << " to Director" << std::endl);
 
@@ -275,7 +271,7 @@ namespace VC = Config;
    * \throws InvalidArgumentException if requested component within
    * configuration file is unkown
    */
-  Config::Component::Ptr VPCBuilder::initComponent()
+  VC::Component::Ptr VPCBuilder::initComponent()
     throw(InvalidArgumentException)
   {
  
@@ -312,7 +308,7 @@ namespace VC = Config;
    * \param comp specifies the component to set attributes for
    * \param node specifies current position within dom tree
    */
-  void VPCBuilder::initCompAttributes(Config::Component::Ptr comp){
+  void VPCBuilder::initCompAttributes(VC::Component::Ptr comp){
     DOMNode* node = this->vpcConfigTreeWalker->firstChild(); 
     DBG_OUT("VPC> InitAttribute for Component name=" << comp->getName()
          << std::endl);
@@ -471,7 +467,6 @@ namespace VC = Config;
 
   void VPCBuilder::parseTopology( DOMNode* top ){
     // iterate children of <topology>
-    this->director->defaultRoute = true; return; //FIXME
     try{
       // scan <topology>
       DOMNamedNodeMap * atts = top->getAttributes();
@@ -502,10 +497,14 @@ namespace VC = Config;
           std::string dest = NStr(
             atts->getNamedItem(destinationAttrStr)->getNodeValue() );
 
-          std::string type = STATIC_ROUTE;
+          VC::Route::Type t = VC::Route::StaticRoute;
           if(atts->getNamedItem(typeAttrStr)!=NULL){
-            type = NStr(atts->getNamedItem(typeAttrStr)->getNodeValue() );
+            t = VC::Route::parseRouteType(
+                NStr(atts->getNamedItem(typeAttrStr)->getNodeValue()));
+            //type = NStr( );
           }
+
+          VC::Route::Ptr route = VC::createRoute(src, dest, t);
 
           //copy default value from <route>
           bool tracing = topologyTracing;
@@ -514,20 +513,9 @@ namespace VC = Config;
             tracing = std::string("true") == NStr(tracingAtt->getNodeValue());
           }
 
-          Route * route = NULL;
-          if(type == B_TRANSPORT){
-            route = new RoutePool<BlockingTransport>(src, dest);
-          } else if(type == STATIC_ROUTE) {
-            route = new RoutePool<StaticRoute>(src, dest);
-          } else{
-            std::string msg("Unknown Routing type: type=");
-            msg += type;
-            std::cerr << msg << endl;
-            throw InvalidArgumentException(msg);
-          }
 
           tracingEnabled |= tracing;
-          route->enableTracing(tracing);
+          route->setTracing(tracing);
 
           // add <hop>s
           for(DOMNode * hopNode = routeNode->getFirstChild();
@@ -539,15 +527,14 @@ namespace VC = Config;
                 NStr( hopNode->getAttributes()->getNamedItem(nameAttrStr)->
                       getNodeValue() );
 
-              std::map<std::string, AbstractComponent* >::iterator iterComp =
-                this->knownComps.find(name);
-              assert( iterComp != this->knownComps.end() );
-              AbstractComponent* hop = iterComp->second; 
-              ProcessControlBlock& pcb =
-                hop->createPCB(this->director->getProcessId(route->getName()));
-              pcb.configure(route->getName(), false, true);
+              assert( VC::hasComponent(name) );
+              VC::Component::Ptr comp = VC::getComponent(name);
+// TODO
+//              ProcessControlBlock& pcb =
+//                hop->createPCB(route->getProcessId());
+//              pcb.configure(route->getName(), false, true);
 
-              route->addHop( name, hop );
+              VC::Hop hop = route->addHop( comp );
 
               // parse <timing>s
               for(DOMNode * timingNode = hopNode->getFirstChild();
@@ -558,16 +545,13 @@ namespace VC = Config;
                 if( xmlName == timingStr ){
                   try {
                     VC::Timing t = this->parseTiming( timingNode );
-                  //pcb.addDelay( t.fid, t.dii );
-                  //pcb.addLatency( t.fid, t.latency );
-                  //pcb.setPriority(5);
-                    pcb.setTiming(t);
+                    hop.setTransferTiming(t);
                   } catch(InvalidArgumentException &e) {
                     std::string msg("Error with route: ");
                     msg += src + " -> " + dest + " (" + name +")\n";
                     msg += e.what();
                     throw InvalidArgumentException(msg);
-              }
+                  }
                 }else if( xmlName == attributeStr ){
                   XStr sType =
                     atts->getNamedItem(typeAttrStr)->getNodeValue();
@@ -578,15 +562,14 @@ namespace VC = Config;
                     int priority = 0;
                     sscanf(NStr(sValue).c_str(), "%d", &priority);
                     
-                    pcb.setPriority(priority);
+                    hop.setPriority(priority);
                   }
                 }
               }
             }
           }
-          //this->director->registerComponent(route);
-          //this->director->registerMapping(route->getName(), route->getName());
-          this->director->registerRoute(route);
+//TODO
+//          this->director->registerRoute(route);
 
         }
       }

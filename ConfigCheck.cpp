@@ -56,4 +56,62 @@ void TaskConfig::check()
   }
 
 }
+
+//
+std::map<ProcessId, std::string> &
+ConfigCheck::processNames()
+{
+  static std::map<ProcessId, std::string> names;
+  return names;
+}
+
+//
+std::map<ProcessId, std::pair<std::string, std::string> > &
+ConfigCheck::routeNames()
+{
+  static std::map<ProcessId, std::pair<std::string, std::string> > names;
+  return names;
+}
+
+//
+void
+ConfigCheck::setProcessName(ProcessId pid, std::string name)
+{
+  processNames()[pid] = name;
+}
+
+//
+void
+ConfigCheck::setRouteName(ProcessId pid, std::string src, std::string dest)
+{
+  routeNames()[pid] = std::make_pair(src, dest);
+}
+
+//
+bool ConfigCheck::hasProcessName(ProcessId pid)
+{
+  return ConfigCheck::processNames().find(pid) != ConfigCheck::processNames().end();
+}
+
+//
+bool ConfigCheck::hasRouteName(ProcessId pid)
+{
+  return ConfigCheck::routeNames().find(pid) != ConfigCheck::routeNames().end();
+}
+//
+
+std::string ConfigCheck::getProcessName(ProcessId pid)
+{
+  assert(hasProcessName(pid));
+  return ConfigCheck::processNames()[pid];
+}
+
+//
+std::pair<std::string, std::string> ConfigCheck::getRouteName(ProcessId pid)
+{
+  assert(hasRouteName(pid));
+  return ConfigCheck::routeNames()[pid];
+}
+
+
 } // namespace SystemC_VPC
