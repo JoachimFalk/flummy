@@ -184,7 +184,8 @@ namespace SystemC_VPC{
 
     FastLink registerActor(ScheduledTask * actor,
                              std::string actorName,
-                             const FunctionNames& functionNames);
+                             const FunctionNames& actionNames,
+                             const FunctionNames& guardNames);
 
     FastLink registerRoute(std::string source, std::string destination);
 

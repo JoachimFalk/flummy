@@ -71,8 +71,10 @@ class TimingsProvider
 public:
   typedef boost::shared_ptr<const TimingsProvider> Ptr;
 
-  virtual bool has(const std::string &functionName) const = 0;
-  virtual Timing get(const std::string &functionName) const = 0;
+  virtual bool hasActionTiming(const std::string &functionName) const = 0;
+  virtual Timing getActionTiming(const std::string &functionName) const = 0;
+  virtual bool hasGuardTiming(const std::string &functionName) const = 0;
+  virtual Timing getGuardTiming(const std::string &functionName) const = 0;
   virtual ~TimingsProvider() {}
 };
 
@@ -84,12 +86,14 @@ class DefaultTimingsProvider : public TimingsProvider
 public:
   typedef boost::shared_ptr<DefaultTimingsProvider> Ptr;
 
-  virtual bool has(const std::string &functionName) const;
-  virtual Timing get(const std::string &functionName) const;
+  virtual bool hasActionTiming(const std::string &functionName) const;
+  virtual Timing getActionTiming(const std::string &functionName) const;
+  virtual bool hasGuardTiming(const std::string &functionName) const;
+  virtual Timing getGuardTiming(const std::string &functionName) const;
 
   virtual void add(Timing timing);
 private:
-  std::map<std::string, Timing> timings_;
+  std::map<std::string, Timing> functionTimings_;
 };
 
 
