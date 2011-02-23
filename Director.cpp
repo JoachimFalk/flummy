@@ -697,13 +697,6 @@ void Director::endOfVpcFinalize()
     return FastLink(pid, fids);
   }
 
-  FastLink Director::getFastLink(std::string source,
-                                 std::string destination,
-                                 std::string function){
-    return registerRoute(source, destination);
-  }
-
-  
   sc_time Director::createSC_Time(const char* timeString)
     throw(InvalidArgumentException)
   {
