@@ -189,10 +189,6 @@ namespace SystemC_VPC{
 
     FastLink registerRoute(std::string source, std::string destination);
 
-    FastLink getFastLink(std::string source,
-                         std::string destination,
-                         std::string function);
-
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
      */
