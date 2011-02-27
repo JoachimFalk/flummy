@@ -104,11 +104,13 @@ namespace SystemC_VPC {
   }
 
   //
-  StaticRoute::StaticRoute( std::string source, std::string dest ) :
+  StaticRoute::StaticRoute( Config::Route::Ptr configuredRoute ) :
+    Route(configuredRoute),
     dummyDii(new CoSupport::SystemC::RefCountEvent()),
     routeLat(new CoSupport::SystemC::RefCountEvent())
   {
-    this->name = "msg_" + source + "_2_" + dest;
+    this->name = "msg_" + configuredRoute->getSource() + "_2_"
+        + configuredRoute->getDestination();
     routeLat->addListener(this);
 
     this->setPtpTracer(CoSupport::Tracing::TracingFactory::getInstance()

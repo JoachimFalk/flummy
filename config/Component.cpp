@@ -123,7 +123,6 @@ Component::MappedTasks Component::getMappedTasks()
 //
 ComponentId Component::getComponentId() const
 {
-  //  std::cerr << name_ << "->getComponentId() " << this->getSequentialId() << std::endl;
   return this->getSequentialId();
 }
 

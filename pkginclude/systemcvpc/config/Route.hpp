@@ -29,12 +29,13 @@ class Hop
 {
 public:
   Hop(Component::Ptr component);
-  void setPriority(size_t priority_);
-  void setTransferTiming(Timing transferTiming_);
-
+  Hop & setPriority(size_t priority_);
+  Hop & setTransferTiming(Timing transferTiming_);
+  Component::Ptr getComponent() const;
+  size_t getPriority() const;
+  Timing getTransferTiming() const;
 private:
   Component::Ptr component_;
-  //FIXME: forward this to PCB
   Timing transferTiming_;
   size_t priority_;
 };
@@ -50,16 +51,25 @@ public:
 
   typedef boost::shared_ptr<Route> Ptr;
 
-  Route();
+  Route(std::string source, std::string dest, Route::Type type);
+  Route(Route::Type type);
   ComponentId getComponentId() const;
   bool getTracing() const;
   void setTracing(bool tracing_);
-  Hop addHop(Component::Ptr component);
+  Hop & addHop(Component::Ptr component);
   void addTiming(Component::Ptr hop, Timing);
+  std::string getDestination() const;
+  std::list<Hop> getHops() const;
+  std::string getSource() const;
+  Type getType() const;
+  void inject(std::string source, std::string destination);
 private:
   bool tracing_;
   std::list<Hop> hops_;
   std::map<Component::Ptr, Timing> routeTimings_;
+  std::string source_;
+  std::string destination_;
+  Type type_;
 };
 } // namespace Config
 }

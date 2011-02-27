@@ -512,6 +512,32 @@ ProcessId Director::getProcessId(std::string process_or_source,
       VC::setCachedTask(actorName, task);
     }
     assert(VC::hasTask(actorName) && VC::hasTask(*actor));
+    assert(VC::getCachedTask(actorName) == VC::getCachedTask(*actor));
+  }
+
+  //
+  void injectRoute(std::string src, std::string dest, sc_port_base * leafPort)
+  {
+    ProcessId pid = Director::getProcessId(src, dest);
+    if (VC::Routing::has(pid) && VC::Routing::has(leafPort)) {
+      if(VC::Routing::get(pid) != VC::Routing::get(leafPort)) {
+        throw VC::ConfigException("Route " + src + " -> " + dest +
+            " has configuration data from XML and from configuration API.");
+      }
+    } else if (!VC::Routing::has(pid) && !VC::Routing::has(leafPort)) {
+      throw VC::ConfigException("Route " + src + " -> " + dest +
+          " has NO configuration data at all.");
+    } else if (VC::Routing::has(pid)) {
+      VC::Route::Ptr route = VC::Routing::get(pid);
+      VC::Routing::set(leafPort, route);
+    } else if (VC::Routing::has(leafPort)) {
+      VC::Route::Ptr route = VC::Routing::get(leafPort);
+      VC::Routing::set(pid, route);
+      route->inject(src, dest);
+    }
+
+    assert(VC::Routing::has(pid) && VC::Routing::has(leafPort));
+    assert(VC::Routing::get(pid) == VC::Routing::get(leafPort));
   }
 
   void finalizeMapping(std::string actorName,
@@ -564,6 +590,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
 //    p.setBaseLatency();
 
   }
+
   //
   AbstractComponent * createComponent(VC::Component::Ptr component)
   {
@@ -591,6 +618,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
   //
   void Director::beforeVpcFinalize()
   {
+    // create AbstractComponents and configure mappings given from config API
     const VC::Components & components = VC::getComponents();
 
     BOOST_FOREACH(VC::Components::value_type component_pair, components) {
@@ -677,7 +705,9 @@ void Director::endOfVpcFinalize()
   }
 
   FastLink Director::registerRoute(std::string source,
-                                      std::string destination){
+    std::string destination,
+    sc_port_base * leafPort)
+  {
     //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
 
@@ -685,14 +715,28 @@ void Director::endOfVpcFinalize()
     FunctionIds     fids; // empty functionIds
     fids.push_back( getFunctionId("1") );
 
-    // change default behavior: add empty route
-    if (defaultRoute){
-      if ( !taskPool.contains(pid) ){
-        Route * route = new RoutePool<StaticRoute>(source, destination);
-        route->enableTracing(false);
-        this->registerRoute(route);
-      }
+    if (!VC::Routing::has(pid) && !VC::Routing::has(leafPort) && defaultRoute) {
+      // default behavior: add empty route
+      VC::Route::Ptr route = VC::createRoute(source, destination);
+      route->setTracing(false);
     }
+
+    try{
+      injectRoute(source, destination, leafPort);
+    }catch(std::exception & e){
+      std::cerr << "Route registration failed for route\"" << source << " - " <<
+          destination <<
+          "\". Got exception:\n" << e.what() << std::endl;
+      exit(-1);
+    }
+
+    assert( !taskPool.contains(pid) );
+
+    VC::Route::Ptr configuredRoute = VC::Routing::get(pid);
+    Route * route = VC::Routing::create(configuredRoute);
+
+    route->enableTracing(false);
+    Director::registerRoute(route);
 
     return FastLink(pid, fids);
   }

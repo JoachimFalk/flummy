@@ -68,8 +68,18 @@ Component::Ptr getComponent(std::string name)
 Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
 {
   ProcessId routePid = Director::getProcessId(source, dest);
-  Route::Ptr route(new Route);
-  Mappings::addRoute(routePid, route);
+  Route::Ptr route(new Route(source, dest, type));
+  Routing::add(routePid, route);
+  return route;
+}
+
+//
+Route::Ptr createRoute(sc_port_base * leafPort, Route::Type type)
+{
+  // TODO: ProcessId routePid = Director::getProcessId(source, dest);
+  assert(leafPort != NULL);
+  Route::Ptr route(new Route(type));
+  Routing::add(leafPort, route);
   return route;
 }
 
@@ -77,8 +87,8 @@ Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
 Route::Ptr getRoute(std::string source, std::string dest)
 {
   ProcessId routePid = Director::getProcessId(source, dest);
-  if (Mappings::hasRoute(routePid)){
-    return Mappings::getRoute(routePid);
+  if (Routing::has(routePid)){
+    return Routing::get(routePid);
   }
 
   throw ConfigException(std::string("Cannot get route \"") + source

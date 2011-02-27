@@ -19,6 +19,7 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
+#include "config/Route.hpp"
 #include "EventPair.hpp"
 #include "ProcessControlBlock.hpp"
 #include "RouteImpl.hpp"
@@ -53,7 +54,7 @@ namespace SystemC_VPC{
 
     const ComponentList& getHops() const;
 
-    StaticRoute( std::string source, std::string dest );
+    StaticRoute( Config::Route::Ptr configuredRoute );
 
     StaticRoute( const StaticRoute & route );
 
