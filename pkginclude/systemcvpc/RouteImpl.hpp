@@ -17,6 +17,7 @@
 
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
+#include "config/Route.hpp"
 #include "AbstractComponent.hpp"
 
 namespace SystemC_VPC{
@@ -32,9 +33,10 @@ namespace SystemC_VPC{
 
     virtual const ComponentList& getHops() const = 0;
 
-    Route() : Delayer(
-        //FIXME: use Builder from VPC API
-        42), instanceId(createRouteId()), enableTracer(false){}
+    Route(Config::Route::Ptr configuredRoute) : Delayer(
+        configuredRoute->getComponentId()),
+        instanceId(createRouteId()),
+        enableTracer(false) {}
 
     Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
         enableTracer(orig.enableTracer), ptpTracer(orig.ptpTracer) {}

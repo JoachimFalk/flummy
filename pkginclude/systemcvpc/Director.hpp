@@ -187,7 +187,8 @@ namespace SystemC_VPC{
                              const FunctionNames& actionNames,
                              const FunctionNames& guardNames);
 
-    FastLink registerRoute(std::string source, std::string destination);
+    FastLink registerRoute(std::string source, std::string destination,
+        sc_port_base * leafPort);
 
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.

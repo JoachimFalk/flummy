@@ -19,33 +19,48 @@
 
 #include <map>
 
+#include <systemc>
+
 namespace SystemC_VPC
 {
 
 class AbstractComponent;
+class Route;
 
 namespace Config
 {
 
 typedef std::map<ProcessId, Route::Ptr> Routes;
+typedef std::map<sc_port_base *, Route::Ptr> RoutesByPort;
 
-class Mappings
+namespace Mappings
 {
-public:
-  Mappings();
   // TODO: replace other mapping maps
   // TODO: provide getter, setter, etc.
-  static std::map<VpcTask::Ptr, Component::Ptr > & getConfiguredMappings();
-  static std::map<Component::Ptr, AbstractComponent * > & getComponents();
-  static bool isMapped(VpcTask::Ptr task, Component::Ptr component);
+  std::map<VpcTask::Ptr, Component::Ptr > & getConfiguredMappings();
+  std::map<Component::Ptr, AbstractComponent * > & getComponents();
+  bool isMapped(VpcTask::Ptr task, Component::Ptr component);
 
-  static void addRoute(ProcessId pid, Route::Ptr route);
-  static bool hasRoute(ProcessId pid);
-  static Route::Ptr getRoute(ProcessId pid);
-};
+} // namespace Mappings
 
-}
+namespace Routing
+{
+  void add(ProcessId pid, Route::Ptr route);
+  void add(sc_port_base * leafPort, Route::Ptr route);
 
-}
+  void set(ProcessId pid, Route::Ptr route);
+  void set(sc_port_base * leafPort, Route::Ptr route);
+
+  bool has(ProcessId pid);
+  bool has(sc_port_base * leafPort);
+
+  Route::Ptr get(ProcessId pid);
+  Route::Ptr get(sc_port_base * leafPort);
+  SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute);
+
+} // namespace Routing
+
+} // namespace Config
+} // namespace SystemC_VPC
 
 #endif /* MAPPINGS_HPP_ */

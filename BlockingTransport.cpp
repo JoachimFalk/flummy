@@ -193,13 +193,15 @@ namespace SystemC_VPC {
   }
 
   //
-  BlockingTransport::BlockingTransport( std::string source, std::string dest )
-    : components(),
+  BlockingTransport::BlockingTransport( Config::Route::Ptr configuredRoute )
+    : Route(configuredRoute),
+      components(),
       dummyDii(new CoSupport::SystemC::RefCountEvent()),
       routeLat(new CoSupport::SystemC::RefCountEvent()),
       phase(LOCK_ROUTE)
   {
-    this->name = "msg_" + source + "_2_" + dest;
+    this->name = "msg_" + configuredRoute->getSource() + "_2_"
+        + configuredRoute->getDestination();    routeLat->addListener(this);
     routeLat->addListener(this);
 
     //components.push_back(comp);
@@ -208,6 +210,7 @@ namespace SystemC_VPC {
 
   //
   BlockingTransport::BlockingTransport( const BlockingTransport & route ) :
+    Route(route),
     components(),
     task(route.task),
     taskEvents(route.taskEvents),

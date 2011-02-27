@@ -54,7 +54,7 @@ namespace SystemC_VPC{
 
     const ComponentList& getHops() const;
 
-    BlockingTransport( std::string source, std::string dest );
+    BlockingTransport( Config::Route::Ptr configuredRoute );
 
     BlockingTransport( const BlockingTransport & route );
 

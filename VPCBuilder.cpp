@@ -529,12 +529,8 @@ namespace VC = Config;
 
               assert( VC::hasComponent(name) );
               VC::Component::Ptr comp = VC::getComponent(name);
-// TODO
-//              ProcessControlBlock& pcb =
-//                hop->createPCB(route->getProcessId());
-//              pcb.configure(route->getName(), false, true);
 
-              VC::Hop hop = route->addHop( comp );
+              VC::Hop &hop = route->addHop( comp );
 
               // parse <timing>s
               for(DOMNode * timingNode = hopNode->getFirstChild();
@@ -568,9 +564,6 @@ namespace VC = Config;
               }
             }
           }
-//TODO
-//          this->director->registerRoute(route);
-
         }
       }
 

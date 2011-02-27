@@ -24,15 +24,32 @@ Hop::Hop(Component::Ptr component) :
 }
 
 //
-void Hop::setPriority(size_t priority_)
+Hop & Hop::setPriority(size_t priority_)
 {
   this->priority_ = priority_;
+  return *this;
 }
 
 //
-void Hop::setTransferTiming(Timing transferTiming_)
+Hop & Hop::setTransferTiming(Timing transferTiming_)
 {
   this->transferTiming_ = transferTiming_;
+  return *this;
+}
+
+Component::Ptr Hop::getComponent() const
+{
+  return component_;
+}
+
+size_t Hop::getPriority() const
+{
+  return priority_;
+}
+
+Timing Hop::getTransferTiming() const
+{
+  return transferTiming_;
 }
 
 //
@@ -52,9 +69,14 @@ Route::Type Route::parseRouteType(std::string name)
   return StaticRoute;
 }
 
-Route::Route()
+Route::Route(std::string source, std::string dest, Route::Type type) :
+  source_(source), destination_(dest), type_(type)
 {
+}
 
+Route::Route(Route::Type type) :
+  source_(""), destination_(""), type_(type)
+{
 }
 
 bool Route::getTracing() const
@@ -69,17 +91,41 @@ void Route::setTracing(bool tracing_)
 //
 ComponentId Route::getComponentId() const
 {
-  std::cerr << " Route::getComponentId() " << this->getSequentialId()
-      << std::endl;
   return this->getSequentialId();
 }
 
+std::string Route::getDestination() const
+{
+  return destination_;
+}
+
+std::list<Hop> Route::getHops() const
+{
+  return hops_;
+}
+
+std::string Route::getSource() const
+{
+  return source_;
+}
+
+Route::Type Route::getType() const
+{
+  return type_;
+}
+
+void Route::inject(std::string source, std::string destination)
+{
+  this->source_ = source;
+  this->destination_ = destination;
+}
+
 //
-Hop Route::addHop(Component::Ptr component)
+Hop & Route::addHop(Component::Ptr component)
 {
   Hop hop(component);
   hops_.push_back(hop);
-  return hop;
+  return hops_.back();
 }
 
 } // namespace Config

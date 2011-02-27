@@ -39,6 +39,9 @@ Component::Ptr getComponent(std::string name);
 Route::Ptr createRoute(std::string source, std::string dest, Route::Type type =
     Route::StaticRoute);
 
+Route::Ptr createRoute(sc_port_base * leafPtr, Route::Type type =
+    Route::StaticRoute);
+
 Route::Ptr getRoute(std::string source, std::string dest);
 
 bool hasComponent(std::string name);

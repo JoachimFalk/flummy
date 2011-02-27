@@ -15,6 +15,7 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
+#include "config/Route.hpp"
 #include <systemcvpc/RouteImpl.hpp>
 #include <systemcvpc/PCBPool.hpp>
 
@@ -57,8 +58,8 @@ namespace SystemC_VPC{
       this->getPrototype().enableTracing(enable);
     }
 
-    RoutePool( std::string source, std::string dest )
-      : PrototypedPool<ROUTE>(source, dest), Route()
+    RoutePool( const Config::Route::Ptr configuredRoute )
+      : PrototypedPool<ROUTE>(configuredRoute), Route(configuredRoute)
     {
     }
   };
