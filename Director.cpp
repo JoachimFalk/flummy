@@ -39,6 +39,7 @@
 
 #include <systemc.h>
 #include <map>
+#include <vector>
 
 #include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_DIRECTOR create stream and include debug macros
@@ -611,7 +612,11 @@ ProcessId Director::getProcessId(std::string process_or_source,
     //       - transfer_delay
     VC::Mappings::getComponents()[component] = comp;
     Director::getInstance().registerComponent(comp);
-    comp->setAttribute(component->getAttribute());
+    std::vector<AttributePtr> atts = component->getAttributes();
+    for(std::vector<AttributePtr>::const_iterator iter = atts.begin();
+        iter != atts.end(); ++iter){
+      comp->setAttribute(*iter);
+    }
     return comp;
   }
 

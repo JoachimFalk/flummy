@@ -72,8 +72,8 @@ public:
   MappedTasks getMappedTasks();
 
   std::string getName() const;
-  AttributePtr getAttribute() const;
-  void setAttribute(AttributePtr attribute);
+  std::vector<AttributePtr> getAttributes() const;
+  void addAttribute(AttributePtr attribute);
   ComponentId getComponentId() const;
 
   ComponentInterface::Ptr getComponentInterface() const;
@@ -86,7 +86,7 @@ private:
   MappedTasks mappedTasks_;
   TimingsProvider::Ptr timingsProvider_;
   DefaultTimingsProvider::Ptr defaultTimingsProvider_;
-  AttributePtr attribute_;
+  std::vector<AttributePtr> attributes_;
   ComponentInterface::Ptr componentInterface_;
 };
 } // namespace Config
