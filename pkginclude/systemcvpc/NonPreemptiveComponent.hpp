@@ -248,9 +248,7 @@ namespace SystemC_VPC{
 
     int getPriority(const ScheduledTask * scheduledTask) {
       ProcessId pid = scheduledTask->getPid();
-      PCBPool &pool = this->getPCBPool();
-      assert(pool.find(pid) != pool.end());
-      ProcessControlBlockPtr pcb = pool[pid];
+      ProcessControlBlockPtr pcb = this->getPCB(pid);
       return pcb->getPriority();
     }
 
