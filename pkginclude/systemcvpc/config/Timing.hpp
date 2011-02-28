@@ -75,6 +75,13 @@ public:
   virtual Timing getActionTiming(const std::string &functionName) const = 0;
   virtual bool hasGuardTiming(const std::string &functionName) const = 0;
   virtual Timing getGuardTiming(const std::string &functionName) const = 0;
+
+  //optional interface: default implementation returns false
+  virtual bool hasDefaultActorTiming(const std::string& actorName) const;
+
+  //optional interface: default implementation throws error
+  virtual Timing getDefaultActorTiming(const std::string& actorName) const;
+
   virtual ~TimingsProvider() {}
 };
 
@@ -91,7 +98,11 @@ public:
   virtual bool hasGuardTiming(const std::string &functionName) const;
   virtual Timing getGuardTiming(const std::string &functionName) const;
 
+  virtual bool hasDefaultActorTiming(const std::string& actorName) const;
+  virtual Timing getDefaultActorTiming(const std::string& actorName) const;
+
   virtual void add(Timing timing);
+  virtual void addDefaultActorTiming(std::string actorName, Timing timing);
 private:
   std::map<std::string, Timing> functionTimings_;
 };
