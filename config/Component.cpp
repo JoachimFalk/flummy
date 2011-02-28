@@ -28,8 +28,7 @@ namespace Config
 
 //
 Component::Component(std::string name, Scheduler::Type scheduler) :
-  name_(name), scheduler_(scheduler), attribute_(new Attribute()),
-      componentInterface_(NULL)
+  name_(name), scheduler_(scheduler), componentInterface_(NULL)
 {
 }
 
@@ -104,14 +103,14 @@ DefaultTimingsProvider::Ptr Component::getDefaultTimingsProvider()
   return defaultTimingsProvider_;
 }
 
-AttributePtr Component::getAttribute() const
+std::vector<AttributePtr> Component::getAttributes() const
 {
-  return attribute_;
+  return attributes_;
 }
 
-void Component::setAttribute(AttributePtr attribute)
+void Component::addAttribute(AttributePtr attribute)
 {
-  this->attribute_ = attribute;
+  this->attributes_.push_back(attribute);
 }
 
 //

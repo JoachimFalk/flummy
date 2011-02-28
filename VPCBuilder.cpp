@@ -335,7 +335,7 @@ namespace VC = Config;
           nextAttribute(attributes, node->getFirstChild());
 
           // FIXME: replace old parsing?
-          comp->setAttribute(attributes);
+          comp->addAttribute(attributes);
         }
       }
       vpcConfigTreeWalker->parentNode();
