@@ -74,7 +74,7 @@ Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
 }
 
 //
-Route::Ptr createRoute(sc_port_base * leafPort, Route::Type type)
+Route::Ptr createRoute(const sc_port_base * leafPort, Route::Type type)
 {
   // TODO: ProcessId routePid = Director::getProcessId(source, dest);
   assert(leafPort != NULL);

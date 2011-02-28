@@ -51,48 +51,48 @@ namespace Routing
 class Impl
 {
 public:
-  void add(ProcessId pid, Route::Ptr route)
+  void add(const ProcessId pid, Route::Ptr route)
   {
     assert(!has(pid));
     routes[pid] = route;
   }
 
-  void add(sc_port_base * leafPort, Route::Ptr route)
+  void add(const sc_port_base * leafPort, Route::Ptr route)
   {
     assert(!has(leafPort));
     routesByPort[leafPort] = route;
   }
 
-  void set(ProcessId pid, Route::Ptr route)
+  void set(const ProcessId pid, Route::Ptr route)
   {
     routes[pid] = route;
   }
 
-  void set(sc_port_base * leafPort, Route::Ptr route)
+  void set(const sc_port_base * leafPort, Route::Ptr route)
   {
     routesByPort[leafPort] = route;
   }
 
-  bool has(ProcessId pid)
+  bool has(const ProcessId pid) const
   {
     return routes.find(pid) != routes.end();
   }
 
-  bool has(sc_port_base * leafPort)
+  bool has(const sc_port_base * leafPort) const
   {
     return routesByPort.find(leafPort) != routesByPort.end();
   }
 
-  Route::Ptr get(ProcessId pid)
+  Route::Ptr get(const ProcessId pid) const
   {
     assert(has(pid));
-    return routes[pid];
+    return routes.find(pid)->second;
   }
 
-  Route::Ptr get(sc_port_base * leafPort)
+  Route::Ptr get(const sc_port_base * leafPort) const
   {
     assert(has(leafPort));
-    return routesByPort[leafPort];
+    return routesByPort.find(leafPort)->second;
   }
 
 private:
@@ -107,49 +107,49 @@ Impl& impl()
 }
 
 //
-void add(ProcessId pid, Route::Ptr route)
+void add(const ProcessId pid, Route::Ptr route)
 {
   impl().add(pid, route);
 }
 
 //
-void add(sc_port_base *leafPort, Route::Ptr route)
+void add(const sc_port_base *leafPort, Route::Ptr route)
 {
   impl().add(leafPort, route);
 }
 
 //
-bool has(ProcessId pid)
+bool has(const ProcessId pid)
 {
   return impl().has(pid);
 }
 
 //
-bool has(sc_port_base *leafPort)
+bool has(const sc_port_base *leafPort)
 {
   return impl().has(leafPort);
 }
 
 //
-Route::Ptr get(ProcessId pid)
+Route::Ptr get(const ProcessId pid)
 {
   return impl().get(pid);
 }
 
 //
-Route::Ptr get(sc_port_base *leafPort)
+Route::Ptr get(const sc_port_base *leafPort)
 {
   return impl().get(leafPort);
 }
 
 //
-void set(ProcessId pid, Route::Ptr route)
+void set(const ProcessId pid, Route::Ptr route)
 {
   impl().set(pid, route);
 }
 
 //
-void set(sc_port_base *leafPort, Route::Ptr route)
+void set(const sc_port_base *leafPort, Route::Ptr route)
 {
   impl().set(leafPort, route);
 }
