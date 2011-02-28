@@ -97,6 +97,20 @@ void Timing::setPowerMode(std::string powerMode_)
   this->powerMode_ = powerMode_;
 }
 
+//
+bool TimingsProvider::hasDefaultActorTiming(const std::string& actorName) const
+{
+    return false;
+}
+
+//
+Timing TimingsProvider::getDefaultActorTiming(const std::string& actorName) const
+{
+  throw ConfigException("TimingsProvider has default actor timing "
+      + actorName);
+}
+
+
 bool DefaultTimingsProvider::hasActionTiming(const std::string &functionName) const
 {
   return functionTimings_.find(functionName) != functionTimings_.end();
@@ -122,9 +136,27 @@ Timing DefaultTimingsProvider::getGuardTiming(const std::string &functionName) c
   return getActionTiming(functionName);
 }
 
+//
+bool DefaultTimingsProvider::hasDefaultActorTiming(const std::string& actorName) const
+{
+    return hasActionTiming(actorName);
+}
+
+//
+Timing DefaultTimingsProvider::getDefaultActorTiming(const std::string& actorName) const
+{
+  return getActionTiming(actorName);
+}
+
+
 void DefaultTimingsProvider::add(Timing timing)
 {
   functionTimings_[timing.getFunction()] = timing;
+}
+
+void DefaultTimingsProvider::addDefaultActorTiming(std::string actorName, Timing timing)
+{
+  functionTimings_[actorName] = timing;
 }
 
 } // namespace Config

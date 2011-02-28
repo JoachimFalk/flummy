@@ -389,7 +389,11 @@ namespace VC = Config;
             if( xmlName == timingStr ){
               try {
                 VC::Timing t = this->parseTiming( attnode );
-                provider->add(t);
+                if (t.getFunctionId() == defaultFunctionId) {
+                  provider->addDefaultActorTiming(sSource, t);
+                } else {
+                  provider->add(t);
+                }
 
               } catch(InvalidArgumentException &e) {
                 std::string msg("Error with mapping: ");

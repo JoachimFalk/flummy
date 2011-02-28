@@ -569,6 +569,9 @@ ProcessId Director::getProcessId(std::string process_or_source,
       if (VC::Mappings::isMapped(task, component)) {
         VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
         pcb.setPriority(task->getPriority());  // GFR BUGFIX
+        if (provider->hasDefaultActorTiming(actorName)) {
+          pcb.setTiming(provider->getDefaultActorTiming(actorName));
+        }
         BOOST_FOREACH(std::string guard, guardNames)
         {
           if (provider->hasGuardTiming(guard)) {
