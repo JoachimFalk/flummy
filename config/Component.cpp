@@ -13,6 +13,7 @@
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/Director.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
 #include <boost/shared_ptr.hpp>
@@ -110,7 +111,29 @@ std::vector<AttributePtr> Component::getAttributes() const
 
 void Component::addAttribute(AttributePtr attribute)
 {
-  this->attributes_.push_back(attribute);
+  if (attribute->isType("transaction_delay")) {
+    sc_time transferDelay = Director::createSC_Time(attribute->getValue());
+    this->setTransferTiming(Config::Timing(transferDelay));
+  } else if (attribute->isType("transfer_delay")) {
+    sc_time transferDelay = Director::createSC_Time(attribute->getValue());
+    this->setTransferTiming(Config::Timing(transferDelay));
+  } else if (attribute->isType("transaction")) {
+    unsigned int transactionSize = 1;
+    sc_time transferDelay = SC_ZERO_TIME;
+    if (attribute->hasParameter("delay")) {
+      transferDelay = Director::createSC_Time(attribute->getParameter("delay"));
+    }
+
+    if (attribute->hasParameter("size")) {
+      transactionSize = atoi(attribute->getParameter("size").c_str());
+    }
+
+    this->setTransferTiming(Config::Timing(transferDelay));
+    // FIXME: add transactionSize
+
+  } else {
+    this->attributes_.push_back(attribute);
+  }
 }
 
 //

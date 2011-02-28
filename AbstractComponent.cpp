@@ -93,34 +93,6 @@ namespace SystemC_VPC{
       return true;
     }
 
-    if(attribute->isType("transaction_delay")) {
-      this->transactionDelays[this->getPowerMode()] =
-        Director::createSC_Time(attribute->getValue());
-      return true;
-    }
-
-    if(attribute->isType("transfer_delay")) {
-      this->transactionDelays[this->getPowerMode()] =
-        Director::createSC_Time(attribute->getValue());
-      return true;
-    }
-
-    if(attribute->isType("transaction")) {
-      unsigned int transactionSize = 1;
-      sc_time transactionDelay     = SC_ZERO_TIME;
-      if(attribute->hasParameter("delay")){
-        transactionDelay =
-          Director::createSC_Time(attribute->getParameter("delay"));
-      }
-
-      if(attribute->hasParameter("size")){
-        transactionSize = atoi(attribute->getParameter("size").c_str());
-      }
-
-      this->transactionDelays[this->getPowerMode()] = transactionDelay;
-      // FIXME: add transactionSize
-      return true;
-    }
     return false;
   }
 

@@ -609,7 +609,6 @@ ProcessId Director::getProcessId(std::string process_or_source,
 
     //TODO: process attributes
     //       - processPower()
-    //       - transfer_delay
     VC::Mappings::getComponents()[component] = comp;
     Director::getInstance().registerComponent(comp);
     std::vector<AttributePtr> atts = component->getAttributes();
