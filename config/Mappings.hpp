@@ -30,8 +30,8 @@ class Route;
 namespace Config
 {
 
-typedef std::map<ProcessId, Route::Ptr> Routes;
-typedef std::map<sc_port_base *, Route::Ptr> RoutesByPort;
+typedef std::map<const ProcessId, Route::Ptr> Routes;
+typedef std::map<const sc_port_base *, Route::Ptr> RoutesByPort;
 
 namespace Mappings
 {
@@ -45,17 +45,17 @@ namespace Mappings
 
 namespace Routing
 {
-  void add(ProcessId pid, Route::Ptr route);
-  void add(sc_port_base * leafPort, Route::Ptr route);
+  void add(const ProcessId pid, Route::Ptr route);
+  void add(const sc_port_base * leafPort, Route::Ptr route);
 
-  void set(ProcessId pid, Route::Ptr route);
-  void set(sc_port_base * leafPort, Route::Ptr route);
+  void set(const ProcessId pid, Route::Ptr route);
+  void set(const sc_port_base * leafPort, Route::Ptr route);
 
-  bool has(ProcessId pid);
-  bool has(sc_port_base * leafPort);
+  bool has(const ProcessId pid);
+  bool has(const sc_port_base * leafPort);
 
-  Route::Ptr get(ProcessId pid);
-  Route::Ptr get(sc_port_base * leafPort);
+  Route::Ptr get(const ProcessId pid);
+  Route::Ptr get(const sc_port_base * leafPort);
   SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute);
 
 } // namespace Routing
