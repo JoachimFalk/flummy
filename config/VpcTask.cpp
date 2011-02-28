@@ -23,13 +23,13 @@ namespace Config
 
 //
 VpcTask::VpcTask(const ScheduledTask & actor) :
-  actor_(&actor)
+  actor_(&actor), priority_(0)
 {
 }
 
 //
 VpcTask::VpcTask() :
-  actor_(NULL)
+  actor_(NULL), priority_(0)
 {
 }
 
