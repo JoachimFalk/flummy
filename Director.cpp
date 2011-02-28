@@ -555,9 +555,12 @@ ProcessId Director::getProcessId(std::string process_or_source,
 
     //generate new ProcessControlBlock or get existing one for
     // initialization
-    ProcessControlBlock& pcb =
-      comp->createPCB(Director::getInstance().getProcessId(actorName));
-    pcb.configure(actorName.c_str(), true, true);
+    const ProcessId pid = Director::getInstance().getProcessId(actorName);
+    if (!comp->hasPCB(pid)) {
+      ProcessControlBlockPtr pcb = comp->createPCB(pid);
+      pcb->configure(actorName.c_str(), true, true);
+    }
+    ProcessControlBlockPtr pcb = comp->getPCB(pid);
 
     //TODO: VC::Timing -> Timing
     const VC::Components & components = VC::getComponents();
@@ -568,22 +571,22 @@ ProcessId Director::getProcessId(std::string process_or_source,
 
       if (VC::Mappings::isMapped(task, component)) {
         VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
-        pcb.setPriority(task->getPriority());  // GFR BUGFIX
+        pcb->setPriority(task->getPriority());  // GFR BUGFIX
         if (provider->hasDefaultActorTiming(actorName)) {
-          pcb.setTiming(provider->getDefaultActorTiming(actorName));
+          pcb->setTiming(provider->getDefaultActorTiming(actorName));
         }
         BOOST_FOREACH(std::string guard, guardNames)
         {
           if (provider->hasGuardTiming(guard)) {
-            pcb.setTiming(provider->getGuardTiming(guard));
-            ConfigCheck::configureTiming(pcb.getPid(), guard);
+            pcb->setTiming(provider->getGuardTiming(guard));
+            ConfigCheck::configureTiming(pid, guard);
           }
         }
         BOOST_FOREACH(std::string action, actionNames)
         {
           if (provider->hasActionTiming(action)) {
-            pcb.setTiming(provider->getActionTiming(action));
-            ConfigCheck::configureTiming(pcb.getPid(), action);
+            pcb->setTiming(provider->getActionTiming(action));
+            ConfigCheck::configureTiming(pid, action);
           }
         }
       }
@@ -658,6 +661,8 @@ void Director::endOfVpcFinalize()
       const FunctionNames &actionNames,
       const FunctionNames &guardNames)
   {
+    //TODO: registerActor is called multiple times (for each transition)
+
     //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
 

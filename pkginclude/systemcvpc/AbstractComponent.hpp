@@ -86,19 +86,32 @@ class ComponentObserver;
     /**
      * \brief Create the process control block.
      */
-    ProcessControlBlock& createPCB(ProcessId pid){
-      PCBPool& pool = this->getPCBPool();
-      if(pool.find(pid) == pool.end()){
-        pool[pid].reset(new ProcessControlBlock( this ));
-        pool[pid]->setPid(pid);
-      }
-      return *(pool[pid]);
+    ProcessControlBlockPtr createPCB(const ProcessId pid){
+      assert(!hasPCB(pid));
+
+      pcbPool[pid].reset(new ProcessControlBlock( this ));
+      pcbPool[pid]->setPid(pid);
+
+      return getPCB(pid);
+    }
+
+    bool hasPCB(const ProcessId pid) const
+    {
+      const PCBPool& pool = this->getPCBPool();
+      return (pool.find(pid) != pool.end());
+    }
+
+    ProcessControlBlockPtr getPCB(const ProcessId pid) const
+    {
+      const PCBPool& pool = this->getPCBPool();
+      assert(hasPCB(pid));
+      return pool.find(pid)->second;
     }
 
     /**
      *
      */
-    PCBPool& getPCBPool(){
+    const PCBPool& getPCBPool() const {
       return this->pcbPool;
     }
 

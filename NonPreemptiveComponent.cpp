@@ -118,9 +118,7 @@ namespace SystemC_VPC{
     / * */
 
     ProcessId pid = actualTask->getProcessId();
-    PCBPool &pool = this->getPCBPool();
-    assert(pool.find(pid) != pool.end());
-    ProcessControlBlockPtr pcb = pool[pid];
+    ProcessControlBlockPtr pcb = this->getPCB(pid);
     actualTask->setPCB(pcb);
     actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
