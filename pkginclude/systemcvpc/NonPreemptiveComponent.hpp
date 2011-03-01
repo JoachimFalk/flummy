@@ -179,7 +179,7 @@ namespace SystemC_VPC{
 
     virtual void addTask(Task *newTask) = 0;
 
-    virtual void scheduleTask() = 0;
+    virtual Task * scheduleTask() = 0;
 
     virtual void notifyActivation(ScheduledTask * scheduledTask,
         bool active) = 0;
@@ -203,7 +203,7 @@ namespace SystemC_VPC{
 
     void addTask(Task *newTask);
 
-    void scheduleTask();
+    Task * scheduleTask();
 
     void notifyActivation(ScheduledTask * scheduledTask,
         bool active);
@@ -231,7 +231,7 @@ namespace SystemC_VPC{
 
     void addTask(Task *newTask);
 
-    void scheduleTask();
+    Task * scheduleTask();
 
     void notifyActivation(ScheduledTask * scheduledTask,
         bool active);

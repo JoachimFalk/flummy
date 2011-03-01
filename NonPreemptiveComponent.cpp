@@ -86,7 +86,9 @@ namespace SystemC_VPC{
       }
 
       if (hasReadyTask()){
-        scheduleTask();
+        runningTask = scheduleTask();
+        runningTask->traceAssignTask();
+
         next_trigger(runningTask->getRemainingDelay());
 
       }
@@ -138,6 +140,7 @@ namespace SystemC_VPC{
     
     //store added task
     this->addTask(actualTask);
+    actualTask->traceReleaseTask();
 
     //awake scheduler thread
     if(runningTask == NULL && !releasePhase){
@@ -280,11 +283,10 @@ namespace SystemC_VPC{
   void FcfsComponent::addTask(Task *newTask){
     DBG_OUT(this->getName() << " add Task: " << newTask->getName()
             << " @ " << sc_time_stamp() << std::endl);
-    newTask->traceReleaseTask();
     readyTasks.push_back(newTask);
   }
 
-  void FcfsComponent::scheduleTask(){
+  Task * FcfsComponent::scheduleTask(){
     assert(!readyTasks.empty());
     Task* task = readyTasks.front();
     readyTasks.pop_front();
@@ -292,12 +294,11 @@ namespace SystemC_VPC{
     DBG_OUT(this->getName() << " schedule Task: " << task->getName()
             << " @ " << sc_time_stamp() << std::endl);
 
-    task->traceAssignTask();
     fireStateChanged(ComponentState::RUNNING);
     if(task->isBlocking() /* && !assignedTask->isExec() */) {
       //TODO
     }
-    runningTask = task;
+    return task;
   }
 
   void PriorityComponent::notifyActivation(ScheduledTask * scheduledTask,
@@ -335,12 +336,11 @@ namespace SystemC_VPC{
   void PriorityComponent::addTask(Task *newTask){
     DBG_OUT(this->getName() << " add Task: " << newTask->getName()
             << " @ " << sc_time_stamp() << std::endl);
-    newTask->traceReleaseTask();
     p_queue_entry entry(fcfsOrder++, newTask);
     readyQueue.push(entry);
   }
 
-  void PriorityComponent::scheduleTask(){
+  Task * PriorityComponent::scheduleTask(){
     assert(!readyQueue.empty());
     Task* task = readyQueue.top().task;
     readyQueue.pop();
@@ -348,12 +348,11 @@ namespace SystemC_VPC{
     DBG_OUT(this->getName() << " schedule Task: " << task->getName()
             << " @ " << sc_time_stamp() << std::endl);
 
-    task->traceAssignTask();
     fireStateChanged(ComponentState::RUNNING);
     if(task->isBlocking() /* && !assignedTask->isExec() */) {
       //TODO
     }
-    runningTask = task;
+    return task;
   }
 
 } //namespace SystemC_VPC
