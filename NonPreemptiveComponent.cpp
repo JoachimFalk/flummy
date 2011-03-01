@@ -70,7 +70,7 @@ namespace SystemC_VPC{
    *
    */
   void NonPreemptiveComponent::schedule_method(){
-    DBG_OUT("FCFSComponent::schedule_method (" << this->name()
+    DBG_OUT("NonPreemptiveComponent::schedule_method (" << this->getName()
             << ") triggered @" << sc_time_stamp() << endl);
 
     //default trigger
@@ -144,7 +144,10 @@ namespace SystemC_VPC{
 
     //awake scheduler thread
     if(runningTask == NULL && !releasePhase){
-      notify_scheduler_thread.notify();
+      DBG_OUT("NonPreemptiveComponent::compute (" << this->getName()
+              << ") notify @" << sc_time_stamp() << endl);
+
+      notify_scheduler_thread.notify(SC_ZERO_TIME);
       //blockCompute.notify();
     }
   }

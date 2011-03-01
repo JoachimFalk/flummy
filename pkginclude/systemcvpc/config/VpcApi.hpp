@@ -48,7 +48,7 @@ bool hasComponent(std::string name);
 
 Components & getComponents();
 
-VpcTask::Ptr getCachedTask(const ScheduledTask & actor); //smoc_actor is a ScheduledTask
+VpcTask::Ptr getCachedTask(ScheduledTask & actor); //smoc_actor is a ScheduledTask
 
 VpcTask::Ptr getCachedTask(std::string name);
 
@@ -60,7 +60,7 @@ bool hasTask(const ScheduledTask & actor);
 
 bool hasTask(std::string name);
 
-void setPriority(const ScheduledTask & actor, size_t priority);
+void setPriority(ScheduledTask & actor, size_t priority);
 
 void ignoreMissingRoutes(bool ignore);
 

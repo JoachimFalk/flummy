@@ -123,6 +123,18 @@ class ComponentObserver;
         scheduledTasks.push_back(pid);
       }
     }
+
+    virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList)
+    {
+      throw Config::ConfigException(std::string("Component ") + this->name() +
+          " doesn't support dynamic priorities!");
+    }
+
+    virtual void schedulerAfterTransition()
+    {
+      throw Config::ConfigException(std::string("Component ") + this->name() +
+          " doesn't support schedulerAfterTransition()!");
+    }
   protected:
 
     std::map<const PowerMode*, sc_time> transactionDelays;

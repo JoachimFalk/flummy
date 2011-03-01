@@ -58,7 +58,7 @@ Scheduler::Type Component::getScheduler() const
 }
 
 //
-void Component::addTask(const ScheduledTask & actor)
+void Component::addTask(ScheduledTask & actor)
 {
   mappedTasks_.insert(&actor);
 }
@@ -70,7 +70,7 @@ std::string Component::getName() const
 }
 
 //
-bool Component::hasTask(const ScheduledTask * actor) const
+bool Component::hasTask(ScheduledTask * actor) const
 {
   return mappedTasks_.find(actor) != mappedTasks_.end();
 }
