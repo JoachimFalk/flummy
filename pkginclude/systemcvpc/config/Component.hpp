@@ -38,6 +38,8 @@ public:
 
   virtual ~ComponentInterface(){}
   virtual void changePowerMode(std::string powerMode) = 0;
+  virtual void setDynamicPriority(std::list<ScheduledTask *>) = 0;
+  virtual void schedulerAfterTransition() = 0;
 };
 
 namespace Config
@@ -47,7 +49,7 @@ class Component : protected SequentiallyIdedObject<ComponentId>
 {
 public:
   typedef boost::shared_ptr<Component> Ptr;
-  typedef std::set<const ScheduledTask *> MappedTasks;
+  typedef std::set<ScheduledTask *> MappedTasks;
 
   Component(std::string name, Scheduler::Type scheduler);
 
@@ -59,9 +61,9 @@ public:
 
   Timing getTransferTiming() const;
 
-  void addTask(const ScheduledTask & actor);
+  void addTask(ScheduledTask & actor);
 
-  bool hasTask(const ScheduledTask * actor) const;
+  bool hasTask(ScheduledTask * actor) const;
 
   void setTimingsProvider(TimingsProvider::Ptr provider);
 

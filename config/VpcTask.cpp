@@ -22,7 +22,7 @@ namespace Config
 {
 
 //
-VpcTask::VpcTask(const ScheduledTask & actor) :
+VpcTask::VpcTask(ScheduledTask & actor) :
   actor_(&actor), priority_(0)
 {
 }
@@ -57,7 +57,7 @@ const ScheduledTask * VpcTask::getActor() const
 }
 
 //
-void VpcTask::inject(const ScheduledTask * actor)
+void VpcTask::inject(ScheduledTask * actor)
 {
   actor_ = actor;
 }

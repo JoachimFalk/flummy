@@ -35,6 +35,7 @@
 #include <systemcvpc/config/VpcApi.hpp>
 
 #include "ConfigCheck.hpp"
+#include "DynamicPriorityComponent.hpp"
 #include "config/Mappings.hpp"
 
 #include <systemc.h>
@@ -493,7 +494,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
   namespace VC = Config;
 
   //
-  void injectTaskName(const ScheduledTask * actor,
+  void injectTaskName(ScheduledTask * actor,
       std::string actorName)
   {
     if (VC::hasTask(actorName) && VC::hasTask(*actor)) {
@@ -609,6 +610,9 @@ ProcessId Director::getProcessId(std::string process_or_source,
       case VC::Scheduler::StaticPriority_NP:
         comp = new PriorityComponent(component);
         break;
+      case VC::Scheduler::DynamicPriorityUserYield:
+        comp = new DynamicPriorityComponent(component);
+        break;
       default:
         comp = new Component(component);
     }
@@ -641,7 +645,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
       AbstractComponent *comp = createComponent(component);
       assert(comp != NULL);
 
-      BOOST_FOREACH(const ScheduledTask* task, tasks) {
+      BOOST_FOREACH(ScheduledTask* task, tasks) {
         VC::Mappings::getConfiguredMappings()[VC::getCachedTask(*task)] = component;
       }
     }

@@ -102,7 +102,7 @@ bool hasComponent(std::string name)
 }
 
 //
-VpcTask::Ptr getCachedTask(const ScheduledTask & actor)
+VpcTask::Ptr getCachedTask(ScheduledTask & actor)
 {
   // TODO: find the right place
   SystemC_VPC::Director::getInstance().FALLBACKMODE = false;
@@ -153,7 +153,7 @@ bool hasTask(std::string name)
 }
 
 //
-void setPriority(const ScheduledTask & actor, size_t priority)
+void setPriority(ScheduledTask & actor, size_t priority)
 {
   getCachedTask(actor)->setPriority(priority);
 }

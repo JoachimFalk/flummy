@@ -63,6 +63,7 @@ libsystemcvpc_la_SOURCES =			\
 	ComponentImpl.cpp			\
 	ConfigCheck.cpp				\
 	Director.cpp				\
+	DynamicPriorityComponent.cpp		\
 	ScheduledTask.cpp			\
 	PriorityScheduler.cpp			\
 	PrioritySchedulerNoPreempt.cpp		\

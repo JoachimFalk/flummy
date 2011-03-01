@@ -32,7 +32,7 @@ public:
 
   VpcTask();
 
-  VpcTask(const ScheduledTask & actor);
+  VpcTask(ScheduledTask & actor);
 
   void mapTo(Component::Ptr component);
 
@@ -43,11 +43,11 @@ public:
   const ScheduledTask * getActor() const;
 
   //private:
-  void inject(const ScheduledTask * actor);
+  void inject(ScheduledTask * actor);
 
 private:
   // configured data
-  const ScheduledTask * actor_;
+  ScheduledTask * actor_;
   Component::Ptr component_;
   size_t priority_;
 };

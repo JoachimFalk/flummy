@@ -26,6 +26,7 @@ enum Type
   FCFS,
   StaticPriority_P,
   StaticPriority_NP,
+  DynamicPriorityUserYield,
   RoundRobin,
   RateMonotonic,
   FlexRay,
