@@ -43,7 +43,7 @@ public:
   bool hasReadyTask();
 
   virtual void setDynamicPriority(PriorityList priorityList);
-  virtual void schedulerAfterTransition();
+  virtual void scheduleAfterTransition();
 
 private:
   PriorityList priorities_;

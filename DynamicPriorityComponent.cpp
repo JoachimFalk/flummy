@@ -125,7 +125,7 @@ void DynamicPriorityComponent::setDynamicPriority(PriorityList priorityList)
   }
 }
 
-void DynamicPriorityComponent::schedulerAfterTransition()
+void DynamicPriorityComponent::scheduleAfterTransition()
 {
   mustYield_ = true;
 }
