@@ -86,14 +86,13 @@ void DynamicPriorityComponent::notifyActivation(ScheduledTask * scheduledTask,
 
 bool DynamicPriorityComponent::releaseActor()
 {
-  bool yield = mustYield_;
-  mustYield_ = false;
-  if (yield || (lastTask_ == NULL)) {
+  if (mustYield_ || (lastTask_ == NULL)) {
     for (PriorityList::const_iterator iter = priorities_.begin(); iter
         != priorities_.end(); ++iter) {
       ScheduledTask * scheduledTask = *iter;
       bool canExec = Director::canExecute(scheduledTask);
       if (canExec) {
+        mustYield_ = false;
         releasedTask_ = scheduledTask;
         Director::execute(scheduledTask);
         return true;
