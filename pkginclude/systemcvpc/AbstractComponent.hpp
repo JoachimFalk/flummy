@@ -130,10 +130,10 @@ class ComponentObserver;
           " doesn't support dynamic priorities!");
     }
 
-    virtual void schedulerAfterTransition()
+    virtual void scheduleAfterTransition()
     {
       throw Config::ConfigException(std::string("Component ") + this->name() +
-          " doesn't support schedulerAfterTransition()!");
+          " doesn't support scheduleAfterTransition()!");
     }
   protected:
 
