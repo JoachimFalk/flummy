@@ -149,7 +149,7 @@ class ComponentObserver;
   public:
   
     AbstractComponent(Config::Component::Ptr component)
-      : sc_module(component->getName()),
+      : sc_module(sc_module_name(component->getName().c_str())),
         Delayer(component->getComponentId()),
         transactionDelays(),
         scheduledTasks(),
