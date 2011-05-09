@@ -59,6 +59,10 @@ namespace SystemC_VPC{
       return name;
     }
 
+    static const std::string powerGated;
+    static const std::string clockGated;
+
+
   private:
     size_t mode;
     std::string name;

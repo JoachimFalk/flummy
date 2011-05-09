@@ -163,5 +163,31 @@ void ignoreMissingRoutes(bool ignore)
 {
   Director::getInstance().defaultRoute = ignore;
 }
+
+ComponentInterface* getTaskComponentInterface(ScheduledTask & actor)
+{
+	Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+	if(component != NULL)
+		return component->getComponentInterface();
+	else
+		return NULL;
+
+	//return NULL;
+}
+
+void changePowerMode(ScheduledTask & actor,std::string powermode)
+{
+	Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+	if(component != NULL)
+	{
+		SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+		if(ci != NULL)
+			ci->changePowerMode(powermode);
+	}
+
+
+	//return NULL;
+}
+
 } // namespace Config
 } // namespace SystemC_VPC

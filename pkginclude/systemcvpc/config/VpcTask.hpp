@@ -42,6 +42,8 @@ public:
 
   const ScheduledTask * getActor() const;
 
+  const Component::Ptr  getComponent() const;
+
   //private:
   void inject(ScheduledTask * actor);
 

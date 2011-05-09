@@ -60,6 +60,8 @@ namespace SystemC_VPC{
   //
   std::auto_ptr<Director> Director::singleton(new Director());
 
+
+
   /**
    *
    */
@@ -96,21 +98,7 @@ namespace SystemC_VPC{
       exit(-1);
     }
 
-#ifndef NO_POWER_SUM
-    powerSumming = new PowerSumming(powerConsStream);
-#endif // NO_POWER_SUM
-    for( Components::iterator it = components.begin();
-         it != components.end();
-         ++it )
-    {
-      if(*it != NULL) {
-#ifndef NO_POWER_SUM
-        (*it)->addObserver(powerSumming);
-#endif // NO_POWER_SUM
-        (*it)->initialize(this);
 
-      }
-    }
 
   }
 
@@ -574,20 +562,41 @@ ProcessId Director::getProcessId(std::string process_or_source,
         VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
         pcb->setPriority(task->getPriority());  // GFR BUGFIX
         if (provider->hasDefaultActorTiming(actorName)) {
-          pcb->setTiming(provider->getDefaultActorTiming(actorName));
+
+        	SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
+
+        	for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+        	{
+        		std::string powermode = (*it).first;
+        		pcb->setTiming(provider->getActionTiming(actorName,powermode));
+        	}
+
         }
         BOOST_FOREACH(std::string guard, guardNames)
         {
-          if (provider->hasGuardTiming(guard)) {
-            pcb->setTiming(provider->getGuardTiming(guard));
-            ConfigCheck::configureTiming(pid, guard);
+          if (provider->hasGuardTimings(guard)) {
+
+        	  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
+        	for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+        	{
+        		std::string powermode = (*it).first;
+        		pcb->setTiming(provider->getGuardTiming(guard,powermode));
+
+        		ConfigCheck::configureTiming(pid, guard);
+        	}
           }
         }
         BOOST_FOREACH(std::string action, actionNames)
         {
-          if (provider->hasActionTiming(action)) {
-            pcb->setTiming(provider->getActionTiming(action));
-            ConfigCheck::configureTiming(pid, action);
+          if (provider->hasActionTimings(action)) {
+
+        	  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
+        	  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+        	  {
+        		  std::string powermode = (*it).first;
+        		  pcb->setTiming(provider->getActionTiming(action,powermode));
+        		  ConfigCheck::configureTiming(pid, action);
+        	  }
           }
         }
       }
@@ -649,6 +658,26 @@ ProcessId Director::getProcessId(std::string process_or_source,
         VC::Mappings::getConfiguredMappings()[VC::getCachedTask(*task)] = component;
       }
     }
+
+
+#ifndef NO_POWER_SUM
+    powerSumming = new PowerSumming(powerConsStream);
+#endif // NO_POWER_SUM
+    for( Components::iterator it = this->components.begin();
+         it != this->components.end();
+         ++it )
+    {
+      if(*it != NULL) {
+#ifndef NO_POWER_SUM
+        (*it)->addObserver(powerSumming);
+#endif // NO_POWER_SUM
+        (*it)->initialize(this);
+
+      }
+    }
+
+
+
   }
   /// end section: VpcApi.hpp related stuff
 

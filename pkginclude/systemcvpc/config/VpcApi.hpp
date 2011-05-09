@@ -17,6 +17,7 @@
 #include "Route.hpp"
 #include "Timing.hpp"
 #include "VpcTask.hpp"
+#include "../Delayer.hpp"
 
 #include <string>
 #include <map>
@@ -63,6 +64,10 @@ bool hasTask(std::string name);
 void setPriority(ScheduledTask & actor, size_t priority);
 
 void ignoreMissingRoutes(bool ignore);
+
+ComponentInterface* getTaskComponentInterface(ScheduledTask & actor);
+
+void changePowerMode(ScheduledTask & actor,std::string powermode);
 
 } // namespace Config
 } // namespace SystemC_VPC

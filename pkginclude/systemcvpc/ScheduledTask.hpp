@@ -28,6 +28,7 @@ public:
   ScheduledTask();
   virtual ~ScheduledTask();
   void setDelayer(Delayer *component);
+  Delayer* getDelayer();
   void setPid(ProcessId pid);
   ProcessId getPid() const;
   void notifyActivation(bool active);

@@ -55,6 +55,8 @@ namespace SystemC_VPC{
       static const ComponentState IDLE;
       static const ComponentState RUNNING;
       static const ComponentState STALLED;
+      //Execution state on which component is not ready to perform any task
+      static const ComponentState SLEEPING;
 
     private:
       size_t state;
@@ -90,11 +92,13 @@ namespace SystemC_VPC{
         return &powerModes[mode];
       }
 
+
       ComponentModel * getModel(){
         return model;
       }
     protected:
       ComponentState componentState;
+      ComponentState previousComponentState;
       double         powerConsumption;
       PowerModes     powerModes;
       ComponentModel *model;
