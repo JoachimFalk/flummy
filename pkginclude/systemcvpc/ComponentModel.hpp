@@ -39,6 +39,8 @@ namespace SystemC_VPC{
       componentState = cs;
     }
 
+
+
     void setPowerConsumption(const double pc)
     {
       powerConsumption = pc;

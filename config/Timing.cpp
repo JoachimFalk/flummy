@@ -104,21 +104,39 @@ bool TimingsProvider::hasDefaultActorTiming(const std::string& actorName) const
 }
 
 //
-Timing TimingsProvider::getDefaultActorTiming(const std::string& actorName) const
+Timing TimingsProvider::getDefaultActorTiming(const std::string& actorName,const std::string &powermode) const
 {
   throw ConfigException("TimingsProvider has default actor timing "
       + actorName);
 }
 
 
-bool DefaultTimingsProvider::hasActionTiming(const std::string &functionName) const
+bool DefaultTimingsProvider::hasActionTiming(const std::string &functionName,const std::string &powermode) const
+{
+  if (functionTimings_.find(functionName) != functionTimings_.end())
+	  return functionTimings_.find(functionName)->second.find(powermode) != functionTimings_.find(functionName)->second.end();
+  else
+	  return false;
+}
+
+bool DefaultTimingsProvider::hasActionTimings(const std::string &functionName) const
 {
   return functionTimings_.find(functionName) != functionTimings_.end();
 }
 
-Timing DefaultTimingsProvider::getActionTiming(const std::string &functionName) const
+Timing DefaultTimingsProvider::getActionTiming(const std::string &functionName,const std::string &powermode) const
 {
-  if(this->hasActionTiming(functionName)) {
+  if(this->hasActionTiming(functionName,powermode)) {
+    return functionTimings_.find(functionName)->second.find(powermode)->second;
+  }
+
+  throw ConfigException("DefaultTimingsProvider has NO timing for function "
+      + functionName);
+}
+
+functionTimingsPM DefaultTimingsProvider::getActionTimings(const std::string &functionName) const
+{
+  if(this->hasActionTimings(functionName)) {
     return functionTimings_.find(functionName)->second;
   }
 
@@ -126,37 +144,43 @@ Timing DefaultTimingsProvider::getActionTiming(const std::string &functionName) 
       + functionName);
 }
 
-bool DefaultTimingsProvider::hasGuardTiming(const std::string &functionName) const
+bool DefaultTimingsProvider::hasGuardTimings(const std::string &functionName) const
 {
-  return hasActionTiming(functionName);
+  return hasActionTimings(functionName);
 }
 
-Timing DefaultTimingsProvider::getGuardTiming(const std::string &functionName) const
+Timing DefaultTimingsProvider::getGuardTiming(const std::string &functionName,const std::string &powermode) const
 {
-  return getActionTiming(functionName);
+  return getActionTiming(functionName,powermode);
+}
+
+functionTimingsPM DefaultTimingsProvider::getGuardTimings(const std::string &functionName) const
+{
+	return functionTimings_.find(functionName)->second;
+  //return functionTimings_.find(functionName);
 }
 
 //
 bool DefaultTimingsProvider::hasDefaultActorTiming(const std::string& actorName) const
 {
-    return hasActionTiming(actorName);
+    return hasActionTimings(actorName);
 }
 
 //
-Timing DefaultTimingsProvider::getDefaultActorTiming(const std::string& actorName) const
+Timing DefaultTimingsProvider::getDefaultActorTiming(const std::string& actorName,const std::string &powermode) const
 {
-  return getActionTiming(actorName);
+  return getActionTiming(actorName,powermode);
 }
 
 
 void DefaultTimingsProvider::add(Timing timing)
 {
-  functionTimings_[timing.getFunction()] = timing;
+  functionTimings_[timing.getFunction()][timing.getPowerMode()] = timing;
 }
 
-void DefaultTimingsProvider::addDefaultActorTiming(std::string actorName, Timing timing)
+void DefaultTimingsProvider::addDefaultActorTiming(std::string actorName,Timing timing)
 {
-  functionTimings_[actorName] = timing;
+  functionTimings_.find(actorName)->second.find(timing.getPowerMode())->second = timing;
 }
 
 } // namespace Config

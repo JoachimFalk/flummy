@@ -56,6 +56,11 @@ const ScheduledTask * VpcTask::getActor() const
   return actor_;
 }
 
+const Component::Ptr  VpcTask::getComponent() const
+{
+	return component_;
+}
+
 //
 void VpcTask::inject(ScheduledTask * actor)
 {

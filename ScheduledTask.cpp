@@ -28,6 +28,12 @@ void ScheduledTask::setDelayer(Delayer *component)
 {
   this->component = component;
 }
+
+Delayer* ScheduledTask::getDelayer()
+{
+	return this->component;
+}
+
 void ScheduledTask::notifyActivation(bool active)
 {
   if (component != NULL) { // FALLBACKMODE

@@ -40,8 +40,12 @@ PowerSumming::~PowerSumming()
   double duration = (m_changedTime - m_lastChangedTime).to_seconds();
   m_energySum += m_lastPowerSum * duration;
 
+
+  if(m_lastPowerMode != NULL)
+  {
   m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << '\t'
            << m_lastPowerMode->getName() << std::endl;
+  }
 }
 
 void PowerSumming::notify(ComponentInfo *ci)

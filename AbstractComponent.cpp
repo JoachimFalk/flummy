@@ -111,6 +111,65 @@ namespace SystemC_VPC{
     localGovernorFactory = AbstractComponent::factories[plugin]->factory;
   }
 
+  /*
+   * This function sets the appropriate execution state of the component according to the component powerstate
+   * (component's power state info is not encapsulated here, so it is the responsability of the powerState object to call this
+   * function whenever a powermode change takes place.
+   *
+   * Assumptions:
+   * "Disabling" a component (i.e. SLEEPING execution state) will remember the previous state and come back to it
+   * when leaving SLEEPING state)
+   *
+  */
+  void AbstractComponent::forceComponentState(const PowerMode * newPowerMode)
+  {
+	  //TODO: Generelize for new powermodes
+
+	  // Moving into powerGated mode and not already there? then change to sleeping mode
+	  if(newPowerMode->getName() == PowerMode::powerGated && this->powerMode->getName() != PowerMode::powerGated)
+	  {
+		  //this->previousComponentState = this->componentState;
+		  //this->componentState = ComponentState::SLEEPING;
+	  }
+	  else
+	  {
+		  //Leaving powerGated? then return to previous execution state
+		  if(this->powerMode->getName() == PowerMode::powerGated && newPowerMode->getName() != PowerMode::powerGated)
+		  {
+			 // this->componentState = this->previousComponentState;
+			 // this->previousComponentState = ComponentState::SLEEPING;
+		  }
+
+	  }
+  }
+
+  void AbstractComponent::setPowerMode(const PowerMode* mode){
+    this->powerMode = translatePowerMode(mode->getName());
+    this->forceComponentState(mode);
+    this->updatePowerConsumption();
+
+    if(timingPools.find(powerMode) == timingPools.end()){
+      timingPools[powerMode].reset(new FunctionTimingPool());
+    }
+    this->timingPool = timingPools[powerMode];
+  }
+
+
+  FunctionTimingPtr AbstractComponent::getTiming(const PowerMode *mode, ProcessId pid){
+
+	  if(timingPools.find(mode) == timingPools.end()){
+          timingPools[mode].reset(new FunctionTimingPool());
+        }
+        FunctionTimingPoolPtr pool = this->timingPools[mode];
+        if(pool->find(pid) == pool->end()){
+          (*pool)[pid].reset(new FunctionTiming());
+          (*pool)[pid]->setBaseDelay(this->transactionDelays[mode]);
+          //sc_time a = this->transactionDelays[mode];
+          //cout << a;
+        }
+        return (*pool)[pid];
+      }
+
   void Delayer::addObserver(ComponentObserver *obs)
   {
     observers.push_back(obs);
