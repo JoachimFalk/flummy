@@ -177,6 +177,10 @@ ComponentInterface* getTaskComponentInterface(ScheduledTask & actor)
 
 void changePowerMode(ScheduledTask & actor,std::string powermode)
 {
+	if(Director::getInstance().FALLBACKMODE)
+	{
+		return;
+	}
 	Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
 	if(component != NULL)
 	{
