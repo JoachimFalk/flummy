@@ -45,13 +45,13 @@ namespace SystemC_VPC{
       midPowerGov->setGlobalGovernor(director->topPowerGov);
 
 
-      if(powerTables.find(getPowerMode()) == powerTables.end()){
-        powerTables[getPowerMode()] = PowerTable();
-      }
+      //if(powerTables.find(getPowerMode()) == powerTables.end()){
+      //  powerTables[getPowerMode()] = PowerTable();
+     // }
 
-      PowerTable &powerTable=powerTables[getPowerMode()];
-      powerTable[ComponentState::IDLE]    = 0.0;
-      powerTable[ComponentState::RUNNING] = 1.0;
+      //PowerTable &powerTable=powerTables[getPowerMode()];
+      //powerTable[ComponentState::IDLE]    = 0.0;
+      //powerTable[ComponentState::RUNNING] = 1.0;
 
 #ifndef NO_POWER_SUM
       std::string powerSumFileName(this->getName());

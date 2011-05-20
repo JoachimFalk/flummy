@@ -38,7 +38,13 @@ namespace SystemC_VPC{
     sc_core::sc_time m_lastChangedTime;
     double           m_lastPowerSum;
     double           m_energySum;
+    const PowerMode* m_currentPowerMode;
     const PowerMode* m_lastPowerMode;
+
+    /*
+     * Flag to print the inital power change at 0s
+     */
+    bool init_print;
 
     void printPowerChange();
   };

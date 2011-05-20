@@ -127,7 +127,7 @@ namespace SystemC_VPC{
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
 
-    PowerTables powerTables;
+    //PowerTables powerTables;
     
     Event blockCompute;
     size_t   blockMutex;
