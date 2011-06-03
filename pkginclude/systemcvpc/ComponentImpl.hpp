@@ -14,8 +14,8 @@
 #define HSCD_VPC_COMPONENT_H
 #include <systemc.h>
 
-#include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/vpc_config.h>
+#include <systemcvpc/config/Scheduler.hpp>
 #include "datatypes.hpp"
 #include "AbstractComponent.hpp"
 #include "ComponentInfo.hpp"

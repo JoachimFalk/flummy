@@ -10,6 +10,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
