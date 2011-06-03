@@ -22,6 +22,8 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
+#include <systemcvpc/vpc_config.h>
+
 #include "config/Component.hpp"
 #include "datatypes.hpp"
 #include "Delayer.hpp"

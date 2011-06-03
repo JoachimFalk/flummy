@@ -18,6 +18,8 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/Director.hpp>

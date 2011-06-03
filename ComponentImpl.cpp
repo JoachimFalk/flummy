@@ -10,6 +10,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/FCFSScheduler.hpp>
