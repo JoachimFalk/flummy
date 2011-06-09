@@ -10,6 +10,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Director.hpp>
