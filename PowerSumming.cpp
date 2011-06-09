@@ -21,11 +21,7 @@ PowerSumming::PowerSumming(std::ostream &os) :
   m_output(os),
   m_changedTime(sc_core::SC_ZERO_TIME),
   m_powerSum(0.0),
-  m_lastChangedTime(sc_core::SC_ZERO_TIME),
-  m_lastPowerSum(0.0),
-  m_energySum(0.0),
-  m_currentPowerMode(NULL),
-  m_lastPowerMode(NULL)
+  m_energySum(0.0)
 {
   assert(m_output.good());
 }
@@ -34,85 +30,75 @@ PowerSumming::~PowerSumming()
 {
   m_changedTime = Director::getInstance().getEnd();
 
-  if(m_changedTime <= m_lastChangedTime)
-    return;
 
-  unsigned long long timeStamp = m_changedTime.to_seconds() * 1000000000.0;
-  double duration = (m_changedTime - m_lastChangedTime).to_seconds();
-  m_energySum += m_lastPowerSum * duration;
+  //Print last change
+  calculateNewEnergySum();
+  printPowerChange( m_lastPowerModeChange->getName());
 
 
-  if(m_currentPowerMode != NULL)
-  {
-  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << '\t'
-           << m_currentPowerMode->getName() << std::endl;
-  }
+
 }
 
+
+/*
+ * This method process events to calculate the power consumption.
+ *
+ * It determines if there has been a time period since the last notification, in order to print only one message per timestamp
+ * It also determines if there has been a change on the power consumption as several calls during a single simulation delta should be ignored
+ * The power change is refreshed in all cases, and only during a valid condition the power info will be printed. This is done at the next time stamp
+ *
+ */
 void PowerSumming::notify(ComponentInfo *ci)
 {
-  double old_powerConsumption = m_powerConsumption[ci];
-  double current_powerConsumption = ci->getPowerConsumption();
+  notifyTimeStamp = sc_core::sc_time_stamp();
 
-  //if(old_powerConsumption == new_powerConsumption) {
-  //    m_lastPowerMode = ci->getPowerMode();
-  //    return;
-  //}
+  double oldCi_powerConsumption = m_powerConsumption[ci];
+  double currentCi_powerConsumption = ci->getPowerConsumption();
+  m_powerConsumption[ci] = currentCi_powerConsumption;
 
-  m_powerSum -= old_powerConsumption;
-  m_powerSum += current_powerConsumption;
-  m_powerConsumption[ci] = current_powerConsumption;
-  m_currentPowerMode = ci->getPowerMode();
 
-  sc_core::sc_time notifyTimeStamp = sc_core::sc_time_stamp();
+  //if current time is different than last time the power consumption changed
+  // and power consumption actually changed (fake exec. state transtitions should be ignored)
+    if(m_changedTime != notifyTimeStamp && currentCi_powerConsumption != oldCi_powerConsumption) {
 
-  //If current time is different than last time the power consumption changed
-  if(m_changedTime != notifyTimeStamp) {
+    	calculateNewEnergySum();
 
-    //If change
-    if(m_lastPowerMode != m_currentPowerMode)
-    {
-    	//special case to print power at t=0s
-    	if (!init_print)
-    	{
 
-    		//If first notification did not occur at t=0s, skip init_print
-    		if(m_lastPowerMode != NULL)
-    		{
-    		  m_output << sc_time(0,SC_MS) << '\t' << m_lastPowerSum << '\t' << 0 << '\t'
-    	  	           << m_lastPowerMode->getName() << std::endl;
-    		}
-    	  	init_print=true;
+    	printPowerChange( m_lastPowerModeChange->getName());
 
-    	}
     	m_changedTime = notifyTimeStamp;
-    	printPowerChange();
-
     }
 
-  }
-
-  m_lastPowerMode = m_currentPowerMode ;
-
-
+    	//Only replace power consumption of component on the total components aggregate
+    	//printing will take place at next power change instant
+    	m_powerSum -= oldCi_powerConsumption;
+    	m_powerSum += currentCi_powerConsumption;
+    	m_lastPowerModeChange = ci->getPowerMode();
 
 }
 
-void PowerSumming::printPowerChange()
+
+/*
+ * This method calculates the energy by integrating the power throughout the time period between the last power mode change and the current timestamp
+ * It also stores the current energysum as the previous energy sum, which will be printed along the previous power mode change
+ */
+void PowerSumming::calculateNewEnergySum()
 {
-  unsigned long long timeStamp = m_changedTime.to_seconds() * 1000000000.0;
+  m_previousEnergySum = m_energySum;
 
-  if( (m_lastPowerSum == m_powerSum) && (timeStamp != 0) && (m_currentPowerMode == m_lastPowerMode ))
-    return;
+  double duration = (notifyTimeStamp - m_changedTime).to_seconds();
 
-  double duration = (m_changedTime - m_lastChangedTime).to_seconds();
+  m_energySum      += m_powerSum * duration;
 
-  m_energySum      += m_lastPowerSum * duration;
-  m_lastPowerSum    = m_powerSum;
-  m_lastChangedTime = m_changedTime;
+}
 
-  m_output << timeStamp << '\t' << m_powerSum << '\t' << m_energySum << '\t'
-           << m_currentPowerMode->getName() << std::endl;
+/*
+ * This method prints the last power mode change including the energy up to that point
+ */
+void PowerSumming::printPowerChange(std::string mode)
+{
+	unsigned long long timeStamp = m_changedTime.to_seconds() * 1000000000.0;
+	m_output << timeStamp << '\t' << m_powerSum << '\t' << m_previousEnergySum << '\t'<< mode << std::endl;
 }
 
 } //namespace SystemC_VPC

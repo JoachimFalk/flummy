@@ -35,18 +35,22 @@ namespace SystemC_VPC{
     double           m_powerSum;
     std::map<const ComponentInfo *, double> m_powerConsumption;
 
-    sc_core::sc_time m_lastChangedTime;
-    double           m_lastPowerSum;
+    //sc_core::sc_time m_lastChangedTime;
+    double           m_previousEnergySum;
     double           m_energySum;
-    const PowerMode* m_currentPowerMode;
-    const PowerMode* m_lastPowerMode;
+
+    const PowerMode * m_lastPowerModeChange;
 
     /*
      * Flag to print the inital power change at 0s
      */
     bool init_print;
 
-    void printPowerChange();
+
+    sc_core::sc_time notifyTimeStamp;
+
+    void printPowerChange(std::string mode);
+    void calculateNewEnergySum();
   };
 } //namespace SystemC_VPC
 #endif // HSCD_VPC_POWERSUMMING_H_
