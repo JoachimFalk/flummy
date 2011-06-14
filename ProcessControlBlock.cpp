@@ -248,4 +248,13 @@ namespace SystemC_VPC{
     ft->addLatency(fid, latency);
   }
 
+  void ProcessControlBlock::setActorAsPSM(bool psm)
+  {
+	  this->psm = psm;
+  }
+
+  bool ProcessControlBlock::isPSM()
+  {
+	  return this->psm;
+  }
 }
