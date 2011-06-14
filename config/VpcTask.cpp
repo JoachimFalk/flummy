@@ -67,5 +67,15 @@ void VpcTask::inject(ScheduledTask * actor)
   actor_ = actor;
 }
 
+void VpcTask::setActorAsPSM(bool psm)
+{
+	psm_ = psm;
+}
+
+bool VpcTask::isPSM()
+{
+	return this->psm_;
+}
+
 } // namespace Config
 } // namespace SystemC_VPC

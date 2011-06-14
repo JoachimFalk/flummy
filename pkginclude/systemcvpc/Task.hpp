@@ -164,6 +164,12 @@ namespace SystemC_VPC {
 #endif //NO_VCD_TRACES
 
     }
+
+    bool isPSM()
+    {
+    	return pcb->isPSM();
+    }
+
   private:
     Tracing* getTraceSignal()
       {assert(pcb != NULL); return pcb->getTraceSignal();}

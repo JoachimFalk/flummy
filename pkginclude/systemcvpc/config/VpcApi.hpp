@@ -69,6 +69,12 @@ ComponentInterface* getTaskComponentInterface(ScheduledTask & actor);
 
 void changePowerMode(ScheduledTask & actor,std::string powermode);
 
+/*
+ * Sets the actor as a PSM actor.
+ * The executing state of this actor will always set the component executing state to IDLE
+ */
+void setActorAsPSM(const char*  name, bool psm);
+
 } // namespace Config
 } // namespace SystemC_VPC
 #endif /* VPC_API_HPP_ */

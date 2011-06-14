@@ -563,6 +563,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
       if (VC::Mappings::isMapped(task, component)) {
         VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
         pcb->setPriority(task->getPriority());  // GFR BUGFIX
+        pcb->setActorAsPSM(task->isPSM());
         if (provider->hasDefaultActorTiming(actorName)) {
 
         	SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);

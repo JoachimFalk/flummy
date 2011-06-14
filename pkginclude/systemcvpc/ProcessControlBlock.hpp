@@ -109,6 +109,9 @@ namespace SystemC_VPC {
       void addDelay(FunctionId fid, sc_time delay);
       void addLatency(FunctionId fid, sc_time latency);
 
+      void setActorAsPSM(bool psm);
+      bool isPSM();
+
     private:
 
       std::string name;
@@ -121,6 +124,7 @@ namespace SystemC_VPC {
       Tracing * traceSignal;
       AbstractComponent * component;
       CoSupport::Tracing::TaskTracer::Ptr taskTracer;
+      bool psm;
       /**
        * \brief Initialize a newly created instance of ProcessControlBlock
        */

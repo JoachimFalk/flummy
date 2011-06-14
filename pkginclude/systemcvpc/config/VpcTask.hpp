@@ -47,11 +47,16 @@ public:
   //private:
   void inject(ScheduledTask * actor);
 
+  void setActorAsPSM(bool psm);
+
+  bool isPSM();
+
 private:
   // configured data
   ScheduledTask * actor_;
   Component::Ptr component_;
   size_t priority_;
+  bool psm_;
 };
 } // namespace Config
 } // namespace SystemC_VPC

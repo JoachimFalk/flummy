@@ -299,7 +299,14 @@ namespace SystemC_VPC{
     DBG_OUT(this->getName() << " schedule Task: " << task->getName()
             << " @ " << sc_time_stamp() << std::endl);
 
-    fireStateChanged(ComponentState::RUNNING);
+    /*
+     * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
+     */
+    if(task->isPSM())
+    	fireStateChanged(ComponentState::IDLE);
+    else
+    	fireStateChanged(ComponentState::RUNNING);
+
     if(task->isBlocking() /* && !assignedTask->isExec() */) {
       //TODO
     }

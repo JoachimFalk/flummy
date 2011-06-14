@@ -193,5 +193,10 @@ void changePowerMode(ScheduledTask & actor,std::string powermode)
 	//return NULL;
 }
 
+void setActorAsPSM(const char* name, bool psm)
+{
+	  getCachedTask(name)->setActorAsPSM(psm);
+}
+
 } // namespace Config
 } // namespace SystemC_VPC
