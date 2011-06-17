@@ -59,7 +59,7 @@ void PowerSumming::notify(ComponentInfo *ci)
 
   //if current time is different than last time the power consumption changed
   // and power consumption actually changed (fake exec. state transtitions should be ignored)
-    if(m_changedTime != notifyTimeStamp && currentCi_powerConsumption != oldCi_powerConsumption) {
+    if(m_changedTime != notifyTimeStamp && (currentCi_powerConsumption != oldCi_powerConsumption || m_lastPowerModeChange != ci->getPowerMode())) {
 
     	calculateNewEnergySum();
 
