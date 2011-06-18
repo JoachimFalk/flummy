@@ -23,13 +23,13 @@ namespace Config
 
 //
 VpcTask::VpcTask(ScheduledTask & actor) :
-  actor_(&actor), priority_(0)
+  actor_(&actor), priority_(0), psm_(false)
 {
 }
 
 //
 VpcTask::VpcTask() :
-  actor_(NULL), priority_(0)
+  actor_(NULL), priority_(0), psm_(false)
 {
 }
 
