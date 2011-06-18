@@ -302,9 +302,9 @@ namespace SystemC_VPC{
     /*
      * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
      */
-    //if(task != NULL and task->isPSM()==true)
-    	//fireStateChanged(ComponentState::IDLE);
-    //else
+    if(task != NULL and task->isPSM()==true)
+    	fireStateChanged(ComponentState::IDLE);
+    else
     	fireStateChanged(ComponentState::RUNNING);
 
     if(task->isBlocking() /* && !assignedTask->isExec() */) {

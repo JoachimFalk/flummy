@@ -132,7 +132,7 @@ namespace SystemC_VPC{
   
   
   ProcessControlBlock::ProcessControlBlock( AbstractComponent * component )
-    : name("NN"), component(component) {
+    : name("NN"), component(component), psm(false) {
     this->init();
   }
 
@@ -142,6 +142,7 @@ namespace SystemC_VPC{
     this->period = sc_time(DBL_MAX, SC_SEC);
     this->priority = 0;
     this->traceSignal = NULL;
+    this->psm=false;
   }
 
   void ProcessControlBlock::configure(std::string name, bool tracing,
