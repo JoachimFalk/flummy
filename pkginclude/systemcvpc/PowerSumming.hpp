@@ -19,6 +19,7 @@
 
 #include "ComponentObserver.hpp"
 
+
 namespace SystemC_VPC{
 
   class PowerSumming : public ComponentObserver
@@ -32,14 +33,19 @@ namespace SystemC_VPC{
   private:
     std::ostream    &m_output;
     sc_core::sc_time m_changedTime;
+	sc_core::sc_time m_lastVirtualTime;
+    double           m_previousPowerSum;
     double           m_powerSum;
     std::map<const ComponentInfo *, double> m_powerConsumption;
+    std::map<const ComponentInfo *, double> m_lastChangedPowerConsumption;
+    std::map<const ComponentInfo *, const PowerMode *> m_powerMode;
+    std::map<const ComponentInfo *, const PowerMode *> m_lastChangedPowerMode;
 
     //sc_core::sc_time m_lastChangedTime;
     double           m_previousEnergySum;
     double           m_energySum;
 
-    const PowerMode * m_lastPowerModeChange;
+    ComponentInfo *m_lastCi;
 
     /*
      * Flag to print the inital power change at 0s

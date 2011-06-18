@@ -20,7 +20,9 @@ namespace SystemC_VPC{
 PowerSumming::PowerSumming(std::ostream &os) :
   m_output(os),
   m_changedTime(sc_core::SC_ZERO_TIME),
+  m_lastVirtualTime(sc_core::SC_ZERO_TIME),
   m_powerSum(0.0),
+  m_previousPowerSum(0.0),
   m_energySum(0.0)
 {
   assert(m_output.good());
@@ -33,7 +35,7 @@ PowerSumming::~PowerSumming()
 
   //Print last change
   calculateNewEnergySum();
-  printPowerChange( m_lastPowerModeChange->getName());
+  printPowerChange( m_powerMode[m_lastCi]->getName());
 
 
 
@@ -56,24 +58,56 @@ void PowerSumming::notify(ComponentInfo *ci)
   double currentCi_powerConsumption = ci->getPowerConsumption();
   m_powerConsumption[ci] = currentCi_powerConsumption;
 
+  const PowerMode* oldCi_powerMode = m_powerMode[ci];
+  const PowerMode* currentCi_powerMode = ci->getPowerMode();
+  m_powerMode[ci] = currentCi_powerMode;
 
+  //special case for previousPowerSum
+  // idea is to set it equal to the power sum for t=0
+  if(!init_print)//speed up
+  {
+	if(notifyTimeStamp != sc_core::SC_ZERO_TIME)
+	{
+		m_previousPowerSum=m_powerSum;
+		init_print=true;
+	}
+  }
+  
+  
   //if current time is different than last time the power consumption changed
   // and power consumption actually changed (fake exec. state transtitions should be ignored)
-    if(m_changedTime != notifyTimeStamp && (currentCi_powerConsumption != oldCi_powerConsumption || m_lastPowerModeChange != ci->getPowerMode())) {
+    if(m_lastVirtualTime != notifyTimeStamp && ( m_previousPowerSum != m_powerSum || oldCi_powerMode != m_lastChangedPowerMode[ci] ) )// && (currentCi_powerConsumption != m_lastChangedPowerConsumption[ci] || oldCi_powerMode != currentCi_powerMode))
+    {
 
     	calculateNewEnergySum();
 
+    	std::string powerMode;
+    	    	if(m_lastChangedPowerMode[ci] != NULL)
+    	    		powerMode = m_lastChangedPowerMode[ci]->getName();
+    	    	else
+    	    		powerMode = "-";
+    	    	printPowerChange( powerMode);
 
-    	printPowerChange( m_lastPowerModeChange->getName());
-
-    	m_changedTime = notifyTimeStamp;
-    }
+    	m_changedTime = m_lastVirtualTime;
 
     	//Only replace power consumption of component on the total components aggregate
-    	//printing will take place at next power change instant
-    	m_powerSum -= oldCi_powerConsumption;
-    	m_powerSum += currentCi_powerConsumption;
-    	m_lastPowerModeChange = ci->getPowerMode();
+    	    	//printing will take place at next power change instant
+    	    	m_lastChangedPowerConsumption[ci] = currentCi_powerConsumption;
+    	    	m_lastChangedPowerMode[ci] = oldCi_powerMode;
+    	    	m_lastCi = ci;
+    	    	m_previousPowerSum = m_powerSum;
+    }
+
+
+	m_lastVirtualTime = notifyTimeStamp;
+
+
+
+    m_powerSum -= oldCi_powerConsumption;
+    m_powerSum += currentCi_powerConsumption;
+
+
+
 
 }
 
@@ -86,9 +120,9 @@ void PowerSumming::calculateNewEnergySum()
 {
   m_previousEnergySum = m_energySum;
 
-  double duration = (notifyTimeStamp - m_changedTime).to_seconds();
+  double duration = (m_lastVirtualTime - m_changedTime).to_seconds();
 
-  m_energySum      += m_powerSum * duration;
+  m_energySum      += m_previousPowerSum * duration;
 
 }
 
@@ -98,7 +132,7 @@ void PowerSumming::calculateNewEnergySum()
 void PowerSumming::printPowerChange(std::string mode)
 {
 	unsigned long long timeStamp = m_changedTime.to_seconds() * 1000000000.0;
-	m_output << timeStamp << '\t' << m_powerSum << '\t' << m_previousEnergySum << '\t'<< mode << std::endl;
+	m_output << timeStamp << '\t' << m_previousPowerSum << '\t' << m_previousEnergySum << '\t'<< mode << std::endl;
 }
 
 } //namespace SystemC_VPC
