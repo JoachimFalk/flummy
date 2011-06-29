@@ -68,7 +68,7 @@ Component::Ptr getComponent(std::string name)
 Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
 {
   ProcessId routePid = Director::getProcessId(source, dest);
-  Route::Ptr route(new Route(source, dest, type));
+  Route::Ptr route(new Route(type, source, dest));
   Routing::add(routePid, route);
   return route;
 }

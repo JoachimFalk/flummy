@@ -51,8 +51,7 @@ public:
 
   typedef boost::shared_ptr<Route> Ptr;
 
-  Route(std::string source, std::string dest, Route::Type type);
-  Route(Route::Type type);
+  Route(Route::Type type, std::string source = "", std::string dest = "");
   ComponentId getComponentId() const;
   bool getTracing() const;
   void setTracing(bool tracing_);
