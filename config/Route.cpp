@@ -69,13 +69,8 @@ Route::Type Route::parseRouteType(std::string name)
   return StaticRoute;
 }
 
-Route::Route(std::string source, std::string dest, Route::Type type) :
+Route::Route(Route::Type type, std::string source, std::string dest) :
   source_(source), destination_(dest), type_(type)
-{
-}
-
-Route::Route(Route::Type type) :
-  source_(""), destination_(""), type_(type)
 {
 }
 
