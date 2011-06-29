@@ -70,7 +70,7 @@ Route::Type Route::parseRouteType(std::string name)
 }
 
 Route::Route(Route::Type type, std::string source, std::string dest) :
-  source_(source), destination_(dest), type_(type)
+  tracing_(false), source_(source), destination_(dest), type_(type)
 {
 }
 
