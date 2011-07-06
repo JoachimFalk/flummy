@@ -32,6 +32,7 @@ ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
 AM_LDFLAGS =			\
 	@AM_LDFLAGS@		\
+	$(BOOST_LDFLAGS)        \
 	@COSUPPORT_LDFLAGS@	\
 	@SYSTEMC_LDFLAGS@	\
 	@XERCES_LDFLAGS@
@@ -41,6 +42,7 @@ AM_LDFLAGS =			\
 #        restore thread based compute interface to SystemC-VPC
 AM_CPPFLAGS =			\
 	@AM_CPPFLAGS@		\
+	$(BOOST_INCLUDE)        \
 	@COSUPPORT_INCLUDE@	\
 	@SYSTEMC_INCLUDE@	\
 	@XERCES_INCLUDE@	\
