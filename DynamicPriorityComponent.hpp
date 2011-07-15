@@ -29,8 +29,9 @@ class DynamicPriorityComponent: public NonPreemptiveComponent
 public:
   typedef std::list<ScheduledTask *> PriorityList;
 
-  DynamicPriorityComponent(Config::Component::Ptr component,
-      Director *director = &Director::getInstance());
+  static DynamicPriorityComponent* create(Config::Component::Ptr component){
+    return new DynamicPriorityComponent(component);
+  }
 
   void addTask(Task *newTask);
 
@@ -44,6 +45,10 @@ public:
 
   virtual void setDynamicPriority(PriorityList priorityList);
   virtual void scheduleAfterTransition();
+
+protected:
+  DynamicPriorityComponent(Config::Component::Ptr component,
+      Director *director = &Director::getInstance());
 
 private:
   PriorityList priorities_;
