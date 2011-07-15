@@ -119,9 +119,6 @@ void DynamicPriorityComponent::setDynamicPriority(PriorityList priorityList)
 {
 
   priorities_ = priorityList;
-  for (PriorityList::const_iterator iter = priorityList.begin(); iter
-      != priorityList.end(); ++iter) {
-  }
 }
 
 void DynamicPriorityComponent::scheduleAfterTransition()
