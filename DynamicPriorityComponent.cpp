@@ -94,6 +94,7 @@ bool DynamicPriorityComponent::releaseActor()
       if (canExec) {
         mustYield_ = false;
         releasedTask_ = scheduledTask;
+        this->debugDump(std::cout, scheduledTask);
         Director::execute(scheduledTask);
         return true;
       }
@@ -103,6 +104,7 @@ bool DynamicPriorityComponent::releaseActor()
     bool canExec = Director::canExecute(lastTask_->getProcessId());
     if (canExec) {
       releasedTask_ = lastTask_->getScheduledTask();
+      this->debugDump(std::cout, releasedTask_);
       Director::execute(lastTask_->getProcessId());
       return true;
     }
@@ -124,6 +126,31 @@ void DynamicPriorityComponent::setDynamicPriority(PriorityList priorityList)
 void DynamicPriorityComponent::scheduleAfterTransition()
 {
   mustYield_ = true;
+}
+
+void DynamicPriorityComponent::debugDump(std::ostream &out,
+    const ScheduledTask * toBeExecuted) const
+{
+  std::stringstream canExec;
+
+  out << "@" << sc_time_stamp() << "\t" << "[VPC DynamicPriorityComponent: "
+        << this->getName() << "] " << "priority list: (";
+  for (PriorityList::const_iterator iter = priorities_.begin(); iter
+      != priorities_.end(); ++iter) {
+    ProcessId pid = (*iter)->getPid();
+    out << getActorName(pid) << " ";
+
+    if (Director::canExecute(pid)) {
+      canExec << getActorName(pid) << " ";
+    }
+  }
+  out << ") executable: (" << canExec.str() << ") execute: " << getActorName(
+      toBeExecuted->getPid()) << std::endl;
+}
+
+std::string DynamicPriorityComponent::getActorName(ProcessId pid) const
+{
+  return Director::getInstance().getTaskName(pid);
 }
 
 } //namespace SystemC_VPC

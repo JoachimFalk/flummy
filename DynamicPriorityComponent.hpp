@@ -56,6 +56,9 @@ private:
   Task * lastTask_;
   ScheduledTask * releasedTask_;
   void buildInitialPriorityList(Config::Component::Ptr component);
+
+  void debugDump(std::ostream &out, const ScheduledTask * toBeExecuted) const;
+  std::string getActorName(ProcessId pid) const;
 };
 
 } //namespace SystemC_VPC
