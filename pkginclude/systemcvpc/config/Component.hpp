@@ -79,6 +79,7 @@ public:
   ComponentId getComponentId() const;
 
   ComponentInterface::Ptr getComponentInterface() const;
+  bool hasDebugFile() const;
   std::string getDebugFileName() const;
   void setDebugFileName(std::string debugFileName);
 private:
