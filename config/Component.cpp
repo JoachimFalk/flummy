@@ -29,7 +29,7 @@ namespace Config
 
 //
 Component::Component(std::string name, Scheduler::Type scheduler) :
-  name_(name), scheduler_(scheduler), componentInterface_(NULL)
+  name_(name), debugFileName_("-"), scheduler_(scheduler), componentInterface_(NULL)
 {
 }
 
@@ -154,6 +154,18 @@ ComponentInterface::Ptr Component::getComponentInterface() const
   //TODO: assert simulation phase
   assert(componentInterface_ != NULL);
   return componentInterface_;
+}
+
+//
+std::string Component::getDebugFileName() const
+{
+  return this->debugFileName_;
+}
+
+//
+void Component::setDebugFileName(std::string debugFileName)
+{
+  this->debugFileName_ = debugFileName;
 }
 
 } // namespace Config

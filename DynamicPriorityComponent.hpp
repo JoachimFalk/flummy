@@ -19,6 +19,8 @@
 
 #include <systemcvpc/config/Component.hpp>
 
+#include "DebugOutput.hpp"
+
 #include <list>
 
 namespace SystemC_VPC
@@ -55,6 +57,8 @@ private:
   bool mustYield_;
   Task * lastTask_;
   ScheduledTask * releasedTask_;
+  SystemC_VPC::Diagnostics::DiscardOutput debug_;
+
   void buildInitialPriorityList(Config::Component::Ptr component);
 
   void debugDump(std::ostream &out, const ScheduledTask * toBeExecuted) const;

@@ -45,7 +45,8 @@ void DynamicPriorityComponent::buildInitialPriorityList(
 DynamicPriorityComponent::DynamicPriorityComponent(
     Config::Component::Ptr component, Director *director) :
   NonPreemptiveComponent(component, director), priorities_(),
-      mustYield_(false), lastTask_(NULL), releasedTask_(NULL)
+      mustYield_(false), lastTask_(NULL), releasedTask_(NULL),
+      debug_(component->getDebugFileName())
 {
   buildInitialPriorityList(component);
 }
@@ -94,7 +95,7 @@ bool DynamicPriorityComponent::releaseActor()
       if (canExec) {
         mustYield_ = false;
         releasedTask_ = scheduledTask;
-        this->debugDump(std::cout, scheduledTask);
+        this->debugDump(debug_, scheduledTask);
         Director::execute(scheduledTask);
         return true;
       }
@@ -104,7 +105,7 @@ bool DynamicPriorityComponent::releaseActor()
     bool canExec = Director::canExecute(lastTask_->getProcessId());
     if (canExec) {
       releasedTask_ = lastTask_->getScheduledTask();
-      this->debugDump(std::cout, releasedTask_);
+      this->debugDump(debug_, releasedTask_);
       Director::execute(lastTask_->getProcessId());
       return true;
     }
