@@ -259,6 +259,7 @@ namespace SystemC_VPC{
         break;
       case Config::Scheduler::StaticPriority_NP:
         scheduler = new PrioritySchedulerNoPreempt();
+        break;
       case Config::Scheduler::StaticPriority_P:
         scheduler = new PriorityScheduler();
         break;
@@ -279,6 +280,7 @@ namespace SystemC_VPC{
         break;
       case Config::Scheduler::TTCC:
         scheduler = new TimeTriggeredCCScheduler();
+        break;
       default:
         scheduler = new FCFSScheduler();
     }
