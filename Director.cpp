@@ -623,7 +623,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
         comp = new PriorityComponent(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
-        comp = new DynamicPriorityComponent(component);
+        comp = DynamicPriorityComponent::create(component);
         break;
       default:
         comp = new Component(component);
