@@ -486,4 +486,11 @@ namespace SystemC_VPC{
     delete powerSumStream;
 #endif // NO_POWER_SUM
   }
+
+  void Component::notifyActivation(ScheduledTask * scheduledTask,
+      bool active){
+    if(active && Director::canExecute(scheduledTask)){
+      Director::execute(scheduledTask);
+    }
+  }
 } //namespace SystemC_VPC

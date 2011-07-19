@@ -101,6 +101,9 @@ namespace SystemC_VPC{
       this->addObserver(gov);
     }
 
+    void notifyActivation(ScheduledTask * scheduledTask,
+        bool active);
+
   protected:
 
     virtual void schedule_thread(); 
