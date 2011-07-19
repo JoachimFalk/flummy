@@ -489,7 +489,7 @@ namespace SystemC_VPC{
 
   void Component::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
-    if(active && Director::canExecute(scheduledTask)){
+    while(active && Director::canExecute(scheduledTask)){
       Director::execute(scheduledTask);
     }
   }
