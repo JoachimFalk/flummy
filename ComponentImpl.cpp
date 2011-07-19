@@ -63,6 +63,9 @@ namespace SystemC_VPC{
     scheduler->initialize();
     fireStateChanged(ComponentState::IDLE);
     
+    //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
+    newTaskDuringOverhead=(newTasks.size()>0);
+
     while(1){
       //determine the time slice for next scheduling descission and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
