@@ -10,6 +10,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Director.hpp>
@@ -130,7 +132,7 @@ namespace SystemC_VPC{
   
   
   ProcessControlBlock::ProcessControlBlock( AbstractComponent * component )
-    : name("NN"), component(component) {
+    : name("NN"), component(component), psm(false) {
     this->init();
   }
 
@@ -140,6 +142,7 @@ namespace SystemC_VPC{
     this->period = sc_time(DBL_MAX, SC_SEC);
     this->priority = 0;
     this->traceSignal = NULL;
+    this->psm=false;
   }
 
   void ProcessControlBlock::configure(std::string name, bool tracing,
@@ -246,4 +249,13 @@ namespace SystemC_VPC{
     ft->addLatency(fid, latency);
   }
 
+  void ProcessControlBlock::setActorAsPSM(bool psm)
+  {
+	  this->psm = psm;
+  }
+
+  bool ProcessControlBlock::isPSM()
+  {
+	  return this->psm;
+  }
 }

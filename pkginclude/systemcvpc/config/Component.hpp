@@ -79,10 +79,14 @@ public:
   ComponentId getComponentId() const;
 
   ComponentInterface::Ptr getComponentInterface() const;
+  bool hasDebugFile() const;
+  std::string getDebugFileName() const;
+  void setDebugFileName(std::string debugFileName);
 private:
   friend class SystemC_VPC::AbstractComponent;
 
   std::string name_;
+  std::string debugFileName_;
   Timing transferTiming_;
   Scheduler::Type scheduler_;
   MappedTasks mappedTasks_;

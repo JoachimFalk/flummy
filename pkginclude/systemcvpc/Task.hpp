@@ -18,6 +18,8 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
@@ -162,6 +164,12 @@ namespace SystemC_VPC {
 #endif //NO_VCD_TRACES
 
     }
+
+    bool isPSM()
+    {
+    	return pcb->isPSM();
+    }
+
   private:
     Tracing* getTraceSignal()
       {assert(pcb != NULL); return pcb->getTraceSignal();}

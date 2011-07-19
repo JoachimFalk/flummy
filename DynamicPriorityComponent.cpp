@@ -18,6 +18,17 @@
 namespace SystemC_VPC
 {
 
+DynamicPriorityComponent* DynamicPriorityComponent::create(
+    Config::Component::Ptr component)
+{
+  if (component->hasDebugFile()) {
+    return new DynamicPriorityComponentImpl<Diagnostics::PrintDebug> (component);
+  } else {
+    return new DynamicPriorityComponentImpl<Diagnostics::DiscardOutput> (
+        component);
+  }
+}
+
 void DynamicPriorityComponent::buildInitialPriorityList(
     Config::Component::Ptr component)
 {
@@ -84,32 +95,6 @@ void DynamicPriorityComponent::notifyActivation(ScheduledTask * scheduledTask,
   }
 }
 
-bool DynamicPriorityComponent::releaseActor()
-{
-  if (mustYield_ || (lastTask_ == NULL)) {
-    for (PriorityList::const_iterator iter = priorities_.begin(); iter
-        != priorities_.end(); ++iter) {
-      ScheduledTask * scheduledTask = *iter;
-      bool canExec = Director::canExecute(scheduledTask);
-      if (canExec) {
-        mustYield_ = false;
-        releasedTask_ = scheduledTask;
-        Director::execute(scheduledTask);
-        return true;
-      }
-    }
-    return false;
-  } else {
-    bool canExec = Director::canExecute(lastTask_->getProcessId());
-    if (canExec) {
-      releasedTask_ = lastTask_->getScheduledTask();
-      Director::execute(lastTask_->getProcessId());
-      return true;
-    }
-    return false;
-  }
-}
-
 bool DynamicPriorityComponent::hasReadyTask()
 {
   return releasedTask_ != NULL;
@@ -119,9 +104,6 @@ void DynamicPriorityComponent::setDynamicPriority(PriorityList priorityList)
 {
 
   priorities_ = priorityList;
-  for (PriorityList::const_iterator iter = priorityList.begin(); iter
-      != priorityList.end(); ++iter) {
-  }
 }
 
 void DynamicPriorityComponent::scheduleAfterTransition()

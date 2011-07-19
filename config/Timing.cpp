@@ -180,7 +180,7 @@ void DefaultTimingsProvider::add(Timing timing)
 
 void DefaultTimingsProvider::addDefaultActorTiming(std::string actorName,Timing timing)
 {
-  functionTimings_.find(actorName)->second.find(timing.getPowerMode())->second = timing;
+  functionTimings_[actorName][timing.getPowerMode()] = timing;
 }
 
 } // namespace Config

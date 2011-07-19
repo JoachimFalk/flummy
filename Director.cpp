@@ -18,6 +18,8 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/Director.hpp>
@@ -561,6 +563,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
       if (VC::Mappings::isMapped(task, component)) {
         VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
         pcb->setPriority(task->getPriority());  // GFR BUGFIX
+        pcb->setActorAsPSM(task->isPSM());
         if (provider->hasDefaultActorTiming(actorName)) {
 
         	SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
@@ -620,7 +623,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
         comp = new PriorityComponent(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
-        comp = new DynamicPriorityComponent(component);
+        comp = DynamicPriorityComponent::create(component);
         break;
       default:
         comp = new Component(component);

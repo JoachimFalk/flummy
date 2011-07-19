@@ -10,6 +10,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <systemcvpc/vpc_config.h>
+
 #include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/FCFSScheduler.hpp>
@@ -61,6 +63,9 @@ namespace SystemC_VPC{
     scheduler->initialize();
     fireStateChanged(ComponentState::IDLE);
     
+    //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
+    newTaskDuringOverhead=(newTasks.size()>0);
+
     while(1){
       //determine the time slice for next scheduling descission and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
@@ -254,6 +259,7 @@ namespace SystemC_VPC{
         break;
       case Config::Scheduler::StaticPriority_NP:
         scheduler = new PrioritySchedulerNoPreempt();
+        break;
       case Config::Scheduler::StaticPriority_P:
         scheduler = new PriorityScheduler();
         break;
@@ -274,6 +280,7 @@ namespace SystemC_VPC{
         break;
       case Config::Scheduler::TTCC:
         scheduler = new TimeTriggeredCCScheduler();
+        break;
       default:
         scheduler = new FCFSScheduler();
     }
@@ -478,5 +485,12 @@ namespace SystemC_VPC{
     delete powerSumming;
     delete powerSumStream;
 #endif // NO_POWER_SUM
+  }
+
+  void Component::notifyActivation(ScheduledTask * scheduledTask,
+      bool active){
+    while(active && Director::canExecute(scheduledTask)){
+      Director::execute(scheduledTask);
+    }
   }
 } //namespace SystemC_VPC

@@ -23,13 +23,13 @@ namespace Config
 
 //
 VpcTask::VpcTask(ScheduledTask & actor) :
-  actor_(&actor), priority_(0)
+  actor_(&actor), priority_(0), psm_(false)
 {
 }
 
 //
 VpcTask::VpcTask() :
-  actor_(NULL), priority_(0)
+  actor_(NULL), priority_(0), psm_(false)
 {
 }
 
@@ -65,6 +65,16 @@ const Component::Ptr  VpcTask::getComponent() const
 void VpcTask::inject(ScheduledTask * actor)
 {
   actor_ = actor;
+}
+
+void VpcTask::setActorAsPSM(bool psm)
+{
+	psm_ = psm;
+}
+
+bool VpcTask::isPSM()
+{
+	return this->psm_;
 }
 
 } // namespace Config
