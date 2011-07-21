@@ -145,7 +145,6 @@ class ComponentObserver;
 #ifndef NO_VCD_TRACES
     sc_trace_file *traceFile;
     std::map<std::string, Tracing* > trace_map_by_name;
-    sc_signal<trace_value> schedulerTrace;
 #endif //NO_VCD_TRACES
   
   public:

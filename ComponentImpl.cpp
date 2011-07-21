@@ -154,9 +154,6 @@ namespace SystemC_VPC{
       overhead=scheduler->schedulingOverhead();
 
       if( overhead != NULL ){
-#ifndef NO_VCD_TRACES
-        schedulerTrace =  SystemC_VPC::Tracing::S_RUNNING;
-#endif //NO_VCD_TRACES
         //    actual time    < endtime
         while( (sc_time_stamp() < timestamp + (*overhead)) ){ 
 
@@ -167,9 +164,6 @@ namespace SystemC_VPC{
 
         // true if some task becames ready during overhead waiting
         newTaskDuringOverhead=(newTasks.size()>0);
-#ifndef NO_VCD_TRACES
-        schedulerTrace = SystemC_VPC::Tracing::S_READY;
-#endif //NO_VCD_TRACES
       }else {
         // avoid failures
         overhead=new sc_time(SC_ZERO_TIME);
