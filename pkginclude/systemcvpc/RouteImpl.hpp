@@ -49,7 +49,7 @@ namespace SystemC_VPC{
     }
 
     virtual void enableTracing(bool enable){
-      enableTracer = enable && ptpTracer != NULL;
+      enableTracer = enable && ptpTracer;
     }
 
   protected:
