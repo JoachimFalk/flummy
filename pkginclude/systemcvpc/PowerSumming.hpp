@@ -34,8 +34,8 @@ namespace SystemC_VPC{
     std::ostream    &m_output;
     sc_core::sc_time m_changedTime;
 	sc_core::sc_time m_lastVirtualTime;
-    double           m_previousPowerSum;
     double           m_powerSum;
+    double           m_previousPowerSum;
     std::map<const ComponentInfo *, double> m_powerConsumption;
     std::map<const ComponentInfo *, double> m_lastChangedPowerConsumption;
     std::map<const ComponentInfo *, const PowerMode *> m_powerMode;
