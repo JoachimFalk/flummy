@@ -50,22 +50,22 @@ namespace SystemC_VPC {
 
     void traceRunning(){
       this->tracePlain("RUN");
-      this->setValue(S_RUNNING);
+      this->setValueWithCaseCorrection(S_RUNNING);
     }
 
     void traceBlocking(){
       this->tracePlain("BLOCK");
-      this->setValue(S_BLOCKED);
+      this->setValueWithCaseCorrection(S_BLOCKED);
     }
 
     void traceSleeping(){
       this->tracePlain("SLEEP");
-      this->setValue(S_SLEEP);
+      this->writeValue(S_SLEEP);
     }
 
     void traceReady(){
       this->tracePlain("WAIT");
-      this->setValue(S_READY);
+      this->setValueWithCaseCorrection(S_READY);
     }
 
     void tracePlain(std::string traceValue){
@@ -83,22 +83,41 @@ namespace SystemC_VPC {
   private:
 
     /**
-     * Set trace value.
-     * If the signal is identic to lastValue then the ascii bit for
-     * lowercase is toggled
+     * remember last value and time stamp of change
      */
-    void setValue(trace_value value){
+    void rememberLastValue(){
       if(lastChange != sc_time_stamp()){
         // remember value from last real changing (ignore delta cycle changing)
         lastValue    = *traceSignal;
         lastChange   = sc_time_stamp();
       }
+    }
+
+    /**
+     * write value to signal
+     */
+    void writeValue(trace_value value){
+      rememberLastValue();
+      *traceSignal  = value;
+    }
+
+    /**
+     * Set trace value.
+     * If the signal is identical to lastValue then the ASCII bit for
+     * lower case is toggled
+     */
+    void setValueWithCaseCorrection(trace_value value){
+      rememberLastValue();
+
       if(lastValue == value){
         // if value does not change toggle between upper and lower case
-        if(value & LOWER_CASE) *traceSignal  = value & UPPER_CASE;
-        else                   *traceSignal  = value | LOWER_CASE;
+        if(value & LOWER_CASE){
+          writeValue(value & UPPER_CASE);
+        } else {
+          writeValue(value | LOWER_CASE);
+        }
       }else{
-        *traceSignal  = value;
+        writeValue(value);
       }
     }
 
