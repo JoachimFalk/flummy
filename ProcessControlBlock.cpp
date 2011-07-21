@@ -71,11 +71,6 @@ namespace SystemC_VPC{
 
   sc_time summarizeFunctionTimes(const FunctionIds& functions,
       const FunctionTimes& functionTimes){
-
-	  size_t fs = functions.size();
-	  size_t fts = functionTimes.size();
-
-
     sc_time ret = SC_ZERO_TIME;
     for(FunctionIds::const_iterator iter = functions.begin();
         iter != functions.end();
