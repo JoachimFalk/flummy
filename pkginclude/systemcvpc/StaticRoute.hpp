@@ -59,8 +59,6 @@ namespace SystemC_VPC{
     StaticRoute( const StaticRoute & route );
 
     ~StaticRoute( );
-
-    const char* getName() const;
   private:
     typedef std::list<AbstractComponent *> Components;
 
@@ -69,7 +67,6 @@ namespace SystemC_VPC{
     EventPair                              taskEvents;
     CoSupport::SystemC::RefCountEventPtr   dummyDii;
     CoSupport::SystemC::RefCountEventPtr   routeLat;
-    std::string                            name;
     Components::iterator                   nextHop;
     RoutePool<StaticRoute>                *pool;
   };

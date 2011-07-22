@@ -49,7 +49,7 @@ namespace SystemC_VPC{
       route->compute( task );
     }
 
-    const char* getName() const
+    std::string getName() const
     {
       return this->getPrototype().getName();
     }

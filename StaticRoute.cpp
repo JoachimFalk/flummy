@@ -109,12 +109,10 @@ namespace SystemC_VPC {
     dummyDii(new CoSupport::SystemC::RefCountEvent()),
     routeLat(new CoSupport::SystemC::RefCountEvent())
   {
-    this->name = "msg_" + configuredRoute->getSource() + "_2_"
-        + configuredRoute->getDestination();
     routeLat->addListener(this);
 
     this->setPtpTracer(CoSupport::Tracing::TracingFactory::getInstance()
-                         .createPtpTracer(this->name));
+                         .createPtpTracer(this->getName()));
   }
 
   //
@@ -124,8 +122,7 @@ namespace SystemC_VPC {
     task(route.task),
     taskEvents(route.taskEvents),
     dummyDii(new CoSupport::SystemC::RefCountEvent()),
-    routeLat(new CoSupport::SystemC::RefCountEvent()),
-    name(route.name)
+    routeLat(new CoSupport::SystemC::RefCountEvent())
   {
     routeLat->addListener(this);
     for(Components::const_iterator iter = route.components.begin();
@@ -140,10 +137,5 @@ namespace SystemC_VPC {
     routeLat->delListener(this);
     components.clear();
     DBG_OUT("StaticRoute::~StaticRoute( )" << endl);
-  }
-
-  //
-  const char* StaticRoute::getName() const {
-    return this->name.c_str();
   }
 }

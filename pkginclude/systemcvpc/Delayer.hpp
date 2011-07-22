@@ -36,7 +36,10 @@ namespace SystemC_VPC{
        */
     virtual void compute(Task* task) = 0;
 
-    virtual const char* getName() const = 0;
+    const std::string& getName() const
+    {
+      return name_;
+    }
 
     const ComponentId getComponentId() const;
 
@@ -55,7 +58,7 @@ namespace SystemC_VPC{
 
   protected:
 
-    Delayer(ComponentId id): componentId_(id) {}
+    Delayer(ComponentId id, std::string name) : componentId_(id), name_(name) {}
 
     typedef std::vector<ComponentObserver *> Observers;
     
@@ -65,6 +68,9 @@ namespace SystemC_VPC{
 
     //
     ComponentId componentId_;
+
+    //
+    std::string name_;
   };
 }
 
