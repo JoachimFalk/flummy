@@ -167,7 +167,6 @@ SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute)
       route = new RoutePool<BlockingTransport> (configuredRoute);
       break;
   }
-  route->enableTracing(configuredRoute->getTracing());
   std::list<Hop> hops = configuredRoute->getHops();
   for (std::list<Hop>::const_iterator iter = hops.begin(); iter != hops.end(); ++iter) {
     Config::Component::Ptr component = iter->getComponent();
