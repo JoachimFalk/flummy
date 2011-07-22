@@ -783,7 +783,6 @@ void Director::endOfVpcFinalize()
     VC::Route::Ptr configuredRoute = VC::Routing::get(pid);
     Route * route = VC::Routing::create(configuredRoute);
 
-    route->enableTracing(false);
     Director::registerRoute(route);
 
     return FastLink(pid, fids);
