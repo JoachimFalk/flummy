@@ -201,7 +201,7 @@ namespace SystemC_VPC {
       phase(LOCK_ROUTE)
   {
     this->name = "msg_" + configuredRoute->getSource() + "_2_"
-        + configuredRoute->getDestination();    routeLat->addListener(this);
+        + configuredRoute->getDestination();
     routeLat->addListener(this);
 
     //components.push_back(comp);
