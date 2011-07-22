@@ -110,9 +110,6 @@ namespace SystemC_VPC {
     routeLat(new CoSupport::SystemC::RefCountEvent())
   {
     routeLat->addListener(this);
-
-    this->setPtpTracer(CoSupport::Tracing::TracingFactory::getInstance()
-                         .createPtpTracer(this->getName()));
   }
 
   //

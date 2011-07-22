@@ -54,10 +54,6 @@ namespace SystemC_VPC{
       return this->getPrototype().getName();
     }
 
-    virtual void enableTracing(bool enable){
-      this->getPrototype().enableTracing(enable);
-    }
-
     RoutePool( const Config::Route::Ptr configuredRoute )
       : PrototypedPool<ROUTE>(configuredRoute), Route(configuredRoute)
     {

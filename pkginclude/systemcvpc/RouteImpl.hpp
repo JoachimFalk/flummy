@@ -36,11 +36,17 @@ namespace SystemC_VPC{
     Route(Config::Route::Ptr configuredRoute) : Delayer(
         configuredRoute->getComponentId(), configuredRoute->getName()),
         instanceId(createRouteId()),
-        enableTracer(false),
-        ptpTracer() {}
+        ptpTracer()
+    {
+      if (configuredRoute->getTracing()) {
+        this->ptpTracer
+          = CoSupport::Tracing::TracingFactory::getInstance() .createPtpTracer(
+              this->getName());
+      }
+    }
 
     Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
-        enableTracer(orig.enableTracer), ptpTracer(orig.ptpTracer) {}
+        ptpTracer(orig.ptpTracer) {}
 
     virtual ~Route(){}
 
@@ -49,28 +55,18 @@ namespace SystemC_VPC{
       return instanceId;
     }
 
-    virtual void enableTracing(bool enable){
-      enableTracer = enable && ptpTracer;
-    }
   protected:
     void traceStart() {
-      assert(ptpTracer != NULL);
-      if (enableTracer) ticket = ptpTracer->startOoo();
+      if (ptpTracer) ticket = ptpTracer->startOoo();
     }
 
     void traceStop() {
-      assert(ptpTracer != NULL);
-      if (enableTracer) ptpTracer->stopOoo(ticket);
-    }
-
-    void setPtpTracer(CoSupport::Tracing::PtpTracer::Ptr     ptpTracer){
-      this->ptpTracer = ptpTracer;
+      if (ptpTracer) ptpTracer->stopOoo(ticket);
     }
   private:
     size_t createRouteId();
 
     const int instanceId;
-    bool enableTracer;
     CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
     CoSupport::Tracing::PtpTracer::Ticket  ticket;
   };
