@@ -82,6 +82,9 @@ namespace SystemC_VPC{
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
+      SC_METHOD(releaseActorsMethod);
+      dont_initialize();
+      sensitive << releaseActors;
       this->setPowerMode(this->translatePowerMode("SLOW"));
       setScheduler(component);
 
@@ -120,6 +123,9 @@ namespace SystemC_VPC{
     sc_event notify_scheduler_thread;
     Event blockCompute;
     size_t   blockMutex;
+    sc_event releaseActors;
+    std::list<ProcessId>       releaseQueue;
+
 #ifndef NO_POWER_SUM
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
@@ -137,6 +143,8 @@ namespace SystemC_VPC{
     void fireStateChanged(const ComponentState &state);
 
     void addTasks();
+
+    void releaseActorsMethod();
   };
 
 } 

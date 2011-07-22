@@ -483,8 +483,21 @@ namespace SystemC_VPC{
 
   void Component::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
-    while(active && Director::canExecute(scheduledTask)){
+    /*while(active && Director::canExecute(scheduledTask)){
       Director::execute(scheduledTask);
+    }*/
+
+    if(active) {
+      releaseQueue.push_back(scheduledTask->getPid());
+      releaseActors.notify(SC_ZERO_TIME);
+    }
+  }
+
+  void Component::releaseActorsMethod(){
+    ProcessId pid = releaseQueue.front();
+    releaseQueue.pop_front();
+    if(Director::canExecute(pid)){
+      Director::execute(pid);
     }
   }
 } //namespace SystemC_VPC
