@@ -153,7 +153,8 @@ namespace SystemC_VPC{
      * \param taskName specifies name of task
      * \param compName specifies name of component
      */
-    void registerMapping(const char* taskName, const char* compName);
+    void registerMapping(const std::string& taskName,
+        const std::string& compName);
 
     /**
      * \brief Register a communication route.

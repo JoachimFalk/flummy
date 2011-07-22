@@ -83,8 +83,6 @@ class ComponentObserver;
      */
     virtual bool setAttribute(AttributePtr attributePtr);
 
-    const char* getName() const;
-
     /**
      * \brief Create the process control block.
      */
@@ -149,9 +147,10 @@ class ComponentObserver;
   
   public:
   
-    AbstractComponent(Config::Component::Ptr component)
-      : sc_module(sc_module_name(component->getName().c_str())),
-        Delayer(component->getComponentId()),
+    AbstractComponent(Config::Component::Ptr component) :
+        sc_module(sc_module_name(component->getName().c_str())),
+        Delayer(component->getComponentId(),
+            component->getName()),
         transactionDelays(),
         scheduledTasks(),
 #ifndef NO_VCD_TRACES

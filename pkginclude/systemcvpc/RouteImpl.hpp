@@ -34,9 +34,10 @@ namespace SystemC_VPC{
     virtual const ComponentList& getHops() const = 0;
 
     Route(Config::Route::Ptr configuredRoute) : Delayer(
-        configuredRoute->getComponentId()),
+        configuredRoute->getComponentId(), configuredRoute->getName()),
         instanceId(createRouteId()),
-        enableTracer(false) {}
+        enableTracer(false),
+        ptpTracer() {}
 
     Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
         enableTracer(orig.enableTracer), ptpTracer(orig.ptpTracer) {}
@@ -51,7 +52,6 @@ namespace SystemC_VPC{
     virtual void enableTracing(bool enable){
       enableTracer = enable && ptpTracer;
     }
-
   protected:
     void traceStart() {
       assert(ptpTracer != NULL);

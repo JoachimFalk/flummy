@@ -281,7 +281,9 @@ namespace SystemC_VPC{
   /**
    * \brief Implementation of Director::registerMapping
    */
-  void Director::registerMapping(const char* taskName, const char* compName){
+  void Director::registerMapping(const std::string& taskName,
+      const std::string& compName)
+  {
     assert(!FALLBACKMODE);
     DBG_OUT("registerMapping( " << taskName<< ", " << compName << " )"<< endl);
     ProcessId       pid = getProcessId( taskName );
@@ -313,8 +315,8 @@ namespace SystemC_VPC{
   void Director::registerRoute(Route* route){
     assert(!FALLBACKMODE);
     this->registerComponent(route);
-    const char * taskName = route->getName();
-    const char * compName = route->getName();
+    const std::string & taskName = route->getName();
+    const std::string & compName = route->getName();
 
     ProcessId       pid = getProcessId( taskName );
     if( pid >= mappings.size() ){

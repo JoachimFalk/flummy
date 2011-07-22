@@ -60,6 +60,7 @@ public:
   std::string getDestination() const;
   std::list<Hop> getHops() const;
   std::string getSource() const;
+  std::string getName() const;
   Type getType() const;
   void inject(std::string source, std::string destination);
 private:

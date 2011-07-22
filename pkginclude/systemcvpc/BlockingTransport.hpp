@@ -59,8 +59,6 @@ namespace SystemC_VPC{
     BlockingTransport( const BlockingTransport & route );
 
     ~BlockingTransport( );
-
-    const char* getName() const;
   private:
     void resetHops();
     void resetLists();
@@ -84,7 +82,6 @@ namespace SystemC_VPC{
     EventPair                              taskEvents;
     CoSupport::SystemC::RefCountEventPtr   dummyDii;
     CoSupport::SystemC::RefCountEventPtr   routeLat;
-    std::string                            name;
     RoutePool<BlockingTransport>          *pool;
 
     // blocking transport has two phases:

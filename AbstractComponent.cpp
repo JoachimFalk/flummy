@@ -27,10 +27,6 @@ namespace SystemC_VPC{
 
   AbstractComponent::Factories AbstractComponent::factories;
 
-  const char* AbstractComponent::getName() const {
-    return this->basename();
-  }
-
   bool AbstractComponent::processPower(AttributePtr attPtr)
   {
     // hierarchical format

@@ -104,6 +104,11 @@ std::string Route::getSource() const
   return source_;
 }
 
+//
+std::string Route::getName() const {
+  return "msg_" + getSource() + "_2_" + getDestination();
+}
+
 Route::Type Route::getType() const
 {
   return type_;
