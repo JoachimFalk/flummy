@@ -15,6 +15,9 @@
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
+#include "diagnostics/DebugOutput.hpp"
+
+
 namespace SystemC_VPC
 {
 

@@ -19,8 +19,6 @@
 
 #include <systemcvpc/config/Component.hpp>
 
-#include "DebugOutput.hpp"
-
 #include <list>
 
 namespace SystemC_VPC
