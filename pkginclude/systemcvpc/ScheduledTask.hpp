@@ -14,6 +14,7 @@
 #define SCHEDULEDTASK_HPP_
 
 #include <cstddef>
+#include <systemc.h>
 
 namespace SystemC_VPC
 {
@@ -32,6 +33,10 @@ public:
   void setPid(ProcessId pid);
   ProcessId getPid() const;
   void notifyActivation(bool active);
+
+  virtual sc_time getNextReleaseTime() {
+    return sc_time_stamp();
+  }
 private:
   Delayer *component;
   ProcessId pid;
