@@ -694,6 +694,12 @@ void Director::endOfVpcFinalize()
   }
 }
 
+//
+bool Director::hasValidConfig() const
+{
+  return !FALLBACKMODE;
+}
+
   FastLink Director::registerActor(ScheduledTask * actor,
       std::string actorName,
       const FunctionNames &actionNames,
