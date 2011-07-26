@@ -38,6 +38,7 @@
 
 #include "ConfigCheck.hpp"
 #include "DynamicPriorityComponent.hpp"
+#include "tracing/TaskTracer.hpp"
 #include "config/Mappings.hpp"
 
 #include <systemc.h>
@@ -619,13 +620,13 @@ ProcessId Director::getProcessId(std::string process_or_source,
     AbstractComponent *comp = NULL;
     switch (component->getScheduler()) {
       case VC::Scheduler::FCFS:
-        comp = new FcfsComponent(component);
+        comp = new FcfsComponent<Trace::DiscardTace>(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
-        comp = new PriorityComponent(component);
+        comp = new PriorityComponent<Trace::DiscardTace>(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
-        comp = DynamicPriorityComponent::create(component);
+        comp = DynamicPriorityComponent<Trace::DiscardTace>::create(component);
         break;
       default:
         comp = new Component(component);

@@ -19,6 +19,7 @@
 #include "datatypes.hpp"
 #include "AbstractComponent.hpp"
 #include "ComponentInfo.hpp"
+#include "HysteresisLocalGovernor.hpp"
 #include "PowerSumming.hpp"
 #include "PowerMode.hpp"
 #include "Director.hpp"
@@ -48,8 +49,6 @@
 
 namespace SystemC_VPC{
 
-  class InternalLoadHysteresisGovernor;
-
   typedef std::map<ComponentState, double> PowerTable;
   typedef std::map<const PowerMode*, PowerTable>  PowerTables;
 
@@ -57,6 +56,7 @@ namespace SystemC_VPC{
    * \brief An implementation of AbstractComponent.
    * 
    */
+  template<class TASKTRACER>
   class NonPreemptiveComponent : public AbstractComponent{
     
     SC_HAS_PROCESS(NonPreemptiveComponent);
@@ -87,7 +87,13 @@ namespace SystemC_VPC{
     /**
      *
      */
-    virtual void updatePowerConsumption();
+    virtual void updatePowerConsumption()
+    {
+      this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
+      // Notify observers (e.g. powersum)
+      this->fireNotification(this);
+    }
+
 
     /**
      * \brief An implementation of AbstractComponent used together with
@@ -116,13 +122,19 @@ namespace SystemC_VPC{
 
     void remainingPipelineStages();
 
-    void fireStateChanged(const ComponentState &state);
+    void fireStateChanged(const ComponentState &state)
+    {
+      this->setComponentState(state);
+      this->updatePowerConsumption();
+    }
 
     Task*                  runningTask;
     sc_event notify_scheduler_thread;
 
     // time last task started
     sc_time startTime;
+
+    TASKTRACER taskTracer;
   private:
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
@@ -144,7 +156,7 @@ namespace SystemC_VPC{
 
     void moveToRemainingPipelineStages(Task* task);
     
-    void setScheduler(const char *schedulername);
+    void setScheduler(const char *schedulername) {};
 
     void removeTask(){
         fireStateChanged(ComponentState::IDLE);
@@ -191,17 +203,24 @@ namespace SystemC_VPC{
 
   typedef PriorityFcfsElement<ScheduledTask*>                    QueueElem;
 
-  class FcfsComponent : public NonPreemptiveComponent {
+  template<class TASKTRACER>
+  class FcfsComponent : public NonPreemptiveComponent<TASKTRACER> {
   public:
     FcfsComponent(Config::Component::Ptr component, Director *director =
       &Director::getInstance()) :
-      NonPreemptiveComponent(component, director)
+      NonPreemptiveComponent<TASKTRACER>(component, director)
     {
     }
 
     virtual ~FcfsComponent() {}
 
-    void addTask(Task *newTask);
+    void addTask(Task *newTask)
+    {
+      DBG_OUT(this->getName() << " add Task: " << newTask->getName()
+              << " @ " << sc_time_stamp() << std::endl);
+      readyTasks.push_back(newTask);
+    }
+
 
     Task * scheduleTask();
 
@@ -219,17 +238,24 @@ namespace SystemC_VPC{
 
   };
 
-  class PriorityComponent : public NonPreemptiveComponent {
+  template<class TASKTRACER>
+  class PriorityComponent : public NonPreemptiveComponent<TASKTRACER> {
   public:
     PriorityComponent(Config::Component::Ptr component, Director *director  =
         &Director::getInstance()) :
-      NonPreemptiveComponent(component, director), fcfsOrder(0)
+      NonPreemptiveComponent<TASKTRACER>(component, director), fcfsOrder(0)
     {
     }
 
     virtual ~PriorityComponent() {}
 
-    void addTask(Task *newTask);
+    void addTask(Task *newTask)
+    {
+      DBG_OUT(this->getName() << " add Task: " << newTask->getName()
+              << " @ " << sc_time_stamp() << std::endl);
+      p_queue_entry entry(fcfsOrder++, newTask);
+      readyQueue.push(entry);
+    }
 
     Task * scheduleTask();
 
@@ -253,6 +279,338 @@ namespace SystemC_VPC{
     }
 
   };
-} 
 
+/**
+ *
+ */
+template<class TASKTRACER>
+NonPreemptiveComponent<TASKTRACER>::NonPreemptiveComponent(
+    Config::Component::Ptr component, Director *director) :
+  AbstractComponent(component), runningTask(NULL), blockMutex(0),
+      releasePhase(false)
+{
+  SC_METHOD(schedule_method);
+  sensitive << notify_scheduler_thread;
+  dont_initialize();
+
+  //SC_THREAD(remainingPipelineStages);
+
+  this->setPowerMode(this->translatePowerMode("SLOW"));
+
+  this->midPowerGov = new InternalLoadHysteresisGovernor(sc_time(12.5, SC_MS),
+      sc_time(12.1, SC_MS), sc_time(4.0, SC_MS));
+  this->midPowerGov->setGlobalGovernor(director->topPowerGov);
+
+  //if(powerTables.find(getPowerMode()) == powerTables.end()){
+  //  powerTables[getPowerMode()] = PowerTable();
+  // }
+
+  //PowerTable &powerTable=powerTables[getPowerMode()];
+  //powerTable[ComponentState::IDLE]    = 0.0;
+  //powerTable[ComponentState::RUNNING] = 1.0;
+
+#ifndef NO_POWER_SUM
+  std::string powerSumFileName(this->getName());
+  powerSumFileName += ".dat";
+
+  powerSumStream = new std::ofstream(powerSumFileName.c_str());
+  powerSumming = new PowerSumming(*powerSumStream);
+  this->addObserver(powerSumming);
+#endif // NO_POWER_SUM
+  fireStateChanged(ComponentState::IDLE);
+}
+
+/**
+ *
+ */
+template<class TASKTRACER>
+void NonPreemptiveComponent<TASKTRACER>::schedule_method()
+{
+  DBG_OUT("NonPreemptiveComponent::schedule_method (" << this->getName()
+      << ") triggered @" << sc_time_stamp() << endl);
+
+  //default trigger
+  next_trigger(notify_scheduler_thread);
+
+  if (runningTask == NULL) {
+    releasePhase = true; // prevent from re-notifying schedule_method
+    bool released = releaseActor();
+    releasePhase = false;
+
+    if (released) {
+      //assert(!readyTasks.empty());
+    }
+
+    if (hasReadyTask()) {
+      runningTask = scheduleTask();
+      runningTask->traceAssignTask();
+
+      next_trigger(runningTask->getRemainingDelay());
+
+    }
+
+  } else {
+    assert(startTime+runningTask->getRemainingDelay() <= sc_time_stamp());
+    removeTask();
+    schedule_method(); //recursion will release/schedule next task
+  }
+}
+
+/**
+ *
+ */
+template<class TASKTRACER>
+void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
+{
+
+  /* * /
+   if(blockMutex > 0) {
+   actualTask->abortBlockingCompute();
+   return;
+   }
+   / * */
+
+  ProcessId pid = actualTask->getProcessId();
+  ProcessControlBlockPtr pcb = this->getPCB(pid);
+  actualTask->setPCB(pcb);
+  actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
+
+  DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
+      << " ) at time: " << sc_time_stamp()
+      << " mode: " << this->getPowerMode()->getName()
+      << " schedTask: " << actualTask->getScheduledTask()
+      << std::endl);
+
+  // reset the execution delay
+  actualTask->initDelays();
+  //    DBG_OUT("Using " << actualTask->getRemainingDelay()
+  //         << " as delay for function " << actualTask->getFunctionIds()() << "!"
+  //         << std::endl);
+  //    DBG_OUT("And " << actualTask->getLatency() << " as latency for function "
+  //         << actualTask->getFunctionIds()() << "!" << std::endl);
+
+  //store added task
+  this->addTask(actualTask);
+  actualTask->traceReleaseTask();
+  //TODO: this->taskTracer.releaseTask(actualTask);
+
+  //awake scheduler thread
+  if (runningTask == NULL && !releasePhase) {
+    DBG_OUT("NonPreemptiveComponent::compute (" << this->getName()
+        << ") notify @" << sc_time_stamp() << endl);
+
+    notify_scheduler_thread.notify(SC_ZERO_TIME);
+    //blockCompute.notify();
+  }
+}
+
+/**
+ *
+ */
+template<class TASKTRACER>
+void NonPreemptiveComponent<TASKTRACER>::requestBlockingCompute(Task* task,
+    RefCountEventPtr blocker)
+{
+  task->setExec(false);
+  task->setBlockingCompute(blocker);
+  this->compute(task);
+}
+
+/**
+ *
+ */
+template<class TASKTRACER>
+void NonPreemptiveComponent<TASKTRACER>::execBlockingCompute(Task* task,
+    RefCountEventPtr blocker)
+{
+  task->setExec(true);
+  blockCompute.notify();
+}
+
+/**
+ *
+ */
+template<class TASKTRACER>
+void NonPreemptiveComponent<TASKTRACER>::abortBlockingCompute(Task* task,
+    RefCountEventPtr blocker)
+{
+  task->resetBlockingCompute();
+  blockCompute.notify();
+}
+
+/**
+ *
+ */
+template<class TASKTRACER>
+void NonPreemptiveComponent<TASKTRACER>::remainingPipelineStages()
+{
+  while (1) {
+    if (pqueue.size() == 0) {
+      wait( remainingPipelineStages_WakeUp);
+    } else {
+      timePcbPair front = pqueue.top();
+
+      //cerr << "Pop from list: " << front.time << " : "
+      //<< front.pcb->getBlockEvent().latency << endl;
+      sc_time waitFor = front.time - sc_time_stamp();
+      assert(front.time >= sc_time_stamp());
+      //cerr << "Pipeline> Wait till " << front.time
+      //<< " (" << waitFor << ") at: " << sc_time_stamp() << endl;
+      wait(waitFor, remainingPipelineStages_WakeUp);
+
+      sc_time rest = front.time - sc_time_stamp();
+      assert(rest >= SC_ZERO_TIME);
+      if (rest > SC_ZERO_TIME) {
+        //cerr << "------------------------------" << endl;
+      } else {
+        assert(rest == SC_ZERO_TIME);
+        //cerr << "Ready! releasing task (" <<  front.time <<") at: "
+        //<< sc_time_stamp() << endl;
+
+        // Latency over -> remove Task
+        Director::getInstance().signalLatencyEvent(front.task);
+
+        //wait(SC_ZERO_TIME);
+        pqueue.pop();
+      }
+    }
+
+  }
+}
+
+/**
+ *
+ */
+template<class TASKTRACER>
+void NonPreemptiveComponent<TASKTRACER>::moveToRemainingPipelineStages(
+    Task* task)
+{
+  sc_time now = sc_time_stamp();
+  sc_time restOfLatency = task->getLatency() - task->getDelay();
+  sc_time end = now + restOfLatency;
+  if (end <= now) {
+    //early exit if (Latency-DII) <= 0
+    //std::cerr << "Early exit: " << task->getName() << std::endl;
+    Director::getInstance().signalLatencyEvent(task);
+    return;
+  }
+  timePcbPair pair;
+  pair.time = end;
+  pair.task = task;
+  //std::cerr << "Rest of pipeline added: " << task->getName()
+  //<< " (EndTime: " << pair.time << ") " << std::endl;
+  pqueue.push(pair);
+  remainingPipelineStages_WakeUp.notify();
+}
+
+template<class TASKTRACER>
+void FcfsComponent<TASKTRACER>::notifyActivation(ScheduledTask * scheduledTask,
+    bool active)
+{
+  DBG_OUT(this->name() << " notifyActivation " << scheduledTask
+      << " " << active << std::endl);
+  if (active) {
+    fcfsQueue.push_back(scheduledTask);
+    if (this->runningTask == NULL) {
+      this->notify_scheduler_thread.notify(SC_ZERO_TIME);
+    }
+  }
+}
+
+template<class TASKTRACER>
+bool FcfsComponent<TASKTRACER>::releaseActor()
+{
+  while (!fcfsQueue.empty()) {
+    ScheduledTask * scheduledTask = fcfsQueue.front();
+    fcfsQueue.pop_front();
+
+    bool canExec = Director::canExecute(scheduledTask);
+    DBG_OUT("FCFS test task: " << scheduledTask
+        << " -> " << canExec << std::endl);
+    if (canExec) {
+      Director::execute(scheduledTask);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+template<class TASKTRACER>
+Task * FcfsComponent<TASKTRACER>::scheduleTask()
+{
+  assert(!readyTasks.empty());
+  Task* task = readyTasks.front();
+  readyTasks.pop_front();
+  this->startTime = sc_time_stamp();
+  DBG_OUT(this->getName() << " schedule Task: " << task->getName()
+      << " @ " << sc_time_stamp() << std::endl);
+
+  /*
+   * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
+   */
+  if (task != NULL and task->isPSM() == true)
+    this->fireStateChanged(ComponentState::IDLE);
+  else
+    this->fireStateChanged(ComponentState::RUNNING);
+
+  if (task->isBlocking() /* && !assignedTask->isExec() */) {
+    //TODO
+  }
+  return task;
+}
+
+template<class TASKTRACER>
+void PriorityComponent<TASKTRACER>::notifyActivation(
+    ScheduledTask * scheduledTask, bool active)
+{
+  DBG_OUT(this->name() << " notifyActivation " << scheduledTask
+      << " " << active << std::endl);
+  if (active) {
+    int priority = getPriority(scheduledTask);
+    DBG_OUT("  priority is: "<< priority << std::endl);
+    releaseQueue.push(QueueElem(priority, fcfsOrder++, scheduledTask));
+    if (this->runningTask == NULL) {
+      this->notify_scheduler_thread.notify(SC_ZERO_TIME);
+    }
+  }
+}
+
+template<class TASKTRACER>
+bool PriorityComponent<TASKTRACER>::releaseActor()
+{
+  while (!releaseQueue.empty()) {
+    ScheduledTask * scheduledTask = releaseQueue.top().payload;
+    releaseQueue.pop();
+
+    bool canExec = Director::canExecute(scheduledTask);
+    DBG_OUT("PS test task: " << scheduledTask
+        << " -> " << canExec << std::endl);
+    if (canExec) {
+      Director::execute(scheduledTask);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+template<class TASKTRACER>
+Task * PriorityComponent<TASKTRACER>::scheduleTask()
+{
+  assert(!readyQueue.empty());
+  Task* task = readyQueue.top().task;
+  readyQueue.pop();
+  this->startTime = sc_time_stamp();
+  DBG_OUT(this->getName() << " schedule Task: " << task->getName()
+      << " @ " << sc_time_stamp() << std::endl);
+
+  this->fireStateChanged(ComponentState::RUNNING);
+  if (task->isBlocking() /* && !assignedTask->isExec() */) {
+    //TODO
+  }
+  return task;
+}
+
+} // namespace SystemC_VPC
 #endif //__INCLUDED_FCFSCOMPONENT_H__

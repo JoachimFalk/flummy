@@ -65,7 +65,6 @@ libsystemcvpc_la_SOURCES =			\
 	ComponentImpl.cpp			\
 	ConfigCheck.cpp				\
 	Director.cpp				\
-	DynamicPriorityComponent.cpp		\
 	ScheduledTask.cpp			\
 	PriorityScheduler.cpp			\
 	PrioritySchedulerNoPreempt.cpp		\
@@ -90,7 +89,6 @@ libsystemcvpc_la_SOURCES =			\
 	PluggablePowerGovernor.cpp		\
 	dynload/dll-elf.cpp			\
 	ComponentInfo.cpp			\
-	NonPreemptiveComponent.cpp			\
 	AbstractComponent.cpp
 
 libsystemcvpc_la_LDFLAGS =				\
