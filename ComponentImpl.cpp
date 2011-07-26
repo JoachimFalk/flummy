@@ -260,7 +260,7 @@ namespace SystemC_VPC{
       case Config::Scheduler::RateMonotonic:
         scheduler = new RateMonotonicScheduler();
         break;
-      case Config::Scheduler::FCFS:
+      case Config::Scheduler::FCFS_old:
         scheduler = new FCFSScheduler();
         break;
       case Config::Scheduler::TDMA:
