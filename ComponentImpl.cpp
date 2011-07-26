@@ -117,6 +117,10 @@ namespace SystemC_VPC{
             runningTasks.erase(actualRunningIID);
 
             task->getBlockEvent().dii->notify();
+            if(task->hasScheduledTask()){
+              assert(Director::canExecute(task->getProcessId()));
+              Director::execute(task->getProcessId());
+            }
             moveToRemainingPipelineStages(task);
             //wait(SC_ZERO_TIME);
           }else{
@@ -498,6 +502,9 @@ namespace SystemC_VPC{
     releaseQueue.pop_front();
     if(Director::canExecute(pid)){
       Director::execute(pid);
+    }
+    if(!releaseQueue.empty()){
+      releaseActors.notify(SC_ZERO_TIME);
     }
   }
 } //namespace SystemC_VPC
