@@ -160,8 +160,8 @@ namespace SystemC_VPC{
 
     void removeTask(){
         fireStateChanged(ComponentState::IDLE);
-        runningTask->traceFinishTaskDii();
-        runningTask->traceFinishTaskLatency();
+        this->taskTracer.finishDii(runningTask);
+        this->taskTracer.finishLatency(runningTask);
 
         DBG_OUT(this->getName() << " resign Task: " << runningTask->getName()
                 << " @ " << sc_time_stamp().to_default_time_units()
@@ -343,7 +343,7 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 
     if (hasReadyTask()) {
       runningTask = scheduleTask();
-      runningTask->traceAssignTask();
+      this->taskTracer.assign(runningTask);
 
       next_trigger(runningTask->getRemainingDelay());
 
@@ -391,8 +391,7 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
 
   //store added task
   this->addTask(actualTask);
-  actualTask->traceReleaseTask();
-  //TODO: this->taskTracer.releaseTask(actualTask);
+  this->taskTracer.release(actualTask);
 
   //awake scheduler thread
   if (runningTask == NULL && !releasePhase) {

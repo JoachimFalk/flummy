@@ -24,9 +24,44 @@ namespace Trace
 class DiscardTace
 {
 public:
-  void releaseTask(Task * task)
+  void release(Task * task)
+  {
+  }
+
+  void finishDii(Task * task)
+  {
+  }
+
+  void finishLatency(Task * task)
+  {
+  }
+
+  void assign(Task * task)
+  {
+  }
+};
+
+class VcdTace
+{
+public:
+  void release(Task * task)
   {
     task->traceReleaseTask();
+  }
+
+  void finishDii(Task * task)
+  {
+    task->traceFinishTaskDii();
+  }
+
+  void finishLatency(Task * task)
+  {
+    task->traceFinishTaskLatency();
+  }
+
+  void assign(Task * task)
+  {
+    task->traceAssignTask();
   }
 };
 
