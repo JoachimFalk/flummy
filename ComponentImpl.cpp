@@ -488,19 +488,27 @@ namespace SystemC_VPC{
   void Component::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
     if(active) {
-      releaseQueue.push_back(scheduledTask->getPid());
-      releaseActors.notify(SC_ZERO_TIME);
+      ttReleaseQueue.push(
+          TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
+
+      assert(ttReleaseQueue.top().time>=sc_time_stamp());
+      sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+      releaseActors.notify(delta);
     }
   }
 
   void Component::releaseActorsMethod(){
-    ProcessId pid = releaseQueue.front();
-    releaseQueue.pop_front();
-    if(Director::canExecute(pid)){
-      Director::execute(pid);
+    TT::TimeNodePair tnp = ttReleaseQueue.top();
+    ttReleaseQueue.pop();
+    assert(tnp.time == sc_time_stamp());
+
+    if(Director::canExecute(tnp.node)){
+      Director::execute(tnp.node);
     }
-    if(!releaseQueue.empty()){
-      releaseActors.notify(SC_ZERO_TIME);
+    if(!ttReleaseQueue.empty()){
+      assert(ttReleaseQueue.top().time>=sc_time_stamp());
+      sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+      releaseActors.notify(delta);
     }
   }
 } //namespace SystemC_VPC

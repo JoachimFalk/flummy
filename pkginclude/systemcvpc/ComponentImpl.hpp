@@ -23,6 +23,8 @@
 #include "PowerMode.hpp"
 #include "Director.hpp"
 
+#include "timetriggered/tt_support.hpp"
+
 #include <vector>
 #include <map>
 #include <deque>
@@ -124,7 +126,7 @@ namespace SystemC_VPC{
     Event blockCompute;
     size_t   blockMutex;
     sc_event releaseActors;
-    std::list<ProcessId>       releaseQueue;
+    TT::TimedQueue ttReleaseQueue;
 
 #ifndef NO_POWER_SUM
     std::ofstream *powerSumStream;
