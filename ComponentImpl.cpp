@@ -487,10 +487,6 @@ namespace SystemC_VPC{
 
   void Component::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
-    /*while(active && Director::canExecute(scheduledTask)){
-      Director::execute(scheduledTask);
-    }*/
-
     if(active) {
       releaseQueue.push_back(scheduledTask->getPid());
       releaseActors.notify(SC_ZERO_TIME);
