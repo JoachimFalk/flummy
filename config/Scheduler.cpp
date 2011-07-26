@@ -40,6 +40,7 @@ Type parseScheduler(std::string name)
   static const std::string STR_RM = "RM";
   static const std::string STR_FIRSTCOMEFIRSTSERVED = "FirstComeFirstServed";
   static const std::string STR_FCFS = "FCFS";
+  static const std::string STR_FCFS_OLD = "FCFS-old";
   static const std::string STR_AVB = "AVB";
 
   if (name == STR_TDMA) {
@@ -58,6 +59,8 @@ Type parseScheduler(std::string name)
     return RateMonotonic;
   } else if (name == STR_FCFS || name == STR_FIRSTCOMEFIRSTSERVED) {
     return FCFS;
+  } else if (name == STR_FCFS_OLD) {
+    return FCFS_old;
   } else if (name == STR_AVB) {
     return AVB;
   } else {

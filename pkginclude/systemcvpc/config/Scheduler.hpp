@@ -24,6 +24,7 @@ namespace Scheduler
 enum Type
 {
   FCFS,
+  FCFS_old,
   StaticPriority_P,
   StaticPriority_NP,
   DynamicPriorityUserYield,
