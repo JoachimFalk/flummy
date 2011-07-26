@@ -233,6 +233,7 @@ namespace SystemC_VPC{
 
     void beforeVpcFinalize();
     void endOfVpcFinalize();
+    bool hasValidConfig() const;
   private:
 
     Task * preCompute( FastLink fLink,
