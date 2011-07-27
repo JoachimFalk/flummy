@@ -14,16 +14,16 @@
 #define __INCLUDED_FCFSCOMPONENT_H__
 #include <systemc.h>
 
+#include <systemcvpc/AbstractComponent.hpp>
+#include <systemcvpc/ComponentInfo.hpp>
+#include <systemcvpc/datatypes.hpp>
+#include <systemcvpc/Director.hpp>
+#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include <systemcvpc/PowerSumming.hpp>
+#include <systemcvpc/PowerMode.hpp>
+#include <systemcvpc/Task.hpp>
 #include <systemcvpc/vpc_config.h>
-#include "config/Component.hpp"
-#include "datatypes.hpp"
-#include "AbstractComponent.hpp"
-#include "ComponentInfo.hpp"
-#include "HysteresisLocalGovernor.hpp"
-#include "PowerSumming.hpp"
-#include "PowerMode.hpp"
-#include "Director.hpp"
-#include "Task.hpp"
+#include <systemcvpc/config/Component.hpp>
 
 #include <vector>
 #include <map>
@@ -32,7 +32,7 @@
 #include <list>
 
 
-#include "debug_config.hpp"
+#include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_FCFSCOMPONENT
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -41,9 +41,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include "debug_on.hpp"
+  #include <systemcvpc/debug_on.hpp>
 #else
-  #include "debug_off.hpp"
+  #include <systemcvpc/debug_off.hpp>
 #endif
 
 

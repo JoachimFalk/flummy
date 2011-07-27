@@ -24,13 +24,13 @@
 #include <systemcvpc/VpcDomErrorHandler.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/ComponentImpl.hpp>
-#include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/Route.hpp>
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 #include "ConfigCheck.hpp"
+#include "NonPreemptiveComponent.hpp"
 #include "config/Mappings.hpp"
 
 #include <systemcvpc/debug_config.hpp>
