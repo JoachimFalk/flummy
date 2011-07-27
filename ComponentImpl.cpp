@@ -67,7 +67,7 @@ namespace SystemC_VPC{
     newTaskDuringOverhead=(newTasks.size()>0);
 
     while(1){
-      //determine the time slice for next scheduling descission and wait for
+      //determine the time slice for next scheduling decision and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
                                                            readyTasks,
                                                            runningTasks );
@@ -80,7 +80,7 @@ namespace SystemC_VPC{
           }else{
             wait( notify_scheduler_thread );
           }
-        }else{                                        // a task allready runs
+        }else{                                        // a task already runs
           if(hasTimeSlice && (timeslice - (*overhead)) < actualRemainingDelay){
             wait( timeslice - (*overhead),
                   notify_scheduler_thread );
