@@ -12,7 +12,8 @@
 
 #include <systemcvpc/FCFSScheduler.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/ComponentImpl.hpp>
+
+#include "ComponentImpl.hpp"
 
 namespace SystemC_VPC{
 

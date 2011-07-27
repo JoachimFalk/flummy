@@ -14,14 +14,14 @@
 #define HSCD_VPC_COMPONENT_H
 #include <systemc.h>
 
-#include <systemcvpc/vpc_config.h>
+#include <systemcvpc/AbstractComponent.hpp>
+#include <systemcvpc/ComponentInfo.hpp>
 #include <systemcvpc/config/Scheduler.hpp>
-#include "datatypes.hpp"
-#include "AbstractComponent.hpp"
-#include "ComponentInfo.hpp"
-#include "PowerSumming.hpp"
-#include "PowerMode.hpp"
-#include "Director.hpp"
+#include <systemcvpc/datatypes.hpp>
+#include <systemcvpc/Director.hpp>
+#include <systemcvpc/PowerMode.hpp>
+#include <systemcvpc/PowerSumming.hpp>
+#include <systemcvpc/vpc_config.h>
 
 #include "timetriggered/tt_support.hpp"
 

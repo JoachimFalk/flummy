@@ -12,8 +12,9 @@
 
 #include <systemcvpc/PrioritySchedulerNoPreempt.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/datatypes.hpp>
+
+#include "ComponentImpl.hpp"
 
 namespace SystemC_VPC{
 

@@ -12,8 +12,9 @@
 
 #include <systemcvpc/PriorityScheduler.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/datatypes.hpp>
+
+#include "ComponentImpl.hpp"
 
 namespace SystemC_VPC{
   void PriorityScheduler::setProperty(const char* key, const char* value){

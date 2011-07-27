@@ -20,7 +20,6 @@
 
 #include <systemcvpc/vpc_config.h>
 
-#include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/VPCBuilder.hpp>
@@ -35,6 +34,7 @@
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
+#include "ComponentImpl.hpp"
 #include "ConfigCheck.hpp"
 #include "DynamicPriorityComponent.hpp"
 #include "NonPreemptiveComponent.hpp"
