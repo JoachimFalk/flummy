@@ -12,7 +12,6 @@
 
 #include <systemcvpc/vpc_config.h>
 
-#include <systemcvpc/ComponentImpl.hpp>
 #include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/FCFSScheduler.hpp>
 #include <systemcvpc/TDMAScheduler.hpp>
@@ -30,6 +29,8 @@
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/config/Component.hpp>
+
+#include "ComponentImpl.hpp"
 
 #include <float.h>
 
