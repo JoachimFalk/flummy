@@ -629,7 +629,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
         comp = DynamicPriorityComponent<Trace::DiscardTace>::create(component);
         break;
       default:
-        comp = new Component(component);
+        comp = new ComponentImpl<Trace::VcdTace>(component);
     }
 
     //TODO: process attributes
