@@ -270,7 +270,7 @@ namespace VC = Config;
    * \brief Initialize a component from the configuration file
    * \return pointer to the initialized component
    * \throws InvalidArgumentException if requested component within
-   * configuration file is unkown
+   * configuration file is unknown
    */
   VC::Component::Ptr VPCBuilder::initComponent()
     throw(InvalidArgumentException)
