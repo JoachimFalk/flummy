@@ -60,7 +60,6 @@ namespace SystemC_VPC{
 
     void increment_credit(sc_time increment){
     if(has_credit()){
-  std::cout<<"increment_Credit for class " <<get_priority_level() << " with "<< increment << " @ " << sc_time_stamp()<< std::endl;
 	queue_credit += increment;
       }else{
 	if(increment < queue_credit){
@@ -73,8 +72,7 @@ namespace SystemC_VPC{
     }
 
     void decrement_credit(sc_time decrement){
-      std::cout<<"decrement_Credit for class " <<get_priority_level() << " with "<< decrement << " @ " << sc_time_stamp() << std::endl;
-      if(decrement < queue_credit){
+      if(decrement <= queue_credit){
 	queue_credit -= decrement;
       }else{
 	queue_credit = decrement - queue_credit;
@@ -90,7 +88,6 @@ namespace SystemC_VPC{
 
     void reset_credit(void){
       //return (queue_credit >= sc_core::SC_ZERO_TIME);
-std::cout<<"reset_credit for class " <<get_priority_level() << " to "<< sc_core::SC_ZERO_TIME << " @ " << sc_time_stamp() << std::endl;
       has_credit_flag = true;
       queue_credit = sc_core::SC_ZERO_TIME;
       
