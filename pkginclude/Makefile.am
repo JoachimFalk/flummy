@@ -49,7 +49,6 @@ nobase_include_HEADERS =				\
 	systemcvpc/debug_on.hpp 			\
 	systemcvpc/Delayer.hpp 				\
 	systemcvpc/FastLink.hpp 			\
-	systemcvpc/NonPreemptiveComponent.hpp 	\
 	systemcvpc/FlexRayScheduler.hpp 		\
 	systemcvpc/FunctionTimingPool.hpp 		\
 	systemcvpc/AbstractComponent.hpp 		\

@@ -21,7 +21,6 @@
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/ComponentImpl.hpp>
-#include <systemcvpc/NonPreemptiveComponent.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/VPCBuilder.hpp>
@@ -38,6 +37,7 @@
 
 #include "ConfigCheck.hpp"
 #include "DynamicPriorityComponent.hpp"
+#include "NonPreemptiveComponent.hpp"
 #include "tracing/TaskTracer.hpp"
 #include "config/Mappings.hpp"
 
