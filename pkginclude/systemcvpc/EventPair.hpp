@@ -16,6 +16,7 @@
 #include <systemc.h>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
+#include <systemcvpc/coupling/VPCEvent.hpp>
 
 namespace SystemC_VPC {
 
@@ -26,14 +27,14 @@ namespace SystemC_VPC {
    * If latency is notified the hole execution time is over.
    */
   struct EventPair{
-    CoSupport::SystemC::RefCountEventPtr dii;     //data introduction interval
-    CoSupport::SystemC::RefCountEventPtr latency; //latency
+    Coupling::VPCEvent::Ptr dii;     //data introduction interval
+    Coupling::VPCEvent::Ptr latency; //latency
 
     /**
      * Sloth constructor.
      */
-    EventPair( CoSupport::SystemC::RefCountEventPtr dii,
-               CoSupport::SystemC::RefCountEventPtr latency )
+    EventPair( Coupling::VPCEvent::Ptr dii,
+        Coupling::VPCEvent::Ptr latency )
       : dii(dii), latency(latency){}
     EventPair() : dii(NULL), latency(NULL){}
   };
