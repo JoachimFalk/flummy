@@ -65,8 +65,8 @@ namespace SystemC_VPC{
     Components                             components;
     Task*                                  task;
     EventPair                              taskEvents;
-    CoSupport::SystemC::RefCountEventPtr   dummyDii;
-    CoSupport::SystemC::RefCountEventPtr   routeLat;
+    Coupling::VPCEvent::Ptr                dummyDii;
+    Coupling::VPCEvent::Ptr                routeLat;
     Components::iterator                   nextHop;
     RoutePool<StaticRoute>                *pool;
   };

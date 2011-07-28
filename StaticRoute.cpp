@@ -106,8 +106,8 @@ namespace SystemC_VPC {
   //
   StaticRoute::StaticRoute( Config::Route::Ptr configuredRoute ) :
     Route(configuredRoute),
-    dummyDii(new CoSupport::SystemC::RefCountEvent()),
-    routeLat(new CoSupport::SystemC::RefCountEvent())
+    dummyDii(new Coupling::VPCEvent()),
+    routeLat(new Coupling::VPCEvent())
   {
     routeLat->addListener(this);
   }
@@ -118,8 +118,8 @@ namespace SystemC_VPC {
     components(),
     task(route.task),
     taskEvents(route.taskEvents),
-    dummyDii(new CoSupport::SystemC::RefCountEvent()),
-    routeLat(new CoSupport::SystemC::RefCountEvent())
+    dummyDii(new Coupling::VPCEvent()),
+    routeLat(new Coupling::VPCEvent())
   {
     routeLat->addListener(this);
     for(Components::const_iterator iter = route.components.begin();

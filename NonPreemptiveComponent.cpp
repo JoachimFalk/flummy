@@ -160,7 +160,7 @@ namespace SystemC_VPC{
    *
    */
   void NonPreemptiveComponent::requestBlockingCompute(Task* task,
-                                             RefCountEventPtr blocker){
+      Coupling::VPCEvent::Ptr blocker){
     task->setExec(false);
     task->setBlockingCompute( blocker );
     this->compute( task );
@@ -169,7 +169,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void NonPreemptiveComponent::execBlockingCompute(Task* task, RefCountEventPtr blocker){
+  void NonPreemptiveComponent::execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
     task->setExec(true);
     blockCompute.notify();
   }
@@ -178,7 +178,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void NonPreemptiveComponent::abortBlockingCompute(Task* task, RefCountEventPtr blocker){
+  void NonPreemptiveComponent::abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
     task->resetBlockingCompute();
     blockCompute.notify();
   }

@@ -72,17 +72,17 @@ namespace SystemC_VPC{
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, RefCountEventPtr blocker);
+    virtual void requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, RefCountEventPtr blocker);
+    virtual void execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, RefCountEventPtr blocker);
+    virtual void abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *

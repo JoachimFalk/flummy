@@ -83,4 +83,5 @@ nobase_include_HEADERS =				\
 	systemcvpc/TimeTriggeredCCScheduler.hpp 	\
 	systemcvpc/Timing.hpp				\
 	systemcvpc/dynload/dll.hpp			\
-	systemcvpc/dynload/world.hpp
+	systemcvpc/dynload/world.hpp		\
+	systemcvpc/coupling/VPCEvent.hpp
