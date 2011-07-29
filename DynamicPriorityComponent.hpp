@@ -59,6 +59,11 @@ public:
     priorities_ = priorityList;
   }
 
+  virtual std::list<ScheduledTask *> getDynamicPriority()
+  {
+    return priorities_;
+  }
+
   virtual void scheduleAfterTransition()
   {
     mustYield_ = true;
