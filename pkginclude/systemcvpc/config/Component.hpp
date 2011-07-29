@@ -39,6 +39,7 @@ public:
   virtual ~ComponentInterface(){}
   virtual void changePowerMode(std::string powerMode) = 0;
   virtual void setDynamicPriority(std::list<ScheduledTask *>) = 0;
+  virtual std::list<ScheduledTask *> getDynamicPriority() = 0;
   virtual void scheduleAfterTransition() = 0;
 };
 

@@ -129,6 +129,13 @@ class ComponentObserver;
           " doesn't support dynamic priorities!");
     }
 
+    virtual std::list<ScheduledTask *> getDynamicPriority()
+    {
+      throw Config::ConfigException(std::string("Component ") + this->name() +
+          " doesn't support dynamic priorities!");
+    }
+
+
     virtual void scheduleAfterTransition()
     {
       throw Config::ConfigException(std::string("Component ") + this->name() +
