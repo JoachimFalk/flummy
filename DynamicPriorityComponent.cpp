@@ -124,6 +124,11 @@ void DynamicPriorityComponent::setDynamicPriority(PriorityList priorityList)
   }
 }
 
+std::list<ScheduledTask *> DynamicPriorityComponent::getDynamicPriority()
+{
+  return priorities_;
+}
+
 void DynamicPriorityComponent::scheduleAfterTransition()
 {
   mustYield_ = true;

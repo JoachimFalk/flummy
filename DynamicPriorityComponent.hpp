@@ -43,6 +43,7 @@ public:
   bool hasReadyTask();
 
   virtual void setDynamicPriority(PriorityList priorityList);
+  virtual std::list<ScheduledTask *> getDynamicPriority();
   virtual void scheduleAfterTransition();
 
 private:
