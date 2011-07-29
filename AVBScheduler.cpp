@@ -37,8 +37,6 @@ namespace SystemC_VPC{
 
 
   void AVBScheduler::setAttribute(AttributePtr attributePtr){
-    std::cout<<"AVBScheduler::setAttribute " << attributePtr->getType() << " " << attributePtr->getValue()  << std::endl;
-  
     std::istringstream is(attributePtr->getType());
     int priority;
     is >> priority;
@@ -49,8 +47,6 @@ namespace SystemC_VPC{
     is2 >> value;
     
     newEntry = new AVBListEntry( new std::queue<Task*>, priority, value);
-
-    std::cout<<"created new AVBListEntry with priority: "<< priority << " and value: " << value << std::endl;
 
     std::list<AVBListEntry*>::iterator it;
     for (it=p_list.begin(); it!=p_list.end(); it++){
@@ -74,7 +70,7 @@ namespace SystemC_VPC{
       //no task.. or a task is running -> no rescheduling
       return false;
     }else{
-      //find the next time, when a task is allowed to run (it has enought credits)
+      //find the next time, when a task is allowed to run (it has enough credits)
       sc_time needed_time = sc_core::SC_ZERO_TIME;
       std::list<AVBListEntry*>::iterator it;
       for (it=p_list.begin(); it!=p_list.end(); it++){
@@ -94,14 +90,11 @@ namespace SystemC_VPC{
    *
    */
   void AVBScheduler::addedNewTask(Task *task){
-    std::cout<<"AVBScheduler::addedNewTask " << std::endl;
     int priority = task->getPriority();
     std::list<AVBListEntry*>::iterator it;
     for (it=p_list.begin(); it!=p_list.end(); it++){
 	if((*it)->get_priority_level() == priority){
 	  (*it)->task_queue->push(task);
-	  std::cout<<"Added Task with priority:"<< priority << " to queue " << (*it)->get_priority_level() << " and reservation: " << (*it)->get_bw_alloc() << std::endl;
-
 	}
    }
 
@@ -117,7 +110,6 @@ namespace SystemC_VPC{
    *
    */
   void AVBScheduler::removedTask(Task *task){
-      std::cout<<"AVBScheduler::removedTask " << task << std::endl;
   }
 
   /**
@@ -129,26 +121,23 @@ namespace SystemC_VPC{
      const  TaskMap &ready_tasks,
      const  TaskMap &running_tasks)
    {
-  std::cout<<"AVBScheduler::schedulingDecision" << std::endl;
-      scheduling_decision ret_decision=NOCHANGE;
+    scheduling_decision ret_decision=NOCHANGE;
     
     std::list<AVBListEntry*>::iterator it;
 
-  if(running_tasks.size()!=0){
+    if(running_tasks.size()!=0){
     //no preemption! 
-std::cout<<"AVBScheduler::schedulingDecision - no Preemption!" << std::endl;
-
-  }else{
+    }else{
     //Update of the Credits
-std::cout<<"AVBScheduler::schedulingDecision - Updateing credits?" << std::endl;
-    if(last_active == -1 || ready_tasks.size() == 0){ //no active Packet -> reset all credits
+    if(/*last_active == -1 || ready_tasks.size() == 0*/false){ //no active Packet -> reset all credits
+      //FIXME: not included in final standard?
       for (it=p_list.begin(); it!=p_list.end(); it++){
 	  (*it)->reset_credit();
       }
     }else{
-    sc_time time_budget = sc_time_stamp() - time_last_assign;
+      sc_time time_budget = sc_time_stamp() - time_last_assign;
       for (it=p_list.begin(); it!=p_list.end(); it++){
-	if((*it)->task_queue->size()!= 0){
+	if((*it)->task_queue->size()!= 0 ){
 	  if((*it)->get_priority_level() != last_active){
 	    //task was blocked by another task (in an other priority_level)
 	    //so raise up the credits
@@ -158,15 +147,16 @@ std::cout<<"AVBScheduler::schedulingDecision - Updateing credits?" << std::endl;
 	    (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
 	  }
 	}else{
+	  if(!(*it)->has_credit()){
+	    (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+	  }else{
 	  (*it)->reset_credit();
+	  }
 	}
       }
     }
 
-
-
   //search the new task
-      std::cout<<"AVBScheduler::schedulingDecision - search for new task!" << std::endl;
       for (it=p_list.begin(); it!=p_list.end(); it++){
 	  if((*it)->task_queue->size() != 0 && (*it)->has_credit() ){
 	      task_to_assign = (*it)->task_queue->front()->getInstanceId();
@@ -174,13 +164,11 @@ std::cout<<"AVBScheduler::schedulingDecision - Updateing credits?" << std::endl;
 	      ret_decision = ONLY_ASSIGN;
 	      last_active = (*it)->get_priority_level();
 	      time_last_assign = sc_time_stamp();
-	      std::cout<<"Found an Entry with priority:"<< (*it)->get_priority_level() << " and credit: " << (*it)->get_credit() << std::endl;
 	      return ret_decision;
 	  }else{
 	    //nothing to do
 	  }
       }
-std::cout<<"AVBScheduler::schedulingDecision - getting IDLE" << std::endl;
     //no new task was found -> getting idle
     last_active = -1;
     time_last_assign = sc_time_stamp();    

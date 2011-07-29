@@ -80,8 +80,8 @@ namespace SystemC_VPC{
 
     Task*                                  task;
     EventPair                              taskEvents;
-    CoSupport::SystemC::RefCountEventPtr   dummyDii;
-    CoSupport::SystemC::RefCountEventPtr   routeLat;
+    Coupling::VPCEvent::Ptr                dummyDii;
+    Coupling::VPCEvent::Ptr                routeLat;
     RoutePool<BlockingTransport>          *pool;
 
     // blocking transport has two phases:

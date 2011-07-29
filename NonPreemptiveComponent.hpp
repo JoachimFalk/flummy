@@ -72,17 +72,17 @@ namespace SystemC_VPC{
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, RefCountEventPtr blocker);
+    virtual void requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, RefCountEventPtr blocker);
+    virtual void execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, RefCountEventPtr blocker);
+    virtual void abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
@@ -408,7 +408,7 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
  */
 template<class TASKTRACER>
 void NonPreemptiveComponent<TASKTRACER>::requestBlockingCompute(Task* task,
-    RefCountEventPtr blocker)
+    Coupling::VPCEvent::Ptr blocker)
 {
   task->setExec(false);
   task->setBlockingCompute(blocker);
@@ -420,7 +420,7 @@ void NonPreemptiveComponent<TASKTRACER>::requestBlockingCompute(Task* task,
  */
 template<class TASKTRACER>
 void NonPreemptiveComponent<TASKTRACER>::execBlockingCompute(Task* task,
-    RefCountEventPtr blocker)
+    Coupling::VPCEvent::Ptr blocker)
 {
   task->setExec(true);
   blockCompute.notify();
@@ -431,7 +431,7 @@ void NonPreemptiveComponent<TASKTRACER>::execBlockingCompute(Task* task,
  */
 template<class TASKTRACER>
 void NonPreemptiveComponent<TASKTRACER>::abortBlockingCompute(Task* task,
-    RefCountEventPtr blocker)
+    Coupling::VPCEvent::Ptr blocker)
 {
   task->resetBlockingCompute();
   blockCompute.notify();

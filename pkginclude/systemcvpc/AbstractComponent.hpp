@@ -44,7 +44,6 @@ namespace SystemC_VPC{
 class ComponentObserver;
 
   using CoSupport::SystemC::Event;
-  using CoSupport::SystemC::RefCountEventPtr;
 
   typedef std::map<ComponentState, double> PowerTable;
   typedef std::map<const PowerMode*, PowerTable>  PowerTables;
@@ -181,17 +180,17 @@ class ComponentObserver;
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, RefCountEventPtr blocker)=0;
+    virtual void requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, RefCountEventPtr blocker)=0;
+    virtual void execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, RefCountEventPtr blocker)=0;
+    virtual void abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker)=0;
 
     /**
      * 

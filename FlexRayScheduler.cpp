@@ -314,11 +314,13 @@ namespace SystemC_VPC{
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
       if(curr_slicecount == -1){
-        time=sc_time(0,SC_NS);
+        if(ready_tasks.size() == 0 && running_tasks.size() == 0 ){
+          return false;
+        }else{
+          time=sc_time(0,SC_NS);
+        }
       }else{
-        //      time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - this->lastassign);  
         time=this->remainingSlice;
-                     // cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
       }
     }else{
       //Dynamisch
@@ -329,10 +331,11 @@ namespace SystemC_VPC{
         time=sc_time(1,SC_US); //sofortiges Reschedule im nächsten Microtick bewirken!
       }else{
         //beide Kanaele voll.. -> naechster Schedulevorgang nach Ende von einem...
-        if(remainingSliceA < remainingSliceB)
+        if(remainingSliceA < remainingSliceB){
           time=remainingSliceA - (sc_time_stamp() - this->lastassignA);
-        else 
+        }else{
           time=remainingSliceB - (sc_time_stamp() - this->lastassignB);
+        }
       }    
       if( TimeDynamicSegment == sc_time(0,SC_NS) )
         //Quick-FIX Falls KEIN dynamischer Teil benutzt wird..
