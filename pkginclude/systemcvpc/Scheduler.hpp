@@ -82,7 +82,13 @@ namespace SystemC_VPC{
      */
     virtual void setProperty(const char* key, const char* value){}
     
-    virtual void setAttribute(AttributePtr attributePtr){}
+    virtual void setAttribute(AttributePtr attPtr)
+    {
+      if(attPtr->getAttributeSize() != 0 || attPtr->getParameterSize() != 0){
+        return;
+      }
+      this->setProperty(attPtr->getType().c_str(), attPtr->getValue().c_str());
+    }
 
     /**************************/
     /*   EXTENSION SECTION    */
