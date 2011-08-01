@@ -143,8 +143,6 @@ namespace SystemC_VPC{
 
     void fireStateChanged(const ComponentState &state);
 
-    void addTasks();
-
   private:
     sc_event releaseActors;
     TT::TimedQueue ttReleaseQueue;
@@ -175,6 +173,31 @@ namespace SystemC_VPC{
      */
     virtual ~ComponentImpl() {}
 
+    /**
+     *
+     */
+    void addTasks(){
+      //look for new tasks (they called compute)
+      while(newTasks.size()>0){
+        Task *newTask;
+        newTask=newTasks.front();
+        newTasks.pop_front();
+        DBG_OUT(this->getName() << " received new Task: "
+                << newTask->getName() << " at: "
+                << sc_time_stamp().to_default_time_units() << std::endl);
+        newTask->traceReleaseTask();
+        //insert new task in read list
+        assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
+                /* A task can call compute only one time! */);
+        assert( runningTasks.find(newTask->getInstanceId()) ==
+                runningTasks.end()
+                /* A task can call compute only one time! */);
+
+        readyTasks[newTask->getInstanceId()]=newTask;
+        scheduler->addedNewTask(newTask);
+      }
+
+    }
 
     /**
      *
