@@ -21,15 +21,15 @@
 
 namespace SystemC_VPC{
   
-  enum scheduling_decision {ONLY_ASSIGN // neuer Task keine alten
-          ,PREEMPT    // neuer Task verdrängt alten
-          ,RESIGNED   // alter Task beendet/verdraengt, kein neuer
-          ,NOCHANGE}; //keine änderung 
+  enum scheduling_decision {ONLY_ASSIGN // no old task, assign new task only
+          ,PREEMPT    // preempt running task
+          ,RESIGNED   // finished running task, no new task
+          ,NOCHANGE}; // keep unchanged
 
   /**
-   * \brief A callback class called from Component to do Scheduling.
+   * \brief A call-back class called from Component to do Scheduling.
    *
-   * Main part is virtual funktion scheduling_decision schedulingDecision(int&, int&, std::map<int,ProcessControlBlock>, std::map<int,ProcessControlBlock>)
+   * Main part is virtual function scheduling_decision schedulingDecision(int&, int&, std::map<int,ProcessControlBlock>, std::map<int,ProcessControlBlock>)
    */
   class Scheduler{
   public:
@@ -57,11 +57,11 @@ namespace SystemC_VPC{
     /**
      * \brief Call the Scheduler to do a scheduling decision.
      *
-     * The tasks to ressign and to assign have to be calculated. 
+     * The tasks to resign and to assign have to be calculated.
      * \param [out] task_to_resign The task that have to be resigned.
      * \param [out] task_to_assign The task that have to be assigned.
-     * \param [in] ready_tasks A map of ready tasks! Component knowes this map.
-     * \param [in] running_tasks A map of running tasks! Usualy only one! Component knowes this map.
+     * \param [in] ready_tasks A map of ready tasks! Component knows this map.
+     * \param [in] running_tasks A map of running tasks! Usually only one! Component knowes this map.
      * \return Returns a scheduling_decision enum. So Component knows what he has to do.
      */
     virtual scheduling_decision
@@ -71,12 +71,12 @@ namespace SystemC_VPC{
                        const TaskMap &running_tasks)=0;
 
     /**
-     *\brief The overhead needed to determine the scheduling descission.
+     *\brief The overhead needed to determine the scheduling decision.
      */
     virtual sc_time* schedulingOverhead()=0;
 
     /**
-     *\brief Customize scheduler options, like timeslice or scheduling overhead.
+     *\brief Customize scheduler options, like time slice or scheduling overhead.
      *
      * Does nothing by default.
      */
