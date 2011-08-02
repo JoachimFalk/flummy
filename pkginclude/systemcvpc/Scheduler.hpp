@@ -90,30 +90,7 @@ namespace SystemC_VPC{
       this->setProperty(attPtr->getType().c_str(), attPtr->getValue().c_str());
     }
 
-    /**************************/
-    /*   EXTENSION SECTION    */
-    /**************************/
-    
-    virtual const char* getName(){
-      return this->name;
-    }
-    
-    virtual void setName(const char* name){
-      assert(name != NULL);
-      this->name = name;
-    }
-
-    virtual void signalDeallocation(bool kill){}
-    
-    virtual void signalAllocation(){}
-    
     virtual void initialize(){}
-            
-  private:
-      const char* name;
-    /**************************/
-    /*  END OF EXTENSION      */
-    /**************************/
   };
 
 }
