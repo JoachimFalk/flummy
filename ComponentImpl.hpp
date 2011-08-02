@@ -183,7 +183,7 @@ namespace SystemC_VPC{
         DBG_OUT(this->getName() << " received new Task: "
                 << newTask->getName() << " at: "
                 << sc_time_stamp().to_default_time_units() << std::endl);
-        newTask->traceReleaseTask();
+        this->taskTracer_.release(newTask);
         //insert new task in read list
         assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
                 /* A task can call compute only one time! */);
@@ -207,7 +207,7 @@ namespace SystemC_VPC{
       if(end <= now){
         //early exit if (Latency-DII) <= 0
         //std::cerr << "Early exit: " << task->getName() << std::endl;
-        task->traceFinishTaskLatency();
+        this->taskTracer_.finishLatency(task);
         Director::getInstance().signalLatencyEvent(task);
         return;
       }
@@ -247,7 +247,7 @@ namespace SystemC_VPC{
             //cerr << "Ready! releasing task (" <<  front.time <<") at: "
             //<< sc_time_stamp() << endl;
 
-            front.task->traceFinishTaskLatency();
+            this->taskTracer_.finishLatency(front.task);
 
             // Latency over -> remove Task
             Director::getInstance().signalLatencyEvent(front.task);
@@ -324,7 +324,7 @@ namespace SystemC_VPC{
               //notify(*(task->blockEvent));
               scheduler->removedTask(task);
               fireStateChanged(ComponentState::IDLE);
-              task->traceFinishTaskDii();
+              this->taskTracer_.finishDii(task);
               runningTasks.erase(actualRunningIID);
 
               task->getBlockEvent().dii->notify();
@@ -361,7 +361,7 @@ namespace SystemC_VPC{
           actualRunningIID=-1;
           readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
           fireStateChanged(ComponentState::IDLE);
-          readyTasks[taskToResign]->traceResignTask();
+          this->taskTracer_.resign(readyTasks[taskToResign]);
         }
 
         sc_time timestamp=sc_time_stamp();
@@ -388,7 +388,7 @@ namespace SystemC_VPC{
         //assign task
         if(decision==ONLY_ASSIGN || decision==PREEMPT){
           runningTasks[taskToAssign]=readyTasks[taskToAssign];
-          runningTasks[taskToAssign]->traceAssignTask();
+          this->taskTracer_.assign(runningTasks[taskToAssign]);
           readyTasks.erase(taskToAssign);
           actualRunningIID=taskToAssign;
           DBG_OUT("IID: " << taskToAssign << "> remaining delay for "
@@ -409,7 +409,7 @@ namespace SystemC_VPC{
               assignedTask->ackBlockingCompute();
               DBG_OUT(this->getName() << " enter wait: " << std::endl);
               fireStateChanged(ComponentState::STALLED);
-              assignedTask->traceBlockTask();
+              this->taskTracer_.block(assignedTask);
               while(!assignedTask->isExec()){
                 blockCompute.reset();
                 CoSupport::SystemC::wait(blockCompute);
@@ -417,7 +417,7 @@ namespace SystemC_VPC{
               }
               DBG_OUT(this->getName() << " exit wait: " << std::endl);
               fireStateChanged(ComponentState::RUNNING);
-              assignedTask->traceAssignTask();
+              this->taskTracer_.assign(assignedTask);
               if(assignedTask->isBlocking()){
                 DBG_OUT(this->getName() << " exec Task: "
                         << assignedTask->getName() << " @  " << sc_time_stamp()
@@ -431,7 +431,7 @@ namespace SystemC_VPC{
                 //notify(*(task->blockEvent));
                 scheduler->removedTask(assignedTask);
                 fireStateChanged(ComponentState::IDLE);
-                assignedTask->traceFinishTaskDii();
+                this->taskTracer_.finishDii(assignedTask);
                 //FIXME: notify latency ??
                 //assignedTask->traceFinishTaskLatency();
                 runningTasks.erase(actualRunningIID);
@@ -441,7 +441,7 @@ namespace SystemC_VPC{
               assert(blockMutex>1);
               scheduler->removedTask(assignedTask);
               fireStateChanged(ComponentState::IDLE);
-              assignedTask->traceFinishTaskDii();
+              this->taskTracer_.finishDii(assignedTask);
               //FIXME: notify latency ??
               //assignedTask->traceFinishTaskLatency();
               runningTasks.erase(actualRunningIID);
@@ -455,6 +455,8 @@ namespace SystemC_VPC{
 
     }
 
+private:
+    TASKTRACER taskTracer_;
 
   };
 

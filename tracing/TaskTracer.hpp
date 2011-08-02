@@ -24,21 +24,30 @@ namespace Trace
 class DiscardTace
 {
 public:
-  void release(Task * task)
+  void release(const Task * task) const
   {
   }
 
-  void finishDii(Task * task)
+  void finishDii(const Task * task) const
   {
   }
 
-  void finishLatency(Task * task)
+  void finishLatency(const Task * task) const
   {
   }
 
-  void assign(Task * task)
+  void assign(const Task * task) const
   {
   }
+
+  void resign(const Task * task) const
+  {
+  }
+
+  void block(const Task * task) const
+  {
+  }
+
 };
 
 class VcdTace
@@ -62,6 +71,16 @@ public:
   void assign(Task * task)
   {
     task->traceAssignTask();
+  }
+
+  void resign(Task * task)
+  {
+    task->traceResignTask();
+  }
+
+  void block(Task * task)
+  {
+    task->traceBlockTask();
   }
 };
 
