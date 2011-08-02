@@ -24,10 +24,9 @@ namespace SystemC_VPC{
   class RoundRobinScheduler : public Scheduler{
   public:
 
-    RoundRobinScheduler(){
-      TIMESLICE=10;
-      this->lastassign=0;
-      this->remainingSlice=0;
+    RoundRobinScheduler() :
+      timeSlice_(10, SC_NS), timeSliceExpires_()
+    {
     }
     virtual ~RoundRobinScheduler(){}
     bool getSchedulerTimeSlice(sc_time &time,
@@ -44,11 +43,12 @@ namespace SystemC_VPC{
     void setProperty(const char* key, const char* value);
     sc_time* schedulingOverhead();
     
-  protected:
+  private:
     std::deque<int> rr_fifo;
-    double TIMESLICE;
-    double lastassign;
-    double remainingSlice;
+    sc_time timeSlice_;
+    sc_time timeSliceExpires_;
+
+    int assignFromFront();
   };
 }
 #endif

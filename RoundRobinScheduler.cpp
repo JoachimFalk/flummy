@@ -18,14 +18,8 @@
 namespace SystemC_VPC{
 
   void RoundRobinScheduler::setProperty(const char* key, const char* value){
-    if(0==strncmp(key,"timeslice",strlen("timeslice"))){
-      const char *domain;
-      domain=strstr(value,"ns");
-      if(domain!=NULL){
-        //domain[0]='\0';
-        sscanf(value,"%lf",&TIMESLICE);
-      }
-
+    if (std::string("timeslice") == key) {
+      timeSlice_ = Director::createSC_Time(value);
     }
   }
 
@@ -35,7 +29,7 @@ namespace SystemC_VPC{
     const  TaskMap &running_tasks )
   {
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
-    time=sc_time(TIMESLICE,SC_NS);
+    time=timeSlice_;
     return true;
   }
   void RoundRobinScheduler::addedNewTask(Task *task){
@@ -50,6 +44,16 @@ namespace SystemC_VPC{
       }
     }
   }
+
+//
+int RoundRobinScheduler::assignFromFront()
+{
+  int task_to_assign = rr_fifo.front();
+  rr_fifo.pop_front();
+  timeSliceExpires_ = sc_time_stamp() + timeSlice_;
+  return task_to_assign;
+}
+
   scheduling_decision RoundRobinScheduler::schedulingDecision(
     int& task_to_resign,
     int& task_to_assign,
@@ -59,18 +63,12 @@ namespace SystemC_VPC{
 
     scheduling_decision ret_decision=NOCHANGE;
 
-    this->remainingSlice = this->remainingSlice -
-      (sc_time_stamp().to_default_time_units() - this->lastassign);
-    this->lastassign = sc_time_stamp().to_default_time_units();
-
-    if(this->remainingSlice <= 0){// time slice expired
+    if(sc_time_stamp() == timeSliceExpires_){// time slice expired
       if(rr_fifo.size()>0){    // select next task
-        task_to_assign = rr_fifo.front();
-        rr_fifo.pop_front();
-        
+        task_to_assign = assignFromFront();
         // default: old tasks execution delay is expired (no running task)
         ret_decision= ONLY_ASSIGN;
-        if(running_tasks.size()!=0){  // a running task is preempted
+        if(!running_tasks.empty()){  // a running task is preempted
           TaskMap::const_iterator iter;
           iter=running_tasks.begin();
           Task *task=iter->second;
@@ -85,9 +83,7 @@ namespace SystemC_VPC{
 
       if(running_tasks.size()==0){       // if running tasks delay has expired
         if(rr_fifo.size()>0){            // schedule a new task
-          task_to_assign = rr_fifo.front();
-          rr_fifo.pop_front();
-
+          task_to_assign = assignFromFront();
           // this is not preemption: the old task BLOCKED
           // and a new one is assigned
           ret_decision= ONLY_ASSIGN;
