@@ -10,25 +10,44 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
-#define HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
+#ifndef HSCD_VPC_RATEMONOTONICSCHEDULER_H
+#define HSCD_VPC_RATEMONOTONICSCHEDULER_H
+#include <systemcvpc/datatypes.hpp>
+#include "Scheduler.hpp"
+
 #include <systemc.h>
+
 #include <map>
 #include <queue>
 #include <vector>
 
-#include "Scheduler.hpp"
-#include "datatypes.hpp"
-#include "PriorityScheduler.hpp"
-
 namespace SystemC_VPC{
   class Component;
 
-  class PrioritySchedulerNoPreempt : public Scheduler{
+  struct rm_queue_compare{
+    bool operator()(const p_queue_entry& pqe1,
+        const p_queue_entry& pqe2) const
+    {
+      double p1 = sc_time(1,SC_NS)/pqe1.task->getPeriod();
+      double p2 = sc_time(1,SC_NS)/pqe2.task->getPeriod();
+      if (p1 > p2)
+        return true;
+      else if(p1 == p2)
+        return (pqe1.fifo_order>pqe2.fifo_order);
+      else
+        return false;
+    }
+
+  };
+
+  class RateMonotonicScheduler : public Scheduler{
   public:
 
-    PrioritySchedulerNoPreempt() : order_counter(0) {}
-    virtual ~PrioritySchedulerNoPreempt(){}
+    RateMonotonicScheduler() : order_counter(0) {
+      std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,rm_queue_compare>
+        pqueue(comp);
+    }
+    virtual ~RateMonotonicScheduler(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
@@ -43,7 +62,9 @@ namespace SystemC_VPC{
     sc_time* schedulingOverhead(){return 0;}//;
   protected:
     int order_counter;
-    std::priority_queue<p_queue_entry> pqueue;
+    rm_queue_compare comp;
+    std::priority_queue<p_queue_entry,std::vector<p_queue_entry>,rm_queue_compare> pqueue;
+
 
   };
 }

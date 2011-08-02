@@ -10,10 +10,10 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <systemcvpc/PriorityScheduler.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 
+#include "scheduler/PriorityScheduler.hpp"
 #include "ComponentImpl.hpp"
 
 namespace SystemC_VPC{

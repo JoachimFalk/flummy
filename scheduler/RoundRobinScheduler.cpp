@@ -10,7 +10,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <systemcvpc/RoundRobinScheduler.hpp>
+#include "RoundRobinScheduler.hpp"
 #include <systemcvpc/Director.hpp>
 
 #include "ComponentImpl.hpp"

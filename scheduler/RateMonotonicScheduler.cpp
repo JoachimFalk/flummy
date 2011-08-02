@@ -10,11 +10,11 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <systemcvpc/RateMonotonicScheduler.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 
 #include "ComponentImpl.hpp"
+#include "RateMonotonicScheduler.hpp"
 
 namespace SystemC_VPC{
   void RateMonotonicScheduler::setProperty(const char* key, const char* value){

@@ -10,11 +10,14 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef HSCD_VPC_PRIORITYSCHEDULER_H
-#define HSCD_VPC_PRIORITYSCHEDULER_H
-#include <systemc.h>
+#ifndef HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
+#define HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
+#include <systemcvpc/datatypes.hpp>
 #include "Scheduler.hpp"
-#include "datatypes.hpp"
+#include "PriorityScheduler.hpp"
+
+#include <systemc.h>
+
 #include <map>
 #include <queue>
 #include <vector>
@@ -22,11 +25,11 @@
 namespace SystemC_VPC{
   class Component;
 
-  class PriorityScheduler : public Scheduler{
+  class PrioritySchedulerNoPreempt : public Scheduler{
   public:
 
-    PriorityScheduler() : order_counter(0) {}
-    virtual ~PriorityScheduler(){}
+    PrioritySchedulerNoPreempt() : order_counter(0) {}
+    virtual ~PrioritySchedulerNoPreempt(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);

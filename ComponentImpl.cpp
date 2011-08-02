@@ -12,25 +12,24 @@
 
 #include <systemcvpc/vpc_config.h>
 
-#include <systemcvpc/Scheduler.hpp>
-#include <systemcvpc/FCFSScheduler.hpp>
-#include <systemcvpc/TDMAScheduler.hpp>
-#include <systemcvpc/FlexRayScheduler.hpp>
-#include <systemcvpc/AVBScheduler.hpp>
-#include <systemcvpc/RoundRobinScheduler.hpp>
-#include <systemcvpc/PriorityScheduler.hpp>
-#include <systemcvpc/RateMonotonicScheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/TimeTriggeredCCScheduler.hpp>
-#include <systemcvpc/PrioritySchedulerNoPreempt.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/config/Component.hpp>
-
 #include "ComponentImpl.hpp"
+#include "scheduler/AVBScheduler.hpp"
+#include "scheduler/FlexRayScheduler.hpp"
+#include "scheduler/FCFSScheduler.hpp"
+#include "scheduler/PriorityScheduler.hpp"
+#include "scheduler/PrioritySchedulerNoPreempt.hpp"
+#include "scheduler/RateMonotonicScheduler.hpp"
+#include "scheduler/RoundRobinScheduler.hpp"
+#include "scheduler/Scheduler.hpp"
+#include "scheduler/TimeTriggeredCCScheduler.hpp"
+#include "scheduler/TDMAScheduler.hpp"
 
 #include <float.h>
 

@@ -49,20 +49,13 @@ nobase_include_HEADERS =				\
 	systemcvpc/debug_on.hpp 			\
 	systemcvpc/Delayer.hpp 				\
 	systemcvpc/FastLink.hpp 			\
-	systemcvpc/FlexRayScheduler.hpp 		\
 	systemcvpc/FunctionTimingPool.hpp 		\
 	systemcvpc/AbstractComponent.hpp 		\
 	systemcvpc/datatypes.hpp 			\
 	systemcvpc/Director.hpp 			\
 	systemcvpc/EventPair.hpp 			\
-	systemcvpc/FCFSScheduler.hpp 			\
 	systemcvpc/InvalidArgumentException.hpp		\
-	systemcvpc/PriorityScheduler.hpp 		\
-	systemcvpc/PrioritySchedulerNoPreempt.hpp	\
 	systemcvpc/ProcessControlBlock.hpp 		\
-	systemcvpc/RateMonotonicScheduler.hpp		\
-	systemcvpc/RoundRobinScheduler.hpp 		\
-	systemcvpc/Scheduler.hpp			\
 	systemcvpc/Tracing.hpp 				\
 	systemcvpc/VPCBuilder.hpp 			\
 	systemcvpc/VpcDomErrorHandler.hpp 		\
@@ -78,8 +71,6 @@ nobase_include_HEADERS =				\
 	systemcvpc/ScheduledTask.hpp 		\
 	systemcvpc/Task.hpp 				\
 	systemcvpc/TaskPool.hpp 			\
-	systemcvpc/TDMAScheduler.hpp 			\
-	systemcvpc/TimeTriggeredCCScheduler.hpp 	\
 	systemcvpc/Timing.hpp				\
 	systemcvpc/dynload/dll.hpp			\
 	systemcvpc/dynload/world.hpp		\

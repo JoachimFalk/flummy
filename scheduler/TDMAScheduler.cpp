@@ -26,13 +26,13 @@
    </component>
 
 */
-#include <utility>
+#include <systemcvpc/Director.hpp>
+#include "ComponentImpl.hpp"
+#include "TDMAScheduler.hpp"
 
 #include <CoSupport/SystemC/algorithm.hpp>
 
-#include <systemcvpc/TDMAScheduler.hpp>
-#include <systemcvpc/Director.hpp>
-#include "ComponentImpl.hpp"
+#include <utility>
 
 namespace SystemC_VPC{
 

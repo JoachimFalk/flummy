@@ -12,12 +12,14 @@
 
 #ifndef FLEXRAYSCHEDULER_H
 #define FLEXRAYSCHEDULER_H
-#include <systemc.h>
+#include <systemcvpc/datatypes.hpp>
 #include "Scheduler.hpp"
-#include "datatypes.hpp"
+#include "TDMAScheduler.hpp"
+
+#include <systemc.h>
+
 #include <map>
 #include <deque>
-#include "TDMAScheduler.hpp"
 
 namespace SystemC_VPC{
   class Component;
