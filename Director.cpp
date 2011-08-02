@@ -620,7 +620,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
     AbstractComponent *comp = NULL;
     switch (component->getScheduler()) {
       case VC::Scheduler::FCFS:
-        comp = new FcfsComponent<Trace::VcdTace>(component);
+        comp = new FcfsComponent<Trace::VcdTrace>(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
         comp = new PriorityComponent<Trace::DiscardTace>(component);
@@ -629,7 +629,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
         comp = DynamicPriorityComponent<Trace::DiscardTace>::create(component);
         break;
       default:
-        comp = new ComponentImpl<Trace::VcdTace>(component);
+        comp = new ComponentImpl<Trace::VcdTrace>(component);
     }
 
     //TODO: process attributes
