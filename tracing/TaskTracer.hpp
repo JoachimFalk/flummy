@@ -21,7 +21,7 @@ namespace SystemC_VPC
 namespace Trace
 {
 
-class DiscardTace
+class DiscardTrace
 {
 public:
   void release(const Task * task) const

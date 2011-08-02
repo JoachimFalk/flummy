@@ -164,10 +164,10 @@ AbstractComponent* DynamicPriorityComponent<T>::create(
 {
   if (component->hasDebugFile()) {
     return new DynamicPriorityComponentImpl<Diagnostics::PrintDebug,
-        Trace::DiscardTace> (component);
+        Trace::DiscardTrace> (component);
   } else {
     return new DynamicPriorityComponentImpl<Diagnostics::DiscardOutput,
-        Trace::DiscardTace> (component);
+        Trace::DiscardTrace> (component);
   }
 }
 
