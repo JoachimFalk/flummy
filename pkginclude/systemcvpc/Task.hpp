@@ -28,6 +28,7 @@
 namespace SystemC_VPC {
 
 namespace Trace {
+  class Tracing;
   class VcdTrace;
 }
 
@@ -133,10 +134,6 @@ using CoSupport::SystemC::Event;
 
   private:
     void traceReleaseTask(){
-#ifndef NO_VCD_TRACES
-      if(this->getTraceSignal()!=0)
-        this->getTraceSignal()->traceReady();
-#endif //NO_VCD_TRACES
       taskTracerTicket = pcb->taskTracer->releaseTask();
     }
 
@@ -144,38 +141,7 @@ using CoSupport::SystemC::Event;
       pcb->taskTracer->finishTaskLatency(taskTracerTicket);
     }
 
-    void traceFinishTaskDii(){
-#ifndef NO_VCD_TRACES
-        if(this->getTraceSignal()!=0)
-          this->getTraceSignal()->traceSleeping();
-#endif //NO_VCD_TRACES
-    }
-
-    void traceAssignTask(){
-#ifndef NO_VCD_TRACES
-      if(this->getTraceSignal()!=0)
-        this->getTraceSignal()->traceRunning();
-#endif //NO_VCD_TRACES
-
-    }
-
-    void traceResignTask(){
-#ifndef NO_VCD_TRACES
-        if(this->getTraceSignal()!=0)
-          this->getTraceSignal()->traceReady();
-#endif //NO_VCD_TRACES
-
-    }
-
-    void traceBlockTask(){
-#ifndef NO_VCD_TRACES
-            if(this->getTraceSignal()!=0)
-              this->getTraceSignal()->traceBlocking();
-#endif //NO_VCD_TRACES
-
-    }
-
-    Tracing* getTraceSignal()
+    Trace::Tracing* getTraceSignal()
       {assert(pcb != NULL); return pcb->getTraceSignal();}
 
     friend class AssociativePrototypedPool<ProcessId, Task>;

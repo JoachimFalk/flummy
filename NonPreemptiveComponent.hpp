@@ -116,6 +116,11 @@ namespace SystemC_VPC{
       this->addObserver(gov);
     }
 
+    virtual Trace::Tracing * getOrCreateTraceSignal(std::string name)
+    {
+      return taskTracer_.getOrCreateTraceSignal(name);
+    }
+
   protected:
 
     void schedule_method();
@@ -286,8 +291,8 @@ namespace SystemC_VPC{
 template<class TASKTRACER>
 NonPreemptiveComponent<TASKTRACER>::NonPreemptiveComponent(
     Config::Component::Ptr component, Director *director) :
-  AbstractComponent(component), runningTask(NULL), blockMutex(0),
-      releasePhase(false)
+  AbstractComponent(component), runningTask(NULL), taskTracer_(component),
+    blockMutex(0), releasePhase(false)
 {
   SC_METHOD(schedule_method);
   sensitive << notify_scheduler_thread;

@@ -20,6 +20,7 @@
 
 
 namespace SystemC_VPC {
+namespace Trace {
   typedef char trace_value;
 
   /** ASCII lower case bit is  2^5 */
@@ -139,5 +140,6 @@ namespace SystemC_VPC {
 
   }; // struct Tracing
 
+} // namespace Trace
 } // namespace SystemC_VPC
 #endif //  HSCD_VPC_TRACING_H

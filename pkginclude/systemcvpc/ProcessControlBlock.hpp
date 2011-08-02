@@ -23,7 +23,6 @@
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
 #include "EventPair.hpp"
-#include "Tracing.hpp"
 #include "datatypes.hpp"
 #include "FastLink.hpp"
 #include "PowerMode.hpp"
@@ -31,6 +30,10 @@
 #include "FunctionTimingPool.hpp"
 
 namespace SystemC_VPC {
+
+namespace Trace{
+  class Tracing;
+}
 
   class AbstractComponent;
 
@@ -53,7 +56,7 @@ namespace SystemC_VPC {
       /**
        * \brief Sets name of instance
        */
-      void configure(std::string name, bool tracing, bool vcd);
+      void configure(std::string name, bool tracing);
 
       /**
        * \brief Used to access name of PCB
@@ -99,9 +102,9 @@ namespace SystemC_VPC {
 
       unsigned int getActivationCount() const;
 
-      void setTraceSignal(Tracing* signal);
+      void setTraceSignal(Trace::Tracing* signal);
 
-      Tracing* getTraceSignal();
+      Trace::Tracing* getTraceSignal();
 
       void setTiming(const Config::Timing& timing);
       void setBaseDelay(sc_time delay);
@@ -121,7 +124,7 @@ namespace SystemC_VPC {
       int priority;
       sc_time period;
       sc_time deadline;
-      Tracing * traceSignal;
+      Trace::Tracing * traceSignal;
       AbstractComponent * component;
       CoSupport::Tracing::TaskTracer::Ptr taskTracer;
       bool psm;

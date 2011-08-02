@@ -56,7 +56,6 @@ nobase_include_HEADERS =				\
 	systemcvpc/EventPair.hpp 			\
 	systemcvpc/InvalidArgumentException.hpp		\
 	systemcvpc/ProcessControlBlock.hpp 		\
-	systemcvpc/Tracing.hpp 				\
 	systemcvpc/VPCBuilder.hpp 			\
 	systemcvpc/VpcDomErrorHandler.hpp 		\
 	systemcvpc/PCBPool.hpp 				\
