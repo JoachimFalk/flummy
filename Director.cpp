@@ -632,8 +632,6 @@ ProcessId Director::getProcessId(std::string process_or_source,
         comp = new ComponentImpl<Trace::VcdTrace>(component);
     }
 
-    //TODO: process attributes
-    //       - processPower()
     VC::Mappings::getComponents()[component] = comp;
     Director::getInstance().registerComponent(comp);
     std::vector<AttributePtr> atts = component->getAttributes();

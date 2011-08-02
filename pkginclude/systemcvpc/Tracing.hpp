@@ -27,7 +27,7 @@ namespace SystemC_VPC {
   const unsigned int UPPER_CASE = ~LOWER_CASE;
   
   /**
-   * tiny little helper: toggeling ASCII characters used for VCD tracing
+   * tiny little helper: toggle ASCII characters used for VCD tracing
    */
   class Tracing{
   public:
