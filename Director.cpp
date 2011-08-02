@@ -623,10 +623,10 @@ ProcessId Director::getProcessId(std::string process_or_source,
         comp = new FcfsComponent<Trace::VcdTrace>(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
-        comp = new PriorityComponent<Trace::DiscardTace>(component);
+        comp = new PriorityComponent<Trace::DiscardTrace>(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
-        comp = DynamicPriorityComponent<Trace::DiscardTace>::create(component);
+        comp = DynamicPriorityComponent<Trace::DiscardTrace>::create(component);
         break;
       default:
         comp = new ComponentImpl<Trace::VcdTrace>(component);
