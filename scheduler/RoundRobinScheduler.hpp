@@ -12,9 +12,11 @@
 
 #ifndef HSCD_VPC_ROUNDROBINSCHEDULER_H
 #define HSCD_VPC_ROUNDROBINSCHEDULER_H
-#include <systemc.h>
+#include <systemcvpc/datatypes.hpp>
 #include "Scheduler.hpp"
-#include "datatypes.hpp"
+
+#include <systemc.h>
+
 #include <map>
 #include <deque>
 

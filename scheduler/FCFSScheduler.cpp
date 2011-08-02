@@ -10,10 +10,10 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <systemcvpc/FCFSScheduler.hpp>
 #include <systemcvpc/Director.hpp>
 
 #include "ComponentImpl.hpp"
+#include "FCFSScheduler.hpp"
 
 namespace SystemC_VPC{
 

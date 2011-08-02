@@ -21,9 +21,9 @@
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/PowerMode.hpp>
 #include <systemcvpc/PowerSumming.hpp>
-#include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/vpc_config.h>
 
+#include "scheduler/Scheduler.hpp"
 #include "timetriggered/tt_support.hpp"
 
 #include <vector>
@@ -46,8 +46,6 @@
 #endif
 
 namespace SystemC_VPC{
-
-  class Scheduler;
 
   /**
    * \brief An implementation of AbstractComponent.

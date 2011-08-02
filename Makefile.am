@@ -60,24 +60,25 @@ libsystemcvpc_la_SOURCES =			\
 	config/VpcTask.cpp			\
 	config/VpcApi.cpp			\
 						\
+	scheduler/AVBScheduler.cpp		\
+	scheduler/FCFSScheduler.cpp		\
+	scheduler/FlexRayScheduler.cpp		\
+	scheduler/PriorityScheduler.cpp		\
+	scheduler/PrioritySchedulerNoPreempt.cpp	\
+	scheduler/RateMonotonicScheduler.cpp	\
+	scheduler/RoundRobinScheduler.cpp	\
+	scheduler/TimeTriggeredCCScheduler.cpp	\
+	scheduler/TDMAScheduler.cpp		\
+						\
 	debug_config.cpp			\
 	BlockingTransport.cpp			\
 	ComponentImpl.cpp			\
 	ConfigCheck.cpp				\
 	Director.cpp				\
 	ScheduledTask.cpp			\
-	PriorityScheduler.cpp			\
-	PrioritySchedulerNoPreempt.cpp		\
-	RoundRobinScheduler.cpp			\
-	FCFSScheduler.cpp			\
 	Tracing.cpp				\
-	TDMAScheduler.cpp			\
-	AVBScheduler.cpp			\
-	FlexRayScheduler.cpp			\
-	TimeTriggeredCCScheduler.cpp		\
 	Attribute.cpp				\
 	Task.cpp				\
-	RateMonotonicScheduler.cpp		\
 	VPCBuilder.cpp				\
 	ProcessControlBlock.cpp			\
 	FastLink.cpp				\

@@ -10,25 +10,26 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef HSCD_VPC_FCFSSCHEDULER_H
-#define HSCD_VPC_FCFSSCHEDULER_H
-#include <systemc.h>
-#include "Scheduler.hpp"
-#include "datatypes.hpp"
-#include <map>
-#include <deque>
-namespace SystemC_VPC{
+#ifndef HSCD_VPC_PRIORITYSCHEDULER_H
+#define HSCD_VPC_PRIORITYSCHEDULER_H
 
+#include <systemcvpc/datatypes.hpp>
+#include "Scheduler.hpp"
+
+#include <systemc.h>
+
+#include <map>
+#include <queue>
+#include <vector>
+
+namespace SystemC_VPC{
   class Component;
 
-  class FCFSScheduler : public Scheduler{
+  class PriorityScheduler : public Scheduler{
   public:
 
-    FCFSScheduler(const char *schedulername){
-    }
-    FCFSScheduler(){
-    }
-    virtual ~FCFSScheduler(){}
+    PriorityScheduler() : order_counter(0) {}
+    virtual ~PriorityScheduler(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
@@ -39,11 +40,12 @@ namespace SystemC_VPC{
                                            int& task_to_assign,
                                            const  TaskMap &ready_tasks,
                                            const  TaskMap &running_tasks);
-    sc_time* schedulingOverhead(){return 0;}//new sc_time(1,SC_NS);
+    void setProperty(const char* key, const char* value);
+    sc_time* schedulingOverhead(){return 0;}//;
   protected:
+    int order_counter;
+    std::priority_queue<p_queue_entry> pqueue;
 
-    std::deque<int> fcfs_fifo;
-    //  double TIMESLICE;
   };
 }
 #endif

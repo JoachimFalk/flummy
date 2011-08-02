@@ -12,14 +12,17 @@
 
 #ifndef AVBSCHEDULER_H
 #define AVBSCHEDULER_H
+
+#include <systemcvpc/datatypes.hpp>
+
+#include "Scheduler.hpp"
+#include "PriorityScheduler.hpp"
+
 #include <systemc.h>
+
 #include <map>
 #include <queue>
 #include <vector>
-
-#include "Scheduler.hpp"
-#include "datatypes.hpp"
-#include "PriorityScheduler.hpp"
 
 namespace SystemC_VPC{
   class Component;

@@ -13,11 +13,11 @@
 #ifndef HSCD_VPC_SCHEDULER_H
 #define HSCD_VPC_SCHEDULER_H
 
-#include <systemc.h>
+#include <systemcvpc/Task.hpp>
+#include <systemcvpc/ComponentModel.hpp>
+#include <systemcvpc/Attribute.hpp>
 
-#include "Task.hpp"
-#include "ComponentModel.hpp"
-#include "Attribute.hpp"
+#include <systemc.h>
 
 namespace SystemC_VPC{
   
