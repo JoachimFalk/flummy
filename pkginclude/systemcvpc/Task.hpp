@@ -27,9 +27,14 @@
 
 namespace SystemC_VPC {
 
-  using CoSupport::SystemC::Event;
+namespace Trace {
+  class VcdTrace;
+}
+
+using CoSupport::SystemC::Event;
   class Task{
   public:
+    friend class Trace::VcdTrace;
     Task(TaskPool * pool)
       : blockingCompute(NULL),
       timing(),
@@ -121,6 +126,12 @@ namespace SystemC_VPC {
       pool->free(this->getProcessId(), this);
     }
 
+    bool isPSM()
+    {
+      return pcb->isPSM();
+    }
+
+  private:
     void traceReleaseTask(){
 #ifndef NO_VCD_TRACES
       if(this->getTraceSignal()!=0)
@@ -164,12 +175,6 @@ namespace SystemC_VPC {
 
     }
 
-    bool isPSM()
-    {
-    	return pcb->isPSM();
-    }
-
-  private:
     Tracing* getTraceSignal()
       {assert(pcb != NULL); return pcb->getTraceSignal();}
 
