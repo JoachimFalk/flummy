@@ -164,12 +164,20 @@ namespace SystemC_VPC{
      *
      */
     ComponentImpl( Config::Component::Ptr component)
-      : Component(component){}
+      : Component(component), taskTracer_(component){}
 
     /**
      *
      */
     virtual ~ComponentImpl() {}
+
+    /**
+     *
+     */
+    virtual Trace::Tracing * getOrCreateTraceSignal(std::string name)
+    {
+      return taskTracer_.getOrCreateTraceSignal(name);
+    }
 
     /**
      *

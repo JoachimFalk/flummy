@@ -552,7 +552,8 @@ ProcessId Director::getProcessId(std::string process_or_source,
     const ProcessId pid = Director::getInstance().getProcessId(actorName);
     if (!comp->hasPCB(pid)) {
       ProcessControlBlockPtr pcb = comp->createPCB(pid);
-      pcb->configure(actorName.c_str(), true, true);
+      pcb->configure(actorName.c_str(), true);
+      pcb->setTraceSignal(comp->getOrCreateTraceSignal(actorName));
     }
     ProcessControlBlockPtr pcb = comp->getPCB(pid);
 

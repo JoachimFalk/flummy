@@ -70,13 +70,14 @@ libsystemcvpc_la_SOURCES =			\
 	scheduler/TimeTriggeredCCScheduler.cpp	\
 	scheduler/TDMAScheduler.cpp		\
 						\
+	tracing/Tracing.cpp			\
+						\
 	debug_config.cpp			\
 	BlockingTransport.cpp			\
 	ComponentImpl.cpp			\
 	ConfigCheck.cpp				\
 	Director.cpp				\
 	ScheduledTask.cpp			\
-	Tracing.cpp				\
 	Attribute.cpp				\
 	Task.cpp				\
 	VPCBuilder.cpp				\

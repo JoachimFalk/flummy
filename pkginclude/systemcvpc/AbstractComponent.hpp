@@ -63,17 +63,6 @@ class ComponentObserver;
   public:
 
     virtual ~AbstractComponent(){
-#ifndef NO_VCD_TRACES
-      for(std::map<std::string, Tracing* >::iterator iter
-          = trace_map_by_name.begin();
-          iter != trace_map_by_name.end();
-          ++iter){
-        delete iter->second;
-      }
-      trace_map_by_name.clear();
-      sc_close_vcd_trace_file(traceFile);
-#endif //NO_VCD_TRACES
-
       this->timingPools.clear();
     }
 
@@ -141,16 +130,14 @@ class ComponentObserver;
       throw Config::ConfigException(std::string("Component ") + this->name() +
           " doesn't support scheduleAfterTransition()!");
     }
+
+    virtual Trace::Tracing * getOrCreateTraceSignal(std::string name) = 0;
+
   protected:
 
     std::map<const PowerMode*, sc_time> transactionDelays;
     ScheduledTasks scheduledTasks;
 
-#ifndef NO_VCD_TRACES
-    sc_trace_file *traceFile;
-    std::map<std::string, Tracing* > trace_map_by_name;
-#endif //NO_VCD_TRACES
-  
   public:
   
     AbstractComponent(Config::Component::Ptr component) :
@@ -159,9 +146,6 @@ class ComponentObserver;
             component->getName()),
         transactionDelays(),
         scheduledTasks(),
-#ifndef NO_VCD_TRACES
-        traceFile(NULL),
-#endif //NO_VCD_TRACES
         powerMode(NULL),
         localGovernorFactory(NULL),
         midPowerGov(NULL),
@@ -237,29 +221,6 @@ class ComponentObserver;
      *
      */
     FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid);
-
-#ifndef NO_VCD_TRACES
-    Tracing * addToTraceFile(std::string name){
-      if (this->traceFile == NULL){
-        std::string tracefilename=this->getName(); //componentName;
-
-        char* traceprefix= getenv("VPCTRACEFILEPREFIX");
-        if(0!=traceprefix){
-          tracefilename.insert(0,traceprefix);
-        }
-
-        this->traceFile = sc_create_vcd_trace_file(tracefilename.c_str());
-        this->traceFile->set_time_unit(1, SC_NS);
-      }
-      Tracing *newsignal = new Tracing(name, this->getName());
-
-      this->trace_map_by_name.insert(std::pair<std::string, Tracing*>(
-          this->getName(), newsignal));
-      sc_trace(this->traceFile, *newsignal->traceSignal, name);
-      newsignal->traceSleeping();
-      return newsignal;
-    }
-#endif //NO_VCD_TRACES
 
   private:
 

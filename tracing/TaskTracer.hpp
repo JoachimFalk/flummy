@@ -15,6 +15,9 @@
 
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Task.hpp>
+#include <systemcvpc/config/Component.hpp>
+
+#include "Tracing.hpp"
 
 namespace SystemC_VPC
 {
@@ -24,6 +27,11 @@ namespace Trace
 class DiscardTrace
 {
 public:
+  //
+  DiscardTrace(Config::Component::Ptr component)
+  {
+  }
+
   void release(const Task * task) const
   {
   }
@@ -48,19 +56,49 @@ public:
   {
   }
 
+  Tracing * getOrCreateTraceSignal(const std::string name) const
+  {
+    return NULL;
+  }
+
 };
 
 class VcdTrace
 {
 public:
+
+  //
+  VcdTrace(Config::Component::Ptr component) :
+    traceFile_(NULL), name_(component->getName())
+  {
+  }
+
+  virtual ~VcdTrace()
+  {
+    for (std::map<std::string, Tracing*>::iterator iter =
+        trace_map_by_name_.begin(); iter != trace_map_by_name_.end(); ++iter) {
+      delete iter->second;
+    }
+    trace_map_by_name_.clear();
+    if (traceFile_) {
+      sc_close_vcd_trace_file(traceFile_);
+    }
+  }
+
+  std::string getName() const
+  {
+    return name_;
+  }
+
   void release(Task * task)
   {
+    task->getTraceSignal()->traceReady();
     task->traceReleaseTask();
   }
 
   void finishDii(Task * task)
   {
-    task->traceFinishTaskDii();
+    task->getTraceSignal()->traceSleeping();
   }
 
   void finishLatency(Task * task)
@@ -70,18 +108,45 @@ public:
 
   void assign(Task * task)
   {
-    task->traceAssignTask();
+    task->getTraceSignal()->traceRunning();
   }
 
   void resign(Task * task)
   {
-    task->traceResignTask();
+    task->getTraceSignal()->traceReady();
   }
 
   void block(Task * task)
   {
-    task->traceBlockTask();
+    task->getTraceSignal()->traceBlocking();
   }
+
+  Tracing * getOrCreateTraceSignal(std::string name)
+  {
+    if (this->traceFile_ == NULL) {
+      std::string tracefilename = this->getName(); //componentName;
+
+      char* traceprefix = getenv("VPCTRACEFILEPREFIX");
+      if (0 != traceprefix) {
+        tracefilename.insert(0, traceprefix);
+      }
+
+      this->traceFile_ = sc_create_vcd_trace_file(tracefilename.c_str());
+      this->traceFile_->set_time_unit(1, SC_NS);
+    }
+    Tracing *newsignal = new Tracing(name, this->getName());
+
+    this->trace_map_by_name_.insert(
+        std::pair<std::string, Tracing*>(this->getName(), newsignal));
+    sc_trace(this->traceFile_, *newsignal->traceSignal, name);
+    newsignal->traceSleeping();
+    return newsignal;
+  }
+private:
+  sc_trace_file *traceFile_;
+  std::string name_;
+  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+
 };
 
 } // namespace Trace
