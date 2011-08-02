@@ -134,7 +134,7 @@ namespace SystemC_VPC{
     // time last task started
     sc_time startTime;
 
-    TASKTRACER taskTracer;
+    TASKTRACER taskTracer_;
   private:
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
@@ -160,8 +160,8 @@ namespace SystemC_VPC{
 
     void removeTask(){
         fireStateChanged(ComponentState::IDLE);
-        this->taskTracer.finishDii(runningTask);
-        this->taskTracer.finishLatency(runningTask);
+        this->taskTracer_.finishDii(runningTask);
+        this->taskTracer_.finishLatency(runningTask);
 
         DBG_OUT(this->getName() << " resign Task: " << runningTask->getName()
                 << " @ " << sc_time_stamp().to_default_time_units()
@@ -343,7 +343,7 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 
     if (hasReadyTask()) {
       runningTask = scheduleTask();
-      this->taskTracer.assign(runningTask);
+      this->taskTracer_.assign(runningTask);
 
       next_trigger(runningTask->getRemainingDelay());
 
@@ -391,7 +391,7 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
 
   //store added task
   this->addTask(actualTask);
-  this->taskTracer.release(actualTask);
+  this->taskTracer_.release(actualTask);
 
   //awake scheduler thread
   if (runningTask == NULL && !releasePhase) {
