@@ -34,7 +34,8 @@ namespace SystemC_VPC{
                                const TaskMap &running_tasks);
     void addedNewTask(Task *task);
     void removedTask(Task *task);
-    sc_event& getNotifyEvent();
+
+    //
     scheduling_decision
     schedulingDecision(int& task_to_resign,
                        int& task_to_assign,
