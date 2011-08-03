@@ -90,33 +90,33 @@ public:
     return name_;
   }
 
-  void release(Task * task)
+  void release(Task * task) const
   {
     task->getTraceSignal()->traceReady();
     task->traceReleaseTask();
   }
 
-  void finishDii(Task * task)
+  void finishDii(Task * task) const
   {
     task->getTraceSignal()->traceSleeping();
   }
 
-  void finishLatency(Task * task)
+  void finishLatency(Task * task) const
   {
     task->traceFinishTaskLatency();
   }
 
-  void assign(Task * task)
+  void assign(Task * task) const
   {
     task->getTraceSignal()->traceRunning();
   }
 
-  void resign(Task * task)
+  void resign(Task * task) const
   {
     task->getTraceSignal()->traceReady();
   }
 
-  void block(Task * task)
+  void block(Task * task) const
   {
     task->getTraceSignal()->traceBlocking();
   }
