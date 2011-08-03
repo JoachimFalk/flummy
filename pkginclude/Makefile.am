@@ -30,6 +30,7 @@ nobase_include_HEADERS =				\
 							\
 	systemcvpc/vpc_config.h 			\
 							\
+	systemcvpc/config/common.hpp			\
 	systemcvpc/config/Component.hpp			\
 	systemcvpc/config/ConfigException.hpp		\
 	systemcvpc/config/Route.hpp			\

@@ -10,6 +10,7 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <systemcvpc/config/common.hpp>
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/config/Timing.hpp>
@@ -131,6 +132,8 @@ void Component::addAttribute(AttributePtr attribute)
     this->setTransferTiming(Config::Timing(transferDelay));
     // FIXME: add transactionSize
 
+  } else if (attribute->isType("tracing")) {
+    this->setTracing(Traceable::parseTracing(attribute->getValue()));
   } else {
     this->attributes_.push_back(attribute);
   }

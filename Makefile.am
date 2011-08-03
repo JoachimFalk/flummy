@@ -52,6 +52,7 @@ AM_CPPFLAGS =			\
 lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_la_SOURCES =			\
+	config/common.cpp			\
 	config/Component.cpp			\
 	config/Mappings.cpp			\
 	config/Route.cpp			\
