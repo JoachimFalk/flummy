@@ -13,6 +13,8 @@
 #ifndef SCHEDULER_H_
 #define SCHEDULER_H_
 
+#include <string>
+
 namespace SystemC_VPC
 {
 
