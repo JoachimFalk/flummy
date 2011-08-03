@@ -38,8 +38,9 @@
 #include "ConfigCheck.hpp"
 #include "DynamicPriorityComponent.hpp"
 #include "NonPreemptiveComponent.hpp"
-#include "tracing/TaskTracer.hpp"
 #include "config/Mappings.hpp"
+#include "tracing/TaskTracer.hpp"
+
 
 #include <systemc.h>
 #include <map>
@@ -616,21 +617,37 @@ ProcessId Director::getProcessId(std::string process_or_source,
   }
 
   //
+  template<template <class> class C>
+  AbstractComponent * createComponent( Config::Component::Ptr component)
+  {
+    switch(component->getTracing()){
+      default:
+      case Config::Traceable::NONE:
+        return new C<Trace::DiscardTrace>(component);
+        break;
+      case Config::Traceable::VCD:
+        return new C<Trace::VcdTrace>(component);
+        break;
+    }
+  }
+
+  //
   AbstractComponent * createComponent(VC::Component::Ptr component)
   {
     AbstractComponent *comp = NULL;
     switch (component->getScheduler()) {
       case VC::Scheduler::FCFS:
-        comp = new FcfsComponent<Trace::VcdTrace>(component);
+        comp = createComponent<FcfsComponent>(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
-        comp = new PriorityComponent<Trace::DiscardTrace>(component);
+        comp = createComponent<PriorityComponent>(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
         comp = DynamicPriorityComponent<Trace::DiscardTrace>::create(component);
+        //comp = createComponent<DynamicPriorityComponent>(component);
         break;
       default:
-        comp = new ComponentImpl<Trace::VcdTrace>(component);
+        comp = createComponent<ComponentImpl>(component);
     }
 
     VC::Mappings::getComponents()[component] = comp;

@@ -13,6 +13,7 @@
 #ifndef COMPONENT_H_
 #define COMPONENT_H_
 
+#include "common.hpp"
 #include "ConfigException.hpp"
 #include "Scheduler.hpp"
 #include "Timing.hpp"
@@ -36,7 +37,9 @@ class ComponentInterface
 public:
   typedef ComponentInterface* Ptr;
 
-  virtual ~ComponentInterface(){}
+  virtual ~ComponentInterface()
+  {
+  }
   virtual void changePowerMode(std::string powerMode) = 0;
   virtual void setDynamicPriority(std::list<ScheduledTask *>) = 0;
   virtual std::list<ScheduledTask *> getDynamicPriority() = 0;
@@ -46,7 +49,9 @@ public:
 namespace Config
 {
 
-class Component : protected SequentiallyIdedObject<ComponentId>
+class Component:
+    protected SequentiallyIdedObject<ComponentId> ,
+    public Traceable
 {
 public:
   typedef boost::shared_ptr<Component> Ptr;
