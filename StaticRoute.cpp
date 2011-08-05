@@ -64,6 +64,15 @@ namespace SystemC_VPC {
       DBG_OUT("route on: " << components.front()->getName() << endl);
       (*nextHop)->compute(newTask);
       ++nextHop;
+      if(newTask->getBlockEvent().latency->isDropped()){
+        taskEvents.latency->setDropped(newTask->getBlockEvent().latency->isDropped());
+        task->setBlockEvent(taskEvents);
+        nextHop = components.end();
+        routeLat->reset();
+        this->traceStop();
+        Director::getInstance().signalLatencyEvent(task);
+         this->pool->free(this);
+       }
     } else {
       this->traceStop();
 
@@ -77,6 +86,9 @@ namespace SystemC_VPC {
   void StaticRoute::signaled(EventWaiter *e) {
     if(e->isActive()){
       DBG_OUT("signaled @ " << sc_time_stamp() << endl);
+      if(task->getBlockEvent().latency->isDropped()){
+        nextHop = components.end();
+      }
       routeLat->reset();
       route( EventPair(dummyDii, routeLat) );
     }
