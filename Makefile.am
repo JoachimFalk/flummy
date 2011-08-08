@@ -70,6 +70,8 @@ libsystemcvpc_la_SOURCES =			\
 	scheduler/RoundRobinScheduler.cpp	\
 	scheduler/TimeTriggeredCCScheduler.cpp	\
 	scheduler/TDMAScheduler.cpp		\
+	scheduler/MostScheduler.cpp   \
+	scheduler/MostSecondaryScheduler.cpp   \
 						\
 	tracing/Tracing.cpp			\
 						\
