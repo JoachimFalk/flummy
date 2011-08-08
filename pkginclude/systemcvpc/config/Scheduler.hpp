@@ -35,7 +35,8 @@ enum Type
   FlexRay,
   TDMA,
   TTCC,
-  AVB
+  AVB,
+  MOST
 };
 
 Type parseScheduler(std::string name);
