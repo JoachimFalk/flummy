@@ -49,7 +49,7 @@ namespace SystemC_VPC
     sc_time boundaryTime = SC_ZERO_TIME;
     if(Most_slots.size()>0)
       {
-      for(int i = 0; i<=Most_slots.size()-1;i++)
+      for(size_t i = 0; i<Most_slots.size();i++)
         {
         boundaryTime += Most_slots[i].length;
         }
@@ -218,7 +218,7 @@ namespace SystemC_VPC
             bool spaceAvail=true;
             //check if there is any available time in asynch area
             sc_time neededTime = SC_ZERO_TIME;
-            for(int i =0; i< slotId; i++)
+            for(size_t i =0; i< slotId; i++)
               {
               neededTime += Most_slots[i].length;
               if(neededTime+ task->getDelay() > setboundary(sysFreq,
@@ -233,8 +233,8 @@ namespace SystemC_VPC
               }
             //Not enough time available for static scheduling
             assert(spaceAvail);
-            int sizeOfMostSlots = Most_slots.size();
-            int temp = sizeOfMostSlots - 1;
+            //int sizeOfMostSlots = Most_slots.size();
+            //int temp = sizeOfMostSlots - 1;
 
             streamcount++;
 
@@ -256,7 +256,7 @@ namespace SystemC_VPC
       {
         if (pid == iter->process)
           {
-            std:cout<<"erased task with id = "<<pid
+            std::cout<<"erased task with id = "<<pid
             <<" from Most_slots iter is" << iter->length <<std::endl;
             Most_slots.erase(iter);
             --streamcount;
@@ -313,7 +313,7 @@ namespace SystemC_VPC
 
         if (running_tasks.begin() != running_tasks.end())
           {
-            int runningTask = running_tasks.begin()->first;
+            //int runningTask = running_tasks.begin()->first;
             ret_decision = NOCHANGE;
             return ret_decision;
           }
