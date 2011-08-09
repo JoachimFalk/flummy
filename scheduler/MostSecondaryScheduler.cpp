@@ -101,7 +101,7 @@ namespace SystemC_VPC
     sc_time remainingTime = sc_time(1.0 / sysFreq, SC_SEC) - cycleTime;
     if (running_tasks.begin() != running_tasks.end())
       { //running Task available
-        int runningTask = running_tasks.begin()->first;
+        //int runningTask = running_tasks.begin()->first;
         ret_decision = NOCHANGE;
         return ret_decision;
       }

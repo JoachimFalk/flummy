@@ -42,7 +42,7 @@ public:
        const  TaskMap &ready_tasks,
        const  TaskMap &running_tasks);
 
-  sc_time* schedulingOverhead(){}
+  sc_time* schedulingOverhead(){return 0;}
 
 
 private:

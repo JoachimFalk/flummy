@@ -17,7 +17,7 @@ namespace SystemC_VPC{
 
   struct MostSlot{
     sc_time length;
-    int process;
+    ProcessId process;
     int Id;
     std::string name;
   };
