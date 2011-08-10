@@ -122,6 +122,7 @@ namespace SystemC_VPC {
     routeLat(new Coupling::VPCEvent())
   {
     routeLat->addListener(this);
+    configuredRoute->routeInterface_ = this;
   }
 
   //

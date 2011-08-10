@@ -121,6 +121,10 @@ namespace SystemC_VPC{
     void notifyActivation(ScheduledTask * scheduledTask,
         bool active);
 
+    bool addStream(ProcessId pid);
+
+    bool closeStream(ProcessId pid);
+
   protected:
     virtual void schedule_thread() = 0;
     virtual void remainingPipelineStages() = 0;

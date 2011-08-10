@@ -95,6 +95,10 @@ Route::Ptr getRoute(std::string source, std::string dest)
       + " -> " + dest + "\" before creation. Use createRoute() first. ");
 }
 
+Route::Ptr getRoute(const sc_port_base * leafPort){
+  return  Routing::get(leafPort);
+}
+
 //
 bool hasComponent(std::string name)
 {

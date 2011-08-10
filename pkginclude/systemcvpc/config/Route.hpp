@@ -21,6 +21,20 @@
 
 namespace SystemC_VPC
 {
+  class Route;
+  class StaticRoute;
+  template<class ROUTE>
+  class RoutePool;
+
+  class RouteInterface
+  {
+  public:
+    typedef RouteInterface* Ptr;
+
+    virtual ~RouteInterface(){}
+    virtual bool addStream(){return false;}
+    virtual bool closeStream(){return false;}
+  };
 
 namespace Config
 {
@@ -63,13 +77,19 @@ public:
   std::string getName() const;
   Type getType() const;
   void inject(std::string source, std::string destination);
+  RouteInterface::Ptr getRouteInterface() const;
 private:
+  friend class SystemC_VPC::Route;
+  friend class SystemC_VPC::StaticRoute;
+  template<class ROUTE>
+  friend class SystemC_VPC::RoutePool;
   bool tracing_;
   std::list<Hop> hops_;
   std::map<Component::Ptr, Timing> routeTimings_;
   std::string source_;
   std::string destination_;
   Type type_;
+  RouteInterface::Ptr routeInterface_;
 };
 } // namespace Config
 }

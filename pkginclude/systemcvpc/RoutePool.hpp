@@ -54,10 +54,17 @@ namespace SystemC_VPC{
       return this->getPrototype().getName();
     }
 
+    void setRouteInterface(Route* route){
+      configuredRoute_->routeInterface_=route;
+    }
+
     RoutePool( const Config::Route::Ptr configuredRoute )
       : PrototypedPool<ROUTE>(configuredRoute), Route(configuredRoute)
     {
+      configuredRoute_=configuredRoute;
     }
+
+    Config::Route::Ptr configuredRoute_;
   };
 
 }
