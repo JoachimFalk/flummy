@@ -45,6 +45,8 @@ Route::Ptr createRoute(const sc_port_base * leafPtr, Route::Type type =
 
 Route::Ptr getRoute(std::string source, std::string dest);
 
+Route::Ptr getRoute(const sc_port_base * leafPort);
+
 bool hasComponent(std::string name);
 
 Components & getComponents();

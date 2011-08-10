@@ -70,7 +70,8 @@ Route::Type Route::parseRouteType(std::string name)
 }
 
 Route::Route(Route::Type type, std::string source, std::string dest) :
-  tracing_(false), source_(source), destination_(dest), type_(type)
+  tracing_(false), source_(source), destination_(dest), type_(type),
+  routeInterface_(NULL)
 {
 }
 
@@ -118,6 +119,13 @@ void Route::inject(std::string source, std::string destination)
 {
   this->source_ = source;
   this->destination_ = destination;
+}
+
+RouteInterface::Ptr Route::getRouteInterface() const
+{
+  //TODO: assert simulation phase
+  assert(routeInterface_ != NULL);
+  return routeInterface_;
 }
 
 //

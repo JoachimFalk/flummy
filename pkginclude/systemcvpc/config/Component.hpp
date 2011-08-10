@@ -31,6 +31,7 @@ namespace SystemC_VPC
 
 class ScheduledTask;
 class AbstractComponent;
+class Task;
 
 class ComponentInterface
 {
@@ -44,6 +45,8 @@ public:
   virtual void setDynamicPriority(std::list<ScheduledTask *>) = 0;
   virtual std::list<ScheduledTask *> getDynamicPriority() = 0;
   virtual void scheduleAfterTransition() = 0;
+  virtual bool addStream(ProcessId pid){return false;};
+  virtual bool closeStream(ProcessId pid){return false;};
 };
 
 namespace Config

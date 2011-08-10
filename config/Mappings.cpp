@@ -161,7 +161,11 @@ SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute)
   switch (configuredRoute->getType()) {
     default:
     case Config::Route::StaticRoute:
-      route = new RoutePool<StaticRoute> (configuredRoute);
+      {
+        RoutePool<StaticRoute> * staticRoute = new RoutePool<StaticRoute> (configuredRoute);
+        route = staticRoute;
+        staticRoute->setRouteInterface(&(staticRoute->getPrototype()));
+      }
       break;
     case Config::Route::BlockingTransport:
       route = new RoutePool<BlockingTransport> (configuredRoute);

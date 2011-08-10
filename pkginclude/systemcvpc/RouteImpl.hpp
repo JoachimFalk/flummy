@@ -27,7 +27,7 @@ namespace SystemC_VPC{
   /**
    * \brief Interface for classes implementing routing simulation.
    */
-  class Route : public Delayer {
+  class Route : public Delayer, public RouteInterface {
   public:
     virtual void addHop(std::string name, AbstractComponent * hop) = 0;
 
@@ -43,6 +43,7 @@ namespace SystemC_VPC{
           = CoSupport::Tracing::TracingFactory::getInstance() .createPtpTracer(
               this->getName());
       }
+      configuredRoute->routeInterface_ = this;
     }
 
     Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),

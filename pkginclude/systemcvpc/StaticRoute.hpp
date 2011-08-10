@@ -24,6 +24,7 @@
 #include "ProcessControlBlock.hpp"
 #include "RouteImpl.hpp"
 #include "Timing.hpp"
+#include "Director.hpp"
 
 namespace SystemC_VPC{
   template<class ROUTE>
@@ -59,6 +60,25 @@ namespace SystemC_VPC{
     StaticRoute( const StaticRoute & route );
 
     ~StaticRoute( );
+
+    virtual bool closeStream(){
+      std::list<AbstractComponent *>::iterator it;
+       for ( it=components.begin() ; it != components.end(); it++ ){
+         ProcessId pid= Director::getInstance().getProcessId(this->getName());
+         (*it)->closeStream(pid);
+       }
+       return true;
+    }
+
+    virtual bool addStream(){
+      std::list<AbstractComponent *>::iterator it;
+        for ( it=components.begin() ; it != components.end(); it++ ){
+          ProcessId pid= Director::getInstance().getProcessId(this->getName());
+          (*it)->addStream(pid);
+        }
+        return true;
+    }
+
   private:
     typedef std::list<AbstractComponent *> Components;
 
