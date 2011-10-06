@@ -354,6 +354,7 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 
     }
 
+    //TODO: use this as "if case" to avoid recursion!
   } else {
     assert(startTime+runningTask->getRemainingDelay() <= sc_time_stamp());
     removeTask();
