@@ -149,9 +149,8 @@ namespace SystemC_VPC{
     for( Components::iterator it = components.begin();
          it != components.end();
          ++it ){
-      // FIXME: find the bug
       if(*it != NULL) {
-        //delete *it;
+        delete *it;
       }
     }
 
