@@ -228,7 +228,7 @@ namespace SystemC_VPC{
 
     std::string getTaskName(ProcessId id);
     
-    sc_time getEnd() const {
+    static sc_time getEnd() {
       return end;
     }
 
@@ -292,7 +292,7 @@ namespace SystemC_VPC{
     std::string vpc_result_file;
     
     // time of latest acknowledge simulated task
-    sc_time end;
+    static sc_time end;
 
 #ifndef NO_POWER_SUM
     std::ofstream powerConsStream;

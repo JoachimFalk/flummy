@@ -64,7 +64,7 @@ namespace SystemC_VPC{
   //
   std::auto_ptr<Director> Director::singleton(new Director());
 
-
+  sc_time Director::end = SC_ZERO_TIME;
 
   /**
    *
@@ -77,7 +77,6 @@ namespace SystemC_VPC{
       topPowerGovFactory(NULL),
       mappings(),
       reverseMapping(),
-      end(SC_ZERO_TIME),
 #ifndef NO_POWER_SUM
       powerConsStream("powerconsumption.dat"),
 #endif // NO_POWER_SUM
