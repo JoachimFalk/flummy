@@ -30,7 +30,7 @@ PowerSumming::PowerSumming(std::ostream &os) :
 
 PowerSumming::~PowerSumming()
 {
-  m_changedTime = Director::getInstance().getEnd();
+  m_changedTime = Director::getEnd();
 
 
   //Print last change
