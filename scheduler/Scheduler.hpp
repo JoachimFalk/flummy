@@ -92,9 +92,13 @@ namespace SystemC_VPC{
 
     virtual void initialize(){}
 
-    virtual void addStream(ProcessId pid){}
+    virtual bool addStream(ProcessId pid) {
+      return false;
+    }
 
-    virtual void closeStream(ProcessId pid){}
+    virtual bool closeStream(ProcessId pid) {
+      return false;
+    }
   };
 
 }
