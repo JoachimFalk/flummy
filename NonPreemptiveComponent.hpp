@@ -317,7 +317,7 @@ namespace SystemC_VPC{
     bool hasReadyTask(){
       return !readyQueue.empty();
     }
-  private:
+  protected:
     size_t fcfsOrder;
     std::priority_queue<PriorityFcfsElement<ScheduledTask *> >    releaseQueue;
     std::priority_queue<p_queue_entry>                            readyQueue;
@@ -330,6 +330,57 @@ namespace SystemC_VPC{
 
   };
 
+  template<class TASKTRACER>
+  class TtPriorityComponent : public PriorityComponent<TASKTRACER> {
+  public:
+    TtPriorityComponent(Config::Component::Ptr component, Director *director =
+        &Director::getInstance()) :
+      PriorityComponent<TASKTRACER>(component, director)
+    {
+    }
+
+    virtual void notifyActivation(ScheduledTask * scheduledTask, bool active)
+    {
+      DBG_OUT(this->name() << " notifyActivation " << scheduledTask
+          << " " << active << std::endl);
+      if (active) {
+        if (scheduledTask->getNextReleaseTime() > sc_time_stamp()) {
+          ttReleaseQueue.push(
+              TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
+        } else {
+          int priority = this->getPriority(scheduledTask);
+          DBG_OUT("  priority is: "<< priority << std::endl);
+          this->releaseQueue.push(QueueElem(priority, this->fcfsOrder++,
+              scheduledTask));
+        }
+        if (this->runningTask == NULL) {
+          this->notify_scheduler_thread.notify(SC_ZERO_TIME);
+        }
+      }
+    }
+
+    virtual bool releaseActor()
+    {
+      //move active TT actors to fcfsQueue
+      while(!ttReleaseQueue.empty()
+          && ttReleaseQueue.top().time<=sc_time_stamp()){
+        ScheduledTask * scheduledTask = ttReleaseQueue.top().node;
+        int priority = this->getPriority(scheduledTask);
+        this->releaseQueue.push(QueueElem(priority, this->fcfsOrder++,
+            scheduledTask));
+        ttReleaseQueue.pop();
+      }
+      bool released = PriorityComponent<TASKTRACER>::releaseActor();
+      if(!ttReleaseQueue.empty() && !released){
+        sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+        this->notify_scheduler_thread.notify(delta);
+      }
+      return released;
+    }
+
+  private:
+    TT::TimedQueue ttReleaseQueue;
+  };
 /**
  *
  */
