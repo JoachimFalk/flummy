@@ -36,6 +36,7 @@ Type parseScheduler(std::string name)
   static const std::string STR_PRIORITYSCHEDULERNOPREEMPT =
       "PrioritySchedulerNoPreempt";
   static const std::string STR_PSNOPRE = "PSNOPRE";
+  static const std::string STR_PSNOPRE_NO_TT = "PSNOPRE-noTT";
   static const std::string STR_RATEMONOTONIC = "RateMonotonic";
   static const std::string STR_RM = "RM";
   static const std::string STR_FIRSTCOMEFIRSTSERVED = "FirstComeFirstServed";
@@ -57,6 +58,8 @@ Type parseScheduler(std::string name)
     return StaticPriority_P;
   } else if (name == STR_PSNOPRE || name == STR_PRIORITYSCHEDULERNOPREEMPT) {
     return StaticPriority_NP;
+  } else if (name == STR_PSNOPRE_NO_TT) {
+    return StaticPriority_NP_noTT;
   } else if (name == STR_RM || name == STR_RATEMONOTONIC) {
     return RateMonotonic;
   } else if (name == STR_FCFS || name == STR_FIRSTCOMEFIRSTSERVED) {
