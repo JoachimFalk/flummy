@@ -27,6 +27,7 @@ enum Type
 {
   FCFS,
   FCFS_old,
+  FCFS_noTT,
   StaticPriority_P,
   StaticPriority_NP,
   DynamicPriorityUserYield,

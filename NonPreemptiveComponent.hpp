@@ -229,18 +229,63 @@ namespace SystemC_VPC{
 
     Task * scheduleTask();
 
-    void notifyActivation(ScheduledTask * scheduledTask,
+    virtual void notifyActivation(ScheduledTask * scheduledTask,
         bool active);
 
-    bool releaseActor();
+    virtual bool releaseActor();
 
     bool hasReadyTask(){
       return !readyTasks.empty();
     }
-  private:
+  protected:
     std::list<ScheduledTask *>       fcfsQueue;
     std::deque<Task*>                readyTasks;
 
+  };
+
+  template<class TASKTRACER>
+  class TtFcfsComponent : public FcfsComponent<TASKTRACER> {
+  public:
+    TtFcfsComponent(Config::Component::Ptr component, Director *director =
+      &Director::getInstance()) :
+      FcfsComponent<TASKTRACER>(component, director)
+    {
+    }
+
+    virtual void notifyActivation(ScheduledTask * scheduledTask, bool active)
+    {
+      DBG_OUT(this->name() << " notifyActivation " << scheduledTask
+          << " " << active << std::endl);
+      if (active) {
+        if (scheduledTask->getNextReleaseTime() > sc_time_stamp()) {
+          ttReleaseQueue.push(
+              TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
+        } else {
+          this->fcfsQueue.push_back(scheduledTask);
+        }
+        if (this->runningTask == NULL) {
+          this->notify_scheduler_thread.notify(SC_ZERO_TIME);
+        }
+      }
+    }
+
+    virtual bool releaseActor()
+    {
+      //move active TT actors to fcfsQueue
+      while(!ttReleaseQueue.empty()
+          && ttReleaseQueue.top().time<=sc_time_stamp()){
+        this->fcfsQueue.push_back(ttReleaseQueue.top().node);
+        ttReleaseQueue.pop();
+      }
+      bool released = FcfsComponent<TASKTRACER>::releaseActor();
+      if(!ttReleaseQueue.empty() && !released){
+        sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+        this->notify_scheduler_thread.notify(delta);
+      }
+      return released;
+    }
+  private:
+    TT::TimedQueue ttReleaseQueue;
   };
 
   template<class TASKTRACER>
