@@ -179,10 +179,11 @@ namespace SystemC_VPC
       }
   }
 
-  void MostScheduler::addStream(ProcessId pid){
+  bool MostScheduler::addStream(ProcessId pid){
 
     std::cout<<"MostScheduler::addStream (" << pid << ")" << std::endl;
     areaMap[pid] = true;
+    return true;
   }
   void
   MostScheduler::addedNewTask(Task *task)
@@ -247,7 +248,7 @@ namespace SystemC_VPC
         secondaryScheduler.addedNewTask(task);
       }
   }
-  void
+  bool
   MostScheduler::closeStream(ProcessId pid)
   { //closes a stream connection by erasing the according element of Most_slots
     std::cout<<"MostScheduler::closeStream PID=" << pid << std::endl;
@@ -260,9 +261,10 @@ namespace SystemC_VPC
             <<" from Most_slots iter is" << iter->length <<std::endl;
             Most_slots.erase(iter);
             --streamcount;
-            return;
+            return true;
           }
       }
+    return false;
   }
 
   scheduling_decision

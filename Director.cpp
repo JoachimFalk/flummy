@@ -637,9 +637,15 @@ ProcessId Director::getProcessId(std::string process_or_source,
     AbstractComponent *comp = NULL;
     switch (component->getScheduler()) {
       case VC::Scheduler::FCFS:
+        comp = createComponent<TtFcfsComponent>(component);
+        break;
+      case VC::Scheduler::FCFS_noTT:
         comp = createComponent<FcfsComponent>(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
+        comp = createComponent<TtPriorityComponent>(component);
+        break;
+      case VC::Scheduler::StaticPriority_NP_noTT:
         comp = createComponent<PriorityComponent>(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:

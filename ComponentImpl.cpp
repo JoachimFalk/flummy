@@ -185,12 +185,12 @@ namespace SystemC_VPC{
     return true;
   }
   bool Component::addStream(ProcessId pid){
-        scheduler->addStream(pid);
+    return scheduler->addStream(pid);
   }
 
   bool Component::closeStream(ProcessId pid){
-         scheduler->closeStream(pid);
-      }
+    return scheduler->closeStream(pid);
+  }
 
 
   Component::~Component(){

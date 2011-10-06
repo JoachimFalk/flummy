@@ -70,8 +70,8 @@ namespace SystemC_VPC{
     
     void initialize(){}
 
-    void addStream(ProcessId pid);
-    void closeStream(ProcessId pid);
+    bool addStream(ProcessId pid);
+    bool closeStream(ProcessId pid);
 
   private:
 

@@ -27,8 +27,10 @@ enum Type
 {
   FCFS,
   FCFS_old,
+  FCFS_noTT,
   StaticPriority_P,
   StaticPriority_NP,
+  StaticPriority_NP_noTT,
   DynamicPriorityUserYield,
   RoundRobin,
   RateMonotonic,
