@@ -51,7 +51,16 @@ namespace SystemC_VPC{
      * \brief Access to singleton Director. 
      */
     static Director& getInstance(){
+      assert(singleton.get());
       return *singleton;
+    }
+
+    /**
+     * end_of_elaboration call back
+     * called from SysteMoC in order to cleanup/delete VPC objects
+     */
+    static void endOfSystemcSimulation(){
+      delete singleton.release();
     }
 
     /**
