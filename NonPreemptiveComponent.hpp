@@ -339,12 +339,9 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 
   if (runningTask == NULL) {
     releasePhase = true; // prevent from re-notifying schedule_method
-    bool released = releaseActor();
+    //in case of read delay (no ready task) continue releasing other actors
+    while(releaseActor() && readyTasks.empty()) {}
     releasePhase = false;
-
-    if (released) {
-      //assert(!readyTasks.empty());
-    }
 
     if (hasReadyTask()) {
       runningTask = scheduleTask();
