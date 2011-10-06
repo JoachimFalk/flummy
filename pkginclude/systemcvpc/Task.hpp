@@ -207,11 +207,11 @@ using CoSupport::SystemC::Event;
     {
     }
 
-    // lesser value means higher priority
     bool operator<(const PriorityFcfsElement<PAYLOAD>& other) const
     {
       int p1=priority;
       int p2=other.priority;
+      // lesser value means higher priority
       if (p1 > p2)
         return true;
       else if(p1 == p2)
