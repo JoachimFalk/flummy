@@ -27,6 +27,8 @@ Traceable::Type Traceable::parseTracing(std::string name)
     return NONE;
   } else if (name == "VCD"){
     return VCD;
+  } else if (name == "DB"){
+    return DB;
   } else {
     std::cerr << "[VPC warning] unknown tracing option: " << name << std::endl;
   }
