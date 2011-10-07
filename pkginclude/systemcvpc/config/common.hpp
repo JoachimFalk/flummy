@@ -25,6 +25,7 @@ class Traceable
 public:
   enum Type
   {
+    DB,  // write trace to a database
     VCD, // trace to vcd file
     NONE // disable tracing
   };

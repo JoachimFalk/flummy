@@ -39,6 +39,7 @@
 #include "DynamicPriorityComponent.hpp"
 #include "NonPreemptiveComponent.hpp"
 #include "config/Mappings.hpp"
+#include "tracing/DataBaseTracer.hpp"
 #include "tracing/TaskTracer.hpp"
 
 
@@ -625,6 +626,9 @@ ProcessId Director::getProcessId(std::string process_or_source,
         break;
       case Config::Traceable::VCD:
         return new C<Trace::VcdTrace>(component);
+        break;
+      case Config::Traceable::DB:
+        return new C<Trace::DataBaseTrace>(component);
         break;
     }
   }

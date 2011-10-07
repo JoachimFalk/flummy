@@ -73,6 +73,7 @@ libsystemcvpc_la_SOURCES =			\
 	scheduler/MostScheduler.cpp   \
 	scheduler/MostSecondaryScheduler.cpp   \
 						\
+	tracing/DataBaseTracer.cpp		\
 	tracing/Tracing.cpp			\
 						\
 	debug_config.cpp			\

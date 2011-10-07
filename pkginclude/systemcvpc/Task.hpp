@@ -49,7 +49,7 @@ using CoSupport::SystemC::Event;
     }
 
     // getter, setter
-    std::string getName(){return name;}
+    std::string getName() const                  {return name;}
     void setName(std::string name){this->name = name;}
     ProcessId  getProcessId()                    {return pid;}
     void       setProcessId(ProcessId pid)       {this->pid = pid;}
@@ -90,7 +90,7 @@ using CoSupport::SystemC::Event;
     sc_time getLatency() const                  {return this->latency;}
     void setRemainingDelay(const sc_time& delay){this->remainingDelay = delay;}
     sc_time getRemainingDelay() const           {return this->remainingDelay;}
-    int getInstanceId()                         {return this->instanceId;}
+    int getInstanceId() const                   {return this->instanceId;}
     void setTimingScale( double scale )         {this->timingScale = scale;}
     double getTimingScale()                     {return this->timingScale;}
 
