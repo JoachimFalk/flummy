@@ -62,11 +62,11 @@ namespace SystemC_VPC{
     }
 
     void increment_credit(sc_time increment){
-    if(has_credit()){
+    if(has_credit_flag){
 	queue_credit += increment;
       }else{
 	if(increment < queue_credit){
-	  queue_credit - increment;
+	  queue_credit -= increment;
 	}else{
 	  queue_credit = increment - queue_credit;
 	  has_credit_flag = true;
@@ -75,11 +75,15 @@ namespace SystemC_VPC{
     }
 
     void decrement_credit(sc_time decrement){
-      if(decrement <= queue_credit){
-	queue_credit -= decrement;
+      if(has_credit_flag){
+        if(decrement <= queue_credit){
+          queue_credit -= decrement;
+        }else{
+          queue_credit = decrement - queue_credit;
+          has_credit_flag = false;
+        }
       }else{
-	queue_credit = decrement - queue_credit;
-	has_credit_flag = false;
+        queue_credit += decrement;
       }
     }
 
@@ -100,7 +104,7 @@ namespace SystemC_VPC{
       if(has_credit_flag){
 	return queue_credit;
       }else{
-	return sc_time(-1, SC_NS);
+	return SC_ZERO_TIME - queue_credit;
       }
     }
 
