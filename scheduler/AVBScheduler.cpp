@@ -51,7 +51,6 @@ namespace SystemC_VPC{
     std::list<AVBListEntry*>::iterator it;
     for (it=p_list.begin(); it!=p_list.end(); it++){
       if((*it)->get_priority_level() < priority){
-	std::cout<<"added newEntry to p_list" << std::endl;
 	p_list.insert(it, newEntry);
 	it = p_list.end();
 	it--;
@@ -76,7 +75,7 @@ namespace SystemC_VPC{
       for (it=p_list.begin(); it!=p_list.end(); it++){
 	if((*it)->task_queue->size() != 0){
 	  assert((*it)->has_credit() == false);
-	  sc_time curr_needed_time = (*it)->get_credit() * ((*it)->get_bw_alloc());
+	  sc_time curr_needed_time = (SC_ZERO_TIME -(*it)->get_credit()) / ((*it)->get_bw_alloc());
 	  if(needed_time == sc_core::SC_ZERO_TIME || needed_time > curr_needed_time){
 	    needed_time = curr_needed_time;
 	  }
@@ -92,9 +91,11 @@ namespace SystemC_VPC{
   void AVBScheduler::addedNewTask(Task *task){
     int priority = task->getPriority();
     std::list<AVBListEntry*>::iterator it;
+    bool added = false;
     for (it=p_list.begin(); it!=p_list.end(); it++){
-	if((*it)->get_priority_level() == priority){
+	if((*it)->get_priority_level() <= priority && !added){
 	  (*it)->task_queue->push(task);
+	  added = true;
 	}
    }
 
@@ -122,19 +123,31 @@ namespace SystemC_VPC{
      const  TaskMap &running_tasks)
    {
     scheduling_decision ret_decision=NOCHANGE;
-    
     std::list<AVBListEntry*>::iterator it;
-
+    if(time_last_assign == SC_ZERO_TIME){
+      //QuickFix for initial credit-error
+      time_last_assign=sc_time_stamp() ;
+    }
     if(running_tasks.size()!=0){
-    //no preemption! 
-    }else{
-    //Update of the Credits
-    if(/*last_active == -1 || ready_tasks.size() == 0*/false){ //no active Packet -> reset all credits
-      //FIXME: not included in final standard?
+      //no preemption! Only update the credits!
+      //or after an idle phase
+      sc_time time_budget = sc_time_stamp() - time_last_assign;
       for (it=p_list.begin(); it!=p_list.end(); it++){
-	  (*it)->reset_credit();
+        if((*it)->get_priority_level() != last_active){
+          if((*it)->task_queue->size()!= 0){
+            (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+          }else if(!(*it)->has_credit()){
+            (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+            if((*it)->has_credit()){
+              (*it)->reset_credit();
+            }
+          }
+        }else{
+          (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
+        }
       }
-    }else{
+      time_last_assign = sc_time_stamp();
+    }else{ //Update of the Credits
       sc_time time_budget = sc_time_stamp() - time_last_assign;
       for (it=p_list.begin(); it!=p_list.end(); it++){
 	if((*it)->task_queue->size()!= 0 ){
@@ -147,14 +160,16 @@ namespace SystemC_VPC{
 	    (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
 	  }
 	}else{
-	  if(!(*it)->has_credit()){
-	    (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
-	  }else{
-	  (*it)->reset_credit();
+	      if((*it)->get_priority_level() != last_active){
+	        (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+	      }else{
+	        (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
+	      }
+	  if((*it)->has_credit()){
+	    (*it)->reset_credit();
 	  }
 	}
       }
-    }
 
   //search the new task
       for (it=p_list.begin(); it!=p_list.end(); it++){
@@ -173,21 +188,6 @@ namespace SystemC_VPC{
     last_active = -1;
     time_last_assign = sc_time_stamp();    
     }
-//     
-     /*
-      if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
-
-     // hoechste prioritaet�der ready tasks
-     p_queue_entry prior_ready=pqueue.top();
-     task_to_assign=prior_ready.task->getInstanceId();
-
-     if(running_tasks.size()!=0){
-        //nothing to do, NO PREEMPTIVE-Scheduler
-     }else{
-       pqueue.pop();
-       ret_decision=ONLY_ASSIGN;  
-     }
-  */
 
      return ret_decision;
    }
