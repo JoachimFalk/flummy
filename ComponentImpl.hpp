@@ -409,10 +409,19 @@ namespace SystemC_VPC{
             = sc_time(runningTasks[taskToAssign]->getRemainingDelay());
           DBG_OUT(" is " << runningTasks[taskToAssign]->getRemainingDelay()
                << endl);
-          fireStateChanged(ComponentState::RUNNING);
 
           /* */
           Task * assignedTask = runningTasks[taskToAssign];
+
+          /*
+           * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
+           */
+          if (assignedTask->isPSM() == true){
+              this->fireStateChanged(ComponentState::IDLE);
+          }else{
+              this->fireStateChanged(ComponentState::RUNNING);
+          }
+
           if(assignedTask->isBlocking() /* && !assignedTask->isExec() */) {
             blockMutex++;
             if(blockMutex == 1) {
