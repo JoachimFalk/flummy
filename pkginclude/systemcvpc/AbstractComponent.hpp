@@ -206,6 +206,12 @@ class ComponentObserver;
     }
 
     /*
+     * from ComponentInterface
+     */
+    bool hasWaitingOrRunningTasks(){
+      return (readyTasks.size() + runningTasks.size()) > 0;
+    }
+
          * This function sets the appropriate execution state of the component according to the component powerstate
          * (component's power state info is not encapsulated here, so it is the responsability of the powerState object to call this
          * function whenever a powermode change takes place.
