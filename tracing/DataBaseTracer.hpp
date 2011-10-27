@@ -41,7 +41,7 @@ public:
 
   // addEvent
   void addEvent(const char* resourceName, const char* taskName,
-      const char* status, double timeStamp, unsigned int taskId);
+      const char* status, unsigned long long timeStamp, unsigned int taskId);
 
 private:
   const char* databaseName_;
@@ -68,38 +68,32 @@ public:
 
   void release(const Task * task)
   {
-    dbProxy_.addEvent(resourceName_.c_str(), task->getName().c_str(), "s",
-        sc_time_stamp().to_default_time_units(), task->getInstanceId());
+    this->addEvent(task, "s");
   }
 
   void finishDii(const Task * task)
   {
-    dbProxy_.addEvent(resourceName_.c_str(), task->getName().c_str(), "d",
-        sc_time_stamp().to_default_time_units(), task->getInstanceId());
+    this->addEvent(task, "d");
   }
 
   void finishLatency(const Task * task)
   {
-    dbProxy_.addEvent(resourceName_.c_str(), task->getName().c_str(), "l",
-        sc_time_stamp().to_default_time_units(), task->getInstanceId());
+    this->addEvent(task, "l");
   }
 
   void assign(const Task * task)
   {
-    dbProxy_.addEvent(resourceName_.c_str(), task->getName().c_str(), "a",
-        sc_time_stamp().to_default_time_units(), task->getInstanceId());
+    this->addEvent(task, "a");
   }
 
   void resign(const Task * task)
   {
-    dbProxy_.addEvent(resourceName_.c_str(), task->getName().c_str(), "r",
-        sc_time_stamp().to_default_time_units(), task->getInstanceId());
+    this->addEvent(task, "r");
   }
 
   void block(const Task * task)
   {
-    dbProxy_.addEvent(resourceName_.c_str(), task->getName().c_str(), "b",
-        sc_time_stamp().to_default_time_units(), task->getInstanceId());
+    this->addEvent(task, "b");
   }
 
   // TODO: Can we avoid this function somehow?
@@ -108,6 +102,15 @@ public:
     return NULL;
   }
 private:
+
+  void addEvent(const Task * task, const char * state)
+  {
+    dbProxy_.addEvent(resourceName_.c_str(),
+        task->getName().c_str(),
+        state,
+        sc_time_stamp().value(),
+        task->getInstanceId());
+  }
   DataBaseProxy & dbProxy_;
   std::string resourceName_;
 };
