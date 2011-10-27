@@ -32,12 +32,11 @@ DataBaseProxy::~DataBaseProxy()
 }
 
 void DataBaseProxy::addEvent(const char* resourceName, const char* taskName,
-    const char* status, double timeStamp, unsigned int taskId)
+    const char* status, const unsigned long long timeStamp,
+    const unsigned int taskId)
 {
-  fprintf(socket_, "%s %s %s %f %u\r\n", resourceName, taskName, status,
+  fprintf(socket_, "%s %s %s %llu %u\r\n", resourceName, taskName, status,
       timeStamp, taskId);
-  //  printf("%s %s %s %f %u\r\n", resourceName, taskName, status, timeStamp,
-  //      taskId);
 }
 
 void DataBaseProxy::open()
