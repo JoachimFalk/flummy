@@ -221,7 +221,15 @@ Task * DynamicPriorityComponent<TASKTRACER>::scheduleTask()
 
   releasedTask_ = NULL;
 
-  this->fireStateChanged(ComponentState::RUNNING);
+  /*
+    * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
+    */
+   if (lastTask_->isPSM() == true){
+     this->fireStateChanged(ComponentState::IDLE);
+   }else{
+     this->fireStateChanged(ComponentState::RUNNING);
+   }
+
   return lastTask_;
 }
 

@@ -197,6 +197,21 @@ void changePowerMode(ScheduledTask & actor,std::string powermode)
 	//return NULL;
 }
 
+bool hasWaitingOrRunningTasks(ScheduledTask & actor){
+  if(Director::getInstance().FALLBACKMODE)
+   {
+    //FIXME: how to handle Fallbackmode?
+           return true;
+   }
+   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+   if(component != NULL)
+   {
+           SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+           if(ci != NULL)
+                 return ci->hasWaitingOrRunningTasks();
+   }
+}
+
 void setActorAsPSM(const char* name, bool psm)
 {
 	  getCachedTask(name)->setActorAsPSM(psm);

@@ -703,7 +703,15 @@ Task * PriorityComponent<TASKTRACER>::scheduleTask()
   DBG_OUT(this->getName() << " schedule Task: " << task->getName()
       << " @ " << sc_time_stamp() << std::endl);
 
-  this->fireStateChanged(ComponentState::RUNNING);
+  /*
+    * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
+    */
+   if (task->isPSM() == true){
+     this->fireStateChanged(ComponentState::IDLE);
+   }else{
+     this->fireStateChanged(ComponentState::RUNNING);
+   }
+
   if (task->isBlocking() /* && !assignedTask->isExec() */) {
     //TODO
   }
