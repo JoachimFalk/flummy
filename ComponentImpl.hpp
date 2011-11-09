@@ -287,6 +287,13 @@ namespace SystemC_VPC{
 
       scheduler->initialize();
       fireStateChanged(ComponentState::IDLE);
+      std::string logName = getName();
+      logName = logName + ".buffer";
+      std::ofstream logBuffer(logName.c_str());
+      if( !logBuffer.is_open() ){
+        assert(false);
+      }
+      unsigned int last_used_buffer = 0;
 
       //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
       newTaskDuringOverhead=(newTasks.size()>0);
@@ -475,6 +482,7 @@ namespace SystemC_VPC{
           /* */
         }
         if(readyTasks.size() != last_used_buffer){
+          //logBuffer<< readyTasks.size() << " " << sc_time_stamp() << std::endl;
           last_used_buffer = readyTasks.size();
           if(last_used_buffer > max_used_buffer){
             max_used_buffer = readyTasks.size();
@@ -482,7 +490,8 @@ namespace SystemC_VPC{
           }
         }
       }
-
+      //fixme: close is never reached cause of while
+      logBuffer.close();
     }
 
 private:
