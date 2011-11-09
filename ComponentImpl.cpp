@@ -90,28 +90,32 @@ namespace SystemC_VPC{
       return;
     }
     / * */
+    if(max_avail_buffer == 0 || (readyTasks.size() + newTasks.size()) < max_avail_buffer){
+      ProcessId pid = actualTask->getProcessId();
+      ProcessControlBlockPtr pcb = this->getPCB(pid);
+      actualTask->setPCB(pcb);
+      actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
-    ProcessId pid = actualTask->getProcessId();
-    ProcessControlBlockPtr pcb = this->getPCB(pid);
-    actualTask->setPCB(pcb);
-    actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
+      DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
+              << " ) at time: " << sc_time_stamp()
+              << " mode: " << this->getPowerMode()->getName()
+              << std::endl);
 
-    DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
-            << " ) at time: " << sc_time_stamp()
-            << " mode: " << this->getPowerMode()->getName()
-            << std::endl);
+      // reset the execution delay
+      actualTask->initDelays();
+      DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
+      DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
 
-    // reset the execution delay
-    actualTask->initDelays();
-    DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
-    DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
-    
-    //store added task
-    newTasks.push_back(actualTask);
+      //store added task
+      newTasks.push_back(actualTask);
 
-    //awake scheduler thread
-    notify_scheduler_thread.notify();
-    blockCompute.notify();
+      //awake scheduler thread
+      notify_scheduler_thread.notify();
+      blockCompute.notify();
+    }else{
+      //std::cout<< "Message/Task " << actualTask->getName() << " dropped due to less buffer-space of component "<< getName() << std::endl;
+      actualTask->getBlockEvent().latency->setDropped(true);
+    }
   }
 
 

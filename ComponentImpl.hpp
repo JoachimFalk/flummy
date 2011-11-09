@@ -92,7 +92,7 @@ namespace SystemC_VPC{
      */
     Component( Config::Component::Ptr component)
       : AbstractComponent(component),
-        blockMutex(0)
+        blockMutex(0), max_used_buffer(0), max_avail_buffer(0)
     {
       SC_THREAD(schedule_thread);
       SC_THREAD(remainingPipelineStages);
@@ -139,6 +139,8 @@ namespace SystemC_VPC{
     sc_event notify_scheduler_thread;
     Event blockCompute;
     size_t   blockMutex;
+    unsigned int max_used_buffer;
+    unsigned int max_avail_buffer;
 
     // time last task started
     sc_time startTime;
@@ -471,6 +473,13 @@ namespace SystemC_VPC{
             blockMutex--;
           }
           /* */
+        }
+        if(readyTasks.size() != last_used_buffer){
+          last_used_buffer = readyTasks.size();
+          if(last_used_buffer > max_used_buffer){
+            max_used_buffer = readyTasks.size();
+            //std::cout<<"MAX used Buffer of Component " << this->getName() << " increased to " << max_used_buffer << " @ " << sc_time_stamp() << std::endl;
+          }
         }
       }
 
