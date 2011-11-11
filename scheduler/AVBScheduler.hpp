@@ -37,6 +37,7 @@ namespace SystemC_VPC{
       task_queue = 0;
       queue_credit = sc_core::SC_ZERO_TIME;
       has_credit_flag = true;
+      wasEmpty_flag=true;
     }
 
     AVBListEntry(std::queue<Task*>* t_queue, int p_level, float b_alloc){
@@ -45,11 +46,13 @@ namespace SystemC_VPC{
       task_queue = t_queue;
       queue_credit = sc_core::SC_ZERO_TIME;
       has_credit_flag = true;
+      wasEmpty_flag=true;
     }
 
     float bw_alloc;
     sc_time queue_credit;
     bool has_credit_flag;
+    bool wasEmpty_flag;
     int priority_level;
     std::queue<Task*>* task_queue;
 
@@ -91,6 +94,14 @@ namespace SystemC_VPC{
       //return (queue_credit >= sc_core::SC_ZERO_TIME);
       return has_credit_flag;
       
+    }
+
+    void setWasEmpty(bool flag){
+      wasEmpty_flag = flag;
+    }
+
+    bool wasEmpty(void){
+      return wasEmpty_flag;
     }
 
     void reset_credit(void){
