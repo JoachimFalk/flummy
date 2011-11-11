@@ -95,6 +95,9 @@ namespace SystemC_VPC{
     for (it=p_list.begin(); it!=p_list.end(); it++){
 	if((*it)->get_priority_level() >= priority && !added){
 	  (*it)->task_queue->push(task);
+	  if((*it)->task_queue->size()==1){
+	    (*it)->setWasEmpty(true);
+	  }
 	  added = true;
 	}
    }
@@ -152,9 +155,15 @@ namespace SystemC_VPC{
       for (it=p_list.begin(); it!=p_list.end(); it++){
 	if((*it)->task_queue->size()!= 0 ){
 	  if((*it)->get_priority_level() != last_active){
-	    //task was blocked by another task (in an other priority_level)
+	    //task was blocked by another task (in another priority_level)
+	    //OR it was newly added!
 	    //so raise up the credits
 	    (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+
+	    if((*it)->has_credit() && (*it)->wasEmpty()){
+	      (*it)->setWasEmpty(false);
+	      (*it)->reset_credit();
+	    }
 	  }else{
 	    //decrement the credit of the currently used queue
 	    (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
