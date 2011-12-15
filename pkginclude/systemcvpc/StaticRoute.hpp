@@ -23,7 +23,6 @@
 #include "EventPair.hpp"
 #include "ProcessControlBlock.hpp"
 #include "RouteImpl.hpp"
-#include "Timing.hpp"
 #include "Director.hpp"
 
 namespace SystemC_VPC{
