@@ -14,7 +14,6 @@
 #define __INCLUDED__CONFIGCHECK_HPP__
 
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/Timing.hpp>
 
 #include <systemc>
 
