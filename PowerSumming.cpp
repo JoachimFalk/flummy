@@ -30,14 +30,18 @@ PowerSumming::PowerSumming(std::ostream &os) :
 
 PowerSumming::~PowerSumming()
 {
-  m_changedTime = Director::getEnd();
+  /* calculateNewEnergySum() and printPowerChange is required to be performed twice
+   * to get correct last PowerSumming - entries
+   */
+  calculateNewEnergySum();
+  printPowerChange( m_powerMode[m_lastCi]->getName());
 
+  m_changedTime = m_lastVirtualTime;
+  m_lastVirtualTime=Director::getEnd();
 
   //Print last change
   calculateNewEnergySum();
   printPowerChange( m_powerMode[m_lastCi]->getName());
-
-
 
 }
 
