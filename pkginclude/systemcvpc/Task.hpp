@@ -105,12 +105,17 @@ using CoSupport::SystemC::Event;
      * 
      */
     void initDelays(){
+//TODO grocki:
+/*timing->getModifier(fid);
+sc_time dii = etDelay
+lat = getLatency
+modify(dii, lat)*/
       assert(pcb != NULL);
       FunctionIds fids = this->getFunctionIds();
-      this->setDelay(this->timingScale * timing->getDelay(fids)
+      this->setDelay(this->timingScale * timing->getDelay(fids) //lat
           + this->extraDelay);
       this->setRemainingDelay(this->getDelay());
-      this->setLatency(this->timingScale * timing->getLatency(fids)
+      this->setLatency(this->timingScale * timing->getLatency(fids) //dii
           + this->extraDelay);
     }
 

@@ -30,7 +30,6 @@ Hop & Hop::setPriority(size_t priority_)
   return *this;
 }
 
-//
 Hop & Hop::setTransferTiming(Timing transferTiming_)
 {
   this->transferTiming_ = transferTiming_;
