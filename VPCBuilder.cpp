@@ -20,6 +20,7 @@
 #include <CoSupport/XML/xerces_support.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
+
 #include <systemcvpc/VPCBuilder.hpp>
 #include <systemcvpc/VpcDomErrorHandler.hpp>
 #include <systemcvpc/datatypes.hpp>
@@ -47,6 +48,14 @@
 #else
   #include <systemcvpc/debug_off.hpp>
 #endif
+
+//TODO: grocki: random
+#include <systemcvpc/TimingModifier.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+typedef boost::minstd_rand base_generator_type;
+//TODO: grocki: end
 
 namespace SystemC_VPC{
 
@@ -160,6 +169,11 @@ namespace VC = Config;
         return;
       }
       
+//TODO: grocki: random
+      // set the seed generation of random times
+      this->seed = new base_generator_type(42);
+			
+//TODO: grocki: end
       // set treewalker to documentroot
       vpcConfigTreeWalker =
         vpcConfigDoc->createTreeWalker(
@@ -234,6 +248,7 @@ namespace VC = Config;
           if(node != NULL){ 
             //foreach mapping of configuration perfom initialization  
             for(; node!=0; node = this->vpcConfigTreeWalker->nextSibling()){
+		std::cerr << "mapping?";
               //this->initMappingAPStruct(node);
               this->initMappingAPStruct();
             }
@@ -363,6 +378,7 @@ namespace VC = Config;
       NStr sSource = atts->getNamedItem(sourceAttrStr)->getNodeValue();
 
 
+      std::cout <<  "VPCBuilder> Found mapping attribute: source=" << sSource << " target=" << sTarget << std::endl; 
       DBG_OUT( "VPCBuilder> Found mapping attribute: source=" << sSource
                << " target=" << sTarget << std::endl); 
 
@@ -390,6 +406,9 @@ namespace VC = Config;
             if( xmlName == timingStr ){
               try {
                 VC::Timing t = this->parseTiming( attnode );
+//grocki: random
+               	std::cout << "timing:" << t.getLatency() << "," << t.getDii() << "," << t.getFunction() << "," << std::endl;
+//grocki: end
                 if (t.getFunctionId() == defaultFunctionId) {
                   provider->addDefaultActorTiming(sSource, t);
                 } else {
@@ -625,6 +644,9 @@ namespace VC = Config;
 
       throw InvalidArgumentException(msg);
     }
+//TODO: grocki: random begin
+       t.setTimingModifier(TimingModifier(*(this->seed)));
+//TODO: grocki: end
     return t;
   }
 

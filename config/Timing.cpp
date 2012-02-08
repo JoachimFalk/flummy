@@ -7,6 +7,9 @@
 
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/Director.hpp>
+//grocki: random
+#include <systemcvpc/TimingModifier.hpp>
+//grocki: end
 
 namespace SystemC_VPC
 {
@@ -53,6 +56,7 @@ bool Timing::operator<(const Timing & other) const
 
 sc_core::sc_time Timing::getDii() const
 {
+  std::cout << "dii " << dii_ << " was read" << std::endl;
   return dii_;
 }
 
@@ -68,6 +72,7 @@ std::string Timing::getFunction() const
 
 sc_core::sc_time Timing::getLatency() const
 {
+  std::cout << "lat " << latency_ << " was read" << std::endl;
   return latency_;
 }
 
@@ -80,6 +85,19 @@ void Timing::setDii(sc_core::sc_time dii_)
 {
   this->dii_ = dii_;
 }
+
+//TODO: grocki: random test
+void Timing::setTimingModifier(TimingModifier)
+{
+  this->range_ = range_;
+}
+
+TimingModifier Timing::getTimingModifier() const
+{
+  return this->range_;
+}
+
+//TODO: grocki: end 
 
 void Timing::setFunction(std::string function_)
 {

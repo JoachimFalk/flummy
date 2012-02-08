@@ -71,6 +71,7 @@ nobase_include_HEADERS =				\
 	systemcvpc/ScheduledTask.hpp 		\
 	systemcvpc/Task.hpp 				\
 	systemcvpc/TaskPool.hpp 			\
+	systemcvpc/TimingModifier.hpp 			\
 	systemcvpc/dynload/dll.hpp			\
 	systemcvpc/dynload/world.hpp		\
 	systemcvpc/coupling/VPCEvent.hpp

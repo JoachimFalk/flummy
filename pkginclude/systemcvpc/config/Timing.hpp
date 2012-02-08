@@ -14,6 +14,9 @@
 #define TIMING_H_
 
 #include <systemcvpc/FastLink.hpp>
+//grocki: random
+#include <systemcvpc/TimingModifier.hpp>
+//grocki: end
 
 #include <boost/shared_ptr.hpp>
 
@@ -53,6 +56,12 @@ public:
   std::string getFunction() const;
   sc_core::sc_time getLatency() const;
   std::string getPowerMode() const;
+//TODO: grocki: random test
+  void setTimingModifier(TimingModifier range_);
+  TimingModifier getTimingModifier() const;
+  TimingModifier range_;
+//TODO: grocki: end
+
   void setDii(sc_core::sc_time dii_);
   void setFunction(std::string function_);
   void setLatency(sc_core::sc_time latency_);

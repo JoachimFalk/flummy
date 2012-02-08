@@ -10,12 +10,20 @@
  * ----------------------------------------------------------------------------
  */
 
+//grocki: random
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+typedef boost::minstd_rand base_generator_type;
+#include <systemcvpc/TimingModifier.hpp>
+//grocki: end
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Director.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
+#include <ctime> 
 
 #include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_COMPONENT create stream and include debug macros
@@ -35,7 +43,10 @@ namespace SystemC_VPC{
 
   FunctionTiming::FunctionTiming( )
     : funcDelays(1, SC_ZERO_TIME),
-      funcLatencies(1, SC_ZERO_TIME)
+      funcLatencies(1, SC_ZERO_TIME),
+//grocki: random
+      funcTimingModifiers(1, TimingModifier())
+//grocki: end
   {
     setBaseDelay(SC_ZERO_TIME);
     setBaseLatency(SC_ZERO_TIME);
@@ -43,7 +54,10 @@ namespace SystemC_VPC{
 
   FunctionTiming::FunctionTiming( const FunctionTiming &delay )
     : funcDelays(    delay.funcDelays    ),
-      funcLatencies( delay.funcLatencies )
+      funcLatencies( delay.funcLatencies ),
+//grocki: random 
+      funcTimingModifiers( delay.funcTimingModifiers)
+//grocki: end
   {
     setBaseDelay(   delay.getBaseDelay()   );
     setBaseLatency( delay.getBaseLatency() );
@@ -57,6 +71,7 @@ namespace SystemC_VPC{
       funcDelays.resize( fid + 100, SC_ZERO_TIME );
     }
     this->funcDelays[fid] = delay;
+
   }
 
   void FunctionTiming::setBaseDelay( sc_time delay ){
@@ -69,6 +84,7 @@ namespace SystemC_VPC{
     return this->funcDelays[defaultFunctionId];
   }
 
+//TODO: grocki: random end
   sc_time summarizeFunctionTimes(const FunctionIds& functions,
       const FunctionTimes& functionTimes){
     sc_time ret = SC_ZERO_TIME;
@@ -85,11 +101,58 @@ namespace SystemC_VPC{
   sc_time FunctionTiming::getDelay(
     FunctionIds functions) const
   {
+
+//TODO: grocki: random test
+
+    base_generator_type generator(42);
+    boost::uniform_real<> uni_dist(0.8,1.2);
+    boost::variate_generator<base_generator_type&, boost::uniform_real<> > uni(generator, uni_dist);
+
+    double tmp = uni();
+    std::cout << "sc_time FunctionTiming::getDelay(functions) " << tmp << " " << uni() << " ";
+    if (functions.begin() == functions.end()){
+      std::cout << "vorher: " << getBaseDelay() << " nacher: " << getBaseDelay()*tmp << " ";
+      return getBaseDelay()*tmp;
+    }
+    std::cout << "vorher: " << summarizeFunctionTimes(functions, funcDelays) << " nacher: " << summarizeFunctionTimes(functions, funcDelays)*tmp << " ";
+    return summarizeFunctionTimes(functions, funcDelays)*tmp;
+
+/*    std::cout << "sc_time FunctionTiming::getDelay(functions) " << uni() << " " << uni() << " ";
     if (functions.begin() == functions.end()){
       return getBaseDelay();
     }
-    return summarizeFunctionTimes(functions, funcDelays);
+    return summarizeFunctionTimes(functions, funcDelays);*/
   }
+	
+  void FunctionTiming::addTimingModifier( FunctionId fid,
+                                                        TimingModifier timingModifier ){
+    if( fid >= funcTimingModifiers.size())
+      funcTimingModifiers.resize( fid + 100, TimingModifier());
+
+    this->funcTimingModifiers[fid] = timingModifier;
+  }
+
+//TODO: grocki: random end
+  TimingModifier FunctionTiming::getTimingModifier(
+    FunctionIds functions) const
+  {
+    if (functions.begin() == functions.end()){
+	    return getBaseTimingModifier();
+    }
+//TODO: grocki: random end
+  // return summarizeFunctionTimes(functions, funcLatencies);
+	  return TimingModifier();
+  }
+  void FunctionTiming::setBaseTimingModifier( TimingModifier timingModifier){
+    this->funcTimingModifiers[defaultFunctionId] = timingModifier;
+  }
+
+//TODO: grocki: random end
+  TimingModifier FunctionTiming::getBaseTimingModifier( ) const {
+    return this->funcTimingModifiers[defaultFunctionId];
+  }
+
+//TODO: grocki: end
 
   void FunctionTiming::addLatency( FunctionId fid,
                                                         sc_time latency ){
@@ -119,6 +182,11 @@ namespace SystemC_VPC{
   void FunctionTiming::setTiming(const Config::Timing& timing){
     this->addDelay(timing.getFunctionId(),   timing.getDii());
     this->addLatency(timing.getFunctionId(), timing.getLatency());
+//TODO: grocki: random
+		this->addTimingModifier(timing.getFunctionId(), timing.getTimingModifier());
+		TimingModifier Tmp = timing.getTimingModifier();
+		Tmp.hello();
+//TODO: grocki: end
   }
 
   /**

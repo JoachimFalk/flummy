@@ -43,6 +43,13 @@
 #include "config/Timing.hpp"
 #include "Attribute.hpp"
 
+//TODO: grocki: random
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+typedef boost::minstd_rand base_generator_type;
+//TODO: grocki: end
+
 XERCES_CPP_NAMESPACE_USE
 namespace SystemC_VPC{
   namespace CX = CoSupport::XML::Xerces;
@@ -175,6 +182,13 @@ namespace SystemC_VPC{
     void buildVPC();
     
   private:
+
+//grocki
+	  /**
+		 * \brief the seed for the generation of random times
+		 */
+
+    base_generator_type* seed;
     
     /**
      * \brief Initialize a component from the configuration file
@@ -208,6 +222,7 @@ namespace SystemC_VPC{
     * \brief Parsing helper for <timing>
     */
     Config::Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
+
   };
     
 }

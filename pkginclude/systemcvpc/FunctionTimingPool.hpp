@@ -18,11 +18,15 @@
 
 #include "FastLink.hpp"
 #include "config/Timing.hpp"
+//grocki: random
+#include <systemcvpc/TimingModifier.hpp>
+//grocki: end
 
 
 namespace SystemC_VPC {
 
   typedef std::vector<sc_time> FunctionTimes;
+  //typedef std::vector<TimingModifier *> FunctionModifiers;
 
   /**
    * Internal helper class to manage  function specific delays.
@@ -94,6 +98,13 @@ namespace SystemC_VPC {
      */
     void setTiming(const Config::Timing& timing);
 
+//TODO: grocki: random 
+    TimingModifier getTimingModifier(FunctionIds functions) const;
+    void addTimingModifier(FunctionId fid, TimingModifier timingModifier);
+    TimingModifier getBaseTimingModifier( ) const;
+    void setBaseTimingModifier( TimingModifier timingModifier);
+//TODO: grocki end
+
   private:
 
     // map of possible special delay depending on functions
@@ -101,6 +112,12 @@ namespace SystemC_VPC {
 
     // map of possible function specific latencies
     FunctionTimes funcLatencies;
+
+//TODO: grocki random
+    // map of possible Timing Modifiers
+    std::vector<TimingModifier> funcTimingModifiers;
+//TODO: end		
+
   };
 
   typedef boost::shared_ptr<FunctionTiming> FunctionTimingPtr;
