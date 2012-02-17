@@ -45,7 +45,7 @@ namespace SystemC_VPC{
     : funcDelays(1, SC_ZERO_TIME),
       funcLatencies(1, SC_ZERO_TIME),
 //grocki: random
-      funcTimingModifiers(1, TimingModifier())
+      funcTimingModifiers(1, boost::shared_ptr<TimingModifier>(new TimingModifier()))
 //grocki: end
   {
     setBaseDelay(SC_ZERO_TIME);
@@ -80,20 +80,70 @@ namespace SystemC_VPC{
     this->funcDelays[defaultFunctionId] = delay;
   }
 
+//grocki: random
   sc_time FunctionTiming::getBaseDelay( ) const {
-    return this->funcDelays[defaultFunctionId];
+    boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+    return modifier->modify(this->funcDelays[defaultFunctionId]);
+  }
+  void FunctionTiming::reset(
+    FunctionIds functions)
+  {
+    if (functions.begin() == functions.end()){
+      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+      modifier->reset();
+    }
+    for(FunctionIds::const_iterator iter = functions.begin();
+        iter != functions.end();
+        ++iter) {
+      FunctionId fid = *iter;
+      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[fid];
+      modifier->reset();
+    }
   }
 
-//TODO: grocki: random end
+
+  void FunctionTiming::reRoll(
+    FunctionIds functions) 
+  {
+    if (functions.begin() == functions.end()){
+      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+      modifier->reRoll();
+    }
+    for(FunctionIds::const_iterator iter = functions.begin();
+        iter != functions.end();
+        ++iter) {
+      FunctionId fid = *iter;
+      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[fid];
+      modifier->reRoll();
+    }
+  }
+
   sc_time summarizeFunctionTimes(const FunctionIds& functions,
-      const FunctionTimes& functionTimes){
+      const FunctionTimes& functionTimes,
+      const FunctionTimingModifiers& timingModifiers){
     sc_time ret = SC_ZERO_TIME;
     for(FunctionIds::const_iterator iter = functions.begin();
         iter != functions.end();
         ++iter) {
       FunctionId fid = *iter;
       assert(fid < functionTimes.size());
-      ret += functionTimes[fid];
+      boost::shared_ptr<TimingModifier> modifier = timingModifiers[fid];
+      ret += modifier->modify(functionTimes[fid]);
+    }
+    return ret;
+  }
+
+  sc_time rePlaySummarizeFunctionTimes(const FunctionIds& functions,
+      const FunctionTimes& functionTimes,
+      const FunctionTimingModifiers& timingModifiers){
+    sc_time ret = SC_ZERO_TIME;
+    for(FunctionIds::const_iterator iter = functions.begin();
+        iter != functions.end();
+        ++iter) {
+      FunctionId fid = *iter;
+      assert(fid < functionTimes.size());
+      boost::shared_ptr<TimingModifier> modifier = timingModifiers[fid];
+      ret += modifier->rePlay(functionTimes[fid]);
     }
     return ret;
   }
@@ -101,58 +151,24 @@ namespace SystemC_VPC{
   sc_time FunctionTiming::getDelay(
     FunctionIds functions) const
   {
-
-//TODO: grocki: random test
-
-    base_generator_type generator(42);
-    boost::uniform_real<> uni_dist(0.8,1.2);
-    boost::variate_generator<base_generator_type&, boost::uniform_real<> > uni(generator, uni_dist);
-
-    double tmp = uni();
-    std::cout << "sc_time FunctionTiming::getDelay(functions) " << tmp << " " << uni() << " ";
-    if (functions.begin() == functions.end()){
-      std::cout << "vorher: " << getBaseDelay() << " nacher: " << getBaseDelay()*tmp << " ";
-      return getBaseDelay()*tmp;
-    }
-    std::cout << "vorher: " << summarizeFunctionTimes(functions, funcDelays) << " nacher: " << summarizeFunctionTimes(functions, funcDelays)*tmp << " ";
-    return summarizeFunctionTimes(functions, funcDelays)*tmp;
-
-/*    std::cout << "sc_time FunctionTiming::getDelay(functions) " << uni() << " " << uni() << " ";
     if (functions.begin() == functions.end()){
       return getBaseDelay();
     }
-    return summarizeFunctionTimes(functions, funcDelays);*/
+    return summarizeFunctionTimes(functions, funcDelays,funcTimingModifiers);
   }
-	
+
   void FunctionTiming::addTimingModifier( FunctionId fid,
-                                                        TimingModifier timingModifier ){
+                                          boost::shared_ptr<TimingModifier> timingModifier ){
     if( fid >= funcTimingModifiers.size())
-      funcTimingModifiers.resize( fid + 100, TimingModifier());
+      funcTimingModifiers.resize( fid + 100, boost::shared_ptr<TimingModifier>(new TimingModifier()));
 
     this->funcTimingModifiers[fid] = timingModifier;
   }
 
-//TODO: grocki: random end
-  TimingModifier FunctionTiming::getTimingModifier(
-    FunctionIds functions) const
-  {
-    if (functions.begin() == functions.end()){
-	    return getBaseTimingModifier();
-    }
-//TODO: grocki: random end
-  // return summarizeFunctionTimes(functions, funcLatencies);
-	  return TimingModifier();
-  }
-  void FunctionTiming::setBaseTimingModifier( TimingModifier timingModifier){
+  void FunctionTiming::setBaseTimingModifier( boost::shared_ptr<TimingModifier> timingModifier){
     this->funcTimingModifiers[defaultFunctionId] = timingModifier;
   }
-
-//TODO: grocki: random end
-  TimingModifier FunctionTiming::getBaseTimingModifier( ) const {
-    return this->funcTimingModifiers[defaultFunctionId];
-  }
-
-//TODO: grocki: end
+//grocki: end
 
   void FunctionTiming::addLatency( FunctionId fid,
                                                         sc_time latency ){
@@ -167,26 +183,30 @@ namespace SystemC_VPC{
   }
 
   sc_time FunctionTiming::getBaseLatency( ) const {
-    return this->funcLatencies[defaultFunctionId];
+//grocki: random
+    boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+    return modifier->rePlay(this->funcLatencies[defaultFunctionId]);
+//grocki: end
   }
 
   sc_time FunctionTiming::getLatency(
-    FunctionIds functions) const
+    FunctionIds functions)
   {
+    this->reset(functions);
     if (functions.begin() == functions.end()){
       return getBaseLatency();
     }
-   return summarizeFunctionTimes(functions, funcLatencies);
+//grocki: random
+   return rePlaySummarizeFunctionTimes(functions, funcLatencies,funcTimingModifiers);
+//grocki: end
   }
 
   void FunctionTiming::setTiming(const Config::Timing& timing){
     this->addDelay(timing.getFunctionId(),   timing.getDii());
     this->addLatency(timing.getFunctionId(), timing.getLatency());
-//TODO: grocki: random
-		this->addTimingModifier(timing.getFunctionId(), timing.getTimingModifier());
-		TimingModifier Tmp = timing.getTimingModifier();
-		Tmp.hello();
-//TODO: grocki: end
+//grocki: random
+    this->addTimingModifier(timing.getFunctionId(), timing.getTimingModifier());
+//grocki: end
   }
 
   /**
@@ -277,6 +297,7 @@ namespace SystemC_VPC{
   }
 
   void ProcessControlBlock::setTiming(const Config::Timing& timing){
+    //grocki: random?
     const PowerMode *mode = this->component->translatePowerMode(timing.getPowerMode());
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->setTiming(timing);

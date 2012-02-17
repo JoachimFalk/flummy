@@ -105,13 +105,11 @@ using CoSupport::SystemC::Event;
      * 
      */
     void initDelays(){
-//TODO grocki:
-/*timing->getModifier(fid);
-sc_time dii = etDelay
-lat = getLatency
-modify(dii, lat)*/
       assert(pcb != NULL);
       FunctionIds fids = this->getFunctionIds();
+//grocki: random
+      //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
+//grocki: end
       this->setDelay(this->timingScale * timing->getDelay(fids) //lat
           + this->extraDelay);
       this->setRemainingDelay(this->getDelay());

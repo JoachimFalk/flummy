@@ -20,31 +20,34 @@ namespace Config
 Timing::Timing(std::string function, sc_core::sc_time dii,
     sc_core::sc_time latency) :
   function_(function), dii_(dii), latency_(latency), fid_(
-      Director::createFunctionId(function)), powerMode_("SLOW")
+      Director::createFunctionId(function)), powerMode_("SLOW"),
+      timingModifier_(new TimingModifier)
 {
 }
 
 Timing::Timing(std::string function, sc_core::sc_time dii) :
   function_(function), dii_(dii), latency_(dii), fid_(
-      Director::createFunctionId(function)), powerMode_("SLOW")
+      Director::createFunctionId(function)), powerMode_("SLOW"),
+      timingModifier_(new TimingModifier)
 {
 }
 
 Timing::Timing(sc_core::sc_time dii, sc_core::sc_time latency) :
   function_(""), dii_(dii), latency_(latency), fid_(Director::createFunctionId(
-      "")), powerMode_("SLOW")
+      "")), powerMode_("SLOW"),timingModifier_(new TimingModifier)
 {
 }
 
 Timing::Timing(sc_core::sc_time dii) :
   function_(""), dii_(dii), latency_(dii),
-      fid_(Director::createFunctionId("")), powerMode_("SLOW")
+      fid_(Director::createFunctionId("")), powerMode_("SLOW"),
+      timingModifier_(new TimingModifier)
 {
 }
 
 Timing::Timing() :
   function_(""), dii_(0, SC_NS), latency_(0, SC_NS), fid_(0),
-      powerMode_("SLOW")
+      powerMode_("SLOW"),timingModifier_(new TimingModifier)
 {
 }
 
@@ -56,7 +59,6 @@ bool Timing::operator<(const Timing & other) const
 
 sc_core::sc_time Timing::getDii() const
 {
-  std::cout << "dii " << dii_ << " was read" << std::endl;
   return dii_;
 }
 
@@ -72,7 +74,6 @@ std::string Timing::getFunction() const
 
 sc_core::sc_time Timing::getLatency() const
 {
-  std::cout << "lat " << latency_ << " was read" << std::endl;
   return latency_;
 }
 
@@ -86,18 +87,18 @@ void Timing::setDii(sc_core::sc_time dii_)
   this->dii_ = dii_;
 }
 
-//TODO: grocki: random test
-void Timing::setTimingModifier(TimingModifier)
+//grocki: random test
+void Timing::setTimingModifier(boost::shared_ptr<TimingModifier> timingModifier_)
 {
-  this->range_ = range_;
+  this->timingModifier_ = timingModifier_;
 }
 
-TimingModifier Timing::getTimingModifier() const
+boost::shared_ptr<TimingModifier> Timing::getTimingModifier() const
 {
-  return this->range_;
+  return this->timingModifier_;
 }
 
-//TODO: grocki: end 
+//grocki: end 
 
 void Timing::setFunction(std::string function_)
 {
