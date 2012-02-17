@@ -133,7 +133,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "UniformTimingModifier hello" << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -156,8 +155,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "BernoulliTimingModifier hello" << std::endl;
-	std::cout << "p: " << this->random.p() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -181,8 +178,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "BinomialTimingModifier hello" << std::endl;
-	std::cout << "t: " << this->random.t() << " ,p: " << this->random.p() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -205,8 +200,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "cauchyTimingModifier hello" << std::endl;
-	std::cout << "median: " << this->random.median() << " ,sigma: " << this->random.sigma() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -229,8 +222,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "exponentialTimingModifier hello" << std::endl;
-	std::cout << "lambda: " << this->random.lambda() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -253,8 +244,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "gammaTimingModifier hello" << std::endl;
-        std::cout << "alpha: " << this->random.alpha() << " beta: " << this->random.beta() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -277,8 +266,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "geometricTimingModifier hello" << std::endl;
-	std::cout << "p: " << this->random.p() << std::endl;
-//	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -305,8 +292,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "lognormalTimingModifier hello" << std::endl;
-//	std::cout << "m: " << this->random.m() << " ,s: " << this->random.s() << std::endl;
-//	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       boost::lognormal_distribution<> random;
@@ -325,8 +310,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "normalTimingModifier hello" << std::endl;
-        std::cout << "mean: " << this->random.mean() << " sigma: " << this->random.sigma() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -349,8 +332,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "poissonTimingModifier hello" << std::endl;
-	std::cout << "mean: " << this->random.mean() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){
@@ -373,8 +354,6 @@ namespace SystemC_VPC{
 
       virtual void hello(){
         std::cout << "triangleTimingModifier hello" << std::endl;
-	std::cout << "a: " << this->random.a() << " ,b: " << this->random.b() << " ,c: " << random.c() << std::endl;
-	std::cout << "min: " << this->random.min() << " ,max: " << this->random.max() << std::endl;
       }
 
       virtual double getFactor(){

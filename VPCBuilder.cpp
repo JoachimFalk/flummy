@@ -782,13 +782,9 @@ namespace VC = Config;
           double param1;
           stm.str(NStr(parameter1->getNodeValue()));
           stm >> param1;
-          std::istringstream stm2;
-          double param2;
-          stm2.str(NStr(parameter2->getNodeValue()));
-          stm2 >> param2;
          
           if (param1>0 && param2>0){
-            return boost::shared_ptr<TimingModifier>(new GammaTimingModifier(boost::gamma_distribution<>(param1,param2),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new GammaTimingModifier(boost::gamma_distribution<>(param1),this->generator,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
