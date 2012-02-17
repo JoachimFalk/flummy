@@ -49,13 +49,25 @@
   #include <systemcvpc/debug_off.hpp>
 #endif
 
-//TODO: grocki: random
+//grocki: random
 #include <systemcvpc/TimingModifier.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/random/bernoulli_distribution.hpp>
+#include <boost/random/binomial_distribution.hpp>
+#include <boost/random/cauchy_distribution.hpp>
+#include <boost/random/exponential_distribution.hpp>
+#include <boost/random/gamma_distribution.hpp>
+#include <boost/random/geometric_distribution.hpp>
+#include <boost/random/lognormal_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/poisson_distribution.hpp>
+#include <boost/random/triangle_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <time.h>
 typedef boost::minstd_rand base_generator_type;
-//TODO: grocki: end
+// grocki: end
 
 namespace SystemC_VPC{
 
@@ -169,11 +181,6 @@ namespace VC = Config;
         return;
       }
       
-//TODO: grocki: random
-      // set the seed generation of random times
-      this->seed = new base_generator_type(42);
-			
-//TODO: grocki: end
       // set treewalker to documentroot
       vpcConfigTreeWalker =
         vpcConfigDoc->createTreeWalker(
@@ -183,6 +190,22 @@ namespace VC = Config;
 
       vpcConfigTreeWalker->setCurrentNode(
         (DOMNode*)vpcConfigDoc->getDocumentElement());
+
+//TODO: grocki: random
+      DOMNode* nodetest = (DOMNode*)vpcConfigDoc->getDocumentElement();
+      DOMNamedNodeMap* atts=nodetest->getAttributes();
+      DOMNode* seed = atts->getNamedItem(seedAttrStr);
+      bool hasSeed = (seed != NULL);
+      if (hasSeed){
+        std::istringstream stm;
+        stm.str(NStr(seed->getNodeValue()));
+        double value;
+        stm >>value;
+        this->generator = boost::shared_ptr<base_generator_type>(new base_generator_type(value));
+      } else {
+        this->generator = boost::shared_ptr<base_generator_type>(new base_generator_type(time(NULL)));
+      } 
+//TODO: grocki: end
       
       // moves the Treewalker to the first Child 
       DOMNode* node = vpcConfigTreeWalker->firstChild(); 
@@ -248,7 +271,6 @@ namespace VC = Config;
           if(node != NULL){ 
             //foreach mapping of configuration perfom initialization  
             for(; node!=0; node = this->vpcConfigTreeWalker->nextSibling()){
-		std::cerr << "mapping?";
               //this->initMappingAPStruct(node);
               this->initMappingAPStruct();
             }
@@ -378,7 +400,6 @@ namespace VC = Config;
       NStr sSource = atts->getNamedItem(sourceAttrStr)->getNodeValue();
 
 
-      std::cout <<  "VPCBuilder> Found mapping attribute: source=" << sSource << " target=" << sTarget << std::endl; 
       DBG_OUT( "VPCBuilder> Found mapping attribute: source=" << sSource
                << " target=" << sTarget << std::endl); 
 
@@ -406,9 +427,7 @@ namespace VC = Config;
             if( xmlName == timingStr ){
               try {
                 VC::Timing t = this->parseTiming( attnode );
-//grocki: random
-               	std::cout << "timing:" << t.getLatency() << "," << t.getDii() << "," << t.getFunction() << "," << std::endl;
-//grocki: end
+//grocki: random?
                 if (t.getFunctionId() == defaultFunctionId) {
                   provider->addDefaultActorTiming(sSource, t);
                 } else {
@@ -565,6 +584,14 @@ namespace VC = Config;
                 if( xmlName == timingStr ){
                   try {
                     VC::Timing t = this->parseTiming( timingNode );
+//grocki: random
+/*    DOMNode* distribution = atts->getNamedItem(distributionAttrStr);
+    bool hasDistribution = (distribution != NULL);
+    if (hasDistribution){
+      t.setTimingModifier(this->parseTimingModifier(node));
+      t.getTimingModifier()->hello();
+    }*/
+//grocki: end
                     hop.setTransferTiming(t);
                   } catch(InvalidArgumentException &e) {
                     std::string msg("Error with route: ");
@@ -620,11 +647,9 @@ namespace VC = Config;
     DOMNode* dii     = atts->getNamedItem(diiAttrStr);
     DOMNode* delay   = atts->getNamedItem(delayAttrStr);
     DOMNode* latency = atts->getNamedItem(latencyAttrStr);
-
     bool hasDii     = (dii != NULL);
     bool hasDelay   = (delay != NULL);
     bool hasLatency = (latency != NULL);
-
     if (hasDelay && !hasDii && !hasLatency) {
       sc_time d = Director::createSC_Time(NStr(delay->getNodeValue()));
       t.setDii(d);
@@ -644,10 +669,232 @@ namespace VC = Config;
 
       throw InvalidArgumentException(msg);
     }
-//TODO: grocki: random begin
-       t.setTimingModifier(TimingModifier(*(this->seed)));
-//TODO: grocki: end
+
+//grocki: random
+    DOMNode* distribution = atts->getNamedItem(distributionAttrStr);
+    bool hasDistribution = (distribution != NULL);
+    if (hasDistribution){
+      t.setTimingModifier(this->parseTimingModifier(node));
+      t.getTimingModifier()->hello();
+    }
+//grocki: end
+
     return t;
   }
+
+
+//grocki: random
+  boost::shared_ptr<TimingModifier> VPCBuilder::parseTimingModifier(DOMNode* node) throw(InvalidArgumentException){
+    DOMNamedNodeMap* atts = node->getAttributes();
+    DOMNode* min = atts->getNamedItem(minAttrStr);
+    DOMNode* max = atts->getNamedItem(maxAttrStr);
+    DOMNode* parameter1 = atts->getNamedItem(parameter1AttrStr);
+    DOMNode* parameter2 = atts->getNamedItem(parameter2AttrStr);
+    DOMNode* parameter3 = atts->getNamedItem(parameter3AttrStr);
+    DOMNode* distribution = atts->getNamedItem(distributionAttrStr);
+    bool hasMin = (min != NULL);
+    bool hasMax = (max != NULL);
+    bool hasParameter1 = (parameter1 != NULL);
+    bool hasParameter2 = (parameter2 != NULL);
+    bool hasParameter3 = (parameter3 != NULL);
+
+      std::string distr = NStr(distribution->getNodeValue());
+
+      double minValue = -1;
+      double maxValue = -1;
+      if (hasMin){
+        std::istringstream stm;
+        stm.str(NStr(min->getNodeValue()));
+        stm >> minValue;
+      }
+      if (minValue<-1){
+        minValue=0;
+      }
+      if (hasMax){
+        std::istringstream stm;
+        stm.str(NStr(max->getNodeValue()));
+        stm >> maxValue;
+      }
+      if (minValue >= maxValue){
+        maxValue=-1;
+      } 
+
+      if (distr.compare("bernoulli")==0){
+	if (hasParameter1){
+          std::istringstream stm;
+          double param1;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+         
+          if (param1>=0 && param1<=1){
+            return boost::shared_ptr<TimingModifier>(new BernoulliTimingModifier(boost::bernoulli_distribution<>(param1),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("binomial")==0){
+	if (hasParameter1 && hasParameter2){
+          std::istringstream stm;
+          int param1;
+          double param2;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+          std::istringstream stm2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
+         
+          if (param2>=0 && param2<=1 && param1>=0){
+            return boost::shared_ptr<TimingModifier>(new BinomialTimingModifier(boost::binomial_distribution<>(param1,param2),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("cauchy")==0){
+	if (hasParameter1 && hasParameter2){
+          std::istringstream stm;
+          double param1;
+          double param2;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+          std::istringstream stm2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
+         
+          return boost::shared_ptr<TimingModifier>(new CauchyTimingModifier(boost::cauchy_distribution<>(param1,param2),this->generator,minValue,maxValue));
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("exponential")==0){
+	if (hasParameter1){
+          std::istringstream stm;
+          double param1;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+         
+          if (param1>0){
+            return boost::shared_ptr<TimingModifier>(new ExponentialTimingModifier(boost::exponential_distribution<>(param1),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("gamma")==0){
+	if (hasParameter1 && hasParameter2){
+          std::istringstream stm;
+          double param1;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+          std::istringstream stm2;
+          double param2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
+         
+          if (param1>0 && param2>0){
+            return boost::shared_ptr<TimingModifier>(new GammaTimingModifier(boost::gamma_distribution<>(param1,param2),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("geometric")==0){
+	if (hasParameter1){
+          std::istringstream stm;
+          double param1;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+         
+          if (param1>0 && param1<1){
+            return boost::shared_ptr<TimingModifier>(new GeometricTimingModifier(boost::geometric_distribution<>(param1),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("lognormal")==0){
+	if (hasParameter1 && hasParameter2){
+          double param1;
+          double param2;
+          std::istringstream stm;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+          std::istringstream stm2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
+         
+          if (param1>0){
+            return boost::shared_ptr<TimingModifier>(new LognormalTimingModifier(boost::lognormal_distribution<>(param1,param2),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("normal")==0){
+	if (hasParameter1 && hasParameter2){
+          double param1;
+          double param2;
+          std::istringstream stm;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+          std::istringstream stm2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
+         
+          if (param2>=0){
+            return boost::shared_ptr<TimingModifier>(new NormalTimingModifier(boost::normal_distribution<>(param1,param2),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("poisson")==0){
+	if (hasParameter1){
+          std::istringstream stm;
+          double param1;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+         
+          if (param1>0){
+            return boost::shared_ptr<TimingModifier>(new PoissonTimingModifier(boost::poisson_distribution<>(param1),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("triangle")==0){
+	if (hasParameter1 && hasParameter2 && hasParameter3){
+          double param1;
+          double param2;
+          double param3;
+          std::istringstream stm;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+          std::istringstream stm2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
+          std::istringstream stm3;
+          stm3.str(NStr(parameter3->getNodeValue()));
+          stm3 >> param3;
+         
+          if (param1<=param2 && param2<=param3){
+            return boost::shared_ptr<TimingModifier>(new TriangleTimingModifier(boost::triangle_distribution<>(param1,param2,param3),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      } else if (distr.compare("uniformReal")==0){
+	if (hasParameter1 && hasParameter2){
+          double param1;
+          double param2;
+          std::istringstream stm;
+          stm.str(NStr(parameter1->getNodeValue()));
+          stm >> param1;
+          std::istringstream stm2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
+          std::cout << param1 << "," << param2 << std::endl;
+         
+          if (param1<param2){
+            return boost::shared_ptr<TimingModifier>(new UniformRealTimingModifier(boost::uniform_real<>(param1,param2),this->generator,minValue,maxValue));
+          }
+          throw InvalidArgumentException("invalid parameter for distribution");
+	}
+        throw InvalidArgumentException("missing parameter for distribution");
+      }
+      throw InvalidArgumentException("unknown distribution");
+  }
+//grocki: end
 
 }// namespace SystemC_VPC

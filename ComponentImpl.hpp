@@ -213,12 +213,10 @@ namespace SystemC_VPC{
      *
      */
     void moveToRemainingPipelineStages(Task* task){
-      std::cout << "   void moveToRemainingPipelineStages(Task* task){";
-
+//grocki: random?
       sc_time now                 = sc_time_stamp();
       sc_time restOfLatency       = task->getLatency()  - task->getDelay();
       sc_time end                 = now + restOfLatency;
-	std::cout << "test3 ";
       if(end <= now){
         //early exit if (Latency-DII) <= 0
         //std::cerr << "Early exit: " << task->getName() << std::endl;

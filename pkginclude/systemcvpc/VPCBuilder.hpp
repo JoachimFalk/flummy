@@ -44,9 +44,11 @@
 #include "Attribute.hpp"
 
 //TODO: grocki: random
+#include <systemcvpc/TimingModifier.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 typedef boost::minstd_rand base_generator_type;
 //TODO: grocki: end
 
@@ -98,6 +100,15 @@ namespace SystemC_VPC{
     CX::XStr delayAttrStr;
     CX::XStr diiAttrStr;
     CX::XStr latencyAttrStr;
+//grocki: random
+    CX::XStr minAttrStr;
+    CX::XStr maxAttrStr;
+    CX::XStr parameter1AttrStr;
+    CX::XStr parameter2AttrStr;
+    CX::XStr parameter3AttrStr;
+    CX::XStr distributionAttrStr;
+    CX::XStr seedAttrStr;
+//grocki: end
     CX::XStr fnameAttrStr;
     CX::XStr destinationAttrStr;
     CX::XStr tracingAttrStr;
@@ -155,6 +166,15 @@ namespace SystemC_VPC{
       delayAttrStr        = "delay";
       diiAttrStr          = "dii";
       latencyAttrStr      = "latency";
+//grocki: random
+      minAttrStr          = "min";
+      maxAttrStr          = "max";
+      parameter1AttrStr   = "parameter1";
+      parameter2AttrStr   = "parameter2";
+      parameter3AttrStr   = "parameter3";
+      distributionAttrStr = "distribution";
+      seedAttrStr         = "seed";
+//grocki: end
       fnameAttrStr        = "fname";
       destinationAttrStr  = "destination";
       tracingAttrStr      = "tracing";
@@ -183,12 +203,10 @@ namespace SystemC_VPC{
     
   private:
 
-//grocki
-	  /**
-		 * \brief the seed for the generation of random times
-		 */
-
-    base_generator_type* seed;
+//grocki: random
+    boost::uniform_real<> distribution;
+    boost::shared_ptr<base_generator_type> generator;
+//grocki: end
     
     /**
      * \brief Initialize a component from the configuration file
@@ -223,6 +241,7 @@ namespace SystemC_VPC{
     */
     Config::Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
 
+    boost::shared_ptr<TimingModifier> parseTimingModifier(DOMNode* node) throw(InvalidArgumentException);
   };
     
 }
