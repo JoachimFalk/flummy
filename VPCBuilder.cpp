@@ -201,10 +201,8 @@ namespace VC = Config;
         stm.str(NStr(seed->getNodeValue()));
         double value;
         stm >>value;
-        this->generator = boost::shared_ptr<base_generator_type>(new base_generator_type(value));
-        this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(value))
+        this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(value));
       } else {
-        this->generator = boost::shared_ptr<base_generator_type>(new base_generator_type(time(NULL)));
         this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(time(NULL)));
       } 
 //TODO: grocki: end
@@ -729,7 +727,7 @@ namespace VC = Config;
           stm >> param1;
          
           if (param1>=0 && param1<=1){
-            return boost::shared_ptr<TimingModifier>(new BernoulliTimingModifier(boost::bernoulli_distribution<>(param1),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new BernoulliTimingModifier(this->gen,param1,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -746,7 +744,7 @@ namespace VC = Config;
           stm2 >> param2;
          
           if (param2>=0 && param2<=1 && param1>=0){
-            return boost::shared_ptr<TimingModifier>(new BinomialTimingModifier(boost::binomial_distribution<>(param1,param2),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new BinomialTimingModifier(this->gen,param1,param2,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -762,7 +760,7 @@ namespace VC = Config;
           stm2.str(NStr(parameter2->getNodeValue()));
           stm2 >> param2;
          
-          return boost::shared_ptr<TimingModifier>(new CauchyTimingModifier(boost::cauchy_distribution<>(param1,param2),this->generator,minValue,maxValue));
+          return boost::shared_ptr<TimingModifier>(new CauchyTimingModifier(this->gen,param1,param2,minValue,maxValue));
 	}
         throw InvalidArgumentException("missing parameter for distribution");
       } else if (distr.compare("exponential")==0){
@@ -773,7 +771,7 @@ namespace VC = Config;
           stm >> param1;
          
           if (param1>0){
-            return boost::shared_ptr<TimingModifier>(new ExponentialTimingModifier(boost::exponential_distribution<>(param1),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new ExponentialTimingModifier(this->gen,param1,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -790,8 +788,7 @@ namespace VC = Config;
           stm2 >> param2;
          
           if (param1>0 && param2>0){
-						boost::shared_ptr<boost::mt19937> gen = boost::shared_ptr<boost::mt19937>( new boost::mt19937());
-            return boost::shared_ptr<TimingModifier>(new GammaTimingModifier(gen,param1,param2,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new GammaTimingModifier(this->gen,param1,param2,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -804,7 +801,7 @@ namespace VC = Config;
           stm >> param1;
          
           if (param1>0 && param1<1){
-            return boost::shared_ptr<TimingModifier>(new GeometricTimingModifier(boost::geometric_distribution<>(param1),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new GeometricTimingModifier(this->gen,param1,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -821,7 +818,7 @@ namespace VC = Config;
           stm2 >> param2;
          
           if (param1>0){
-            return boost::shared_ptr<TimingModifier>(new LognormalTimingModifier(boost::lognormal_distribution<>(param1,param2),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new LognormalTimingModifier(this->gen,param1,param2,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -838,8 +835,7 @@ namespace VC = Config;
           stm2 >> param2;
          
           if (param2>=0){
-						boost::shared_ptr<boost::mt19937> gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937());
-            return boost::shared_ptr<TimingModifier>(new NormalTimingModifier(gen,param1,param2,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new NormalTimingModifier(this->gen,param1,param2,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -852,7 +848,7 @@ namespace VC = Config;
           stm >> param1;
          
           if (param1>0){
-            return boost::shared_ptr<TimingModifier>(new PoissonTimingModifier(boost::poisson_distribution<>(param1),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new PoissonTimingModifier(this->gen,param1,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -873,7 +869,7 @@ namespace VC = Config;
           stm3 >> param3;
          
           if (param1<=param2 && param2<=param3){
-            return boost::shared_ptr<TimingModifier>(new TriangleTimingModifier(boost::triangle_distribution<>(param1,param2,param3),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new TriangleTimingModifier(this->gen,param1,param2,param3,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -891,7 +887,7 @@ namespace VC = Config;
           std::cout << param1 << "," << param2 << std::endl;
          
           if (param1<param2){
-            return boost::shared_ptr<TimingModifier>(new UniformRealTimingModifier(boost::uniform_real<>(param1,param2),this->generator,minValue,maxValue));
+            return boost::shared_ptr<TimingModifier>(new UniformRealTimingModifier(this->gen,param1,param2,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
