@@ -15,6 +15,7 @@
 
 #include <systemc>
 #include <vector>
+#include <boost/random.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/bernoulli_distribution.hpp>
@@ -82,7 +83,9 @@ namespace SystemC_VPC{
       //generates a new random factor used later for modification 
 
       virtual void reRoll(){
+				std::cout << "reRoll begin" << std::endl;
         while (1){
+				  std::cout << "reRoll inner begin" << std::endl;
           double roled = getFactor();
           if ((roled >= minValue) && ((roled < maxValue) || (maxValue == -1))) {
             this->factor = roled+1;
@@ -91,7 +94,9 @@ namespace SystemC_VPC{
           } else {
             std::cout << "nofactor: " << roled << std::endl;
           }  
+				  std::cout << "reRoll inner end" << std::endl;
         }
+				std::cout << "reRoll end" << std::endl;
       }
 
       virtual double getFactor(){
@@ -114,6 +119,7 @@ namespace SystemC_VPC{
       boost::uniform_real<> random;
       double factor;
       boost::shared_ptr<base_generator_type> generator;
+			boost::shared_ptr<boost::mt19937> gen;
       std::vector<double> history;
       unsigned int position;
       double minValue;
@@ -235,11 +241,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      GammaTimingModifier(boost::gamma_distribution<> random,boost::shared_ptr<base_generator_type> generator,double minValue,double maxValue){
-	this->generator = generator;
-	this->random = random;
+      GammaTimingModifier(boost::shared_ptr<boost::mt19937> generator,double shape,double scale,double minValue,double maxValue){
+        this->gen = generator;
         this->minValue = minValue;
         this->maxValue = maxValue;
+				this->random = boost::gamma_distribution<> (shape);
+				this->scale = scale;  
+				std::cout << scale << std::endl;
       }
 
       virtual void hello(){
@@ -247,9 +255,13 @@ namespace SystemC_VPC{
       }
 
       virtual double getFactor(){
-        return this->random(*(this->generator.get()));
+				std::cout << "scale start" << std::endl;
+				boost::variate_generator<boost::mt19937&,boost::gamma_distribution<> > gen(*(this->gen.get()),this->random);
+        return gen()*this->scale;
+				std::cout << "scale end" << std::endl;
       }
 
+      double scale;
       boost::gamma_distribution<> random;
   };
 
@@ -258,8 +270,8 @@ namespace SystemC_VPC{
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
       GeometricTimingModifier(boost::geometric_distribution<> random,boost::shared_ptr<base_generator_type> generator,double minValue,double maxValue){
-	this->generator = generator;
-	this->random = random;
+        this->generator = generator;
+        this->random = random;
         this->minValue = minValue;
         this->maxValue = maxValue;
       }
@@ -301,11 +313,11 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      NormalTimingModifier(boost::normal_distribution<> random,boost::shared_ptr<base_generator_type> generator,double minValue,double maxValue){
-	this->generator = generator;
-	this->random = random;
+      NormalTimingModifier(boost::shared_ptr<boost::mt19937> generator,double mean,double sigma,double minValue,double maxValue){
         this->minValue = minValue;
         this->maxValue = maxValue;
+				this->random = boost::normal_distribution<> (mean, sigma);
+				this->gen = generator;
       }
 
       virtual void hello(){
@@ -313,10 +325,12 @@ namespace SystemC_VPC{
       }
 
       virtual double getFactor(){
-        return this->random(*(this->generator.get()));
+				boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > gen(*(this->gen.get()),this->random);
+        return gen();
       }
 
       boost::normal_distribution<> random;
+			boost::shared_ptr<boost::mt19937> gen;
   };
 
   class PoissonTimingModifier : public BaseTimingModifier {
