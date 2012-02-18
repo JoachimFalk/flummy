@@ -206,6 +206,7 @@ namespace SystemC_VPC{
 //grocki: random
     boost::uniform_real<> distribution;
     boost::shared_ptr<base_generator_type> generator;
+		boost::shared_ptr<boost::mt19937> gen;
 //grocki: end
     
     /**

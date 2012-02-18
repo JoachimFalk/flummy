@@ -202,8 +202,10 @@ namespace VC = Config;
         double value;
         stm >>value;
         this->generator = boost::shared_ptr<base_generator_type>(new base_generator_type(value));
+        this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(value))
       } else {
         this->generator = boost::shared_ptr<base_generator_type>(new base_generator_type(time(NULL)));
+        this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(time(NULL)));
       } 
 //TODO: grocki: end
       
@@ -782,9 +784,14 @@ namespace VC = Config;
           double param1;
           stm.str(NStr(parameter1->getNodeValue()));
           stm >> param1;
+          std::istringstream stm2;
+          double param2;
+          stm2.str(NStr(parameter2->getNodeValue()));
+          stm2 >> param2;
          
-          if (param1>0){
-            return boost::shared_ptr<TimingModifier>(new GammaTimingModifier(boost::gamma_distribution<>(param1),this->generator,minValue,maxValue));
+          if (param1>0 && param2>0){
+						boost::shared_ptr<boost::mt19937> gen = boost::shared_ptr<boost::mt19937>( new boost::mt19937());
+            return boost::shared_ptr<TimingModifier>(new GammaTimingModifier(gen,param1,param2,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
@@ -831,7 +838,8 @@ namespace VC = Config;
           stm2 >> param2;
          
           if (param2>=0){
-            return boost::shared_ptr<TimingModifier>(new NormalTimingModifier(boost::normal_distribution<>(param1,param2),this->generator,minValue,maxValue));
+						boost::shared_ptr<boost::mt19937> gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937());
+            return boost::shared_ptr<TimingModifier>(new NormalTimingModifier(gen,param1,param2,minValue,maxValue));
           }
           throw InvalidArgumentException("invalid parameter for distribution");
 	}
