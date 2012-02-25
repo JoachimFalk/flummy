@@ -1,10 +1,10 @@
 <!ELEMENT vpcconfiguration (resultfile?, measurefile?, resources, mappings, topology?)>
 <!ATTLIST vpcconfiguration
-seed CDATA #IMPLIED>
+name CDATA #IMPLIED>
 
 <!ELEMENT resultfile EMPTY>
 <!ATTLIST resultfile
-name CDATA #REQUIRED>
+seed CDATA #REQUIRED>
 
 <!ELEMENT measurefile EMPTY>
 <!ATTLIST measurefile
@@ -41,12 +41,10 @@ powermode CDATA #IMPLIED
 delay   CDATA #IMPLIED
 dii     CDATA #IMPLIED
 latency CDATA #IMPLIED
-distribution CDATA #IMPLIED
 parameter1 CDATA #IMPLIED
 parameter2 CDATA #IMPLIED
 parameter3 CDATA #IMPLIED
-min CDATA #IMPLIED
-max CDATA #IMPLIED
+distribution CDATA #IMPLIED
 fname   CDATA #IMPLIED>
 
 <!ELEMENT topology (route)*>
@@ -62,6 +60,6 @@ type        CDATA #IMPLIED
 tracing     CDATA #IMPLIED
 >
 
-<!ELEMENT hop (attribute|timing)*>
+<!ELEMENT hop (timing|attribute)*>
 <!ATTLIST hop
 name    CDATA #IMPLIED>

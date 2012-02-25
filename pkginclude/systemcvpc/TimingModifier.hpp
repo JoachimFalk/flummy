@@ -83,14 +83,16 @@ namespace SystemC_VPC{
       //generates a new random factor used later for modification 
 
       virtual void reRoll(){
-        while (1){
-          double roled = getFactor();
-          if ((roled >= minValue) && ((roled < maxValue) || (maxValue == -1))) {
-            this->factor = roled+1;
-            std::cout << "factor: " << this->factor-1 << std::endl;
-            break;
-          } else {
-            std::cout << "nofactor: " << roled << std::endl;
+				if (this->factor == -1 || !this->isfixed){
+          while (1){
+            double roled = getFactor();
+            if ((roled >= minValue) && ((roled < maxValue) || (maxValue == -1))) {
+              this->factor = roled+1;
+              std::cout << "factor: " << this->factor-1 << std::endl;
+              break;
+            } else {
+              std::cout << "nofactor: " << roled << std::endl;
+						}
           }  
         }
       }
@@ -102,12 +104,10 @@ namespace SystemC_VPC{
       virtual void reset(){
         this->position = 0;
         this->history.clear();
-        std::cout << "reset" << std::endl;
       }
 
       virtual sc_core::sc_time rePlay(sc_core::sc_time time){
         this->position++;
-        std::cout << "(replay) old: " << time << " modified: " << time*(this->history[(this->position)-1]) << std::endl;
         return time*(this->history[(this->position)-1]);
       }
 
@@ -119,17 +119,20 @@ namespace SystemC_VPC{
       unsigned int position;
       double minValue;
       double maxValue;
+			bool isfixed;
   };
 
   class UniformRealTimingModifier : public BaseTimingModifier {
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      UniformRealTimingModifier(boost::shared_ptr<boost::mt19937> generator,double min,double max,double minValue,double maxValue){
+      UniformRealTimingModifier(boost::shared_ptr<boost::mt19937> generator,double min,double max,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::uniform_real<> (min,max);
         this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -148,11 +151,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      BernoulliTimingModifier(boost::shared_ptr<boost::mt19937> generator,double p,double minValue,double maxValue){
+      BernoulliTimingModifier(boost::shared_ptr<boost::mt19937> generator,double p,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::bernoulli_distribution<> (p);
         this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -172,11 +177,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      BinomialTimingModifier(boost::shared_ptr<boost::mt19937> generator,int t,double p,double minValue,double maxValue){
+      BinomialTimingModifier(boost::shared_ptr<boost::mt19937> generator,int t,double p,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::binomial_distribution<> (t,p);
         this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -195,11 +202,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      CauchyTimingModifier(boost::shared_ptr<boost::mt19937> generator,double median,double sigma,double minValue,double maxValue){
+      CauchyTimingModifier(boost::shared_ptr<boost::mt19937> generator,double median,double sigma,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::cauchy_distribution<> (median,sigma);
         this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -218,11 +227,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      ExponentialTimingModifier(boost::shared_ptr<boost::mt19937> generator,double lambda,double minValue,double maxValue){
+      ExponentialTimingModifier(boost::shared_ptr<boost::mt19937> generator,double lambda,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::exponential_distribution<> (lambda);
         this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -241,12 +252,14 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      GammaTimingModifier(boost::shared_ptr<boost::mt19937> generator,double shape,double scale,double minValue,double maxValue){
+      GammaTimingModifier(boost::shared_ptr<boost::mt19937> generator,double shape,double scale,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::gamma_distribution<> (shape);
         this->gen = generator;
 				this->scale = scale;  
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -266,11 +279,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      GeometricTimingModifier(boost::shared_ptr<boost::mt19937> generator,double p,double minValue,double maxValue){
+      GeometricTimingModifier(boost::shared_ptr<boost::mt19937> generator,double p,double minValue,double maxValue,bool isfixed){
         this->gen = generator;
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::geometric_distribution<> (p);
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -289,11 +304,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      LognormalTimingModifier(boost::shared_ptr<boost::mt19937> generator,double mean,double sigma,double minValue,double maxValue){
+      LognormalTimingModifier(boost::shared_ptr<boost::mt19937> generator,double mean,double sigma,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::lognormal_distribution<> (mean,sigma);
         this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -312,11 +329,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      NormalTimingModifier(boost::shared_ptr<boost::mt19937> generator,double mean,double sigma,double minValue,double maxValue){
+      NormalTimingModifier(boost::shared_ptr<boost::mt19937> generator,double mean,double sigma,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::normal_distribution<> (mean, sigma);
 				this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -335,11 +354,13 @@ namespace SystemC_VPC{
 
     public:
       //the regular constructor, it needs a random-distribution and a random-generator
-      PoissonTimingModifier(boost::shared_ptr<boost::mt19937> generator,double mean,double minValue,double maxValue){
+      PoissonTimingModifier(boost::shared_ptr<boost::mt19937> generator,double mean,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::poisson_distribution<> (mean);
 				this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
@@ -357,11 +378,13 @@ namespace SystemC_VPC{
   class TriangleTimingModifier : public BaseTimingModifier {
 
     public:
-      TriangleTimingModifier(boost::shared_ptr<boost::mt19937> generator,double a,double b,double c,double minValue,double maxValue){
+      TriangleTimingModifier(boost::shared_ptr<boost::mt19937> generator,double a,double b,double c,double minValue,double maxValue,bool isfixed){
         this->minValue = minValue;
         this->maxValue = maxValue;
 				this->random = boost::triangle_distribution<> (a,b,c);
 				this->gen = generator;
+        this->isfixed = isfixed;
+				this->factor = -1;
       }
 
       virtual void hello(){
