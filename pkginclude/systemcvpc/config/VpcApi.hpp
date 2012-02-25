@@ -31,6 +31,9 @@ namespace Config
 {
 
 typedef std::map<std::string, Component::Ptr> Components;
+typedef std::map<std::string, boost::shared_ptr<TimingModifier> > Modifiers;
+
+void createDistribution(std::string name, boost::shared_ptr<TimingModifier> modifier);
 
 Component::Ptr createComponent(std::string name, Scheduler::Type scheduler =
     Scheduler::FCFS);
@@ -47,7 +50,11 @@ Route::Ptr getRoute(std::string source, std::string dest);
 
 Route::Ptr getRoute(const sc_port_base * leafPort);
 
+bool hasDistribution(std::string name);
+
 bool hasComponent(std::string name);
+
+Modifiers & getDistributions();
 
 Components & getComponents();
 

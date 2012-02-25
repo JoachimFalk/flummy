@@ -106,8 +106,12 @@ namespace SystemC_VPC{
     CX::XStr parameter1AttrStr;
     CX::XStr parameter2AttrStr;
     CX::XStr parameter3AttrStr;
+    CX::XStr baseAttrStr;
+    CX::XStr fixedAttrStr;
     CX::XStr distributionAttrStr;
     CX::XStr seedAttrStr;
+		CX::XStr distributionsStr;
+		CX::XStr distributionStr;
 //grocki: end
     CX::XStr fnameAttrStr;
     CX::XStr destinationAttrStr;
@@ -167,11 +171,15 @@ namespace SystemC_VPC{
       diiAttrStr          = "dii";
       latencyAttrStr      = "latency";
 //grocki: random
+      distributionsStr    = "distributions";
+			distributionStr     = "distribution";
       minAttrStr          = "min";
       maxAttrStr          = "max";
       parameter1AttrStr   = "parameter1";
       parameter2AttrStr   = "parameter2";
       parameter3AttrStr   = "parameter3";
+      baseAttrStr         = "base";
+      fixedAttrStr        = "fixed";
       distributionAttrStr = "distribution";
       seedAttrStr         = "seed";
 //grocki: end
@@ -207,6 +215,7 @@ namespace SystemC_VPC{
     boost::uniform_real<> distribution;
     boost::shared_ptr<base_generator_type> generator;
 		boost::shared_ptr<boost::mt19937> gen;
+    void initDistribution();
 //grocki: end
     
     /**
