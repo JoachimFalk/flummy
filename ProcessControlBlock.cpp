@@ -10,13 +10,11 @@
  * ----------------------------------------------------------------------------
  */
 
-//grocki: random
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 typedef boost::minstd_rand base_generator_type;
 #include <systemcvpc/TimingModifier.hpp>
-//grocki: end
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/AbstractComponent.hpp>
@@ -44,9 +42,7 @@ namespace SystemC_VPC{
   FunctionTiming::FunctionTiming( )
     : funcDelays(1, SC_ZERO_TIME),
       funcLatencies(1, SC_ZERO_TIME),
-//grocki: random
       funcTimingModifiers(1, boost::shared_ptr<TimingModifier>(new TimingModifier()))
-//grocki: end
   {
     setBaseDelay(SC_ZERO_TIME);
     setBaseLatency(SC_ZERO_TIME);
@@ -55,9 +51,7 @@ namespace SystemC_VPC{
   FunctionTiming::FunctionTiming( const FunctionTiming &delay )
     : funcDelays(    delay.funcDelays    ),
       funcLatencies( delay.funcLatencies ),
-//grocki: random 
       funcTimingModifiers( delay.funcTimingModifiers)
-//grocki: end
   {
     setBaseDelay(   delay.getBaseDelay()   );
     setBaseLatency( delay.getBaseLatency() );
@@ -80,11 +74,11 @@ namespace SystemC_VPC{
     this->funcDelays[defaultFunctionId] = delay;
   }
 
-//grocki: random
   sc_time FunctionTiming::getBaseDelay( ) const {
     boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
     return modifier->modify(this->funcDelays[defaultFunctionId]);
   }
+
   void FunctionTiming::reset(
     FunctionIds functions)
   {
@@ -98,23 +92,6 @@ namespace SystemC_VPC{
       FunctionId fid = *iter;
       boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[fid];
       modifier->reset();
-    }
-  }
-
-
-  void FunctionTiming::reRoll(
-    FunctionIds functions) 
-  {
-    if (functions.begin() == functions.end()){
-      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
-      modifier->reRoll();
-    }
-    for(FunctionIds::const_iterator iter = functions.begin();
-        iter != functions.end();
-        ++iter) {
-      FunctionId fid = *iter;
-      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[fid];
-      modifier->reRoll();
     }
   }
 
@@ -168,7 +145,6 @@ namespace SystemC_VPC{
   void FunctionTiming::setBaseTimingModifier( boost::shared_ptr<TimingModifier> timingModifier){
     this->funcTimingModifiers[defaultFunctionId] = timingModifier;
   }
-//grocki: end
 
   void FunctionTiming::addLatency( FunctionId fid,
                                                         sc_time latency ){
@@ -183,10 +159,9 @@ namespace SystemC_VPC{
   }
 
   sc_time FunctionTiming::getBaseLatency( ) const {
-//grocki: random
     boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+	  //replay the result from getBaseDelay() to get identical modifications
     return modifier->rePlay(this->funcLatencies[defaultFunctionId]);
-//grocki: end
   }
 
   sc_time FunctionTiming::getLatency(
@@ -196,17 +171,14 @@ namespace SystemC_VPC{
     if (functions.begin() == functions.end()){
       return getBaseLatency();
     }
-//grocki: random
+	 //replay the result from getDelay() to get identical modifications
    return rePlaySummarizeFunctionTimes(functions, funcLatencies,funcTimingModifiers);
-//grocki: end
   }
 
   void FunctionTiming::setTiming(const Config::Timing& timing){
     this->addDelay(timing.getFunctionId(),   timing.getDii());
     this->addLatency(timing.getFunctionId(), timing.getLatency());
-//grocki: random
     this->addTimingModifier(timing.getFunctionId(), timing.getTimingModifier());
-//grocki: end
   }
 
   /**
@@ -297,7 +269,6 @@ namespace SystemC_VPC{
   }
 
   void ProcessControlBlock::setTiming(const Config::Timing& timing){
-    //grocki: random?
     const PowerMode *mode = this->component->translatePowerMode(timing.getPowerMode());
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->setTiming(timing);

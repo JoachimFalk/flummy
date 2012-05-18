@@ -31,9 +31,9 @@ namespace Config
 {
 
 typedef std::map<std::string, Component::Ptr> Components;
-typedef std::map<std::string, boost::shared_ptr<TimingModifier> > Modifiers;
+typedef std::map<std::string, boost::shared_ptr<DistributionTimingModifier> > Modifiers;
 
-void createDistribution(std::string name, boost::shared_ptr<TimingModifier> modifier);
+void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier);
 
 Component::Ptr createComponent(std::string name, Scheduler::Type scheduler =
     Scheduler::FCFS);

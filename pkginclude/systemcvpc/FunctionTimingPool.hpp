@@ -18,18 +18,14 @@
 
 #include "FastLink.hpp"
 #include "config/Timing.hpp"
-//grocki: random
 #include <systemcvpc/TimingModifier.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-//grocki: end
 
 
 namespace SystemC_VPC {
 
   typedef std::vector<sc_time> FunctionTimes;
-//grocki: random 
   typedef std::vector<boost::shared_ptr<TimingModifier> > FunctionTimingModifiers;
-//grocki: end
 
   /**
    * Internal helper class to manage  function specific delays.
@@ -93,21 +89,32 @@ namespace SystemC_VPC {
      * \return Returns the sum of function latencies. The default latency is
      * returned if no function names are given.
      */
-//grocki: random 
     sc_time getLatency(FunctionIds functions);
 
 
     /**
-     *
+     * \brief set the timing of the instace
+		 * \param timing is the timing to set
      */
     void setTiming(const Config::Timing& timing);
 
+    /**
+		 * \brief adds TimingModifiers to the instance
+		 * \param fids is the id of the function the timingModifiers should be added to
+		 * \param timingModifier is the timingModifier to set
+		 */
     void addTimingModifier(FunctionId fid, boost::shared_ptr<TimingModifier> timingModifier);
+
+		/**
+		 * \brief set the base timingModifier
+		 * \param timingModifier is the timingModifier to set
+		 */
     void setBaseTimingModifier( boost::shared_ptr<TimingModifier> timingModifier);
-    void reRoll(FunctionIds functions);
+		/**
+		 * \brief drop the history of the modifications
+		 * \param functions is a list of functionids affected
+		 */
     void reset(FunctionIds functions);
-    void goBack();
-//grocki: end
 
   private:
 
@@ -117,10 +124,8 @@ namespace SystemC_VPC {
     // map of possible function specific latencies
     FunctionTimes funcLatencies;
 
-//grocki: random
     // map of possible Timing Modifiers
     FunctionTimingModifiers funcTimingModifiers;
-//grocki: end		
 
   };
 

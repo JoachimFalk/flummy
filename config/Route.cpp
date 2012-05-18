@@ -33,9 +33,6 @@ Hop & Hop::setPriority(size_t priority_)
 Hop & Hop::setTransferTiming(Timing transferTiming_)
 {
   this->transferTiming_ = transferTiming_;
-//grocki: random
-  std::cout << "test" << std::endl;
-//grocki: end
   return *this;
 }
 
@@ -51,9 +48,6 @@ size_t Hop::getPriority() const
 
 Timing Hop::getTransferTiming() const
 {
-//grocki: random
-  std::cout << "test" << std::endl;
-//grocki: end
   return transferTiming_;
 }
 

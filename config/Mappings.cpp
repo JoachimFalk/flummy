@@ -180,7 +180,6 @@ SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute)
     ProcessControlBlockPtr pcb = c->createPCB(Director::getProcessId(route->getName()));
     pcb->configure(route->getName(), false);
     pcb->setTraceSignal(c->getOrCreateTraceSignal(route->getName()));
-//grocki: random?
     pcb->setTiming(iter->getTransferTiming());
     pcb->setPriority(iter->getPriority());
 
