@@ -47,7 +47,7 @@ std::map<std::string, VpcTask::Ptr>& getVpcTasksByName()
 
 static std::map<const ScheduledTask *, VpcTask::Ptr> vpcTasks;
 
-void createDistribution(std::string name, boost::shared_ptr<TimingModifier> modifier)
+void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier)
 {
 	if(!hasDistribution(name)) {
 		getDistributions()[name] = modifier;

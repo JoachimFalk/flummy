@@ -71,8 +71,6 @@ namespace SystemC_VPC{
           Director::createSC_Time(powerAtt->getParameter("transaction_delay"));
       }
       if(powerAtt->hasParameter("transfer_delay")) {
-//grocki: random?
-        std::cout << "check 2" << std::endl;
         this->transactionDelays[power] =
           Director::createSC_Time(powerAtt->getParameter("transfer_delay"));
       }

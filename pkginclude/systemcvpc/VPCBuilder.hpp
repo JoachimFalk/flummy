@@ -43,14 +43,12 @@
 #include "config/Timing.hpp"
 #include "Attribute.hpp"
 
-//TODO: grocki: random
 #include <systemcvpc/TimingModifier.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 typedef boost::minstd_rand base_generator_type;
-//TODO: grocki: end
 
 XERCES_CPP_NAMESPACE_USE
 namespace SystemC_VPC{
@@ -100,7 +98,6 @@ namespace SystemC_VPC{
     CX::XStr delayAttrStr;
     CX::XStr diiAttrStr;
     CX::XStr latencyAttrStr;
-//grocki: random
     CX::XStr minAttrStr;
     CX::XStr maxAttrStr;
     CX::XStr parameter1AttrStr;
@@ -110,9 +107,10 @@ namespace SystemC_VPC{
     CX::XStr fixedAttrStr;
     CX::XStr distributionAttrStr;
     CX::XStr seedAttrStr;
-		CX::XStr distributionsStr;
-		CX::XStr distributionStr;
-//grocki: end
+    CX::XStr dataAttrStr;
+    CX::XStr scaleAttrStr;
+    CX::XStr distributionsStr;
+    CX::XStr distributionStr;
     CX::XStr fnameAttrStr;
     CX::XStr destinationAttrStr;
     CX::XStr tracingAttrStr;
@@ -170,9 +168,8 @@ namespace SystemC_VPC{
       delayAttrStr        = "delay";
       diiAttrStr          = "dii";
       latencyAttrStr      = "latency";
-//grocki: random
       distributionsStr    = "distributions";
-			distributionStr     = "distribution";
+      distributionStr     = "distribution";
       minAttrStr          = "min";
       maxAttrStr          = "max";
       parameter1AttrStr   = "parameter1";
@@ -182,7 +179,8 @@ namespace SystemC_VPC{
       fixedAttrStr        = "fixed";
       distributionAttrStr = "distribution";
       seedAttrStr         = "seed";
-//grocki: end
+      dataAttrStr         = "data";
+      scaleAttrStr        = "scale";
       fnameAttrStr        = "fname";
       destinationAttrStr  = "destination";
       tracingAttrStr      = "tracing";
@@ -211,12 +209,10 @@ namespace SystemC_VPC{
     
   private:
 
-//grocki: random
-    boost::uniform_real<> distribution;
-    boost::shared_ptr<base_generator_type> generator;
-		boost::shared_ptr<boost::mt19937> gen;
+    /**
+     * \brief Initialize a distribution from the configuration file
+     */
     void initDistribution();
-//grocki: end
     
     /**
      * \brief Initialize a component from the configuration file
@@ -251,7 +247,11 @@ namespace SystemC_VPC{
     */
     Config::Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
 
-    boost::shared_ptr<TimingModifier> parseTimingModifier(DOMNode* node) throw(InvalidArgumentException);
+    //variables for the generation of random times
+    boost::uniform_real<> distribution;
+    boost::shared_ptr<base_generator_type> generator;
+    boost::shared_ptr<boost::mt19937> gen;
+    boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(DOMNode* node) throw(InvalidArgumentException);
   };
     
 }

@@ -7,9 +7,7 @@
 
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/Director.hpp>
-//grocki: random
 #include <systemcvpc/TimingModifier.hpp>
-//grocki: end
 
 namespace SystemC_VPC
 {
@@ -87,7 +85,6 @@ void Timing::setDii(sc_core::sc_time dii_)
   this->dii_ = dii_;
 }
 
-//grocki: random test
 void Timing::setTimingModifier(boost::shared_ptr<TimingModifier> timingModifier_)
 {
   this->timingModifier_ = timingModifier_;
@@ -97,8 +94,6 @@ boost::shared_ptr<TimingModifier> Timing::getTimingModifier() const
 {
   return this->timingModifier_;
 }
-
-//grocki: end 
 
 void Timing::setFunction(std::string function_)
 {

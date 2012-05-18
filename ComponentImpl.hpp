@@ -213,7 +213,6 @@ namespace SystemC_VPC{
      *
      */
     void moveToRemainingPipelineStages(Task* task){
-//grocki: random?
       sc_time now                 = sc_time_stamp();
       sc_time restOfLatency       = task->getLatency()  - task->getDelay();
       sc_time end                 = now + restOfLatency;
