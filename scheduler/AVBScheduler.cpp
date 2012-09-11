@@ -139,6 +139,12 @@ namespace SystemC_VPC{
         if((*it)->get_priority_level() != last_active){
           if((*it)->task_queue->size()!= 0){
             (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+            if((*it)->wasEmpty()){
+                if((*it)->has_credit()){
+                    (*it)->reset_credit();
+                }
+            (*it)->setWasEmpty(false);
+            }
           }else if(!(*it)->has_credit()){
             (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
             if((*it)->has_credit()){
