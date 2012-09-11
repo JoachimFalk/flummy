@@ -145,6 +145,8 @@ namespace SystemC_VPC{
     std::deque<std::pair<std::string, std::string> > _properties;
     int last_active;
     sc_time time_last_assign;
+  private:
+    bool firstrun;
 
   };
 }
