@@ -24,6 +24,7 @@ namespace SystemC_VPC{
     newEntry = new AVBListEntry( new std::queue<Task*>, INT_MAX, 1.0);
     p_list.insert(p_list.begin(), newEntry);
     last_active = -1;
+    firstrun=true;
     time_last_assign = sc_time_stamp();
   
   }
@@ -127,9 +128,10 @@ namespace SystemC_VPC{
    {
     scheduling_decision ret_decision=NOCHANGE;
     std::list<AVBListEntry*>::iterator it;
-    if(time_last_assign == SC_ZERO_TIME){
+    if(firstrun){
       //QuickFix for initial credit-error
       time_last_assign=sc_time_stamp() ;
+      firstrun=false;
     }
     if(running_tasks.size()!=0){
       //no preemption! Only update the credits!
@@ -152,6 +154,7 @@ namespace SystemC_VPC{
             }
           }
         }else{
+          (*it)->setWasEmpty(false);
           (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
         }
       }
