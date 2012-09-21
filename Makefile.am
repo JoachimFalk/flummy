@@ -72,6 +72,7 @@ libsystemcvpc_la_SOURCES =			\
 	scheduler/TDMAScheduler.cpp		\
 	scheduler/MostScheduler.cpp   \
 	scheduler/MostSecondaryScheduler.cpp   \
+	scheduler/StreamShaperScheduler.cpp   \
 						\
 	tracing/DataBaseTracer.cpp		\
 	tracing/Tracing.cpp			\

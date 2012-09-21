@@ -38,7 +38,8 @@ enum Type
   TDMA,
   TTCC,
   AVB,
-  MOST
+  MOST,
+  StreamShaper
 };
 
 Type parseScheduler(std::string name);
