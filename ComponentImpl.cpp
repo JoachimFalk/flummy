@@ -22,6 +22,7 @@
 #include "ComponentImpl.hpp"
 #include "scheduler/AVBScheduler.hpp"
 #include <scheduler/MostScheduler.hpp>
+#include <scheduler/StreamShaperScheduler.hpp>
 #include <scheduler/MostSecondaryScheduler.hpp>
 #include "scheduler/FlexRayScheduler.hpp"
 #include "scheduler/FCFSScheduler.hpp"
@@ -73,6 +74,9 @@ namespace SystemC_VPC{
         break;
       case Config::Scheduler::MOST:
         scheduler = new MostScheduler();
+        break;
+      case Config::Scheduler::StreamShaper:
+        scheduler = new StreamShaperScheduler();
         break;
       default:
         scheduler = new FCFSScheduler();

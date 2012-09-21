@@ -45,6 +45,7 @@ Type parseScheduler(std::string name)
   static const std::string STR_FCFS_NO_TT = "FCFS-noTT";
   static const std::string STR_AVB = "AVB";
   static const std::string STR_MOST = "MOST";
+  static const std::string STR_STREAMSHAPER = "StreamShaper";
 
   if (name == STR_TDMA) {
     return TDMA;
@@ -72,6 +73,8 @@ Type parseScheduler(std::string name)
     return AVB;
   } else if (name == STR_MOST){
     return MOST;
+  } else if (name == STR_STREAMSHAPER){
+    return StreamShaper;
   } else {
     throw Config::ConfigException("Unknown scheduler \"" + name
         + "\" for component: " + name);
