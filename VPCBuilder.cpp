@@ -573,9 +573,12 @@ namespace VC = Config;
       }
 
       testAndRemoveFile("tracing.log");
+      testAndRemoveFile("absolute_tracing.log");
       if (tracingEnabled) {
         CoSupport::Tracing::TracingFactory::getInstance().setTraceFile(
             "tracing.log");
+        CoSupport::Tracing::TracingFactory::getInstance().setAbsoluteTraceFile(
+                    "absolute_tracing.log");
       }
 
     }catch(InvalidArgumentException &e){
