@@ -311,11 +311,13 @@ namespace SystemC_VPC{
         assert(false);
       }
       unsigned int last_used_buffer = 0;
+      //logBuffer << last_used_buffer << " " << sc_time_stamp() << std::endl;
 
       //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
       newTaskDuringOverhead=(newTasks.size()>0);
 
       while(1){
+      //  std::cout<<"Component " << this->getName() << "schedule_thread @ " << sc_time_stamp() << std::endl;
         //determine the time slice for next scheduling decision and wait for
         bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
                                                              readyTasks,

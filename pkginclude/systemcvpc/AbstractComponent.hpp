@@ -141,8 +141,7 @@ class ComponentObserver;
       //assert(this->canExecuteTasks == false);
       componentIdle->reset();
       if(!requestExecuteTasks && componentWakeup != 0){
-        std::cout<< "Comp: " << this->getName()<<" requestCanExecute() - componentWakeup->notify() @ " << sc_time_stamp() <<  std::endl;
-        std::cout<<" debug:"<< this->getReadyTasks().size() << " " << this->getRunningTasks().size() << std::endl;
+        //std::cout<< "Comp: " << this->getName()<<" requestCanExecute() - componentWakeup->notify() @ " << sc_time_stamp() <<  std::endl;
         //First request
         requestExecuteTasks=true;
         componentWakeup->notify();
@@ -154,11 +153,11 @@ class ComponentObserver;
         //FIXME: why did I use sc_pending_activity_at_current_time() here? what special-case?
       if(!hasWaitingOrRunningTasks() && (shutdownRequestAtTime == sc_time_stamp()) /*&& !sc_pending_activity_at_current_time()*/){
         if(componentIdle != 0){
-          std::cout<< "Comp: " << this->getName()<<" requestShutdown() - componentIdle->notify() @ " << sc_time_stamp() << " hasWaitingOrRunningTasks=" << hasWaitingOrRunningTasks()<< " " << sc_pending_activity_at_current_time() /*<< " " << m_simcontext->next_time()*/ <<  std::endl;
+          //std::cout<< "Comp: " << this->getName()<<" requestShutdown() - componentIdle->notify() @ " << sc_time_stamp() << " hasWaitingOrRunningTasks=" << hasWaitingOrRunningTasks()<< " " << sc_pending_activity_at_current_time() /*<< " " << m_simcontext->next_time()*/ <<  std::endl;
           //TODO: maybe notify it in the future?
           componentIdle->notify();
           if(sc_pending_activity_at_current_time()){
-              std::cout<<"sc_pending_activity_at_current_time"<<std::endl;
+            //  std::cout<<"sc_pending_activity_at_current_time"<<std::endl;
               return false;
           }
         }
