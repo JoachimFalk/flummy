@@ -210,6 +210,53 @@ bool hasWaitingOrRunningTasks(ScheduledTask & actor){
            if(ci != NULL)
                  return ci->hasWaitingOrRunningTasks();
    }
+   //should never reach here
+   return false;
+}
+
+void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr  event){
+  if(Director::getInstance().FALLBACKMODE)
+  {
+          return;
+  }
+  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  std::cout<<"VPCApiregisterComponentWakeup comp=" << component << std::endl;
+
+  if(component != NULL)
+  {
+          SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+          if(ci != NULL)
+                  ci->registerComponentWakeup(getCachedTask(actor)->getActor(), event);
+  }
+}
+
+void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr  event){
+
+  if(Director::getInstance().FALLBACKMODE)
+  {
+          return;
+  }
+  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  std::cout<<"VPCApiregisterComponentIdle comp=" << component << std::endl;
+  if(component != NULL)
+  {
+          SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+          if(ci != NULL)
+                  ci->registerComponentIdle(getCachedTask(actor)->getActor(), event);
+  }
+}
+
+void setCanExec(ScheduledTask & actor, bool canExec){
+  if(Director::getInstance().FALLBACKMODE){
+            return;
+    }
+    Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+    if(component != NULL)
+    {
+            SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+            if(ci != NULL)
+                    ci->setCanExec(canExec);
+    }
 }
 
 void setActorAsPSM(const char* name, bool psm)

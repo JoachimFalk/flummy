@@ -118,6 +118,8 @@ namespace SystemC_VPC{
       this->addObserver(gov);
     }
 
+    void reactivateExecution();
+
     void notifyActivation(ScheduledTask * scheduledTask,
         bool active);
 
@@ -132,10 +134,10 @@ namespace SystemC_VPC{
 
     sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
+    bool pendingTask;
 
     Scheduler *scheduler;
     std::deque<Task*>      newTasks;
-    
     sc_event notify_scheduler_thread;
     Event blockCompute;
     size_t   blockMutex;
@@ -189,26 +191,41 @@ namespace SystemC_VPC{
      *
      */
     void addTasks(){
-      //look for new tasks (they called compute)
-      while(newTasks.size()>0){
-        Task *newTask;
-        newTask=newTasks.front();
-        newTasks.pop_front();
-        DBG_OUT(this->getName() << " received new Task: "
-                << newTask->getName() << " at: "
-                << sc_time_stamp().to_default_time_units() << std::endl);
-        this->taskTracer_.release(newTask);
-        //insert new task in read list
-        assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
-                /* A task can call compute only one time! */);
-        assert( runningTasks.find(newTask->getInstanceId()) ==
-                runningTasks.end()
-                /* A task can call compute only one time! */);
-
-        readyTasks[newTask->getInstanceId()]=newTask;
-        scheduler->addedNewTask(newTask);
+      if(!this->getCanExecuteTasks()){
+        std::deque<Task*>::iterator iter = newTasks.begin();
+        for(;newTasks.size() > 0 && iter!=newTasks.end(); iter++){
+          if((*iter)->isPSM()){ //PSM - actors need to be executed - even if Component can not execute tasks
+            Task *newTask = *iter;
+            this->taskTracer_.release(newTask);
+            assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
+                    /* A task can call compute only one time! */);
+            assert( runningTasks.find(newTask->getInstanceId()) == runningTasks.end()
+                    /* A task can call compute only one time! */);
+            readyTasks[newTask->getInstanceId()]=newTask;
+            scheduler->addedNewTask(newTask);
+            newTasks.erase(iter);
+            iter = newTasks.begin();
+          }
+        }
+      }else{
+        //look for new tasks (they called compute)
+        while(newTasks.size()>0){
+          Task *newTask;
+          newTask=newTasks.front();
+          newTasks.pop_front();
+          DBG_OUT(this->getName() << " received new Task: "
+                  << newTask->getName() << " at: "
+                  << sc_time_stamp().to_default_time_units() << std::endl);
+          this->taskTracer_.release(newTask);
+          //insert new task in read list
+          assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
+                  /* A task can call compute only one time! */);
+          assert( runningTasks.find(newTask->getInstanceId()) == runningTasks.end()
+                  /* A task can call compute only one time! */);
+          readyTasks[newTask->getInstanceId()]=newTask;
+          scheduler->addedNewTask(newTask);
+        }
       }
-
     }
 
     /**
@@ -310,6 +327,11 @@ namespace SystemC_VPC{
               wait( timeslice - (*overhead),
                     notify_scheduler_thread );
             }else{
+              if(!pendingTask && !hasWaitingOrRunningTasks()){
+                if(!requestShutdown()){
+                  notify_scheduler_thread.notify();
+                }
+              }
               wait( notify_scheduler_thread );
             }
           }else{                                        // a task already runs
@@ -367,6 +389,11 @@ namespace SystemC_VPC{
         }
 
         this->addTasks();
+
+        if(!pendingTask && !hasWaitingOrRunningTasks())
+          if(!requestShutdown()){
+            notify_scheduler_thread.notify();
+          }
 
         int taskToResign,taskToAssign;
         scheduling_decision decision =

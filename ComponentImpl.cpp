@@ -94,7 +94,8 @@ namespace SystemC_VPC{
       return;
     }
     / * */
-    if(max_avail_buffer == 0 || (readyTasks.size() + newTasks.size()) < max_avail_buffer){
+    pendingTask = false;
+    if(max_avail_buffer == 0 || (readyTasks.size() + newTasks.size() + tasksDuringNoExecutionPhase.size()) < max_avail_buffer){
       ProcessId pid = actualTask->getProcessId();
       ProcessControlBlockPtr pcb = this->getPCB(pid);
       actualTask->setPCB(pcb);
@@ -113,11 +114,15 @@ namespace SystemC_VPC{
       //store added task
       newTasks.push_back(actualTask);
 
-      //awake scheduler thread
-      notify_scheduler_thread.notify();
-      blockCompute.notify();
+      if(this->getCanExecuteTasks() || actualTask->isPSM()){
+        //awake scheduler thread
+        notify_scheduler_thread.notify();
+        blockCompute.notify();
+      }else{
+        //TODO: This has to notify the scheduler after the CanExecute is set correctly
+        this->requestCanExecute();
+      }
     }else{
-      //std::cout<< "Message/Task " << actualTask->getName() << " dropped due to less buffer-space of component "<< getName() << std::endl;
       actualTask->getBlockEvent().latency->setDropped(true);
     }
   }
@@ -211,30 +216,84 @@ namespace SystemC_VPC{
 #endif // NO_POWER_SUM
   }
 
+/*
+ * used to reactivate a halted execution of the component
+ */
+  void Component::reactivateExecution(){
+    requestExecuteTasks=false;
+    while(!tasksDuringNoExecutionPhase.empty()){
+      TT::TimeNodePair pair = tasksDuringNoExecutionPhase.front();
+      ttReleaseQueue.push(pair);
+      tasksDuringNoExecutionPhase.pop_front();
+    }
+
+    if(!ttReleaseQueue.empty()){
+      if(ttReleaseQueue.top().time<=sc_time_stamp()){
+        releaseActors.notify();
+      }else{
+       sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+       releaseActors.notify(delta);
+      }
+    }
+    //awake scheduler thread
+    notify_scheduler_thread.notify();
+    blockCompute.notify();
+  }
+
   void Component::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
     if(active) {
-      ttReleaseQueue.push(
-          TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
+      TT::TimeNodePair newTask = TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask);
+      //std::cout<<"Component " << this->getName() << " notifyActivation("<<scheduledTask->getPid()<<", " << (this->getPCB(scheduledTask->getPid()))->getName() << " isPSM=" << this->getPCB(scheduledTask->getPid())->isPSM() << " @ " << newTask.time << " @ " << sc_time_stamp() << std::endl;
+      if(this->getCanExecuteTasks() || this->getPCB(scheduledTask->getPid())->isPSM()){
+        pendingTask = true;
+        ttReleaseQueue.push(newTask);
 
-      assert(ttReleaseQueue.top().time>=sc_time_stamp());
-      sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
-      releaseActors.notify(delta);
+        if(ttReleaseQueue.top().time<=sc_time_stamp()){
+          releaseActors.notify(SC_ZERO_TIME);
+        }else{
+         sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+         releaseActors.notify(delta);
+        }
+      }else{
+        tasksDuringNoExecutionPhase.push_back(newTask);
+        this->requestCanExecute();
+      }
     }
   }
 
   void Component::releaseActorsMethod(){
-    TT::TimeNodePair tnp = ttReleaseQueue.top();
-    ttReleaseQueue.pop();
-    assert(tnp.time == sc_time_stamp());
+//     if(this->getCanExecuteTasks()){ //not required, no "normal" task will be added to ttReleaseQueue
+    //std::cout<<"Component " << this->getName() << " releaseActorsMethod " << ttReleaseQueue.top().node->getPid() << " @ " << sc_time_stamp() << std::endl;
+      TT::TimeNodePair tnp = ttReleaseQueue.top();
+      sc_time curr = sc_time_stamp();
 
-    if(Director::canExecute(tnp.node)){
-      Director::execute(tnp.node);
-    }
-    if(!ttReleaseQueue.empty()){
-      assert(ttReleaseQueue.top().time>=sc_time_stamp());
-      sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
-      releaseActors.notify(delta);
-    }
+      if(tnp.time <= sc_time_stamp()){
+        ttReleaseQueue.pop();
+        assert(tnp.time <= sc_time_stamp());
+        if(this->getCanExecuteTasks() || this->getPCB(tnp.node->getPid())->isPSM()){
+          if(Director::canExecute(tnp.node)){
+            Director::execute(tnp.node);
+            pendingTask = true;
+          }else{
+            pendingTask = false;
+            notify_scheduler_thread.notify();
+          }
+        }else{
+          tasksDuringNoExecutionPhase.push_back(tnp);
+        }
+      }else{
+        std::cout<<"Spezial!" << std::endl;
+      }
+
+      if(!ttReleaseQueue.empty()){
+        if(ttReleaseQueue.top().time<=sc_time_stamp()){
+          releaseActors.notify();
+        }else{
+          assert(ttReleaseQueue.top().time>=sc_time_stamp());
+          sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+          releaseActors.notify(delta);
+        }
+      }
   }
 } //namespace SystemC_VPC
