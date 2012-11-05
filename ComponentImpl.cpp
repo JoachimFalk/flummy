@@ -123,6 +123,7 @@ namespace SystemC_VPC{
         this->requestCanExecute();
       }
     }else{
+      //std::cout<< "Message/Task " << actualTask->getName() << " dropped due to less buffer-space of component "<< getName() << " @ " << sc_time_stamp() << std::endl;
       actualTask->getBlockEvent().latency->setDropped(true);
     }
   }
@@ -209,6 +210,7 @@ namespace SystemC_VPC{
   Component::~Component(){
     this->setPowerConsumption(0.0);
     this->fireNotification(this);
+    //std::cout<<"MAX used Buffer of Component " << this->name() << " was " << max_used_buffer << std::endl;
 #ifndef NO_POWER_SUM
     this->removeObserver(powerSumming);
     delete powerSumming;
@@ -283,7 +285,7 @@ namespace SystemC_VPC{
           tasksDuringNoExecutionPhase.push_back(tnp);
         }
       }else{
-        std::cout<<"Spezial!" << std::endl;
+        //std::cout<<"Spezial!" << std::endl;
       }
 
       if(!ttReleaseQueue.empty()){
