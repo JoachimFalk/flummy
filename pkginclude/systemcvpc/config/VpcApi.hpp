@@ -73,6 +73,12 @@ void changePowerMode(ScheduledTask & actor,std::string powermode);
 
 bool hasWaitingOrRunningTasks(ScheduledTask & actor);
 
+void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr event);
+
+void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr event);
+
+void setCanExec(ScheduledTask & actor, bool canExec);
+
 /*
  * Sets the actor as a PSM actor.
  * The executing state of this actor will always set the component executing state to IDLE

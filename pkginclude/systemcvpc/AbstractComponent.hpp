@@ -38,6 +38,9 @@
 #include "ComponentModel.hpp"
 #include "Attribute.hpp"
 #include "FunctionTimingPool.hpp"
+#include "ScheduledTask.hpp"
+#include "../timetriggered/tt_support.hpp"
+#include <list>
 
 namespace SystemC_VPC{
 
@@ -133,10 +136,62 @@ class ComponentObserver;
 
     virtual Trace::Tracing * getOrCreateTraceSignal(std::string name) = 0;
 
+    void requestCanExecute(){
+
+      //assert(this->canExecuteTasks == false);
+      componentIdle->reset();
+      if(!requestExecuteTasks && componentWakeup != 0){
+        std::cout<< "Comp: " << this->getName()<<" requestCanExecute() - componentWakeup->notify() @ " << sc_time_stamp() <<  std::endl;
+        std::cout<<" debug:"<< this->getReadyTasks().size() << " " << this->getRunningTasks().size() << std::endl;
+        //First request
+        requestExecuteTasks=true;
+        componentWakeup->notify();
+      }
+    }
+
+    bool requestShutdown(){
+
+        //FIXME: why did I use sc_pending_activity_at_current_time() here? what special-case?
+      if(!hasWaitingOrRunningTasks() && (shutdownRequestAtTime == sc_time_stamp()) /*&& !sc_pending_activity_at_current_time()*/){
+        if(componentIdle != 0){
+          std::cout<< "Comp: " << this->getName()<<" requestShutdown() - componentIdle->notify() @ " << sc_time_stamp() << " hasWaitingOrRunningTasks=" << hasWaitingOrRunningTasks()<< " " << sc_pending_activity_at_current_time() /*<< " " << m_simcontext->next_time()*/ <<  std::endl;
+          //TODO: maybe notify it in the future?
+          componentIdle->notify();
+          if(sc_pending_activity_at_current_time()){
+              std::cout<<"sc_pending_activity_at_current_time"<<std::endl;
+              return false;
+          }
+        }
+      }else{
+        shutdownRequestAtTime = sc_time_stamp();
+        return false;
+      }
+      return true;
+    }
+
+    bool getCanExecuteTasks() const
+    {
+        return canExecuteTasks;
+    }
+
+    void setCanExecuteTasks(bool canExecuteTasks)
+    {
+      bool oldCanExecuteTasks = this->canExecuteTasks;
+      this->canExecuteTasks = canExecuteTasks;
+      if(!oldCanExecuteTasks && this->canExecuteTasks){
+        requestExecuteTasks = false;
+        this->reactivateExecution();
+      }
+    }
+
+    virtual void reactivateExecution(){};
+
   protected:
 
     std::map<const PowerMode*, sc_time> transactionDelays;
     ScheduledTasks scheduledTasks;
+    std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
+    bool requestExecuteTasks;
 
   public:
   
@@ -147,6 +202,7 @@ class ComponentObserver;
         transactionDelays(),
         scheduledTasks(),
         powerMode(NULL),
+        canExecuteTasks(true),
         localGovernorFactory(NULL),
         midPowerGov(NULL),
         powerAttribute(new Attribute("",""))
@@ -208,8 +264,31 @@ class ComponentObserver;
     /*
      * from ComponentInterface
      */
+    void setCanExec(bool canExec){
+      this->setCanExecuteTasks(canExec);
+    }
+
+    /*
+     * from ComponentInterface
+     */
+    void registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
+      componentWakeup = event;
+     }
+
+    /*
+     * from ComponentInterface
+     */
+    void registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
+      //std::cout<<"registerComponentIdle" << std::endl;
+      componentIdle = event;
+     }
+
+    /*
+     * from ComponentInterface
+     */
     bool hasWaitingOrRunningTasks(){
-      return (readyTasks.size() + runningTasks.size()) > 0;
+      //std::cout<<"hasWaitingOrRunningTasks() " << readyTasks.size() <<" " <<  runningTasks.size() << " " << tasksDuringNoExecutionPhase.size() << std::endl;
+      return (readyTasks.size() + runningTasks.size() + tasksDuringNoExecutionPhase.size()) > 0;
     }
 
         /* This function sets the appropriate execution state of the component according to the component powerstate
@@ -242,6 +321,10 @@ class ComponentObserver;
     FunctionTimingPoolPtr timingPool;
     std::map<const PowerMode*, FunctionTimingPoolPtr> timingPools;
     const PowerMode *powerMode;
+    bool canExecuteTasks;
+    sc_time shutdownRequestAtTime;
+    Coupling::VPCEvent::Ptr componentWakeup;
+    Coupling::VPCEvent::Ptr componentIdle;
 
   protected:
     PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
