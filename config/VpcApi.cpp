@@ -220,8 +220,6 @@ void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr  event){
           return;
   }
   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
-  std::cout<<"VPCApiregisterComponentWakeup comp=" << component << std::endl;
-
   if(component != NULL)
   {
           SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
@@ -237,7 +235,6 @@ void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr  event){
           return;
   }
   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
-  std::cout<<"VPCApiregisterComponentIdle comp=" << component << std::endl;
   if(component != NULL)
   {
           SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
