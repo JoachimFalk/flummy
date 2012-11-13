@@ -80,6 +80,26 @@ namespace SystemC_VPC{
     return true;
   }
 
+  bool AbstractComponent::processMCG(AttributePtr attPtr)
+  {
+    // hierarchical format
+    if(!attPtr->isType("multicastgroup")) {
+      return false;
+    }
+    std::string value = attPtr->getValue();
+    MultiCastGroup mcg = attPtr->getType();
+
+    for(size_t i=0; i<attPtr->getAttributeSize();++i){
+         AttributePtr mcgAtt = attPtr->getNextAttribute(i).second;
+         if(mcgAtt->isType("task")){
+             std::string task = mcgAtt->getValue();
+             ProcessId pid = Director::getInstance().getProcessId(task);
+             multiCastGroups[pid] = mcg;
+         }
+    }
+    return true;
+  }
+
 
   /**
    *
@@ -87,6 +107,8 @@ namespace SystemC_VPC{
   bool AbstractComponent::setAttribute(AttributePtr attribute){
     if(processPower(attribute)){
       return true;
+    }else if(processMCG(attribute)){
+        return true;
     }
 
     return false;

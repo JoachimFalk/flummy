@@ -516,8 +516,9 @@ ProcessId Director::getProcessId(std::string process_or_source,
     ProcessId pid = Director::getProcessId(src, dest);
     if (VC::Routing::has(pid) && VC::Routing::has(leafPort)) {
       if(VC::Routing::get(pid) != VC::Routing::get(leafPort)) {
-        throw VC::ConfigException("Route " + src + " -> " + dest +
-            " has configuration data from XML and from configuration API.");
+          std::cout<<"debug Multicast: " << VC::Routing::get(pid)->getDestination() << " and " << VC::Routing::get(leafPort)->getDestination() << std::endl;
+        /*throw VC::ConfigException("Route " + src + " -> " + dest +
+            " has configuration data from XML and from configuration API.");*/
       }
     } else if (!VC::Routing::has(pid) && !VC::Routing::has(leafPort)) {
       throw VC::ConfigException("Route " + src + " -> " + dest +
@@ -532,7 +533,7 @@ ProcessId Director::getProcessId(std::string process_or_source,
     }
 
     assert(VC::Routing::has(pid) && VC::Routing::has(leafPort));
-    assert(VC::Routing::get(pid) == VC::Routing::get(leafPort));
+    //assert(VC::Routing::get(pid) == VC::Routing::get(leafPort));
   }
 
   void finalizeMapping(std::string actorName,

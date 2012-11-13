@@ -51,6 +51,7 @@ class ComponentObserver;
   typedef std::map<ComponentState, double> PowerTable;
   typedef std::map<const PowerMode*, PowerTable>  PowerTables;
   typedef std::vector<ProcessId> ScheduledTasks;
+  typedef std::string MultiCastGroup;
 
 
   /**
@@ -157,7 +158,6 @@ class ComponentObserver;
           //TODO: maybe notify it in the future?
           componentIdle->notify();
           if(sc_pending_activity_at_current_time()){
-            //  std::cout<<"sc_pending_activity_at_current_time"<<std::endl;
               return false;
           }
         }
@@ -191,6 +191,52 @@ class ComponentObserver;
     ScheduledTasks scheduledTasks;
     std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
     bool requestExecuteTasks;
+    std::map<ProcessId, MultiCastGroup> multiCastGroups;
+
+    struct MultiCastGroupInstance{
+      MultiCastGroup mcg;
+      sc_time timestamp;
+      Task* task;
+      std::list<Task*>* additional_tasks;
+    };
+
+    std::list<MultiCastGroupInstance*> multiCastGroupInstances;
+
+
+    MultiCastGroupInstance* getMultiCastGroupInstance(Task* actualTask){
+      if(multiCastGroupInstances.size()!=0 ){
+        //there are MultiCastGroupInstances, let's find the correct one
+        for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
+            list_iter != multiCastGroupInstances.end(); list_iter++)
+        {
+              MultiCastGroupInstance* mcgi = *list_iter;
+            if(mcgi->mcg == multiCastGroups[actualTask->getProcessId()]){
+              bool existing =  (mcgi->task->getProcessId() == actualTask->getProcessId());
+              for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
+                  tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
+                  Task* task = *tasks_iter;
+                  if(task->getProcessId() == actualTask->getProcessId()){
+                      existing = true;
+                  }
+              }
+              //we assume a fixed order of token-events, thus, the first free one is the correct one.
+              if(!existing){
+                  mcgi->additional_tasks->push_back(actualTask);
+                  assert(mcgi->timestamp == sc_time_stamp()); // if not, MultiCastMessage reached at different times...
+                  return mcgi;
+              }
+            }
+        }
+      }
+      // no Instance found, create new one
+      MultiCastGroupInstance* newInstance = new MultiCastGroupInstance();
+      newInstance->mcg = multiCastGroups[actualTask->getProcessId()];
+      newInstance->timestamp = sc_time_stamp();
+      newInstance->task = actualTask;
+      newInstance->additional_tasks = new  std::list<Task*>();
+      multiCastGroupInstances.push_back(newInstance);
+      return newInstance;
+    }
 
   public:
   
@@ -309,6 +355,11 @@ class ComponentObserver;
   private:
 
     bool processPower(AttributePtr att);
+
+    /**
+     * process attributes/parameters for MultiCast Configuration
+     */
+    bool processMCG(AttributePtr attribute);
 
     void loadLocalGovernorPlugin(std::string plugin);
 
