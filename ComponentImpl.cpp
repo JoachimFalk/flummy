@@ -87,18 +87,6 @@ namespace SystemC_VPC{
    *
    */
   void Component::compute(Task* actualTask){
-    if(multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()){
-        //MCG vorhanden und Task auch als MultiCast zu behandeln
-        MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
-
-        //handling of buffer overflow
-        actualTask->getBlockEvent().latency->setDropped(instance->task->getBlockEvent().latency->getDropped());
-        if(instance->task != actualTask){
-            //instance already running...
-            //start tracing etc. TODO!
-            return;
-        }
-    }
     pendingTask = false;
     if(max_avail_buffer == 0 || (readyTasks.size() + newTasks.size() + tasksDuringNoExecutionPhase.size()) < max_avail_buffer){
       ProcessId pid = actualTask->getProcessId();
