@@ -387,6 +387,7 @@ namespace SystemC_VPC{
                              assert(Director::canExecute((*tasks_iter)->getProcessId()));
                              Director::execute((*tasks_iter)->getProcessId());
                            }
+                           this->taskTracer_.finishDii((*tasks_iter));
                            this->taskTracer_.finishLatency((*tasks_iter));
                            Director::getInstance().signalLatencyEvent((*tasks_iter));
                        }
