@@ -164,6 +164,30 @@ namespace SystemC_VPC{
     void setScheduler(const char *schedulername) {};
 
     void removeTask(){
+      if(multiCastGroups.size() != 0 && multiCastGroups.find(runningTask->getProcessId()) != multiCastGroups.end()){
+         for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
+                     list_iter != multiCastGroupInstances.end(); list_iter++)
+         {
+           MultiCastGroupInstance* mcgi = *list_iter;
+           if(mcgi->task == runningTask){
+             for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
+               tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
+               (*tasks_iter)->getBlockEvent().dii->notify();
+               if((*tasks_iter)->hasScheduledTask()){
+                 assert(Director::canExecute((*tasks_iter)->getProcessId()));
+                 Director::execute((*tasks_iter)->getProcessId());
+               }
+               this->taskTracer_.finishDii((*tasks_iter));
+               this->taskTracer_.finishLatency((*tasks_iter));
+               Director::getInstance().signalLatencyEvent((*tasks_iter));
+             }
+             multiCastGroupInstances.remove(mcgi);
+             delete(mcgi->additional_tasks);
+             delete(mcgi);
+             break;
+           }
+         }
+        }
         fireStateChanged(ComponentState::IDLE);
         this->taskTracer_.finishDii(runningTask);
         this->taskTracer_.finishLatency(runningTask);
@@ -461,13 +485,24 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 template<class TASKTRACER>
 void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
 {
+  if(multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()){
+      //MCG vorhanden und Task auch als MultiCast zu behandeln
+      MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
 
-  /* * /
-   if(blockMutex > 0) {
-   actualTask->abortBlockingCompute();
-   return;
-   }
-   / * */
+      if(instance->task != actualTask){
+        //instance already running...
+        if(instance->task->getBlockEvent().latency->getDropped()){
+            //handling of buffer overflow
+            actualTask->getBlockEvent().latency->setDropped(true);
+        }else{
+            ProcessId pid = actualTask->getProcessId();
+            ProcessControlBlockPtr pcb = this->getPCB(pid);
+                  actualTask->setPCB(pcb);
+          this->taskTracer_.release(actualTask);
+        }
+          return;
+      }
+  }
 
   ProcessId pid = actualTask->getProcessId();
   ProcessControlBlockPtr pcb = this->getPCB(pid);
