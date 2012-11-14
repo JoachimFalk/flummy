@@ -375,28 +375,28 @@ namespace SystemC_VPC{
               task->getBlockEvent().dii->notify();
 
               if(multiCastGroups.size() != 0 && multiCastGroups.find(task->getProcessId()) != multiCastGroups.end()){
-                     for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
-                                 list_iter != multiCastGroupInstances.end(); list_iter++)
-                       {
-                         MultiCastGroupInstance* mcgi = *list_iter;
-                         if(mcgi->task == task){
-                             for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
-                                 tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
-                                 (*tasks_iter)->getBlockEvent().dii->notify();
-                                 if((*tasks_iter)->hasScheduledTask()){
-                                   assert(Director::canExecute((*tasks_iter)->getProcessId()));
-                                   Director::execute((*tasks_iter)->getProcessId());
-                                 }
-                               //  this->taskTracer_.finishLatency((*tasks_iter)); //TODO: fix/add tracing
-                                 Director::getInstance().signalLatencyEvent((*tasks_iter));
-                             }
-                             multiCastGroupInstances.remove(mcgi);
-                             delete(mcgi->additional_tasks);
-                             delete(mcgi);
-                             break;
-                         }
+               for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
+                           list_iter != multiCastGroupInstances.end(); list_iter++)
+                 {
+                   MultiCastGroupInstance* mcgi = *list_iter;
+                   if(mcgi->task == task){
+                       for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
+                           tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
+                           (*tasks_iter)->getBlockEvent().dii->notify();
+                           if((*tasks_iter)->hasScheduledTask()){
+                             assert(Director::canExecute((*tasks_iter)->getProcessId()));
+                             Director::execute((*tasks_iter)->getProcessId());
+                           }
+                           this->taskTracer_.finishLatency((*tasks_iter));
+                           Director::getInstance().signalLatencyEvent((*tasks_iter));
                        }
+                       multiCastGroupInstances.remove(mcgi);
+                       delete(mcgi->additional_tasks);
+                       delete(mcgi);
+                       break;
                    }
+                 }
+              }
 
               if(task->hasScheduledTask()){
                 assert(Director::canExecute(task->getProcessId()));
@@ -546,6 +546,29 @@ namespace SystemC_VPC{
       }
       //fixme: close is never reached cause of while
       logBuffer.close();
+    }
+
+
+    void compute(Task* actualTask){
+      if(multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()){
+          //MCG vorhanden und Task auch als MultiCast zu behandeln
+          MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
+
+          if(instance->task != actualTask){
+            //instance already running...
+            if(instance->task->getBlockEvent().latency->getDropped()){
+                //handling of buffer overflow
+                actualTask->getBlockEvent().latency->setDropped(true);
+            }else{
+                ProcessId pid = actualTask->getProcessId();
+                ProcessControlBlockPtr pcb = this->getPCB(pid);
+                      actualTask->setPCB(pcb);
+              this->taskTracer_.release(actualTask);
+            }
+              return;
+          }
+      }
+      Component::compute(actualTask);
     }
 
 private:
