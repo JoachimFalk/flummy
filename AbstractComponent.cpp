@@ -86,8 +86,7 @@ namespace SystemC_VPC{
     if(!attPtr->isType("multicastgroup")) {
       return false;
     }
-    std::string value = attPtr->getValue();
-    MultiCastGroup mcg = attPtr->getType();
+    MultiCastGroup mcg = attPtr->getValue();
 
     for(size_t i=0; i<attPtr->getAttributeSize();++i){
          AttributePtr mcgAtt = attPtr->getNextAttribute(i).second;
