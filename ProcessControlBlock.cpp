@@ -10,12 +10,18 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+typedef boost::minstd_rand base_generator_type;
+#include <systemcvpc/TimingModifier.hpp>
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Director.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
+#include <ctime> 
 
 #include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_COMPONENT create stream and include debug macros
@@ -35,7 +41,8 @@ namespace SystemC_VPC{
 
   FunctionTiming::FunctionTiming( )
     : funcDelays(1, SC_ZERO_TIME),
-      funcLatencies(1, SC_ZERO_TIME)
+      funcLatencies(1, SC_ZERO_TIME),
+      funcTimingModifiers(1, boost::shared_ptr<TimingModifier>(new TimingModifier()))
   {
     setBaseDelay(SC_ZERO_TIME);
     setBaseLatency(SC_ZERO_TIME);
@@ -43,7 +50,8 @@ namespace SystemC_VPC{
 
   FunctionTiming::FunctionTiming( const FunctionTiming &delay )
     : funcDelays(    delay.funcDelays    ),
-      funcLatencies( delay.funcLatencies )
+      funcLatencies( delay.funcLatencies ),
+      funcTimingModifiers( delay.funcTimingModifiers)
   {
     setBaseDelay(   delay.getBaseDelay()   );
     setBaseLatency( delay.getBaseLatency() );
@@ -57,6 +65,7 @@ namespace SystemC_VPC{
       funcDelays.resize( fid + 100, SC_ZERO_TIME );
     }
     this->funcDelays[fid] = delay;
+
   }
 
   void FunctionTiming::setBaseDelay( sc_time delay ){
@@ -66,18 +75,52 @@ namespace SystemC_VPC{
   }
 
   sc_time FunctionTiming::getBaseDelay( ) const {
-    return this->funcDelays[defaultFunctionId];
+    boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+    return modifier->modify(this->funcDelays[defaultFunctionId]);
+  }
+
+  void FunctionTiming::reset(
+    FunctionIds functions)
+  {
+    if (functions.begin() == functions.end()){
+      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+      modifier->reset();
+    }
+    for(FunctionIds::const_iterator iter = functions.begin();
+        iter != functions.end();
+        ++iter) {
+      FunctionId fid = *iter;
+      boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[fid];
+      modifier->reset();
+    }
   }
 
   sc_time summarizeFunctionTimes(const FunctionIds& functions,
-      const FunctionTimes& functionTimes){
+      const FunctionTimes& functionTimes,
+      const FunctionTimingModifiers& timingModifiers){
     sc_time ret = SC_ZERO_TIME;
     for(FunctionIds::const_iterator iter = functions.begin();
         iter != functions.end();
         ++iter) {
       FunctionId fid = *iter;
       assert(fid < functionTimes.size());
-      ret += functionTimes[fid];
+      boost::shared_ptr<TimingModifier> modifier = timingModifiers[fid];
+      ret += modifier->modify(functionTimes[fid]);
+    }
+    return ret;
+  }
+
+  sc_time rePlaySummarizeFunctionTimes(const FunctionIds& functions,
+      const FunctionTimes& functionTimes,
+      const FunctionTimingModifiers& timingModifiers){
+    sc_time ret = SC_ZERO_TIME;
+    for(FunctionIds::const_iterator iter = functions.begin();
+        iter != functions.end();
+        ++iter) {
+      FunctionId fid = *iter;
+      assert(fid < functionTimes.size());
+      boost::shared_ptr<TimingModifier> modifier = timingModifiers[fid];
+      ret += modifier->rePlay(functionTimes[fid]);
     }
     return ret;
   }
@@ -88,7 +131,19 @@ namespace SystemC_VPC{
     if (functions.begin() == functions.end()){
       return getBaseDelay();
     }
-    return summarizeFunctionTimes(functions, funcDelays);
+    return summarizeFunctionTimes(functions, funcDelays,funcTimingModifiers);
+  }
+
+  void FunctionTiming::addTimingModifier( FunctionId fid,
+                                          boost::shared_ptr<TimingModifier> timingModifier ){
+    if( fid >= funcTimingModifiers.size())
+      funcTimingModifiers.resize( fid + 100, boost::shared_ptr<TimingModifier>(new TimingModifier()));
+
+    this->funcTimingModifiers[fid] = timingModifier;
+  }
+
+  void FunctionTiming::setBaseTimingModifier( boost::shared_ptr<TimingModifier> timingModifier){
+    this->funcTimingModifiers[defaultFunctionId] = timingModifier;
   }
 
   void FunctionTiming::addLatency( FunctionId fid,
@@ -104,21 +159,26 @@ namespace SystemC_VPC{
   }
 
   sc_time FunctionTiming::getBaseLatency( ) const {
-    return this->funcLatencies[defaultFunctionId];
+    boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
+	  //replay the result from getBaseDelay() to get identical modifications
+    return modifier->rePlay(this->funcLatencies[defaultFunctionId]);
   }
 
   sc_time FunctionTiming::getLatency(
-    FunctionIds functions) const
+    FunctionIds functions)
   {
+    this->reset(functions);
     if (functions.begin() == functions.end()){
       return getBaseLatency();
     }
-   return summarizeFunctionTimes(functions, funcLatencies);
+	 //replay the result from getDelay() to get identical modifications
+   return rePlaySummarizeFunctionTimes(functions, funcLatencies,funcTimingModifiers);
   }
 
   void FunctionTiming::setTiming(const Config::Timing& timing){
     this->addDelay(timing.getFunctionId(),   timing.getDii());
     this->addLatency(timing.getFunctionId(), timing.getLatency());
+    this->addTimingModifier(timing.getFunctionId(), timing.getTimingModifier());
   }
 
   /**

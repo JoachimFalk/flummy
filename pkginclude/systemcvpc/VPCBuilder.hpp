@@ -43,6 +43,13 @@
 #include "config/Timing.hpp"
 #include "Attribute.hpp"
 
+#include <systemcvpc/TimingModifier.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+typedef boost::minstd_rand base_generator_type;
+
 XERCES_CPP_NAMESPACE_USE
 namespace SystemC_VPC{
   namespace CX = CoSupport::XML::Xerces;
@@ -91,6 +98,19 @@ namespace SystemC_VPC{
     CX::XStr delayAttrStr;
     CX::XStr diiAttrStr;
     CX::XStr latencyAttrStr;
+    CX::XStr minAttrStr;
+    CX::XStr maxAttrStr;
+    CX::XStr parameter1AttrStr;
+    CX::XStr parameter2AttrStr;
+    CX::XStr parameter3AttrStr;
+    CX::XStr baseAttrStr;
+    CX::XStr fixedAttrStr;
+    CX::XStr distributionAttrStr;
+    CX::XStr seedAttrStr;
+    CX::XStr dataAttrStr;
+    CX::XStr scaleAttrStr;
+    CX::XStr distributionsStr;
+    CX::XStr distributionStr;
     CX::XStr fnameAttrStr;
     CX::XStr destinationAttrStr;
     CX::XStr tracingAttrStr;
@@ -148,6 +168,19 @@ namespace SystemC_VPC{
       delayAttrStr        = "delay";
       diiAttrStr          = "dii";
       latencyAttrStr      = "latency";
+      distributionsStr    = "distributions";
+      distributionStr     = "distribution";
+      minAttrStr          = "min";
+      maxAttrStr          = "max";
+      parameter1AttrStr   = "parameter1";
+      parameter2AttrStr   = "parameter2";
+      parameter3AttrStr   = "parameter3";
+      baseAttrStr         = "base";
+      fixedAttrStr        = "fixed";
+      distributionAttrStr = "distribution";
+      seedAttrStr         = "seed";
+      dataAttrStr         = "data";
+      scaleAttrStr        = "scale";
       fnameAttrStr        = "fname";
       destinationAttrStr  = "destination";
       tracingAttrStr      = "tracing";
@@ -175,6 +208,11 @@ namespace SystemC_VPC{
     void buildVPC();
     
   private:
+
+    /**
+     * \brief Initialize a distribution from the configuration file
+     */
+    void initDistribution();
     
     /**
      * \brief Initialize a component from the configuration file
@@ -208,6 +246,12 @@ namespace SystemC_VPC{
     * \brief Parsing helper for <timing>
     */
     Config::Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
+
+    //variables for the generation of random times
+    boost::uniform_real<> distribution;
+    boost::shared_ptr<base_generator_type> generator;
+    boost::shared_ptr<boost::mt19937> gen;
+    boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(DOMNode* node) throw(InvalidArgumentException);
   };
     
 }

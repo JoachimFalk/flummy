@@ -20,6 +20,7 @@
 #include "../Attribute.hpp"
 #include "../datatypes.hpp"
 #include <CoSupport/SystemC/systemc_support.hpp>
+#include "../TimingModifier.hpp"
 
 #include <boost/shared_ptr.hpp>
 
@@ -72,6 +73,8 @@ public:
   Scheduler::Type getScheduler() const;
 
   void setTransferTiming(Timing transferTiming);
+
+  void setTransferTimingModifier(boost::shared_ptr<TimingModifier> timingModifier);
 
   Timing getTransferTiming() const;
 

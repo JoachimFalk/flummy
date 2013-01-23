@@ -18,11 +18,14 @@
 
 #include "FastLink.hpp"
 #include "config/Timing.hpp"
+#include <systemcvpc/TimingModifier.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 
 namespace SystemC_VPC {
 
   typedef std::vector<sc_time> FunctionTimes;
+  typedef std::vector<boost::shared_ptr<TimingModifier> > FunctionTimingModifiers;
 
   /**
    * Internal helper class to manage  function specific delays.
@@ -86,13 +89,32 @@ namespace SystemC_VPC {
      * \return Returns the sum of function latencies. The default latency is
      * returned if no function names are given.
      */
-    sc_time getLatency(FunctionIds functions) const;
+    sc_time getLatency(FunctionIds functions);
 
 
     /**
-     *
+     * \brief set the timing of the instace
+		 * \param timing is the timing to set
      */
     void setTiming(const Config::Timing& timing);
+
+    /**
+		 * \brief adds TimingModifiers to the instance
+		 * \param fids is the id of the function the timingModifiers should be added to
+		 * \param timingModifier is the timingModifier to set
+		 */
+    void addTimingModifier(FunctionId fid, boost::shared_ptr<TimingModifier> timingModifier);
+
+		/**
+		 * \brief set the base timingModifier
+		 * \param timingModifier is the timingModifier to set
+		 */
+    void setBaseTimingModifier( boost::shared_ptr<TimingModifier> timingModifier);
+		/**
+		 * \brief drop the history of the modifications
+		 * \param functions is a list of functionids affected
+		 */
+    void reset(FunctionIds functions);
 
   private:
 
@@ -101,6 +123,10 @@ namespace SystemC_VPC {
 
     // map of possible function specific latencies
     FunctionTimes funcLatencies;
+
+    // map of possible Timing Modifiers
+    FunctionTimingModifiers funcTimingModifiers;
+
   };
 
   typedef boost::shared_ptr<FunctionTiming> FunctionTimingPtr;

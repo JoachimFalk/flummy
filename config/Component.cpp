@@ -16,6 +16,7 @@
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/TimingModifier.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -38,6 +39,11 @@ Component::Component(std::string name, Scheduler::Type scheduler) :
 void Component::setTransferTiming(Timing transferTiming)
 {
   transferTiming_ = transferTiming;
+}
+
+void Component::setTransferTimingModifier(boost::shared_ptr<TimingModifier> timingModifier)
+{
+	transferTiming_.setTimingModifier(timingModifier);
 }
 
 //
@@ -134,7 +140,7 @@ void Component::addAttribute(AttributePtr attribute)
 
   } else if (attribute->isType("tracing")) {
     this->setTracing(Traceable::parseTracing(attribute->getValue()));
-  } else {
+	} else {
     this->attributes_.push_back(attribute);
   }
 }
