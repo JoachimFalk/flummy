@@ -107,10 +107,11 @@ using CoSupport::SystemC::Event;
     void initDelays(){
       assert(pcb != NULL);
       FunctionIds fids = this->getFunctionIds();
-      this->setDelay(this->timingScale * timing->getDelay(fids)
+      //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
+      this->setDelay(this->timingScale * timing->getDelay(fids) //lat
           + this->extraDelay);
       this->setRemainingDelay(this->getDelay());
-      this->setLatency(this->timingScale * timing->getLatency(fids)
+      this->setLatency(this->timingScale * timing->getLatency(fids) //dii
           + this->extraDelay);
     }
 

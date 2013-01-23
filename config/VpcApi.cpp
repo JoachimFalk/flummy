@@ -25,6 +25,12 @@ namespace SystemC_VPC
 namespace Config
 {
 
+Modifiers & getDistributions()
+{
+	static Modifiers modifiers;
+	return modifiers;
+}
+
 //
 Components & getComponents()
 {
@@ -40,6 +46,16 @@ std::map<std::string, VpcTask::Ptr>& getVpcTasksByName()
 }
 
 static std::map<const ScheduledTask *, VpcTask::Ptr> vpcTasks;
+
+void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier)
+{
+	if(!hasDistribution(name)) {
+		getDistributions()[name] = modifier;
+		return;
+	}
+  throw ConfigException(std::string("Multiple creation of distribution \"") + name
+      + "\" is not supported. Use getDistribution() instead. ");
+}
 
 //
 Component::Ptr createComponent(std::string name, Scheduler::Type scheduler)
@@ -97,6 +113,11 @@ Route::Ptr getRoute(std::string source, std::string dest)
 
 Route::Ptr getRoute(const sc_port_base * leafPort){
   return  Routing::get(leafPort);
+}
+
+bool hasDistribution(std::string name)
+{
+	return getDistributions().find(name) != getDistributions().end();
 }
 
 //

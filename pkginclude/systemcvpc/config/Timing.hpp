@@ -14,6 +14,8 @@
 #define TIMING_H_
 
 #include <systemcvpc/FastLink.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <systemcvpc/TimingModifier.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -53,6 +55,9 @@ public:
   std::string getFunction() const;
   sc_core::sc_time getLatency() const;
   std::string getPowerMode() const;
+  void setTimingModifier(boost::shared_ptr<TimingModifier> timingModifier_);
+  boost::shared_ptr<TimingModifier> getTimingModifier() const;
+
   void setDii(sc_core::sc_time dii_);
   void setFunction(std::string function_);
   void setLatency(sc_core::sc_time latency_);
@@ -64,6 +69,7 @@ private:
 
   FunctionId fid_;
   std::string powerMode_;
+  boost::shared_ptr<TimingModifier> timingModifier_;
 };
 
 typedef std::map<std::string, Timing> functionTimingsPM;

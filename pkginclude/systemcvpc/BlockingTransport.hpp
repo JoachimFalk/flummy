@@ -23,7 +23,6 @@
 #include "EventPair.hpp"
 #include "ProcessControlBlock.hpp"
 #include "RouteImpl.hpp"
-#include "Timing.hpp"
 
 namespace SystemC_VPC{
   template<class ROUTE>
