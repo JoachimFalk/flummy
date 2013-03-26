@@ -19,6 +19,7 @@ namespace SystemC_VPC
 ScheduledTask::ScheduledTask() :
   component(NULL)
 {
+  active=true;
 }
 
 ScheduledTask::~ScheduledTask()
@@ -50,5 +51,12 @@ ProcessId ScheduledTask::getPid() const
 {
   return this->pid;
 }
+
+  void ScheduledTask::setActive(bool a){
+    if(a && (active != a)){
+        component->notifyActivation(this, true);
+    }
+    active=a;
+  }
 
 } // namespace SystemC_VPC
