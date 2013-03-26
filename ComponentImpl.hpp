@@ -138,6 +138,7 @@ namespace SystemC_VPC{
 
     Scheduler *scheduler;
     std::deque<Task*>      newTasks;
+    std::deque<Task*>      disabledTasks;
     sc_event notify_scheduler_thread;
     Event blockCompute;
     size_t   blockMutex;
@@ -209,21 +210,38 @@ namespace SystemC_VPC{
         }
       }else{
         //look for new tasks (they called compute)
+        if(disabledTasks.size()>0){
+            std::deque<Task*>::iterator iter = disabledTasks.begin();
+            for(;disabledTasks.size() > 0 && iter!=disabledTasks.end(); iter++){
+              if((*iter)->getScheduledTask()->getActive()){
+                  newTasks.push_back(*iter);
+                  disabledTasks.erase(iter);
+                  iter = disabledTasks.begin();
+              }
+            }
+        }
+
         while(newTasks.size()>0){
           Task *newTask;
           newTask=newTasks.front();
+          ScheduledTask* actor = newTask->getScheduledTask();
           newTasks.pop_front();
-          DBG_OUT(this->getName() << " received new Task: "
-                  << newTask->getName() << " at: "
-                  << sc_time_stamp().to_default_time_units() << std::endl);
-          this->taskTracer_.release(newTask);
-          //insert new task in read list
-          assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
-                  /* A task can call compute only one time! */);
-          assert( runningTasks.find(newTask->getInstanceId()) == runningTasks.end()
-                  /* A task can call compute only one time! */);
-          readyTasks[newTask->getInstanceId()]=newTask;
-          scheduler->addedNewTask(newTask);
+          if(actor!=NULL && !actor->getActive()){
+              std::cout<<"actor disabled"<<std::endl;
+              disabledTasks.push_back(newTask);
+          }else{
+            DBG_OUT(this->getName() << " received new Task: "
+                    << newTask->getName() << " at: "
+                    << sc_time_stamp().to_default_time_units() << std::endl);
+            this->taskTracer_.release(newTask);
+            //insert new task in read list
+            assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
+                    /* A task can call compute only one time! */);
+            assert( runningTasks.find(newTask->getInstanceId()) == runningTasks.end()
+                    /* A task can call compute only one time! */);
+            readyTasks[newTask->getInstanceId()]=newTask;
+            scheduler->addedNewTask(newTask);
+            }
         }
       }
     }

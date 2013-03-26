@@ -37,9 +37,17 @@ public:
   virtual sc_time getNextReleaseTime() {
     return sc_time_stamp();
   }
+
+  void setActive(bool a);
+
+  bool getActive(){
+    return active;
+  }
+
 private:
   Delayer *component;
   ProcessId pid;
+  bool active;
 };
 
 }
