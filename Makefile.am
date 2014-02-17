@@ -28,84 +28,100 @@ SUBDIRS = pkginclude
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
-AM_LDFLAGS =			\
-	@AM_LDFLAGS@		\
-	$(BOOST_LDFLAGS)        \
-	@COSUPPORT_LDFLAGS@	\
-	@SYSTEMC_LDFLAGS@	\
-	@XERCES_LDFLAGS@
+AM_LDFLAGS = @AM_LDFLAGS@
 
-# FIXME: Decouple SystemC-VPC and SysteMoC by moving SysteMoC
-#        dependant code from SystemC-VPC into SysteMoC
-#        restore thread based compute interface to SystemC-VPC
-AM_CPPFLAGS =			\
-	@AM_CPPFLAGS@		\
-	$(BOOST_INCLUDE)        \
-	@COSUPPORT_INCLUDE@	\
-	@SYSTEMC_INCLUDE@	\
-	@XERCES_INCLUDE@	\
-	-Ipkginclude		\
+AM_CPPFLAGS= @AM_CPPFLAGS@ \
+	-Ipkginclude \
 	-I$(srcdir)/pkginclude
+
+pkgconfigdir = $(libdir)/pkgconfig
+
+nodist_pkgconfig_DATA = \
+	libsystemcvpc.pc
+
+%.pc: pkgconfig/%.pc
+	@sed -e '/^srctreemode_\w\+\s*=/d' \
+	     -e 's/\$${srctreemode_libdir}\/lib\([^ 	]*\).la/-l\1/g' \
+	     -e 's/\$${srctreemode_\(\w\+\)}/\$${\1}/g' \
+	  < $^ > $@
+
+CLEANFILES=$(nodist_pkgconfig_DATA)
 
 lib_LTLIBRARIES = libsystemcvpc.la
 
-libsystemcvpc_la_SOURCES =			\
-	config/common.cpp			\
-	config/Component.cpp			\
-	config/Mappings.cpp			\
-	config/Route.cpp			\
-	config/Scheduler.cpp			\
-	config/Timing.cpp			\
-	config/VpcTask.cpp			\
-	config/VpcApi.cpp			\
-						\
-	scheduler/AVBScheduler.cpp		\
-	scheduler/FCFSScheduler.cpp		\
-	scheduler/FlexRayScheduler.cpp		\
-	scheduler/PriorityScheduler.cpp		\
-	scheduler/PrioritySchedulerNoPreempt.cpp	\
-	scheduler/RateMonotonicScheduler.cpp	\
-	scheduler/RoundRobinScheduler.cpp	\
-	scheduler/TimeTriggeredCCScheduler.cpp	\
-	scheduler/TDMAScheduler.cpp		\
-	scheduler/MostScheduler.cpp   \
-	scheduler/MostSecondaryScheduler.cpp   \
-	scheduler/StreamShaperScheduler.cpp   \
-						\
-	tracing/DataBaseTracer.cpp		\
-	tracing/Tracing.cpp			\
-						\
-	debug_config.cpp			\
-	BlockingTransport.cpp			\
-	ComponentImpl.cpp			\
-	ConfigCheck.cpp				\
-	Director.cpp				\
-	ScheduledTask.cpp			\
-	Attribute.cpp				\
-	Task.cpp				\
-	VPCBuilder.cpp				\
-	ProcessControlBlock.cpp			\
-	FastLink.cpp				\
-	StaticRoute.cpp				\
-	RouteImpl.cpp				\
-	PowerSumming.cpp                        \
-	HysteresisLocalGovernor.cpp		\
-	SelectFastestPowerModeGlobalGovernor.cpp\
-	PluggablePowerGovernor.cpp		\
-	dynload/dll-elf.cpp			\
-	ComponentInfo.cpp			\
+libsystemcvpc_la_SOURCES = \
+	config/common.cpp \
+	config/Component.cpp \
+	config/Mappings.cpp \
+	config/Route.cpp \
+	config/Scheduler.cpp \
+	config/Timing.cpp \
+	config/VpcTask.cpp \
+	config/VpcApi.cpp \
+	\
+	scheduler/AVBScheduler.cpp \
+	scheduler/FCFSScheduler.cpp \
+	scheduler/FlexRayScheduler.cpp \
+	scheduler/PriorityScheduler.cpp \
+	scheduler/PrioritySchedulerNoPreempt.cpp \
+	scheduler/RateMonotonicScheduler.cpp \
+	scheduler/RoundRobinScheduler.cpp \
+	scheduler/TimeTriggeredCCScheduler.cpp \
+	scheduler/TDMAScheduler.cpp \
+	scheduler/MostScheduler.cpp \
+	scheduler/MostSecondaryScheduler.cpp \
+	scheduler/StreamShaperScheduler.cpp \
+	\
+	tracing/DataBaseTracer.cpp \
+	tracing/Tracing.cpp \
+	\
+	debug_config.cpp \
+	BlockingTransport.cpp \
+	ComponentImpl.cpp \
+	ConfigCheck.cpp \
+	Director.cpp \
+	ScheduledTask.cpp \
+	Attribute.cpp \
+	Task.cpp \
+	VPCBuilder.cpp \
+	ProcessControlBlock.cpp \
+	FastLink.cpp \
+	StaticRoute.cpp \
+	RouteImpl.cpp \
+	PowerSumming.cpp \
+	HysteresisLocalGovernor.cpp \
+	SelectFastestPowerModeGlobalGovernor.cpp \
+	PluggablePowerGovernor.cpp \
+	dynload/dll-elf.cpp \
+	ComponentInfo.cpp \
 	AbstractComponent.cpp
 
-libsystemcvpc_la_LDFLAGS =				\
-	-version-info 0:0:0 				\
-	-no-undefined					\
+libsystemcvpc_la_CPPFLAGS = $(AM_CPPFLAGS) \
+	$(BOOST_CPPFLAGS) \
+	$(SYSTEMC_CPPFLAGS) \
+	$(XERCES_CPPFLAGS) \
+	$(COSUPPORT_SYSTEMC_CPPFLAGS) \
+	$(COSUPPORT_TRACING_CPPFLAGS) \
+	$(COSUPPORT_STREAMS_CPPFLAGS)
+libsystemcvpc_la_LDFLAGS = $(AM_LDFLAGS) \
+	$(BOOST_LDFLAGS) \
+	$(SYSTEMC_LDFLAGS) \
+	$(XERCES_LDFLAGS) \
+	$(COSUPPORT_SYSTEMC_LDFLAGS) \
+	$(COSUPPORT_TRACING_LDFLAGS) \
+	$(COSUPPORT_STREAMS_LDFLAGS) \
+	-version-info 0:0:0 \
+	-no-undefined \
 	-rdynamic
-
-libsystemcvpc_la_LIBADD = 				\
-	@COSUPPORT_LIBPATH@/libcosupport-systemc.la	\
-	@COSUPPORT_LIBPATH@/libcosupport-tracing.la	\
-	@COSUPPORT_LIBPATH@/libcosupport-streams.la     \
-	-lxerces-c					\
-	-lsystemc					\
-	-lstdc++					\
+libsystemcvpc_la_LIBADD = \
+	-lsystemc \
+	-lxerces-c \
+	$(COSUPPORT_SYSTEMC_LIBS) \
+	$(COSUPPORT_TRACING_LIBS) \
+	$(COSUPPORT_STREAMS_LIBS) \
+	-lstdc++ \
 	-ldl
+libsystemcvpc_la_DEPENDENCIES = \
+	$(COSUPPORT_SYSTEMC_DEPENDENCIES) \
+	$(COSUPPORT_TRACING_DEPENDENCIES) \
+	$(COSUPPORT_STREAMS_DEPENDENCIES)
