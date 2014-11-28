@@ -13,13 +13,9 @@
 #ifndef LOSABLEEVENT_HPP_
 #define LOSABLEEVENT_HPP_
 
-//#include <CoSupport/SystemC>
+#include <CoSupport/SystemC/systemc_support.hpp>
 
-namespace SystemC_VPC
-{
-
-namespace Coupling
-{
+namespace SystemC_VPC { namespace Coupling {
 
   /*
    * Event used for messages in order to invalidate them in the Component
@@ -56,6 +52,6 @@ namespace Coupling
     }
   };
 
-}
-}
-  #endif /* LOSABLEEVENT_HPP_ */
+} } // namespace SystemC_VPC::Coupling
+
+#endif /* LOSABLEEVENT_HPP_ */
