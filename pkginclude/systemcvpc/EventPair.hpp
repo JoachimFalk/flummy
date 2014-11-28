@@ -15,7 +15,6 @@
 
 #include <systemc.h>
 
-#include <CoSupport/SystemC/systemc_support.hpp>
 #include <systemcvpc/coupling/VPCEvent.hpp>
 
 namespace SystemC_VPC {
