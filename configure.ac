@@ -34,7 +34,7 @@ AC_PROG_LIBTOOL
 
 ACJF_ARG_DEBUG([yes], [], [-DNDEBUG])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_HEADER([config.h pkginclude/systemcvpc/vpc_config.h])
 
 DX_HTML_FEATURE(ON)
