@@ -17,9 +17,8 @@
 #include <string>
 #include <stdlib.h>
 
-#include <CoSupport/XML/xerces_support.hpp>
+#include <CoSupport/XML/Xerces/common.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
-
 
 #include <systemcvpc/VPCBuilder.hpp>
 #include <systemcvpc/VpcDomErrorHandler.hpp>
@@ -38,18 +37,21 @@
 #include <systemcvpc/debug_config.hpp>
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_VPCBUILDER
-#include <CoSupport/Streams/DebugOStream.hpp>
-#include <CoSupport/Streams/FilterOStream.hpp>
+# include <CoSupport/Streams/DebugOStream.hpp>
+# include <CoSupport/Streams/FilterOStream.hpp>
   // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
-  #define DBGOUT_STREAM dbgout
-  #include <systemcvpc/debug_on.hpp>
+# define DBGOUT_STREAM dbgout
+# include <systemcvpc/debug_on.hpp>
 #else
-  #include <systemcvpc/debug_off.hpp>
+# include <systemcvpc/debug_off.hpp>
 #endif
 
+#include <CoSupport/DataTypes/MaybeValue.hpp>
+
 #include <systemcvpc/TimingModifier.hpp>
+
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/bernoulli_distribution.hpp>
@@ -63,23 +65,31 @@
 #include <boost/random/poisson_distribution.hpp>
 #include <boost/random/triangle_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
+
 #include <boost/smart_ptr/shared_ptr.hpp>
+
+#include <boost/filesystem.hpp>
+
 #include <time.h>
-typedef boost::minstd_rand base_generator_type;
-
-namespace SystemC_VPC{
-
-using namespace CoSupport::XML::Xerces;
-namespace VC = Config;
 
 #define MAX(x,y) ((x > y) ? x : y)
 
-  const char* VPCBuilder::STR_VPC_THREADEDCOMPONENTSTRING =  "threaded";
-  const char* VPCBuilder::STR_VPC_DELAY =                    "delay";
-  const char* VPCBuilder::STR_VPC_LATENCY =                  "latency";
-  const char* VPCBuilder::STR_VPC_PRIORITY =                 "priority";
-  const char* VPCBuilder::STR_VPC_PERIOD =                   "period";
-  const char* VPCBuilder::STR_VPC_DEADLINE =                 "deadline";
+namespace SystemC_VPC {
+
+  typedef boost::minstd_rand base_generator_type;
+
+  //using namespace CoSupport::XML::Xerces;
+  namespace VC = Config;
+  namespace fs = boost::filesystem;
+
+  using CoSupport::DataTypes::MaybeValue;
+
+  const char *VPCBuilder::STR_VPC_THREADEDCOMPONENTSTRING =  "threaded";
+  const char *VPCBuilder::STR_VPC_DELAY =                    "delay";
+  const char *VPCBuilder::STR_VPC_LATENCY =                  "latency";
+  const char *VPCBuilder::STR_VPC_PRIORITY =                 "priority";
+  const char *VPCBuilder::STR_VPC_PERIOD =                   "period";
+  const char *VPCBuilder::STR_VPC_DEADLINE =                 "deadline";
 
   void testAndRemoveFile(std::string fileName){
     std::ofstream file(fileName.c_str());
@@ -88,129 +98,106 @@ namespace VC = Config;
       std::remove(fileName.c_str());
     }
   }
+
+  VPCBuilder::VPCBuilder(Director *director)
+    : FALLBACKMODE(false),
+      vpcConfigTreeWalker(NULL),
+      director(director)
+  {
+    /*
+     * SECTION: initialization of init tag values for comparison while initializing
+     */
+    resultfileStr       = "resultfile";
+    resourcesStr        = "resources";
+    mappingsStr         = "mappings";
+    componentStr        = "component";
+    mappingStr          = "mapping";
+    attributeStr        = "attribute";
+    timingStr           = "timing";
+    parameterStr        = "parameter";
+    topologyStr         = "topology";
+    hopStr              = "hop";
+    routeStr            = "route";
+    powerModeStr        = "powermode";
+    nameAttrStr         = "name";
+    countAttrStr        = "count";
+    typeAttrStr         = "type";
+    dividerAttrStr      = "divider";
+    schedulerAttrStr    = "scheduler";
+    valueAttrStr        = "value";
+    targetAttrStr       = "target";
+    sourceAttrStr       = "source";
+    delayAttrStr        = "delay";
+    diiAttrStr          = "dii";
+    latencyAttrStr      = "latency";
+    distributionsStr    = "distributions";
+    distributionStr     = "distribution";
+    minAttrStr          = "min";
+    maxAttrStr          = "max";
+    parameter1AttrStr   = "parameter1";
+    parameter2AttrStr   = "parameter2";
+    parameter3AttrStr   = "parameter3";
+    baseAttrStr         = "base";
+    fixedAttrStr        = "fixed";
+    distributionAttrStr = "distribution";
+    seedAttrStr         = "seed";
+    dataAttrStr         = "data";
+    scaleAttrStr        = "scale";
+    fnameAttrStr        = "fname";
+    destinationAttrStr  = "destination";
+    tracingAttrStr      = "tracing";
+    defaultRouteAttrStr = "default";
+
+    /*
+     * END OF SECTION: init tag values for comparison while initializing
+     */
+  }
+
+  VPCBuilder::~VPCBuilder() {};
+
   /**
    * \brief sets ups VPC Framework
    */
-  void VPCBuilder::buildVPC(){
+  void VPCBuilder::buildVPC() {
+    char *cfile = getenv("VPCCONFIGURATION");
 
-    FALLBACKMODE=false;
-    
-    // open file and check existence
-    FILE* fconffile;
-    char* cfile = getenv("VPCCONFIGURATION");
-    DBG_OUT("VPCBuilder> VPCCONFIGURATION set to " << cfile
-            << std::endl);
-        
-    if(cfile){
-      fconffile=fopen(cfile,"r");
-      if( NULL == fconffile ){       // test if file exists
-
-        // for joachim
-        std::cerr << "VPCBuilder> Warning: could not open '" << cfile << "'"
-                  << std::endl;
-
-        FALLBACKMODE=true;
-      }else{
-        fclose(fconffile);
-        DBG_OUT("configuration: "<<cfile << std::endl);
-      }
-    }else{
+    if (cfile == NULL)
       FALLBACKMODE=true;
-    }
-    
-    // init vars for parsing
-    if(FALLBACKMODE){
+    else if (!exists(fs::path(cfile))) {
+      std::cerr << "VPCBuilder> Warning: could not open '" << cfile << "'" << std::endl;
+      FALLBACKMODE=true;
+    } else
+      FALLBACKMODE=false;
+
+    if (FALLBACKMODE) {
       this->director->FALLBACKMODE = true;
       DBG_OUT("running fallbackmode" << std::endl);
-    }else{
-      // process xml
-      XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* vpcConfigDoc;
-      XERCES_CPP_NAMESPACE_QUALIFIER DOMBuilder* configParser;
-      static const XMLCh gLS[] = { chLatin_L, chLatin_S, chNull };
-      DOMImplementation* configImpl =
-        DOMImplementationRegistry::getDOMImplementation(gLS);
-      // create an error handler and install it
-      VpcDomErrorHandler* configErrorh=new VpcDomErrorHandler();
-      configParser =
-        ((DOMImplementationLS*)configImpl)->
-          createDOMBuilder(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
-      // turn on validation
-      configParser->setFeature(XMLUni::fgDOMValidation, true);
-      configParser->setErrorHandler(configErrorh);
-
-      try {                                                             
-        // reset document pool - clear all previous allocated data
-        configParser->resetDocumentPool();                                    
-        vpcConfigDoc = configParser->parseURI(cfile);
-      }
-      catch (const XMLException& toCatch) {
-        std::cerr << "\nVPCBuilder> Error while parsing xml file: '"
-                  << cfile << "'\n"
-          << "Exception message is:  \n"
-          << NStr( toCatch.getMessage()) << "\n" << std::endl;
-          return;
-      }
-      catch (const DOMException& toCatch) {
-        const unsigned int maxChars = 2047;
-        XMLCh errText[maxChars + 1];
-          
-        std::cerr << "\nVPCBuilder> DOM Error while parsing xml file: '"
-                  << cfile << "'\n"
-                  << "DOMException code is:  "
-                  << NStr( toCatch.msg) << std::endl;
-          
-        if (DOMImplementation::loadDOMExceptionMsg(toCatch.code,
-                                                   errText,
-                                                   maxChars))
-          std::cerr << "Message is: "
-                    << NStr( errText) << std::endl;
-        return;
-      }
-      catch (...) {
-        std::cerr << "\nVPCBuilder> Unexpected exception while parsing"
-                  << " xml file: '" << cfile << "'\n";
-        return;
-      }
-      
-      //check if parsing failed
-      if(configErrorh->parseFailed()){
-        DBG_OUT("VPCBuilder: Parsing of configuration failed,"
-                " aborting initialization!" << std::endl);
-        return;
-      }
+    } else { //!FALLBACKMODE
+      DBG_OUT("VPCBuilder> VPCCONFIGURATION set to " << cfile << std::endl);
+      handler.load(cfile);
       
       // set treewalker to documentroot
       vpcConfigTreeWalker =
-        vpcConfigDoc->createTreeWalker(
-          (DOMNode*)vpcConfigDoc->getDocumentElement(),
+        handler.getDocument()->createTreeWalker(
+          handler.getDocument()->getDocumentElement(),
           DOMNodeFilter::SHOW_ELEMENT, 0,
           true);
 
       vpcConfigTreeWalker->setCurrentNode(
-        (DOMNode*)vpcConfigDoc->getDocumentElement());
+        handler.getDocument()->getDocumentElement());
 
       // set central seed for random number generation
-      DOMNode* nodetest = (DOMNode*)vpcConfigDoc->getDocumentElement();
-      DOMNamedNodeMap* atts=nodetest->getAttributes();
-      DOMNode* seed = atts->getNamedItem(seedAttrStr);
-      bool hasSeed = (seed != NULL);
-      if (hasSeed){
-        std::istringstream stm;
-        stm.str(NStr(seed->getNodeValue()));
-        double value;
-        stm >>value;
-        this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(value));
-      } else {
-        this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(time(NULL)));
-      } 
+      CX::XN::DOMNode *nodetest = handler.getDocument()->getDocumentElement();
+
+      MaybeValue<double> seed = CX::getAttrValueAs<MaybeValue<double> >(nodetest, seedAttrStr);
+      this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(
+          seed.isDefined() ? seed.get() : time(NULL)));
       
       // moves the Treewalker to the first Child 
       DOMNode* node = vpcConfigTreeWalker->firstChild(); 
       // name of xmlTag
-      XStr xmlName;
-
-      while(node!=0){
-        xmlName = node->getNodeName();
+      while (node!=0) {
+        const CX::XStr xmlName = node->getNodeName();
         
         // find distributions tag
         if( xmlName == distributionsStr ){
@@ -235,7 +222,7 @@ namespace VC = Config;
             // pointer to currently initiated component
             // init all components
             for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
-              const XStr xmlName = node->getNodeName();
+              const CX::XStr xmlName = node->getNodeName();
               try{
                 if( xmlName == VPCBuilder::componentStr ) {
                   VC::Component::Ptr comp = initComponent();
@@ -246,9 +233,9 @@ namespace VC = Config;
                 }else{
                   if( xmlName == attributeStr ){
 
-                    XStr sType = 
+                    const CX::XStr sType =
                       node->getAttributes()->getNamedItem(typeAttrStr)->getNodeValue();
-                    XStr sValue = "";
+                    CX::XStr sValue = "";
                     DOMNode * value = node->getAttributes()->getNamedItem(valueAttrStr);
                     if( value  != NULL){
                       sValue=
@@ -292,7 +279,7 @@ namespace VC = Config;
         }else if( xmlName == resultfileStr ){
            
            DOMNamedNodeMap * atts=node->getAttributes();
-           XStr vpc_result_file =
+           CX::XStr vpc_result_file =
              atts->getNamedItem(nameAttrStr)->getNodeValue();
            this->director->setResultFile(vpc_result_file);
         
@@ -305,12 +292,7 @@ namespace VC = Config;
 
         node = vpcConfigTreeWalker->nextSibling();
       }
-
-      // clean up pareser
-      configParser->release();
-      delete configErrorh;
-      
-    }// else !FALLBACK
+    } //!FALLBACKMODE
     DBG_OUT("Initializing VPC finished!" << std::endl);
   }
 
@@ -321,11 +303,11 @@ namespace VC = Config;
 
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     
-    XStr xmlName=node->getNodeName();
+    CX::XStr xmlName=node->getNodeName();
 
     if( xmlName == distributionStr ){
       DOMNamedNodeMap* atts=node->getAttributes();
-      NStr sName = atts->getNamedItem(nameAttrStr)->getNodeValue();
+      CX::NStr sName = atts->getNamedItem(nameAttrStr)->getNodeValue();
       VC::createDistribution(sName,this->parseTimingModifier(node));
     }
   }
@@ -341,16 +323,16 @@ namespace VC = Config;
   {
  
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
-    const XStr xmlName = node->getNodeName(); 
+    const CX::XStr xmlName = node->getNodeName(); 
 
     // check for component tag
     if( xmlName == VPCBuilder::componentStr ){
       
       DOMNamedNodeMap* atts = node->getAttributes();
   
-      XStr sScheduler =
+      CX::XStr sScheduler =
         atts->getNamedItem(VPCBuilder::schedulerAttrStr)->getNodeValue();
-      XStr sName = atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue();
+      CX::XStr sName = atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue();
   
       DBG_OUT("VPCBuilder> initComponent: " << sName << std::endl);
 
@@ -363,7 +345,7 @@ namespace VC = Config;
     }
 
     std::string msg("Unknown configuration tag: ");
-    msg += NStr(xmlName);
+    msg += CX::NStr(xmlName);
     throw InvalidArgumentException(msg);
 
   }
@@ -380,15 +362,15 @@ namespace VC = Config;
     if(node != NULL){
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
-        const XStr xmlName = node->getNodeName();
+        const CX::XStr xmlName = node->getNodeName();
         DOMNamedNodeMap * atts = node->getAttributes();
 
         // check if its an attribute to add
         if( xmlName == attributeStr ){
 
-          //NStr sType;
-          NStr sValue = "";
-          NStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
+          //CX::NStr sType;
+          CX::NStr sValue = "";
+          CX::NStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
 
           DOMNode * value = atts->getNamedItem(valueAttrStr);
           if( value  != NULL){
@@ -418,16 +400,16 @@ namespace VC = Config;
 
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     
-    XStr xmlName=node->getNodeName();
+    CX::XStr xmlName=node->getNodeName();
 
     DBG_OUT("VPCBuilder> entering initMappingAPStruct"<< std::endl);    
    
     // find mapping tag (not mappings)
     if( xmlName == mappingStr ){
       DOMNamedNodeMap* atts=node->getAttributes();
-      NStr sTarget = atts->getNamedItem(targetAttrStr)->getNodeValue();
+      CX::NStr sTarget = atts->getNamedItem(targetAttrStr)->getNodeValue();
 
-      NStr sSource = atts->getNamedItem(sourceAttrStr)->getNodeValue();
+      CX::NStr sSource = atts->getNamedItem(sourceAttrStr)->getNodeValue();
 
 
       DBG_OUT( "VPCBuilder> Found mapping attribute: source=" << sSource
@@ -471,15 +453,15 @@ namespace VC = Config;
               }
               
             }else if( xmlName == attributeStr ){
-              XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
-              XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
+              CX::XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
+              CX::XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
 
               DBG_OUT("attribute values are: " <<sType
                       << " and " << sValue << std::endl);
           
               if( sType == STR_VPC_PRIORITY){
                 int priority = 0;
-                sscanf(NStr(sValue), "%d", &priority);
+                sscanf(CX::NStr(sValue), "%d", &priority);
                 task->setPriority(priority);
               }else if( sType == STR_VPC_DEADLINE){
 //                task->setDeadline(Director::createSC_Time(sValue));
@@ -511,13 +493,13 @@ namespace VC = Config;
                                  DOMNode* node){
         //walk down hierarchy to attributes             
         for(; node != NULL; node = node->getNextSibling()){
-        const XStr xmlName = node->getNodeName();
+        const CX::XStr xmlName = node->getNodeName();
         DOMNamedNodeMap * atts = node->getAttributes();
                 
         // check if its an attribute to add
         if( xmlName == attributeStr ){
-          XStr sValue="";
-          XStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
+          CX::XStr sValue="";
+          CX::XStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
           if(atts->getNamedItem(valueAttrStr)!=NULL){
                 sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
           }
@@ -530,8 +512,8 @@ namespace VC = Config;
         }
         // check if its an Parameter to add
         if( xmlName == parameterStr ){
-          XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
-          XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
+          CX::XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
+          CX::XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
           attribute->addParameter( sType, sValue);
         }
      }
@@ -544,7 +526,7 @@ namespace VC = Config;
       DOMNamedNodeMap * atts = top->getAttributes();
       DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
       bool topologyTracing = (tracingAtt != NULL) &&
-          (std::string("true") == NStr(tracingAtt->getNodeValue()) );
+          (std::string("true") == CX::NStr(tracingAtt->getNodeValue()) );
 
       // check if tracing is enabled for any route -> open trace file
       bool tracingEnabled = false;
@@ -552,28 +534,28 @@ namespace VC = Config;
       // define the empty default route behavior
       DOMNode    *defaultRouteAttr = atts->getNamedItem(defaultRouteAttrStr);
       director->defaultRoute = (defaultRouteAttr != NULL) &&
-          (std::string("ignore") == NStr(defaultRouteAttr->getNodeValue()) );
+          (std::string("ignore") == CX::NStr(defaultRouteAttr->getNodeValue()) );
 
       for(DOMNode * routeNode = top->getFirstChild();
           routeNode != NULL;
           routeNode = routeNode->getNextSibling()){
         
-        const XStr xmlName = routeNode->getNodeName();
+        const CX::XStr xmlName = routeNode->getNodeName();
 
         if( xmlName == routeStr ){
           
           // scan <route>
           DOMNamedNodeMap * atts = routeNode->getAttributes();
-          std::string src = NStr(
+          std::string src = CX::NStr(
             atts->getNamedItem(sourceAttrStr)->getNodeValue() );
-          std::string dest = NStr(
+          std::string dest = CX::NStr(
             atts->getNamedItem(destinationAttrStr)->getNodeValue() );
 
           VC::Route::Type t = VC::Route::StaticRoute;
           if(atts->getNamedItem(typeAttrStr)!=NULL){
             t = VC::Route::parseRouteType(
-                NStr(atts->getNamedItem(typeAttrStr)->getNodeValue()));
-            //type = NStr( );
+                CX::NStr(atts->getNamedItem(typeAttrStr)->getNodeValue()));
+            //type = CX::NStr( );
           }
 
           VC::Route::Ptr route = VC::createRoute(src, dest, t);
@@ -582,7 +564,7 @@ namespace VC = Config;
           bool tracing = topologyTracing;
           DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
           if (tracingAtt != NULL){
-            tracing = std::string("true") == NStr(tracingAtt->getNodeValue());
+            tracing = std::string("true") == CX::NStr(tracingAtt->getNodeValue());
           }
 
 
@@ -593,10 +575,10 @@ namespace VC = Config;
           for(DOMNode * hopNode = routeNode->getFirstChild();
               hopNode != NULL;
               hopNode = hopNode->getNextSibling()){
-            const XStr xmlName = hopNode->getNodeName();
+            const CX::XStr xmlName = hopNode->getNodeName();
             if( xmlName == hopStr ){
               std::string name =
-                NStr( hopNode->getAttributes()->getNamedItem(nameAttrStr)->
+                CX::NStr( hopNode->getAttributes()->getNamedItem(nameAttrStr)->
                       getNodeValue() );
 
               assert( VC::hasComponent(name) );
@@ -608,7 +590,7 @@ namespace VC = Config;
               for(DOMNode * timingNode = hopNode->getFirstChild();
                   timingNode != NULL;
                   timingNode = timingNode->getNextSibling()){
-                const XStr xmlName = timingNode->getNodeName();
+                const CX::XStr xmlName = timingNode->getNodeName();
                 DOMNamedNodeMap* atts=timingNode->getAttributes();
                 if( xmlName == timingStr ){
                   try {
@@ -621,14 +603,14 @@ namespace VC = Config;
                     throw InvalidArgumentException(msg);
                   }
                 }else if( xmlName == attributeStr ){
-                  XStr sType =
+                  CX::XStr sType =
                     atts->getNamedItem(typeAttrStr)->getNodeValue();
-                  XStr sValue =
+                  CX::XStr sValue =
                     atts->getNamedItem(valueAttrStr)->getNodeValue();
     
                   if( sType == STR_VPC_PRIORITY ){
                     int priority = 0;
-                    sscanf(NStr(sValue).c_str(), "%d", &priority);
+                    sscanf(CX::NStr(sValue).c_str(), "%d", &priority);
                     
                     hop.setPriority(priority);
                   }
@@ -661,10 +643,10 @@ namespace VC = Config;
 
     DOMNamedNodeMap* atts = node->getAttributes();
     if( NULL != atts->getNamedItem(powerModeStr) ) {
-      t.setPowerMode(NStr(atts->getNamedItem(powerModeStr)->getNodeValue()));
+      t.setPowerMode(CX::NStr(atts->getNamedItem(powerModeStr)->getNodeValue()));
     }
     if( NULL != atts->getNamedItem(fnameAttrStr) ) {
-      XStr attribute = atts->getNamedItem(fnameAttrStr)->getNodeValue();
+      CX::XStr attribute = atts->getNamedItem(fnameAttrStr)->getNodeValue();
       t.setFunction(attribute);
     }
 
@@ -675,19 +657,19 @@ namespace VC = Config;
     bool hasDelay   = (delay != NULL);
     bool hasLatency = (latency != NULL);
     if (hasDelay && !hasDii && !hasLatency) {
-      sc_time d = Director::createSC_Time(NStr(delay->getNodeValue()));
+      sc_time d = Director::createSC_Time(CX::NStr(delay->getNodeValue()));
       t.setDii(d);
       t.setLatency(d);
     } else if (!hasDelay && hasDii && hasLatency) {
-      t.setDii(Director::createSC_Time(NStr(dii->getNodeValue())));
-      t.setLatency(Director::createSC_Time(NStr(latency->getNodeValue())));
+      t.setDii(Director::createSC_Time(CX::NStr(dii->getNodeValue())));
+      t.setLatency(Director::createSC_Time(CX::NStr(latency->getNodeValue())));
     } else {
       std::string msg("Invalid timing annotation.\n");
       for(unsigned int i=0; i<atts->getLength(); i++){
         DOMNode* a=atts->item(i);
-        XStr val  = a->getNodeValue();
-        XStr name = a->getNodeName();
-        msg += "timing: " + NStr(name) + " = " + NStr(val) + "\n";
+        CX::XStr val  = a->getNodeValue();
+        CX::XStr name = a->getNodeName();
+        msg += "timing: " + CX::NStr(name) + " = " + CX::NStr(val) + "\n";
       }
       msg += "Please specify values for dii and latency only. Alternatively, specify only the delay value. (E.g. use a delay when having identical values for dii and latency.)";
 
@@ -698,7 +680,7 @@ namespace VC = Config;
     DOMNode* distribution = atts->getNamedItem(distributionAttrStr);
     bool hasDistribution = (distribution != NULL);
     if (hasDistribution){
-      std::string distr = NStr(distribution->getNodeValue());
+      std::string distr = CX::NStr(distribution->getNodeValue());
       t.setTimingModifier(VC::getDistributions()[distr]);
     }
 
@@ -736,14 +718,14 @@ namespace VC = Config;
     bool hasScale = (scale != NULL);
     bool hasfixed = (fixed != NULL);
     bool hasBase = (base != NULL);
-    std::string distr = NStr(distribution->getNodeValue());
+    std::string distr = CX::NStr(distribution->getNodeValue());
 
     //set min/max values 
     double minValue = -1;
     double maxValue = -1;
     if (hasMin){
       std::istringstream stm;
-      stm.str(NStr(min->getNodeValue()));
+      stm.str(CX::NStr(min->getNodeValue()));
       stm >> minValue;
     }
     if (minValue<-1){
@@ -751,7 +733,7 @@ namespace VC = Config;
     }
     if (hasMax){
       std::istringstream stm;
-      stm.str(NStr(max->getNodeValue()));
+      stm.str(CX::NStr(max->getNodeValue()));
       stm >> maxValue;
     }
     if (minValue >= maxValue){
@@ -763,7 +745,7 @@ namespace VC = Config;
     if (hasSeed){
       std::cout << "fixed seed found" << std::endl;
       std::istringstream stm;
-      stm.str(NStr(seed->getNodeValue()));
+      stm.str(CX::NStr(seed->getNodeValue()));
       double value;
       generator = boost::shared_ptr<boost::mt19937>(new boost::mt19937(value));
     }
@@ -777,7 +759,7 @@ namespace VC = Config;
       if (hasParameter1){
         std::istringstream stm;
         double param1;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
          
         if (param1>=0 && param1<=1){
@@ -799,10 +781,10 @@ namespace VC = Config;
         std::istringstream stm;
         int param1;
         double param2;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
         std::istringstream stm2;
-        stm2.str(NStr(parameter2->getNodeValue()));
+        stm2.str(CX::NStr(parameter2->getNodeValue()));
         stm2 >> param2;
          
         if (param2>=0 && param2<=1 && param1>=0){
@@ -824,10 +806,10 @@ namespace VC = Config;
         std::istringstream stm;
         double param1;
         double param2;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
         std::istringstream stm2;
-        stm2.str(NStr(parameter2->getNodeValue()));
+        stm2.str(CX::NStr(parameter2->getNodeValue()));
         stm2 >> param2;
          
         //create the timingModifier
@@ -842,7 +824,7 @@ namespace VC = Config;
       if (hasParameter1){
         std::istringstream stm;
         double param1;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
          
         if (param1>0){
@@ -862,11 +844,11 @@ namespace VC = Config;
       if (hasParameter1 && hasParameter2){
         std::istringstream stm;
         double param1;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
         std::istringstream stm2;
         double param2;
-        stm2.str(NStr(parameter2->getNodeValue()));
+        stm2.str(CX::NStr(parameter2->getNodeValue()));
         stm2 >> param2;
          
         if (param1>0 && param2>0){
@@ -887,7 +869,7 @@ namespace VC = Config;
       if (hasParameter1){
         std::istringstream stm;
         double param1;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
          
         if (param1>0 && param1<1){
@@ -909,10 +891,10 @@ namespace VC = Config;
         double param1;
         double param2;
         std::istringstream stm;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
         std::istringstream stm2;
-        stm2.str(NStr(parameter2->getNodeValue()));
+        stm2.str(CX::NStr(parameter2->getNodeValue()));
         stm2 >> param2;
          
         if (param1>0){
@@ -934,10 +916,10 @@ namespace VC = Config;
         double param1;
         double param2;
         std::istringstream stm;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
         std::istringstream stm2;
-        stm2.str(NStr(parameter2->getNodeValue()));
+        stm2.str(CX::NStr(parameter2->getNodeValue()));
         stm2 >> param2;
          
         if (param2>=0){
@@ -958,7 +940,7 @@ namespace VC = Config;
       if (hasParameter1){
         std::istringstream stm;
         double param1;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
          
         if (param1>0){
@@ -981,13 +963,13 @@ namespace VC = Config;
         double param2;
         double param3;
         std::istringstream stm;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
         std::istringstream stm2;
-        stm2.str(NStr(parameter2->getNodeValue()));
+        stm2.str(CX::NStr(parameter2->getNodeValue()));
         stm2 >> param2;
         std::istringstream stm3;
-        stm3.str(NStr(parameter3->getNodeValue()));
+        stm3.str(CX::NStr(parameter3->getNodeValue()));
         stm3 >> param3;
          
         if (param1<=param2 && param2<=param3){
@@ -1008,7 +990,7 @@ namespace VC = Config;
       if (hasData && hasScale){
 
         //create the timingModifier
-        result = boost::shared_ptr<DistributionTimingModifier>(new EmpiricTimingModifier(generator,Director::createSC_Time(NStr(scale->getNodeValue())),NStr(data->getNodeValue()),minValue,maxValue,hasfixed));
+        result = boost::shared_ptr<DistributionTimingModifier>(new EmpiricTimingModifier(generator,Director::createSC_Time(CX::NStr(scale->getNodeValue())),CX::NStr(data->getNodeValue()),minValue,maxValue,hasfixed));
         foundDistribution = true;
       } else {
         throw InvalidArgumentException("invalid parameter for distribution");
@@ -1021,10 +1003,10 @@ namespace VC = Config;
         double param1;
         double param2;
         std::istringstream stm;
-        stm.str(NStr(parameter1->getNodeValue()));
+        stm.str(CX::NStr(parameter1->getNodeValue()));
         stm >> param1;
         std::istringstream stm2;
-        stm2.str(NStr(parameter2->getNodeValue()));
+        stm2.str(CX::NStr(parameter2->getNodeValue()));
         stm2 >> param2;
         std::cout << param1 << "," << param2 << std::endl;
          
@@ -1042,14 +1024,13 @@ namespace VC = Config;
     }
 
     //set the base and return the result if there is one
-		if (foundDistribution == true){
-      if (hasBase){
-	      std::cout << "base:";
-        result->setBase(boost::shared_ptr<TimingModifier>(VC::getDistributions()[NStr(base->getNodeValue())]));
-     }
-
-		 return result;
-		}
+    if (foundDistribution == true) {
+      if (hasBase) {
+	std::cout << "base:";
+        result->setBase(boost::shared_ptr<TimingModifier>(VC::getDistributions()[CX::NStr(base->getNodeValue())]));
+      }
+      return result;
+    }
     throw InvalidArgumentException("unknown distribution");
   }
 
