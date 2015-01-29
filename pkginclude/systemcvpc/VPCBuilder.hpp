@@ -13,6 +13,7 @@
 #ifndef HSCD_VPC_VPCBUILDER_H_
 #define HSCD_VPC_VPCBUILDER_H_
 
+/*
 #include <xercesc/dom/DOMTreeWalker.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/util/XMLString.hpp>
@@ -28,8 +29,10 @@
 #include <xercesc/dom/DOMLocator.hpp>
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
+ */
 
-#include <CoSupport/XML/xerces_support.hpp>
+#include <CoSupport/XML/Xerces/Handler.hpp>
+#include <CoSupport/XML/Xerces/common.hpp>
 
 #include <map>
 #include <string>
@@ -50,25 +53,42 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 typedef boost::minstd_rand base_generator_type;
 
-XERCES_CPP_NAMESPACE_USE
+//XERCES_CPP_NAMESPACE_USE
+
 namespace SystemC_VPC{
   namespace CX = CoSupport::XML::Xerces;
+
   class Director;
 
   /**
    * VPCBuilder sets up VPC framework through a given specification file before
    * simulation start.
    */
-  class VPCBuilder{
+  class VPCBuilder {
+  public:
 
-    static const char* B_TRANSPORT;
-    static const char* STATIC_ROUTE;
-    static const char* STR_VPC_THREADEDCOMPONENTSTRING;
-    static const char* STR_VPC_DELAY;
-    static const char* STR_VPC_LATENCY;
-    static const char* STR_VPC_PRIORITY;
-    static const char* STR_VPC_PERIOD;
-    static const char* STR_VPC_DEADLINE;
+    VPCBuilder(Director *director);
+    ~VPCBuilder();
+
+    void setDirector(Director *director)
+      { this->director = director; }
+
+    bool FALLBACKMODE;
+
+    /**
+     * \brief Initializes VPC Framework using a configuration file
+     */
+    void buildVPC();
+
+  private:
+    static const char *B_TRANSPORT;
+    static const char *STATIC_ROUTE;
+    static const char *STR_VPC_THREADEDCOMPONENTSTRING;
+    static const char *STR_VPC_DELAY;
+    static const char *STR_VPC_LATENCY;
+    static const char *STR_VPC_PRIORITY;
+    static const char *STR_VPC_PERIOD;
+    static const char *STR_VPC_DEADLINE;
 
     /*
      * SECTION: init tag values for comparison while initializing
@@ -116,99 +136,22 @@ namespace SystemC_VPC{
     CX::XStr tracingAttrStr;
     CX::XStr defaultRouteAttrStr;
     
+    // The handler for loading a xerces xml document
+    CX::Handler handler;
+
     // walker over parsed configure file
     // used as instance variable to enable code modularization
-    DOMTreeWalker* vpcConfigTreeWalker;
+    CX::XN::DOMTreeWalker* vpcConfigTreeWalker;
     
     /*
      * HELPER STRUCTURES FOR INITIALIZATION
      */
     // map of all created components
-    std::map<std::string, AbstractComponent* > knownComps;
+    std::map<std::string, AbstractComponent *> knownComps;
 
     // pointer to Director to be initialized
-    Director* director;
+    Director *director;
     
-  public:
-    
-    VPCBuilder(Director* director){
-      
-      this->director = director;
-      //init xml
-      try {
-        XMLPlatformUtils::Initialize();
-      }
-      catch(const XMLException& e){
-        std::cerr << "Director> Error initializing Xerces:\n"
-             << e.getMessage() << std::endl;
-      }
-      /*
-       * SECTION: initialization of init tag values for comparison while initializing
-       */
-      resultfileStr       = "resultfile";
-      resourcesStr        = "resources";
-      mappingsStr         = "mappings";
-      componentStr        = "component";
-      mappingStr          = "mapping";
-      attributeStr        = "attribute";
-      timingStr           = "timing";
-      parameterStr        = "parameter";
-      topologyStr         = "topology";
-      hopStr              = "hop";
-      routeStr            = "route";
-      powerModeStr        = "powermode";
-      nameAttrStr         = "name";
-      countAttrStr        = "count";
-      typeAttrStr         = "type";
-      dividerAttrStr      = "divider";
-      schedulerAttrStr    = "scheduler";
-      valueAttrStr        = "value";
-      targetAttrStr       = "target";
-      sourceAttrStr       = "source";
-      delayAttrStr        = "delay";
-      diiAttrStr          = "dii";
-      latencyAttrStr      = "latency";
-      distributionsStr    = "distributions";
-      distributionStr     = "distribution";
-      minAttrStr          = "min";
-      maxAttrStr          = "max";
-      parameter1AttrStr   = "parameter1";
-      parameter2AttrStr   = "parameter2";
-      parameter3AttrStr   = "parameter3";
-      baseAttrStr         = "base";
-      fixedAttrStr        = "fixed";
-      distributionAttrStr = "distribution";
-      seedAttrStr         = "seed";
-      dataAttrStr         = "data";
-      scaleAttrStr        = "scale";
-      fnameAttrStr        = "fname";
-      destinationAttrStr  = "destination";
-      tracingAttrStr      = "tracing";
-      defaultRouteAttrStr = "default";
-      
-      /*
-       * END OF SECTION: init tag values for comparison while initializing
-       */
-    }
-      
-    ~VPCBuilder(){
-      XMLPlatformUtils::Terminate();
-    }
-      
-      
-    void setDirector(Director* director){
-      this->director = director;
-    }
-      
-    bool FALLBACKMODE;
-      
-    /**
-     * \brief Initializes VPC Framework using a configuration file
-     */
-    void buildVPC();
-    
-  private:
-
     /**
      * \brief Initialize a distribution from the configuration file
      */
@@ -235,23 +178,23 @@ namespace SystemC_VPC{
     /**
     * \brief Used to create the Attribute-Object recursively
     */
-    void nextAttribute(AttributePtr attributePtr, DOMNode* node);
+    void nextAttribute(AttributePtr attributePtr, CX::XN::DOMNode *node);
      
     /**
     * \brief Topology parsing related code
     */
-    void parseTopology(DOMNode* node);
+    void parseTopology(CX::XN::DOMNode* node);
 
     /**
     * \brief Parsing helper for <timing>
     */
-    Config::Timing parseTiming(DOMNode* node) throw(InvalidArgumentException);
+    Config::Timing parseTiming(CX::XN::DOMNode* node) throw(InvalidArgumentException);
 
     //variables for the generation of random times
     boost::uniform_real<> distribution;
     boost::shared_ptr<base_generator_type> generator;
     boost::shared_ptr<boost::mt19937> gen;
-    boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(DOMNode* node) throw(InvalidArgumentException);
+    boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(CX::XN::DOMNode* node) throw(InvalidArgumentException);
   };
     
 }
