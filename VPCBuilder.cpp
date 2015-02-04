@@ -74,6 +74,8 @@
 
 #define MAX(x,y) ((x > y) ? x : y)
 
+#include "vpc-dtd.c" // get DTD
+
 namespace SystemC_VPC {
 
   typedef boost::minstd_rand base_generator_type;
@@ -104,6 +106,9 @@ namespace SystemC_VPC {
       vpcConfigTreeWalker(NULL),
       director(director)
   {
+    handler.setTopElementName(CX::XStr("vpcconfiguration"));
+    handler.setDTDUrl(CX::XStr("vpc.dtd"));
+    handler.setDTD(vpcDTD, sizeof(vpcDTD));
     /*
      * SECTION: initialization of init tag values for comparison while initializing
      */
