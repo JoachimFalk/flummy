@@ -45,6 +45,19 @@ nodist_pkgconfig_DATA = \
 	     -e 's/\$${srctreemode_\(\w\+\)}/\$${\1}/g' \
 	  < $^ > $@
 
+%-xsd.c: %.xsd
+	{ set -e; echo "static char const $(notdir $*)XSD[] ="; \
+	  sed -e 's/\(["\\]\)/\\\1/g' -e 's/^\(.*\)$$/  "\1\\n"/' $<; \
+	  echo ";"; \
+	} > $@
+%-dtd.c: %.dtd
+	{ set -e; echo "static char const $(notdir $*)DTD[] ="; \
+	  sed -e 's/\(["\\]\)/\\\1/g' -e 's/^\(.*\)$$/  "\1\\n"/' $<; \
+	  echo ";"; \
+	} > $@
+
+BUILT_SOURCES=vpc-dtd.c
+
 CLEANFILES=$(nodist_pkgconfig_DATA)
 
 lib_LTLIBRARIES = libsystemcvpc.la
