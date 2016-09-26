@@ -29,7 +29,7 @@
 
 // make sure this stream exists
 #ifndef DBG_STREAM
-  #define DBG_STREAM dbgout
+  #define DBG_STREAM getDbgOut()
 #endif
 
 // make DBG.*() statements disapear in non-debug builds
