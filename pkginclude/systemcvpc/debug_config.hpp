@@ -19,7 +19,12 @@
 //#define DBG_ENABLE
 
 #ifdef DBG_ENABLE
-extern CoSupport::Streams::DebugOStream dbgout;
+// Global CTOR initialization order is undefined between translation units.
+// Hence, using a global variable CoSupport::Streams::DebugOStream dbgout does
+// not insure that this variable will already have been initialized during the
+// CTOR call used for other global variables. Hence, we use the below given
+// helper function to guarantee this property.
+extern std::ostream &getDbgOut();
 #endif //DBG_ENABLE
 
 /** enable/disable debugging for StaticRoute */
