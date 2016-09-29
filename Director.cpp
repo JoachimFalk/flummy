@@ -543,7 +543,17 @@ ProcessId Director::getProcessId(std::string process_or_source,
     VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
     assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
     VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
-    assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
+#ifndef NDEBUG
+    if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
+      for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
+           iter != VC::Mappings::getComponents().end();
+           ++iter) {
+        std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
+      }
+      std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
+      assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
+    }
+#endif //NDEBUG
     AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
     Director::getInstance().registerMapping(actorName.c_str(),
         comp->getName());
