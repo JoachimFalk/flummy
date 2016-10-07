@@ -36,22 +36,48 @@
 							</tool>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen.1828624766" name="autogen.sh" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen"/>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc.2110058710" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc">
-								<option id="gnu.c.compiler.option.include.paths.1574367076" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.1574367076" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/pkginclude}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/pkginclude}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/src/cosupport-base/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-allocators/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-base/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-initializer/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-math/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-path/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-random/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-smartptr/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-streams/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-string/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-systemc/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-tracing/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-xerces/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/pkginclude}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/pkginclude}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/pkginclude}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/pkginclude}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.328748247" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp.275374220" name="GCC C++ Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp">
-								<option id="gnu.cpp.compiler.option.include.paths.669900603" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.669900603" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/pkginclude}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/pkginclude}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/src/cosupport-base/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-allocators/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-base/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-initializer/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-math/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-path/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-random/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-smartptr/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-streams/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-string/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-systemc/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-tracing/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-xerces/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/pkginclude}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/pkginclude}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/pkginclude}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/pkginclude}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1693378229" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -64,6 +90,19 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/obj/pkginclude"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/pkginclude"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/obj/src/cosupport-base/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-allocators/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-base/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-initializer/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-math/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-path/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-random/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-smartptr/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-streams/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-string/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-systemc/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-tracing/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/Support/src/cosupport-xerces/headers"/>
 					</externalSetting>
 				</externalSettings>
 			</storageModule>
@@ -90,6 +129,22 @@
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 		<buildTargets>
+			<target name="%-dtd.c" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>-j4</buildArguments>
+				<buildTarget>%-dtd.c</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="%-xsd.c" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>-j4</buildArguments>
+				<buildTarget>%-xsd.c</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
 			<target name="%.pc" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>-j4</buildArguments>
