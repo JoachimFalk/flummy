@@ -23,16 +23,13 @@
 include $(auxdir)/jfrules.mk
 include ../BuildSystem/doxygen.am
 
-SUBDIRS = pkginclude
+SUBDIRS = src/systemcvpc/headers/
 
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
 AM_LDFLAGS = @AM_LDFLAGS@
-
-AM_CPPFLAGS= @AM_CPPFLAGS@ \
-	-Ipkginclude \
-	-I$(srcdir)/pkginclude
+AM_CPPFLAGS= @AM_CPPFLAGS@
 
 pkgconfigdir = $(libdir)/pkgconfig
 
@@ -63,51 +60,51 @@ CLEANFILES=$(nodist_pkgconfig_DATA)
 lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_la_SOURCES = \
-	config/common.cpp \
-	config/Component.cpp \
-	config/Mappings.cpp \
-	config/Route.cpp \
-	config/Scheduler.cpp \
-	config/Timing.cpp \
-	config/VpcTask.cpp \
-	config/VpcApi.cpp \
+	src/systemcvpc/cpp/config/common.cpp \
+	src/systemcvpc/cpp/config/Component.cpp \
+	src/systemcvpc/cpp/config/Mappings.cpp \
+	src/systemcvpc/cpp/config/Route.cpp \
+	src/systemcvpc/cpp/config/Scheduler.cpp \
+	src/systemcvpc/cpp/config/Timing.cpp \
+	src/systemcvpc/cpp/config/VpcTask.cpp \
+	src/systemcvpc/cpp/config/VpcApi.cpp \
 	\
-	scheduler/AVBScheduler.cpp \
-	scheduler/FCFSScheduler.cpp \
-	scheduler/FlexRayScheduler.cpp \
-	scheduler/PriorityScheduler.cpp \
-	scheduler/PrioritySchedulerNoPreempt.cpp \
-	scheduler/RateMonotonicScheduler.cpp \
-	scheduler/RoundRobinScheduler.cpp \
-	scheduler/TimeTriggeredCCScheduler.cpp \
-	scheduler/TDMAScheduler.cpp \
-	scheduler/MostScheduler.cpp \
-	scheduler/MostSecondaryScheduler.cpp \
-	scheduler/StreamShaperScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/AVBScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/FCFSScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/FlexRayScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/PriorityScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/PrioritySchedulerNoPreempt.cpp \
+	src/systemcvpc/cpp/scheduler/RateMonotonicScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/RoundRobinScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/TimeTriggeredCCScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/TDMAScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/MostScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/MostSecondaryScheduler.cpp \
+	src/systemcvpc/cpp/scheduler/StreamShaperScheduler.cpp \
 	\
-	tracing/DataBaseTracer.cpp \
-	tracing/Tracing.cpp \
+	src/systemcvpc/cpp/tracing/DataBaseTracer.cpp \
+	src/systemcvpc/cpp/tracing/Tracing.cpp \
 	\
-	debug_config.cpp \
-	BlockingTransport.cpp \
-	ComponentImpl.cpp \
-	ConfigCheck.cpp \
-	Director.cpp \
-	ScheduledTask.cpp \
-	Attribute.cpp \
-	Task.cpp \
-	VPCBuilder.cpp \
-	ProcessControlBlock.cpp \
-	FastLink.cpp \
-	StaticRoute.cpp \
-	RouteImpl.cpp \
-	PowerSumming.cpp \
-	HysteresisLocalGovernor.cpp \
-	SelectFastestPowerModeGlobalGovernor.cpp \
-	PluggablePowerGovernor.cpp \
-	dynload/dll-elf.cpp \
-	ComponentInfo.cpp \
-	AbstractComponent.cpp
+	src/systemcvpc/cpp/debug_config.cpp \
+	src/systemcvpc/cpp/BlockingTransport.cpp \
+	src/systemcvpc/cpp/ComponentImpl.cpp \
+	src/systemcvpc/cpp/ConfigCheck.cpp \
+	src/systemcvpc/cpp/Director.cpp \
+	src/systemcvpc/cpp/ScheduledTask.cpp \
+	src/systemcvpc/cpp/Attribute.cpp \
+	src/systemcvpc/cpp/Task.cpp \
+	src/systemcvpc/cpp/VPCBuilder.cpp \
+	src/systemcvpc/cpp/ProcessControlBlock.cpp \
+	src/systemcvpc/cpp/FastLink.cpp \
+	src/systemcvpc/cpp/StaticRoute.cpp \
+	src/systemcvpc/cpp/RouteImpl.cpp \
+	src/systemcvpc/cpp/PowerSumming.cpp \
+	src/systemcvpc/cpp/HysteresisLocalGovernor.cpp \
+	src/systemcvpc/cpp/SelectFastestPowerModeGlobalGovernor.cpp \
+	src/systemcvpc/cpp/PluggablePowerGovernor.cpp \
+	src/systemcvpc/cpp/dynload/dll-elf.cpp \
+	src/systemcvpc/cpp/ComponentInfo.cpp \
+	src/systemcvpc/cpp/AbstractComponent.cpp
 
 libsystemcvpc_la_DEPENDENCIES = \
 	$(COSUPPORT_STRING_DEPENDENCIES) \
@@ -118,6 +115,10 @@ libsystemcvpc_la_DEPENDENCIES = \
 	$(COSUPPORT_XERCES_DEPENDENCIES)
 
 libsystemcvpc_la_CPPFLAGS = $(AM_CPPFLAGS) \
+	-Isrc/systemcvpc/cpp \
+	-Isrc/systemcvpc/headers \
+	-I$(srcdir)/src/systemcvpc/cpp \
+	-I$(srcdir)/src/systemcvpc/headers \
 	$(BOOST_CPPFLAGS) \
 	$(SYSTEMC_CPPFLAGS) \
 	$(COSUPPORT_STRING_CPPFLAGS) \
