@@ -22,9 +22,9 @@
 #include <systemcvpc/PowerMode.hpp>
 #include <systemcvpc/PowerSumming.hpp>
 #include <systemcvpc/vpc_config.h>
+#include <systemcvpc/timetriggered/tt_support.hpp>
 
 #include "scheduler/Scheduler.hpp"
-#include "timetriggered/tt_support.hpp"
 
 #include <vector>
 #include <map>

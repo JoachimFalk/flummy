@@ -39,7 +39,7 @@
 #include "Attribute.hpp"
 #include "FunctionTimingPool.hpp"
 #include "ScheduledTask.hpp"
-#include "../timetriggered/tt_support.hpp"
+#include "timetriggered/tt_support.hpp"
 #include <list>
 
 namespace SystemC_VPC{

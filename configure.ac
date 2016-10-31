@@ -8,7 +8,7 @@ AC_INIT(
 AC_PREREQ(2.57)
 ACJF_INIT
 
-AC_CONFIG_SRCDIR([Director.cpp])
+AC_CONFIG_SRCDIR([src/systemcvpc/cpp/Director.cpp])
 AC_CONFIG_AUX_DIR([../BuildSystem])
 AC_CONFIG_MACRO_DIR([../BuildSystem/m4])
 
@@ -35,7 +35,7 @@ AC_PROG_LIBTOOL
 ACJF_ARG_DEBUG([yes], [], [-DNDEBUG])
 
 AM_INIT_AUTOMAKE([subdir-objects])
-AC_CONFIG_HEADER([config.h pkginclude/systemcvpc/vpc_config.h])
+AC_CONFIG_HEADER([config.h src/systemcvpc/headers/systemcvpc/vpc_config.h])
 
 DX_HTML_FEATURE(ON)
 DX_CHM_FEATURE(OFF)
@@ -111,7 +111,7 @@ fi
 
 AC_CONFIG_FILES([
   Makefile
-  pkginclude/Makefile
+  src/systemcvpc/headers/Makefile
   pkgconfig/libsystemcvpc.pc
 ])
 
