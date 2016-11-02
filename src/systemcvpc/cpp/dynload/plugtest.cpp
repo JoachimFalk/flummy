@@ -10,9 +10,9 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "world.h"
-#include "dll.h"
-#include "plugin.h"
+#include <systemcvpc/dynload/world.hpp>
+#include <systemcvpc/dynload/dll.hpp>
+#include <systemcvpc/dynload/plugin.hpp>
 
 using namespace std;
 

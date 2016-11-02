@@ -14,7 +14,7 @@
 #define __PLUGIN_H
 
 
-#include "dll.h"
+#include "dll.hpp"
 
 
 //

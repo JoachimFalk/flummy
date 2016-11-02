@@ -12,7 +12,7 @@
 
 #include <typeinfo>
 #include <iostream>
-#include "plugin.h"
+#include <systemcvpc/dynload/plugin.hpp>
 
 // Class PlugInFun inherits from PlugIn
 // and shows the world when one is created/destroyed
