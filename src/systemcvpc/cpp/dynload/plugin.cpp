@@ -12,7 +12,7 @@
 
 #include <typeinfo>
 #include <iostream>
-#include <systemcvpc/dynload/plugin.h>
+#include <systemcvpc/dynload/plugin.hpp>
 
 //
 // Announce to the world that the PlugIn base

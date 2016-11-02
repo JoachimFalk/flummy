@@ -10,8 +10,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "world.h"
-#include "plugin.h"
+#include <systemcvpc/dynload/world.hpp>
+#include <systemcvpc/dynload/plugin.hpp>
 
 
 // Class PlugInHappy inherits from PlugIn
