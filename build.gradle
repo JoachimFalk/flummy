@@ -162,6 +162,8 @@ model {
               srcDirs configHeaderDir
               include "**/*.hpp", "**/*.h"
             }
+            lib project: ':PrebuiltLibraries', library: "boost_headers", flavor: "default", exportHeaders: true
+            lib project: ':PrebuiltLibraries', library: "boost_filesystem", flavor: "default"
             lib project: ':Support', library: 'cosupport-systemc', exportHeaders: true
             lib project: ':Support', library: 'cosupport-xerces', exportHeaders: true
             lib project: ':Support', library: 'cosupport-streams', exportHeaders: true
