@@ -69,6 +69,11 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/config/VpcTask.cpp \
 	src/systemcvpc/cpp/config/VpcApi.cpp \
 	\
+	src/systemcvpc/cpp/dynload/dll-elf.cpp \
+	src/systemcvpc/cpp/dynload/dll-win32.cpp \
+	src/systemcvpc/cpp/dynload/plugin.cpp \
+	src/systemcvpc/cpp/dynload/plugtest.cpp \
+	\
 	src/systemcvpc/cpp/scheduler/AVBScheduler.cpp \
 	src/systemcvpc/cpp/scheduler/FCFSScheduler.cpp \
 	src/systemcvpc/cpp/scheduler/FlexRayScheduler.cpp \
