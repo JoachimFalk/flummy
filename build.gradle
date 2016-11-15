@@ -188,6 +188,9 @@ model {
       }
       binaries.withType(SharedLibraryBinarySpec) {
         sources.cpp.exportedCompilerArgs.define "SYSTEMCVPC_DLL_IMPORT"
+        if (targetPlatform.operatingSystem.name == 'linux') {
+          linker.args "-ldl"
+        }
         cppCompiler.define "SYSTEMCVPC_DLL_EXPORT"
       }
     }
