@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef TASKTRACER_HPP_
-#define TASKTRACER_HPP_
+#ifndef _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP
+#define _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP
 
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Task.hpp>
@@ -41,62 +41,17 @@
 
 #include "Tracing.hpp"
 
-namespace SystemC_VPC
-{
-namespace Trace
-{
+namespace SystemC_VPC { namespace Trace {
 
-class DiscardTrace
-{
-public:
-  //
-  DiscardTrace(Config::Component::Ptr component)
-  {
-  }
-
-  void release(const Task * task) const
-  {
-  }
-
-  void finishDii(const Task * task) const
-  {
-  }
-
-  void finishLatency(const Task * task) const
-  {
-  }
-
-  void assign(const Task * task) const
-  {
-  }
-
-  void resign(const Task * task) const
-  {
-  }
-
-  void block(const Task * task) const
-  {
-  }
-
-  Tracing * getOrCreateTraceSignal(const std::string name) const
-  {
-    return NULL;
-  }
-
-};
-
-class VcdTrace
-{
+class VcdTracer {
 public:
 
   //
-  VcdTrace(Config::Component::Ptr component) :
-    traceFile_(NULL), name_(component->getName())
-  {
-  }
+  VcdTracer(Config::Component::Ptr component)
+    : traceFile_(NULL), name_(component->getName())
+  {}
 
-  virtual ~VcdTrace()
-  {
+  virtual ~VcdTracer() {
     for (std::map<std::string, Tracing*>::iterator iter =
         trace_map_by_name_.begin(); iter != trace_map_by_name_.end(); ++iter) {
       delete iter->second;
@@ -171,6 +126,6 @@ private:
 
 };
 
-} // namespace Trace
-} // namespace SystemC_VPC
-#endif /* TASKTRACER_HPP_ */
+} } // namespace SystemC_VPC::Trace
+
+#endif /* _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP */

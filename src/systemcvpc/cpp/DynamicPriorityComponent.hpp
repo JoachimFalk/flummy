@@ -43,7 +43,6 @@
 
 #include "NonPreemptiveComponent.hpp"
 #include "diagnostics/DebugOutput.hpp"
-#include "tracing/TaskTracer.hpp"
 
 #include <list>
 

@@ -51,21 +51,28 @@ namespace SystemC_VPC {
 
 namespace Trace {
   class Tracing;
-  class VcdTrace;
+  class VcdTracer;
+  class PajeTracer;
 }
 
 using CoSupport::SystemC::Event;
   class Task{
   public:
-    friend class Trace::VcdTrace;
+    friend class Trace::VcdTracer;
+    friend class Trace::PajeTracer;
+
     Task(TaskPool * pool)
-      : blockingCompute(NULL),
-      timing(),
-      pcb(),
-      pool(pool),
-      name("NN"),
-      timingScale(1),
-      scheduledTask(NULL)
+      : pid(-1)
+      , blockingCompute(NULL)
+      , blockAck(false)
+      , exec(false)
+      , write(false)
+      , timing()
+      , pcb()
+      , pool(pool)
+      , name("NN")
+      , timingScale(1)
+      , scheduledTask(NULL)
     {
           this->instanceId = Task::globalInstanceId++;
     }
