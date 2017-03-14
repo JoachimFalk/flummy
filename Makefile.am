@@ -87,8 +87,8 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/scheduler/MostSecondaryScheduler.cpp \
 	src/systemcvpc/cpp/scheduler/StreamShaperScheduler.cpp \
 	\
-	src/systemcvpc/cpp/tracing/DataBaseTracer.cpp \
-	src/systemcvpc/cpp/tracing/Tracing.cpp \
+	src/systemcvpc/cpp/tracing/db/DataBaseTracer.cpp \
+	src/systemcvpc/cpp/tracing/vcd/Tracing.cpp \
 	\
 	src/systemcvpc/cpp/debug_config.cpp \
 	src/systemcvpc/cpp/BlockingTransport.cpp \

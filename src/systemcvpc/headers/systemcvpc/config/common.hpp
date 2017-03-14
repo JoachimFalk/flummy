@@ -48,6 +48,7 @@ public:
   enum Type
   {
     DB,  // write trace to a database
+    PAJE,// trace to paje file
     VCD, // trace to vcd file
     NONE // disable tracing
   };

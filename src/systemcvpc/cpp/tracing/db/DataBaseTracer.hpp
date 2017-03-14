@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_DATABASETRACER_H
-#define HSCD_VPC_DATABASETRACER_H
+#ifndef _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP
+#define _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP
 
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/config/Component.hpp>
@@ -45,13 +45,12 @@
 //#define VPC_ENABLE_PLAIN_TRACING
 #include <CoSupport/Streams/AlternateStream.hpp>
 
-namespace SystemC_VPC
-{
-namespace Trace
-{
-class DataBaseProxy
-{
+namespace SystemC_VPC { namespace Trace {
 
+// FIXME: Remove this after method getOrCreateTraceSignal has been removed!
+class Tracing;
+
+class DataBaseProxy {
 public:
   static DataBaseProxy & getDataBaseProxy()
   {
@@ -78,11 +77,11 @@ private:
   void close();
 };
 
-class DataBaseTrace
+class DataBaseTracer
 {
 public:
   //
-  DataBaseTrace(Config::Component::Ptr component) :
+  DataBaseTracer(Config::Component::Ptr component) :
     dbProxy_(DataBaseProxy::getDataBaseProxy()),
         resourceName_(component->getName())
   {
@@ -119,10 +118,8 @@ public:
   }
 
   // TODO: Can we avoid this function somehow?
-  Tracing * getOrCreateTraceSignal(const std::string name) const
-  {
-    return NULL;
-  }
+  Tracing *getOrCreateTraceSignal(const std::string name) const
+    { return NULL; }
 private:
 
   void addEvent(const Task * task, const char * state)
@@ -137,6 +134,6 @@ private:
   std::string resourceName_;
 };
 
-} // namespace Trace
-} // namespace SystemC_VPC
-#endif // HSCD_VPC_DATABASETRACER_H
+} } // namespace SystemC_VPC::Trace
+
+#endif // _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP

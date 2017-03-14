@@ -61,8 +61,10 @@
 #include "DynamicPriorityComponent.hpp"
 #include "NonPreemptiveComponent.hpp"
 #include "config/Mappings.hpp"
-#include "tracing/DataBaseTracer.hpp"
-#include "tracing/TaskTracer.hpp"
+#include "tracing/null/NullTracer.hpp"
+#include "tracing/db/DataBaseTracer.hpp"
+#include "tracing/vcd/VcdTracer.hpp"
+#include "tracing/paje/PajeTracer.hpp"
 
 
 #include <systemc.h>
@@ -114,6 +116,8 @@ namespace SystemC_VPC{
     try{
       VPCBuilder builder((Director*)this);
       builder.buildVPC();
+//    PAJEBuilder builder2((Director*)this);
+//    builder2.buildPAJE();
     }catch(InvalidArgumentException& e){
       std::cerr << "Director> Got exception while setting up VPC:\n"
                 << e.what() << std::endl;
@@ -655,13 +659,16 @@ ProcessId Director::getProcessId(std::string process_or_source,
     switch(component->getTracing()){
       default:
       case Config::Traceable::NONE:
-        return new C<Trace::DiscardTrace>(component);
+        return new C<Trace::NullTracer>(component);
         break;
+      case Config::Traceable::PAJE:
+	return new C<Trace::PajeTracer>(component);
+	break;
       case Config::Traceable::VCD:
-        return new C<Trace::VcdTrace>(component);
+        return new C<Trace::VcdTracer>(component);
         break;
       case Config::Traceable::DB:
-        return new C<Trace::DataBaseTrace>(component);
+        return new C<Trace::DataBaseTracer>(component);
         break;
     }
   }
@@ -684,8 +691,9 @@ ProcessId Director::getProcessId(std::string process_or_source,
         comp = createComponent<PriorityComponent>(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
-        comp = DynamicPriorityComponent<Trace::DiscardTrace>::create(component);
+        // FIXME: Why does this not support a tracer?
         //comp = createComponent<DynamicPriorityComponent>(component);
+        comp = DynamicPriorityComponent<Trace::NullTracer>::create(component);
         break;
       default:
         comp = createComponent<ComponentImpl>(component);
