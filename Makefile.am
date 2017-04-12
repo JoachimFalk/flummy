@@ -89,6 +89,7 @@ libsystemcvpc_la_SOURCES = \
 	\
 	src/systemcvpc/cpp/tracing/db/DataBaseTracer.cpp \
 	src/systemcvpc/cpp/tracing/vcd/Tracing.cpp \
+	src/systemcvpc/cpp/tracing/paje/PajeTracer.cpp \
 	\
 	src/systemcvpc/cpp/debug_config.cpp \
 	src/systemcvpc/cpp/BlockingTransport.cpp \

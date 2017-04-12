@@ -140,6 +140,7 @@ using CoSupport::SystemC::Event;
       this->setDelay(this->timingScale * timing->getDelay(fids) //lat
           + this->extraDelay);
       this->setRemainingDelay(this->getDelay());
+
       this->setLatency(this->timingScale * timing->getLatency(fids) //dii
           + this->extraDelay);
     }
@@ -222,6 +223,7 @@ using CoSupport::SystemC::Event;
     double timingScale;
     CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
     ScheduledTask * scheduledTask;
+
   };
 
   typedef std::map<int, Task*>  TaskMap;

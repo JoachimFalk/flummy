@@ -27,89 +27,49 @@
 
 #include "../vcd/Tracing.hpp"
 
+#include <CoSupport/Tracing/PajeTracer.hpp>
+#include <CoSupport/String/color.hpp>
+
+#include <vector>
+using namespace std;
+
 namespace SystemC_VPC { namespace Trace {
 
 class PajeTracer {
 public:
   //
-  PajeTracer(Config::Component::Ptr component):
-    traceFile_(NULL), name_(component->getName())
-  {
-  }
-  virtual ~PajeTracer()
-    {
-      for (std::map<std::string, Tracing*>::iterator iter =
-          trace_map_by_name_.begin(); iter != trace_map_by_name_.end(); ++iter) {
-        delete iter->second;
-      }
-      trace_map_by_name_.clear();
-      if (traceFile_) {
-        sc_close_vcd_trace_file(traceFile_);
-      }
-    }
+  struct TaskAct;
 
-  std::string getName() const
-    {
-      return name_;
-    }
+  PajeTracer(Config::Component::Ptr component);
 
-    void release(Task * task) const
-    {
-      task->getTraceSignal()->traceReady();
-      task->traceReleaseTask();
-    }
+  ~PajeTracer();
 
-    void finishDii(Task * task) const
-    {
-      task->getTraceSignal()->traceSleeping();
-    }
+  std::string getName() const;
 
-    void finishLatency(Task * task) const
-    {
-      task->traceFinishTaskLatency();
-    }
+  void release(Task * task);
 
-    void assign(Task * task) const
-    {
-      task->getTraceSignal()->traceRunning();
-    }
+  void finishDii(Task * task) const;
 
-    void resign(Task * task) const
-    {
-      task->getTraceSignal()->traceReady();
-    }
+  void finishLatency(Task * task) const;
 
-    void block(Task * task) const
-    {
-      task->getTraceSignal()->traceBlocking();
-    }
+  void assign(Task * task);
 
-    Tracing * getOrCreateTraceSignal(std::string name)
-    {
-      if (this->traceFile_ == NULL) {
-        std::string tracefilename = this->getName(); //componentName;
+  void resign(Task * task) const;
 
-        char* traceprefix = getenv("VPCTRACEFILEPREFIX");
-        if (0 != traceprefix) {
-          tracefilename.insert(0, traceprefix);
-        }
+  void block(Task * task) const;
 
-        this->traceFile_ = sc_create_vcd_trace_file(tracefilename.c_str());
-        this->traceFile_->set_time_unit(1, SC_NS);
-      }
-      Tracing *newsignal = new Tracing(name, this->getName());
+  Tracing *getOrCreateTraceSignal(std::string name);
 
-      this->trace_map_by_name_.insert(
-          std::pair<std::string, Tracing*>(this->getName(), newsignal));
-      sc_trace(this->traceFile_, *newsignal->traceSignal, name);
-      newsignal->traceSleeping();
-      return newsignal;
-    }
-  private:
-    sc_trace_file *traceFile_;
-    std::string name_;
-    std::map<std::string, Trace::Tracing*> trace_map_by_name_;
 
+
+//  CoSupport::String::Color getNextColor();
+
+private:
+  sc_trace_file *traceFile_;
+  std::string name_;
+  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+  CoSupport::Tracing::PajeTracer::Resource const *res_;
+  std::vector<TaskAct> taskActList;
 };
 
 } } // namespace SystemC_VPC::Trace
