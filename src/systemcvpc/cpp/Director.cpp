@@ -39,7 +39,7 @@
 
 
 #include <CoSupport/SystemC/systemc_time.hpp>
-
+#include <src/systemcvpc/cpp/tracing/paje/PajeTracer.hpp>
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/Director.hpp>
@@ -64,9 +64,6 @@
 #include "tracing/null/NullTracer.hpp"
 #include "tracing/db/DataBaseTracer.hpp"
 #include "tracing/vcd/VcdTracer.hpp"
-#include "tracing/paje/PajeTracer.hpp"
-
-
 #include <systemc.h>
 #include <map>
 #include <vector>
@@ -116,8 +113,6 @@ namespace SystemC_VPC{
     try{
       VPCBuilder builder((Director*)this);
       builder.buildVPC();
-//    PAJEBuilder builder2((Director*)this);
-//    builder2.buildPAJE();
     }catch(InvalidArgumentException& e){
       std::cerr << "Director> Got exception while setting up VPC:\n"
                 << e.what() << std::endl;
