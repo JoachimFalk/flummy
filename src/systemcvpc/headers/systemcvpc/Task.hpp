@@ -78,16 +78,16 @@ using CoSupport::SystemC::Event;
     }
 
     // getter, setter
-    std::string getName() const                  {return name;}
-    void setName(std::string name){this->name = name;}
-    ProcessId  getProcessId()                    {return pid;}
-    void       setProcessId(ProcessId pid)       {this->pid = pid;}
-    FunctionIds getFunctionIds()                   {return fid;}
-    void        setFunctionIds(FunctionIds fid)  {this->fid = fid;}
-    EventPair  getBlockEvent()                   {return blockEvent;}
-    void       setBlockEvent(EventPair p)        {blockEvent = p;}
-    void       setPCB(ProcessControlBlockPtr pcb)  {this->pcb = pcb;}
-    void       setTiming(FunctionTimingPtr timing) {this->timing = timing;}
+    std::string getName() const                         {return name;}
+    void        setName(std::string name)               {this->name = name;}
+    ProcessId  getProcessId()                           {return pid;}
+    void       setProcessId(ProcessId pid)              {this->pid = pid;}
+    FunctionIds getFunctionIds()                        {return fid;}
+    void        setFunctionIds(FunctionIds fid)         {this->fid = fid;}
+    EventPair  getBlockEvent()                          {return blockEvent;}
+    void       setBlockEvent(EventPair p)               {this->blockEvent = p;}
+    void       setPCB(ProcessControlBlockPtr pcb)       {this->pcb = pcb;}
+    void       setTiming(FunctionTimingPtr timing)      {this->timing = timing;}
 
     void       setExtraDelay(const sc_time & ed) { this->extraDelay = ed;}
 
@@ -119,6 +119,10 @@ using CoSupport::SystemC::Event;
     sc_time getLatency() const                  {return this->latency;}
     void setRemainingDelay(const sc_time& delay){this->remainingDelay = delay;}
     sc_time getRemainingDelay() const           {return this->remainingDelay;}
+    void setOverhead(const sc_time& overhead)   {this->overhead = overhead;}
+    sc_time getOverhead()const                  {return this->overhead;}
+    void setRuntime(const sc_time& runtime)     {this->runtime = runtime;}
+    sc_time getRuntime()const                   {return this->runtime;}
     int getInstanceId() const                   {return this->instanceId;}
     void setTimingScale( double scale )         {this->timingScale = scale;}
     double getTimingScale()                     {return this->timingScale;}
@@ -143,6 +147,10 @@ using CoSupport::SystemC::Event;
 
       this->setLatency(this->timingScale * timing->getLatency(fids) //dii
           + this->extraDelay);
+      sc_time *overhead = new sc_time(2,SC_NS);
+      this->setOverhead(*overhead);
+      sc_time *runtime = new sc_time(0,SC_NS);
+      this->setRuntime(*runtime);
     }
 
     // Adaptor setter / getter for ProcessControlBlock
@@ -187,6 +195,8 @@ using CoSupport::SystemC::Event;
       delay(task.delay),
       latency(task.latency),
       remainingDelay(task.remainingDelay),
+      overhead(task.overhead),
+      runtime(task.runtime),
       extraDelay(task.extraDelay),
       timing(task.timing),
       pcb(task.pcb),
@@ -211,6 +221,8 @@ using CoSupport::SystemC::Event;
     sc_time delay;
     sc_time latency;
     sc_time remainingDelay;
+    sc_time overhead;
+    sc_time runtime;
     sc_time extraDelay;
     
     FunctionTimingPtr       timing;

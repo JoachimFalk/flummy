@@ -31,6 +31,7 @@
 #include <CoSupport/String/color.hpp>
 
 #include <vector>
+//#include <map>
 using namespace std;
 
 namespace SystemC_VPC { namespace Trace {
@@ -38,8 +39,6 @@ namespace SystemC_VPC { namespace Trace {
 class PajeTracer {
 public:
   //
-  struct TaskAct;
-
   PajeTracer(Config::Component::Ptr component);
 
   ~PajeTracer();
@@ -61,15 +60,13 @@ public:
   Tracing *getOrCreateTraceSignal(std::string name);
 
 
-
-//  CoSupport::String::Color getNextColor();
-
 private:
   sc_trace_file *traceFile_;
-  std::string name_;
-  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+  string name_;
+  map<std::string, Trace::Tracing*> trace_map_by_name_;
   CoSupport::Tracing::PajeTracer::Resource const *res_;
-  std::vector<TaskAct> taskActList;
+  map<string, CoSupport::Tracing::PajeTracer::Activity*> my_map_;
+
 };
 
 } } // namespace SystemC_VPC::Trace
