@@ -37,7 +37,6 @@
 
 #include <boost/foreach.hpp>
 
-
 #include <CoSupport/SystemC/systemc_time.hpp>
 #include <src/systemcvpc/cpp/tracing/paje/PajeTracer.hpp>
 #include <systemcvpc/vpc_config.h>
@@ -84,7 +83,7 @@
 namespace SystemC_VPC{
 
   //
-  std::auto_ptr<Director> Director::singleton(new Director());
+  std::unique_ptr<Director> Director::singleton;
 
   sc_time Director::end = SC_ZERO_TIME;
 

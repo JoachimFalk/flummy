@@ -49,7 +49,10 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <memory>
+
 #include <stdio.h>
+
 #include <boost/function.hpp>
 
 namespace SystemC_VPC{
@@ -72,8 +75,9 @@ namespace SystemC_VPC{
     /**
      * \brief Access to singleton Director. 
      */
-    static Director& getInstance(){
-      assert(singleton.get());
+    static Director &getInstance() {
+      if (!singleton.get())
+        singleton.reset(new Director());
       return *singleton;
     }
 
@@ -293,7 +297,7 @@ namespace SystemC_VPC{
     /**
      * Singleton design pattern
      */
-    static std::auto_ptr<Director> singleton; 
+    static std::unique_ptr<Director> singleton;
 
     /**
      * \brief Reads allocation and binding from file.
