@@ -38,10 +38,13 @@
 namespace SystemC_VPC
 {
 
-ScheduledTask::ScheduledTask() :
-  component(NULL)
+ScheduledTask::ScheduledTask(sc_core::sc_module_name name)
+  : sc_core::sc_module(name)
+  , component(NULL), pid(-1), active(true)
 {
-  active=true;
+  SC_METHOD(scheduleRequestMethod);
+  sensitive << scheduleRequest;
+  dont_initialize();
 }
 
 ScheduledTask::~ScheduledTask()
@@ -57,11 +60,21 @@ Delayer* ScheduledTask::getDelayer()
 	return this->component;
 }
 
-void ScheduledTask::notifyActivation(bool active)
+void ScheduledTask::setActivation(bool active)
 {
-  if (component != NULL) { // FALLBACKMODE
+  if (component != NULL) {
     component->notifyActivation(this, active);
+  } else {
+    if (active)
+      scheduleRequest.notify(getNextReleaseTime()-sc_core::sc_time_stamp());
+    else
+      scheduleRequest.cancel();
   }
+}
+
+void ScheduledTask::scheduleRequestMethod() {
+  while (canFire())
+    schedule();
 }
 
 void ScheduledTask::setPid(ProcessId pid)
@@ -75,7 +88,7 @@ ProcessId ScheduledTask::getPid() const
 }
 
   void ScheduledTask::setActive(bool a){
-    if(a && (active != a)){
+    if (a && !active) {
         component->notifyActivation(this, true);
     }
     active=a;
