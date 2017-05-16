@@ -44,7 +44,7 @@
 #include <deque>
 
 namespace SystemC_VPC{
-  class Component;
+  class PreemptiveComponent;
   
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
     pid_fifo enthaelt die laufbereiten Prozesse  

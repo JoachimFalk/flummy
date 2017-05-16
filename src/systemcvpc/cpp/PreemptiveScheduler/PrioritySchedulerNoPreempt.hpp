@@ -44,7 +44,7 @@
 #include <vector>
 
 namespace SystemC_VPC{
-  class Component;
+  class PreemptiveComponent;
 
   class PrioritySchedulerNoPreempt : public Scheduler{
   public:

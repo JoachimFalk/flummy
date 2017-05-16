@@ -74,6 +74,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/dynload/plugin.cpp \
 	src/systemcvpc/cpp/dynload/plugtest.cpp \
 	\
+	src/systemcvpc/cpp/PreemptiveScheduler/PreemptiveComponent.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/AVBScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/FCFSScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/FlexRayScheduler.cpp \
@@ -93,7 +94,6 @@ libsystemcvpc_la_SOURCES = \
 	\
 	src/systemcvpc/cpp/debug_config.cpp \
 	src/systemcvpc/cpp/BlockingTransport.cpp \
-	src/systemcvpc/cpp/ComponentImpl.cpp \
 	src/systemcvpc/cpp/ConfigCheck.cpp \
 	src/systemcvpc/cpp/Director.cpp \
 	src/systemcvpc/cpp/ScheduledTask.cpp \

@@ -38,7 +38,7 @@
 #include <boost/foreach.hpp>
 
 #include <CoSupport/SystemC/systemc_time.hpp>
-#include <PreemptiveScheduler/ComponentImpl.hpp>
+#include <PreemptiveScheduler/PreemptiveComponent.hpp>
 #include <tracing/paje/PajeTracer.hpp>
 #include <systemcvpc/vpc_config.h>
 

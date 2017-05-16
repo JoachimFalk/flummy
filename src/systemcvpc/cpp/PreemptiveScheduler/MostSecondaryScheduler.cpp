@@ -38,7 +38,7 @@
 #include <systemcvpc/Director.hpp>
 #include <PreemptiveScheduler/MostScheduler.hpp>
 #include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
-#include <PreemptiveScheduler/ComponentImpl.hpp>
+#include <PreemptiveScheduler/PreemptiveComponent.hpp>
 #include <systemcvpc/datatypes.hpp>
 
 

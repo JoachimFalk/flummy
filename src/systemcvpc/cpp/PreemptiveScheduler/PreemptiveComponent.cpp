@@ -55,14 +55,14 @@
 #include <PreemptiveScheduler/StreamShaperScheduler.hpp>
 #include <PreemptiveScheduler/TDMAScheduler.hpp>
 #include <PreemptiveScheduler/TimeTriggeredCCScheduler.hpp>
-#include <PreemptiveScheduler/ComponentImpl.hpp>
+#include <PreemptiveScheduler/PreemptiveComponent.hpp>
 
 namespace SystemC_VPC{
 
   /**
    *
    */
-  void Component::setScheduler(Config::Component::Ptr component)
+  void PreemptiveComponent::setScheduler(Config::Component::Ptr component)
   {
     Config::Scheduler::Type type = component->getScheduler();
     switch (type) {
@@ -107,7 +107,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::compute(Task* actualTask){
+  void PreemptiveComponent::compute(Task* actualTask){
     pendingTask = false;
     if(max_avail_buffer == 0 || (readyTasks.size() + newTasks.size() + tasksDuringNoExecutionPhase.size()) < max_avail_buffer){
       ProcessId pid = actualTask->getProcessId();
@@ -147,7 +147,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
     task->setExec(false);
     task->setBlockingCompute( blocker );
     this->compute( task );
@@ -156,7 +156,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
     task->setExec(true);
     blockCompute.notify();
   }
@@ -165,26 +165,26 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void Component::abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
     task->resetBlockingCompute();
     blockCompute.notify();
   }
 
 
-  void Component::updatePowerConsumption()
+  void PreemptiveComponent::updatePowerConsumption()
   {
     this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
     // Notify observers (e.g. powersum)
     this->fireNotification(this);
   }
 
-  void Component::fireStateChanged(const ComponentState &state)
+  void PreemptiveComponent::fireStateChanged(const ComponentState &state)
   {
     this->setComponentState(state);
     this->updatePowerConsumption();
   }
 
-  void Component::initialize(const Director* d){
+  void PreemptiveComponent::initialize(const Director* d){
     //std::cerr << "Component::initialize" << std::endl;
     if(powerAttribute->isType("")){
       //std::cerr << "disabled local power governor" << std::endl;
@@ -205,23 +205,23 @@ namespace SystemC_VPC{
     
   }
 
-  bool Component::setAttribute(AttributePtr attribute){
+  bool PreemptiveComponent::setAttribute(AttributePtr attribute){
     bool isComponentAttribute = AbstractComponent::setAttribute(attribute);
     if (!isComponentAttribute){
       scheduler->setAttribute(attribute);
     }
     return true;
   }
-  bool Component::addStream(ProcessId pid){
+  bool PreemptiveComponent::addStream(ProcessId pid){
     return scheduler->addStream(pid);
   }
 
-  bool Component::closeStream(ProcessId pid){
+  bool PreemptiveComponent::closeStream(ProcessId pid){
     return scheduler->closeStream(pid);
   }
 
 
-  Component::~Component(){
+  PreemptiveComponent::~PreemptiveComponent(){
     this->setPowerConsumption(0.0);
     this->fireNotification(this);
     //std::cout<<"MAX used Buffer of Component " << this->name() << " was " << max_used_buffer << std::endl;
@@ -235,7 +235,7 @@ namespace SystemC_VPC{
 /*
  * used to reactivate a halted execution of the component
  */
-  void Component::reactivateExecution(){
+  void PreemptiveComponent::reactivateExecution(){
     requestExecuteTasks=false;
     while(!tasksDuringNoExecutionPhase.empty()){
       TT::TimeNodePair pair = tasksDuringNoExecutionPhase.front();
@@ -256,7 +256,7 @@ namespace SystemC_VPC{
     blockCompute.notify();
   }
 
-  void Component::notifyActivation(ScheduledTask * scheduledTask,
+  void PreemptiveComponent::notifyActivation(ScheduledTask * scheduledTask,
       bool active){
     if(active) {
       TT::TimeNodePair newTask = TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask);
@@ -278,7 +278,7 @@ namespace SystemC_VPC{
     }
   }
 
-  void Component::releaseActorsMethod(){
+  void PreemptiveComponent::releaseActorsMethod(){
 //     if(this->getCanExecuteTasks()){ //not required, no "normal" task will be added to ttReleaseQueue
     //std::cout<<"Component " << this->getName() << " releaseActorsMethod " << ttReleaseQueue.top().node->getPid() << " @ " << sc_time_stamp() << std::endl;
       TT::TimeNodePair tnp = ttReleaseQueue.top();

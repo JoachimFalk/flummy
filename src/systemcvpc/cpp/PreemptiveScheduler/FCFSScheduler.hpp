@@ -42,7 +42,7 @@
 #include <deque>
 namespace SystemC_VPC{
 
-  class Component;
+  class PreemptiveComponent;
 
   class FCFSScheduler : public Scheduler{
   public:
