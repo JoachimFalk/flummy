@@ -32,48 +32,62 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_ROUNDROBINSCHEDULER_H
-#define HSCD_VPC_ROUNDROBINSCHEDULER_H
-#include <systemcvpc/datatypes.hpp>
-#include "Scheduler.hpp"
-
+#ifndef SECONDARYSCHEDULER_H
+#define SECONDARYSCHEDULER_H
+#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemc.h>
-
+#include <systemcvpc/datatypes.hpp>
 #include <map>
 #include <deque>
+
+
 
 namespace SystemC_VPC{
   class Component;
 
-  class RoundRobinScheduler : public Scheduler{
-  public:
+  struct AsynchSlot{
+      sc_time length;
+      int process;
+      int Id;
+      int priority;
+      std::string name;
+    };
 
-    RoundRobinScheduler() :
-      timeSlice_(10, SC_NS), timeSliceExpires_()
-    {
-    }
-    virtual ~RoundRobinScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,
-                               const TaskMap &ready_tasks,
-                               const TaskMap &running_tasks);
-    void addedNewTask(Task *task);
-    void removedTask(Task *task);
+class MostSecondaryScheduler :public Scheduler{
+public:
+  MostSecondaryScheduler(){
+    sysFreq = 48000;
+  }
 
-    //
-    scheduling_decision
-    schedulingDecision(int& task_to_resign,
-                       int& task_to_assign,
-                       const  TaskMap &ready_tasks,
-                       const  TaskMap &running_tasks);
-    void setProperty(const char* key, const char* value);
-    sc_time* schedulingOverhead();
-    
-  private:
-    std::deque<int> rr_fifo;
-    sc_time timeSlice_;
-    sc_time timeSliceExpires_;
 
-    int assignFromFront();
-  };
+  sc_time cycle(int sysFreq);
+
+  void addedNewTask(Task *task);
+
+  void removedTask(Task *task);
+
+  bool getSchedulerTimeSlice(sc_time& time,
+                              const TaskMap &ready_tasks,
+                              const TaskMap &running_tasks);
+
+  scheduling_decision schedulingDecision(
+       int& task_to_resign,
+       int& task_to_assign,
+       const  TaskMap &ready_tasks,
+       const  TaskMap &running_tasks);
+
+  sc_time* schedulingOverhead(){return 0;}
+
+
+private:
+
+std::deque<AsynchSlot> Asynch_slots;
+sc_time lastassignasynch;
+int sysFreq;
+
+
+};
+
 }
+
 #endif

@@ -49,10 +49,9 @@
 
 */
 #include <systemcvpc/Director.hpp>
-#include "ComponentImpl.hpp"
-#include "TDMAScheduler.hpp"
-
 #include <CoSupport/SystemC/algorithm.hpp>
+#include <PreemptiveScheduler/TDMAScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 
 #include <utility>
 

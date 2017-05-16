@@ -32,42 +32,79 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_FCFSSCHEDULER_H
-#define HSCD_VPC_FCFSSCHEDULER_H
+#ifndef TDMASCHEDULER_H
+#define TDMASCHEDULER_H
+#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include "Scheduler.hpp"
-
 #include <systemc.h>
 
 #include <map>
 #include <deque>
-namespace SystemC_VPC{
 
+namespace SystemC_VPC{
   class Component;
 
-  class FCFSScheduler : public Scheduler{
+  typedef size_t ProcessId;
+  typedef std::deque< std::pair <std::string, std::string> > Properties;
+  /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
+    pid_fifo enthaelt die laufbereiten Prozesse  
+  */
+  struct TDMASlot{
+    sc_time length;
+    std::string name;
+    std::deque<int> pid_fifo;
+  };
+  
+  class TDMAScheduler : public Scheduler{
   public:
-
-    FCFSScheduler(const char *schedulername){
-    }
-    FCFSScheduler(){
-    }
-    virtual ~FCFSScheduler(){}
+    
+//    TDMAScheduler()
+//      : tdmaCycle(SC_ZERO_TIME) {
+//      this->lastassign=sc_time(0,SC_NS);
+//      this->remainingSlice=sc_time(0,SC_NS);
+//      slicecount=0;
+//      curr_slicecount=0;
+//    }
+    
+    TDMAScheduler();
+    
+    virtual ~TDMAScheduler(){}
+    
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
+    
     void addedNewTask(Task *task);
+    
     void removedTask(Task *task);
+    
     sc_event& getNotifyEvent();
+    
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,
-                                           const  TaskMap &ready_tasks,
-                                           const  TaskMap &running_tasks);
-    sc_time* schedulingOverhead(){return 0;}//new sc_time(1,SC_NS);
-  protected:
+                                           const  TaskMap &ready_tasks
+                                           ,const  TaskMap &running_tasks);
+    
+    void setProperty(const char* key, const char* value);
+    
+    sc_time* schedulingOverhead();
+    
+    void initialize();
+    
+  private:
+    void _setProperty(const char* key, const char* value);
+    
+    sc_time  tdmaCycle;
+    std::map<sc_time, unsigned int> slotOffsets;
 
-    std::deque<int> fcfs_fifo;
-    //  double TIMESLICE;
+    sc_time lastassign;
+    sc_time remainingSlice;
+    int slicecount;
+    int curr_slicecount;
+    int processcount;
+    std::vector<TDMASlot> TDMA_slots;
+    std::map <ProcessId,int> PIDmap;
+    std::deque<std::pair<std::string, std::string> > _properties;
   };
 }
 #endif

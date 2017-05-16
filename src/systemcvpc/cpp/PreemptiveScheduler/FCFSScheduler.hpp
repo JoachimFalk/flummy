@@ -32,62 +32,41 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef SECONDARYSCHEDULER_H
-#define SECONDARYSCHEDULER_H
-#include <systemc.h>
-#include "Scheduler.hpp"
+#ifndef HSCD_VPC_FCFSSCHEDULER_H
+#define HSCD_VPC_FCFSSCHEDULER_H
+#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
+#include <systemc.h>
+
 #include <map>
 #include <deque>
-
-
-
 namespace SystemC_VPC{
+
   class Component;
 
-  struct AsynchSlot{
-      sc_time length;
-      int process;
-      int Id;
-      int priority;
-      std::string name;
-    };
+  class FCFSScheduler : public Scheduler{
+  public:
 
-class MostSecondaryScheduler :public Scheduler{
-public:
-  MostSecondaryScheduler(){
-    sysFreq = 48000;
-  }
+    FCFSScheduler(const char *schedulername){
+    }
+    FCFSScheduler(){
+    }
+    virtual ~FCFSScheduler(){}
+    bool getSchedulerTimeSlice(sc_time &time,
+                               const TaskMap &ready_tasks,
+                               const TaskMap &running_tasks);
+    void addedNewTask(Task *task);
+    void removedTask(Task *task);
+    sc_event& getNotifyEvent();
+    scheduling_decision schedulingDecision(int& task_to_resign,
+                                           int& task_to_assign,
+                                           const  TaskMap &ready_tasks,
+                                           const  TaskMap &running_tasks);
+    sc_time* schedulingOverhead(){return 0;}//new sc_time(1,SC_NS);
+  protected:
 
-
-  sc_time cycle(int sysFreq);
-
-  void addedNewTask(Task *task);
-
-  void removedTask(Task *task);
-
-  bool getSchedulerTimeSlice(sc_time& time,
-                              const TaskMap &ready_tasks,
-                              const TaskMap &running_tasks);
-
-  scheduling_decision schedulingDecision(
-       int& task_to_resign,
-       int& task_to_assign,
-       const  TaskMap &ready_tasks,
-       const  TaskMap &running_tasks);
-
-  sc_time* schedulingOverhead(){return 0;}
-
-
-private:
-
-std::deque<AsynchSlot> Asynch_slots;
-sc_time lastassignasynch;
-int sysFreq;
-
-
-};
-
+    std::deque<int> fcfs_fifo;
+    //  double TIMESLICE;
+  };
 }
-
 #endif

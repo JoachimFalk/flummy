@@ -18,7 +18,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <src/systemcvpc/cpp/tracing/paje/PajeTracer.hpp>
+#include <tracing/paje/PajeTracer.hpp>
 
 #include <CoSupport/Tracing/PajeTracer.hpp>
 #include <CoSupport/String/DoubleQuotedString.hpp>

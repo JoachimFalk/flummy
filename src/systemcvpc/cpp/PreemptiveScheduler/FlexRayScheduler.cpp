@@ -72,10 +72,10 @@
 
 */
 
+#include <PreemptiveScheduler/FlexRayScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 #include <systemcvpc/Director.hpp>
 
-#include "ComponentImpl.hpp"
-#include "FlexRayScheduler.hpp"
 
 namespace SystemC_VPC{
 

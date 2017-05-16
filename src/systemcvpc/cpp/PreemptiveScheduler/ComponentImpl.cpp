@@ -41,22 +41,21 @@
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/config/Component.hpp>
-#include "ComponentImpl.hpp"
-#include "scheduler/AVBScheduler.hpp"
-#include <scheduler/MostScheduler.hpp>
-#include <scheduler/StreamShaperScheduler.hpp>
-#include <scheduler/MostSecondaryScheduler.hpp>
-#include "scheduler/FlexRayScheduler.hpp"
-#include "scheduler/FCFSScheduler.hpp"
-#include "scheduler/PriorityScheduler.hpp"
-#include "scheduler/PrioritySchedulerNoPreempt.hpp"
-#include "scheduler/RateMonotonicScheduler.hpp"
-#include "scheduler/RoundRobinScheduler.hpp"
-#include "scheduler/Scheduler.hpp"
-#include "scheduler/TimeTriggeredCCScheduler.hpp"
-#include "scheduler/TDMAScheduler.hpp"
-
 #include <float.h>
+#include <PreemptiveScheduler/AVBScheduler.hpp>
+#include <PreemptiveScheduler/FCFSScheduler.hpp>
+#include <PreemptiveScheduler/FlexRayScheduler.hpp>
+#include <PreemptiveScheduler/MostScheduler.hpp>
+#include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
+#include <PreemptiveScheduler/PriorityScheduler.hpp>
+#include <PreemptiveScheduler/PrioritySchedulerNoPreempt.hpp>
+#include <PreemptiveScheduler/RateMonotonicScheduler.hpp>
+#include <PreemptiveScheduler/RoundRobinScheduler.hpp>
+#include <PreemptiveScheduler/Scheduler.hpp>
+#include <PreemptiveScheduler/StreamShaperScheduler.hpp>
+#include <PreemptiveScheduler/TDMAScheduler.hpp>
+#include <PreemptiveScheduler/TimeTriggeredCCScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 
 namespace SystemC_VPC{
 

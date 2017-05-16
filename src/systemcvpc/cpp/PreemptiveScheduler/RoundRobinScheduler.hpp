@@ -32,102 +32,47 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef MOSTSCHEDULER_H
-#define MOSTSCHEDULER_H
-#include <systemc.h>
-#include "Scheduler.hpp"
+#ifndef HSCD_VPC_ROUNDROBINSCHEDULER_H
+#define HSCD_VPC_ROUNDROBINSCHEDULER_H
+#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
+#include <systemc.h>
+
 #include <map>
 #include <deque>
-#include <string.h>
-#include "MostSecondaryScheduler.hpp"
-
-
 
 namespace SystemC_VPC{
   class Component;
 
-  typedef size_t ProcessId;
-
-  struct MostSlot{
-    sc_time length;
-    ProcessId process;
-    int Id;
-    std::string name;
-  };
-  
-  class MostScheduler : public Scheduler{
+  class RoundRobinScheduler : public Scheduler{
   public:
-    
-    MostScheduler()
-      : secondaryScheduler() {
 
-      slicecount = 0;
-      streamcount = 0;
-      lastassign = SC_ZERO_TIME;
-      this->remainingSlice = SC_ZERO_TIME;
-      curr_slicecount = -1;
-      sysFreq = 48000;
-      cycleSize = 372;
-      std::map<sc_time, unsigned int> IDmap;
-
-      currSlotStartTime = sc_time(0, SC_NS);
+    RoundRobinScheduler() :
+      timeSlice_(10, SC_NS), timeSliceExpires_()
+    {
     }
-    
-    MostScheduler(const char *schedulername);
-    
-    
+    virtual ~RoundRobinScheduler(){}
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
-
-    sc_time setboundary(int sysFreq,int framesize);
-
-    sc_time cycle(int sysFreq);
-
-    bool area(int sysFreq,int framesize);
- 
     void addedNewTask(Task *task);
-    
     void removedTask(Task *task);
-    
-    sc_event& getNotifyEvent();
-    
-    scheduling_decision schedulingDecision(int& task_to_resign,
-                                           int& task_to_assign,
-                                           const  TaskMap &ready_tasks,
-                                           const  TaskMap &running_tasks);
-    
-    sc_time* schedulingOverhead(){
-	return NULL;
-    }
-    
-    void initialize(){}
 
-    bool addStream(ProcessId pid);
-    bool closeStream(ProcessId pid);
-
+    //
+    scheduling_decision
+    schedulingDecision(int& task_to_resign,
+                       int& task_to_assign,
+                       const  TaskMap &ready_tasks,
+                       const  TaskMap &running_tasks);
+    void setProperty(const char* key, const char* value);
+    sc_time* schedulingOverhead();
+    
   private:
+    std::deque<int> rr_fifo;
+    sc_time timeSlice_;
+    sc_time timeSliceExpires_;
 
-    
-    std::map<sc_time, unsigned int> slotOffsets;
-
-    std::map<ProcessId, bool> areaMap;
-	
-    MostSecondaryScheduler secondaryScheduler;
-
-    sc_time lastassign;
-    sc_time remainingSlice;
-    int slicecount;
-    int curr_slicecount;
-    int curr_slicecount_help;
-    bool already_avail;
-    std::deque<MostSlot> Most_slots;
-    int sysFreq;
-    int cycleSize;
-    int streamcount;
-    bool flag;
-    sc_time currSlotStartTime;
+    int assignFromFront();
   };
 }
 #endif
