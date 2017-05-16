@@ -8,7 +8,7 @@
 #ifndef FCFSCOMPONENT_HPP_
 #define FCFSCOMPONENT_HPP_
 
-#include "NonPreemptiveComponent.hpp"
+#include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
 
 namespace SystemC_VPC{
 

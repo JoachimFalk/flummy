@@ -39,6 +39,11 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 #include <PreemptiveScheduler/PreemptiveComponent.hpp>
+#include <NonPreemptiveScheduler/DynamicPriorityComponent.hpp>
+#include <NonPreemptiveScheduler/FcfsComponent.hpp>
+#include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
+#include <NonPreemptiveScheduler/PriorityComponent.hpp>
+#include <NonPreemptiveScheduler/RoundRobinComponent.hpp>
 #include <tracing/paje/PajeTracer.hpp>
 #include <systemcvpc/vpc_config.h>
 
@@ -57,11 +62,6 @@
 #include <systemcvpc/config/VpcApi.hpp>
 
 #include "ConfigCheck.hpp"
-#include "DynamicPriorityComponent.hpp"
-#include "NonPreemptiveComponent.hpp"
-#include "RoundRobinComponent.hpp"
-#include "FcfsComponent.hpp"
-#include "PriorityComponent.hpp"
 #include "config/Mappings.hpp"
 
 #include "tracing/null/NullTracer.hpp"
