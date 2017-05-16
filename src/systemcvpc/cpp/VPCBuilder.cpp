@@ -41,7 +41,7 @@
 
 #include <CoSupport/XML/Xerces/common.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
+
 #include <systemcvpc/VPCBuilder.hpp>
 #include <systemcvpc/VpcDomErrorHandler.hpp>
 #include <systemcvpc/datatypes.hpp>
@@ -52,7 +52,6 @@
 #include <systemcvpc/config/VpcApi.hpp>
 
 #include "ConfigCheck.hpp"
-#include "NonPreemptiveComponent.hpp"
 #include "config/Mappings.hpp"
 
 #include <systemcvpc/debug_config.hpp>

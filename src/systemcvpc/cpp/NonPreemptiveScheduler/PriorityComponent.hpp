@@ -8,7 +8,7 @@
 #ifndef PRIORITYCOMPONENT_HPP_
 #define PRIORITYCOMPONENT_HPP_
 
-#include "NonPreemptiveComponent.hpp"
+#include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
 
 namespace SystemC_VPC{
 

@@ -8,7 +8,7 @@
 #ifndef ROUNDROBINCOMPONENT_HPP_
 #define ROUNDROBINCOMPONENT_HPP_
 
-#include "NonPreemptiveComponent.hpp"
+#include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
 
 namespace SystemC_VPC{
 
