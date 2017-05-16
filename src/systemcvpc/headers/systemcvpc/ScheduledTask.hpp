@@ -94,7 +94,7 @@ class ScheduledTask
   : public sc_core::sc_module
   , public SchedulingInterface
 {
-  friend                     class Component;
+  friend                     class PreemptiveComponent;
   template<class TASKTRACER> class TtPriorityComponent;
   template<class TASKTRACER> class TtFcfsComponent;
   template<class DEBUG_OUT,class TASKTRACER> class DynamicPriorityComponentImpl;

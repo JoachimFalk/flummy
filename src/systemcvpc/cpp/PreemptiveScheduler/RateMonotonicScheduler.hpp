@@ -43,7 +43,7 @@
 #include <vector>
 
 namespace SystemC_VPC{
-  class Component;
+  class PreemptiveComponent;
 
   struct rm_queue_compare{
     bool operator()(const p_queue_entry& pqe1,

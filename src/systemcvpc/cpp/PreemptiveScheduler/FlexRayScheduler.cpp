@@ -73,7 +73,7 @@
 */
 
 #include <PreemptiveScheduler/FlexRayScheduler.hpp>
-#include <PreemptiveScheduler/ComponentImpl.hpp>
+#include <PreemptiveScheduler/PreemptiveComponent.hpp>
 #include <systemcvpc/Director.hpp>
 
 

@@ -33,7 +33,7 @@
  */
 
 #include <PreemptiveScheduler/AVBScheduler.hpp>
-#include <PreemptiveScheduler/ComponentImpl.hpp>
+#include <PreemptiveScheduler/PreemptiveComponent.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 

@@ -43,7 +43,7 @@
 
 
 namespace SystemC_VPC{
-  class Component;
+  class PreemptiveComponent;
 
   struct AsynchSlot{
       sc_time length;

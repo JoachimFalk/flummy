@@ -42,7 +42,7 @@
 #include <deque>
 
 namespace SystemC_VPC{
-  class Component;
+  class PreemptiveComponent;
 
   typedef size_t ProcessId;
   typedef std::deque< std::pair <std::string, std::string> > Properties;

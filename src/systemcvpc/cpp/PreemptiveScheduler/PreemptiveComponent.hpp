@@ -72,9 +72,9 @@ namespace SystemC_VPC{
    * \brief An implementation of AbstractComponent.
    * 
    */
-  class Component : public AbstractComponent{
+  class PreemptiveComponent : public AbstractComponent{
     
-    SC_HAS_PROCESS(Component);
+    SC_HAS_PROCESS(PreemptiveComponent);
 
   public:
 
@@ -111,7 +111,7 @@ namespace SystemC_VPC{
     /**
      * \brief An implementation of AbstractComponent.
      */
-    Component( Config::Component::Ptr component)
+    PreemptiveComponent( Config::Component::Ptr component)
       : AbstractComponent(component),
         blockMutex(0), max_used_buffer(0), max_avail_buffer(0)
     {
@@ -133,7 +133,7 @@ namespace SystemC_VPC{
 #endif // NO_POWER_SUM
     }
       
-    virtual ~Component();
+    virtual ~PreemptiveComponent();
     
     void addPowerGovernor(PluggableLocalPowerGovernor * gov){
       this->addObserver(gov);
@@ -188,13 +188,13 @@ namespace SystemC_VPC{
   };
 
   template<class TASKTRACER>
-  class ComponentImpl : public Component{
+  class ComponentImpl : public PreemptiveComponent{
   public:
     /**
      *
      */
     ComponentImpl( Config::Component::Ptr component)
-      : Component(component), taskTracer_(component){}
+      : PreemptiveComponent(component), taskTracer_(component){}
 
     /**
      *
@@ -613,7 +613,7 @@ namespace SystemC_VPC{
               return;
           }
       }
-      Component::compute(actualTask);
+      PreemptiveComponent::compute(actualTask);
     }
 
 private:

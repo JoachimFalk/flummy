@@ -45,7 +45,7 @@
 
 
 namespace SystemC_VPC{
-  class Component;
+  class PreemptiveComponent;
 
   typedef size_t ProcessId;
 
