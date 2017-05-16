@@ -32,74 +32,60 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/Director.hpp>
+#ifndef STREAMSHAPERSCHEDULER_H
+#define STREAMSHAPERSCHEDULER_H
+#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
+#include <systemc.h>
 
-#include "ComponentImpl.hpp"
-#include "RateMonotonicScheduler.hpp"
+#include <map>
+#include <deque>
 
 namespace SystemC_VPC{
-  void RateMonotonicScheduler::setProperty(const char* key, const char* value){
-  }
+  class Component;
 
-  bool RateMonotonicScheduler::getSchedulerTimeSlice(
-    sc_time& time,
-    const TaskMap &ready_tasks,
-    const  TaskMap &running_tasks)
-  {
-     return false;
-  }
-  /**
-   *
-   */  void RateMonotonicScheduler::addedNewTask(Task *task){
-    p_queue_entry pqe(order_counter++, task);
-    pqueue.push(pqe);
-  }
-  /**
-   *
-   */  void RateMonotonicScheduler::removedTask(Task *task){
-  }
+  typedef size_t ProcessId;
+  typedef std::deque< std::pair <std::string, std::string> > Properties;
 
-  /**
-   *
-   */
-  scheduling_decision RateMonotonicScheduler::schedulingDecision(
-    int& task_to_resign,
-    int& task_to_assign,
-    const  TaskMap &ready_tasks,
-    const  TaskMap &running_tasks)
-  {
-    scheduling_decision ret_decision=ONLY_ASSIGN;
-    if(pqueue.size()<=0) return NOCHANGE;    // no new task -> no change
-
-    // unassigned task with highest priority
-    p_queue_entry prior_ready=pqueue.top();
-
-    double d_prior_ready=prior_ready.task->getPriority();
-    task_to_assign=prior_ready.task->getInstanceId();
-
-
-    if(running_tasks.size()!=0){  // is another task running?
-      TaskMap::const_iterator iter;
-      iter=running_tasks.begin();
-      Task *task=iter->second;
-
-      //has running task higher priority (lesser value)
-      if(task->getPriority() <= d_prior_ready){
-        ret_decision=NOCHANGE;
-      }else{
-        ret_decision=PREEMPT;                        //preempt task
-        task_to_resign=task->getInstanceId(); 
-        pqueue.pop();
-        p_queue_entry pqe(0,task);
-        pqueue.push(pqe);
-      }
-    }else{
-      pqueue.pop();
-      ret_decision=ONLY_ASSIGN;  
-    }
+  class StreamShaperScheduler : public Scheduler{
+  public:
     
+    StreamShaperScheduler();
     
-    return ret_decision;
-  }
+    virtual ~StreamShaperScheduler(){}
+    
+    bool getSchedulerTimeSlice(sc_time &time,
+                               const TaskMap &ready_tasks,
+                               const TaskMap &running_tasks);
+    
+    void addedNewTask(Task *task);
+    
+    void removedTask(Task *task);
+    
+    void setAttribute(AttributePtr attributePtr);
+
+    sc_event& getNotifyEvent();
+    
+    scheduling_decision schedulingDecision(int& task_to_resign,
+                                           int& task_to_assign,
+                                           const  TaskMap &ready_tasks
+                                           ,const  TaskMap &running_tasks);
+    
+    void setProperty(const char* key, const char* value);
+    
+    sc_time* schedulingOverhead();
+    
+    void initialize();
+    
+  private:
+    void _setProperty(const char* key, const char* value);
+    
+    sc_time shapeCycle;
+    bool firstrun;
+    sc_time lastassign;
+    sc_time remainingSlice;
+    std::deque<std::pair<std::string, std::string> > _properties;
+    std::deque<int> stream_fifo;
+  };
 }
+#endif

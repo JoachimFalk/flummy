@@ -36,10 +36,10 @@
 #include <queue>
 #include <CoSupport/SystemC/algorithm.hpp>
 #include <systemcvpc/Director.hpp>
-#include <ComponentImpl.hpp>
+#include <PreemptiveScheduler/MostScheduler.hpp>
+#include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include "MostSecondaryScheduler.hpp"
-#include "MostScheduler.hpp"
 
 
 

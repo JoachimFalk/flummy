@@ -32,10 +32,10 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "RoundRobinScheduler.hpp"
+#include <PreemptiveScheduler/RoundRobinScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 #include <systemcvpc/Director.hpp>
 
-#include "ComponentImpl.hpp"
 
 namespace SystemC_VPC{
 

@@ -32,42 +32,102 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
-#define HSCD_VPC_PRIORITYSCHEDULERNOPREEMPT_H
-#include <systemcvpc/datatypes.hpp>
-#include "Scheduler.hpp"
-#include "PriorityScheduler.hpp"
-
+#ifndef MOSTSCHEDULER_H
+#define MOSTSCHEDULER_H
+#include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
+#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemc.h>
-
+#include <systemcvpc/datatypes.hpp>
 #include <map>
-#include <queue>
-#include <vector>
+#include <deque>
+#include <string.h>
+
+
 
 namespace SystemC_VPC{
   class Component;
 
-  class PrioritySchedulerNoPreempt : public Scheduler{
-  public:
+  typedef size_t ProcessId;
 
-    PrioritySchedulerNoPreempt() : order_counter(0) {}
-    virtual ~PrioritySchedulerNoPreempt(){}
+  struct MostSlot{
+    sc_time length;
+    ProcessId process;
+    int Id;
+    std::string name;
+  };
+  
+  class MostScheduler : public Scheduler{
+  public:
+    
+    MostScheduler()
+      : secondaryScheduler() {
+
+      slicecount = 0;
+      streamcount = 0;
+      lastassign = SC_ZERO_TIME;
+      this->remainingSlice = SC_ZERO_TIME;
+      curr_slicecount = -1;
+      sysFreq = 48000;
+      cycleSize = 372;
+      std::map<sc_time, unsigned int> IDmap;
+
+      currSlotStartTime = sc_time(0, SC_NS);
+    }
+    
+    MostScheduler(const char *schedulername);
+    
+    
     bool getSchedulerTimeSlice(sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
+
+    sc_time setboundary(int sysFreq,int framesize);
+
+    sc_time cycle(int sysFreq);
+
+    bool area(int sysFreq,int framesize);
+ 
     void addedNewTask(Task *task);
+    
     void removedTask(Task *task);
+    
     sc_event& getNotifyEvent();
+    
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,
                                            const  TaskMap &ready_tasks,
                                            const  TaskMap &running_tasks);
-    void setProperty(const char* key, const char* value);
-    sc_time* schedulingOverhead(){return 0;}//;
-  protected:
-    int order_counter;
-    std::priority_queue<p_queue_entry> pqueue;
+    
+    sc_time* schedulingOverhead(){
+	return NULL;
+    }
+    
+    void initialize(){}
 
+    bool addStream(ProcessId pid);
+    bool closeStream(ProcessId pid);
+
+  private:
+
+    
+    std::map<sc_time, unsigned int> slotOffsets;
+
+    std::map<ProcessId, bool> areaMap;
+	
+    MostSecondaryScheduler secondaryScheduler;
+
+    sc_time lastassign;
+    sc_time remainingSlice;
+    int slicecount;
+    int curr_slicecount;
+    int curr_slicecount_help;
+    bool already_avail;
+    std::deque<MostSlot> Most_slots;
+    int sysFreq;
+    int cycleSize;
+    int streamcount;
+    bool flag;
+    sc_time currSlotStartTime;
   };
 }
 #endif

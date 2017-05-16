@@ -49,10 +49,9 @@
 
 */
 #include <systemcvpc/Director.hpp>
-#include "ComponentImpl.hpp"
-#include "StreamShaperScheduler.hpp"
-
 #include <CoSupport/SystemC/algorithm.hpp>
+#include <PreemptiveScheduler/StreamShaperScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 
 #include <utility>
 

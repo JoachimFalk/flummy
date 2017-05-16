@@ -32,42 +32,60 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_PRIORITYSCHEDULER_H
-#define HSCD_VPC_PRIORITYSCHEDULER_H
-
+#include <PreemptiveScheduler/PrioritySchedulerNoPreempt.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
+#include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include "Scheduler.hpp"
 
-#include <systemc.h>
-
-#include <map>
-#include <queue>
-#include <vector>
 
 namespace SystemC_VPC{
-  class Component;
 
-  class PriorityScheduler : public Scheduler{
-  public:
+  void PrioritySchedulerNoPreempt::setProperty(const char* key, const char* value){
+  }
 
-    PriorityScheduler() : order_counter(0) {}
-    virtual ~PriorityScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,
-                               const TaskMap &ready_tasks,
-                               const TaskMap &running_tasks);
-    void addedNewTask(Task *task);
-    void removedTask(Task *task);
-    sc_event& getNotifyEvent();
-    scheduling_decision schedulingDecision(int& task_to_resign,
-                                           int& task_to_assign,
-                                           const  TaskMap &ready_tasks,
-                                           const  TaskMap &running_tasks);
-    void setProperty(const char* key, const char* value);
-    sc_time* schedulingOverhead(){return 0;}//;
-  protected:
-    int order_counter;
-    std::priority_queue<p_queue_entry> pqueue;
+  bool PrioritySchedulerNoPreempt::getSchedulerTimeSlice(
+    sc_time& time,
+    const TaskMap &ready_tasks,
+    const  TaskMap &running_tasks )
+  {
+    return false;
+  }
+  /**
+   *
+   */
+  void PrioritySchedulerNoPreempt::addedNewTask(Task *task){
+    p_queue_entry pqe(order_counter++, task);
+    pqueue.push(pqe);
+  }
+  /**
+   *
+   */
+  void PrioritySchedulerNoPreempt::removedTask(Task *task){
+  }
 
-  };
+  /**
+   *
+   */
+   scheduling_decision PrioritySchedulerNoPreempt::schedulingDecision(
+     int& task_to_resign,
+     int& task_to_assign,
+     const  TaskMap &ready_tasks,
+     const  TaskMap &running_tasks)
+   {
+     scheduling_decision ret_decision=NOCHANGE;
+     if(pqueue.size()<=0) return NOCHANGE;    // kein neuer -> nichts tun
+
+     // hoechste prioritaet�der ready tasks
+     p_queue_entry prior_ready=pqueue.top();
+     task_to_assign=prior_ready.task->getInstanceId();
+
+     if(running_tasks.size()!=0){
+        //nothing to do, NO PREEMPTIVE-Scheduler
+     }else{
+       pqueue.pop();
+       ret_decision=ONLY_ASSIGN;  
+     }
+
+     return ret_decision;
+   }
 }
-#endif

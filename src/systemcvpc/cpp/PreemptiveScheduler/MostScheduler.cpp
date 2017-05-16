@@ -34,9 +34,9 @@
 
 #include <utility>
 #include <CoSupport/SystemC/algorithm.hpp>
-#include "MostScheduler.hpp"
-#include "MostSecondaryScheduler.hpp"
-#include <ComponentImpl.hpp>
+#include <PreemptiveScheduler/MostScheduler.hpp>
+#include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 
 
 //////////////////

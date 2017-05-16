@@ -32,45 +32,76 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#include <PreemptiveScheduler/PriorityScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 #include <systemcvpc/Director.hpp>
+#include <systemcvpc/datatypes.hpp>
 
-#include "ComponentImpl.hpp"
-#include "FCFSScheduler.hpp"
 
 namespace SystemC_VPC{
+  void PriorityScheduler::setProperty(const char* key, const char* value){
+  }
 
-  bool FCFSScheduler::getSchedulerTimeSlice(
+  bool PriorityScheduler::getSchedulerTimeSlice(
     sc_time& time,
-    const  TaskMap &ready_tasks,
-    const  TaskMap &running_tasks ){
+    const TaskMap &ready_tasks,
+    const  TaskMap &running_tasks )
+  {
     return false;
   }
-  void FCFSScheduler::addedNewTask(Task *task){
-    fcfs_fifo.push_back(task->getInstanceId());
+  /**
+   *
+   */
+  void PriorityScheduler::addedNewTask(Task *task){
+    p_queue_entry pqe(order_counter++,task);
+    pqueue.push(pqe);
   }
-  void FCFSScheduler::removedTask(Task *task){
-    std::deque<int>::iterator iter;
-    for(iter=fcfs_fifo.begin();iter!=fcfs_fifo.end();iter++){
-      if( *iter == task->getInstanceId()){
-  fcfs_fifo.erase(iter);
-  break;
-      }
-    }
+  /**
+   *
+   */
+  void PriorityScheduler::removedTask(Task *task){
   }
-  scheduling_decision FCFSScheduler::schedulingDecision(
-    int& task_to_resign,
-    int& task_to_assign,
-    const  TaskMap &ready_tasks,
-    const  TaskMap &running_tasks ){
-    if(running_tasks.size()==0){
-      if(fcfs_fifo.size()>0){
-        //      cerr << "only_assign" << endl;
-        task_to_assign = fcfs_fifo.front();
-        fcfs_fifo.pop_front();
-        return ONLY_ASSIGN;
-      }
-    }
-    return NOCHANGE;
 
-  }
+  /**
+   *
+   */
+   scheduling_decision PriorityScheduler::schedulingDecision(
+     int& task_to_resign,
+     int& task_to_assign,
+     const  TaskMap &ready_tasks,
+     const  TaskMap &running_tasks)
+   {
+     scheduling_decision ret_decision=ONLY_ASSIGN;
+     if(pqueue.size()<=0) return NOCHANGE;    // no new task -> no change
+
+     // unassigned task with highest priority
+     p_queue_entry prior_ready=pqueue.top();
+
+     double d_prior_ready=prior_ready.task->getPriority();
+     task_to_assign=prior_ready.task->getInstanceId();
+
+
+     if(running_tasks.size()!=0){  // is another task running?
+       TaskMap::const_iterator iter;
+       iter=running_tasks.begin();
+       Task *task=iter->second;
+
+       //has running task higher priority (lesser value)
+       if(task->getPriority() <= d_prior_ready){
+         ret_decision=NOCHANGE;
+       }else{
+         ret_decision=PREEMPT;                        //preempt task
+         task_to_resign=task->getInstanceId(); 
+         pqueue.pop();
+         p_queue_entry pqe(0,task);
+         pqueue.push(pqe);
+       }
+     }else{
+       pqueue.pop();
+       ret_decision=ONLY_ASSIGN;  
+     }
+
+
+     return ret_decision;
+   }
 }

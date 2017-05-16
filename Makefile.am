@@ -74,18 +74,18 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/dynload/plugin.cpp \
 	src/systemcvpc/cpp/dynload/plugtest.cpp \
 	\
-	src/systemcvpc/cpp/scheduler/AVBScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/FCFSScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/FlexRayScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/PriorityScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/PrioritySchedulerNoPreempt.cpp \
-	src/systemcvpc/cpp/scheduler/RateMonotonicScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/RoundRobinScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/TimeTriggeredCCScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/TDMAScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/MostScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/MostSecondaryScheduler.cpp \
-	src/systemcvpc/cpp/scheduler/StreamShaperScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/AVBScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/FCFSScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/FlexRayScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/PriorityScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/PrioritySchedulerNoPreempt.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/RateMonotonicScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/RoundRobinScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/TimeTriggeredCCScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/TDMAScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/MostScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/MostSecondaryScheduler.cpp \
+	src/systemcvpc/cpp/PreemptiveScheduler/StreamShaperScheduler.cpp \
 	\
 	src/systemcvpc/cpp/tracing/db/DataBaseTracer.cpp \
 	src/systemcvpc/cpp/tracing/vcd/Tracing.cpp \

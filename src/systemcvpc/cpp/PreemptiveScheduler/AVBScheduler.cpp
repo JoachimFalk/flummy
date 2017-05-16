@@ -32,11 +32,11 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#include <PreemptiveScheduler/AVBScheduler.hpp>
+#include <PreemptiveScheduler/ComponentImpl.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 
-#include "AVBScheduler.hpp"
-#include "ComponentImpl.hpp"
 
 namespace SystemC_VPC{
   

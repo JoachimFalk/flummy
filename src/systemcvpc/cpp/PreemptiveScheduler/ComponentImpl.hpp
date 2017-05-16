@@ -34,6 +34,7 @@
 
 #ifndef HSCD_VPC_COMPONENT_H
 #define HSCD_VPC_COMPONENT_H
+#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemc.h>
 
 #include <systemcvpc/AbstractComponent.hpp>
@@ -45,8 +46,6 @@
 #include <systemcvpc/PowerSumming.hpp>
 #include <systemcvpc/vpc_config.h>
 #include <systemcvpc/timetriggered/tt_support.hpp>
-
-#include "scheduler/Scheduler.hpp"
 
 #include <vector>
 #include <map>
