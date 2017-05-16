@@ -289,8 +289,10 @@ namespace SystemC_VPC{
         ttReleaseQueue.pop();
         assert(tnp.time <= sc_time_stamp());
         if(this->getCanExecuteTasks() || this->getPCB(tnp.node->getPid())->isPSM()){
-          if(Director::canExecute(tnp.node)){
-            Director::execute(tnp.node);
+          if(tnp.node->canFire()){
+            tnp.node->schedule();
+//          if(Director::canExecute(tnp.node)){
+//            Director::execute(tnp.node);
             pendingTask = true;
           }else{
             pendingTask = false;

@@ -47,6 +47,13 @@ class Delayer;
 
 
 class SchedulingInterface {
+  template<class TASKTRACER> friend class ComponentImpl;
+  template<class TASKTRACER> friend class RoundRobinComponent;
+  template<class TASKTRACER> friend class FcfsComponent;
+  template<class TASKTRACER> friend class PriorityComponent;
+  template<class TASKTRACER> friend class DynamicPriorityComponent;
+  template<class DEBUG_OUT, class TASKTRACER> friend class DynamicPriorityComponentImpl;
+  template<class TASKTRACER> friend class NonPreemptiveComponent;
 
 protected:
   // This will execute the actor. The actor must be fireable if this method is called.
@@ -55,6 +62,10 @@ protected:
   // This will test if the actor is fireable.
   // This will be implemented by the SysteMoC actor and called by the scheduler.
   virtual bool canFire()  = 0;
+
+  // This will add the Number of Guards to the ScheduledTask.
+  // This will be implemented by the SysteMoc actor and called by the scheduler.
+  //virtual void addGuardsNr() = 0;
 
   // If this method returns true, then SysteMoC will call
   // setActivation to notify the SchedulingInterface
@@ -86,6 +97,8 @@ class ScheduledTask
   friend                     class Component;
   template<class TASKTRACER> class TtPriorityComponent;
   template<class TASKTRACER> class TtFcfsComponent;
+  template<class DEBUG_OUT,class TASKTRACER> class DynamicPriorityComponentImpl;
+  friend                     class smoc_root_node;
 
   SC_HAS_PROCESS(ScheduledTask);
 public:
@@ -113,7 +126,7 @@ private:
   Delayer *component;
   ProcessId pid;
   bool active;
-
+//  const smoc::Expr::Ex<bool>::type NrGuards;
 
   /// The following member variable are for the fallback
   /// case if VPC scheduling is not enabled due to missing

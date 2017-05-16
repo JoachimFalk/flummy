@@ -128,22 +128,26 @@ public:
       for (PriorityList::const_iterator iter = this->priorities_.begin(); iter
           != this->priorities_.end(); ++iter) {
         ScheduledTask * scheduledTask = *iter;
-        bool canExec = Director::canExecute(scheduledTask);
+        bool canExec = scheduledTask->canFire();
+//        bool canExec = Director::canExecute(scheduledTask);
         if (canExec) {
           this->mustYield_ = false;
           this->releasedTask_ = scheduledTask;
           this->debugDump(debug_, scheduledTask);
-          Director::execute(scheduledTask);
+          scheduledTask->schedule();
+//          Director::execute(scheduledTask);
           return true;
         }
       }
       return false;
     } else {
-      bool canExec = Director::canExecute(this->lastTask_->getProcessId());
+      bool canExec = ((this->lastTask_)->getScheduledTask())->canFire();
+//      bool canExec = Director::canExecute(this->lastTask_->getProcessId());
       if (canExec) {
         this->releasedTask_ = this->lastTask_->getScheduledTask();
         this->debugDump(this->debug_, this->releasedTask_);
-        Director::execute(this->lastTask_->getProcessId());
+        ((this->lastTask_)->getScheduledTask())->schedule();
+//        Director::execute(this->lastTask_->getProcessId());
         return true;
       }
       return false;
@@ -164,7 +168,8 @@ private:
       ProcessId pid = (*iter)->getPid();
       out << getActorName(pid) << " ";
 
-      if (Director::canExecute(pid)) {
+      if((*iter)->canFire()){
+//      if (Director::canExecute(pid)) {
         canExec << getActorName(pid) << " ";
       }
     }

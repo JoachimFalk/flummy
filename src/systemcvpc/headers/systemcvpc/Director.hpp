@@ -67,6 +67,8 @@ namespace SystemC_VPC{
    * Director reads allocation and binding from file.
    */
   class Director {
+
+    template<class TASKTRACER> friend class NonPreemptiveComponent;
   public:
     bool FALLBACKMODE;
     bool defaultRoute;
@@ -90,21 +92,20 @@ namespace SystemC_VPC{
     }
 
     /**
-     *
-     */
     static bool canExecute(ScheduledTask * scheduledTask) {
       return getInstance().callCanExecute(scheduledTask);
     }
-
-    /**
      *
      */
+
+    /**
     static void execute(ScheduledTask * scheduledTask) {
       getInstance().callExecute(scheduledTask);
     }
-    /**
      *
      */
+
+    /**
     static bool canExecute(ProcessId pid){
       Task & task = getInstance().taskPool.getPrototype(pid);
       if (task.hasScheduledTask()){
@@ -112,15 +113,17 @@ namespace SystemC_VPC{
       }
       return false;
     }
-
-    /**
      *
      */
+
+    /**
     static void execute(ProcessId pid){
       Task & task = getInstance().taskPool.getPrototype(pid);
       assert (task.hasScheduledTask());
       execute(task.getScheduledTask());
     }
+     *
+     */
 
     ~Director();
 
@@ -257,7 +260,7 @@ namespace SystemC_VPC{
     static sc_time getEnd() {
       return end;
     }
-
+/*
     void registerSysteMoCCallBacks(
       boost::function<void (SystemC_VPC::ScheduledTask* actor)> execute,
       boost::function<bool (SystemC_VPC::ScheduledTask* actor)> testExecute){
@@ -265,6 +268,7 @@ namespace SystemC_VPC{
       callExecute = execute;
       callCanExecute = testExecute;
     }
+ */
 
     void beforeVpcFinalize();
     void endOfVpcFinalize();

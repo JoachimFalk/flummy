@@ -425,8 +425,10 @@ namespace SystemC_VPC{
                            tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
                            (*tasks_iter)->getBlockEvent().dii->notify();
                            if((*tasks_iter)->hasScheduledTask()){
-                             assert(Director::canExecute((*tasks_iter)->getProcessId()));
-                             Director::execute((*tasks_iter)->getProcessId());
+                             assert(((*tasks_iter)->getScheduledTask())->canFire());
+                             ((*tasks_iter)->getScheduledTask())->schedule();
+//                             assert(Director::canExecute((*tasks_iter)->getProcessId()));
+//                             Director::execute((*tasks_iter)->getProcessId());
                            }
                            this->taskTracer_.finishDii((*tasks_iter));
                            this->taskTracer_.finishLatency((*tasks_iter));
@@ -441,8 +443,10 @@ namespace SystemC_VPC{
               }
 
               if(task->hasScheduledTask()){
-                assert(Director::canExecute(task->getProcessId()));
-                Director::execute(task->getProcessId());
+                assert((task->getScheduledTask())->canFire());
+                (task->getScheduledTask())->schedule();
+//                assert(Director::canExecute(task->getProcessId()));
+//                Director::execute(task->getProcessId());
               }
               moveToRemainingPipelineStages(task);
               //wait(SC_ZERO_TIME);

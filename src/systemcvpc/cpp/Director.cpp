@@ -59,7 +59,11 @@
 #include "ConfigCheck.hpp"
 #include "DynamicPriorityComponent.hpp"
 #include "NonPreemptiveComponent.hpp"
+#include "RoundRobinComponent.hpp"
+#include "FcfsComponent.hpp"
+#include "PriorityComponent.hpp"
 #include "config/Mappings.hpp"
+
 #include "tracing/null/NullTracer.hpp"
 #include "tracing/db/DataBaseTracer.hpp"
 #include "tracing/vcd/VcdTracer.hpp"
@@ -683,6 +687,9 @@ ProcessId Director::getProcessId(std::string process_or_source,
         break;
       case VC::Scheduler::StaticPriority_NP_noTT:
         comp = createComponent<PriorityComponent>(component);
+        break;
+      case VC::Scheduler::RoundRobin:
+        comp = createComponent<RoundRobinComponent>(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
         // FIXME: Why does this not support a tracer?
