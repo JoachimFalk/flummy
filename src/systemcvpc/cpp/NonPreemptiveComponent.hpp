@@ -196,8 +196,10 @@ namespace SystemC_VPC{
                tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
                (*tasks_iter)->getBlockEvent().dii->notify();
                if((*tasks_iter)->hasScheduledTask()){
-                 assert(Director::canExecute((*tasks_iter)->getProcessId()));
-                 Director::execute((*tasks_iter)->getProcessId());
+                 assert(((*tasks_iter)->getScheduledTask())->canFire());
+                 ((*tasks_iter)->getScheduledTask())->schedule();
+//                 assert(Director::canExecute((*tasks_iter)->getProcessId()));
+//                 Director::execute((*tasks_iter)->getProcessId());
                }
                this->taskTracer_.finishDii((*tasks_iter));
                this->taskTracer_.finishLatency((*tasks_iter));
@@ -226,14 +228,24 @@ namespace SystemC_VPC{
 
         Director::getInstance().signalLatencyEvent(runningTask);
 
+        Task &task = Director::getInstance().taskPool.getPrototype(pid);
+        ScheduledTask * scheduledTask;
+
         DBG_OUT("remove Task " << runningTask->getName() << std::endl);
         if (hasScheduledTask){
           // reflect comm_state -> execute _communicate transition
           // FIXME: redesign
+          scheduledTask =task.getScheduledTask();
           DBG_OUT(" scheduledTask: " << runningTask->getName()
-                  << " " << Director::canExecute(pid) << std::endl);
-          assert(Director::canExecute(pid));
-          Director::execute(pid);
+                  << " " << scheduledTask->canFire() << std::endl);
+
+          assert(scheduledTask->canFire());
+          scheduledTask->schedule();
+
+//          DBG_OUT(" scheduledTask: " << runningTask->getName()
+//                  << " " << Director::canExecute(pid) << std::endl);
+//          assert(Director::canExecute(pid));
+//          Director::execute(pid);
         }
 
         //TODO: PIPELINING
@@ -254,179 +266,7 @@ namespace SystemC_VPC{
 
   typedef PriorityFcfsElement<ScheduledTask*>                    QueueElem;
 
-  template<class TASKTRACER>
-  class FcfsComponent : public NonPreemptiveComponent<TASKTRACER> {
-  public:
-    FcfsComponent(Config::Component::Ptr component, Director *director =
-      &Director::getInstance()) :
-      NonPreemptiveComponent<TASKTRACER>(component, director)
-    {
-    }
 
-    virtual ~FcfsComponent() {}
-
-    void addTask(Task *newTask)
-    {
-      DBG_OUT(this->getName() << " add Task: " << newTask->getName()
-              << " @ " << sc_time_stamp() << std::endl);
-      readyTasks.push_back(newTask);
-    }
-
-
-    Task * scheduleTask();
-
-    virtual void notifyActivation(ScheduledTask * scheduledTask,
-        bool active);
-
-    virtual bool releaseActor();
-
-    bool hasReadyTask(){
-      return !readyTasks.empty();
-    }
-  protected:
-    std::list<ScheduledTask *>       fcfsQueue;
-    std::deque<Task*>                readyTasks;
-
-  };
-
-  template<class TASKTRACER>
-  class TtFcfsComponent : public FcfsComponent<TASKTRACER> {
-  public:
-    TtFcfsComponent(Config::Component::Ptr component, Director *director =
-      &Director::getInstance()) :
-      FcfsComponent<TASKTRACER>(component, director)
-    {
-    }
-
-    virtual void notifyActivation(ScheduledTask * scheduledTask, bool active)
-    {
-      DBG_OUT(this->name() << " notifyActivation " << scheduledTask
-          << " " << active << std::endl);
-      if (active) {
-        if (scheduledTask->getNextReleaseTime() > sc_time_stamp()) {
-          ttReleaseQueue.push(
-              TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
-        } else {
-          this->fcfsQueue.push_back(scheduledTask);
-        }
-        if (this->runningTask == NULL) {
-          this->notify_scheduler_thread.notify(SC_ZERO_TIME);
-        }
-      }
-    }
-
-    virtual bool releaseActor()
-    {
-      //move active TT actors to fcfsQueue
-      while(!ttReleaseQueue.empty()
-          && ttReleaseQueue.top().time<=sc_time_stamp()){
-        this->fcfsQueue.push_back(ttReleaseQueue.top().node);
-        ttReleaseQueue.pop();
-      }
-      bool released = FcfsComponent<TASKTRACER>::releaseActor();
-      if(!ttReleaseQueue.empty() && !released){
-        sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
-        this->notify_scheduler_thread.notify(delta);
-      }
-      return released;
-    }
-  private:
-    TT::TimedQueue ttReleaseQueue;
-  };
-
-  template<class TASKTRACER>
-  class PriorityComponent : public NonPreemptiveComponent<TASKTRACER> {
-  public:
-    PriorityComponent(Config::Component::Ptr component, Director *director  =
-        &Director::getInstance()) :
-      NonPreemptiveComponent<TASKTRACER>(component, director), fcfsOrder(0)
-    {
-    }
-
-    virtual ~PriorityComponent() {}
-
-    void addTask(Task *newTask)
-    {
-      DBG_OUT(this->getName() << " add Task: " << newTask->getName()
-              << " @ " << sc_time_stamp() << std::endl);
-      p_queue_entry entry(fcfsOrder++, newTask);
-      readyQueue.push(entry);
-    }
-
-    Task * scheduleTask();
-
-    void notifyActivation(ScheduledTask * scheduledTask,
-        bool active);
-
-    bool releaseActor();
-
-    bool hasReadyTask(){
-      return !readyQueue.empty();
-    }
-  protected:
-    size_t fcfsOrder;
-    std::priority_queue<PriorityFcfsElement<ScheduledTask *> >    releaseQueue;
-    std::priority_queue<p_queue_entry>                            readyQueue;
-
-    int getPriority(const ScheduledTask * scheduledTask) {
-      ProcessId pid = scheduledTask->getPid();
-      ProcessControlBlockPtr pcb = this->getPCB(pid);
-      return pcb->getPriority();
-    }
-
-  };
-
-  template<class TASKTRACER>
-  class TtPriorityComponent : public PriorityComponent<TASKTRACER> {
-  public:
-    TtPriorityComponent(Config::Component::Ptr component, Director *director =
-        &Director::getInstance()) :
-      PriorityComponent<TASKTRACER>(component, director)
-    {
-    }
-
-    virtual void notifyActivation(ScheduledTask * scheduledTask, bool active)
-    {
-      DBG_OUT(this->name() << " notifyActivation " << scheduledTask
-          << " " << active << std::endl);
-      if (active) {
-        if (scheduledTask->getNextReleaseTime() > sc_time_stamp()) {
-          ttReleaseQueue.push(
-              TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
-        } else {
-          int priority = this->getPriority(scheduledTask);
-          DBG_OUT("  priority is: "<< priority << std::endl);
-          this->releaseQueue.push(QueueElem(priority, this->fcfsOrder++,
-              scheduledTask));
-        }
-        if (this->runningTask == NULL) {
-          this->notify_scheduler_thread.notify(SC_ZERO_TIME);
-        }
-      }
-    }
-
-    virtual bool releaseActor()
-    {
-      //move active TT actors to fcfsQueue
-      while(!ttReleaseQueue.empty()
-          && ttReleaseQueue.top().time<=sc_time_stamp()){
-        ScheduledTask * scheduledTask = ttReleaseQueue.top().node;
-        int priority = this->getPriority(scheduledTask);
-        this->releaseQueue.push(QueueElem(priority, this->fcfsOrder++,
-            scheduledTask));
-        ttReleaseQueue.pop();
-      }
-      bool released = PriorityComponent<TASKTRACER>::releaseActor();
-      if(!ttReleaseQueue.empty() && !released){
-        sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
-        this->notify_scheduler_thread.notify(delta);
-      }
-      return released;
-    }
-
-  private:
-    TT::TimedQueue ttReleaseQueue;
-  };
 /**
  *
  */
@@ -659,122 +499,7 @@ void NonPreemptiveComponent<TASKTRACER>::moveToRemainingPipelineStages(
   remainingPipelineStages_WakeUp.notify();
 }
 
-template<class TASKTRACER>
-void FcfsComponent<TASKTRACER>::notifyActivation(ScheduledTask * scheduledTask,
-    bool active)
-{
-  DBG_OUT(this->name() << " notifyActivation " << scheduledTask
-      << " " << active << std::endl);
-  if (active) {
-    fcfsQueue.push_back(scheduledTask);
-    if (this->runningTask == NULL) {
-      this->notify_scheduler_thread.notify(SC_ZERO_TIME);
-    }
-  }
-}
 
-template<class TASKTRACER>
-bool FcfsComponent<TASKTRACER>::releaseActor()
-{
-  while (!fcfsQueue.empty()) {
-    ScheduledTask * scheduledTask = fcfsQueue.front();
-    fcfsQueue.pop_front();
-
-    bool canExec = Director::canExecute(scheduledTask);
-    DBG_OUT("FCFS test task: " << scheduledTask
-        << " -> " << canExec << std::endl);
-    if (canExec) {
-      Director::execute(scheduledTask);
-      return true;
-    }
-  }
-
-  return false;
-}
-
-template<class TASKTRACER>
-Task * FcfsComponent<TASKTRACER>::scheduleTask()
-{
-  assert(!readyTasks.empty());
-  Task* task = readyTasks.front();
-  readyTasks.pop_front();
-  this->startTime = sc_time_stamp();
-  DBG_OUT(this->getName() << " schedule Task: " << task->getName()
-      << " @ " << sc_time_stamp() << std::endl);
-
-  /*
-   * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
-   */
-  if (task != NULL and task->isPSM() == true)
-    this->fireStateChanged(ComponentState::IDLE);
-  else
-    this->fireStateChanged(ComponentState::RUNNING);
-
-  if (task->isBlocking() /* && !assignedTask->isExec() */) {
-    //TODO
-  }
-  return task;
-}
-
-template<class TASKTRACER>
-void PriorityComponent<TASKTRACER>::notifyActivation(
-    ScheduledTask * scheduledTask, bool active)
-{
-  DBG_OUT(this->name() << " notifyActivation " << scheduledTask
-      << " " << active << std::endl);
-  if (active) {
-    int priority = getPriority(scheduledTask);
-    DBG_OUT("  priority is: "<< priority << std::endl);
-    releaseQueue.push(QueueElem(priority, fcfsOrder++, scheduledTask));
-    if (this->runningTask == NULL) {
-      this->notify_scheduler_thread.notify(SC_ZERO_TIME);
-    }
-  }
-}
-
-template<class TASKTRACER>
-bool PriorityComponent<TASKTRACER>::releaseActor()
-{
-  while (!releaseQueue.empty()) {
-    ScheduledTask * scheduledTask = releaseQueue.top().payload;
-    releaseQueue.pop();
-
-    bool canExec = Director::canExecute(scheduledTask);
-    DBG_OUT("PS test task: " << scheduledTask
-        << " -> " << canExec << std::endl);
-    if (canExec) {
-      Director::execute(scheduledTask);
-      return true;
-    }
-  }
-
-  return false;
-}
-
-template<class TASKTRACER>
-Task * PriorityComponent<TASKTRACER>::scheduleTask()
-{
-  assert(!readyQueue.empty());
-  Task* task = readyQueue.top().task;
-  readyQueue.pop();
-  this->startTime = sc_time_stamp();
-  DBG_OUT(this->getName() << " schedule Task: " << task->getName()
-      << " @ " << sc_time_stamp() << std::endl);
-
-  /*
-    * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
-    */
-   if (task->isPSM() == true){
-     this->fireStateChanged(ComponentState::IDLE);
-   }else{
-     this->fireStateChanged(ComponentState::RUNNING);
-   }
-
-  if (task->isBlocking() /* && !assignedTask->isExec() */) {
-    //TODO
-  }
-  return task;
-}
 
 } // namespace SystemC_VPC
 #endif //__INCLUDED_FCFSCOMPONENT_H__
