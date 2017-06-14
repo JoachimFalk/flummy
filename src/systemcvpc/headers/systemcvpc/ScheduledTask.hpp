@@ -32,73 +32,39 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef SCHEDULEDTASK_HPP_
-#define SCHEDULEDTASK_HPP_
+#ifndef _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP
+#define _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP
 
 #include <cstddef>
-#include <systemc.h>
+#include <systemc>
 
-namespace SystemC_VPC
-{
+#include <smoc/EvalAPI/SchedulingInterface.hpp>
+
+namespace SystemC_VPC {
 
 typedef size_t ProcessId;
 
 class Delayer;
 
-
-class SchedulingInterface {
-  template<class TASKTRACER> friend class ComponentImpl;
-  template<class TASKTRACER> friend class RoundRobinComponent;
-  template<class TASKTRACER> friend class FcfsComponent;
-  template<class TASKTRACER> friend class PriorityComponent;
-  template<class TASKTRACER> friend class DynamicPriorityComponent;
-  template<class DEBUG_OUT, class TASKTRACER> friend class DynamicPriorityComponentImpl;
-  template<class TASKTRACER> friend class NonPreemptiveComponent;
-
-protected:
-  // This will execute the actor. The actor must be fireable if this method is called.
-  // This will be implemented by the SysteMoC actor and called by the scheduler.
-  virtual void schedule() = 0;
-  // This will test if the actor is fireable.
-  // This will be implemented by the SysteMoC actor and called by the scheduler.
-  virtual bool canFire()  = 0;
-
-  // This will add the Number of Guards to the ScheduledTask.
-  // This will be implemented by the SysteMoc actor and called by the scheduler.
-  //virtual void addGuardsNr() = 0;
-
-  // If this method returns true, then SysteMoC will call
-  // setActivation to notify the SchedulingInterface
-  // that an actor is fireable. Otherwise, this has
-  // to be check via calls to canFire.
-  virtual bool useActivationCallback() const = 0;
-
-  // This will be called by SysteMoC if useActivationCallback()
-  // return true.
-  virtual void setActivation(bool activation) = 0;
-  // This must return a time until the actor is suspended
-  // due to some timing behavior. If no timing behavior is
-  // given, then this should return sc_core::sc_time_stamp().
-  // This will be implemented by the SysteMoC actor and called by the scheduler.
-  virtual sc_core::sc_time const &getNextReleaseTime() const = 0;
-
-  // setActive(false) will disable the scheduling of this actor
-  // setActive(true) will enable the scheduling of this actor
-  virtual void setActive(bool) = 0;
-  virtual bool getActive() const = 0;
-
-  virtual ~SchedulingInterface() {}
-};
-
 class ScheduledTask
   : public sc_core::sc_module
-  , public SchedulingInterface
+  , protected smoc::EvalAPI::SchedulingInterface
 {
-  friend                     class PreemptiveComponent;
-  template<class TASKTRACER> class TtPriorityComponent;
-  template<class TASKTRACER> class TtFcfsComponent;
-  template<class DEBUG_OUT,class TASKTRACER> class DynamicPriorityComponentImpl;
-  friend                     class smoc_root_node;
+  friend class PreemptiveComponent;
+  template<class TASKTRACER>
+  friend class ComponentImpl;
+  template<class TASKTRACER>
+  friend class RoundRobinComponent;
+  template<class TASKTRACER>
+  friend class FcfsComponent;
+  template<class TASKTRACER>
+  friend class PriorityComponent;
+  template<class TASKTRACER>
+  friend class DynamicPriorityComponent;
+  template<class DEBUG_OUT, class TASKTRACER>
+  friend class DynamicPriorityComponentImpl;
+  template<class TASKTRACER>
+  friend class NonPreemptiveComponent;
 
   SC_HAS_PROCESS(ScheduledTask);
 public:
@@ -137,4 +103,4 @@ private:
 
 }
 
-#endif /* SCHEDULEDTASK_HPP_ */
+#endif // _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP
