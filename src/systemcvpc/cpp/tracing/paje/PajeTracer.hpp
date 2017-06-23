@@ -24,6 +24,7 @@
 #include <systemcvpc/ProcessControlBlock.hpp>
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
 
 #include "../vcd/Tracing.hpp"
 
@@ -31,8 +32,7 @@
 #include <CoSupport/String/color.hpp>
 
 #include <vector>
-//#include <map>
-using namespace std;
+#include <map>
 
 namespace SystemC_VPC { namespace Trace {
 
@@ -47,26 +47,42 @@ public:
 
   void release(Task * task);
 
-  void finishDii(Task * task) const;
+  void finishDii(Task * task);
 
-  void finishLatency(Task * task) const;
+  void finishLatency(Task * task);
 
   void assign(Task * task);
 
-  void resign(Task * task) const;
+  void resign(Task * task);
 
-  void block(Task * task) const;
+  void block(Task * task);
 
   Tracing *getOrCreateTraceSignal(std::string name);
 
+protected:
+  unsigned int keyCounter;
+  int getNextKey();
 
 private:
-  sc_trace_file *traceFile_;
-  string name_;
-  map<std::string, Trace::Tracing*> trace_map_by_name_;
+  std::string name_;
+  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
   CoSupport::Tracing::PajeTracer::Resource const *res_;
-  map<string, CoSupport::Tracing::PajeTracer::Activity*> my_map_;
+  sc_core::sc_time startTime;
 
+  typedef std::map<std::string, CoSupport::Tracing::PajeTracer::Activity*> TaskToActivity;
+  TaskToActivity taskToActivity;
+
+  typedef std::map<std::string, CoSupport::Tracing::PajeTracer::Event*> TaskToEvent;
+  TaskToEvent taskToEvent;
+
+  typedef std::map<std::string, sc_core::sc_time> TaskToEndTime;
+  TaskToEndTime taskToEndTime;
+
+  typedef std::map<std::string, const CoSupport::Tracing::PajeTracer::Resource*> TaskToResource;
+  TaskToResource taskToResource;
+
+  typedef std::map<std::string, std::string> TaskToPreTask;
+  TaskToPreTask taskToPreTask;
 };
 
 } } // namespace SystemC_VPC::Trace

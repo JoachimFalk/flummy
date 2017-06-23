@@ -51,9 +51,14 @@ typedef std::vector<FunctionId> FunctionIds;
   public:
 
     /**
-     *
+     * This is called if a transition is executed.
      */
     void compute( EventPair p ) const;
+
+    /**
+     * This is called if a transition is checked if it is enabled.
+     */
+    void check() const;
 
     /**
      *
@@ -70,35 +75,21 @@ typedef std::vector<FunctionId> FunctionIds;
      */
     ComponentId getComponentId() const;
 
-    /**
-     *
-     */
-    void addDelay(size_t delay_ns){
-      addDelay(sc_time(delay_ns, SC_NS));
-    }
-
-    /**
-     *
-     */
-    void addDelay(sc_time delay);
-
-    FastLink(ProcessId pid, FunctionIds fid)
-      : process(pid),
-      functions(fid),
-      extraDelay(SC_ZERO_TIME)
+    FastLink(ProcessId pid, FunctionIds actionIds, FunctionIds guardIds, int complexity)
+      : process(pid)
+      , actionIds(actionIds)
+      , guardIds(guardIds)
+      , complexity(complexity)
     { }
 
     FastLink()
-      : process(),
-      functions(),
-      extraDelay(SC_ZERO_TIME)
+      : process(-1), complexity(0)
     { }
 
     ProcessId            process;
-    FunctionIds          functions;
-
-  private:
-    mutable sc_time      extraDelay;
+    FunctionIds          actionIds;
+    FunctionIds          guardIds;
+    int                  complexity;
   };
 
   static const FunctionId defaultFunctionId = 0;

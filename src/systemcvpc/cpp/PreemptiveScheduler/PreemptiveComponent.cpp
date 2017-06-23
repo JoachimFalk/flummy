@@ -109,7 +109,7 @@ namespace SystemC_VPC{
    */
   void PreemptiveComponent::compute(Task* actualTask){
     pendingTask = false;
-    if(max_avail_buffer == 0 || (readyTasks.size() + newTasks.size() + tasksDuringNoExecutionPhase.size()) < max_avail_buffer){
+    if(max_avail_buffer == 0 || (getReadyTasks().size() + newTasks.size() + tasksDuringNoExecutionPhase.size()) < max_avail_buffer){
       ProcessId pid = actualTask->getProcessId();
       ProcessControlBlockPtr pcb = this->getPCB(pid);
       actualTask->setPCB(pcb);
@@ -176,6 +176,15 @@ namespace SystemC_VPC{
     this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
     // Notify observers (e.g. powersum)
     this->fireNotification(this);
+  }
+
+  /*
+   * from ComponentInterface
+   */
+  bool PreemptiveComponent::hasWaitingOrRunningTasks()
+  {
+    //std::cout<<"hasWaitingOrRunningTasks() " << readyTasks.size() <<" " <<  runningTasks.size() << " " << tasksDuringNoExecutionPhase.size() << std::endl;
+    return (getReadyTasks().size() + getRunningTasks().size() + tasksDuringNoExecutionPhase.size()) > 0;
   }
 
   void PreemptiveComponent::fireStateChanged(const ComponentState &state)

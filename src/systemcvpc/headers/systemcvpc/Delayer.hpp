@@ -49,19 +49,24 @@ namespace SystemC_VPC{
   /**
    * \brief Interface for classes implementing delay simulation.
    */
-  class Delayer{
+  class Delayer {
   public:
     /**
-       * \brief Simulate the delay caused by this Delayer.
-       *
-       * While the simulation is running SystemC simulation time is consumed.
-       */
+     * \brief Simulate the delay caused by the transition execution on this Delayer.
+     *
+     * While the simulation is running SystemC simulation time is consumed.
+     */
     virtual void compute(Task* task) = 0;
 
-    const std::string& getName() const
-    {
-      return name_;
-    }
+    /**
+     * \brief Simulate the delay caused by the transition guard check on this Delayer.
+     *
+     * While the simulation is running SystemC simulation time is consumed.
+     */
+    virtual void check(Task* task) {}
+
+    const std::string &getName() const
+      { return name_; }
 
     const ComponentId getComponentId() const;
 

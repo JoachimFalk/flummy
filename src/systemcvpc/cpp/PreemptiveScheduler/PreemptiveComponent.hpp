@@ -107,6 +107,11 @@ namespace SystemC_VPC{
      *
      */
     virtual void updatePowerConsumption();
+
+    /*
+     * from ComponentInterface
+     */
+    bool hasWaitingOrRunningTasks();
       
     /**
      * \brief An implementation of AbstractComponent.
@@ -170,6 +175,15 @@ namespace SystemC_VPC{
     sc_time startTime;
 
     void fireStateChanged(const ComponentState &state);
+
+    const TaskMap &getReadyTasks()
+      { return readyTasks; }
+
+    const TaskMap &getRunningTasks()
+      { return runningTasks; }
+
+    TaskMap readyTasks;
+    TaskMap runningTasks;
 
   private:
     sc_event releaseActors;
@@ -360,11 +374,11 @@ namespace SystemC_VPC{
       //  std::cout<<"Component " << this->getName() << "schedule_thread @ " << sc_time_stamp() << std::endl;
         //determine the time slice for next scheduling decision and wait for
         bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
-                                                             readyTasks,
-                                                             runningTasks );
+                                                             getReadyTasks(),
+                                                             getRunningTasks());
         startTime = sc_time_stamp();
         if(!newTaskDuringOverhead){
-          if(runningTasks.size()<=0){                    // no running task
+          if(getRunningTasks().size()<=0){                    // no running task
             if(hasTimeSlice){
               wait( timeslice - (*overhead),
                     notify_scheduler_thread );

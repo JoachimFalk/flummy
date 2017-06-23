@@ -5,8 +5,8 @@
  *      Author: muellersi
  */
 
-#ifndef PRIORITYCOMPONENT_HPP_
-#define PRIORITYCOMPONENT_HPP_
+#ifndef NONPREEMPTIVESCHEUDLER_PRIORITYCOMPONENT_HPP_
+#define NONPREEMPTIVESCHEUDLER_PRIORITYCOMPONENT_HPP_
 
 #include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
 
@@ -162,27 +162,17 @@ namespace SystemC_VPC{
     /*
       * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
       */
-     if (task->isPSM() == true){
-       this->fireStateChanged(ComponentState::IDLE);
-     }else{
-       this->fireStateChanged(ComponentState::RUNNING);
-     }
-
+    if (task->isPSM() == true){
+     this->fireStateChanged(ComponentState::IDLE);
+    }else{
+     this->fireStateChanged(ComponentState::RUNNING);
+    }
     if (task->isBlocking() /* && !assignedTask->isExec() */) {
       //TODO
     }
     return task;
   }
 
-
-
-
-
-
-
-
-
-
 } // namespace SystemC_VPC
 
-#endif /* PRIORITYCOMPONENT_HPP_ */
+#endif /* NONPREEMPTIVESCHEUDLER_PRIORITYCOMPONENT_HPP_ */
