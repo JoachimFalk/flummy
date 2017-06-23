@@ -35,6 +35,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP
 #define _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP
 
+#include <list>
 #include <cstddef>
 #include <systemc>
 
@@ -50,6 +51,7 @@ class ScheduledTask
   : public sc_core::sc_module
   , protected smoc::EvalAPI::SchedulingInterface
 {
+  friend class PajeTracer;
   friend class PreemptiveComponent;
   template<class TASKTRACER>
   friend class ComponentImpl;
@@ -76,9 +78,6 @@ public:
   ProcessId getPid() const;
 
   virtual sc_core::sc_time const &getNextReleaseTime() const = 0;
-
-  bool useActivationCallback() const
-    { return true; }
 
   void setActivation(bool active);
 

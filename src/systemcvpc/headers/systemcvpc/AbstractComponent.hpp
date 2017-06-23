@@ -207,6 +207,7 @@ class ComponentObserver;
 
     virtual void reactivateExecution(){};
 
+
   protected:
 
     std::map<const PowerMode*, sc_time> transactionDelays;
@@ -268,6 +269,7 @@ class ComponentObserver;
             component->getName()),
         transactionDelays(),
         scheduledTasks(),
+        requestExecuteTasks(false),
         powerMode(NULL),
         canExecuteTasks(true),
         localGovernorFactory(NULL),
@@ -350,23 +352,15 @@ class ComponentObserver;
       componentIdle = event;
      }
 
-    /*
-     * from ComponentInterface
+    /* This function sets the appropriate execution state of the component according to the component powerstate
+     * (component's power state info is not encapsulated here, so it is the responsability of the powerState object to call this
+     * function whenever a powermode change takes place.
+     *
+     * Assumptions:
+     * "Disabling" a component (i.e. SLEEPING execution state) will remember the previous state and come back to it
+     * when leaving SLEEPING state)
+     *
      */
-    bool hasWaitingOrRunningTasks(){
-      //std::cout<<"hasWaitingOrRunningTasks() " << readyTasks.size() <<" " <<  runningTasks.size() << " " << tasksDuringNoExecutionPhase.size() << std::endl;
-      return (readyTasks.size() + runningTasks.size() + tasksDuringNoExecutionPhase.size()) > 0;
-    }
-
-        /* This function sets the appropriate execution state of the component according to the component powerstate
-         * (component's power state info is not encapsulated here, so it is the responsability of the powerState object to call this
-         * function whenever a powermode change takes place.
-         *
-         * Assumptions:
-         * "Disabling" a component (i.e. SLEEPING execution state) will remember the previous state and come back to it
-         * when leaving SLEEPING state)
-         *
-        */
     void forceComponentState(const PowerMode * powerMode);
 
     /**

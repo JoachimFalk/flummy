@@ -67,7 +67,7 @@ namespace SystemC_VPC{
    * Director reads allocation and binding from file.
    */
   class Director {
-
+    template<class TASKTRACER> friend class RoundRobinComponent;
     template<class TASKTRACER> friend class NonPreemptiveComponent;
   public:
     bool FALLBACKMODE;
@@ -91,41 +91,15 @@ namespace SystemC_VPC{
       delete singleton.release();
     }
 
-    /**
-    static bool canExecute(ScheduledTask * scheduledTask) {
-      return getInstance().callCanExecute(scheduledTask);
-    }
-     *
-     */
-
-    /**
-    static void execute(ScheduledTask * scheduledTask) {
-      getInstance().callExecute(scheduledTask);
-    }
-     *
-     */
-
-    /**
-    static bool canExecute(ProcessId pid){
-      Task & task = getInstance().taskPool.getPrototype(pid);
-      if (task.hasScheduledTask()){
-        return canExecute(task.getScheduledTask());
-      }
-      return false;
-    }
-     *
-     */
-
-    /**
-    static void execute(ProcessId pid){
-      Task & task = getInstance().taskPool.getPrototype(pid);
-      assert (task.hasScheduledTask());
-      execute(task.getScheduledTask());
-    }
-     *
-     */
-
     ~Director();
+
+    /**
+     * \brief Simulates timing simulations of guard checks.
+     *
+     * Determines the component from FastLink.
+     * \param fLink FastLink for transition to evaluate its guard.
+     */
+    void check(FastLink const *fLink);
 
     /**
      * \brief Simulates computation of a given task
@@ -139,9 +113,8 @@ namespace SystemC_VPC{
      * at same time!
      * \sa EventPair
      */
-    void compute(FastLink fLink,
-                 EventPair endPair = EventPair(NULL, NULL),
-                 const sc_time & extraDelay = SC_ZERO_TIME);
+    void compute(FastLink const *fLink,
+                 EventPair endPair = EventPair(NULL, NULL));
 
     /**
      * \brief Simulates communication delay of a given task
@@ -156,9 +129,9 @@ namespace SystemC_VPC{
      * at same time!
      * \sa EventPair
      */
-    void read( FastLink fLink,
-               size_t quantum,
-               EventPair endPair = EventPair(NULL, NULL) );
+    void read(FastLink const *fLink,
+              size_t quantum,
+              EventPair endPair = EventPair(NULL, NULL) );
 
     /**
      * \brief Simulates communication delay of a given task
@@ -173,9 +146,9 @@ namespace SystemC_VPC{
      * at same time!
      * \sa EventPair
      */
-    void write( FastLink fLink,
-                size_t quantum,
-                EventPair endPair = EventPair(NULL, NULL) );
+    void write(FastLink const *fLink,
+               size_t quantum,
+               EventPair endPair = EventPair(NULL, NULL) );
 
     /**
      * \brief Register component to Director
@@ -184,26 +157,27 @@ namespace SystemC_VPC{
      * is used as identifier for it.
      * \param comp points to component instance to be registered
      */
-    void registerComponent(Delayer* comp);
+    void registerComponent(Delayer *comp);
     
     /**
      * \brief Register mapping between task and component to Director
      * \param taskName specifies name of task
      * \param compName specifies name of component
      */
-    void registerMapping(const std::string& taskName,
-        const std::string& compName);
+    void registerMapping(
+        const std::string &taskName,
+        const std::string &compName);
 
     /**
      * \brief Register a communication route.
      * \param route the route
      */
-    void registerRoute(Route* route);
+    void registerRoute(Route *route);
 
     /**
      * \brief resolve mapping
      */
-    const Delayer * getComponent(const FastLink vpcLink) const ;
+    const Delayer *getComponent(FastLink const *vpcLink) const ;
     
     void signalLatencyEvent(Task* task);
 
@@ -224,7 +198,8 @@ namespace SystemC_VPC{
     FastLink registerActor(ScheduledTask * actor,
                              std::string actorName,
                              const FunctionNames& actionNames,
-                             const FunctionNames& guardNames);
+                             const FunctionNames& guardNames,
+                             const int complexity);
 
     FastLink registerRoute(std::string source, std::string destination,
         sc_port_base * leafPort);
@@ -260,30 +235,19 @@ namespace SystemC_VPC{
     static sc_time getEnd() {
       return end;
     }
-/*
-    void registerSysteMoCCallBacks(
-      boost::function<void (SystemC_VPC::ScheduledTask* actor)> execute,
-      boost::function<bool (SystemC_VPC::ScheduledTask* actor)> testExecute){
-
-      callExecute = execute;
-      callCanExecute = testExecute;
-    }
- */
 
     void beforeVpcFinalize();
     void endOfVpcFinalize();
     bool hasValidConfig() const;
   private:
 
-    Task * preCompute( FastLink fLink,
-                       EventPair endPair );
+    Task *preCompute(FastLink const *fLink);
 
-    void postCompute( Task *task,
-                      EventPair endPair );
+    void  postCompute(Task *task, EventPair endPair);
 
     void debugUnknownNames( ) const;
 
-    void assertMapping(ProcessId & pid){
+    void assertMapping(ProcessId const pid){
       if (mappings.size() < pid ||
           mappings[pid] == NULL) {
 
@@ -336,11 +300,6 @@ namespace SystemC_VPC{
     PowerSumming    *powerSumming;
 
     TaskPool        taskPool;
-
-    // callback to SysteMoC
-    boost::function<void (SystemC_VPC::ScheduledTask* actor)> callExecute;
-    boost::function<bool (SystemC_VPC::ScheduledTask* actor)> callCanExecute;
-
   };
 
 }

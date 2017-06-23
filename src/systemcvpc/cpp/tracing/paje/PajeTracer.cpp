@@ -41,10 +41,11 @@ namespace {
 namespace SystemC_VPC { namespace Trace {
 
   PajeTracer::PajeTracer(Config::Component::Ptr component)
-      : traceFile_(NULL)
+      : keyCounter(0)
       , name_(component->getName()) {
-    if (!myPajeTracer)
+    if (!myPajeTracer){
       myPajeTracer.reset(new CoSupport::Tracing::PajeTracer("paje.trace"));
+    }
     this->res_ = myPajeTracer->registerResource(component->getName().c_str());
   }
 
@@ -57,7 +58,6 @@ namespace SystemC_VPC { namespace Trace {
   }
 
   void PajeTracer::release(Task * task) {
-//           sc_core::sc_time(10, sc_core::SC_NS), sc_core::sc_time(3, sc_core::SC_US));
 //    ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
 //    sc_time t1 = sc_time_stamp();
@@ -65,15 +65,42 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  void PajeTracer::finishDii(Task * task) const {
+  void PajeTracer::finishDii(Task * task) {
 //    ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
 //    sc_time t1 = sc_time_stamp();
 //    logfile << "finishDii Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
 //    logfile.close();
+
+    TaskToActivity::const_iterator iterAction = taskToActivity.find(task->getName());
+    assert(iterAction != taskToActivity.end());
+    myPajeTracer->traceActivity(this->res_, iterAction->second, this->startTime, sc_time_stamp()); //
+
   }
 
-  void PajeTracer::finishLatency(Task * task) const {
+  void PajeTracer::finishLatency(Task * task) {
+
+    taskToEndTime[task->getName()] = sc_time_stamp();
+    taskToResource[task->getName()] = this->res_;
+//    if(!task->destState.empty())
+//      taskToPreTask[task->destState] = task->getName();
+//
+//    TaskToPreTask::const_iterator iterTask = taskToPreTask.find(task->getName());
+//    if (iterTask != taskToPreTask.end())
+//      //    std::string link = task->getName().append("_to_").append(task->getDestState());
+//      std::string link_ = taskToPreTask[task->getName()].append("_to_" + task->getName());
+//      myPajeTracer->registerLink(link_.c_str());
+//      int key = getNextKey();
+//
+//      TaskToEndTime::const_iterator iterPre = taskToEndTime.find(task->getPreState().c_str());
+//      assert(iterPre == taskToEndTime.end());
+//
+//      myPajeTracer->traceLinkBegin(link_.c_str(), taskToResource[task->getPreState()], key, taskToEndTime[task->getPreState()]);
+//      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, key, sc_time_stamp());
+//
+//    }
+
+
 //    ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
 //    sc_time t1 = sc_time_stamp();
@@ -83,33 +110,11 @@ namespace SystemC_VPC { namespace Trace {
 
   void PajeTracer::assign(Task * task) {
 
-    std::string taskOverhead = task->getName().append("_overhead");
-    std::string timeLeft = task->getName().append("_time_left");
-    std::map<string,CoSupport::Tracing::PajeTracer::Activity*>::iterator it_1;
-    std::map<string,CoSupport::Tracing::PajeTracer::Activity*>::iterator it_2;
+    this->startTime = sc_time_stamp();
 
-    int done =0;
-    if (!(this->my_map_.empty())){
-      it_1 = this->my_map_.find(timeLeft);
-      if (it_1 != this->my_map_.end()){
-        myPajeTracer->traceActivity(this->res_, this->my_map_.find(timeLeft)->second, sc_time_stamp(),sc_time_stamp()+task->getRuntime());
-        done =1;
-      }
-
-      it_2 = this->my_map_.find(task->getName());
-      if (it_2 != this->my_map_.end()){
-        myPajeTracer->traceActivity(this->res_, this->my_map_.find(task->getName())->second, sc_time_stamp()+task->getRuntime(),sc_time_stamp()+task->getDelay());
-        done =1;
-      }
-    }
-
-    if (done ==0) {
-      this->my_map_[timeLeft] = myPajeTracer->registerActivity(task->getName().c_str());
-      myPajeTracer->traceActivity(this->res_, this->my_map_.find(timeLeft)->second,sc_time_stamp(),sc_time_stamp()+task->getRuntime());
-
-      this->my_map_[task->getName()] = myPajeTracer->registerActivity(task->getName().c_str());
-      myPajeTracer->traceActivity(this->res_, this->my_map_.find(task->getName())->second,sc_time_stamp()+task->getRuntime(), sc_time_stamp()+task->getDelay());
-
+    TaskToActivity::const_iterator iterActivity = taskToActivity.find(task->getName());
+    if (iterActivity == taskToActivity.end()) {
+      taskToActivity[task->getName()] = myPajeTracer->registerActivity(task->getName().c_str(),true);
     }
 
 //    ofstream logfile;
@@ -119,7 +124,17 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  void PajeTracer::resign(Task * task) const {
+  void PajeTracer::resign(Task * task) {
+
+    this->startTime = sc_time_stamp();
+
+    std::string event = task->getName().append(" resigned!");
+
+    TaskToEvent::const_iterator iterEvent = taskToEvent.find(event);
+    if (iterEvent == taskToEvent.end())
+      taskToEvent[event] = myPajeTracer->registerEvent(task->getName().c_str(),true);
+
+    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_time_stamp());
 //    ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
 //    sc_time t1 = sc_time_stamp();
@@ -127,7 +142,18 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  void PajeTracer::block(Task * task) const {
+  void PajeTracer::block(Task * task) {
+
+    std::string event = task->getName().append(" blocked!");
+
+    TaskToEvent::const_iterator iterEvent = taskToEvent.find(event);
+    if (iterEvent == taskToEvent.end())
+      taskToEvent[event] = myPajeTracer->registerEvent(task->getName().c_str(),true);
+
+    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_time_stamp());
+
+    myPajeTracer->traceActivity(this->res_, taskToActivity.find(task->getName())->second, this->startTime, sc_time_stamp());
+
 //    ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
 //    sc_time t1 = sc_time_stamp();
@@ -136,7 +162,9 @@ namespace SystemC_VPC { namespace Trace {
   }
 
   Tracing * PajeTracer::getOrCreateTraceSignal(std::string name) {
-    Tracing *newsignal = new Tracing(name, this->getName()); // ressource, task
+    Tracing *newsignal = new Tracing(name, this->getName()); // resource, task
+
+    // not relevant for paje tracese, as all components are displayed in one trace.
 
 //    ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
@@ -145,5 +173,10 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
     return newsignal;
   }
+
+  int PajeTracer::getNextKey() {
+    return (keyCounter++);
+  }
+
 
 } } // namespace SystemC_VPC::Trace

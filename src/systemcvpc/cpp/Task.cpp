@@ -33,8 +33,30 @@
  */
 
 #include <systemcvpc/Task.hpp>
+
 namespace SystemC_VPC{
 
   int Task::globalInstanceId = 0;
+
+
+  void Task::initDelays() {
+    assert(pcb != NULL);
+    FunctionIds fids = this->getFunctionIds();
+    FunctionIds gids = this->getGuardIds();
+
+    if(!gids.empty())
+      this->setOverhead(this->timingScale * timing->getDelay(gids) + (double)this->factorOverhead * sc_time(10, SC_NS));
+    else
+      this->setOverhead((double)this->factorOverhead * sc_time(10, SC_NS));
+
+    //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
+    this->setDelay(this->timingScale * timing->getDelay(fids) //lat
+        + this->getOverhead());
+
+    this->setRemainingDelay(this->getDelay());
+
+    this->setLatency(this->timingScale * timing->getLatency(fids) //dii
+        + this->getOverhead());
+  }
 
 }

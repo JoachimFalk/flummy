@@ -116,6 +116,15 @@ namespace SystemC_VPC{
       this->fireNotification(this);
     }
 
+    /*
+     * from ComponentInterface
+     */
+    bool hasWaitingOrRunningTasks()
+    {
+      /// FIXME: Implement this;
+      assert(false);
+    }
+
 
     /**
      * \brief An implementation of AbstractComponent used together with
@@ -264,8 +273,6 @@ namespace SystemC_VPC{
     virtual bool hasReadyTask() = 0;
   };
 
-  typedef PriorityFcfsElement<ScheduledTask*>                    QueueElem;
-
 
 /**
  *
@@ -322,11 +329,12 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
   if (runningTask == NULL) {
     releasePhase = true; // prevent from re-notifying schedule_method
     //in case of read delay (no ready task) continue releasing other actors
-    while(releaseActor() && readyTasks.empty()) {}
+    while(releaseActor()/* && readyTasks.empty()*/) {}
     releasePhase = false;
 
     if (hasReadyTask()) {
       runningTask = scheduleTask();
+
       this->taskTracer_.assign(runningTask);
 
       next_trigger(runningTask->getRemainingDelay());

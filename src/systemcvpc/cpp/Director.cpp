@@ -84,7 +84,7 @@
   #include <systemcvpc/debug_off.hpp>
 #endif
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
 
   //
   std::unique_ptr<Director> Director::singleton;
@@ -95,17 +95,15 @@ namespace SystemC_VPC{
    *
    */
   Director::Director()
-    : FALLBACKMODE(false),
-      defaultRoute(false),
-      checkVpcConfig(true),
-      topPowerGov(new InternalSelectFastestPowerModeGovernor),
-      topPowerGovFactory(NULL),
-      mappings(),
-      reverseMapping(),
+    : FALLBACKMODE(false)
+    , defaultRoute(false)
+    , checkVpcConfig(true)
+    , topPowerGov(new InternalSelectFastestPowerModeGovernor)
+    , topPowerGovFactory(NULL)
 #ifndef NO_POWER_SUM
-      powerConsStream("powerconsumption.dat"),
+    , powerConsStream("powerconsumption.dat")
 #endif // NO_POWER_SUM
-      componentIdMap()
+    , powerSumming(NULL)
   {
      sc_report_handler::set_actions(SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
                                     SC_DO_NOTHING);
@@ -182,47 +180,26 @@ namespace SystemC_VPC{
     componentIdMap.clear();
   }
 
-  //
-  Task* Director::preCompute( FastLink fLink,
-                              EventPair endPair ){
-    if(FALLBACKMODE){
-      // create Fallback behavior for active and passive mode!
-      if( endPair.dii != NULL )
-        endPair.dii->notify();      // passive mode: notify end
-      if( endPair.latency != NULL )
-        endPair.latency->notify();  // passive mode: notify end
-
-      // do nothing, just return
-      return NULL;
-    }
-
-//    EventPair blockEvent = endPair;
-//    if( endPair.dii == NULL ){
-//      // prepare active mode
-//      blockEvent=EventPair(new VPC_Event(), new VPC_Event());
-//      // we could use a pool of VPC_Events instead of new/delete
-//    }
-
-    try{
-      //Task *task = new Task(fLink, endPair);
-      Task *task = this->allocateTask( fLink.process );
-      task->setFunctionIds( fLink.functions );
-      task->setBlockEvent( endPair );
-    
+  Task *Director::preCompute(FastLink const *fLink) {
+    try {
+      Task *task = this->allocateTask( fLink->process );
+      task->setFunctionIds( fLink->actionIds );
+      task->setGuardIds(fLink->guardIds);
+      task->setFactorOverhead(fLink->complexity);
     
       //HINT: also treat mode!!
       //if( endPair.latency != NULL ) endPair.latency->notify();
     
-      assertMapping(fLink.process);
+      assertMapping(fLink->process);
       
       return task;
-    } catch (NotAllocatedException e){
-      cerr << "Unknown Task: ID = " << fLink.process
-           << " name = " << this->getTaskName(fLink.process)  << std::endl;
+    } catch (NotAllocatedException &e) {
+      cerr << "Unknown Task: ID = " << fLink->process
+           << " name = " << this->getTaskName(fLink->process)  << std::endl;
 
       debugUnknownNames();
     }
-    throw NotAllocatedException(this->getTaskName(fLink.process));
+    throw NotAllocatedException(this->getTaskName(fLink->process));
   }
 
   //
@@ -235,53 +212,91 @@ namespace SystemC_VPC{
       EventPair blockEvent =  task->getBlockEvent();
 
       CoSupport::SystemC::wait(*blockEvent.dii);
-      blockEvent.dii = NULL;
-      blockEvent.latency = NULL;
+//    blockEvent.dii = NULL;
+//    blockEvent.latency = NULL;
     }
   }
 
-  //
-  void Director::compute( FastLink fLink, EventPair endPair,
-      const sc_time & extraDelay ){
-    Task * task = preCompute(fLink, endPair);
-    if(task == NULL) return;
+  void Director::check(FastLink const *fLink) {
+    if (FALLBACKMODE)
+      return;
+    Task *task = preCompute(fLink);
+    task->setName(task->getName().append("_check"));
     task->setTimingScale(1);
-    task->setExtraDelay(extraDelay);
-    assert(!FALLBACKMODE);
 
-    Delayer* comp = mappings[fLink.process];
+    Delayer *comp = mappings[fLink->process];
+    comp->check(task);
+  }
+
+  //
+  void Director::compute(FastLink const *fLink, EventPair endPair) {
+    if (FALLBACKMODE) {
+      // create Fallback behavior for active and passive mode!
+      if( endPair.dii != NULL )
+        endPair.dii->notify();      // passive mode: notify end
+      if( endPair.latency != NULL )
+        endPair.latency->notify();  // passive mode: notify end
+      // do nothing, just return
+      return;
+    }
+
+    Task * task = preCompute(fLink);
+    task->setBlockEvent( endPair );
+    task->setTimingScale(1);
+
+    Delayer* comp = mappings[fLink->process];
     comp->compute(task);
     postCompute(task, endPair);
   }
 
   //
-  void Director::read( FastLink fLink,
-                       size_t quantum,
-                       EventPair endPair ) {
+  void Director::read(FastLink const *fLink,
+                      size_t quantum,
+                      EventPair endPair ) {
+    if (FALLBACKMODE) {
+      // create Fallback behavior for active and passive mode!
+      if( endPair.dii != NULL )
+        endPair.dii->notify();      // passive mode: notify end
+      if( endPair.latency != NULL )
+        endPair.latency->notify();  // passive mode: notify end
+      // do nothing, just return
+      return;
+    }
+
     // FIXME: treat quantum
-    Task * task = preCompute(fLink, endPair);
-    if(task == NULL) return;
+    Task * task = preCompute(fLink);
+    task->setBlockEvent( endPair );
     task->setWrite(false);
     task->setTimingScale(quantum);
     assert(!FALLBACKMODE);
 
-    Delayer* comp = mappings[fLink.process];
+    Delayer* comp = mappings[fLink->process];
     comp->compute(task);
     postCompute(task, endPair);
   }
 
   //
-  void Director::write( FastLink fLink,
-                        size_t quantum,
-                        EventPair endPair ) {
+  void Director::write(FastLink const *fLink,
+                       size_t quantum,
+                       EventPair endPair ) {
+    if (FALLBACKMODE) {
+      // create Fallback behavior for active and passive mode!
+      if( endPair.dii != NULL )
+        endPair.dii->notify();      // passive mode: notify end
+      if( endPair.latency != NULL )
+        endPair.latency->notify();  // passive mode: notify end
+      // do nothing, just return
+      return;
+    }
+
     // FIXME: treat quantum
-    Task * task = preCompute(fLink, endPair);
-    if(task == NULL) return;
+    Task * task = preCompute(fLink);
+    task->setBlockEvent(endPair);
     task->setWrite(true);
     task->setTimingScale(quantum);
     assert(!FALLBACKMODE);
 
-    Delayer* comp = mappings[fLink.process];
+    Delayer* comp = mappings[fLink->process];
     comp->compute(task);
     postCompute(task, endPair);
   }
@@ -378,16 +393,16 @@ namespace SystemC_VPC{
   }
 
   //
-  const Delayer * Director::getComponent(const FastLink vpcLink) const {
-    if (mappings.size() < vpcLink.process ||
-        mappings[vpcLink.process] == NULL) {
-      std::string name = ConfigCheck::getProcessName(vpcLink.process);
+  const Delayer * Director::getComponent(FastLink const *vpcLink) const {
+    if (mappings.size() < vpcLink->process ||
+        mappings[vpcLink->process] == NULL) {
+      std::string name = ConfigCheck::getProcessName(vpcLink->process);
       std::cerr << "Unknown mapping for task " << name << std::endl;
 
       debugUnknownNames();
     }
 
-    return mappings[vpcLink.process];
+    return mappings[vpcLink->process];
   }
 
   //
@@ -415,36 +430,36 @@ namespace SystemC_VPC{
     return globalProcessId++;
   }
 
-ProcessId Director::getProcessId(std::string process_or_source,
-    std::string destination)
-{
-  typedef std::map<std::string, ProcessId> ProcessIdMap;
-  static ProcessIdMap processIdMap;
+  ProcessId Director::getProcessId(std::string process_or_source,
+      std::string destination)
+  {
+    typedef std::map<std::string, ProcessId> ProcessIdMap;
+    static ProcessIdMap processIdMap;
 
-  if (destination == "") {
-    std::string & process = process_or_source;
-    ProcessIdMap::const_iterator iter = processIdMap.find(process);
-    if (iter == processIdMap.end()) {
-      ProcessId id = getNextProcessId();
-      processIdMap[process] = id;
-      ConfigCheck::setProcessName(id, process);
-    }
-    iter = processIdMap.find(process);
-    return iter->second;
+    if (destination == "") {
+      std::string & process = process_or_source;
+      ProcessIdMap::const_iterator iter = processIdMap.find(process);
+      if (iter == processIdMap.end()) {
+        ProcessId id = getNextProcessId();
+        processIdMap[process] = id;
+        ConfigCheck::setProcessName(id, process);
+      }
+      iter = processIdMap.find(process);
+      return iter->second;
 
-  } else {
-    std::string & source = process_or_source;
-    std::string name_hack = "msg_" + source + "_2_" + destination;
-    ProcessIdMap::const_iterator iter = processIdMap.find(name_hack);
-    if (iter == processIdMap.end()) {
-      ProcessId id = getNextProcessId();
-      processIdMap[name_hack] = id;
-      ConfigCheck::setRouteName(id, source, destination);
+    } else {
+      std::string & source = process_or_source;
+      std::string name_hack = "msg_" + source + "_2_" + destination;
+      ProcessIdMap::const_iterator iter = processIdMap.find(name_hack);
+      if (iter == processIdMap.end()) {
+        ProcessId id = getNextProcessId();
+        processIdMap[name_hack] = id;
+        ConfigCheck::setRouteName(id, source, destination);
+      }
+      iter = processIdMap.find(name_hack);
+      return iter->second;
     }
-    iter = processIdMap.find(name_hack);
-    return iter->second;
   }
-}
 
   ComponentId Director::getComponentId(std::string component) {
 #ifdef DBG_DIRECTOR
@@ -753,24 +768,25 @@ ProcessId Director::getProcessId(std::string process_or_source,
   }
   /// end section: VpcApi.hpp related stuff
 
-//
-void Director::endOfVpcFinalize()
-{
-  if (checkVpcConfig) {
-    ConfigCheck::check();
+  //
+  void Director::endOfVpcFinalize()
+  {
+    if (checkVpcConfig) {
+      ConfigCheck::check();
+    }
   }
-}
 
-//
-bool Director::hasValidConfig() const
-{
-  return !FALLBACKMODE;
-}
+  //
+  bool Director::hasValidConfig() const
+  {
+    return !FALLBACKMODE;
+  }
 
   FastLink Director::registerActor(ScheduledTask * actor,
       std::string actorName,
       const FunctionNames &actionNames,
-      const FunctionNames &guardNames)
+      const FunctionNames &guardNames,
+      const int complexity)
   {
     //TODO: registerActor is called multiple times (for each transition)
 
@@ -787,27 +803,32 @@ bool Director::hasValidConfig() const
     }
 
     ProcessId       pid = getProcessId(  actorName  );
-    FunctionIds     functionIds;
+    FunctionIds     actionIds;
+    FunctionIds     guardIds;
 
-    //TODO: move this to finalizeMappings ??
-    FunctionNames functionNames;
-    functionNames.insert(functionNames.end(), actionNames.begin(), actionNames.end());
-    functionNames.insert(functionNames.end(), guardNames.begin(), guardNames.end());
-
-    for(FunctionNames::const_iterator iter = functionNames.begin();
-        iter != functionNames .end();
+    for(FunctionNames::const_iterator iter = actionNames.begin();
+        iter != actionNames .end();
         ++iter){
-      //check if we have timing data for this function in the XML configuration
-      if(hasFunctionId(*iter)){
-        functionIds.push_back( getFunctionId(*iter) );
-      }
       debugFunctionNames[pid].insert(*iter);
+      //check if we have timing data for this function in the XML configuration
+      if (hasFunctionId(*iter)) {
+        actionIds.push_back( getFunctionId(*iter) );
+      }
+      ConfigCheck::modelTiming(pid, *iter);
+    }
+    for(FunctionNames::const_iterator iter = guardNames.begin();
+        iter != guardNames.end();
+        ++iter){
+      debugFunctionNames[pid].insert(*iter);
+      if(hasFunctionId(*iter)){
+        guardIds.push_back( getFunctionId(*iter) );
+      }
       ConfigCheck::modelTiming(pid, *iter);
     }
 
     if (!taskPool.contains( pid )){
       cerr << "Unknown Task: name = " << actorName  << std::endl;
-      return FastLink(pid, functionIds);
+      return FastLink(pid, actionIds, guardIds, complexity);
 
       //debugUnknownNames();
       //throw NotAllocatedException(actorName);
@@ -824,7 +845,7 @@ bool Director::hasValidConfig() const
     actor->setDelayer(delayer);
     actor->setPid(pid);
 
-    return FastLink(pid, functionIds);
+    return FastLink(pid, actionIds, guardIds, complexity);
   }
 
   FastLink Director::registerRoute(std::string source,
@@ -860,7 +881,7 @@ bool Director::hasValidConfig() const
 
     Director::registerRoute(route);
 
-    return FastLink(pid, fids);
+    return FastLink(pid, fids, FunctionIds(),0);
   }
 
   sc_time Director::createSC_Time(const char* timeString)
@@ -868,7 +889,7 @@ bool Director::hasValidConfig() const
   {
     try{
       return CoSupport::SystemC::createSCTime(timeString);
-    } catch(std::string msg){
+    } catch(std::string &msg){
       throw InvalidArgumentException(msg);
     }
   }
@@ -893,10 +914,10 @@ bool Director::hasValidConfig() const
     }
   }
 
-std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
-  ComponentId cid=getComponentId(compName);
-  return reverseMapping[cid];
-}  
+  std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
+    ComponentId cid=getComponentId(compName);
+    return reverseMapping[cid];
+  }
   
   void Director::debugUnknownNames( ) const {
     bool route = false;

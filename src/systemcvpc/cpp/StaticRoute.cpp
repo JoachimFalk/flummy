@@ -93,7 +93,7 @@ namespace SystemC_VPC {
         routeLat->reset();
         this->traceStop();
         Director::getInstance().signalLatencyEvent(task);
-         this->pool->free(this);
+        this->pool->free(this);
        }
     } else {
       this->traceStop();

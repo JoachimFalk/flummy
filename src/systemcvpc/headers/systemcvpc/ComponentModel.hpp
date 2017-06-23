@@ -45,13 +45,15 @@ namespace SystemC_VPC{
   public:
     ComponentModel() : ComponentInfo(this){}
 
-    const TaskMap& getReadyTasks(){
+/*
+    const TaskMap &getReadyTasks(){
       return readyTasks;
     }
 
-    const TaskMap& getRunningTasks(){
+    const TaskMap &getRunningTasks(){
       return runningTasks;
     }
+ */
 
     virtual void setPowerMode(const PowerMode *mode) = 0;
 
@@ -68,8 +70,9 @@ namespace SystemC_VPC{
       powerConsumption = pc;
     }
 
-    TaskMap readyTasks;
-    TaskMap runningTasks;
+  private:
+//  TaskMap readyTasks;
+//  TaskMap runningTasks;
   };
 }
 #endif // HSCD_VPC_COMPONENT_MODEL_H

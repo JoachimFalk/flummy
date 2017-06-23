@@ -5,8 +5,8 @@
  *      Author: muellersi
  */
 
-#ifndef FCFSCOMPONENT_HPP_
-#define FCFSCOMPONENT_HPP_
+#ifndef NONPREEMPTIVESCHEUDLER_FCFSCOMPONENT_HPP_
+#define NONPREEMPTIVESCHEUDLER_FCFSCOMPONENT_HPP_
 
 #include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
 
@@ -42,8 +42,8 @@ namespace SystemC_VPC{
         return !readyTasks.empty();
       }
     protected:
-      std::list<ScheduledTask *>       fcfsQueue;
       std::deque<Task*>                readyTasks;
+      std::list<ScheduledTask *>       fcfsQueue;
 
     };
 
@@ -163,4 +163,4 @@ namespace SystemC_VPC{
 } // namespace SystemC_VPC
 
 
-#endif /* FCFSCOMPONENT_HPP_ */
+#endif /* NONPREEMPTIVESCHEUDLER_FCFSCOMPONENT_HPP_ */

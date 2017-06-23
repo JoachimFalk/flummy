@@ -40,6 +40,7 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
+
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/FastLink.hpp>
@@ -49,47 +50,55 @@
 
 namespace SystemC_VPC {
 
-namespace Trace {
-  class Tracing;
-  class VcdTracer;
-  class PajeTracer;
-}
+  namespace Trace {
+    class Tracing;
+    class VcdTracer;
+    class PajeTracer;
+  }
 
-using CoSupport::SystemC::Event;
+  using CoSupport::SystemC::Event;
+
   class Task{
   public:
     friend class Trace::VcdTracer;
     friend class Trace::PajeTracer;
+    template<class TASKTRACER> friend class NonPreemptiveComponent;
+    template<class TASKTRACER> friend class RoundRobinComponent;
 
     Task(TaskPool * pool)
       : pid(-1)
+      , fid()
+      , gid()
+      , blockEvent()
       , blockingCompute(NULL)
       , blockAck(false)
       , exec(false)
       , write(false)
+      , factorOverhead(0)
       , timing()
       , pcb()
       , pool(pool)
       , name("NN")
       , timingScale(1)
+      , taskTracerTicket()
       , scheduledTask(NULL)
     {
           this->instanceId = Task::globalInstanceId++;
     }
 
     // getter, setter
-    std::string getName() const                         {return name;}
-    void        setName(std::string name)               {this->name = name;}
-    ProcessId  getProcessId()                           {return pid;}
-    void       setProcessId(ProcessId pid)              {this->pid = pid;}
-    FunctionIds getFunctionIds()                        {return fid;}
-    void        setFunctionIds(FunctionIds fid)         {this->fid = fid;}
-    EventPair  getBlockEvent()                          {return blockEvent;}
-    void       setBlockEvent(EventPair p)               {this->blockEvent = p;}
-    void       setPCB(ProcessControlBlockPtr pcb)       {this->pcb = pcb;}
-    void       setTiming(FunctionTimingPtr timing)      {this->timing = timing;}
-
-    void       setExtraDelay(const sc_time & ed) { this->extraDelay = ed;}
+    std::string getName() const                          {return name;}
+    void        setName(std::string name)                {this->name = name;}
+    ProcessId   getProcessId()                           {return pid;}
+    void        setProcessId(ProcessId pid)              {this->pid = pid;}
+    FunctionIds getFunctionIds()                         {return fid;}
+    void        setFunctionIds(FunctionIds fid)          {this->fid = fid;}
+    FunctionIds getGuardIds()                            {return gid;}
+    void        setGuardIds(FunctionIds gid)             {this->gid = gid;}
+    EventPair   getBlockEvent()                          {return blockEvent;}
+    void        setBlockEvent(EventPair p)               {this->blockEvent = p;}
+    void        setPCB(ProcessControlBlockPtr pcb)       {this->pcb = pcb;}
+    void        setTiming(FunctionTimingPtr timing)      {this->timing = timing;}
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -112,6 +121,26 @@ using CoSupport::SystemC::Event;
     void       setWrite( bool write ) {this->write=write;}
     bool       isWrite(  ) { return this->write;}
 
+    //////////////////////////////
+    // Begin from Simone Mueller //
+    //////////////////////////////
+
+    //getter/setter of states that have to executed before the actual task can be.
+    void setPreState(std::string state)        {this->preState = state;}
+    std::string getPreState()                  {return this->preState;}
+
+    //not used right now
+    void setRuntime(const sc_time& runtime)     {this->runtime = runtime;}
+    sc_time getRuntime()const                   {return this->runtime;}
+
+
+    void setFactorOverhead(int complexity)      {this->factorOverhead = complexity;}
+    int getFactorOverhead()                     {return this->factorOverhead;}
+    void setOverhead(const sc_time& overhead)   {this->overhead = overhead;}
+    sc_time getOverhead()const                  {return this->overhead;}
+    //////////////////////////////
+    // End from Simone Mueller //
+    //////////////////////////////
 
     void setDelay(const sc_time& delay)         {this->delay = delay;}
     sc_time getDelay() const                    {return this->delay;}
@@ -119,10 +148,6 @@ using CoSupport::SystemC::Event;
     sc_time getLatency() const                  {return this->latency;}
     void setRemainingDelay(const sc_time& delay){this->remainingDelay = delay;}
     sc_time getRemainingDelay() const           {return this->remainingDelay;}
-    void setOverhead(const sc_time& overhead)   {this->overhead = overhead;}
-    sc_time getOverhead()const                  {return this->overhead;}
-    void setRuntime(const sc_time& runtime)     {this->runtime = runtime;}
-    sc_time getRuntime()const                   {return this->runtime;}
     int getInstanceId() const                   {return this->instanceId;}
     void setTimingScale( double scale )         {this->timingScale = scale;}
     double getTimingScale()                     {return this->timingScale;}
@@ -137,21 +162,7 @@ using CoSupport::SystemC::Event;
     /**
      * 
      */
-    void initDelays(){
-      assert(pcb != NULL);
-      FunctionIds fids = this->getFunctionIds();
-      //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
-      this->setDelay(this->timingScale * timing->getDelay(fids) //lat
-          + this->extraDelay);
-      this->setRemainingDelay(this->getDelay());
-
-      this->setLatency(this->timingScale * timing->getLatency(fids) //dii
-          + this->extraDelay);
-      sc_time *overhead = new sc_time(2,SC_NS);
-      this->setOverhead(*overhead);
-      sc_time *runtime = new sc_time(0,SC_NS);
-      this->setRuntime(*runtime);
-    }
+    void initDelays();
 
     // Adaptor setter / getter for ProcessControlBlock
     int getPriority()
@@ -191,18 +202,21 @@ using CoSupport::SystemC::Event;
       fid(task.fid),
       blockEvent(task.blockEvent),
       blockingCompute(task.blockingCompute),
+      blockAck(task.blockAck),
+      exec(task.exec),
       write(task.write),
       delay(task.delay),
       latency(task.latency),
       remainingDelay(task.remainingDelay),
       overhead(task.overhead),
       runtime(task.runtime),
-      extraDelay(task.extraDelay),
+      factorOverhead(task.factorOverhead),
       timing(task.timing),
       pcb(task.pcb),
       pool(task.pool),
       name(task.name),
       timingScale(task.timingScale),
+      taskTracerTicket(task.taskTracerTicket),
       scheduledTask(task.scheduledTask)
     {
           this->instanceId = Task::globalInstanceId++;
@@ -211,6 +225,7 @@ using CoSupport::SystemC::Event;
 
     ProcessId        pid;
     FunctionIds      fid;
+    FunctionIds      gid;
     EventPair        blockEvent;
 
     Coupling::VPCEvent::Ptr blockingCompute;
@@ -218,13 +233,17 @@ using CoSupport::SystemC::Event;
     bool       exec;
     bool       write;
 
+    sc_time startTime;
+    sc_time endTime;
+    sc_time blockingTime;
     sc_time delay;
     sc_time latency;
     sc_time remainingDelay;
     sc_time overhead;
     sc_time runtime;
-    sc_time extraDelay;
     
+    int factorOverhead;
+
     FunctionTimingPtr       timing;
     ProcessControlBlockPtr  pcb;
     TaskPool            *pool;
@@ -235,7 +254,8 @@ using CoSupport::SystemC::Event;
     double timingScale;
     CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
     ScheduledTask * scheduledTask;
-
+    std::string preState;
+    std::string destState;
   };
 
   typedef std::map<int, Task*>  TaskMap;
