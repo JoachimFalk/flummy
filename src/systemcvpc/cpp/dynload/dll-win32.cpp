@@ -34,9 +34,8 @@
 
 #ifdef WIN32
 
-#include <systemcvpc/dynload/world.hpp>
+#include <iostream>
 #include <systemcvpc/dynload/dll.hpp>
-
 
 DLLManager::DLLManager( const char *fname )
 {

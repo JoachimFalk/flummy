@@ -65,13 +65,12 @@ nobase_include_HEADERS =				\
 	systemcvpc/PowerGovernor.hpp 			\
 	systemcvpc/PowerMode.hpp 			\
 	systemcvpc/PowerSumming.hpp 			\
-	systemcvpc/RouteImpl.hpp 				\
+	systemcvpc/RouteImpl.hpp 			\
 	systemcvpc/RoutePool.hpp 			\
 	systemcvpc/StaticRoute.hpp 			\
-	systemcvpc/ScheduledTask.hpp 		\
+	systemcvpc/ScheduledTask.hpp 			\
 	systemcvpc/Task.hpp 				\
 	systemcvpc/TaskPool.hpp 			\
 	systemcvpc/TimingModifier.hpp 			\
 	systemcvpc/dynload/dll.hpp			\
-	systemcvpc/dynload/world.hpp		\
 	systemcvpc/coupling/VPCEvent.hpp

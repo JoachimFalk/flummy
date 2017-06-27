@@ -147,15 +147,15 @@ void Component::addAttribute(AttributePtr attribute)
     sc_time transferDelay = Director::createSC_Time(attribute->getValue());
     this->setTransferTiming(Config::Timing(transferDelay));
   } else if (attribute->isType("transaction")) {
-    unsigned int transactionSize = 1;
+//  unsigned int transactionSize = 1;
     sc_time transferDelay = SC_ZERO_TIME;
     if (attribute->hasParameter("delay")) {
       transferDelay = Director::createSC_Time(attribute->getParameter("delay"));
     }
 
-    if (attribute->hasParameter("size")) {
-      transactionSize = atoi(attribute->getParameter("size").c_str());
-    }
+//  if (attribute->hasParameter("size")) {
+//    transactionSize = atoi(attribute->getParameter("size").c_str());
+//  }
 
     this->setTransferTiming(Config::Timing(transferDelay));
     // FIXME: add transactionSize

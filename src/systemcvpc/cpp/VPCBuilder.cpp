@@ -493,10 +493,10 @@ namespace SystemC_VPC {
               }else if( sType == STR_VPC_PERIOD){
 //                task->setPeriod(Director::createSC_Time(sValue));
               }else if( sType == STR_VPC_DELAY){
-                sc_time delay = Director::createSC_Time(sValue);
+//              sc_time delay = Director::createSC_Time(sValue);
 //                task->setBaseDelay( delay );
               }else if( sType == STR_VPC_LATENCY){
-                sc_time latency = Director::createSC_Time(sValue);
+//              sc_time latency = Director::createSC_Time(sValue);
 //                task->setBaseLatency( latency );
               }else{
                 DBG_OUT("VPCBuilder> Unknown mapping attribute: type="

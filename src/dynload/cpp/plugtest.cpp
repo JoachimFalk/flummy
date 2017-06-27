@@ -38,7 +38,7 @@
 
 using namespace std;
 
-main()
+int main(int argc, char *argv[])
 {
 	
 	// Ask the user for the name of the DLL
