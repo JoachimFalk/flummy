@@ -130,9 +130,9 @@ namespace SystemC_VPC
     cout << "###SecondaryScheduler::schedulingDecision" << endl;
     //at the beginning no new scheduling decision
     scheduling_decision ret_decision = NOCHANGE;
-    sc_time cycleTime = CoSupport::SystemC::modulus(sc_time_stamp(), sc_time(
-        1.0 / sysFreq, SC_SEC)); //actual position in actual cycle
-    sc_time remainingTime = sc_time(1.0 / sysFreq, SC_SEC) - cycleTime;
+//  sc_time cycleTime = CoSupport::SystemC::modulus(sc_time_stamp(), sc_time(
+//      1.0 / sysFreq, SC_SEC)); //actual position in actual cycle
+//    sc_time remainingTime = sc_time(1.0 / sysFreq, SC_SEC) - cycleTime;
     if (running_tasks.begin() != running_tasks.end())
       { //running Task available
         //int runningTask = running_tasks.begin()->first;

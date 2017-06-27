@@ -138,7 +138,7 @@ namespace SystemC_VPC
               }
             else
               {
-                if (curr_slicecount == Most_slots.size() - 1)
+                if (curr_slicecount == static_cast<int>(Most_slots.size()) - 1)
                   {
                     /*nothing else to do for synch area, waiting for
                       SecondaryScheduler*/
@@ -320,7 +320,7 @@ namespace SystemC_VPC
         if ((currSlotStartTime + Most_slots[curr_slicecount].length)
             <= cycleTime)
           { //Most-Slot is over
-           if (curr_slicecount == Most_slots.size() - 1)
+           if (curr_slicecount == static_cast<int>(Most_slots.size()) - 1)
               {
                 curr_slicecount = -1;
                 currSlotStartTime = sc_time(0, SC_NS);
@@ -336,7 +336,7 @@ namespace SystemC_VPC
                 remainingSlice = Most_slots[Most_slots.size() - 1].length
                     - (sc_time_stamp() - currSlotStartTime
                         - Most_slots[Most_slots.size() - 1].length);
-                if (curr_slicecount == Most_slots.size())
+                if (curr_slicecount == static_cast<int>(Most_slots.size()))
                   {
 
                     remainingSlice = (setboundary(sysFreq, cycleSize)
@@ -355,7 +355,7 @@ namespace SystemC_VPC
           }
 
 
-        if (curr_slicecount > Most_slots.size() - 1)
+        if (curr_slicecount > static_cast<int>(Most_slots.size()) - 1)
           {
             curr_slicecount = Most_slots.size() - 1;
             return NOCHANGE;

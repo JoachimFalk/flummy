@@ -71,8 +71,6 @@ libsystemcvpc_la_SOURCES = \
 	\
 	src/systemcvpc/cpp/dynload/dll-elf.cpp \
 	src/systemcvpc/cpp/dynload/dll-win32.cpp \
-	src/systemcvpc/cpp/dynload/plugin.cpp \
-	src/systemcvpc/cpp/dynload/plugtest.cpp \
 	\
 	src/systemcvpc/cpp/PreemptiveScheduler/PreemptiveComponent.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/AVBScheduler.cpp \
@@ -108,7 +106,6 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/HysteresisLocalGovernor.cpp \
 	src/systemcvpc/cpp/SelectFastestPowerModeGlobalGovernor.cpp \
 	src/systemcvpc/cpp/PluggablePowerGovernor.cpp \
-	src/systemcvpc/cpp/dynload/dll-elf.cpp \
 	src/systemcvpc/cpp/ComponentInfo.cpp \
 	src/systemcvpc/cpp/AbstractComponent.cpp
 

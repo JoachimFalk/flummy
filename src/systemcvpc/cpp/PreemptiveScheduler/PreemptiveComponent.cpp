@@ -291,8 +291,6 @@ namespace SystemC_VPC{
 //     if(this->getCanExecuteTasks()){ //not required, no "normal" task will be added to ttReleaseQueue
     //std::cout<<"Component " << this->getName() << " releaseActorsMethod " << ttReleaseQueue.top().node->getPid() << " @ " << sc_time_stamp() << std::endl;
       TT::TimeNodePair tnp = ttReleaseQueue.top();
-      sc_time curr = sc_time_stamp();
-
       if(tnp.time <= sc_time_stamp()){
         ttReleaseQueue.pop();
         assert(tnp.time <= sc_time_stamp());
