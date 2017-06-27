@@ -772,6 +772,7 @@ namespace SystemC_VPC {
       std::istringstream stm;
       stm.str(CX::NStr(seed->getNodeValue()));
       double value;
+      stm >> value;
       generator = boost::shared_ptr<boost::mt19937>(new boost::mt19937(value));
     }
 
