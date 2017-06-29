@@ -313,7 +313,9 @@ namespace SystemC_VPC{
 
       if(!ttReleaseQueue.empty()){
         if(ttReleaseQueue.top().time<=sc_time_stamp()){
-          releaseActors.notify();
+          // The SC_ZERO_TIME is needed, otherwise releaseActorsMethod won't
+          // be recalled.
+          releaseActors.notify(SC_ZERO_TIME);
         }else{
           assert(ttReleaseQueue.top().time>=sc_time_stamp());
           sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
