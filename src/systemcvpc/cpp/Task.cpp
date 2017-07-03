@@ -50,8 +50,7 @@ namespace SystemC_VPC{
       this->setOverhead((double)this->factorOverhead * sc_time(10, SC_NS));
 
     //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
-    this->setDelay(this->timingScale * timing->getDelay(fids) //lat
-        + this->getOverhead());
+    this->setDelay(this->timingScale * timing->getDelay(fids) );//lat
 
     this->setRemainingDelay(this->getDelay());
 
