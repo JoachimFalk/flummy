@@ -57,7 +57,7 @@ void ScheduledTask::setDelayer(Delayer *component)
 
 Delayer* ScheduledTask::getDelayer()
 {
-	return this->component;
+  return this->component;
 }
 
 void ScheduledTask::setActivation(bool active)
@@ -87,11 +87,11 @@ ProcessId ScheduledTask::getPid() const
   return this->pid;
 }
 
-  void ScheduledTask::setActive(bool a){
-    if (a && !active) {
-        component->notifyActivation(this, true);
-    }
-    active=a;
+void ScheduledTask::setActive(bool a){
+  if (a && !active) {
+    component->notifyActivation(this, true);
   }
+  active=a;
+}
 
 } // namespace SystemC_VPC
