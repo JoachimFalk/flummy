@@ -24,6 +24,7 @@ namespace SystemC_VPC{
     RoundRobinComponent(Config::Component::Ptr component,
         Director *director = &Director::getInstance())
       : AbstractComponent(component)
+      , useActivationCallback(false)
       , actualTask(NULL)
       , taskTracer(component)
     {
@@ -34,13 +35,22 @@ namespace SystemC_VPC{
     }
 
   protected:
+    bool useActivationCallback;
+
+    void setActivationCallback(bool flag) {
+      if (useActivationCallback == flag)
+        return;
+      useActivationCallback = flag;
+      for (ScheduledTask *scheduledTask: taskList)
+        scheduledTask->setUseActivationCallback(flag);
+    }
+
     void end_of_elaboration() {
       PCBPool const &pcbPool = getPCBPool();
       for (PCBPool::const_iterator it=pcbPool.begin(); it!=pcbPool.end(); ++it) {
         std::cout << "\t " << it->second->getName() << std::endl;
         Task &task = Director::getInstance().taskPool.getPrototype(it->first);
         task.setPCB(it->second);
-//      task.setTiming(this->getTiming(this->getPowerMode(), it->first));
         if (task.hasScheduledTask()) {
           ScheduledTask *scheduledTask = task.getScheduledTask();
           scheduledTask->setUseActivationCallback(false);
@@ -49,37 +59,43 @@ namespace SystemC_VPC{
       }
     }
 
+    void notifyActivation(ScheduledTask * scheduledTask, bool active) {
+      if (active) {
+        setActivationCallback(false);
+        readyEvent.notify();
+      }
+    }
+
     void compute(Task *actualTask) {
       std::cout << "\t " << sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
       ProcessId pid = actualTask->getProcessId();
-//      taskTracer.release(actualTask);
       /// Note that actualTask is not the task prototype, i.e.,
       /// Director::getInstance().taskPool.getPrototype(pid),
       /// but an instance allocated with PrototypedPool<Task>::allocate().
       actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
       actualTask->initDelays();
-      scheduleMessageTasks(true);
       if (actualTask->hasScheduledTask()) {
+        assert(!useActivationCallback);
         assert(!this->actualTask);
         this->actualTask = actualTask;
       } else
         readyMsgTasks.push_back(actualTask);
-
       readyEvent.notify();
     }
 
     void check(Task *actualTask) {
-      ProcessId pid = actualTask->getProcessId();
-      actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
-      actualTask->initDelays();
+      if (!useActivationCallback) {
+        ProcessId pid = actualTask->getProcessId();
+        actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
+        actualTask->initDelays();
 
-//      scheduleMessageTasks(true);
-      this->taskTracer.assign(actualTask);
-      wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
-      this->taskTracer.finishDii(actualTask);
-      this->taskTracer.finishLatency(actualTask);
+        this->taskTracer.assign(actualTask);
+        wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
+        this->taskTracer.finishDii(actualTask);
+        this->taskTracer.finishLatency(actualTask);
 
-      std::cout << "check: " <<  actualTask->getName() << std::endl;
+        std::cout << "check: " <<  actualTask->getName() << std::endl;
+      }
     }
 
     /**
@@ -125,7 +141,8 @@ namespace SystemC_VPC{
       return taskTracer.getOrCreateTraceSignal(name);
     }
 
-    void scheduleMessageTasks(bool success) {
+    bool scheduleMessageTasks() {
+      bool progress = !readyMsgTasks.empty();
       while (!readyMsgTasks.empty()) {
         Task *messageTask = readyMsgTasks.front();
         readyMsgTasks.pop_front();
@@ -142,38 +159,30 @@ namespace SystemC_VPC{
         /// Enable transition out of comm state by notifying the dii event.
         messageTask->getBlockEvent().dii->notify();
         /// FIXME: What about dii != latency
-        success = true;
       }
-      if (!success)
-        wait(1, SC_NS);
+      return progress;
     }
-
-    std::vector<ScheduledTask *> taskList;
 
     void scheduleThread() {
       while (true) {
-        bool success = false;
-        if(taskList.empty())
-          scheduleMessageTasks(success);
+        bool progress = scheduleMessageTasks();
         for (ScheduledTask *scheduledTask: taskList) {
-          scheduleMessageTasks(true);
           while (scheduledTask->canFire()) {
             // This will invoke our compute callback and setup actualTask.
             assert(readyMsgTasks.empty());
             std::cout << "schedule Aufruf at : " << sc_time_stamp() << std::endl;
+            assert(!this->actualTask);
             scheduledTask->schedule();
-            scheduleMessageTasks(true);
             while (!actualTask) {
-              wait(readyEvent);
-              scheduleMessageTasks(true);
+              progress |= scheduleMessageTasks();
+              if (!actualTask)
+                wait(readyEvent);
             }
             assert(actualTask);
             assert(actualTask->hasScheduledTask());
             assert(actualTask->getScheduledTask() == scheduledTask);
-
-            actualTask->destState = scheduledTask->getDestStateName();
             this->taskTracer.assign(actualTask);
-            wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
+            wait(actualTask->getOverhead());
             this->taskTracer.finishDii(actualTask);
             this->taskTracer.finishLatency(actualTask);
 
@@ -187,20 +196,35 @@ namespace SystemC_VPC{
             /// FIXME: What about dii != latency
             Director::getInstance().signalLatencyEvent(actualTask);
             actualTask = nullptr;
-            success = true;
-            scheduleMessageTasks(success);
+            progress |= scheduleMessageTasks();
           }
+        }
+        if (!progress) {
+          setActivationCallback(true);
+          do {
+            wait(readyEvent);
+            scheduleMessageTasks();
+          } while (useActivationCallback);
         }
       }
     }
 
     virtual ~RoundRobinComponent() {}
 
-    std::deque<Task *>  readyMsgTasks;
-    Task               *actualTask;
-    sc_core::sc_event   readyEvent;
-    TASKTRACER          taskTracer;
-
+    /// This list contains the message tasks that will appear
+    /// via compute calls.
+    std::deque<Task *>            readyMsgTasks;
+    /// This list represent all the SysteMoC actors that
+    /// are mapped to this component. The list will be
+    /// filled by the the end_of_elaboration method.
+    std::vector<ScheduledTask *>  taskList;
+    /// This is the actual running task that will
+    /// be assigned by the compute method if
+    /// on of the SysteMoC actors of the component
+    /// is currently running.
+    Task                         *actualTask;
+    sc_core::sc_event             readyEvent;
+    TASKTRACER                    taskTracer;
   };
 
 } // namespace SystemC_VPC
