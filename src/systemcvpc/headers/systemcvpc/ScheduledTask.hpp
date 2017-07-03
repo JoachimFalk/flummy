@@ -91,7 +91,6 @@ private:
   Delayer *component;
   ProcessId pid;
   bool active;
-//  const smoc::Expr::Ex<bool>::type NrGuards;
 
   /// The following member variable are for the fallback
   /// case if VPC scheduling is not enabled due to missing
