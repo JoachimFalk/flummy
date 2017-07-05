@@ -1,0 +1,48 @@
+apply plugin: 'java'
+apply plugin: 'jvm-component'
+apply plugin: 'java-lang'
+
+//apply plugin: 'de.jfalk.gradle.utilities'
+
+//Creating LanguageSourceSets via the model DSL
+model {
+  components {
+    evaluatorCS12DSE(JvmLibrarySpec) {
+      sources {
+        java {
+//        source {
+//          srcDir "src"
+//        }
+          dependencies {
+//          analysis "dependencies", it
+            project ':dse' library 'dse'
+            project ':dseconstraintcommons' library 'constraintcommons'
+            module 'net.sf.jung:jung-api:2.0.1'
+            module 'net.sf.jung:jung-graph-impl:2.0.1'
+            module 'net.sf.jung:jung-algorithms:2.0.1'
+            module 'net.sf.jung:jung-visualization:2.0.1'
+            module 'com.google.inject:guice:4.1.0'
+            module 'com.google.inject.extensions:guice-multibindings:4.1.0'
+            module 'net.sourceforge.collections:collections-generic:4.01'
+            module 'com.google.code.gson:gson:2.3.1'
+          }
+        }
+        
+        binaries.all {
+          tasks.withType(JavaCompile) { task ->
+//          task.sourceCompatibility = 1.6
+            opt4jDependencies.each {
+              task.dependsOn parent.project("opt4j:"+it).jar
+              task.classpath += files(parent.project("opt4j:"+it).jar.archivePath)
+              task.classpath += fileTree(dir: 'lib', include: '*.jar')
+            }
+          }
+          tasks.withType(AbstractArchiveTask) {
+            project.jar.dependsOn it
+            project.jar.from zipTree(it.archivePath)
+          }
+        }
+      }
+    }
+  }
+}
