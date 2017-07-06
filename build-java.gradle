@@ -2,6 +2,11 @@ apply plugin: 'java'
 apply plugin: 'jvm-component'
 apply plugin: 'java-lang'
 
+// This is for eclipse
+sourceSets {
+  evaluatorCS12DSE
+}
+
 //apply plugin: 'de.jfalk.gradle.utilities'
 
 //Creating LanguageSourceSets via the model DSL
