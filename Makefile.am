@@ -74,10 +74,8 @@ libsystemcvpc_la_SOURCES = \
 	\
 	src/systemcvpc/cpp/PreemptiveScheduler/PreemptiveComponent.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/AVBScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/FCFSScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/FlexRayScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/PriorityScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/PrioritySchedulerNoPreempt.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/RateMonotonicScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/RoundRobinScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/TimeTriggeredCCScheduler.cpp \

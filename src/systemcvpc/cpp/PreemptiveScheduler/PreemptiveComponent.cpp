@@ -43,12 +43,10 @@
 #include <systemcvpc/config/Component.hpp>
 #include <float.h>
 #include <PreemptiveScheduler/AVBScheduler.hpp>
-#include <PreemptiveScheduler/FCFSScheduler.hpp>
 #include <PreemptiveScheduler/FlexRayScheduler.hpp>
 #include <PreemptiveScheduler/MostScheduler.hpp>
 #include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
 #include <PreemptiveScheduler/PriorityScheduler.hpp>
-#include <PreemptiveScheduler/PrioritySchedulerNoPreempt.hpp>
 #include <PreemptiveScheduler/RateMonotonicScheduler.hpp>
 #include <PreemptiveScheduler/RoundRobinScheduler.hpp>
 #include <PreemptiveScheduler/Scheduler.hpp>
@@ -69,17 +67,11 @@ namespace SystemC_VPC{
       case Config::Scheduler::RoundRobin:
         scheduler = new RoundRobinScheduler();
         break;
-      case Config::Scheduler::StaticPriority_NP:
-        scheduler = new PrioritySchedulerNoPreempt();
-        break;
       case Config::Scheduler::StaticPriority_P:
         scheduler = new PriorityScheduler();
         break;
       case Config::Scheduler::RateMonotonic:
         scheduler = new RateMonotonicScheduler();
-        break;
-      case Config::Scheduler::FCFS_old:
-        scheduler = new FCFSScheduler();
         break;
       case Config::Scheduler::TDMA:
         scheduler = new TDMAScheduler();
@@ -100,7 +92,7 @@ namespace SystemC_VPC{
         scheduler = new StreamShaperScheduler();
         break;
       default:
-        scheduler = new FCFSScheduler();
+        assert(!"Oops, I don't know this scheduler!");
     }
   }
 
