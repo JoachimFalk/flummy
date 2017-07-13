@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <map>
+
 using namespace std;
 
 namespace {
@@ -58,6 +59,33 @@ namespace SystemC_VPC { namespace Trace {
   }
 
   void PajeTracer::release(Task * task) {
+
+    if(!task->hasScheduledTask()){
+      string name = task->getName();
+      string msg_name;
+      int msg_cf = name.find("msg_cf_");
+      int begin = name.find("_cf_");
+      int end = name.find("_1_");
+      if (msg_cf == -1)
+        msg_name = name.substr(begin+4, name.length()-begin-6);
+      else
+        msg_name = name.substr(7, end-7);
+      int n = msg_name.find("_");
+      string from = msg_name.substr(0,n);
+      string to = msg_name.substr(n+1,msg_name.length()-n-1);
+
+      TaskToPreTask::const_iterator iterTask = taskToPreTask.find(to);
+
+      if(iterTask == taskToPreTask.end()) {
+        taskToPreTask[to] = from;
+        taskToDestTask[from] = to;
+        myPajeTracer->registerLink(msg_name.c_str());
+      } //else if(taskToPreTask[to] != from) {
+//        taskToPreTask[to] = from;
+//        myPajeTracer->registerLink(msg_name.c_str());
+      //}
+    }
+
 //    ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
 //    sc_time t1 = sc_time_stamp();
@@ -80,25 +108,28 @@ namespace SystemC_VPC { namespace Trace {
 
   void PajeTracer::finishLatency(Task * task) {
 
-    taskToEndTime[task->getName()] = sc_time_stamp();
-    taskToResource[task->getName()] = this->res_;
-//    if(!task->destState.empty())
-//      taskToPreTask[task->destState] = task->getName();
-//
-//    TaskToPreTask::const_iterator iterTask = taskToPreTask.find(task->getName());
-//    if (iterTask != taskToPreTask.end())
-//      //    std::string link = task->getName().append("_to_").append(task->getDestState());
-//      std::string link_ = taskToPreTask[task->getName()].append("_to_" + task->getName());
-//      myPajeTracer->registerLink(link_.c_str());
-//      int key = getNextKey();
-//
-//      TaskToEndTime::const_iterator iterPre = taskToEndTime.find(task->getPreState().c_str());
+//    taskToEndTime[task->getName()] = sc_time_stamp();
+//    taskToResource[task->getName()] = this->res_;
+
+    TaskToDestTask::const_iterator iterDestTask = taskToDestTask.find(task->getName());
+    if (iterDestTask != taskToDestTask.end()){
+      std::string destTask = iterDestTask->second;
+      std::string link_ = task->getName().append("_" + destTask);
+
+      myPajeTracer->traceLinkBegin(link_.c_str(), this->res_, sc_time_stamp());
+    }
+
+    TaskToPreTask::const_iterator iterTask = taskToPreTask.find(task->getName());
+    if (iterTask != taskToPreTask.end()){
+      std::string preTask = iterTask->second;
+      std::string link_ = preTask.append("_" + task->getName());
+
+//      TaskToEndTime::const_iterator iterPre = taskToEndTime.find(preTask.c_str());
 //      assert(iterPre == taskToEndTime.end());
-//
-//      myPajeTracer->traceLinkBegin(link_.c_str(), taskToResource[task->getPreState()], key, taskToEndTime[task->getPreState()]);
-//      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, key, sc_time_stamp());
-//
-//    }
+
+      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, sc_time_stamp());
+
+    }
 
 
 //    ofstream logfile;
