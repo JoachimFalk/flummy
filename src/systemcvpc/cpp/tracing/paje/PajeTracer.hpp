@@ -83,6 +83,10 @@ private:
 
   typedef std::map<std::string, std::string> TaskToPreTask;
   TaskToPreTask taskToPreTask;
+
+  typedef std::map<std::string, std::string> TaskToDestTask;
+  TaskToDestTask taskToDestTask;
+
 };
 
 } } // namespace SystemC_VPC::Trace

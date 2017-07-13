@@ -41,8 +41,26 @@ namespace SystemC_VPC{
       if (useActivationCallback == flag)
         return;
       useActivationCallback = flag;
-      for (ScheduledTask *scheduledTask: taskList)
-        scheduledTask->setUseActivationCallback(flag);
+      if (!flag) {
+        for (ScheduledTask *scheduledTask: taskList)
+          scheduledTask->setUseActivationCallback(flag);
+      } else {
+        for (std::vector<ScheduledTask *>::iterator iter = taskList.begin();
+             iter != taskList.end();
+             ++iter) {
+          (*iter)->setUseActivationCallback(true);
+          if ((*iter)->canFire()) {
+            /// Oops, undo it
+            useActivationCallback = false;
+            (*iter)->setUseActivationCallback(false);
+            while (iter != taskList.begin()) {
+              --iter;
+              (*iter)->setUseActivationCallback(false);
+            }
+            return;
+          }
+        }
+      }
     }
 
     void end_of_elaboration() {
@@ -88,7 +106,7 @@ namespace SystemC_VPC{
         ProcessId pid = actualTask->getProcessId();
         actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
         actualTask->initDelays();
-
+        this->taskTracer.release(actualTask);
         this->taskTracer.assign(actualTask);
         wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
         this->taskTracer.finishDii(actualTask);
@@ -147,6 +165,7 @@ namespace SystemC_VPC{
         Task *messageTask = readyMsgTasks.front();
         readyMsgTasks.pop_front();
         assert(!messageTask->hasScheduledTask());
+        this->taskTracer.release(messageTask);
         this->taskTracer.assign(messageTask);
         /// This will setup the trigger for schedule_method to be called
         /// again when the task execution time is over.
@@ -167,20 +186,23 @@ namespace SystemC_VPC{
       while (true) {
         bool progress = scheduleMessageTasks();
         for (ScheduledTask *scheduledTask: taskList) {
+          std::cout << "Checking " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
           while (scheduledTask->canFire()) {
+            progress = true;
             // This will invoke our compute callback and setup actualTask.
             assert(readyMsgTasks.empty());
-            std::cout << "schedule Aufruf at : " << sc_time_stamp() << std::endl;
+            std::cout << "Scheduling " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
             assert(!this->actualTask);
             scheduledTask->schedule();
             while (!actualTask) {
-              progress |= scheduleMessageTasks();
+              scheduleMessageTasks();
               if (!actualTask)
                 wait(readyEvent);
             }
             assert(actualTask);
             assert(actualTask->hasScheduledTask());
             assert(actualTask->getScheduledTask() == scheduledTask);
+            this->taskTracer.release(actualTask);
             this->taskTracer.assign(actualTask);
             wait(actualTask->getOverhead());
             this->taskTracer.finishDii(actualTask);
@@ -196,15 +218,15 @@ namespace SystemC_VPC{
             /// FIXME: What about dii != latency
             Director::getInstance().signalLatencyEvent(actualTask);
             actualTask = nullptr;
-            progress |= scheduleMessageTasks();
+            scheduleMessageTasks();
           }
         }
         if (!progress) {
           setActivationCallback(true);
-          do {
+          while (useActivationCallback) {
             wait(readyEvent);
             scheduleMessageTasks();
-          } while (useActivationCallback);
+          }
         }
       }
     }
