@@ -351,7 +351,7 @@ namespace SystemC_VPC{
     void schedule_thread(){
       sc_core::sc_time timeslice;
       sc_core::sc_time actualRemainingDelay;
-      sc_core::sc_time *overhead = new sc_core::sc_time( sc_core::SC_ZERO_TIME );
+      sc_core::sc_time overhead = sc_core::SC_ZERO_TIME;
       int actualRunningIID;
       bool newTaskDuringOverhead=false;
       //wait(sc_core::SC_ZERO_TIME);
@@ -380,7 +380,7 @@ namespace SystemC_VPC{
         if(!newTaskDuringOverhead){
           if(getRunningTasks().size()<=0){                    // no running task
             if(hasTimeSlice){
-              wait( timeslice - (*overhead),
+              wait( timeslice - overhead,
                     notify_scheduler_thread );
             }else{
               if(!pendingTask && !hasWaitingOrRunningTasks()){
@@ -391,8 +391,8 @@ namespace SystemC_VPC{
               wait( notify_scheduler_thread );
             }
           }else{                                        // a task already runs
-            if(hasTimeSlice && (timeslice - (*overhead)) < actualRemainingDelay){
-              wait( timeslice - (*overhead),
+            if(hasTimeSlice && (timeslice - overhead) < actualRemainingDelay){
+              wait( timeslice - overhead,
                     notify_scheduler_thread );
             }else{
               wait( actualRemainingDelay,
@@ -498,26 +498,17 @@ namespace SystemC_VPC{
           this->taskTracer_.resign(readyTasks[taskToResign]);
         }
 
-        sc_core::sc_time timestamp=sc_core::sc_time_stamp();
-        if( overhead != NULL ) delete overhead;
-        overhead=scheduler->schedulingOverhead();
-
-        if( overhead != NULL ){
-          //    actual time    < endtime
-          while( (sc_core::sc_time_stamp() < timestamp + (*overhead)) ){
-
-            wait( (timestamp+(*overhead))-sc_core::sc_time_stamp(),
-                  notify_scheduler_thread );
-
-          }
-
-          // true if some task becames ready during overhead waiting
-          newTaskDuringOverhead=(newTasks.size()>0);
-        }else {
-          // avoid failures
-          overhead=new sc_core::sc_time(sc_core::SC_ZERO_TIME);
+        {
+          sc_core::sc_time *newOverhead = scheduler->schedulingOverhead();
+          overhead = newOverhead ? *newOverhead : sc_core::SC_ZERO_TIME;
+          delete newOverhead;
         }
 
+        if (overhead != sc_core::SC_ZERO_TIME) {
+          wait(overhead);
+          // true if some task becames ready during overhead waiting
+          newTaskDuringOverhead = newTasks.size()>0;
+        }
 
         //assign task
         if(decision==ONLY_ASSIGN || decision==PREEMPT){
