@@ -39,7 +39,7 @@
 #include <systemcvpc/ComponentModel.hpp>
 #include <systemcvpc/Attribute.hpp>
 
-#include <systemc.h>
+#include <systemc>
 
 namespace SystemC_VPC{
   
@@ -62,7 +62,7 @@ namespace SystemC_VPC{
      * 
      */
     virtual bool
-    getSchedulerTimeSlice(sc_time &time,
+    getSchedulerTimeSlice(sc_core::sc_time &time,
                           const TaskMap &ready_tasks,
                           const TaskMap &running_tasks)=0;
 
@@ -95,7 +95,7 @@ namespace SystemC_VPC{
     /**
      *\brief The overhead needed to determine the scheduling decision.
      */
-    virtual sc_time* schedulingOverhead()=0;
+    virtual sc_core::sc_time* schedulingOverhead()=0;
 
     /**
      *\brief Customize scheduler options, like time slice or scheduling overhead.

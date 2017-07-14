@@ -47,7 +47,7 @@ namespace SystemC_VPC{
     p_list.insert(p_list.begin(), newEntry);
     last_active = -1;
     firstrun=true;
-    time_last_assign = sc_time_stamp();
+    time_last_assign = sc_core::sc_time_stamp();
   
   }
 
@@ -84,7 +84,7 @@ namespace SystemC_VPC{
 
 
   bool AVBScheduler::getSchedulerTimeSlice(
-    sc_time& time,
+    sc_core::sc_time& time,
     const TaskMap &ready_tasks,
     const  TaskMap &running_tasks )
   {
@@ -93,12 +93,12 @@ namespace SystemC_VPC{
       return false;
     }else{
       //find the next time, when a task is allowed to run (it has enough credits)
-      sc_time needed_time = sc_core::SC_ZERO_TIME;
+      sc_core::sc_time needed_time = sc_core::SC_ZERO_TIME;
       std::list<AVBListEntry*>::iterator it;
       for (it=p_list.begin(); it!=p_list.end(); it++){
 	if((*it)->task_queue->size() != 0){
 	  assert((*it)->has_credit() == false);
-	  sc_time curr_needed_time = (SC_ZERO_TIME -(*it)->get_credit()) / ((*it)->get_bw_alloc());
+	  sc_core::sc_time curr_needed_time = (sc_core::SC_ZERO_TIME -(*it)->get_credit()) / ((*it)->get_bw_alloc());
 	  if(needed_time == sc_core::SC_ZERO_TIME || needed_time > curr_needed_time){
 	    needed_time = curr_needed_time;
 	  }
@@ -152,13 +152,13 @@ namespace SystemC_VPC{
     std::list<AVBListEntry*>::iterator it;
     if(firstrun){
       //QuickFix for initial credit-error
-      time_last_assign=sc_time_stamp() ;
+      time_last_assign=sc_core::sc_time_stamp() ;
       firstrun=false;
     }
     if(running_tasks.size()!=0){
       //no preemption! Only update the credits!
       //or after an idle phase
-      sc_time time_budget = sc_time_stamp() - time_last_assign;
+      sc_core::sc_time time_budget = sc_core::sc_time_stamp() - time_last_assign;
       for (it=p_list.begin(); it!=p_list.end(); it++){
         if((*it)->get_priority_level() != last_active){
           if((*it)->task_queue->size()!= 0){
@@ -180,9 +180,9 @@ namespace SystemC_VPC{
           (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
         }
       }
-      time_last_assign = sc_time_stamp();
+      time_last_assign = sc_core::sc_time_stamp();
     }else{ //Update of the Credits
-      sc_time time_budget = sc_time_stamp() - time_last_assign;
+      sc_core::sc_time time_budget = sc_core::sc_time_stamp() - time_last_assign;
       for (it=p_list.begin(); it!=p_list.end(); it++){
 	if((*it)->task_queue->size()!= 0 ){
 	  if((*it)->get_priority_level() != last_active){
@@ -218,7 +218,7 @@ namespace SystemC_VPC{
 	      (*it)->task_queue->pop();
 	      ret_decision = ONLY_ASSIGN;
 	      last_active = (*it)->get_priority_level();
-	      time_last_assign = sc_time_stamp();
+	      time_last_assign = sc_core::sc_time_stamp();
 	      return ret_decision;
 	  }else{
 	    //nothing to do
@@ -226,7 +226,7 @@ namespace SystemC_VPC{
       }
     //no new task was found -> getting idle
     last_active = -1;
-    time_last_assign = sc_time_stamp();    
+    time_last_assign = sc_core::sc_time_stamp();    
     }
 
      return ret_decision;

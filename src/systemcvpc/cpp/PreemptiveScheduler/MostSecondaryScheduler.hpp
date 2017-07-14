@@ -35,7 +35,7 @@
 #ifndef SECONDARYSCHEDULER_H
 #define SECONDARYSCHEDULER_H
 #include <PreemptiveScheduler/Scheduler.hpp>
-#include <systemc.h>
+#include <systemc>
 #include <systemcvpc/datatypes.hpp>
 #include <map>
 #include <deque>
@@ -46,7 +46,7 @@ namespace SystemC_VPC{
   class PreemptiveComponent;
 
   struct AsynchSlot{
-      sc_time length;
+      sc_core::sc_time length;
       int process;
       int Id;
       int priority;
@@ -60,13 +60,13 @@ public:
   }
 
 
-  sc_time cycle(int sysFreq);
+  sc_core::sc_time cycle(int sysFreq);
 
   void addedNewTask(Task *task);
 
   void removedTask(Task *task);
 
-  bool getSchedulerTimeSlice(sc_time& time,
+  bool getSchedulerTimeSlice(sc_core::sc_time& time,
                               const TaskMap &ready_tasks,
                               const TaskMap &running_tasks);
 
@@ -76,13 +76,13 @@ public:
        const  TaskMap &ready_tasks,
        const  TaskMap &running_tasks);
 
-  sc_time* schedulingOverhead(){return 0;}
+  sc_core::sc_time* schedulingOverhead(){return 0;}
 
 
 private:
 
 std::deque<AsynchSlot> Asynch_slots;
-sc_time lastassignasynch;
+sc_core::sc_time lastassignasynch;
 int sysFreq;
 
 

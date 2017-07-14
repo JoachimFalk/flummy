@@ -54,7 +54,7 @@ namespace SystemC_VPC{
       m_lastMode = newMode;
 
     if(m_components.find(ci) == m_components.end()) {
-      //std::cerr << "@" << sc_time_stamp() << ": setPowerMode(" << newMode->getName() << ");" << std::endl;
+      //std::cerr << "@" << sc_core::sc_time_stamp() << ": setPowerMode(" << newMode->getName() << ");" << std::endl;
       ci->getModel()->setPowerMode(m_lastMode);
     }
 
@@ -72,7 +72,7 @@ namespace SystemC_VPC{
     }
 
     if(*newMode != *m_lastMode) {
-      std::cerr << "@" << sc_time_stamp() << ": for all components setPowerMode(" << newMode->getName() << ");" << std::endl;
+      std::cerr << "@" << sc_core::sc_time_stamp() << ": for all components setPowerMode(" << newMode->getName() << ");" << std::endl;
 
       for(std::map<ComponentInfo*, const PowerMode*>::iterator
             iter  = m_components.begin();

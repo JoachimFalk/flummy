@@ -130,24 +130,24 @@ namespace SystemC_VPC {
     std::string getPreState()                  {return this->preState;}
 
     //not used right now
-    void setRuntime(const sc_time& runtime)     {this->runtime = runtime;}
-    sc_time getRuntime()const                   {return this->runtime;}
+    void setRuntime(const sc_core::sc_time& runtime)     {this->runtime = runtime;}
+    sc_core::sc_time getRuntime()const                   {return this->runtime;}
 
 
     void setFactorOverhead(int complexity)      {this->factorOverhead = complexity;}
     int getFactorOverhead()                     {return this->factorOverhead;}
-    void setOverhead(const sc_time& overhead)   {this->overhead = overhead;}
-    sc_time getOverhead()const                  {return this->overhead;}
+    void setOverhead(const sc_core::sc_time& overhead)   {this->overhead = overhead;}
+    sc_core::sc_time getOverhead()const                  {return this->overhead;}
     //////////////////////////////
     // End from Simone Mueller //
     //////////////////////////////
 
-    void setDelay(const sc_time& delay)         {this->delay = delay;}
-    sc_time getDelay() const                    {return this->delay;}
-    void setLatency(const sc_time& latency)     {this->latency = latency;}
-    sc_time getLatency() const                  {return this->latency;}
-    void setRemainingDelay(const sc_time& delay){this->remainingDelay = delay;}
-    sc_time getRemainingDelay() const           {return this->remainingDelay;}
+    void setDelay(const sc_core::sc_time& delay)         {this->delay = delay;}
+    sc_core::sc_time getDelay() const                    {return this->delay;}
+    void setLatency(const sc_core::sc_time& latency)     {this->latency = latency;}
+    sc_core::sc_time getLatency() const                  {return this->latency;}
+    void setRemainingDelay(const sc_core::sc_time& delay){this->remainingDelay = delay;}
+    sc_core::sc_time getRemainingDelay() const           {return this->remainingDelay;}
     int getInstanceId() const                   {return this->instanceId;}
     void setTimingScale( double scale )         {this->timingScale = scale;}
     double getTimingScale()                     {return this->timingScale;}
@@ -167,7 +167,7 @@ namespace SystemC_VPC {
     // Adaptor setter / getter for ProcessControlBlock
     int getPriority()
       {assert(pcb != NULL); return pcb->getPriority();}
-    sc_time getPeriod()
+    sc_core::sc_time getPeriod()
       {assert(pcb != NULL); return pcb->getPeriod();}
 
     void release() {
@@ -233,14 +233,14 @@ namespace SystemC_VPC {
     bool       exec;
     bool       write;
 
-    sc_time startTime;
-    sc_time endTime;
-    sc_time blockingTime;
-    sc_time delay;
-    sc_time latency;
-    sc_time remainingDelay;
-    sc_time overhead;
-    sc_time runtime;
+    sc_core::sc_time startTime;
+    sc_core::sc_time endTime;
+    sc_core::sc_time blockingTime;
+    sc_core::sc_time delay;
+    sc_core::sc_time latency;
+    sc_core::sc_time remainingDelay;
+    sc_core::sc_time overhead;
+    sc_core::sc_time runtime;
     
     int factorOverhead;
 
@@ -309,7 +309,7 @@ namespace SystemC_VPC {
   };
 
   struct timePcbPair{
-    sc_time time;
+    sc_core::sc_time time;
     Task *task;
 
     bool operator<(const timePcbPair& right) const

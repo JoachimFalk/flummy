@@ -57,30 +57,30 @@ namespace SystemC_VPC
   {
     slicecount = 0;
     streamcount = 0;
-    lastassign = SC_ZERO_TIME;
-    this->remainingSlice = SC_ZERO_TIME;
+    lastassign = sc_core::SC_ZERO_TIME;
+    this->remainingSlice = sc_core::SC_ZERO_TIME;
     curr_slicecount = -1;
     sysFreq = 48000;
     cycleSize = 372;
-    std::map<sc_time, unsigned int> IDmap;
+    std::map<sc_core::sc_time, unsigned int> IDmap;
 
-    currSlotStartTime = sc_time(0, SC_NS);
+    currSlotStartTime = sc_core::sc_time(0, sc_core::SC_NS);
 
   }
 
-  sc_time
+  sc_core::sc_time
   MostScheduler::cycle(int sysFreq)
   { //returns the time of one cycle depending on the system frequency
-    sc_time cycle = sc_time(1.0 / sysFreq, SC_SEC);
+    sc_core::sc_time cycle = sc_core::sc_time(1.0 / sysFreq, sc_core::SC_SEC);
     return cycle;
   }
 
-  sc_time
+  sc_core::sc_time
   MostScheduler::setboundary(int sysFreq, int cycleSize)
   { /*the boundary between synchronous and asynchronous area will be
     calculated dynamically
     the boundaryTime represents the border between the two channels*/
-    sc_time boundaryTime = SC_ZERO_TIME;
+    sc_core::sc_time boundaryTime = sc_core::SC_ZERO_TIME;
     if(Most_slots.size()>0)
       {
       for(size_t i = 0; i<Most_slots.size();i++)
@@ -92,8 +92,8 @@ namespace SystemC_VPC
       }
     else
       {
-      std::cout<<"dynamic boundary set to time = "<<SC_ZERO_TIME<<std::endl;
-      return SC_ZERO_TIME;
+      std::cout<<"dynamic boundary set to time = "<<sc_core::SC_ZERO_TIME<<std::endl;
+      return sc_core::SC_ZERO_TIME;
       }
   }
 
@@ -101,9 +101,9 @@ namespace SystemC_VPC
   MostScheduler::area(int sysFreq, int cycleSize)
   {/*true if actual time is part of synchronous area
      false if actual time is part of asynchronous area*/
-    sc_time actualTime = sc_time_stamp();
-    sc_time temp1 = cycle(sysFreq);
-    sc_time temp2 = CoSupport::SystemC::modulus(actualTime, temp1);
+    sc_core::sc_time actualTime = sc_core::sc_time_stamp();
+    sc_core::sc_time temp1 = cycle(sysFreq);
+    sc_core::sc_time temp2 = CoSupport::SystemC::modulus(actualTime, temp1);
     if (temp2 < setboundary(sysFreq, cycleSize))
       {
         return true;
@@ -112,7 +112,7 @@ namespace SystemC_VPC
   }
 
   bool
-  MostScheduler::getSchedulerTimeSlice(sc_time& time,
+  MostScheduler::getSchedulerTimeSlice(sc_core::sc_time& time,
       const TaskMap &ready_tasks, const TaskMap &running_tasks)
   { //returns the time of the next scheduler call
 
@@ -133,7 +133,7 @@ namespace SystemC_VPC
               }
             if (curr_slicecount == -1)
               {
-                time = sc_time(0, SC_NS);
+                time = sc_core::sc_time(0, sc_core::SC_NS);
                 return false;
               }
             else
@@ -143,7 +143,7 @@ namespace SystemC_VPC
                     /*nothing else to do for synch area, waiting for
                       SecondaryScheduler*/
                     time = setboundary(sysFreq, cycleSize)
-                        -CoSupport::SystemC::modulus(sc_time_stamp(),
+                        -CoSupport::SystemC::modulus(sc_core::sc_time_stamp(),
                             cycle(sysFreq) );
                     return true;
                   }
@@ -155,9 +155,9 @@ namespace SystemC_VPC
                     if task length > one quadlet ->
                     take time of task + difference to the next full quadlet
                     if(Most_slots[curr_slicecount].length
-                    <= sc_time(224 , SC_NS) )
+                    <= sc_core::sc_time(224 , sc_core::SC_NS) )
                       {
-                      time = sc_time(224 , SC_NS);
+                      time = sc_core::sc_time(224 , sc_core::SC_NS);
                       std::cout<<"xyz timeslice returned in if time= "
                       <<time<<std::endl;
                       return true;
@@ -165,9 +165,9 @@ namespace SystemC_VPC
                     else
                       {
                       time = Most_slots[curr_slicecount].length +
-                      (sc_time(224,SC_NS)-
+                      (sc_core::sc_time(224,sc_core::SC_NS)-
                       CoSupport::SystemC::modulus(
-                      Most_slots[curr_slicecount].length,sc_time(224,SC_NS)));
+                      Most_slots[curr_slicecount].length,sc_core::sc_time(224,sc_core::SC_NS)));
                       std::cout<<"xyz timeslice returned in else time = "<<
                       time<<std::endl;
                       return true;
@@ -201,8 +201,8 @@ namespace SystemC_VPC
           {
             if (task->getProcessId() == iter->process)
               {
-                cout << "Stop task with ID " << task->getProcessId()
-                    << " actual time = " << sc_time_stamp() << endl;
+                std::cout << "Stop task with ID " << task->getProcessId()
+                    << " actual time = " << sc_core::sc_time_stamp() << std::endl;
                 notFound = false;
               }
           }
@@ -252,7 +252,7 @@ namespace SystemC_VPC
             Most_slots.push_back(newSlot);
             bool spaceAvail=true;
             //check if there is any available time in asynch area
-            sc_time neededTime = SC_ZERO_TIME;
+            sc_core::sc_time neededTime = sc_core::SC_ZERO_TIME;
             for(size_t i =0; i< slotId; i++)
               {
               neededTime += Most_slots[i].length;
@@ -309,13 +309,13 @@ namespace SystemC_VPC
     if (area(sysFreq, cycleSize))
       { /*synchronous area -> TDMA Scheduling with variable slot size
           cycleTime is the actual position in the actual cycle*/
-        sc_time cycleTime = CoSupport::SystemC::modulus(sc_time_stamp(),
+        sc_core::sc_time cycleTime = CoSupport::SystemC::modulus(sc_core::sc_time_stamp(),
             cycle(sysFreq)); //position in actual cycle
         if (curr_slicecount == -1)
           { /*the synchronous area has just started
               the last request was handled within the asynchronous area*/
             curr_slicecount = 0;
-            lastassign = sc_time_stamp();
+            lastassign = sc_core::sc_time_stamp();
           }
         if ((currSlotStartTime + Most_slots[curr_slicecount].length)
             <= cycleTime)
@@ -323,7 +323,7 @@ namespace SystemC_VPC
            if (curr_slicecount == static_cast<int>(Most_slots.size()) - 1)
               {
                 curr_slicecount = -1;
-                currSlotStartTime = sc_time(0, SC_NS);
+                currSlotStartTime = sc_core::sc_time(0, sc_core::SC_NS);
                 remainingSlice = setboundary(sysFreq, cycleSize)
                     - cycleTime; //time of dynamic boundary - cycleTime;
               }
@@ -334,7 +334,7 @@ namespace SystemC_VPC
                 curr_slicecount++;
 
                 remainingSlice = Most_slots[Most_slots.size() - 1].length
-                    - (sc_time_stamp() - currSlotStartTime
+                    - (sc_core::sc_time_stamp() - currSlotStartTime
                         - Most_slots[Most_slots.size() - 1].length);
                 if (curr_slicecount == static_cast<int>(Most_slots.size()))
                   {
@@ -366,7 +366,7 @@ namespace SystemC_VPC
             if(it->second->getProcessId()==Most_slots[curr_slicecount].process){
             task_to_assign = it->second->getInstanceId();
             ret_decision = ONLY_ASSIGN;
-            lastassign = sc_time_stamp();
+            lastassign = sc_core::sc_time_stamp();
             return ret_decision;
           }
           it++;
@@ -379,7 +379,7 @@ namespace SystemC_VPC
 
         //asynchronous area -> call secondary scheduler for scheduling decision
         curr_slicecount = -1;
-        currSlotStartTime = sc_time(0,SC_NS);
+        currSlotStartTime = sc_core::sc_time(0,sc_core::SC_NS);
         return (secondaryScheduler.schedulingDecision(task_to_resign,
             task_to_assign, ready_tasks, running_tasks));
       }

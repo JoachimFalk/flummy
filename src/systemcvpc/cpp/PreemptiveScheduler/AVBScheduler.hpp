@@ -39,7 +39,7 @@
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 
-#include <systemc.h>
+#include <systemc>
 
 #include <map>
 #include <queue>
@@ -71,7 +71,7 @@ namespace SystemC_VPC{
     }
 
     float bw_alloc;
-    sc_time queue_credit;
+    sc_core::sc_time queue_credit;
     bool has_credit_flag;
     bool wasEmpty_flag;
     int priority_level;
@@ -85,7 +85,7 @@ namespace SystemC_VPC{
       return bw_alloc;
     }
 
-    void increment_credit(sc_time increment){
+    void increment_credit(sc_core::sc_time increment){
     if(has_credit_flag){
 	queue_credit += increment;
       }else{
@@ -98,7 +98,7 @@ namespace SystemC_VPC{
       }
     }
 
-    void decrement_credit(sc_time decrement){
+    void decrement_credit(sc_core::sc_time decrement){
       if(has_credit_flag){
         if(decrement <= queue_credit){
           queue_credit -= decrement;
@@ -132,11 +132,11 @@ namespace SystemC_VPC{
       
     }
 
-    sc_time get_credit(void){
+    sc_core::sc_time get_credit(void){
       if(has_credit_flag){
 	return queue_credit;
       }else{
-	return SC_ZERO_TIME - queue_credit;
+	return sc_core::SC_ZERO_TIME - queue_credit;
       }
     }
 
@@ -147,12 +147,12 @@ namespace SystemC_VPC{
 
     AVBScheduler();
     virtual ~AVBScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,
+    bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
     void addedNewTask(Task *task);
     void removedTask(Task *task);
-    sc_event& getNotifyEvent();
+    sc_core::sc_event& getNotifyEvent();
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,
                                            const  TaskMap &ready_tasks,
@@ -160,12 +160,12 @@ namespace SystemC_VPC{
     void setProperty(const char* key, const char* value);
     void setAttribute(AttributePtr attributePtr);
 
-    sc_time* schedulingOverhead(){return 0;}//;
+    sc_core::sc_time* schedulingOverhead(){return 0;}//;
   protected:
     std::list<AVBListEntry*> p_list;
     std::deque<std::pair<std::string, std::string> > _properties;
     int last_active;
-    sc_time time_last_assign;
+    sc_core::sc_time time_last_assign;
   private:
     bool firstrun;
 

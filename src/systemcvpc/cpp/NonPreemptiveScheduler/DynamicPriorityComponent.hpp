@@ -65,7 +65,7 @@ public:
   void notifyActivation(ScheduledTask * scheduledTask, bool active)
   {
     if (active && (this->runningTask == NULL)) {
-      this->notify_scheduler_thread.notify(SC_ZERO_TIME);
+      this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
     }
   }
 
@@ -161,7 +161,7 @@ private:
   {
     std::stringstream canExec;
 
-    out << "@" << sc_time_stamp() << "\t" << "[VPC DynamicPriorityComponent: "
+    out << "@" << sc_core::sc_time_stamp() << "\t" << "[VPC DynamicPriorityComponent: "
         << this->getName() << "] " << "priority list: (";
     for (PriorityList::const_iterator iter = this->priorities_.begin(); iter
         != this->priorities_.end(); ++iter) {
@@ -243,7 +243,7 @@ Task * DynamicPriorityComponent<TASKTRACER>::scheduleTask()
   assert(this->runningTask == NULL);
   assert(lastTask_ != NULL);
   assert(releasedTask_ != NULL);
-  this->startTime = sc_time_stamp();
+  this->startTime = sc_core::sc_time_stamp();
 
   releasedTask_ = NULL;
 

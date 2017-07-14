@@ -203,8 +203,8 @@ namespace SystemC_VPC{
         if(pool->find(pid) == pool->end()){
           (*pool)[pid].reset(new FunctionTiming());
           (*pool)[pid]->setBaseDelay(this->transactionDelays[mode]);
-          //sc_time a = this->transactionDelays[mode];
-          //cout << a;
+          //sc_core::sc_time a = this->transactionDelays[mode];
+          //std::cout << a;
         }
         return (*pool)[pid];
       }

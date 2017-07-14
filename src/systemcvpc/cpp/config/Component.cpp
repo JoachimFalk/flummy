@@ -141,14 +141,14 @@ std::vector<AttributePtr> Component::getAttributes() const
 void Component::addAttribute(AttributePtr attribute)
 {
   if (attribute->isType("transaction_delay")) {
-    sc_time transferDelay = Director::createSC_Time(attribute->getValue());
+    sc_core::sc_time transferDelay = Director::createSC_Time(attribute->getValue());
     this->setTransferTiming(Config::Timing(transferDelay));
   } else if (attribute->isType("transfer_delay")) {
-    sc_time transferDelay = Director::createSC_Time(attribute->getValue());
+    sc_core::sc_time transferDelay = Director::createSC_Time(attribute->getValue());
     this->setTransferTiming(Config::Timing(transferDelay));
   } else if (attribute->isType("transaction")) {
 //  unsigned int transactionSize = 1;
-    sc_time transferDelay = SC_ZERO_TIME;
+    sc_core::sc_time transferDelay = sc_core::SC_ZERO_TIME;
     if (attribute->hasParameter("delay")) {
       transferDelay = Director::createSC_Time(attribute->getParameter("delay"));
     }

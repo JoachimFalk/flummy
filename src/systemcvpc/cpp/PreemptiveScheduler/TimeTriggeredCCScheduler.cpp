@@ -75,8 +75,8 @@ namespace SystemC_VPC{
     //alt (TDMA)
     processcount=0;
     cyclecount=0;
-    lastassign=sc_time(0,SC_NS);
-    this->remainingSlice = sc_time(0,SC_NS);
+    lastassign=sc_core::sc_time(0,sc_core::SC_NS);
+    this->remainingSlice = sc_core::sc_time(0,sc_core::SC_NS);
     slicecount=0;
     curr_slicecount=-1; 
   }
@@ -93,7 +93,7 @@ namespace SystemC_VPC{
       this->_setProperty(iter->first.c_str(), iter->second.c_str());
     }
 #ifdef VPC_DEBUG
-    cout << "------------ END Initialize ---------"<<endl;
+    std::cout << "------------ END Initialize ---------"<<std::endl;
 #endif //VPC_DEBUG      
     this->_properties.clear();
   }
@@ -107,12 +107,12 @@ namespace SystemC_VPC{
     do{
       //nichts zu tun.. da lediglich durchiteriert wird!
     }while(TDMA_slots[++i].name != value && (i+1)<(int)TDMA_slots.size());
-    //cout<<"found at i= " <<i<<endl;
+    //std::cout<<"found at i= " <<i<<std::endl;
         
     if(TDMA_slots[i].name != value){
       i=-1;
       assert(0<Dynamic_slots.size());
-      //cout<< "DynSize: " << Dynamic_slots.size()<<endl;
+      //std::cout<< "DynSize: " << Dynamic_slots.size()<<std::endl;
       do{
         //nichts zu tun.. da lediglich durchiteriert wird!
       }while(Dynamic_slots[++i].name != value && (i+1)<(int)Dynamic_slots.size());
@@ -120,13 +120,13 @@ namespace SystemC_VPC{
       assert(i<(int)Dynamic_slots.size());      
       i+=StartslotDynamic;      
     }
-    //cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<endl;
+    //std::cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<std::endl;
     //Beziehung PId - SlotID herstellen
     ProcessId id=Director::getInstance().getProcessId(key);
     PIDmap[id]=i;   
     ProcessParams[id]=ProcessParams_string[key];
-    //      cout<<"registered function: "<< key<<" with ID: "<<id<<endl;
-    //  cout<<"add Function " <<  key << " to " << value<<endl; 
+    //      std::cout<<"registered function: "<< key<<" with ID: "<<id<<std::endl;
+    //  std::cout<<"add Function " <<  key << " to " << value<<std::endl; 
   }
 
   void TimeTriggeredCCScheduler::setAttribute(AttributePtr attributePtr){
@@ -158,7 +158,7 @@ namespace SystemC_VPC{
           param.first=attribute2.second->getType();
           param.second=attribute2.second->getValue();
 
-          //                         cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
+          //                         std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
           TDMASlot newSlot;
           //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
           newSlot.length = Director::createSC_Time(param.second.c_str() );      
@@ -174,7 +174,7 @@ namespace SystemC_VPC{
 
               param3.first=attribute3.second->getValue();
               param3.second=param.first;
-              //                    cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<endl;
+              //                    std::cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<std::endl;
                             
               this->_properties.push_back(param3);
               ProcessParams_string[param3.first]=SlotParameters(0,0);
@@ -186,11 +186,11 @@ namespace SystemC_VPC{
                   std::pair<std::string, std::string > param4 =attribute3.second->getNextParameter(m);
                   if(param4.first=="offset"){
                     ProcessParams_string[param3.first].offset=atoi(param4.second.c_str());
-                    //                                  cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+                    //                                  std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
                   }
                   if(param4.first=="multiplex"){
                     ProcessParams_string[param3.first].multiplex=atoi(param4.second.c_str());
-                    //                                   cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+                    //                                   std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
                   }
                 }
               }
@@ -201,24 +201,24 @@ namespace SystemC_VPC{
     }
   }
   
-  bool TimeTriggeredCCScheduler::getSchedulerTimeSlice( sc_time& time,
+  bool TimeTriggeredCCScheduler::getSchedulerTimeSlice( sc_core::sc_time& time,
                                                         const TaskMap &ready_tasks,
                                                         const  TaskMap &running_tasks )
   {   
     // keine wartenden + keine aktiven Threads -> ende!
-    //   cout<<"getSchedulerTimeSlice "<< processcount<<" "<<running_tasks.size()<<endl;
+    //   std::cout<<"getSchedulerTimeSlice "<< processcount<<" "<<running_tasks.size()<<std::endl;
     if(processcount==0 && running_tasks.size()==0) return 0;   
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
       if(curr_slicecount == -1){
-        time=sc_time(0,SC_NS);
+        time=sc_core::sc_time(0,sc_core::SC_NS);
       }else{
-        //      time=TDMA_slots[curr_slicecount].length -(sc_time_stamp() - this->lastassign);  
+        //      time=TDMA_slots[curr_slicecount].length -(sc_core::sc_time_stamp() - this->lastassign);  
         time=this->remainingSlice;
-        //              cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<endl;
+        //              std::cout<<"static-timeSlice-request "<< curr_slicecount << "  " << sc_core::sc_time_stamp() << "  " << time  << "running_tasks " << running_tasks.size() <<std::endl;
       }
     }else{
-      cout<<"getSchedulerTimeSlice: Dynamic not implemented in TimeTriggered-CommunicationController"<<endl;
+      std::cout<<"getSchedulerTimeSlice: Dynamic not implemented in TimeTriggered-CommunicationController"<<std::endl;
     }
     return true;   
   }
@@ -226,18 +226,18 @@ namespace SystemC_VPC{
   
   void TimeTriggeredCCScheduler::addedNewTask(Task *task){    
     int index = PIDmap[task->getProcessId()];
-    //       cout<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<endl;
+    //       std::cout<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<std::endl;
     if(index<StartslotDynamic){
       //TDMA-Task
       TDMA_slots[ index ].pid_fifo.push_back(task->getInstanceId());
       ProcessParams[task->getInstanceId()]=ProcessParams[task->getProcessId()];
 #ifdef VPC_DEBUG     
-      cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
+      std::cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<std::endl;
 #endif //VPC_DEBUG
     
-      //cout << "added static Task" <<endl;
+      //std::cout << "added static Task" <<std::endl;
     }else{
-      cout<<"addedNewTask: Dynamic not implemented in TimeTriggered-CommunicationController"<<endl;
+      std::cout<<"addedNewTask: Dynamic not implemented in TimeTriggered-CommunicationController"<<std::endl;
     }
     processcount++;
   }
@@ -245,7 +245,7 @@ namespace SystemC_VPC{
   void TimeTriggeredCCScheduler::removedTask(Task *task){ 
     int index = PIDmap[task->getProcessId()];
     
-    // cout<<"Task entfernt! @ "<< sc_time_stamp() << "  " << index << endl;
+    // std::cout<<"Task entfernt! @ "<< sc_core::sc_time_stamp() << "  " << index << std::endl;
       
     std::deque<int>::iterator iter;
     if(index<StartslotDynamic){
@@ -256,10 +256,10 @@ namespace SystemC_VPC{
         }
       }
     }else{
-      cout<<"removedTask: Dynamic not implemented in TimeTriggered-CommunicationController"<<endl;
+      std::cout<<"removedTask: Dynamic not implemented in TimeTriggered-CommunicationController"<<std::endl;
     }
 #ifdef VPC_DEBUG    
-    cout<<"removed Task: " << task->getInstanceId()<<endl;
+    std::cout<<"removed Task: " << task->getInstanceId()<<std::endl;
 #endif //VPC_DEBUG   
     processcount--;  
   }
@@ -276,17 +276,17 @@ namespace SystemC_VPC{
     
     //statischer oder dynamischer Teil?
     if(curr_slicecount+1<StartslotDynamic){
-      //      cout<<"Static! @ "<< sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< endl;
+      //      std::cout<<"Static! @ "<< sc_core::sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< std::endl;
       //TDMA-Scheduling: unveraendert aus TDMAScheduler verwendet.
       ret_decision=NOCHANGE;
       //Zeitscheibe abgelaufen?
-      if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
+      if(this->remainingSlice < (sc_core::sc_time_stamp() - this->lastassign)) this->remainingSlice=sc_core::SC_ZERO_TIME;
       else{
-        this->remainingSlice = this->remainingSlice - (sc_time_stamp() - this->lastassign);  
+        this->remainingSlice = this->remainingSlice - (sc_core::sc_time_stamp() - this->lastassign);  
       }
-      this->lastassign = sc_time_stamp();
+      this->lastassign = sc_core::sc_time_stamp();
     
-      if(this->remainingSlice <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
+      if(this->remainingSlice <= sc_core::sc_time(0,sc_core::SC_NS)){//Zeitscheibe wirklich abgelaufen!
         curr_slicecount++; // Wechsel auf die naechste Zeitscheibe noetig!
         //neue Timeslice laden
         this->remainingSlice = TDMA_slots[curr_slicecount].length;
@@ -298,14 +298,14 @@ namespace SystemC_VPC{
           while(!found && tempcount<TDMA_slots[curr_slicecount].pid_fifo.size()){
             task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
             //is this task allowed to run in this slot?
-            //             cout<<"testing "<<tempcount<<" @ "<<curr_slicecount<<" bei "<<task_to_assign<<" von gesamt: "<<TDMA_slots[curr_slicecount].pid_fifo.size()<<endl;
+            //             std::cout<<"testing "<<tempcount<<" @ "<<curr_slicecount<<" bei "<<task_to_assign<<" von gesamt: "<<TDMA_slots[curr_slicecount].pid_fifo.size()<<std::endl;
             if(ProcessParams[task_to_assign].offset<=cyclecount){
-              //          cout<<"found task_to_assign: "<<task_to_assign<<endl;
+              //          std::cout<<"found task_to_assign: "<<task_to_assign<<std::endl;
               int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
               if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
-                /* cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
-                   cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
-                   cout<< " MOD= " << cyclecount % mux_value <<endl;
+                /* std::cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << std::endl;
+                   std::cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<std::endl;
+                   std::cout<< " MOD= " << cyclecount % mux_value <<std::endl;
                 */
                 found=true;
               }
@@ -315,7 +315,7 @@ namespace SystemC_VPC{
         
           //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
           // -> kein preemption!
-          //         cout<<"here we are"<<endl;
+          //         std::cout<<"here we are"<<std::endl;
           ret_decision= ONLY_ASSIGN;
         
           if(!found){ //keinen lauffaehigen gefunden! -> idle werden
@@ -362,14 +362,14 @@ namespace SystemC_VPC{
         //oder alter entfernt    -> neuen setzen
         //neuen setzen:
         if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-          //   cout<<"Task fertig!"<<endl;
+          //   std::cout<<"Task fertig!"<<std::endl;
 
           if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){            // ist da auch ein neuer da?        
             unsigned int tempcount=0;
             bool found=false;
             //if not.. try the next one (if existing)
             while(!found && tempcount < TDMA_slots[curr_slicecount].pid_fifo.size()){
-              cout<<"task_to_assign =  TDMA_slots["<<curr_slicecount<<"].pid_fifo["<<tempcount<<"]"<<endl;
+              std::cout<<"task_to_assign =  TDMA_slots["<<curr_slicecount<<"].pid_fifo["<<tempcount<<"]"<<std::endl;
               task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
 
               //is this task allowed to run in this slot? or is an offset required?
@@ -378,9 +378,9 @@ namespace SystemC_VPC{
                 int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
                 //no multiplex - run it  -- 
                 if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
-                  /*  cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
-                      cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
-                      cout<< " MOD= " << cyclecount % mux_value <<endl;
+                  /*  std::cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << std::endl;
+                      std::cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<std::endl;
+                      std::cout<< " MOD= " << cyclecount % mux_value <<std::endl;
                   */
                   found=true;
                 }
@@ -400,12 +400,12 @@ namespace SystemC_VPC{
         //neuer Task hinzugefuegt, aber ein anderer laeuft noch -> nichts tun
       }
     }else{
-      if((curr_slicecount+1)==StartslotDynamic && this->remainingSlice > sc_time(0,SC_NS) ){
+      if((curr_slicecount+1)==StartslotDynamic && this->remainingSlice > sc_core::sc_time(0,sc_core::SC_NS) ){
         //Restzeit des statischen Abschnitts "verbraten"
         ret_decision=NOCHANGE;
-        if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
-        else{ this->remainingSlice = this->remainingSlice - (sc_time_stamp() - this->lastassign);  }
-        this->lastassign = sc_time_stamp();
+        if(this->remainingSlice < (sc_core::sc_time_stamp() - this->lastassign)) this->remainingSlice=sc_core::SC_ZERO_TIME;
+        else{ this->remainingSlice = this->remainingSlice - (sc_core::sc_time_stamp() - this->lastassign);  }
+        this->lastassign = sc_core::sc_time_stamp();
         
       }else{
         curr_slicecount=-1;
@@ -415,13 +415,13 @@ namespace SystemC_VPC{
     } 
     
     /*  if(ret_decision != NOCHANGE){
-        cout << sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<endl;
+        std::cout << sc_core::sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<std::endl;
         }
     */  
 
 #ifdef VPC_DEBUG  
-    cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
-         << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << " " << sc_time_stamp() <<  endl;
+    std::cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
+         << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << " " << sc_core::sc_time_stamp() <<  std::endl;
 #endif //VPC_DEBUG  
     return ret_decision;
   }
@@ -430,9 +430,9 @@ namespace SystemC_VPC{
   /**
    *
    */
-  sc_time* TimeTriggeredCCScheduler::schedulingOverhead(){
-    return NULL; //new sc_time(1,SC_NS);
+  sc_core::sc_time* TimeTriggeredCCScheduler::schedulingOverhead(){
+    return NULL; //new sc_core::sc_time(1,sc_core::SC_NS);
     
-    //     return new sc_time(1,SC_NS);
+    //     return new sc_core::sc_time(1,sc_core::SC_NS);
   }
 }

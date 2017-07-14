@@ -62,12 +62,12 @@ typedef boost::minstd_rand base_generator_type;
 namespace SystemC_VPC{
 
   FunctionTiming::FunctionTiming( )
-    : funcDelays(1, SC_ZERO_TIME),
-      funcLatencies(1, SC_ZERO_TIME),
+    : funcDelays(1, sc_core::SC_ZERO_TIME),
+      funcLatencies(1, sc_core::SC_ZERO_TIME),
       funcTimingModifiers(1, boost::shared_ptr<TimingModifier>(new TimingModifier()))
   {
-    setBaseDelay(SC_ZERO_TIME);
-    setBaseLatency(SC_ZERO_TIME);
+    setBaseDelay(sc_core::SC_ZERO_TIME);
+    setBaseLatency(sc_core::SC_ZERO_TIME);
   }
 
   FunctionTiming::FunctionTiming( const FunctionTiming &delay )
@@ -80,23 +80,23 @@ namespace SystemC_VPC{
   }
 
   void FunctionTiming::addDelay( FunctionId fid,
-                                              sc_time delay ){
+                                              sc_core::sc_time delay ){
     DBG_OUT( "::addDelay(" << fid << ") " << delay
              << std::endl);
     if( fid >= funcDelays.size()){
-      funcDelays.resize( fid + 100, SC_ZERO_TIME );
+      funcDelays.resize( fid + 100, sc_core::SC_ZERO_TIME );
     }
     this->funcDelays[fid] = delay;
 
   }
 
-  void FunctionTiming::setBaseDelay( sc_time delay ){
+  void FunctionTiming::setBaseDelay( sc_core::sc_time delay ){
     DBG_OUT( "::setBaseDelay() " << delay
              << std::endl);
     this->funcDelays[defaultFunctionId] = delay;
   }
 
-  sc_time FunctionTiming::getBaseDelay( ) const {
+  sc_core::sc_time FunctionTiming::getBaseDelay( ) const {
     boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
     return modifier->modify(this->funcDelays[defaultFunctionId]);
   }
@@ -117,10 +117,10 @@ namespace SystemC_VPC{
     }
   }
 
-  sc_time summarizeFunctionTimes(const FunctionIds& functions,
+  sc_core::sc_time summarizeFunctionTimes(const FunctionIds& functions,
       const FunctionTimes& functionTimes,
       const FunctionTimingModifiers& timingModifiers){
-    sc_time ret = SC_ZERO_TIME;
+    sc_core::sc_time ret = sc_core::SC_ZERO_TIME;
     for(FunctionIds::const_iterator iter = functions.begin();
         iter != functions.end();
         ++iter) {
@@ -132,10 +132,10 @@ namespace SystemC_VPC{
     return ret;
   }
 
-  sc_time rePlaySummarizeFunctionTimes(const FunctionIds& functions,
+  sc_core::sc_time rePlaySummarizeFunctionTimes(const FunctionIds& functions,
       const FunctionTimes& functionTimes,
       const FunctionTimingModifiers& timingModifiers){
-    sc_time ret = SC_ZERO_TIME;
+    sc_core::sc_time ret = sc_core::SC_ZERO_TIME;
     for(FunctionIds::const_iterator iter = functions.begin();
         iter != functions.end();
         ++iter) {
@@ -147,7 +147,7 @@ namespace SystemC_VPC{
     return ret;
   }
 
-  sc_time FunctionTiming::getDelay(
+  sc_core::sc_time FunctionTiming::getDelay(
     FunctionIds functions) const
   {
     if (functions.begin() == functions.end()){
@@ -169,24 +169,24 @@ namespace SystemC_VPC{
   }
 
   void FunctionTiming::addLatency( FunctionId fid,
-                                                        sc_time latency ){
+                                                        sc_core::sc_time latency ){
     if( fid >= funcLatencies.size())
-      funcLatencies.resize( fid + 100, SC_ZERO_TIME );
+      funcLatencies.resize( fid + 100, sc_core::SC_ZERO_TIME );
 
     this->funcLatencies[fid] = latency;
   }
 
-  void FunctionTiming::setBaseLatency( sc_time latency ){
+  void FunctionTiming::setBaseLatency( sc_core::sc_time latency ){
     this->funcLatencies[defaultFunctionId] = latency;
   }
 
-  sc_time FunctionTiming::getBaseLatency( ) const {
+  sc_core::sc_time FunctionTiming::getBaseLatency( ) const {
     boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
 	  //replay the result from getBaseDelay() to get identical modifications
     return modifier->rePlay(this->funcLatencies[defaultFunctionId]);
   }
 
-  sc_time FunctionTiming::getLatency(
+  sc_core::sc_time FunctionTiming::getLatency(
     FunctionIds functions)
   {
     this->reset(functions);
@@ -215,8 +215,8 @@ namespace SystemC_VPC{
 
   void ProcessControlBlock::init(){
 
-    this->deadline = sc_time(DBL_MAX, SC_SEC);
-    this->period = sc_time(DBL_MAX, SC_SEC);
+    this->deadline = sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
+    this->period = sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
     this->priority = 0;
     this->traceSignal = NULL;
     this->psm=false;
@@ -254,11 +254,11 @@ namespace SystemC_VPC{
     return "";
   }
 
-  void ProcessControlBlock::setPeriod(sc_time period){
+  void ProcessControlBlock::setPeriod(sc_core::sc_time period){
     this->period = period;
   }
 
-  sc_time ProcessControlBlock::getPeriod() const{
+  sc_core::sc_time ProcessControlBlock::getPeriod() const{
     return this->period;
   }
 
@@ -270,15 +270,15 @@ namespace SystemC_VPC{
     return this->priority;
   }
 
-  void ProcessControlBlock::setDeadline(sc_time deadline){
-    if(deadline > SC_ZERO_TIME){
+  void ProcessControlBlock::setDeadline(sc_core::sc_time deadline){
+    if(deadline > sc_core::SC_ZERO_TIME){
       this->deadline = deadline;
     }else{
-      this->deadline = SC_ZERO_TIME;
+      this->deadline = sc_core::SC_ZERO_TIME;
     }
   }
 
-  sc_time ProcessControlBlock::getDeadline() const{
+  sc_core::sc_time ProcessControlBlock::getDeadline() const{
     return this->deadline;
   }
 
@@ -296,25 +296,25 @@ namespace SystemC_VPC{
     ft->setTiming(timing);
   }
 
-  void ProcessControlBlock::setBaseDelay(sc_time delay){
+  void ProcessControlBlock::setBaseDelay(sc_core::sc_time delay){
     const PowerMode *mode = this->component->translatePowerMode("SLOW");
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->setBaseDelay(delay);
   }
 
-  void ProcessControlBlock::setBaseLatency(sc_time latency){
+  void ProcessControlBlock::setBaseLatency(sc_core::sc_time latency){
     const PowerMode *mode = this->component->translatePowerMode("SLOW");
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->setBaseLatency(latency);
   }
 
-  void ProcessControlBlock::addDelay(FunctionId fid, sc_time delay){
+  void ProcessControlBlock::addDelay(FunctionId fid, sc_core::sc_time delay){
     const PowerMode *mode = this->component->translatePowerMode("SLOW");
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->addDelay(fid, delay);
   }
 
-  void ProcessControlBlock::addLatency(FunctionId fid, sc_time latency){
+  void ProcessControlBlock::addLatency(FunctionId fid, sc_core::sc_time latency){
     const PowerMode *mode = this->component->translatePowerMode("SLOW");
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->addLatency(fid, latency);

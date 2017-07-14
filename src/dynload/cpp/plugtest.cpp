@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
 	// Ask the user for the name of the DLL
 	
  	string fname;
-	cout << "Type in a full pathname of a dll:";
-	cin >> fname;
+	std::cout << "Type in a full pathname of a dll:";
+	std::cin >> fname;
 
 	
 	// show it
 	
-	cout << endl << "Opening '" << fname << "'" << endl;
+	std::cout << std::endl << "Opening '" << fname << "'" << std::endl;
 	
 	// Now create a DLLFactory for our PlugInFactory attached
 	// to the requested file
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 		
 		// show the C++ RTTI typeid name to the user
 		
-		cout << "type name = " << typeid(*c).name() << endl;
+		std::cout << "type name = " << typeid(*c).name() << std::endl;
 		
 		// kill the plug in.
 		
@@ -85,13 +85,13 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		cout << "Error opening dll!" << endl;
+		std::cout << "Error opening dll!" << std::endl;
 		
 		// show the error message if any
 		
         if( dll.LastError() )
 		{
-		    cout << "DLL Error: " << dll.LastError() << endl;
+		    std::cout << "DLL Error: " << dll.LastError() << std::endl;
 		}
 		
 	}

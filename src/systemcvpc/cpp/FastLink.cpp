@@ -44,7 +44,7 @@ namespace SystemC_VPC{
   }
 
   void FastLink::check() const {
-    //cerr << "FastLink " << this->process << ", " << this->func << endl;
+    //std::cerr << "FastLink " << this->process << ", " << this->func << std::endl;
     SystemC_VPC::Director::getInstance()
       .check(this);
   }

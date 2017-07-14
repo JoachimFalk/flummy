@@ -112,7 +112,7 @@ Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
 }
 
 //
-Route::Ptr createRoute(const sc_port_base * leafPort, Route::Type type)
+Route::Ptr createRoute(const sc_core::sc_port_base * leafPort, Route::Type type)
 {
   // TODO: ProcessId routePid = Director::getProcessId(source, dest);
   assert(leafPort != NULL);
@@ -133,7 +133,7 @@ Route::Ptr getRoute(std::string source, std::string dest)
       + " -> " + dest + "\" before creation. Use createRoute() first. ");
 }
 
-Route::Ptr getRoute(const sc_port_base * leafPort){
+Route::Ptr getRoute(const sc_core::sc_port_base * leafPort){
   return  Routing::get(leafPort);
 }
 

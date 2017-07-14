@@ -46,7 +46,7 @@ namespace SystemC_VPC{
   }
 
   bool RoundRobinScheduler::getSchedulerTimeSlice(
-    sc_time& time,
+    sc_core::sc_time& time,
     const TaskMap &ready_tasks,
     const  TaskMap &running_tasks )
   {
@@ -72,7 +72,7 @@ int RoundRobinScheduler::assignFromFront()
 {
   int task_to_assign = rr_fifo.front();
   rr_fifo.pop_front();
-  timeSliceExpires_ = sc_time_stamp() + timeSlice_;
+  timeSliceExpires_ = sc_core::sc_time_stamp() + timeSlice_;
   return task_to_assign;
 }
 
@@ -85,7 +85,7 @@ int RoundRobinScheduler::assignFromFront()
 
     scheduling_decision ret_decision=NOCHANGE;
 
-    if(sc_time_stamp() == timeSliceExpires_){// time slice expired
+    if(sc_core::sc_time_stamp() == timeSliceExpires_){// time slice expired
       if(rr_fifo.size()>0){    // select next task
         task_to_assign = assignFromFront();
         // default: old tasks execution delay is expired (no running task)
@@ -119,7 +119,7 @@ int RoundRobinScheduler::assignFromFront()
   /**
    *
    */
-  sc_time* RoundRobinScheduler::schedulingOverhead(){
-    return NULL; //new sc_time(1,SC_NS);
+  sc_core::sc_time* RoundRobinScheduler::schedulingOverhead(){
+    return NULL; //new sc_core::sc_time(1,sc_core::SC_NS);
   }
 }

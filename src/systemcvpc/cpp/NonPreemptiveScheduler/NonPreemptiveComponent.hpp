@@ -34,7 +34,7 @@
 
 #ifndef __INCLUDED_FCFSCOMPONENT_H__
 #define __INCLUDED_FCFSCOMPONENT_H__
-#include <systemc.h>
+#include <systemc>
 
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/ComponentInfo.hpp>
@@ -165,14 +165,14 @@ namespace SystemC_VPC{
     }
 
     Task*                  runningTask;
-    sc_event notify_scheduler_thread;
+    sc_core::sc_event notify_scheduler_thread;
 
     // time last task started
-    sc_time startTime;
+    sc_core::sc_time startTime;
 
     TASKTRACER taskTracer_;
   private:
-    sc_event remainingPipelineStages_WakeUp;
+    sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
 
     //PowerTables powerTables;
@@ -225,7 +225,7 @@ namespace SystemC_VPC{
         this->taskTracer_.finishDii(runningTask);
 
         DBG_OUT(this->getName() << " resign Task: " << runningTask->getName()
-                << " @ " << sc_time_stamp().to_default_time_units()
+                << " @ " << sc_core::sc_time_stamp().to_default_time_units()
                 << std::endl);
       
         runningTask->getBlockEvent().dii->notify();
@@ -289,8 +289,8 @@ NonPreemptiveComponent<TASKTRACER>::NonPreemptiveComponent(
 
   this->setPowerMode(this->translatePowerMode("SLOW"));
 
-  this->midPowerGov = new InternalLoadHysteresisGovernor(sc_time(12.5, SC_MS),
-      sc_time(12.1, SC_MS), sc_time(4.0, SC_MS));
+  this->midPowerGov = new InternalLoadHysteresisGovernor(sc_core::sc_time(12.5, sc_core::SC_MS),
+      sc_core::sc_time(12.1, sc_core::SC_MS), sc_core::sc_time(4.0, sc_core::SC_MS));
   this->midPowerGov->setGlobalGovernor(director->topPowerGov);
 
   //if(powerTables.find(getPowerMode()) == powerTables.end()){
@@ -319,7 +319,7 @@ template<class TASKTRACER>
 void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 {
   DBG_OUT("NonPreemptiveComponent::schedule_method (" << this->getName()
-      << ") triggered @" << sc_time_stamp() << endl);
+      << ") triggered @" << sc_core::sc_time_stamp() << std::endl);
 
   //default trigger
   next_trigger(notify_scheduler_thread);
@@ -341,7 +341,7 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 
     //TODO: use this as "if case" to avoid recursion!
   } else {
-    assert(startTime+runningTask->getRemainingDelay() <= sc_time_stamp());
+    assert(startTime+runningTask->getRemainingDelay() <= sc_core::sc_time_stamp());
     removeTask();
     schedule_method(); //recursion will release/schedule next task
   }
@@ -378,7 +378,7 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
   actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
   DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
-      << " ) at time: " << sc_time_stamp()
+      << " ) at time: " << sc_core::sc_time_stamp()
       << " mode: " << this->getPowerMode()->getName()
       << " schedTask: " << actualTask->getScheduledTask()
       << std::endl);
@@ -398,9 +398,9 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
   //awake scheduler thread
   if (runningTask == NULL && !releasePhase) {
     DBG_OUT("NonPreemptiveComponent::compute (" << this->getName()
-        << ") notify @" << sc_time_stamp() << endl);
+        << ") notify @" << sc_core::sc_time_stamp() << std::endl);
 
-    notify_scheduler_thread.notify(SC_ZERO_TIME);
+    notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
     //blockCompute.notify();
   }
 }
@@ -452,29 +452,29 @@ void NonPreemptiveComponent<TASKTRACER>::remainingPipelineStages()
     } else {
       timePcbPair front = pqueue.top();
 
-      //cerr << "Pop from list: " << front.time << " : "
-      //<< front.pcb->getBlockEvent().latency << endl;
-      sc_time waitFor = front.time - sc_time_stamp();
-      assert(front.time >= sc_time_stamp());
-      //cerr << "Pipeline> Wait till " << front.time
-      //<< " (" << waitFor << ") at: " << sc_time_stamp() << endl;
+      //std::cerr << "Pop from list: " << front.time << " : "
+      //<< front.pcb->getBlockEvent().latency << std::endl;
+      sc_core::sc_time waitFor = front.time - sc_core::sc_time_stamp();
+      assert(front.time >= sc_core::sc_time_stamp());
+      //std::cerr << "Pipeline> Wait till " << front.time
+      //<< " (" << waitFor << ") at: " << sc_core::sc_time_stamp() << std::endl;
       wait(waitFor, remainingPipelineStages_WakeUp);
 
-      sc_time rest = front.time - sc_time_stamp();
-      assert(rest >= SC_ZERO_TIME);
-      if (rest > SC_ZERO_TIME) {
-        //cerr << "------------------------------" << endl;
+      sc_core::sc_time rest = front.time - sc_core::sc_time_stamp();
+      assert(rest >= sc_core::SC_ZERO_TIME);
+      if (rest > sc_core::SC_ZERO_TIME) {
+        //std::cerr << "------------------------------" << std::endl;
       } else {
-        assert(rest == SC_ZERO_TIME);
-        //cerr << "Ready! releasing task (" <<  front.time <<") at: "
-        //<< sc_time_stamp() << endl;
+        assert(rest == sc_core::SC_ZERO_TIME);
+        //std::cerr << "Ready! releasing task (" <<  front.time <<") at: "
+        //<< sc_core::sc_time_stamp() << std::endl;
 
         // Latency over -> remove Task
         this->taskTracer_.finishLatency(front.task);
         // signalLatencyEvent will release runningTask (back to TaskPool)
         Director::getInstance().signalLatencyEvent(front.task);
 
-        //wait(SC_ZERO_TIME);
+        //wait(sc_core::SC_ZERO_TIME);
         pqueue.pop();
       }
     }
@@ -489,9 +489,9 @@ template<class TASKTRACER>
 void NonPreemptiveComponent<TASKTRACER>::moveToRemainingPipelineStages(
     Task* task)
 {
-  sc_time now = sc_time_stamp();
-  sc_time restOfLatency = task->getLatency() - task->getDelay();
-  sc_time end = now + restOfLatency;
+  sc_core::sc_time now = sc_core::sc_time_stamp();
+  sc_core::sc_time restOfLatency = task->getLatency() - task->getDelay();
+  sc_core::sc_time end = now + restOfLatency;
   if (end <= now) {
     //early exit if (Latency-DII) <= 0
     //std::cerr << "Early exit: " << task->getName() << std::endl;

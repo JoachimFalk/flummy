@@ -37,10 +37,10 @@
 namespace SystemC_VPC{
 
 
-  InternalLoadHysteresisGovernor::InternalLoadHysteresisGovernor(const sc_time& windowTime,
-                                                 const sc_time& fastTime,
-                                                 const sc_time& slowTime) :
-    sc_module(sc_module_name("InternalLoadHysteresisGovernor")),
+  InternalLoadHysteresisGovernor::InternalLoadHysteresisGovernor(const sc_core::sc_time& windowTime,
+                                                 const sc_core::sc_time& fastTime,
+                                                 const sc_core::sc_time& slowTime) :
+    sc_core::sc_module(sc_core::sc_module_name("InternalLoadHysteresisGovernor")),
     m_windowTime(windowTime),
     m_fastTime(fastTime),
     m_slowTime(slowTime),
@@ -49,7 +49,7 @@ namespace SystemC_VPC{
     m_lastState(ComponentState::IDLE)
   {
     //std::cout << "InternalLoadHysteresisGovernor" << std::endl;
-    if(m_windowTime > SC_ZERO_TIME){
+    if(m_windowTime > sc_core::SC_ZERO_TIME){
       SC_METHOD(process);
       sensitive << m_wakeup_ev;
       dont_initialize();
@@ -62,7 +62,7 @@ namespace SystemC_VPC{
 
   void InternalLoadHysteresisGovernor::notify(ComponentInfo *ci)
   {
-    //    std::cerr << "InternalLoadHysteresisGovernor::notify() @ " << sc_time_stamp() << std::endl;
+    //    std::cerr << "InternalLoadHysteresisGovernor::notify() @ " << sc_core::sc_time_stamp() << std::endl;
 
     const ComponentState newState = ci->getComponentState();
 
@@ -71,31 +71,31 @@ namespace SystemC_VPC{
       m_ci = ci;
       m_mode.powerMode = m_ci->getPowerMode();
       m_tpg->notify_top(m_ci, &m_mode);
-      m_wakeup_ev.notify(SC_ZERO_TIME);
+      m_wakeup_ev.notify(sc_core::SC_ZERO_TIME);
     }
 
     assert(m_ci == ci);
 
     if(newState != m_lastState) {
-      m_stateHistory.push_back(std::pair<ComponentState, sc_time>(m_lastState, sc_time_stamp()));
+      m_stateHistory.push_back(std::pair<ComponentState, sc_core::sc_time>(m_lastState, sc_core::sc_time_stamp()));
       m_lastState = newState;
-      m_wakeup_ev.notify(SC_ZERO_TIME);
+      m_wakeup_ev.notify(sc_core::SC_ZERO_TIME);
     }
   }
 
   void InternalLoadHysteresisGovernor::process()
   {
-    //    std::cerr << "InternalLoadHysteresisGovernor::process() @ " << sc_time_stamp() << std::endl;
+    //    std::cerr << "InternalLoadHysteresisGovernor::process() @ " << sc_core::sc_time_stamp() << std::endl;
 
     const PowerMode *SLOW = m_ci->translatePowerMode("SLOW");
     const PowerMode *FAST = m_ci->translatePowerMode("FAST");
 
-    sc_time execTime(SC_ZERO_TIME);
-    sc_time startTime(SC_ZERO_TIME);
+    sc_core::sc_time execTime(sc_core::SC_ZERO_TIME);
+    sc_core::sc_time startTime(sc_core::SC_ZERO_TIME);
 
     // calculate start time for sliding window
-    if(sc_time_stamp() > m_windowTime)
-      startTime = sc_time_stamp() - m_windowTime;
+    if(sc_core::sc_time_stamp() > m_windowTime)
+      startTime = sc_core::sc_time_stamp() - m_windowTime;
 
     // drop old state history
     while(!m_stateHistory.empty() &&
@@ -105,7 +105,7 @@ namespace SystemC_VPC{
       }
 
     // sum up execution times
-    for(std::deque<std::pair<ComponentState, sc_time> >::const_iterator
+    for(std::deque<std::pair<ComponentState, sc_core::sc_time> >::const_iterator
           iter  = m_stateHistory.begin();
         iter != m_stateHistory.end();
         iter++)
@@ -116,7 +116,7 @@ namespace SystemC_VPC{
         startTime = iter->second;
       }
     if(m_lastState != ComponentState::IDLE)
-      execTime += sc_time_stamp() - startTime;
+      execTime += sc_core::sc_time_stamp() - startTime;
 
     //    std::cerr << "execTime = " << execTime << std::endl;
 

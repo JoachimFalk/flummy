@@ -58,7 +58,7 @@ public:
     }
     trace_map_by_name_.clear();
     if (traceFile_) {
-      sc_close_vcd_trace_file(traceFile_);
+      sc_core::sc_close_vcd_trace_file(traceFile_);
     }
   }
 
@@ -108,8 +108,8 @@ public:
         tracefilename.insert(0, traceprefix);
       }
 
-      this->traceFile_ = sc_create_vcd_trace_file(tracefilename.c_str());
-      this->traceFile_->set_time_unit(1, SC_NS);
+      this->traceFile_ = sc_core::sc_create_vcd_trace_file(tracefilename.c_str());
+      this->traceFile_->set_time_unit(1, sc_core::SC_NS);
     }
     Tracing *newsignal = new Tracing(name, this->getName());
 
@@ -120,7 +120,7 @@ public:
     return newsignal;
   }
 private:
-  sc_trace_file *traceFile_;
+  sc_core::sc_trace_file *traceFile_;
   std::string name_;
   std::map<std::string, Trace::Tracing*> trace_map_by_name_;
 
