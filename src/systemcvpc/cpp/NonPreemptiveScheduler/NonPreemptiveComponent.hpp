@@ -223,7 +223,6 @@ namespace SystemC_VPC{
         }
         fireStateChanged(ComponentState::IDLE);
         this->taskTracer_.finishDii(runningTask);
-        this->taskTracer_.finishLatency(runningTask);
 
         DBG_OUT(this->getName() << " resign Task: " << runningTask->getName()
                 << " @ " << sc_time_stamp().to_default_time_units()
@@ -231,11 +230,10 @@ namespace SystemC_VPC{
       
         runningTask->getBlockEvent().dii->notify();
 
-        // signalLatencyEvent will release runningTask (back to TaskPool)
         bool hasScheduledTask = runningTask->hasScheduledTask();
         ProcessId pid = runningTask->getProcessId();
 
-        Director::getInstance().signalLatencyEvent(runningTask);
+        moveToRemainingPipelineStages(runningTask);
 
         Task &task = Director::getInstance().taskPool.getPrototype(pid);
         ScheduledTask * scheduledTask;
@@ -287,7 +285,7 @@ NonPreemptiveComponent<TASKTRACER>::NonPreemptiveComponent(
   sensitive << notify_scheduler_thread;
   dont_initialize();
 
-  //SC_THREAD(remainingPipelineStages);
+  SC_THREAD(remainingPipelineStages);
 
   this->setPowerMode(this->translatePowerMode("SLOW"));
 
@@ -472,6 +470,8 @@ void NonPreemptiveComponent<TASKTRACER>::remainingPipelineStages()
         //<< sc_time_stamp() << endl;
 
         // Latency over -> remove Task
+        this->taskTracer_.finishLatency(front.task);
+        // signalLatencyEvent will release runningTask (back to TaskPool)
         Director::getInstance().signalLatencyEvent(front.task);
 
         //wait(SC_ZERO_TIME);
@@ -495,6 +495,8 @@ void NonPreemptiveComponent<TASKTRACER>::moveToRemainingPipelineStages(
   if (end <= now) {
     //early exit if (Latency-DII) <= 0
     //std::cerr << "Early exit: " << task->getName() << std::endl;
+    this->taskTracer_.finishLatency(task);
+    // signalLatencyEvent will release runningTask (back to TaskPool)
     Director::getInstance().signalLatencyEvent(task);
     return;
   }
