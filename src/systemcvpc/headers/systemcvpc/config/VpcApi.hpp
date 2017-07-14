@@ -57,7 +57,7 @@ typedef std::map<std::string, boost::shared_ptr<DistributionTimingModifier> > Mo
 
 void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier);
 
-Component::Ptr createComponent(std::string name, Scheduler::Type scheduler =
+Component::Ptr createComponent(std::string name, Scheduler scheduler =
     Scheduler::FCFS);
 
 Component::Ptr getComponent(std::string name);

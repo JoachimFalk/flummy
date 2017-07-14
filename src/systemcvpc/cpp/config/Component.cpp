@@ -52,7 +52,7 @@ namespace Config
 {
 
 //
-Component::Component(std::string name, Scheduler::Type scheduler) :
+Component::Component(std::string name, Scheduler scheduler) :
   name_(name), debugFileName_(""), scheduler_(scheduler), componentInterface_(NULL)
 {
 }
@@ -75,13 +75,13 @@ Timing Component::getTransferTiming() const
 }
 
 //
-void Component::setScheduler(Scheduler::Type scheduler)
+void Component::setScheduler(Scheduler scheduler)
 {
   scheduler_ = scheduler;
 }
 
 //
-Scheduler::Type Component::getScheduler() const
+Scheduler Component::getScheduler() const
 {
   return scheduler_;
 }
