@@ -58,7 +58,7 @@
 #if defined(ENABLE_DEBUG) && defined(DBG_ENABLE)
   #define DBG(e) e
   #define DBG_OUT(s) DBG_STREAM <<  s
-  #define DBG_SC_OUT(s) DBG_STREAM << "[" << sc_time_stamp() << "]: " << s
+  #define DBG_SC_OUT(s) DBG_STREAM << "[" << sc_core::sc_time_stamp() << "]: " << s
   #define DBG_DOBJ(o) DBG_STREAM << " Object " #o ": " << o << std::endl
 #else
   #define DBG(e) do {} while(0)

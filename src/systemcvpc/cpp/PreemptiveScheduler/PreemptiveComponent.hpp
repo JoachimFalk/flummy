@@ -35,7 +35,7 @@
 #ifndef HSCD_VPC_COMPONENT_H
 #define HSCD_VPC_COMPONENT_H
 #include <PreemptiveScheduler/Scheduler.hpp>
-#include <systemc.h>
+#include <systemc>
 
 #include <systemcvpc/AbstractComponent.hpp>
 #include <systemcvpc/ComponentInfo.hpp>
@@ -158,21 +158,21 @@ namespace SystemC_VPC{
     virtual void remainingPipelineStages() = 0;
     virtual void moveToRemainingPipelineStages(Task* task) = 0;
 
-    sc_event remainingPipelineStages_WakeUp;
+    sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
     bool pendingTask;
 
     Scheduler *scheduler;
     std::deque<Task*>      newTasks;
     std::deque<Task*>      disabledTasks;
-    sc_event notify_scheduler_thread;
+    sc_core::sc_event notify_scheduler_thread;
     Event blockCompute;
     size_t   blockMutex;
     unsigned int max_used_buffer;
     unsigned int max_avail_buffer;
 
     // time last task started
-    sc_time startTime;
+    sc_core::sc_time startTime;
 
     void fireStateChanged(const ComponentState &state);
 
@@ -186,7 +186,7 @@ namespace SystemC_VPC{
     TaskMap runningTasks;
 
   private:
-    sc_event releaseActors;
+    sc_core::sc_event releaseActors;
     TT::TimedQueue ttReleaseQueue;
 
 #ifndef NO_POWER_SUM
@@ -267,7 +267,7 @@ namespace SystemC_VPC{
           }else{
             DBG_OUT(this->getName() << " received new Task: "
                     << newTask->getName() << " at: "
-                    << sc_time_stamp().to_default_time_units() << std::endl);
+                    << sc_core::sc_time_stamp().to_default_time_units() << std::endl);
             this->taskTracer_.release(newTask);
             //insert new task in read list
             assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
@@ -285,9 +285,9 @@ namespace SystemC_VPC{
      *
      */
     void moveToRemainingPipelineStages(Task* task){
-      sc_time now                 = sc_time_stamp();
-      sc_time restOfLatency       = task->getLatency()  - task->getDelay();
-      sc_time end                 = now + restOfLatency;
+      sc_core::sc_time now                 = sc_core::sc_time_stamp();
+      sc_core::sc_time restOfLatency       = task->getLatency()  - task->getDelay();
+      sc_core::sc_time end                 = now + restOfLatency;
       if(end <= now){
         //early exit if (Latency-DII) <= 0
         //std::cerr << "Early exit: " << task->getName() << std::endl;
@@ -314,30 +314,30 @@ namespace SystemC_VPC{
         }else{
           timePcbPair front = pqueue.top();
 
-          //cerr << "Pop from list: " << front.time << " : "
-          //<< front.pcb->getBlockEvent().latency << endl;
-          sc_time waitFor = front.time-sc_time_stamp();
+          //std::cerr << "Pop from list: " << front.time << " : "
+          //<< front.pcb->getBlockEvent().latency << std::endl;
+          sc_core::sc_time waitFor = front.time-sc_core::sc_time_stamp();
 	  
-          assert(front.time >= sc_time_stamp());
-          //cerr << "Pipeline> Wait till " << front.time
-          //<< " (" << waitFor << ") at: " << sc_time_stamp() << endl;
+          assert(front.time >= sc_core::sc_time_stamp());
+          //std::cerr << "Pipeline> Wait till " << front.time
+          //<< " (" << waitFor << ") at: " << sc_core::sc_time_stamp() << std::endl;
           wait( waitFor, remainingPipelineStages_WakeUp );
 
-          sc_time rest = front.time-sc_time_stamp();
-          assert(rest >= SC_ZERO_TIME);
-          if(rest > SC_ZERO_TIME){
-            //cerr << "------------------------------" << endl;
+          sc_core::sc_time rest = front.time-sc_core::sc_time_stamp();
+          assert(rest >= sc_core::SC_ZERO_TIME);
+          if(rest > sc_core::SC_ZERO_TIME){
+            //std::cerr << "------------------------------" << std::endl;
           }else{
-            assert(rest == SC_ZERO_TIME);
-            //cerr << "Ready! releasing task (" <<  front.time <<") at: "
-            //<< sc_time_stamp() << endl;
+            assert(rest == sc_core::SC_ZERO_TIME);
+            //std::cerr << "Ready! releasing task (" <<  front.time <<") at: "
+            //<< sc_core::sc_time_stamp() << std::endl;
 
             this->taskTracer_.finishLatency(front.task);
 
             // Latency over -> remove Task
             Director::getInstance().signalLatencyEvent(front.task);
 
-            //wait(SC_ZERO_TIME);
+            //wait(sc_core::SC_ZERO_TIME);
             pqueue.pop();
           }
         }
@@ -349,12 +349,12 @@ namespace SystemC_VPC{
      *
      */
     void schedule_thread(){
-      sc_time timeslice;
-      sc_time actualRemainingDelay;
-      sc_time *overhead = new sc_time( SC_ZERO_TIME );
+      sc_core::sc_time timeslice;
+      sc_core::sc_time actualRemainingDelay;
+      sc_core::sc_time *overhead = new sc_core::sc_time( sc_core::SC_ZERO_TIME );
       int actualRunningIID;
       bool newTaskDuringOverhead=false;
-      //wait(SC_ZERO_TIME);
+      //wait(sc_core::SC_ZERO_TIME);
 
       scheduler->initialize();
       fireStateChanged(ComponentState::IDLE);
@@ -365,18 +365,18 @@ namespace SystemC_VPC{
         assert(false);
       }
       unsigned int last_used_buffer = 0;
-      //logBuffer << last_used_buffer << " " << sc_time_stamp() << std::endl;
+      //logBuffer << last_used_buffer << " " << sc_core::sc_time_stamp() << std::endl;
 
       //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
       newTaskDuringOverhead=(newTasks.size()>0);
 
       while(1){
-      //  std::cout<<"Component " << this->getName() << "schedule_thread @ " << sc_time_stamp() << std::endl;
+      //  std::cout<<"Component " << this->getName() << "schedule_thread @ " << sc_core::sc_time_stamp() << std::endl;
         //determine the time slice for next scheduling decision and wait for
         bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
                                                              getReadyTasks(),
                                                              getRunningTasks());
-        startTime = sc_time_stamp();
+        startTime = sc_core::sc_time_stamp();
         if(!newTaskDuringOverhead){
           if(getRunningTasks().size()<=0){                    // no running task
             if(hasTimeSlice){
@@ -398,7 +398,7 @@ namespace SystemC_VPC{
               wait( actualRemainingDelay,
                     notify_scheduler_thread );
             }
-            sc_time runTime=sc_time_stamp()-startTime;
+            sc_core::sc_time runTime=sc_core::sc_time_stamp()-startTime;
             assert(runTime.value()>=0);
             actualRemainingDelay-=runTime;
 
@@ -408,7 +408,7 @@ namespace SystemC_VPC{
                       << "> actualRemainingDelay= "
                       << actualRemainingDelay.value() << " for iid="
                       << actualRunningIID << " at: "
-                      << sc_time_stamp().to_default_time_units()
+                      << sc_core::sc_time_stamp().to_default_time_units()
                       << std::endl);
 
             if(actualRemainingDelay.value()==0){
@@ -417,7 +417,7 @@ namespace SystemC_VPC{
 
             DBG_OUT(this->getName() << " IID: " << actualRunningIID<< " > ");
             DBG_OUT(this->getName() << " removed Task: " << task->getName()
-                    << " at: " << sc_time_stamp().to_default_time_units()
+                    << " at: " << sc_core::sc_time_stamp().to_default_time_units()
                     << std::endl);
 
               //notify(*(task->blockEvent));
@@ -462,7 +462,7 @@ namespace SystemC_VPC{
 //                Director::execute(task->getProcessId());
               }
               moveToRemainingPipelineStages(task);
-              //wait(SC_ZERO_TIME);
+              //wait(sc_core::SC_ZERO_TIME);
             }else{
 
               // store remainingDelay
@@ -498,15 +498,15 @@ namespace SystemC_VPC{
           this->taskTracer_.resign(readyTasks[taskToResign]);
         }
 
-        sc_time timestamp=sc_time_stamp();
+        sc_core::sc_time timestamp=sc_core::sc_time_stamp();
         if( overhead != NULL ) delete overhead;
         overhead=scheduler->schedulingOverhead();
 
         if( overhead != NULL ){
           //    actual time    < endtime
-          while( (sc_time_stamp() < timestamp + (*overhead)) ){
+          while( (sc_core::sc_time_stamp() < timestamp + (*overhead)) ){
 
-            wait( (timestamp+(*overhead))-sc_time_stamp(),
+            wait( (timestamp+(*overhead))-sc_core::sc_time_stamp(),
                   notify_scheduler_thread );
 
           }
@@ -515,7 +515,7 @@ namespace SystemC_VPC{
           newTaskDuringOverhead=(newTasks.size()>0);
         }else {
           // avoid failures
-          overhead=new sc_time(SC_ZERO_TIME);
+          overhead=new sc_core::sc_time(sc_core::SC_ZERO_TIME);
         }
 
 
@@ -528,9 +528,9 @@ namespace SystemC_VPC{
           DBG_OUT("IID: " << taskToAssign << "> remaining delay for "
                << runningTasks[taskToAssign]->getName());
           actualRemainingDelay
-            = sc_time(runningTasks[taskToAssign]->getRemainingDelay());
+            = sc_core::sc_time(runningTasks[taskToAssign]->getRemainingDelay());
           DBG_OUT(" is " << runningTasks[taskToAssign]->getRemainingDelay()
-               << endl);
+               << std::endl);
 
           /* */
           Task * assignedTask = runningTasks[taskToAssign];
@@ -563,12 +563,12 @@ namespace SystemC_VPC{
               this->taskTracer_.assign(assignedTask);
               if(assignedTask->isBlocking()){
                 DBG_OUT(this->getName() << " exec Task: "
-                        << assignedTask->getName() << " @  " << sc_time_stamp()
+                        << assignedTask->getName() << " @  " << sc_core::sc_time_stamp()
                         << std::endl);
                 // task is still blocking: exec task
               } else {
                 DBG_OUT(this->getName() << " abort Task: "
-                        << assignedTask->getName() << " @  " << sc_time_stamp()
+                        << assignedTask->getName() << " @  " << sc_core::sc_time_stamp()
                         << std::endl);
 
                 //notify(*(task->blockEvent));
@@ -595,11 +595,11 @@ namespace SystemC_VPC{
           /* */
         }
         if(readyTasks.size() != last_used_buffer){
-          //logBuffer<< readyTasks.size() << " " << sc_time_stamp() << std::endl;
+          //logBuffer<< readyTasks.size() << " " << sc_core::sc_time_stamp() << std::endl;
           last_used_buffer = readyTasks.size();
           if(last_used_buffer > max_used_buffer){
             max_used_buffer = readyTasks.size();
-            //std::cout<<"MAX used Buffer of Component " << this->getName() << " increased to " << max_used_buffer << " @ " << sc_time_stamp() << std::endl;
+            //std::cout<<"MAX used Buffer of Component " << this->getName() << " increased to " << max_used_buffer << " @ " << sc_core::sc_time_stamp() << std::endl;
           }
         }
       }

@@ -35,7 +35,7 @@
 #ifndef HSCD_VPC_TRACING_H
 #define HSCD_VPC_TRACING_H
 
-#include <systemc.h>
+#include <systemc>
 
 //#define VPC_ENABLE_PLAIN_TRACING
 #include <CoSupport/Streams/AlternateStream.hpp>
@@ -61,15 +61,15 @@ namespace Trace {
     static const trace_value S_RUNNING;
 
     Tracing( std::string resource, std::string task ) :
-      traceSignal( new sc_signal<trace_value>() ),
+      traceSignal( new sc_core::sc_signal<trace_value>() ),
       resource(resource),
       task(task),
-      lastChange( SC_ZERO_TIME ),
+      lastChange( sc_core::SC_ZERO_TIME ),
       lastValue( 0 )
       { }
 
     /** signal for VCD tracing */ 
-    sc_signal<trace_value>* traceSignal;
+    sc_core::sc_signal<trace_value>* traceSignal;
 
     void traceRunning(){
       this->tracePlain("RUN");
@@ -94,7 +94,7 @@ namespace Trace {
     void tracePlain(std::string traceValue){
 #ifdef VPC_ENABLE_PLAIN_TRACING
       if(plainTrace != NULL){
-        *plainTrace << sc_time_stamp().value()
+        *plainTrace << sc_core::sc_time_stamp().value()
                     << "\t" << resource
                     << "\t" << task
                     << "\t" << traceValue
@@ -109,10 +109,10 @@ namespace Trace {
      * remember last value and time stamp of change
      */
     void rememberLastValue(){
-      if(lastChange != sc_time_stamp()){
+      if(lastChange != sc_core::sc_time_stamp()){
         // remember value from last real changing (ignore delta cycle changing)
         lastValue    = *traceSignal;
-        lastChange   = sc_time_stamp();
+        lastChange   = sc_core::sc_time_stamp();
       }
     }
 
@@ -155,7 +155,7 @@ namespace Trace {
     std::string task;
 
     /** remeber last time of signal changing */
-    sc_time                 lastChange;
+    sc_core::sc_time                 lastChange;
 
     /** rember last signal value */
     trace_value             lastValue;

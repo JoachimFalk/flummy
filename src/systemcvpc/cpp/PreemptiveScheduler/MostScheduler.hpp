@@ -36,7 +36,7 @@
 #define MOSTSCHEDULER_H
 #include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
 #include <PreemptiveScheduler/Scheduler.hpp>
-#include <systemc.h>
+#include <systemc>
 #include <systemcvpc/datatypes.hpp>
 #include <map>
 #include <deque>
@@ -50,7 +50,7 @@ namespace SystemC_VPC{
   typedef size_t ProcessId;
 
   struct MostSlot{
-    sc_time length;
+    sc_core::sc_time length;
     ProcessId process;
     int Id;
     std::string name;
@@ -64,26 +64,26 @@ namespace SystemC_VPC{
 
       slicecount = 0;
       streamcount = 0;
-      lastassign = SC_ZERO_TIME;
-      this->remainingSlice = SC_ZERO_TIME;
+      lastassign = sc_core::SC_ZERO_TIME;
+      this->remainingSlice = sc_core::SC_ZERO_TIME;
       curr_slicecount = -1;
       sysFreq = 48000;
       cycleSize = 372;
-      std::map<sc_time, unsigned int> IDmap;
+      std::map<sc_core::sc_time, unsigned int> IDmap;
 
-      currSlotStartTime = sc_time(0, SC_NS);
+      currSlotStartTime = sc_core::sc_time(0, sc_core::SC_NS);
     }
     
     MostScheduler(const char *schedulername);
     
     
-    bool getSchedulerTimeSlice(sc_time &time,
+    bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
 
-    sc_time setboundary(int sysFreq,int framesize);
+    sc_core::sc_time setboundary(int sysFreq,int framesize);
 
-    sc_time cycle(int sysFreq);
+    sc_core::sc_time cycle(int sysFreq);
 
     bool area(int sysFreq,int framesize);
  
@@ -91,14 +91,14 @@ namespace SystemC_VPC{
     
     void removedTask(Task *task);
     
-    sc_event& getNotifyEvent();
+    sc_core::sc_event& getNotifyEvent();
     
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,
                                            const  TaskMap &ready_tasks,
                                            const  TaskMap &running_tasks);
     
-    sc_time* schedulingOverhead(){
+    sc_core::sc_time* schedulingOverhead(){
 	return NULL;
     }
     
@@ -110,14 +110,14 @@ namespace SystemC_VPC{
   private:
 
     
-    std::map<sc_time, unsigned int> slotOffsets;
+    std::map<sc_core::sc_time, unsigned int> slotOffsets;
 
     std::map<ProcessId, bool> areaMap;
 	
     MostSecondaryScheduler secondaryScheduler;
 
-    sc_time lastassign;
-    sc_time remainingSlice;
+    sc_core::sc_time lastassign;
+    sc_core::sc_time remainingSlice;
     int slicecount;
     int curr_slicecount;
     int curr_slicecount_help;
@@ -127,7 +127,7 @@ namespace SystemC_VPC{
     int cycleSize;
     int streamcount;
     bool flag;
-    sc_time currSlotStartTime;
+    sc_core::sc_time currSlotStartTime;
   };
 }
 #endif

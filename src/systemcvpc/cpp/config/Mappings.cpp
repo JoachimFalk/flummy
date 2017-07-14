@@ -79,7 +79,7 @@ public:
     routes[pid] = route;
   }
 
-  void add(const sc_port_base * leafPort, Route::Ptr route)
+  void add(const sc_core::sc_port_base * leafPort, Route::Ptr route)
   {
     assert(!has(leafPort));
     routesByPort[leafPort] = route;
@@ -90,7 +90,7 @@ public:
     routes[pid] = route;
   }
 
-  void set(const sc_port_base * leafPort, Route::Ptr route)
+  void set(const sc_core::sc_port_base * leafPort, Route::Ptr route)
   {
     routesByPort[leafPort] = route;
   }
@@ -100,7 +100,7 @@ public:
     return routes.find(pid) != routes.end();
   }
 
-  bool has(const sc_port_base * leafPort) const
+  bool has(const sc_core::sc_port_base * leafPort) const
   {
     return routesByPort.find(leafPort) != routesByPort.end();
   }
@@ -111,7 +111,7 @@ public:
     return routes.find(pid)->second;
   }
 
-  Route::Ptr get(const sc_port_base * leafPort) const
+  Route::Ptr get(const sc_core::sc_port_base * leafPort) const
   {
     assert(has(leafPort));
     return routesByPort.find(leafPort)->second;
@@ -135,7 +135,7 @@ void add(const ProcessId pid, Route::Ptr route)
 }
 
 //
-void add(const sc_port_base *leafPort, Route::Ptr route)
+void add(const sc_core::sc_port_base *leafPort, Route::Ptr route)
 {
   impl().add(leafPort, route);
 }
@@ -147,7 +147,7 @@ bool has(const ProcessId pid)
 }
 
 //
-bool has(const sc_port_base *leafPort)
+bool has(const sc_core::sc_port_base *leafPort)
 {
   return impl().has(leafPort);
 }
@@ -159,7 +159,7 @@ Route::Ptr get(const ProcessId pid)
 }
 
 //
-Route::Ptr get(const sc_port_base *leafPort)
+Route::Ptr get(const sc_core::sc_port_base *leafPort)
 {
   return impl().get(leafPort);
 }
@@ -171,7 +171,7 @@ void set(const ProcessId pid, Route::Ptr route)
 }
 
 //
-void set(const sc_port_base *leafPort, Route::Ptr route)
+void set(const sc_core::sc_port_base *leafPort, Route::Ptr route)
 {
   impl().set(leafPort, route);
 }

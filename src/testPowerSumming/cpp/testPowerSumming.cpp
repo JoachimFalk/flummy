@@ -36,13 +36,13 @@
 #include <systemcvpc/PowerSumming.hpp>
 
 #include <fstream>
-#include <systemc.h>
+#include <systemc>
 
-class testmodule : public sc_module, public ComponentInfo
+class testmodule : public sc_core::sc_module, public ComponentInfo
 {
   public:
   
-  testmodule(sc_module_name nm, ComponentObserver &obs) : sc_module(nm), m_obs(obs)
+  testmodule(sc_core::sc_module_name nm, ComponentObserver &obs) : sc_core::sc_module(nm), m_obs(obs)
   {
     SC_HAS_PROCESS(testmodule);
     SC_THREAD(process);
@@ -53,12 +53,12 @@ class testmodule : public sc_module, public ComponentInfo
     powerConsumption = 10;
     m_obs.notify(this);
 
-    wait(10, SC_NS);
+    wait(10, sc_core::SC_NS);
 
     powerConsumption = 20;
     m_obs.notify(this);
 
-    wait(20, SC_NS);
+    wait(20, sc_core::SC_NS);
 
     powerConsumption = 0;
     m_obs.notify(this);
@@ -69,7 +69,7 @@ class testmodule : public sc_module, public ComponentInfo
 
 int sc_main(int argc, char *argv[])
 {
-  ofstream outfile("test.log");
+  std::ofstream outfile("test.log");
   PowerSumming powObs(outfile);
 
   testmodule top1("top1", powObs);

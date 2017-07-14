@@ -67,7 +67,7 @@
 #include "tracing/null/NullTracer.hpp"
 #include "tracing/db/DataBaseTracer.hpp"
 #include "tracing/vcd/VcdTracer.hpp"
-#include <systemc.h>
+#include <systemc>
 #include <map>
 #include <vector>
 
@@ -89,7 +89,7 @@ namespace SystemC_VPC {
   //
   std::unique_ptr<Director> Director::singleton;
 
-  sc_time Director::end = SC_ZERO_TIME;
+  sc_core::sc_time Director::end = sc_core::SC_ZERO_TIME;
 
   /**
    *
@@ -105,11 +105,14 @@ namespace SystemC_VPC {
 #endif // NO_POWER_SUM
     , powerSumming(NULL)
   {
-     sc_report_handler::set_actions(SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
-                                    SC_DO_NOTHING);
-    //sc_report_handler::set_actions(SC_ID_OBJECT_EXISTS_,
+    sc_core::sc_report_handler::set_actions(
+        sc_core::SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
+        sc_core::SC_DO_NOTHING);
+    //sc_core::sc_report_handler::set_actions(SC_ID_OBJECT_EXISTS_,
     //                               SC_DO_NOTHING);
-    sc_report_handler::set_actions(SC_WARNING, SC_DO_NOTHING);
+    sc_core::sc_report_handler::set_actions(
+        sc_core::SC_WARNING,
+        sc_core::SC_DO_NOTHING);
 
     try{
       VPCBuilder builder((Director*)this);
@@ -133,8 +136,8 @@ namespace SystemC_VPC {
    */
   Director::~Director(){
 
-    sc_time start = SC_ZERO_TIME;
-    sc_time end = this->end;
+    sc_core::sc_time start = sc_core::SC_ZERO_TIME;
+    sc_core::sc_time end = this->end;
 #ifdef DBG_DIRECTOR
     std::cerr << "start: " << start << " end: " << end  << std::endl;
 #endif //DBG_DIRECTOR
@@ -144,7 +147,7 @@ namespace SystemC_VPC {
       std::cerr << "Director> result_file: "
                 << this->vpc_result_file << std::endl;
 #endif //DBG_DIRECTOR
-      ofstream resultFile;
+      std::ofstream resultFile;
       resultFile.open(this->vpc_result_file.c_str());
       if(resultFile){
         resultFile << (end-start).to_default_time_units();
@@ -194,7 +197,7 @@ namespace SystemC_VPC {
       
       return task;
     } catch (NotAllocatedException &e) {
-      cerr << "Unknown Task: ID = " << fLink->process
+      std::cerr << "Unknown Task: ID = " << fLink->process
            << " name = " << this->getTaskName(fLink->process)  << std::endl;
 
       debugUnknownNames();
@@ -315,7 +318,7 @@ namespace SystemC_VPC {
 
     DBG_OUT(" Director::registerComponent(" << comp->getName()
             << ") [" << comp->getComponentId() << "] # " << components.size()
-            << endl);
+            << std::endl);
   }
     
   /**
@@ -325,7 +328,7 @@ namespace SystemC_VPC {
       const std::string& compName)
   {
     assert(!FALLBACKMODE);
-    DBG_OUT("registerMapping( " << taskName<< ", " << compName << " )"<< endl);
+    DBG_OUT("registerMapping( " << taskName<< ", " << compName << " )"<< std::endl);
     ProcessId       pid = getProcessId( taskName );
     if( pid >= mappings.size() ){
       mappings.resize( pid + 100, NULL );
@@ -362,7 +365,7 @@ namespace SystemC_VPC {
     if( pid >= mappings.size() ){
       mappings.resize( pid + 100, NULL );
     }
-    DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< endl);
+    DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< std::endl);
 
     if( !taskPool.contains( pid ) ){
       Task &task = taskPool.createObject( pid );
@@ -418,7 +421,7 @@ namespace SystemC_VPC {
     if(NULL != task->getBlockEvent().latency)
       task->getBlockEvent().latency->notify();
     // remember last acknowledged task time
-    this->end = sc_time_stamp();
+    this->end = sc_core::sc_time_stamp();
     
     // free allocated task
     task->release();
@@ -463,9 +466,9 @@ namespace SystemC_VPC {
 
   ComponentId Director::getComponentId(std::string component) {
 #ifdef DBG_DIRECTOR
-    cerr << " Director::getComponentId(" << component
+    std::cerr << " Director::getComponentId(" << component
          << ") # " << componentIdMap.size()
-         << endl;
+         << std::endl;
 #endif //DBG_DIRECTOR
 
     ComponentIdMap::const_iterator iter = componentIdMap.find(component);
@@ -550,7 +553,7 @@ namespace SystemC_VPC {
   }
 
   //
-  void injectRoute(std::string src, std::string dest, sc_port_base * leafPort)
+  void injectRoute(std::string src, std::string dest, sc_core::sc_port_base * leafPort)
   {
     ProcessId pid = Director::getProcessId(src, dest);
     if (VC::Routing::has(pid) && VC::Routing::has(leafPort)) {
@@ -827,7 +830,7 @@ namespace SystemC_VPC {
     }
 
     if (!taskPool.contains( pid )){
-      cerr << "Unknown Task: name = " << actorName  << std::endl;
+      std::cerr << "Unknown Task: name = " << actorName  << std::endl;
       return FastLink(pid, actionIds, guardIds, complexity);
 
       //debugUnknownNames();
@@ -850,7 +853,7 @@ namespace SystemC_VPC {
 
   FastLink Director::registerRoute(std::string source,
     std::string destination,
-    sc_port_base * leafPort)
+    sc_core::sc_port_base * leafPort)
   {
     //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
@@ -884,7 +887,7 @@ namespace SystemC_VPC {
     return FastLink(pid, fids, FunctionIds(),0);
   }
 
-  sc_time Director::createSC_Time(const char* timeString)
+  sc_core::sc_time Director::createSC_Time(const char* timeString)
     throw(InvalidArgumentException)
   {
     try{
@@ -894,7 +897,7 @@ namespace SystemC_VPC {
     }
   }
 
-  sc_time Director::createSC_Time(std::string timeString)
+  sc_core::sc_time Director::createSC_Time(std::string timeString)
     throw(InvalidArgumentException)
   {
     return Director::createSC_Time( timeString.c_str());

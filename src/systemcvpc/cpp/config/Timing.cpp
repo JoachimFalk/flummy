@@ -71,7 +71,7 @@ Timing::Timing(sc_core::sc_time dii) :
 }
 
 Timing::Timing() :
-  function_(""), dii_(0, SC_NS), latency_(0, SC_NS), fid_(0),
+  function_(""), dii_(0, sc_core::SC_NS), latency_(0, sc_core::SC_NS), fid_(0),
       powerMode_("SLOW"),timingModifier_(new TimingModifier)
 {
 }

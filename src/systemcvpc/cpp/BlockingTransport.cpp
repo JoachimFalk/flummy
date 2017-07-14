@@ -153,7 +153,7 @@ namespace SystemC_VPC {
     if(e->isActive()){
       DBG_OUT("signaled"
               << " (" << this->getName() << ") "
-              << " @ " << sc_time_stamp() << endl);
+              << " @ " << sc_core::sc_time_stamp() << std::endl);
 
       DBG_OUT( " "
                << (phase == LOCK_ROUTE) << ", "
@@ -180,7 +180,7 @@ namespace SystemC_VPC {
           // the hop is locked -> reset route
           DBG_OUT("  is NOT blocking: "
                   << " (" << this->getName() << ") "
-                  << " @ " << sc_time_stamp() << endl);
+                  << " @ " << sc_core::sc_time_stamp() << std::endl);
           
           // in this case we have to release locks
           // and we need to restart locking
@@ -195,7 +195,7 @@ namespace SystemC_VPC {
 
   //
   void BlockingTransport::eventDestroyed(EventWaiter *e){
-    DBG_OUT("eventDestroyed" << endl);
+    DBG_OUT("eventDestroyed" << std::endl);
   }
 
   //
@@ -248,14 +248,14 @@ namespace SystemC_VPC {
 
   BlockingTransport::~BlockingTransport( ){
     routeLat->delListener(this);
-    DBG_OUT("BlockingTransport::~BlockingTransport( )" << endl);
+    DBG_OUT("BlockingTransport::~BlockingTransport( )" << std::endl);
   }
 
   //
   void BlockingTransport::resetHops(){
     DBG_OUT("resetHops()"
             << " (" << this->getName() << ") "
-            << " @ " << sc_time_stamp() << endl);
+            << " @ " << sc_core::sc_time_stamp() << std::endl);
     for(Components::iterator iter = lockList.begin();
         iter != lockList.end();
         ++iter){
@@ -270,7 +270,7 @@ namespace SystemC_VPC {
   void BlockingTransport::resetLists(){
     DBG_OUT("resetLists()"
             << " (" << this->getName() << ") "
-            << " @ " << sc_time_stamp() << endl);
+            << " @ " << sc_core::sc_time_stamp() << std::endl);
     phase   = LOCK_ROUTE;
     nextHop = lockList.begin();
   }

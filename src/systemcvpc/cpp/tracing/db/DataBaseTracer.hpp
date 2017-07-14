@@ -38,7 +38,7 @@
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/config/Component.hpp>
 
-#include <systemc.h>
+#include <systemc>
 
 #include <CoSupport/compatibility-glue/integertypes.h>
 
@@ -127,7 +127,7 @@ private:
     dbProxy_.addEvent(resourceName_.c_str(),
         task->getName().c_str(),
         state,
-        sc_time_stamp().value(),
+        sc_core::sc_time_stamp().value(),
         task->getInstanceId());
   }
   DataBaseProxy & dbProxy_;

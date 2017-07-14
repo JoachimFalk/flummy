@@ -59,8 +59,8 @@ namespace SystemC_VPC{
   TDMAScheduler::TDMAScheduler()
     : _properties() {
     processcount=0;
-    lastassign=SC_ZERO_TIME;
-    this->remainingSlice = SC_ZERO_TIME;
+    lastassign=sc_core::SC_ZERO_TIME;
+    this->remainingSlice = sc_core::SC_ZERO_TIME;
     slicecount=0;
     curr_slicecount=-1;  
   }
@@ -76,7 +76,7 @@ namespace SystemC_VPC{
       this->_setProperty(iter->first.c_str(), iter->second.c_str());
     }
 #ifdef VPC_DEBUG
-    cout << "------------ END Initialize ---------"<<endl;
+    std::cout << "------------ END Initialize ---------"<<std::endl;
 #endif //VPC_DEBUG      
     this->_properties.clear();
   }
@@ -126,12 +126,12 @@ namespace SystemC_VPC{
       assert(i<(int)TDMA_slots.size());
       //Beziehung PId - SlotID herstellen
       PIDmap[Director::getInstance().getProcessId(key)]=i;   
-      //                cout<<"add Function " <<  key << " to " << value<<endl;
+      //                std::cout<<"add Function " <<  key << " to " << value<<std::endl;
     }   
   }
 
   
-  bool TDMAScheduler::getSchedulerTimeSlice( sc_time& time,
+  bool TDMAScheduler::getSchedulerTimeSlice( sc_core::sc_time& time,
                                              const TaskMap &ready_tasks,
                                              const TaskMap &running_tasks )
   {      
@@ -139,9 +139,9 @@ namespace SystemC_VPC{
     if(processcount==0 && running_tasks.size()==0) return false;   
 
 
-    sc_time cycleTime =
-      CoSupport::SystemC::modulus(sc_time_stamp(), tdmaCycle);
-    std::map<sc_time, unsigned int>::iterator it =
+    sc_core::sc_time cycleTime =
+      CoSupport::SystemC::modulus(sc_core::sc_time_stamp(), tdmaCycle);
+    std::map<sc_core::sc_time, unsigned int>::iterator it =
       slotOffsets.upper_bound(cycleTime);
     if(it == slotOffsets.end()){
       remainingSlice  = tdmaCycle - cycleTime;
@@ -176,7 +176,7 @@ namespace SystemC_VPC{
 
     TDMA_slots[ PIDmap[task->getProcessId()] ].pid_fifo.push_back(task->getInstanceId());
 #ifdef VPC_DEBUG     
-    cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
+    std::cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<std::endl;
 #endif //VPC_DEBUG
     processcount++;
   }
@@ -193,7 +193,7 @@ namespace SystemC_VPC{
       }
     }
 #ifdef VPC_DEBUG    
-    cout<<"removed Task: " << task->getInstanceId()<<endl;
+    std::cout<<"removed Task: " << task->getInstanceId()<<std::endl;
 #endif //VPC_DEBUG   
     processcount--;  
   }
@@ -207,11 +207,11 @@ namespace SystemC_VPC{
                                     const TaskMap &running_tasks )
   {
 
-    assert(tdmaCycle != SC_ZERO_TIME);
+    assert(tdmaCycle != sc_core::SC_ZERO_TIME);
 
-    sc_time cycleTime =
-      CoSupport::SystemC::modulus(sc_time_stamp(), tdmaCycle);
-    std::map<sc_time, unsigned int>::iterator it =
+    sc_core::sc_time cycleTime =
+      CoSupport::SystemC::modulus(sc_core::sc_time_stamp(), tdmaCycle);
+    std::map<sc_core::sc_time, unsigned int>::iterator it =
       slotOffsets.upper_bound(cycleTime); // upper_bound is the very next slot
     if(it == slotOffsets.end()){ //
       remainingSlice  = tdmaCycle - cycleTime;
@@ -233,17 +233,17 @@ namespace SystemC_VPC{
 
       // running task == next task ?
       if( TDMA_slots[curr_slicecount].pid_fifo.front() == runningTask){
-        //cerr << "TDMA: NOCHANGE " << endl;
+        //std::cerr << "TDMA: NOCHANGE " << std::endl;
         return NOCHANGE; // no task switch needed
       }else{ //running task != next task 
         //resign running task
         task_to_resign = runningTask;
-        //cerr << "TDMA: RESIGNED?? " << endl;
+        //std::cerr << "TDMA: RESIGNED?? " << std::endl;
         ret_decision = RESIGNED;
         if( ! currentSlot.pid_fifo.empty() ){
           //assign next task if available
           task_to_assign = currentSlot.pid_fifo.front();
-          //cerr << "TDMA: PREEMPT " << endl;
+          //std::cerr << "TDMA: PREEMPT " << std::endl;
           ret_decision = PREEMPT;
         }
         return ret_decision;
@@ -253,11 +253,11 @@ namespace SystemC_VPC{
       //assign next task if available
       if( ! currentSlot.pid_fifo.empty() ){
         task_to_assign = currentSlot.pid_fifo.front();
-        //cerr << "TDMA: ASSIGN " << endl;
+        //std::cerr << "TDMA: ASSIGN " << std::endl;
         return ONLY_ASSIGN;;
       }
     }
-    //cerr << "TDMA: NOCHANGE " << endl;
+    //std::cerr << "TDMA: NOCHANGE " << std::endl;
     return ret_decision;
   }
 
@@ -265,7 +265,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  sc_time* TDMAScheduler::schedulingOverhead(){
-    return NULL; //new sc_time(1,SC_NS);
+  sc_core::sc_time* TDMAScheduler::schedulingOverhead(){
+    return NULL; //new sc_core::sc_time(1,sc_core::SC_NS);
   }
 }

@@ -37,7 +37,7 @@
 #include <list>
 #include <utility>
 
-#include <systemc.h>
+#include <systemc>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 

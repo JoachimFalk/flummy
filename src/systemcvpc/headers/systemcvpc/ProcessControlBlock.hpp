@@ -35,7 +35,7 @@
 #ifndef HSCD_VPC_PROCESSCONTROLBLOCK_H_
 #define HSCD_VPC_PROCESSCONTROLBLOCK_H_
 
-#include <systemc.h>
+#include <systemc>
 #include <float.h>
 #include <map>
 #include <vector>
@@ -105,17 +105,17 @@ namespace Trace{
        */
       const char* getFuncName() const;
 
-      void setPeriod(sc_time period);
+      void setPeriod(sc_core::sc_time period);
 
-      sc_time getPeriod() const;
+      sc_core::sc_time getPeriod() const;
       
       void setPriority(int priority);
 
       int getPriority() const;
 
-      void setDeadline(sc_time deadline);
+      void setDeadline(sc_core::sc_time deadline);
 
-      sc_time getDeadline() const;
+      sc_core::sc_time getDeadline() const;
 
       /**
        * \brief Used to increment activation count of this PCB instance
@@ -129,10 +129,10 @@ namespace Trace{
       Trace::Tracing* getTraceSignal();
 
       void setTiming(const Config::Timing& timing);
-      void setBaseDelay(sc_time delay);
-      void setBaseLatency(sc_time latency);
-      void addDelay(FunctionId fid, sc_time delay);
-      void addLatency(FunctionId fid, sc_time latency);
+      void setBaseDelay(sc_core::sc_time delay);
+      void setBaseLatency(sc_core::sc_time latency);
+      void addDelay(FunctionId fid, sc_core::sc_time delay);
+      void addLatency(FunctionId fid, sc_core::sc_time latency);
 
       void setActorAsPSM(bool psm);
       bool isPSM();
@@ -144,8 +144,8 @@ namespace Trace{
       FunctionId  fid;
 
       int priority;
-      sc_time period;
-      sc_time deadline;
+      sc_core::sc_time period;
+      sc_core::sc_time deadline;
       Trace::Tracing * traceSignal;
       AbstractComponent * component;
       CoSupport::Tracing::TaskTracer::Ptr taskTracer;

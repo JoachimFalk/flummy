@@ -37,7 +37,7 @@
 
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemc.h>
+#include <systemc>
 
 #include <map>
 #include <queue>
@@ -51,18 +51,18 @@ namespace SystemC_VPC{
 
     PriorityScheduler() : order_counter(0) {}
     virtual ~PriorityScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,
+    bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
     void addedNewTask(Task *task);
     void removedTask(Task *task);
-    sc_event& getNotifyEvent();
+    sc_core::sc_event& getNotifyEvent();
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,
                                            const  TaskMap &ready_tasks,
                                            const  TaskMap &running_tasks);
     void setProperty(const char* key, const char* value);
-    sc_time* schedulingOverhead(){return 0;}//;
+    sc_core::sc_time* schedulingOverhead(){return 0;}//;
   protected:
     int order_counter;
     std::priority_queue<p_queue_entry> pqueue;

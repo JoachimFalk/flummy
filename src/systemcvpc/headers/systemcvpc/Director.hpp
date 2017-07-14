@@ -202,17 +202,17 @@ namespace SystemC_VPC{
                              const int complexity);
 
     FastLink registerRoute(std::string source, std::string destination,
-        sc_port_base * leafPort);
+        sc_core::sc_port_base * leafPort);
 
     /**
-     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
+     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
      */
-    static sc_time createSC_Time(const char* timeString) throw(InvalidArgumentException);
+    static sc_core::sc_time createSC_Time(const char* timeString) throw(InvalidArgumentException);
 
     /**
-     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_time object.
+     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
      */
-    static sc_time createSC_Time(std::string timeString) throw(InvalidArgumentException);
+    static sc_core::sc_time createSC_Time(std::string timeString) throw(InvalidArgumentException);
     
     std::vector<ProcessId> * getTaskAnnotation(std::string compName);
 
@@ -232,7 +232,7 @@ namespace SystemC_VPC{
 
     std::string getTaskName(ProcessId id);
     
-    static sc_time getEnd() {
+    static sc_core::sc_time getEnd() {
       return end;
     }
 
@@ -286,7 +286,7 @@ namespace SystemC_VPC{
     std::string vpc_result_file;
     
     // time of latest acknowledge simulated task
-    static sc_time end;
+    static sc_core::sc_time end;
 
 #ifndef NO_POWER_SUM
     std::ofstream powerConsStream;

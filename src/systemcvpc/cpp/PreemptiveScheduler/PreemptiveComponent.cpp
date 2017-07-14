@@ -108,7 +108,7 @@ namespace SystemC_VPC{
       actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
       DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
-              << " ) at time: " << sc_time_stamp()
+              << " ) at time: " << sc_core::sc_time_stamp()
               << " mode: " << this->getPowerMode()->getName()
               << std::endl);
 
@@ -129,7 +129,7 @@ namespace SystemC_VPC{
         this->requestCanExecute();
       }
     }else{
-      //std::cout<< "Message/Task " << actualTask->getName() << " dropped due to less buffer-space of component "<< getName() << " @ " << sc_time_stamp() << std::endl;
+      //std::cout<< "Message/Task " << actualTask->getName() << " dropped due to less buffer-space of component "<< getName() << " @ " << sc_core::sc_time_stamp() << std::endl;
       actualTask->getBlockEvent().latency->setDropped(true);
     }
   }
@@ -245,10 +245,10 @@ namespace SystemC_VPC{
     }
 
     if(!ttReleaseQueue.empty()){
-      if(ttReleaseQueue.top().time<=sc_time_stamp()){
+      if(ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
         releaseActors.notify();
       }else{
-       sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+       sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
        releaseActors.notify(delta);
       }
     }
@@ -261,15 +261,15 @@ namespace SystemC_VPC{
       bool active){
     if(active) {
       TT::TimeNodePair newTask = TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask);
-      //std::cout<<"Component " << this->getName() << " notifyActivation("<<scheduledTask->getPid()<<", " << (this->getPCB(scheduledTask->getPid()))->getName() << " isPSM=" << this->getPCB(scheduledTask->getPid())->isPSM() << " @ " << newTask.time << " @ " << sc_time_stamp() << std::endl;
+      //std::cout<<"Component " << this->getName() << " notifyActivation("<<scheduledTask->getPid()<<", " << (this->getPCB(scheduledTask->getPid()))->getName() << " isPSM=" << this->getPCB(scheduledTask->getPid())->isPSM() << " @ " << newTask.time << " @ " << sc_core::sc_time_stamp() << std::endl;
       if(this->getCanExecuteTasks() || this->getPCB(scheduledTask->getPid())->isPSM()){
         pendingTask = true;
         ttReleaseQueue.push(newTask);
 
-        if(ttReleaseQueue.top().time<=sc_time_stamp()){
-          releaseActors.notify(SC_ZERO_TIME);
+        if(ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
+          releaseActors.notify(sc_core::SC_ZERO_TIME);
         }else{
-         sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+         sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
          releaseActors.notify(delta);
         }
       }else{
@@ -281,11 +281,11 @@ namespace SystemC_VPC{
 
   void PreemptiveComponent::releaseActorsMethod(){
 //     if(this->getCanExecuteTasks()){ //not required, no "normal" task will be added to ttReleaseQueue
-    //std::cout<<"Component " << this->getName() << " releaseActorsMethod " << ttReleaseQueue.top().node->getPid() << " @ " << sc_time_stamp() << std::endl;
+    //std::cout<<"Component " << this->getName() << " releaseActorsMethod " << ttReleaseQueue.top().node->getPid() << " @ " << sc_core::sc_time_stamp() << std::endl;
       TT::TimeNodePair tnp = ttReleaseQueue.top();
-      if(tnp.time <= sc_time_stamp()){
+      if(tnp.time <= sc_core::sc_time_stamp()){
         ttReleaseQueue.pop();
-        assert(tnp.time <= sc_time_stamp());
+        assert(tnp.time <= sc_core::sc_time_stamp());
         if(this->getCanExecuteTasks() || this->getPCB(tnp.node->getPid())->isPSM()){
           if(tnp.node->canFire()){
             tnp.node->schedule();
@@ -304,13 +304,13 @@ namespace SystemC_VPC{
       }
 
       if(!ttReleaseQueue.empty()){
-        if(ttReleaseQueue.top().time<=sc_time_stamp()){
-          // The SC_ZERO_TIME is needed, otherwise releaseActorsMethod won't
+        if(ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
+          // The sc_core::SC_ZERO_TIME is needed, otherwise releaseActorsMethod won't
           // be recalled.
-          releaseActors.notify(SC_ZERO_TIME);
+          releaseActors.notify(sc_core::SC_ZERO_TIME);
         }else{
-          assert(ttReleaseQueue.top().time>=sc_time_stamp());
-          sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+          assert(ttReleaseQueue.top().time>=sc_core::sc_time_stamp());
+          sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
           releaseActors.notify(delta);
         }
       }

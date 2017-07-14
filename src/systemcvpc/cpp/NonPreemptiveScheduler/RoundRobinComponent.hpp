@@ -112,7 +112,7 @@ namespace SystemC_VPC{
     }
 
     void compute(Task *actualTask) {
-      std::cout << "\t " << sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
+      std::cout << "\t " << sc_core::sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
       ProcessId pid = actualTask->getProcessId();
       /// Note that actualTask is not the task prototype, i.e.,
       /// Director::getInstance().taskPool.getPrototype(pid),

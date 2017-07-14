@@ -43,7 +43,7 @@ namespace SystemC_VPC{
   }
 
   bool PriorityScheduler::getSchedulerTimeSlice(
-    sc_time& time,
+    sc_core::sc_time& time,
     const TaskMap &ready_tasks,
     const  TaskMap &running_tasks )
   {

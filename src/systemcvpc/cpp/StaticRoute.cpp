@@ -83,7 +83,7 @@ namespace SystemC_VPC {
       newTask->setTimingScale(task->getTimingScale());
       newTask->setBlockEvent(np);
       newTask->setFunctionIds(task->getFunctionIds());
-      DBG_OUT("route on: " << components.front()->getName() << endl);
+      DBG_OUT("route on: " << components.front()->getName() << std::endl);
       (*nextHop)->compute(newTask);
       ++nextHop;
       if(newTask->getBlockEvent().latency->isDropped()){
@@ -107,7 +107,7 @@ namespace SystemC_VPC {
   //
   void StaticRoute::signaled(EventWaiter *e) {
     if(e->isActive()){
-      DBG_OUT("signaled @ " << sc_time_stamp() << endl);
+      DBG_OUT("signaled @ " << sc_core::sc_time_stamp() << std::endl);
       if(task->getBlockEvent().latency->isDropped()){
         nextHop = components.end();
       }
@@ -118,7 +118,7 @@ namespace SystemC_VPC {
 
   //
   void StaticRoute::eventDestroyed(EventWaiter *e){
-    DBG_OUT("eventDestroyed" << endl);
+    DBG_OUT("eventDestroyed" << std::endl);
   }
 
   //
@@ -168,6 +168,6 @@ namespace SystemC_VPC {
   StaticRoute::~StaticRoute( ){
     routeLat->delListener(this);
     components.clear();
-    DBG_OUT("StaticRoute::~StaticRoute( )" << endl);
+    DBG_OUT("StaticRoute::~StaticRoute( )" << std::endl);
   }
 }

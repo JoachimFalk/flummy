@@ -58,8 +58,8 @@ namespace SystemC_VPC{
 
   StreamShaperScheduler::StreamShaperScheduler()
     : _properties() {
-    lastassign=SC_ZERO_TIME;
-    this->remainingSlice = SC_ZERO_TIME;
+    lastassign=sc_core::SC_ZERO_TIME;
+    this->remainingSlice = sc_core::SC_ZERO_TIME;
     firstrun = true;
   }
   
@@ -74,7 +74,7 @@ namespace SystemC_VPC{
       this->_setProperty(iter->first.c_str(), iter->second.c_str());
     }
 #ifdef VPC_DEBUG
-    cout << "------------ END Initialize ---------"<<endl;
+    std::cout << "------------ END Initialize ---------"<<std::endl;
 #endif //VPC_DEBUG      
     this->_properties.clear();
   }
@@ -92,17 +92,17 @@ namespace SystemC_VPC{
   }
 
   
-  bool StreamShaperScheduler::getSchedulerTimeSlice( sc_time& time,
+  bool StreamShaperScheduler::getSchedulerTimeSlice( sc_core::sc_time& time,
                                              const TaskMap &ready_tasks,
                                              const TaskMap &running_tasks )
   {
     if(firstrun) return false;
 
-    sc_time nextRelTime = lastassign + shapeCycle;
-    if(nextRelTime <= sc_time_stamp()){
+    sc_core::sc_time nextRelTime = lastassign + shapeCycle;
+    if(nextRelTime <= sc_core::sc_time_stamp()){
         return false;
     }
-    time = nextRelTime - sc_time_stamp();
+    time = nextRelTime - sc_core::sc_time_stamp();
     return true;
   }
   
@@ -130,13 +130,13 @@ namespace SystemC_VPC{
                                     const TaskMap &running_tasks )
   {
     scheduling_decision ret = NOCHANGE;
-    if(firstrun || sc_time_stamp() >= lastassign + shapeCycle){
+    if(firstrun || sc_core::sc_time_stamp() >= lastassign + shapeCycle){
         firstrun=false;
         if(running_tasks.size()==0){
            if(stream_fifo.size()>0){
               task_to_assign = stream_fifo.front();
               stream_fifo.pop_front();
-              lastassign = sc_time_stamp();
+              lastassign = sc_core::sc_time_stamp();
               ret = ONLY_ASSIGN;
             }
           }
@@ -149,7 +149,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  sc_time* StreamShaperScheduler::schedulingOverhead(){
-    return NULL; //new sc_time(1,SC_NS);
+  sc_core::sc_time* StreamShaperScheduler::schedulingOverhead(){
+    return NULL; //new sc_core::sc_time(1,sc_core::SC_NS);
   }
 }

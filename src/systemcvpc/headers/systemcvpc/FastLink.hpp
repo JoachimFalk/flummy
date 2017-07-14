@@ -34,7 +34,7 @@
 
 #ifndef __INCLUDED__FASTLINK__H__
 #define __INCLUDED__FASTLINK__H__
-#include <systemc.h>
+#include <systemc>
 #include "EventPair.hpp"
 #include "datatypes.hpp"
 

@@ -37,7 +37,7 @@
 
 #include <map>
 #include <deque>
-#include <systemc.h>
+#include <systemc>
 
 #include <systemcvpc/PowerMode.hpp>
 #include <systemcvpc/PluggablePowerGovernor.hpp>

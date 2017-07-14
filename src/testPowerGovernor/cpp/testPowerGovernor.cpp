@@ -42,8 +42,8 @@ int main()
 {
   SelectFastestPowerModeGovernor *govTop = new SelectFastestPowerModeGovernor;
 
-  LoadHysteresisGovernor *gov1 = new LoadHysteresisGovernor(govTop, sc_time(10, SC_MS), sc_time(7.5, SC_MS), sc_time(2.5, SC_MS));
-  LoadHysteresisGovernor *gov2 = new LoadHysteresisGovernor(govTop, sc_time(10, SC_MS), sc_time(7.5, SC_MS), sc_time(2.5, SC_MS));
+  LoadHysteresisGovernor *gov1 = new LoadHysteresisGovernor(govTop, sc_core::sc_time(10, sc_core::SC_MS), sc_core::sc_time(7.5, sc_core::SC_MS), sc_core::sc_time(2.5, sc_core::SC_MS));
+  LoadHysteresisGovernor *gov2 = new LoadHysteresisGovernor(govTop, sc_core::sc_time(10, sc_core::SC_MS), sc_core::sc_time(7.5, sc_core::SC_MS), sc_core::sc_time(2.5, sc_core::SC_MS));
   
   PreemptiveComponent *res1 = new PreemptiveComponent("res1", "FCFS");
   PreemptiveComponent *res2 = new PreemptiveComponent("res2", "FCFS");

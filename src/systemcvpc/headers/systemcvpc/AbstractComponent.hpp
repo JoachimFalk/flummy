@@ -38,7 +38,7 @@
 #include <vector>
 #include <map>
 
-#include <systemc.h>
+#include <systemc>
 
 #include <string.h>
 
@@ -80,7 +80,7 @@ class ComponentObserver;
    * \brief The interface of a Virtual-Processing-Component (VPC).
    */
   class AbstractComponent:
-    public sc_module,
+    public sc_core::sc_module,
     public Delayer,
     public ComponentModel,
     public ComponentInterface
@@ -164,7 +164,7 @@ class ComponentObserver;
       //assert(this->canExecuteTasks == false);
       componentIdle->reset();
       if(!requestExecuteTasks && componentWakeup != 0){
-        //std::cout<< "Comp: " << this->getName()<<" requestCanExecute() - componentWakeup->notify() @ " << sc_time_stamp() <<  std::endl;
+        //std::cout<< "Comp: " << this->getName()<<" requestCanExecute() - componentWakeup->notify() @ " << sc_core::sc_time_stamp() <<  std::endl;
         //First request
         requestExecuteTasks=true;
         componentWakeup->notify();
@@ -174,17 +174,17 @@ class ComponentObserver;
     bool requestShutdown(){
 
         //FIXME: why did I use sc_pending_activity_at_current_time() here? what special-case?
-      if(!hasWaitingOrRunningTasks() && (shutdownRequestAtTime == sc_time_stamp()) /*&& !sc_pending_activity_at_current_time()*/){
+      if(!hasWaitingOrRunningTasks() && (shutdownRequestAtTime == sc_core::sc_time_stamp()) /*&& !sc_pending_activity_at_current_time()*/){
         if(componentIdle != 0){
-          //std::cout<< "Comp: " << this->getName()<<" requestShutdown() - componentIdle->notify() @ " << sc_time_stamp() << " hasWaitingOrRunningTasks=" << hasWaitingOrRunningTasks()<< " " << sc_pending_activity_at_current_time() /*<< " " << m_simcontext->next_time()*/ <<  std::endl;
+          //std::cout<< "Comp: " << this->getName()<<" requestShutdown() - componentIdle->notify() @ " << sc_core::sc_time_stamp() << " hasWaitingOrRunningTasks=" << hasWaitingOrRunningTasks()<< " " << sc_pending_activity_at_current_time() /*<< " " << m_simcontext->next_time()*/ <<  std::endl;
           //TODO: maybe notify it in the future?
           componentIdle->notify();
-          if(sc_pending_activity_at_current_time()){
+          if(sc_core::sc_pending_activity_at_current_time()){
               return false;
           }
         }
       }else{
-        shutdownRequestAtTime = sc_time_stamp();
+        shutdownRequestAtTime = sc_core::sc_time_stamp();
         return false;
       }
       return true;
@@ -210,7 +210,7 @@ class ComponentObserver;
 
   protected:
 
-    std::map<const PowerMode*, sc_time> transactionDelays;
+    std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
     ScheduledTasks scheduledTasks;
     std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
     bool requestExecuteTasks;
@@ -218,7 +218,7 @@ class ComponentObserver;
 
     struct MultiCastGroupInstance{
       MultiCastGroup mcg;
-      sc_time timestamp;
+      sc_core::sc_time timestamp;
       Task* task;
       std::list<Task*>* additional_tasks;
     };
@@ -245,7 +245,7 @@ class ComponentObserver;
               //we assume a fixed order of token-events, thus, the first free one is the correct one.
               if(!existing){
                   mcgi->additional_tasks->push_back(actualTask);
-                  assert(mcgi->timestamp == sc_time_stamp()); // if not, MultiCastMessage reached at different times...
+                  assert(mcgi->timestamp == sc_core::sc_time_stamp()); // if not, MultiCastMessage reached at different times...
                   return mcgi;
               }
             }
@@ -254,7 +254,7 @@ class ComponentObserver;
       // no Instance found, create new one
       MultiCastGroupInstance* newInstance = new MultiCastGroupInstance();
       newInstance->mcg = multiCastGroups[actualTask->getProcessId()];
-      newInstance->timestamp = sc_time_stamp();
+      newInstance->timestamp = sc_core::sc_time_stamp();
       newInstance->task = actualTask;
       newInstance->additional_tasks = new  std::list<Task*>();
       multiCastGroupInstances.push_back(newInstance);
@@ -264,7 +264,7 @@ class ComponentObserver;
   public:
   
     AbstractComponent(Config::Component::Ptr component) :
-        sc_module(sc_module_name(component->getName().c_str())),
+        sc_core::sc_module(sc_core::sc_module_name(component->getName().c_str())),
         Delayer(component->getComponentId(),
             component->getName()),
         transactionDelays(),
@@ -388,7 +388,7 @@ class ComponentObserver;
     std::map<const PowerMode*, FunctionTimingPoolPtr> timingPools;
     const PowerMode *powerMode;
     bool canExecuteTasks;
-    sc_time shutdownRequestAtTime;
+    sc_core::sc_time shutdownRequestAtTime;
     Coupling::VPCEvent::Ptr componentWakeup;
     Coupling::VPCEvent::Ptr componentIdle;
 

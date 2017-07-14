@@ -44,9 +44,9 @@ namespace TT
 
 /* struct used to store an event with a certain release-time */
 struct TimeNodePair{
-  TimeNodePair(sc_time time,  ScheduledTask *node)
+  TimeNodePair(sc_core::sc_time time,  ScheduledTask *node)
     : time(time), node(node) {}
-  sc_time time;
+  sc_core::sc_time time;
   ScheduledTask *node;
 };
 
@@ -56,8 +56,8 @@ struct nodeCompare{
   bool operator()(const TimeNodePair& tnp1,
                   const TimeNodePair& tnp2) const
   {
-    sc_time p1=tnp1.time;
-    sc_time p2=tnp2.time;
+    sc_core::sc_time p1=tnp1.time;
+    sc_core::sc_time p2=tnp2.time;
     if (p1 > p2)
       return true;
     else

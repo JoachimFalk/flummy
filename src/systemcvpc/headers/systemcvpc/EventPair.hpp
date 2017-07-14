@@ -35,7 +35,7 @@
 #ifndef HSCD_VPC_EVENTPAIR_H
 #define HSCD_VPC_EVENTPAIR_H
 
-#include <systemc.h>
+#include <systemc>
 
 #include <systemcvpc/coupling/VPCEvent.hpp>
 

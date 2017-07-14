@@ -89,9 +89,9 @@ namespace SystemC_VPC{
     //alt (TDMA)
     processcount=0;
     cyclecount=0;
-    lastassign=sc_time(0,SC_NS);
-    cycle_length = sc_time(0,SC_NS);
-    this->remainingSlice = sc_time(0,SC_NS);
+    lastassign=sc_core::sc_time(0,sc_core::SC_NS);
+    cycle_length = sc_core::sc_time(0,sc_core::SC_NS);
+    this->remainingSlice = sc_core::sc_time(0,sc_core::SC_NS);
     slicecount=0;
     to_init=0;
    // firstrun=true;
@@ -112,7 +112,7 @@ namespace SystemC_VPC{
       this->_setProperty(iter->first.c_str(), iter->second.c_str());
     }
 #ifdef VPC_DEBUG
-    cout << "------------ END Initialize ---------"<<endl;
+    std::cout << "------------ END Initialize ---------"<<std::endl;
 #endif //VPC_DEBUG      
     this->_properties.clear();
   }
@@ -124,7 +124,7 @@ namespace SystemC_VPC{
       //Herausfinden, welcher Slot genannt ist + welche Zeit ihm zugeordnet wird    
   
       if(0==strncmp(key,"slot",strlen("slot"))){
-      //cout<<"hier darf ich - bei neuer Config - nichtmehr hin!!!!!!!"<<endl;
+      //std::cout<<"hier darf ich - bei neuer Config - nichtmehr hin!!!!!!!"<<std::endl;
       domain=strstr(key,"slot");
       if(domain!=NULL){
       domain+=4*sizeof(char);
@@ -139,7 +139,7 @@ namespace SystemC_VPC{
       TDMA_slots.insert(TDMA_slots.end(), newSlot);
       }else{
       Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
-      //cout<<"new Dynamic One! " << newSlot.length <<endl;
+      //std::cout<<"new Dynamic One! " << newSlot.length <<std::endl;
       }
       slicecount++;
       //Erzeugen einer Info-Ausgabe             
@@ -153,7 +153,7 @@ namespace SystemC_VPC{
       }else 
       if(0==strncmp(value,"slot",strlen("slot"))){
     */
-    //cout<<"looking for "<< key << " and " << value<<endl;
+    //std::cout<<"looking for "<< key << " and " << value<<std::endl;
     int i=-1;
     //schon Slots geadded? oder cmx-Syntax/Reihenfolge falsch?
     assert(0<TDMA_slots.size());
@@ -161,12 +161,12 @@ namespace SystemC_VPC{
     do{
       //nichts zu tun.. da lediglich durchiteriert wird!
     }while(TDMA_slots[++i].name != value && (i+1)<(int)TDMA_slots.size());
-    //cout<<"found at i= " <<i<<endl;
+    //std::cout<<"found at i= " <<i<<std::endl;
                 
     if(TDMA_slots[i].name != value){
       i=-1;
       assert(0<Dynamic_slots.size());
-      //cout<< "DynSize: " << Dynamic_slots.size()<<endl;
+      //std::cout<< "DynSize: " << Dynamic_slots.size()<<std::endl;
       do{
         //nichts zu tun.. da lediglich durchiteriert wird!
       }while(Dynamic_slots[++i].name != value && (i+1)<(int)Dynamic_slots.size());
@@ -174,13 +174,13 @@ namespace SystemC_VPC{
       assert(i<(int)Dynamic_slots.size());      
       i+=StartslotDynamic;      
     }
-    //cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<endl;
+    //std::cout<<"PId-Map "<<i<< " to "<< Director::getInstance().getProcessId(key) <<std::endl;
     //Beziehung PId - SlotID herstellen
     ProcessId id=Director::getInstance().getProcessId(key);
     PIDmap[id]=i;   
     ProcessParams[id]=ProcessParams_string[key];
-    //                 cout<<"registered function: "<< key<<" with ID: "<<id<<endl;
-    //          cout<<"add Function " <<  key << " to " << value<<endl;
+    //                 std::cout<<"registered function: "<< key<<" with ID: "<<id<<std::endl;
+    //          std::cout<<"add Function " <<  key << " to " << value<<std::endl;
                 
   }
 
@@ -190,7 +190,7 @@ namespace SystemC_VPC{
     if( value!="FlexRayParams" )
       return;
 
-    //cout<<attributePtr->getAttributeSize()<<endl;
+    //std::cout<<attributePtr->getAttributeSize()<<std::endl;
     if(attributePtr->getParameterSize()!=0){
       //es gibt folglich globale FlexRay-Parameter!
       if(attributePtr->hasParameter("duachannel")){
@@ -211,7 +211,7 @@ namespace SystemC_VPC{
         param.first=attribute2.second->getType();
         param.second=attribute2.second->getValue();
                         
-        //cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<endl;
+        //std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
         TDMASlot newSlot;
         //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
         newSlot.length = Director::createSC_Time(param.second.c_str() );  
@@ -228,7 +228,7 @@ namespace SystemC_VPC{
 
             param3.first=attribute3.second->getValue();
             param3.second=param.first;
-            // cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<endl;
+            // std::cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<std::endl;
                             
             this->_properties.push_back(param3);
             ProcessParams_string[param3.first]=SlotParameters(0,0);
@@ -242,7 +242,7 @@ namespace SystemC_VPC{
                          attribute3.second->getParameter("offset")
                          .c_str()
                          );
-                //                                   cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+                //                                   std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
               }
               if(attribute3.second->hasParameter("multiplex")){
                 ProcessParams_string[param3.first].multiplex
@@ -250,7 +250,7 @@ namespace SystemC_VPC{
                          attribute3.second->getParameter("multiplex")
                          .c_str()
                          );
-                //                                   cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<endl;
+                //                                   std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
               }
             }
           }
@@ -264,7 +264,7 @@ namespace SystemC_VPC{
           if(param2.first == "mapping"){
           param2.first=param2.second;
           param2.second=param.first;
-          cout<<"found static binding: "<<param2.second <<" with value: "<<param2.first<<endl;
+          std::cout<<"found static binding: "<<param2.second <<" with value: "<<param2.first<<std::endl;
           this->_properties.push_back(param2);
           }
                                 
@@ -275,7 +275,7 @@ namespace SystemC_VPC{
       /*
         for(j=0;j<attribute2.second->getParameterSize();j++){
         std::pair<std::string, std::string > param=attribute2.second->getNextParameter(j);
-        cout<<"found static Slot: "<<param.first <<" with value: "<<param.second <<endl;
+        std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second <<std::endl;
         this->_properties.push_back(param);
                         
         }
@@ -293,7 +293,7 @@ namespace SystemC_VPC{
         std::pair<std::string, std::string > param;
         param.first=attribute2.second->getType();
         param.second=attribute2.second->getValue();
-        //                      cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second <<endl;
+        //                      std::cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second <<std::endl;
                         
         TDMASlot newSlot;
         std::string temp = param.second;
@@ -304,7 +304,7 @@ namespace SystemC_VPC{
         newSlot.length = Director::createSC_Time(param.second.c_str() );        
         newSlot.name = param.first;
         Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
-        //                      cout<<"new Dynamic One! " << newSlot.length <<endl;
+        //                      std::cout<<"new Dynamic One! " << newSlot.length <<std::endl;
                 
         //jetzt noch die Task-mappings!
         for(size_t j=0;j<attribute2.second->getParameterSize();j++){
@@ -312,7 +312,7 @@ namespace SystemC_VPC{
           if(param2.first == "mapping"){
             param2.first=param2.second;
             param2.second=param.first;
-            //                          cout<<"found dyn. binding: "<<param2.first <<"value: "<<param2.second<<endl;
+            //                          std::cout<<"found dyn. binding: "<<param2.first <<"value: "<<param2.second<<std::endl;
             this->_properties.push_back(param2);
           }
         }
@@ -321,48 +321,48 @@ namespace SystemC_VPC{
       /*        std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(0);
                 for(j=0;j<attribute2.second->getParameterSize();j++){
                 std::pair<std::string, std::string > param=attribute2.second->getNextParameter(j);
-                cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second<<endl;
+                std::cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
                 this->_properties.push_back(param);
                 }
       */
     }   
   }
   
-  bool FlexRayScheduler::getSchedulerTimeSlice( sc_time& time,
+  bool FlexRayScheduler::getSchedulerTimeSlice( sc_core::sc_time& time,
                                                 const TaskMap &ready_tasks,
                                                 const TaskMap &running_tasks )
   {   
     // keine wartenden + keine aktiven Threads -> ende!
-/*    if(processcount==0 && running_tasks.size()==0)   {cout<<"return 0"<<endl; return 0;} */
+/*    if(processcount==0 && running_tasks.size()==0)   {std::cout<<"return 0"<<std::endl; return 0;} */
     //ansonsten: Restlaufzeit der Zeitscheibe
     if(curr_slicecount<StartslotDynamic){ //statisch
       if(curr_slicecount == -1){
         if(ready_tasks.size() == 0 && running_tasks.size() == 0 ){
           return false;
         }else{
-          time=sc_time(0,SC_NS);
+          time=sc_core::sc_time(0,sc_core::SC_NS);
         }
       }else{
         time=this->remainingSlice;
       }
     }else{
       //Dynamisch
-      //      cout<<"dynamic-timeSlice-request "<< curr_slicecount << "  " << sc_time_stamp() << "  " << time << "running_tasks " << running_tasks.size() <<endl;
+      //      std::cout<<"dynamic-timeSlice-request "<< curr_slicecount << "  " << sc_core::sc_time_stamp() << "  " << time << "running_tasks " << running_tasks.size() <<std::endl;
       if(running_tasks.size()<=1){
         //gerade kein (dynamic) Task aktiv.. -> naechster Schedulevorgang!
         //oder nur einer -> ein Kanal frei!
-        time=sc_time(1,SC_US); //sofortiges Reschedule im nächsten Microtick bewirken!
+        time=sc_core::sc_time(1,sc_core::SC_US); //sofortiges Reschedule im nächsten Microtick bewirken!
       }else{
         //beide Kanaele voll.. -> naechster Schedulevorgang nach Ende von einem...
         if(remainingSliceA < remainingSliceB){
-          time=remainingSliceA - (sc_time_stamp() - this->lastassignA);
+          time=remainingSliceA - (sc_core::sc_time_stamp() - this->lastassignA);
         }else{
-          time=remainingSliceB - (sc_time_stamp() - this->lastassignB);
+          time=remainingSliceB - (sc_core::sc_time_stamp() - this->lastassignB);
         }
       }    
-      if( TimeDynamicSegment == sc_time(0,SC_NS) )
+      if( TimeDynamicSegment == sc_core::sc_time(0,sc_core::SC_NS) )
         //Quick-FIX Falls KEIN dynamischer Teil benutzt wird..
-        time=sc_time(0,SC_NS);
+        time=sc_core::sc_time(0,sc_core::SC_NS);
 
     }
     return true;   
@@ -371,25 +371,25 @@ namespace SystemC_VPC{
   
   void FlexRayScheduler::addedNewTask(Task *task){    
     int index = PIDmap[task->getProcessId()];
-         // cerr<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<" name:"<<task->getName()<<endl;
+         // std::cerr<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<" name:"<<task->getName()<<std::endl;
     if(index<StartslotDynamic){
       //TDMA-Task
       TDMA_slots[ index ].pid_fifo.push_back(task->getInstanceId());
       ProcessParams[task->getInstanceId()]=ProcessParams[task->getProcessId()];
 //#ifdef VPC_DEBUG     
-      //cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<endl;
+      //std::cout<<"added Process " <<  task->getInstanceId() << " to Slot " << PIDmap[task->getProcessId()]  <<std::endl;
 //#endif //VPC_DEBUG
     
-      //cout << "added static Task" <<endl;
+      //std::cout << "added static Task" <<std::endl;
     }else{
-        //cout << "added Dynamic Task at Slot " << index - StartslotDynamic  <<endl;
+        //std::cout << "added Dynamic Task at Slot " << index - StartslotDynamic  <<std::endl;
       Dynamic_slots[ index - StartslotDynamic ].pid_fifo.push_back(task->getInstanceId());
     }
     
     if(processcount==0 /*&& firstrun == false */){
-	    cyclecount = (int) (sc_time_stamp() / cycle_length);
+	    cyclecount = (int) (sc_core::sc_time_stamp() / cycle_length);
 	    to_init=true;
-	   // cout<<"new cyclecount: "<<cyclecount<<endl;
+	   // std::cout<<"new cyclecount: "<<cyclecount<<std::endl;
      }
      //firstrun=false;
      processcount++;
@@ -398,7 +398,7 @@ namespace SystemC_VPC{
   void FlexRayScheduler::removedTask(Task *task){ 
     int index = PIDmap[task->getProcessId()];
     
-    // cout<<"Task entfernt! @ "<< sc_time_stamp() << "  " << index << endl;
+    // std::cout<<"Task entfernt! @ "<< sc_core::sc_time_stamp() << "  " << index << std::endl;
       
     std::deque<int>::iterator iter;
     if(index<StartslotDynamic){
@@ -418,7 +418,7 @@ namespace SystemC_VPC{
       }
     }
 #ifdef VPC_DEBUG    
-    cout<<"removed Task: " << task->getInstanceId()<<endl;
+    std::cout<<"removed Task: " << task->getInstanceId()<<std::endl;
 #endif //VPC_DEBUG   
     processcount--;  
   }
@@ -434,38 +434,38 @@ namespace SystemC_VPC{
     scheduling_decision ret_decision = NOCHANGE;
     //statischer oder dynamischer Teil?
     if(curr_slicecount+1<StartslotDynamic){
-      //     cout<<"Static! @ "<< sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< endl;
+      //     std::cout<<"Static! @ "<< sc_core::sc_time_stamp() << " curr slice: " << curr_slicecount+1 <<" cycle: "<< cyclecount<< std::endl;
       //TDMA-Scheduling: unveraendert aus TDMAScheduler verwendet.
       ret_decision=NOCHANGE;
       //Zeitscheibe abgelaufen?
-      if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
+      if(this->remainingSlice < (sc_core::sc_time_stamp() - this->lastassign)) this->remainingSlice=sc_core::SC_ZERO_TIME;
       else{
-        this->remainingSlice = this->remainingSlice - (sc_time_stamp() - this->lastassign);  
+        this->remainingSlice = this->remainingSlice - (sc_core::sc_time_stamp() - this->lastassign);  
       }
-      this->lastassign = sc_time_stamp();
+      this->lastassign = sc_core::sc_time_stamp();
     
-      if(this->remainingSlice <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
+      if(this->remainingSlice <= sc_core::sc_time(0,sc_core::SC_NS)){//Zeitscheibe wirklich abgelaufen!
         curr_slicecount++; // Wechsel auf die naechste Zeitscheibe noetig!
         //neue Timeslice laden
         this->remainingSlice = TDMA_slots[curr_slicecount].length;
         
         //Korrekturfaktor falls mitten im Slot
         if(to_init == true && running_tasks.size()==0) {
-        //	cout<<"FIXME - curr_slicecount: "<< curr_slicecount<<" curr_remaining_slice="<< this->remainingSlice<< " @" <<sc_time_stamp()<<endl;
+        //	std::cout<<"FIXME - curr_slicecount: "<< curr_slicecount<<" curr_remaining_slice="<< this->remainingSlice<< " @" <<sc_core::sc_time_stamp()<<std::endl;
         	to_init=false;
-	//	cout<<"remainingSlice: " << this->remainingSlice <<"  "<<sc_time_stamp()<<" - "<< cycle_length <<" * "<< cyclecount<<endl;
+	//	std::cout<<"remainingSlice: " << this->remainingSlice <<"  "<<sc_core::sc_time_stamp()<<" - "<< cycle_length <<" * "<< cyclecount<<std::endl;
 		
-		if(sc_time_stamp() < cycle_length * cyclecount){
+		if(sc_core::sc_time_stamp() < cycle_length * cyclecount){
 			//Quick-FIX: Bug if last Slot is completely empty
-			this->remainingSlice = sc_time_stamp() - cycle_length * (cyclecount-1);
+			this->remainingSlice = sc_core::sc_time_stamp() - cycle_length * (cyclecount-1);
 		}else{
-        		this->remainingSlice = sc_time_stamp() - cycle_length * cyclecount;
+        		this->remainingSlice = sc_core::sc_time_stamp() - cycle_length * cyclecount;
 		}
-        //	cout<<"new temp value: "<<this->remainingSlice<<endl;
+        //	std::cout<<"new temp value: "<<this->remainingSlice<<std::endl;
         	for(int i_fix = 0; i_fix < StartslotDynamic; i_fix++){
         		if( this->remainingSlice > TDMA_slots[i_fix].length){
         			this->remainingSlice = this->remainingSlice  - TDMA_slots[i_fix].length;
-        //			cout<<"new value: " << i_fix << "with: "<< TDMA_slots[i_fix].length <<" = "<<this->remainingSlice<<endl;
+        //			std::cout<<"new value: " << i_fix << "with: "<< TDMA_slots[i_fix].length <<" = "<<this->remainingSlice<<std::endl;
         		}else{
        				this->remainingSlice = TDMA_slots[i_fix].length - this->remainingSlice;
        				curr_slicecount = i_fix;
@@ -473,7 +473,7 @@ namespace SystemC_VPC{
         		}
         	}
 
-         	//cout<<"new value: "<<this->remainingSlice<<endl; 
+         	//std::cout<<"new value: "<<this->remainingSlice<<std::endl; 
         }
         if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
           unsigned int tempcount=0;
@@ -482,14 +482,14 @@ namespace SystemC_VPC{
           while(!found && tempcount<TDMA_slots[curr_slicecount].pid_fifo.size()){
             task_to_assign = TDMA_slots[curr_slicecount].pid_fifo[tempcount];
             //is this task allowed to run in this slot?
-            //            cout<<"testing "<<tempcount<<" @ "<<curr_slicecount<<" bei "<<task_to_assign<<" von gesamt: "<<TDMA_slots[curr_slicecount].pid_fifo.size()<<endl;
+            //            std::cout<<"testing "<<tempcount<<" @ "<<curr_slicecount<<" bei "<<task_to_assign<<" von gesamt: "<<TDMA_slots[curr_slicecount].pid_fifo.size()<<std::endl;
             if(ProcessParams[task_to_assign].offset<=cyclecount){
-              //          cout<<"found task_to_assign: "<<task_to_assign<<endl;
+              //          std::cout<<"found task_to_assign: "<<task_to_assign<<std::endl;
               int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
               if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
-                /* cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
-                   cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
-                   cout<< " MOD= " << cyclecount % mux_value <<" @ "<< sc_time_stamp()<<endl;
+                /* std::cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << std::endl;
+                   std::cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<std::endl;
+                   std::cout<< " MOD= " << cyclecount % mux_value <<" @ "<< sc_core::sc_time_stamp()<<std::endl;
                 */
                 found=true;
               }
@@ -499,7 +499,7 @@ namespace SystemC_VPC{
         
           //alter wurde schon entfernt (freiwillige abgabe "BLOCK")
           // -> kein preemption!
-          //         cout<<"here we are"<<endl;
+          //         std::cout<<"here we are"<<std::endl;
           ret_decision= ONLY_ASSIGN;
         
           if(!found){ //keinen lauffaehigen gefunden! -> idle werden
@@ -546,7 +546,7 @@ namespace SystemC_VPC{
         //oder alter entfernt    -> neuen setzen
         //neuen setzen:
         if(running_tasks.size()==0){       //alter entfernt  -> neuen setzen
-          //   cout<<"Task fertig!"<<endl;
+          //   std::cout<<"Task fertig!"<<std::endl;
           if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){            // ist da auch ein neuer da?        
             unsigned int tempcount=0;
             bool found=false;
@@ -561,9 +561,9 @@ namespace SystemC_VPC{
                 int mux_value = 1 << ProcessParams[task_to_assign].multiplex;
                 //no multiplex - run it  -- 
                 if(ProcessParams[task_to_assign].multiplex==0 || (cyclecount % mux_value)==ProcessParams[task_to_assign].offset){
-                    /*cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << endl;
-                      cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<endl;
-                      cout<< " MOD= " << cyclecount % mux_value <<" @ "<< sc_time_stamp()<<endl;
+                    /*std::cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << std::endl;
+                      std::cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<std::endl;
+                      std::cout<< " MOD= " << cyclecount % mux_value <<" @ "<< sc_core::sc_time_stamp()<<std::endl;
 					*/                  
                   found=true;
                 }
@@ -584,24 +584,24 @@ namespace SystemC_VPC{
       }
     }else{
       //Dynamischer Teil von FlexRay  
-      if((curr_slicecount+1)==StartslotDynamic && this->remainingSlice > sc_time(0,SC_NS) ){
+      if((curr_slicecount+1)==StartslotDynamic && this->remainingSlice > sc_core::sc_time(0,sc_core::SC_NS) ){
         //Restzeit des statischen Abschnitts "verbraten"
         ret_decision=NOCHANGE;
-        if(this->remainingSlice < (sc_time_stamp() - this->lastassign)) this->remainingSlice=SC_ZERO_TIME;
-        else{ this->remainingSlice = this->remainingSlice - (sc_time_stamp() - this->lastassign);  }
-        this->lastassign = sc_time_stamp();
+        if(this->remainingSlice < (sc_core::sc_time_stamp() - this->lastassign)) this->remainingSlice=sc_core::SC_ZERO_TIME;
+        else{ this->remainingSlice = this->remainingSlice - (sc_core::sc_time_stamp() - this->lastassign);  }
+        this->lastassign = sc_core::sc_time_stamp();
         
       }else{
     
-        //      cout<<"Dynamic! "<< curr_slicecount << "  " << sc_time_stamp()<< endl;
+        //      std::cout<<"Dynamic! "<< curr_slicecount << "  " << sc_core::sc_time_stamp()<< std::endl;
         if(curr_slicecount+1==StartslotDynamic){
           //Start des Dyn. Segments
           curr_slicecount++;
           this->remainingSlice=TimeDynamicSegment;
           curr_slicecountA=0;
-          remainingSliceA=sc_time(0,SC_NS);
+          remainingSliceA=sc_core::sc_time(0,sc_core::SC_NS);
           curr_slicecountB=0;
-          remainingSliceA=sc_time(0,SC_NS);
+          remainingSliceA=sc_core::sc_time(0,sc_core::SC_NS);
          
           //auf alle Faelle den letzten (periodischen) Task verdraengen!
           if(running_tasks.size()!=0){  // alten Task entfernen
@@ -614,10 +614,10 @@ namespace SystemC_VPC{
             //war keiner da... und ist auch kein Neuer da -> keine Aenderung    
             ret_decision=NOCHANGE;
           }      
-          this->lastassign = sc_time_stamp();
+          this->lastassign = sc_core::sc_time_stamp();
         }else{  
           //Zeitscheibe abgelaufen? -> ende des dyn. Teils.. und Wechsel zurueck zum statischen
-          if(this->remainingSlice <=(sc_time_stamp() - this->lastassign)){
+          if(this->remainingSlice <=(sc_core::sc_time_stamp() - this->lastassign)){
             if(running_tasks.size()!=0){  // alten Task entfernen
               TaskMap::const_iterator iter;
               iter=running_tasks.begin();
@@ -630,16 +630,16 @@ namespace SystemC_VPC{
             }    
                 
             if(running_tasks.size()<2){
-              this->remainingSlice=SC_ZERO_TIME;
+              this->remainingSlice=sc_core::SC_ZERO_TIME;
               //dynamischer Teil "aufgeraeumt" -> statischer kann starten.
               curr_slicecount=-1;
               //naechster Zyklus beginnt
               cyclecount++;
             }
-            this->lastassign=sc_time_stamp();
+            this->lastassign=sc_core::sc_time_stamp();
             curr_slicecountA=0;
             curr_slicecountB=0;
-            // cout<<"Dyn Ende! "<< this->lastassign <<endl;
+            // std::cout<<"Dyn Ende! "<< this->lastassign <<std::endl;
                 
           }else{ //Normalfall im dynamischen Teil.. -> ByteFlight-Protokoll!
             if(running_tasks.size() ==0){ //es laeuft grad keiner -> aktuellen auf Kanal A einlasten
@@ -649,7 +649,7 @@ namespace SystemC_VPC{
                   taskAssignedToA=task_to_assign;
                   ret_decision= ONLY_ASSIGN;
                   remainingSliceA=Dynamic_slots[curr_slicecountA].length;
-                  lastassignA=sc_time_stamp();
+                  lastassignA=sc_core::sc_time_stamp();
                   curr_slicecountA++;
                 }else{//oder doch Kanal B nehmen? ;-)
                   if(curr_slicecountB + StartslotDynamic < slicecount){
@@ -658,7 +658,7 @@ namespace SystemC_VPC{
                       taskAssignedToB=task_to_assign;
                       ret_decision= ONLY_ASSIGN;        
                       remainingSliceB=Dynamic_slots[curr_slicecountB].length;
-                      lastassignB=sc_time_stamp();
+                      lastassignB=sc_core::sc_time_stamp();
                       curr_slicecountB++;
                     }else{
                       //hm, keiner da :-(  -> Zeit/Zaehler vorranschreiten lassen.
@@ -673,19 +673,19 @@ namespace SystemC_VPC{
             }else{
                 
               if(running_tasks.size() ==1){ //es laeft ein Prozess -> pruefen auf welchem Kanal
-                if(remainingSliceA > sc_time(0,SC_NS)){ //auf Kanal A =D
+                if(remainingSliceA > sc_core::sc_time(0,sc_core::SC_NS)){ //auf Kanal A =D
                   //und ob er noch weiterlaufen darf ;-) 
                 
                   //-------------------------------------------         
-                  if(this->remainingSliceA < (sc_time_stamp() - this->lastassignA)){ 
-                    this->remainingSliceA=SC_ZERO_TIME;
+                  if(this->remainingSliceA < (sc_core::sc_time_stamp() - this->lastassignA)){ 
+                    this->remainingSliceA=sc_core::SC_ZERO_TIME;
                   }else{
-                    this->remainingSliceA = this->remainingSliceA - (sc_time_stamp() - this->lastassignA);  
+                    this->remainingSliceA = this->remainingSliceA - (sc_core::sc_time_stamp() - this->lastassignA);  
                   }
-                  this->lastassignA = sc_time_stamp();
-                  if(this->remainingSliceA <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
+                  this->lastassignA = sc_core::sc_time_stamp();
+                  if(this->remainingSliceA <= sc_core::sc_time(0,sc_core::SC_NS)){//Zeitscheibe wirklich abgelaufen!
                     if(curr_slicecountA + StartslotDynamic +1 < slicecount){
-                      // cout<<"next slicecount dynamic"<<endl;
+                      // std::cout<<"next slicecount dynamic"<<std::endl;
           
                       //                curr_slicecountA++; // Wechsel auf die naechste Zeitscheibe noetig!
                       //neue Timeslice laden
@@ -752,14 +752,14 @@ namespace SystemC_VPC{
                   if(dualchannel){
                 
                     //-------------------------------------------               
-                    if(this->remainingSliceB < (sc_time_stamp() - this->lastassignB)) 
-                      this->remainingSliceB=SC_ZERO_TIME;
+                    if(this->remainingSliceB < (sc_core::sc_time_stamp() - this->lastassignB)) 
+                      this->remainingSliceB=sc_core::SC_ZERO_TIME;
                     else{
-                      this->remainingSliceB = this->remainingSliceB - (sc_time_stamp() - this->lastassignB);  
+                      this->remainingSliceB = this->remainingSliceB - (sc_core::sc_time_stamp() - this->lastassignB);  
                     }
-                    this->lastassignB = sc_time_stamp();
+                    this->lastassignB = sc_core::sc_time_stamp();
                                 
-                    if(this->remainingSliceB <= sc_time(0,SC_NS)){//Zeitscheibe wirklich abgelaufen!
+                    if(this->remainingSliceB <= sc_core::sc_time(0,sc_core::SC_NS)){//Zeitscheibe wirklich abgelaufen!
                       if(curr_slicecountB + StartslotDynamic +1 < slicecount){
                         curr_slicecountB++; // Wechsel auf die naechste Zeitscheibe noetig!
                         //neue Timeslice laden
@@ -817,15 +817,15 @@ namespace SystemC_VPC{
                   Task *task=iter->second;
                   task->getInstanceId();
                 */
-                //              cout <<"Ende: "<< ret_decision << "  " << task_to_assign << "  " << running_tasks.size() << "  " <<  task->getInstanceId() << endl;
+                //              std::cout <<"Ende: "<< ret_decision << "  " << task_to_assign << "  " << running_tasks.size() << "  " <<  task->getInstanceId() << std::endl;
               }
               if(running_tasks.size() ==2){ // einer von beiden muss abgelaufen sein... welcher?
                 //auch hier darf man bei dualchannel=false Niemals hinkommen!
                 assert(dualchannel==true);
-                if(this->remainingSliceA < (sc_time_stamp() - this->lastassignA)){      
+                if(this->remainingSliceA < (sc_core::sc_time_stamp() - this->lastassignA)){      
                   //na, es war wohl A
-                  this->remainingSliceA=SC_ZERO_TIME;
-                  this->remainingSliceB = this->remainingSliceB - (sc_time_stamp() - this->lastassignB);  
+                  this->remainingSliceA=sc_core::SC_ZERO_TIME;
+                  this->remainingSliceB = this->remainingSliceB - (sc_core::sc_time_stamp() - this->lastassignB);  
                   //-------------       
                   if(curr_slicecountA + StartslotDynamic +1 < slicecount){
                     curr_slicecountA++; // Wechsel auf die naechste Zeitscheibe noetig!
@@ -850,8 +850,8 @@ namespace SystemC_VPC{
                   }
                 }else{
                   // na, dann wohl B
-                  this->remainingSliceB=SC_ZERO_TIME;
-                  this->remainingSliceA = this->remainingSliceA - (sc_time_stamp() - this->lastassignA);  
+                  this->remainingSliceB=sc_core::SC_ZERO_TIME;
+                  this->remainingSliceA = this->remainingSliceA - (sc_core::sc_time_stamp() - this->lastassignA);  
                         
                   if(curr_slicecountA + StartslotDynamic +1 < slicecount){
                     curr_slicecountB++; // Wechsel auf die naechste Zeitscheibe naeig!
@@ -886,8 +886,8 @@ namespace SystemC_VPC{
                     taskAssignedToB=0;
                   }
                 }               
-                this->lastassignA = sc_time_stamp();
-                this->lastassignB = sc_time_stamp();
+                this->lastassignA = sc_core::sc_time_stamp();
+                this->lastassignB = sc_core::sc_time_stamp();
               }
             }                           
           }
@@ -896,13 +896,13 @@ namespace SystemC_VPC{
     } 
     
     /* if(ret_decision != NOCHANGE){
-       cout << sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<endl;
+       std::cout << sc_core::sc_time_stamp() << " Decision: " << ret_decision << "newTask: " << task_to_assign  << " old task: " << task_to_resign << " Timeslice: " << this->remainingSlice << "  "<< remainingSliceA << "  " << remainingSliceB <<std::endl;
       }
     */
 
 #ifdef VPC_DEBUG  
-    cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
-         << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << " " << sc_time_stamp() <<  endl;
+    std::cout << "Decision: " << ret_decision << "newTask: " << task_to_assign 
+         << " old task: " << task_to_resign <<  "Timeslice: " << this->remainingSlice << " " << sc_core::sc_time_stamp() <<  std::endl;
 #endif //VPC_DEBUG  
     return ret_decision;
   }
@@ -911,9 +911,9 @@ namespace SystemC_VPC{
   /**
    *
    */
-  sc_time* FlexRayScheduler::schedulingOverhead(){
-    return NULL; //new sc_time(1,SC_NS);
+  sc_core::sc_time* FlexRayScheduler::schedulingOverhead(){
+    return NULL; //new sc_core::sc_time(1,sc_core::SC_NS);
     
-    //     return new sc_time(1,SC_NS);
+    //     return new sc_core::sc_time(1,sc_core::SC_NS);
   }
 }

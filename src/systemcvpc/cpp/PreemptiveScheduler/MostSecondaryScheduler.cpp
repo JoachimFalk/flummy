@@ -46,10 +46,10 @@
 namespace SystemC_VPC
 {
 
-  sc_time
+  sc_core::sc_time
   MostSecondaryScheduler::cycle(int sysFreq)
   {//returns the time of one cycle depending on the system frequency
-    sc_time cycle = sc_time(1.0 / sysFreq, SC_SEC);
+    sc_core::sc_time cycle = sc_core::sc_time(1.0 / sysFreq, sc_core::SC_SEC);
     return cycle;
   }
 
@@ -77,8 +77,8 @@ namespace SystemC_VPC
       {
         if (task->getInstanceId() == iter->process)
           {
-            cout << "Stop and remove task with ID " << task->getProcessId()
-                << " actual time = " << sc_time_stamp()<<endl;
+            std::cout << "Stop and remove task with ID " << task->getProcessId()
+                << " actual time = " << sc_core::sc_time_stamp()<<std::endl;
             Asynch_slots.erase(iter);
             notFound = false;
           }
@@ -86,11 +86,11 @@ namespace SystemC_VPC
   }
 
   bool
-  MostSecondaryScheduler::getSchedulerTimeSlice(sc_time& time,
+  MostSecondaryScheduler::getSchedulerTimeSlice(sc_core::sc_time& time,
       const TaskMap &ready_tasks, const TaskMap &running_tasks)
   {//returns the time of the next scheduler call
-    cout << "in MostSecondaryScheduler::getSchedulerTimeSlice actual time = "
-        << sc_time_stamp() << endl;
+    std::cout << "in MostSecondaryScheduler::getSchedulerTimeSlice actual time = "
+        << sc_core::sc_time_stamp() << std::endl;
 
     //no waiting + no active thread
     if (ready_tasks.size() == 0 && running_tasks.size() == 0)
@@ -99,22 +99,22 @@ namespace SystemC_VPC
       }
 
     //find next valid point of time
-    if (((CoSupport::SystemC::modulus(sc_time_stamp(), sc_time(
-        1.0 / sysFreq, SC_SEC)))+Asynch_slots[0].length > (cycle(sysFreq))))
+    if (((CoSupport::SystemC::modulus(sc_core::sc_time_stamp(), sc_core::sc_time(
+        1.0 / sysFreq, sc_core::SC_SEC)))+Asynch_slots[0].length > (cycle(sysFreq))))
       {
-        time = cycle(sysFreq)-(CoSupport::SystemC::modulus(sc_time_stamp(),
-            sc_time(1.0 /sysFreq, SC_SEC)));
+        time = cycle(sysFreq)-(CoSupport::SystemC::modulus(sc_core::sc_time_stamp(),
+            sc_core::sc_time(1.0 /sysFreq, sc_core::SC_SEC)));
         return true;
     }
 
     if (running_tasks.size() == 0 && Asynch_slots.size() != 0)
       {// no running task at the moment and tasks in Asynch_slots
-        time = sc_time(0, SC_NS);
+        time = sc_core::sc_time(0, sc_core::SC_NS);
         return true;
       }
     else
       {
-        time = cycle(sysFreq) - CoSupport::SystemC::modulus(sc_time_stamp(),
+        time = cycle(sysFreq) - CoSupport::SystemC::modulus(sc_core::sc_time_stamp(),
             cycle(sysFreq));
         return true;
       }
@@ -127,12 +127,12 @@ namespace SystemC_VPC
       const TaskMap &running_tasks)
   {//returns the scheduling decision according to the task and the actual time
 
-    cout << "###SecondaryScheduler::schedulingDecision" << endl;
+    std::cout << "###SecondaryScheduler::schedulingDecision" << std::endl;
     //at the beginning no new scheduling decision
     scheduling_decision ret_decision = NOCHANGE;
-//  sc_time cycleTime = CoSupport::SystemC::modulus(sc_time_stamp(), sc_time(
-//      1.0 / sysFreq, SC_SEC)); //actual position in actual cycle
-//    sc_time remainingTime = sc_time(1.0 / sysFreq, SC_SEC) - cycleTime;
+//  sc_core::sc_time cycleTime = CoSupport::SystemC::modulus(sc_core::sc_time_stamp(), sc_core::sc_time(
+//      1.0 / sysFreq, sc_core::SC_SEC)); //actual position in actual cycle
+//    sc_core::sc_time remainingTime = sc_core::sc_time(1.0 / sysFreq, sc_core::SC_SEC) - cycleTime;
     if (running_tasks.begin() != running_tasks.end())
       { //running Task available
         //int runningTask = running_tasks.begin()->first;
@@ -141,11 +141,11 @@ namespace SystemC_VPC
       }
     if (Asynch_slots.size() <= 0)
       { //no new task available
-        cout << "no new task for asynchronous area!" << endl;
+        std::cout << "no new task for asynchronous area!" << std::endl;
         return NOCHANGE;
       }
     if ((Asynch_slots.size() > 0) && ((CoSupport::SystemC::
-        modulus(sc_time_stamp(), sc_time(1.0 / sysFreq, SC_SEC)))
+        modulus(sc_core::sc_time_stamp(), sc_core::sc_time(1.0 / sysFreq, sc_core::SC_SEC)))
         +Asynch_slots[0].length <= (cycle(sysFreq))))
       { //no registered task
         if(Asynch_slots.size()>1)
@@ -181,7 +181,7 @@ namespace SystemC_VPC
         }
 
        std::cout<< " task to assign = " << task_to_assign
-            << " actual time = " << sc_time_stamp()<< std::endl;
+            << " actual time = " << sc_core::sc_time_stamp()<< std::endl;
         if ((ready_tasks.find(task_to_assign) == ready_tasks.end()))
           {
             ret_decision = NOCHANGE;

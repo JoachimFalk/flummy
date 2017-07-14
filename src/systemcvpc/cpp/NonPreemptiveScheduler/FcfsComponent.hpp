@@ -53,7 +53,7 @@ namespace SystemC_VPC{
       void addTask(Task *newTask)
       {
         DBG_OUT(this->getName() << " add Task: " << newTask->getName()
-                << " @ " << sc_time_stamp() << std::endl);
+                << " @ " << sc_core::sc_time_stamp() << std::endl);
         readyTasks.push_back(newTask);
       }
 
@@ -91,14 +91,14 @@ namespace SystemC_VPC{
         DBG_OUT(this->name() << " notifyActivation " << scheduledTask
             << " " << active << std::endl);
         if (active) {
-          if (scheduledTask->getNextReleaseTime() > sc_time_stamp()) {
+          if (scheduledTask->getNextReleaseTime() > sc_core::sc_time_stamp()) {
             ttReleaseQueue.push(
                 TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
           } else {
             this->fcfsQueue.push_back(scheduledTask);
           }
           if (this->runningTask == NULL) {
-            this->notify_scheduler_thread.notify(SC_ZERO_TIME);
+            this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
           }
         }
       }
@@ -107,13 +107,13 @@ namespace SystemC_VPC{
       {
         //move active TT actors to fcfsQueue
         while(!ttReleaseQueue.empty()
-            && ttReleaseQueue.top().time<=sc_time_stamp()){
+            && ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
           this->fcfsQueue.push_back(ttReleaseQueue.top().node);
           ttReleaseQueue.pop();
         }
         bool released = FcfsComponent<TASKTRACER>::releaseActor();
         if(!ttReleaseQueue.empty() && !released){
-          sc_time delta = ttReleaseQueue.top().time-sc_time_stamp();
+          sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
           this->notify_scheduler_thread.notify(delta);
         }
         return released;
@@ -132,7 +132,7 @@ namespace SystemC_VPC{
       if (active) {
         fcfsQueue.push_back(scheduledTask);
         if (this->runningTask == NULL) {
-          this->notify_scheduler_thread.notify(SC_ZERO_TIME);
+          this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
         }
       }
     }
@@ -164,9 +164,9 @@ namespace SystemC_VPC{
       assert(!readyTasks.empty());
       Task* task = readyTasks.front();
       readyTasks.pop_front();
-      this->startTime = sc_time_stamp();
+      this->startTime = sc_core::sc_time_stamp();
       DBG_OUT(this->getName() << " schedule Task: " << task->getName()
-          << " @ " << sc_time_stamp() << std::endl);
+          << " @ " << sc_core::sc_time_stamp() << std::endl);
 
       /*
        * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE

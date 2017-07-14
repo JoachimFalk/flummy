@@ -46,7 +46,7 @@
 
 namespace SystemC_VPC {
 
-  typedef std::vector<sc_time> FunctionTimes;
+  typedef std::vector<sc_core::sc_time> FunctionTimes;
   typedef std::vector<boost::shared_ptr<TimingModifier> > FunctionTimingModifiers;
 
   /**
@@ -73,22 +73,22 @@ namespace SystemC_VPC {
      * \param funcname specifies the associated function
      * \param delay is the corresponding delay for the function execution
      */
-    void addDelay(FunctionId fid, sc_time delay);
+    void addDelay(FunctionId fid, sc_core::sc_time delay);
 
     /**
      * \brief Set the base delay to the instance
      * \param funcname specifies the associated function
      * \param delay is the corresponding delay for the function execution
      */
-    void setBaseDelay(sc_time delay);
-    sc_time getBaseDelay( ) const;
+    void setBaseDelay(sc_core::sc_time delay);
+    sc_core::sc_time getBaseDelay( ) const;
 
     /**
      * \brief Used to access delay
      * \return Returns the sum of function delays. The default delay is
      * returned if no function names are given.
      */
-    sc_time getDelay(FunctionIds functions) const;
+    sc_core::sc_time getDelay(FunctionIds functions) const;
 
     /**
      * \brief Adds a new function latency to the instance
@@ -96,22 +96,22 @@ namespace SystemC_VPC {
      * \param latency is the corresponding latency for the function
      * execution
      */
-    void addLatency(FunctionId fid, sc_time latency);
+    void addLatency(FunctionId fid, sc_core::sc_time latency);
 
     /**
      * \brief Set the base latency to the instance
      * \param latency is the corresponding latency for the function
      * execution
      */
-    void setBaseLatency(sc_time latency);
-    sc_time getBaseLatency( ) const;
+    void setBaseLatency(sc_core::sc_time latency);
+    sc_core::sc_time getBaseLatency( ) const;
 
     /**
      * \brief Used to access latency
      * \return Returns the sum of function latencies. The default latency is
      * returned if no function names are given.
      */
-    sc_time getLatency(FunctionIds functions);
+    sc_core::sc_time getLatency(FunctionIds functions);
 
 
     /**

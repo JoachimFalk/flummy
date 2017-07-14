@@ -36,7 +36,7 @@
 #define STREAMSHAPERSCHEDULER_H
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemc.h>
+#include <systemc>
 
 #include <map>
 #include <deque>
@@ -54,7 +54,7 @@ namespace SystemC_VPC{
     
     virtual ~StreamShaperScheduler(){}
     
-    bool getSchedulerTimeSlice(sc_time &time,
+    bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
     
@@ -64,7 +64,7 @@ namespace SystemC_VPC{
     
     void setAttribute(AttributePtr attributePtr);
 
-    sc_event& getNotifyEvent();
+    sc_core::sc_event& getNotifyEvent();
     
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,
@@ -73,17 +73,17 @@ namespace SystemC_VPC{
     
     void setProperty(const char* key, const char* value);
     
-    sc_time* schedulingOverhead();
+    sc_core::sc_time* schedulingOverhead();
     
     void initialize();
     
   private:
     void _setProperty(const char* key, const char* value);
     
-    sc_time shapeCycle;
+    sc_core::sc_time shapeCycle;
     bool firstrun;
-    sc_time lastassign;
-    sc_time remainingSlice;
+    sc_core::sc_time lastassign;
+    sc_core::sc_time remainingSlice;
     std::deque<std::pair<std::string, std::string> > _properties;
     std::deque<int> stream_fifo;
   };

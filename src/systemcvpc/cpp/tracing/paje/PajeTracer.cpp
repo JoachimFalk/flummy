@@ -45,8 +45,6 @@
 #include <vector>
 #include <map>
 
-using namespace std;
-
 namespace {
 
   std::unique_ptr<CoSupport::Tracing::PajeTracer> myPajeTracer;
@@ -75,8 +73,8 @@ namespace SystemC_VPC { namespace Trace {
   void PajeTracer::release(Task * task) {
 
     if(!task->hasScheduledTask()){
-      string name = task->getName();
-      string msg_name;
+      std::string name = task->getName();
+      std::string msg_name;
       int msg_cf = name.find("msg_cf_");
       int begin = name.find("_cf_");
       int end = name.find("_1_");
@@ -85,8 +83,8 @@ namespace SystemC_VPC { namespace Trace {
       else
         msg_name = name.substr(7, end-7);
       int n = msg_name.find("_");
-      string from = msg_name.substr(0,n);
-      string to = msg_name.substr(n+1,msg_name.length()-n-1);
+      std::string from = msg_name.substr(0,n);
+      std::string to = msg_name.substr(n+1,msg_name.length()-n-1);
 
       TaskToPreTask::const_iterator iterTask = taskToPreTask.find(to);
 
@@ -100,29 +98,29 @@ namespace SystemC_VPC { namespace Trace {
       //}
     }
 
-//    ofstream logfile;
+//    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_time t1 = sc_time_stamp();
+//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
 //    logfile << "release Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
 //    logfile.close();
   }
 
   void PajeTracer::finishDii(Task * task) {
-//    ofstream logfile;
+//    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_time t1 = sc_time_stamp();
+//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
 //    logfile << "finishDii Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
 //    logfile.close();
 
     TaskToActivity::const_iterator iterAction = taskToActivity.find(task->getName());
     assert(iterAction != taskToActivity.end());
-    myPajeTracer->traceActivity(this->res_, iterAction->second, this->startTime, sc_time_stamp()); //
+    myPajeTracer->traceActivity(this->res_, iterAction->second, this->startTime, sc_core::sc_time_stamp()); //
 
   }
 
   void PajeTracer::finishLatency(Task * task) {
 
-//    taskToEndTime[task->getName()] = sc_time_stamp();
+//    taskToEndTime[task->getName()] = sc_core::sc_time_stamp();
 //    taskToResource[task->getName()] = this->res_;
 
     TaskToDestTask::const_iterator iterDestTask = taskToDestTask.find(task->getName());
@@ -130,7 +128,7 @@ namespace SystemC_VPC { namespace Trace {
       std::string destTask = iterDestTask->second;
       std::string link_ = task->getName().append("_" + destTask);
 
-      myPajeTracer->traceLinkBegin(link_.c_str(), this->res_, sc_time_stamp());
+      myPajeTracer->traceLinkBegin(link_.c_str(), this->res_, sc_core::sc_time_stamp());
     }
 
     TaskToPreTask::const_iterator iterTask = taskToPreTask.find(task->getName());
@@ -141,37 +139,37 @@ namespace SystemC_VPC { namespace Trace {
 //      TaskToEndTime::const_iterator iterPre = taskToEndTime.find(preTask.c_str());
 //      assert(iterPre == taskToEndTime.end());
 
-      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, sc_time_stamp());
+      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, sc_core::sc_time_stamp());
 
     }
 
 
-//    ofstream logfile;
+//    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_time t1 = sc_time_stamp();
+//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
 //    logfile << "finishLatency Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
 //    logfile.close();
   }
 
   void PajeTracer::assign(Task * task) {
 
-    this->startTime = sc_time_stamp();
+    this->startTime = sc_core::sc_time_stamp();
 
     TaskToActivity::const_iterator iterActivity = taskToActivity.find(task->getName());
     if (iterActivity == taskToActivity.end()) {
       taskToActivity[task->getName()] = myPajeTracer->registerActivity(task->getName().c_str(),true);
     }
 
-//    ofstream logfile;
+//    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_time t1 = sc_time_stamp();
+//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
 //    logfile << "assign Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
 //    logfile.close();
   }
 
   void PajeTracer::resign(Task * task) {
 
-    this->startTime = sc_time_stamp();
+    this->startTime = sc_core::sc_time_stamp();
 
     std::string event = task->getName().append(" resigned!");
 
@@ -179,10 +177,10 @@ namespace SystemC_VPC { namespace Trace {
     if (iterEvent == taskToEvent.end())
       taskToEvent[event] = myPajeTracer->registerEvent(task->getName().c_str(),true);
 
-    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_time_stamp());
-//    ofstream logfile;
+    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_core::sc_time_stamp());
+//    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_time t1 = sc_time_stamp();
+//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
 //    logfile << "resign Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
 //    logfile.close();
   }
@@ -195,13 +193,13 @@ namespace SystemC_VPC { namespace Trace {
     if (iterEvent == taskToEvent.end())
       taskToEvent[event] = myPajeTracer->registerEvent(task->getName().c_str(),true);
 
-    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_time_stamp());
+    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_core::sc_time_stamp());
 
-    myPajeTracer->traceActivity(this->res_, taskToActivity.find(task->getName())->second, this->startTime, sc_time_stamp());
+    myPajeTracer->traceActivity(this->res_, taskToActivity.find(task->getName())->second, this->startTime, sc_core::sc_time_stamp());
 
-//    ofstream logfile;
+//    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_time t1 = sc_time_stamp();
+//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
 //    logfile << "block Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
 //    logfile.close();
   }
@@ -211,9 +209,9 @@ namespace SystemC_VPC { namespace Trace {
 
     // not relevant for paje tracese, as all components are displayed in one trace.
 
-//    ofstream logfile;
+//    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_time t1 = sc_time_stamp();
+//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
 //    logfile << "getOrCreateTraceSignal at: " << t1 << "\n";
 //    logfile.close();
     return newsignal;

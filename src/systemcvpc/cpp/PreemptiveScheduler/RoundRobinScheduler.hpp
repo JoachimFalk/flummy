@@ -36,7 +36,7 @@
 #define HSCD_VPC_ROUNDROBINSCHEDULER_H
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemc.h>
+#include <systemc>
 
 #include <map>
 #include <deque>
@@ -48,11 +48,11 @@ namespace SystemC_VPC{
   public:
 
     RoundRobinScheduler() :
-      timeSlice_(10, SC_NS), timeSliceExpires_()
+      timeSlice_(10, sc_core::SC_NS), timeSliceExpires_()
     {
     }
     virtual ~RoundRobinScheduler(){}
-    bool getSchedulerTimeSlice(sc_time &time,
+    bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
     void addedNewTask(Task *task);
@@ -65,12 +65,12 @@ namespace SystemC_VPC{
                        const  TaskMap &ready_tasks,
                        const  TaskMap &running_tasks);
     void setProperty(const char* key, const char* value);
-    sc_time* schedulingOverhead();
+    sc_core::sc_time* schedulingOverhead();
     
   private:
     std::deque<int> rr_fifo;
-    sc_time timeSlice_;
-    sc_time timeSliceExpires_;
+    sc_core::sc_time timeSlice_;
+    sc_core::sc_time timeSliceExpires_;
 
     int assignFromFront();
   };

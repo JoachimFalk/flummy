@@ -493,14 +493,14 @@ namespace SystemC_VPC {
               }else if( sType == STR_VPC_PERIOD){
 //                task->setPeriod(Director::createSC_Time(sValue));
               }else if( sType == STR_VPC_DELAY){
-//              sc_time delay = Director::createSC_Time(sValue);
+//              sc_core::sc_time delay = Director::createSC_Time(sValue);
 //                task->setBaseDelay( delay );
               }else if( sType == STR_VPC_LATENCY){
-//              sc_time latency = Director::createSC_Time(sValue);
+//              sc_core::sc_time latency = Director::createSC_Time(sValue);
 //                task->setBaseLatency( latency );
               }else{
                 DBG_OUT("VPCBuilder> Unknown mapping attribute: type="
-                          << sType << " value=" << sValue << endl); 
+                          << sType << " value=" << sValue << std::endl); 
                 DBG_OUT("VPCBuilder> Try to interpret as function"
                   " specific delay!!" << std::endl);
               }
@@ -682,7 +682,7 @@ namespace SystemC_VPC {
     bool hasDelay   = (delay != NULL);
     bool hasLatency = (latency != NULL);
     if (hasDelay && !hasDii && !hasLatency) {
-      sc_time d = Director::createSC_Time(CX::NStr(delay->getNodeValue()));
+      sc_core::sc_time d = Director::createSC_Time(CX::NStr(delay->getNodeValue()));
       t.setDii(d);
       t.setLatency(d);
     } else if (!hasDelay && hasDii && hasLatency) {

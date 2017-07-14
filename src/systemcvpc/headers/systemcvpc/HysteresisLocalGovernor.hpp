@@ -37,7 +37,7 @@
 
 #include <map>
 #include <deque>
-#include <systemc.h>
+#include <systemc>
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
@@ -48,11 +48,11 @@
 namespace SystemC_VPC{
 
   class InternalLoadHysteresisGovernor : public PluggableLocalPowerGovernor,
-                                 public sc_module {
+                                 public sc_core::sc_module {
   public:
-    InternalLoadHysteresisGovernor(const sc_time& windowTime,
-                           const sc_time& fastTime,
-                           const sc_time& slowTime);
+    InternalLoadHysteresisGovernor(const sc_core::sc_time& windowTime,
+                           const sc_core::sc_time& fastTime,
+                           const sc_core::sc_time& slowTime);
 
     ~InternalLoadHysteresisGovernor();
 
@@ -61,14 +61,14 @@ namespace SystemC_VPC{
     virtual void notify(ComponentInfo *ci);
 
   private:
-    sc_time                                         m_windowTime;
-    sc_time                                         m_fastTime;
-    sc_time                                         m_slowTime;
+    sc_core::sc_time                                         m_windowTime;
+    sc_core::sc_time                                         m_fastTime;
+    sc_core::sc_time                                         m_slowTime;
     PowerModeParameter                              m_mode;
     ComponentInfo                                  *m_ci;
     ComponentState                                  m_lastState;
-    std::deque<std::pair<ComponentState, sc_time> > m_stateHistory;
-    sc_event                                        m_wakeup_ev;
+    std::deque<std::pair<ComponentState, sc_core::sc_time> > m_stateHistory;
+    sc_core::sc_event                                        m_wakeup_ev;
 
     void process();
   };
@@ -81,9 +81,9 @@ namespace SystemC_VPC{
 
   public:
     InternalLoadHysteresisGovernorFactory()
-      : windowTime( SC_ZERO_TIME ),
-        fastTime(   sc_time(12.1, SC_MS) ),
-        slowTime(   sc_time( 4.0, SC_MS) )
+      : windowTime( sc_core::SC_ZERO_TIME ),
+        fastTime(   sc_core::sc_time(12.1, sc_core::SC_MS) ),
+        slowTime(   sc_core::sc_time( 4.0, sc_core::SC_MS) )
     {
     }
 
@@ -109,9 +109,9 @@ namespace SystemC_VPC{
       }
     }
   private:
-    sc_time windowTime;
-    sc_time fastTime;
-    sc_time slowTime;
+    sc_core::sc_time windowTime;
+    sc_core::sc_time fastTime;
+    sc_core::sc_time slowTime;
   };
 }
 

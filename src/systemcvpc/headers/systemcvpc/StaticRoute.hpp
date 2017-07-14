@@ -36,7 +36,7 @@
 #define __INCLUDED__STATICROUTE__H__
 #include <list>
 
-#include <systemc.h>
+#include <systemc>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>

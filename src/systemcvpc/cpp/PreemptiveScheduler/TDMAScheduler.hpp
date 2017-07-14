@@ -36,7 +36,7 @@
 #define TDMASCHEDULER_H
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemc.h>
+#include <systemc>
 
 #include <map>
 #include <deque>
@@ -50,7 +50,7 @@ namespace SystemC_VPC{
     pid_fifo enthaelt die laufbereiten Prozesse  
   */
   struct TDMASlot{
-    sc_time length;
+    sc_core::sc_time length;
     std::string name;
     std::deque<int> pid_fifo;
   };
@@ -59,9 +59,9 @@ namespace SystemC_VPC{
   public:
     
 //    TDMAScheduler()
-//      : tdmaCycle(SC_ZERO_TIME) {
-//      this->lastassign=sc_time(0,SC_NS);
-//      this->remainingSlice=sc_time(0,SC_NS);
+//      : tdmaCycle(sc_core::SC_ZERO_TIME) {
+//      this->lastassign=sc_core::sc_time(0,sc_core::SC_NS);
+//      this->remainingSlice=sc_core::sc_time(0,sc_core::SC_NS);
 //      slicecount=0;
 //      curr_slicecount=0;
 //    }
@@ -70,7 +70,7 @@ namespace SystemC_VPC{
     
     virtual ~TDMAScheduler(){}
     
-    bool getSchedulerTimeSlice(sc_time &time,
+    bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
     
@@ -78,7 +78,7 @@ namespace SystemC_VPC{
     
     void removedTask(Task *task);
     
-    sc_event& getNotifyEvent();
+    sc_core::sc_event& getNotifyEvent();
     
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,
@@ -87,18 +87,18 @@ namespace SystemC_VPC{
     
     void setProperty(const char* key, const char* value);
     
-    sc_time* schedulingOverhead();
+    sc_core::sc_time* schedulingOverhead();
     
     void initialize();
     
   private:
     void _setProperty(const char* key, const char* value);
     
-    sc_time  tdmaCycle;
-    std::map<sc_time, unsigned int> slotOffsets;
+    sc_core::sc_time  tdmaCycle;
+    std::map<sc_core::sc_time, unsigned int> slotOffsets;
 
-    sc_time lastassign;
-    sc_time remainingSlice;
+    sc_core::sc_time lastassign;
+    sc_core::sc_time remainingSlice;
     int slicecount;
     int curr_slicecount;
     int processcount;

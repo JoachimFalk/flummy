@@ -37,7 +37,7 @@
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <PreemptiveScheduler/TDMAScheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemc.h>
+#include <systemc>
 
 #include <map>
 #include <deque>
@@ -61,8 +61,8 @@ namespace SystemC_VPC{
   public:
     
 //    FlexRayScheduler(){
-//      this->lastassign=sc_time(0,SC_NS);
-//      this->remainingSlice=sc_time(0,SC_NS);
+//      this->lastassign=sc_core::sc_time(0,sc_core::SC_NS);
+//      this->remainingSlice=sc_core::sc_time(0,sc_core::SC_NS);
 //      slicecount=0;
 //      curr_slicecount=0;
 //    }
@@ -71,13 +71,13 @@ namespace SystemC_VPC{
     
     virtual ~FlexRayScheduler(){}
     
-    bool getSchedulerTimeSlice(sc_time &time,const TaskMap &ready_tasks,const TaskMap &running_tasks);
+    bool getSchedulerTimeSlice(sc_core::sc_time &time,const TaskMap &ready_tasks,const TaskMap &running_tasks);
     
     void addedNewTask(Task *task);
     
     void removedTask(Task *task);
     
-    sc_event& getNotifyEvent();
+    sc_core::sc_event& getNotifyEvent();
     
     scheduling_decision schedulingDecision(int& task_to_resign, int& task_to_assign,const  TaskMap &ready_tasks,const  TaskMap &running_tasks);
     
@@ -85,16 +85,16 @@ namespace SystemC_VPC{
     
     void setAttribute(AttributePtr attributePtr);
     
-    sc_time* schedulingOverhead();
+    sc_core::sc_time* schedulingOverhead();
     
     void initialize();
     
   private:
     void _setProperty(const char* key, const char* value);
     
-    sc_time lastassign;
-    sc_time cycle_length;
-    sc_time remainingSlice;
+    sc_core::sc_time lastassign;
+    sc_core::sc_time cycle_length;
+    sc_core::sc_time remainingSlice;
     int slicecount;
     int curr_slicecount;
     int curr_slicecountA;
@@ -110,16 +110,16 @@ namespace SystemC_VPC{
     //Neu fuer FlexRay
     std::vector<TDMASlot> Dynamic_slots;
     int StartslotDynamic;
-    sc_time lastassignA;
-    sc_time remainingSliceA;
-    sc_time lastassignB;
-    sc_time remainingSliceB;
+    sc_core::sc_time lastassignA;
+    sc_core::sc_time remainingSliceA;
+    sc_core::sc_time lastassignB;
+    sc_core::sc_time remainingSliceB;
     int taskAssignedToA;
     int taskAssignedToB;
     bool dualchannel;
     bool to_init;
    // bool firstrun;
-    sc_time TimeDynamicSegment;   
+    sc_core::sc_time TimeDynamicSegment;   
     
   };
 }
