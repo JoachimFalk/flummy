@@ -88,11 +88,11 @@ public:
   typedef boost::shared_ptr<Component> Ptr;
   typedef std::set<ScheduledTask *> MappedTasks;
 
-  Component(std::string name, Scheduler::Type scheduler);
+  Component(std::string name, Scheduler scheduler);
 
-  void setScheduler(Scheduler::Type scheduler);
+  void setScheduler(Scheduler scheduler);
 
-  Scheduler::Type getScheduler() const;
+  Scheduler getScheduler() const;
 
   void setTransferTiming(Timing transferTiming);
 
@@ -126,8 +126,8 @@ private:
 
   std::string name_;
   std::string debugFileName_;
-  Timing transferTiming_;
-  Scheduler::Type scheduler_;
+  Timing      transferTiming_;
+  Scheduler   scheduler_;
   MappedTasks mappedTasks_;
   TimingsProvider::Ptr timingsProvider_;
   DefaultTimingsProvider::Ptr defaultTimingsProvider_;

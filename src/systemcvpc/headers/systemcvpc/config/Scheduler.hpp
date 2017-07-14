@@ -32,21 +32,14 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef SCHEDULER_H_
-#define SCHEDULER_H_
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_SCHEDULER_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIG_SCHEDULER_HPP
 
 #include <string>
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC { namespace Config {
 
-namespace Config
-{
-
-namespace Scheduler
-{
-enum Type
-{
+enum class Scheduler {
   FCFS,
   FCFS_noTT,
   StaticPriority_P,
@@ -54,6 +47,7 @@ enum Type
   StaticPriority_NP_noTT,
   DynamicPriorityUserYield,
   RoundRobin,
+  RoundRobin_NP,
   RateMonotonic,
   FlexRay,
   TDMA,
@@ -63,9 +57,8 @@ enum Type
   StreamShaper
 };
 
-Type parseScheduler(std::string name);
+Scheduler parseScheduler(std::string name);
 
-} // namespace Scheduler
-} // namespace Config
-} // namespace SystemC_VPC
-#endif /* SCHEDULER_H_ */
+} }  // namespace SystemC_VPC::Config
+
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_SCHEDULER_HPP */

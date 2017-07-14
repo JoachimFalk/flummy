@@ -703,7 +703,7 @@ namespace SystemC_VPC {
       case VC::Scheduler::StaticPriority_NP_noTT:
         comp = createComponent<PriorityComponent>(component);
         break;
-      case VC::Scheduler::RoundRobin:
+      case VC::Scheduler::RoundRobin_NP:
         comp = createComponent<RoundRobinComponent>(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:

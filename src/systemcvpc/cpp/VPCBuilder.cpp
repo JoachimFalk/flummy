@@ -362,7 +362,7 @@ namespace SystemC_VPC {
       DBG_OUT("VPCBuilder> initComponent: " << sName << std::endl);
 
       VC::Component::Ptr comp =
-          VC::createComponent(sName, VC::Scheduler::parseScheduler(sScheduler));
+          VC::createComponent(sName, VC::parseScheduler(sScheduler));
 
       this->initCompAttributes(comp);
         

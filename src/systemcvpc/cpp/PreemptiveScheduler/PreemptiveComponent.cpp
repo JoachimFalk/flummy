@@ -62,8 +62,8 @@ namespace SystemC_VPC{
    */
   void PreemptiveComponent::setScheduler(Config::Component::Ptr component)
   {
-    Config::Scheduler::Type type = component->getScheduler();
-    switch (type) {
+    Config::Scheduler schedulerType = component->getScheduler();
+    switch (schedulerType) {
       case Config::Scheduler::RoundRobin:
         scheduler = new RoundRobinScheduler();
         break;

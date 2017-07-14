@@ -37,71 +37,40 @@
 
 #include <string>
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC { namespace Config {
 
-namespace Config
-{
-
-namespace Scheduler
-{
-
-Type parseScheduler(std::string name)
-{
-  static const std::string STR_TDMA = "TDMA";
-  static const std::string STR_FLEXRAY = "FlexRay";
-  static const std::string STR_TTCC = "TTCC";
-  static const std::string STR_ROUNDROBIN = "RoundRobin";
-  static const std::string STR_RR = "RR";
-  static const std::string STR_PRIORITYSCHEDULER = "PriorityScheduler";
-  static const std::string STR_PS = "PS";
-  static const std::string STR_PRIORITYSCHEDULERNOPREEMPT = "PrioritySchedulerNoPreempt";
-  static const std::string STR_PSNOPRE = "PSNOPRE";
-  static const std::string STR_PSNOPRE_NO_TT = "PSNOPRE-noTT";
-  static const std::string STR_RATEMONOTONIC = "RateMonotonic";
-  static const std::string STR_RM = "RM";
-  static const std::string STR_FIRSTCOMEFIRSTSERVED = "FirstComeFirstServed";
-  static const std::string STR_FCFS = "FCFS";
-  static const std::string STR_FCFS_NO_TT = "FCFS-noTT";
-  static const std::string STR_AVB = "AVB";
-  static const std::string STR_MOST = "MOST";
-  static const std::string STR_STREAMSHAPER = "StreamShaper";
-
-  if (name == STR_TDMA) {
-    return TDMA;
-  } else if (name == STR_FLEXRAY) {
-    return FlexRay;
-  } else if (name == STR_TTCC) {
-    return TTCC;
-  } else if (name == STR_RR || name == STR_ROUNDROBIN) {
-    return RoundRobin;
-  } else if (name == STR_PS || name == STR_PRIORITYSCHEDULER) {
-    return StaticPriority_P;
-  } else if (name == STR_PSNOPRE || name == STR_PRIORITYSCHEDULERNOPREEMPT) {
-    return StaticPriority_NP;
-  } else if (name == STR_PSNOPRE_NO_TT) {
-    return StaticPriority_NP_noTT;
-  } else if (name == STR_RM || name == STR_RATEMONOTONIC) {
-    return RateMonotonic;
-  } else if (name == STR_FCFS || name == STR_FIRSTCOMEFIRSTSERVED) {
-    return FCFS;
-  } else if (name == STR_FCFS_NO_TT) {
-    return FCFS_noTT;
-  } else if (name == STR_AVB) {
-    return AVB;
-  } else if (name == STR_MOST){
-    return MOST;
-  } else if (name == STR_STREAMSHAPER){
-    return StreamShaper;
+Scheduler parseScheduler(std::string name) {
+  if (name == "TDMA") {
+    return Scheduler::TDMA;
+  } else if (name == "FlexRay") {
+    return Scheduler::FlexRay;
+  } else if (name == "TTCC") {
+    return Scheduler::TTCC;
+  } else if (name == "RR" || name == "RoundRobin") {
+    return Scheduler::RoundRobin;
+  } else if (name == "RRNOPRE" || name == "RoundRobinNoPreempt") {
+    return Scheduler::RoundRobin_NP;
+  } else if (name == "PS" || name == "PriorityScheduler") {
+    return Scheduler::StaticPriority_P;
+  } else if (name == "PSNOPRE" || name == "PrioritySchedulerNoPreempt") {
+    return Scheduler::StaticPriority_NP;
+  } else if (name == "PSNOPRE-noTT") {
+    return Scheduler::StaticPriority_NP_noTT;
+  } else if (name == "RM" || name == "RateMonotonic") {
+    return Scheduler::RateMonotonic;
+  } else if (name == "FCFS" || name == "FirstComeFirstServed") {
+    return Scheduler::FCFS;
+  } else if (name == "FCFS-noTT") {
+    return Scheduler::FCFS_noTT;
+  } else if (name == "AVB") {
+    return Scheduler::AVB;
+  } else if (name == "MOST"){
+    return Scheduler::MOST;
+  } else if (name == "StreamShaper"){
+    return Scheduler::StreamShaper;
   } else {
-    throw Config::ConfigException("Unknown scheduler \"" + name
-        + "\" for component: " + name);
-    return FCFS;
+    throw Config::ConfigException("Unknown scheduler \"" + name + "\"!");
   }
-
 }
 
-} // namespace Scheduler
-} // namespace Config
-} // namespace SystemC_VPC
-
+} }  // namespace SystemC_VPC::Config

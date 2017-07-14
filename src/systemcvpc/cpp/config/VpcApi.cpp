@@ -80,7 +80,7 @@ void createDistribution(std::string name, boost::shared_ptr<DistributionTimingMo
 }
 
 //
-Component::Ptr createComponent(std::string name, Scheduler::Type scheduler)
+Component::Ptr createComponent(std::string name, Scheduler scheduler)
 {
   if (!hasComponent(name)) {
     Component::Ptr ptr(new Component(name, scheduler));
