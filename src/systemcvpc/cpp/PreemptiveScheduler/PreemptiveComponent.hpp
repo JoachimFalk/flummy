@@ -47,6 +47,8 @@
 #include <systemcvpc/vpc_config.h>
 #include <systemcvpc/timetriggered/tt_support.hpp>
 
+#include "tracing/TracerIf.hpp"
+
 #include <vector>
 #include <map>
 #include <deque>
@@ -201,14 +203,13 @@ namespace SystemC_VPC{
     void releaseActorsMethod();
   };
 
-  template<class TASKTRACER>
-  class ComponentImpl : public PreemptiveComponent{
+  class ComponentImpl: public PreemptiveComponent {
   public:
     /**
      *
      */
-    ComponentImpl( Config::Component::Ptr component)
-      : PreemptiveComponent(component), taskTracer_(component){}
+    ComponentImpl(Config::Component::Ptr component)
+      : PreemptiveComponent(component) {}
 
     /**
      *
@@ -220,7 +221,7 @@ namespace SystemC_VPC{
      */
     virtual Trace::Tracing * getOrCreateTraceSignal(std::string name)
     {
-      return taskTracer_.getOrCreateTraceSignal(name);
+      return taskTracer_->getOrCreateTraceSignal(name);
     }
 
     /**
@@ -232,7 +233,7 @@ namespace SystemC_VPC{
         for(;newTasks.size() > 0 && iter!=newTasks.end(); iter++){
           if((*iter)->isPSM()){ //PSM - actors need to be executed - even if Component can not execute tasks
             Task *newTask = *iter;
-            this->taskTracer_.release(newTask);
+            this->taskTracer_->release(newTask);
             assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
                     /* A task can call compute only one time! */);
             assert( runningTasks.find(newTask->getInstanceId()) == runningTasks.end()
@@ -268,7 +269,7 @@ namespace SystemC_VPC{
             DBG_OUT(this->getName() << " received new Task: "
                     << newTask->getName() << " at: "
                     << sc_core::sc_time_stamp().to_default_time_units() << std::endl);
-            this->taskTracer_.release(newTask);
+            this->taskTracer_->release(newTask);
             //insert new task in read list
             assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
                     /* A task can call compute only one time! */);
@@ -291,7 +292,7 @@ namespace SystemC_VPC{
       if(end <= now){
         //early exit if (Latency-DII) <= 0
         //std::cerr << "Early exit: " << task->getName() << std::endl;
-        this->taskTracer_.finishLatency(task);
+        this->taskTracer_->finishLatency(task);
         Director::getInstance().signalLatencyEvent(task);
         return;
       }
@@ -332,7 +333,7 @@ namespace SystemC_VPC{
             //std::cerr << "Ready! releasing task (" <<  front.time <<") at: "
             //<< sc_core::sc_time_stamp() << std::endl;
 
-            this->taskTracer_.finishLatency(front.task);
+            this->taskTracer_->finishLatency(front.task);
 
             // Latency over -> remove Task
             Director::getInstance().signalLatencyEvent(front.task);
@@ -423,7 +424,7 @@ namespace SystemC_VPC{
               //notify(*(task->blockEvent));
               scheduler->removedTask(task);
               fireStateChanged(ComponentState::IDLE);
-              this->taskTracer_.finishDii(task);
+              this->taskTracer_->finishDii(task);
               runningTasks.erase(actualRunningIID);
 
               task->getBlockEvent().dii->notify();
@@ -443,8 +444,8 @@ namespace SystemC_VPC{
 //                             assert(Director::canExecute((*tasks_iter)->getProcessId()));
 //                             Director::execute((*tasks_iter)->getProcessId());
                            }
-                           this->taskTracer_.finishDii((*tasks_iter));
-                           this->taskTracer_.finishLatency((*tasks_iter));
+                           this->taskTracer_->finishDii((*tasks_iter));
+                           this->taskTracer_->finishLatency((*tasks_iter));
                            Director::getInstance().signalLatencyEvent((*tasks_iter));
                        }
                        multiCastGroupInstances.remove(mcgi);
@@ -495,7 +496,7 @@ namespace SystemC_VPC{
           actualRunningIID=-1;
           readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
           fireStateChanged(ComponentState::IDLE);
-          this->taskTracer_.resign(readyTasks[taskToResign]);
+          this->taskTracer_->resign(readyTasks[taskToResign]);
         }
 
         {
@@ -513,7 +514,7 @@ namespace SystemC_VPC{
         //assign task
         if(decision==ONLY_ASSIGN || decision==PREEMPT){
           runningTasks[taskToAssign]=readyTasks[taskToAssign];
-          this->taskTracer_.assign(runningTasks[taskToAssign]);
+          this->taskTracer_->assign(runningTasks[taskToAssign]);
           readyTasks.erase(taskToAssign);
           actualRunningIID=taskToAssign;
           DBG_OUT("IID: " << taskToAssign << "> remaining delay for "
@@ -543,7 +544,7 @@ namespace SystemC_VPC{
               assignedTask->ackBlockingCompute();
               DBG_OUT(this->getName() << " enter wait: " << std::endl);
               fireStateChanged(ComponentState::STALLED);
-              this->taskTracer_.block(assignedTask);
+              this->taskTracer_->block(assignedTask);
               while(!assignedTask->isExec()){
                 blockCompute.reset();
                 CoSupport::SystemC::wait(blockCompute);
@@ -551,7 +552,7 @@ namespace SystemC_VPC{
               }
               DBG_OUT(this->getName() << " exit wait: " << std::endl);
               fireStateChanged(ComponentState::RUNNING);
-              this->taskTracer_.assign(assignedTask);
+              this->taskTracer_->assign(assignedTask);
               if(assignedTask->isBlocking()){
                 DBG_OUT(this->getName() << " exec Task: "
                         << assignedTask->getName() << " @  " << sc_core::sc_time_stamp()
@@ -565,7 +566,7 @@ namespace SystemC_VPC{
                 //notify(*(task->blockEvent));
                 scheduler->removedTask(assignedTask);
                 fireStateChanged(ComponentState::IDLE);
-                this->taskTracer_.finishDii(assignedTask);
+                this->taskTracer_->finishDii(assignedTask);
                 //FIXME: notify latency ??
                 //assignedTask->traceFinishTaskLatency();
                 runningTasks.erase(actualRunningIID);
@@ -575,7 +576,7 @@ namespace SystemC_VPC{
               assert(blockMutex>1);
               scheduler->removedTask(assignedTask);
               fireStateChanged(ComponentState::IDLE);
-              this->taskTracer_.finishDii(assignedTask);
+              this->taskTracer_->finishDii(assignedTask);
               //FIXME: notify latency ??
               //assignedTask->traceFinishTaskLatency();
               runningTasks.erase(actualRunningIID);
@@ -613,17 +614,13 @@ namespace SystemC_VPC{
                 ProcessId pid = actualTask->getProcessId();
                 ProcessControlBlockPtr pcb = this->getPCB(pid);
                       actualTask->setPCB(pcb);
-              this->taskTracer_.release(actualTask);
+              this->taskTracer_->release(actualTask);
             }
               return;
           }
       }
       PreemptiveComponent::compute(actualTask);
     }
-
-private:
-    TASKTRACER taskTracer_;
-
   };
 
 } 

@@ -32,18 +32,45 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "Tracing.hpp"
+#ifndef _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP
+#define _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP
 
-namespace SystemC_VPC{
-namespace Trace{
+#include <systemcvpc/Task.hpp>
+#include <systemcvpc/config/Component.hpp>
 
-const trace_value Tracing::S_SLEEP   = ' ';
-const trace_value Tracing::S_BLOCKED = 'b';
-const trace_value Tracing::S_READY   = 'w';
-const trace_value Tracing::S_RUNNING = 'R';
+namespace SystemC_VPC { namespace Trace {
 
-#ifdef VPC_ENABLE_PLAIN_TRACING
-std::ostream * Tracing::plainTrace = new CoSupport::Streams::AOStream(std::cout, "vpc.trace", "-");
-#endif // VPC_ENABLE_PLAIN_TRACING
-} // namespace Trace
-} // namespace SystemC_VPC
+// FIXME: Remove this after method getOrCreateTraceSignal has been removed!
+class Tracing;
+
+class TracerIf {
+public:
+  virtual
+  void release(Task const *task) = 0;
+
+  virtual
+  void finishDii(Task const *task) = 0;
+
+  virtual
+  void finishLatency(Task const *task) = 0;
+
+  virtual
+  void assign(Task const *task) = 0;
+
+  virtual
+  void resign(Task const *task) = 0;
+
+  virtual
+  void block(Task const *task) = 0;
+
+  // TODO: Can we avoid this function somehow?
+  virtual
+  Tracing *getOrCreateTraceSignal(std::string const &name) = 0;
+
+  virtual
+  ~TracerIf() {}
+};
+
+} } // namespace SystemC_VPC::Trace
+
+#endif /* _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP */

@@ -78,7 +78,6 @@ namespace SystemC_VPC{
    * \brief An implementation of AbstractComponent.
    * 
    */
-  template<class TASKTRACER>
   class NonPreemptiveComponent : public AbstractComponent{
     
     SC_HAS_PROCESS(NonPreemptiveComponent);
@@ -149,7 +148,7 @@ namespace SystemC_VPC{
 
     virtual Trace::Tracing * getOrCreateTraceSignal(std::string name)
     {
-      return taskTracer_.getOrCreateTraceSignal(name);
+      return taskTracer_->getOrCreateTraceSignal(name);
     }
 
   protected:
@@ -169,8 +168,6 @@ namespace SystemC_VPC{
 
     // time last task started
     sc_core::sc_time startTime;
-
-    TASKTRACER taskTracer_;
   private:
     sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
@@ -210,8 +207,8 @@ namespace SystemC_VPC{
 //                 assert(Director::canExecute((*tasks_iter)->getProcessId()));
 //                 Director::execute((*tasks_iter)->getProcessId());
                }
-               this->taskTracer_.finishDii((*tasks_iter));
-               this->taskTracer_.finishLatency((*tasks_iter));
+               this->taskTracer_->finishDii((*tasks_iter));
+               this->taskTracer_->finishLatency((*tasks_iter));
                Director::getInstance().signalLatencyEvent((*tasks_iter));
              }
              multiCastGroupInstances.remove(mcgi);
@@ -222,7 +219,7 @@ namespace SystemC_VPC{
          }
         }
         fireStateChanged(ComponentState::IDLE);
-        this->taskTracer_.finishDii(runningTask);
+        this->taskTracer_->finishDii(runningTask);
 
         DBG_OUT(this->getName() << " resign Task: " << runningTask->getName()
                 << " @ " << sc_core::sc_time_stamp().to_default_time_units()
@@ -275,10 +272,9 @@ namespace SystemC_VPC{
 /**
  *
  */
-template<class TASKTRACER>
-NonPreemptiveComponent<TASKTRACER>::NonPreemptiveComponent(
+NonPreemptiveComponent::NonPreemptiveComponent(
     Config::Component::Ptr component, Director *director) :
-  AbstractComponent(component), runningTask(NULL), taskTracer_(component),
+  AbstractComponent(component), runningTask(NULL),
     blockMutex(0), releasePhase(false)
 {
   SC_METHOD(schedule_method);
@@ -315,8 +311,7 @@ NonPreemptiveComponent<TASKTRACER>::NonPreemptiveComponent(
 /**
  *
  */
-template<class TASKTRACER>
-void NonPreemptiveComponent<TASKTRACER>::schedule_method()
+void NonPreemptiveComponent::schedule_method()
 {
   DBG_OUT("NonPreemptiveComponent::schedule_method (" << this->getName()
       << ") triggered @" << sc_core::sc_time_stamp() << std::endl);
@@ -333,7 +328,7 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
     if (hasReadyTask()) {
       runningTask = scheduleTask();
 
-      this->taskTracer_.assign(runningTask);
+      this->taskTracer_->assign(runningTask);
 
       next_trigger(runningTask->getRemainingDelay());
 
@@ -350,8 +345,7 @@ void NonPreemptiveComponent<TASKTRACER>::schedule_method()
 /**
  *
  */
-template<class TASKTRACER>
-void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
+void NonPreemptiveComponent::compute(Task* actualTask)
 {
   if(multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()){
       //MCG vorhanden und Task auch als MultiCast zu behandeln
@@ -366,7 +360,7 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
             ProcessId pid = actualTask->getProcessId();
             ProcessControlBlockPtr pcb = this->getPCB(pid);
                   actualTask->setPCB(pcb);
-          this->taskTracer_.release(actualTask);
+          this->taskTracer_->release(actualTask);
         }
           return;
       }
@@ -393,7 +387,7 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
 
   //store added task
   this->addTask(actualTask);
-  this->taskTracer_.release(actualTask);
+  this->taskTracer_->release(actualTask);
 
   //awake scheduler thread
   if (runningTask == NULL && !releasePhase) {
@@ -408,8 +402,7 @@ void NonPreemptiveComponent<TASKTRACER>::compute(Task* actualTask)
 /**
  *
  */
-template<class TASKTRACER>
-void NonPreemptiveComponent<TASKTRACER>::requestBlockingCompute(Task* task,
+void NonPreemptiveComponent::requestBlockingCompute(Task* task,
     Coupling::VPCEvent::Ptr blocker)
 {
   task->setExec(false);
@@ -420,8 +413,7 @@ void NonPreemptiveComponent<TASKTRACER>::requestBlockingCompute(Task* task,
 /**
  *
  */
-template<class TASKTRACER>
-void NonPreemptiveComponent<TASKTRACER>::execBlockingCompute(Task* task,
+void NonPreemptiveComponent::execBlockingCompute(Task* task,
     Coupling::VPCEvent::Ptr blocker)
 {
   task->setExec(true);
@@ -431,8 +423,7 @@ void NonPreemptiveComponent<TASKTRACER>::execBlockingCompute(Task* task,
 /**
  *
  */
-template<class TASKTRACER>
-void NonPreemptiveComponent<TASKTRACER>::abortBlockingCompute(Task* task,
+void NonPreemptiveComponent::abortBlockingCompute(Task* task,
     Coupling::VPCEvent::Ptr blocker)
 {
   task->resetBlockingCompute();
@@ -442,8 +433,7 @@ void NonPreemptiveComponent<TASKTRACER>::abortBlockingCompute(Task* task,
 /**
  *
  */
-template<class TASKTRACER>
-void NonPreemptiveComponent<TASKTRACER>::remainingPipelineStages()
+void NonPreemptiveComponent::remainingPipelineStages()
 {
   std::cerr << "test";
   while (1) {
@@ -470,7 +460,7 @@ void NonPreemptiveComponent<TASKTRACER>::remainingPipelineStages()
         //<< sc_core::sc_time_stamp() << std::endl;
 
         // Latency over -> remove Task
-        this->taskTracer_.finishLatency(front.task);
+        this->taskTracer_->finishLatency(front.task);
         // signalLatencyEvent will release runningTask (back to TaskPool)
         Director::getInstance().signalLatencyEvent(front.task);
 
@@ -485,8 +475,7 @@ void NonPreemptiveComponent<TASKTRACER>::remainingPipelineStages()
 /**
  *
  */
-template<class TASKTRACER>
-void NonPreemptiveComponent<TASKTRACER>::moveToRemainingPipelineStages(
+void NonPreemptiveComponent::moveToRemainingPipelineStages(
     Task* task)
 {
   sc_core::sc_time now = sc_core::sc_time_stamp();
@@ -495,7 +484,7 @@ void NonPreemptiveComponent<TASKTRACER>::moveToRemainingPipelineStages(
   if (end <= now) {
     //early exit if (Latency-DII) <= 0
     //std::cerr << "Early exit: " << task->getName() << std::endl;
-    this->taskTracer_.finishLatency(task);
+    this->taskTracer_->finishLatency(task);
     // signalLatencyEvent will release runningTask (back to TaskPool)
     Director::getInstance().signalLatencyEvent(task);
     return;

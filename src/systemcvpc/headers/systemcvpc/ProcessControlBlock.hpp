@@ -126,7 +126,7 @@ namespace Trace{
 
       void setTraceSignal(Trace::Tracing* signal);
 
-      Trace::Tracing* getTraceSignal();
+      Trace::Tracing *getTraceSignal() const;
 
       void setTiming(const Config::Timing& timing);
       void setBaseDelay(sc_core::sc_time delay);

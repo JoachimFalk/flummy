@@ -39,12 +39,11 @@
 
 namespace SystemC_VPC{
 
-  template<class TASKTRACER>
-    class FcfsComponent : public NonPreemptiveComponent<TASKTRACER> {
+    class FcfsComponent : public NonPreemptiveComponent {
     public:
       FcfsComponent(Config::Component::Ptr component, Director *director =
         &Director::getInstance()) :
-        NonPreemptiveComponent<TASKTRACER>(component, director)
+        NonPreemptiveComponent(component, director)
       {
       }
 
@@ -74,12 +73,11 @@ namespace SystemC_VPC{
 
     };
 
-    template<class TASKTRACER>
-    class TtFcfsComponent : public FcfsComponent<TASKTRACER> {
+    class TtFcfsComponent : public FcfsComponent {
     public:
       TtFcfsComponent(Config::Component::Ptr component, Director *director =
         &Director::getInstance()) :
-        FcfsComponent<TASKTRACER>(component, director)
+        FcfsComponent(component, director)
       {
       }
 
@@ -111,7 +109,7 @@ namespace SystemC_VPC{
           this->fcfsQueue.push_back(ttReleaseQueue.top().node);
           ttReleaseQueue.pop();
         }
-        bool released = FcfsComponent<TASKTRACER>::releaseActor();
+        bool released = FcfsComponent::releaseActor();
         if(!ttReleaseQueue.empty() && !released){
           sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
           this->notify_scheduler_thread.notify(delta);
@@ -123,8 +121,7 @@ namespace SystemC_VPC{
     };
 
 
-    template<class TASKTRACER>
-    void FcfsComponent<TASKTRACER>::notifyActivation(ScheduledTask * scheduledTask,
+    void FcfsComponent::notifyActivation(ScheduledTask * scheduledTask,
         bool active)
     {
       DBG_OUT(this->name() << " notifyActivation " << scheduledTask
@@ -137,8 +134,7 @@ namespace SystemC_VPC{
       }
     }
 
-    template<class TASKTRACER>
-    bool FcfsComponent<TASKTRACER>::releaseActor()
+    bool FcfsComponent::releaseActor()
     {
       while (!fcfsQueue.empty()) {
         ScheduledTask * scheduledTask = fcfsQueue.front();
@@ -158,8 +154,7 @@ namespace SystemC_VPC{
       return false;
     }
 
-    template<class TASKTRACER>
-    Task * FcfsComponent<TASKTRACER>::scheduleTask()
+    Task * FcfsComponent::scheduleTask()
     {
       assert(!readyTasks.empty());
       Task* task = readyTasks.front();

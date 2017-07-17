@@ -53,19 +53,13 @@ class ScheduledTask
 {
   friend class PajeTracer;
   friend class PreemptiveComponent;
-  template<class TASKTRACER>
   friend class ComponentImpl;
-  template<class TASKTRACER>
   friend class RoundRobinComponent;
-  template<class TASKTRACER>
   friend class FcfsComponent;
-  template<class TASKTRACER>
   friend class PriorityComponent;
-  template<class TASKTRACER>
   friend class DynamicPriorityComponent;
-  template<class DEBUG_OUT, class TASKTRACER>
+  template<class DEBUG_OUT>
   friend class DynamicPriorityComponentImpl;
-  template<class TASKTRACER>
   friend class NonPreemptiveComponent;
 
   SC_HAS_PROCESS(ScheduledTask);

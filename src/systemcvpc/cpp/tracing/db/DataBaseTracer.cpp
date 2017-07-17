@@ -37,32 +37,54 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-namespace SystemC_VPC
-{
-namespace Trace
-{
+namespace SystemC_VPC { namespace Trace {
 
-DataBaseProxy::DataBaseProxy(const char* database_name, uint16_t port) :
-  databaseName_(database_name), portNumber_(port)
-{
-  open();
-}
+class DataBaseTracer::DataBaseProxy {
+public:
+  static DataBaseProxy &getDataBaseProxy() {
+    static DataBaseProxy dbProxy("VPC");
+    return dbProxy;
+  }
 
-DataBaseProxy::~DataBaseProxy()
-{
-  close();
-}
+  ~DataBaseProxy();
 
-void DataBaseProxy::addEvent(const char* resourceName, const char* taskName,
-    const char* status, const unsigned long long timeStamp,
+  // addEvent
+  void addEvent(const char* resourceName, const char* taskName,
+      const char* status, unsigned long long timeStamp, unsigned int taskId);
+
+private:
+  const char* databaseName_;
+  uint16_t portNumber_;
+  FILE* socket_;
+
+  // create database with given name
+  DataBaseProxy(const char* database_name, uint16_t port = 5555);
+
+  void open();
+
+  void close();
+};
+
+DataBaseTracer::DataBaseProxy::DataBaseProxy(const char* database_name, uint16_t port)
+  : databaseName_(database_name)
+  , portNumber_(port)
+  { open(); }
+
+DataBaseTracer::DataBaseProxy::~DataBaseProxy()
+  { close(); }
+
+void DataBaseTracer::DataBaseProxy::addEvent(
+    const char *resourceName,
+    const char *taskName,
+    const char *status,
+    const unsigned long long timeStamp,
     const unsigned int taskId)
 {
   fprintf(socket_, "%s %s %s %llu %u\r\n", resourceName, taskName, status,
       timeStamp, taskId);
 }
 
-void DataBaseProxy::open()
-{
+void DataBaseTracer::DataBaseProxy::open() {
 
   struct sockaddr_in6 socketAddr;
   int socketFD;
@@ -90,10 +112,42 @@ void DataBaseProxy::open()
   fprintf(socket_, "%s\r\n", databaseName_);
 }
 
-void DataBaseProxy::close()
-{
+void DataBaseTracer::DataBaseProxy::close() {
   fprintf(socket_, "CLOSE\r\n");
 }
 
-} // namespace Trace
-} // namespace SystemC_VPC
+DataBaseTracer::DataBaseTracer(Config::Component::Ptr component)
+  : dbProxy_(DataBaseProxy::getDataBaseProxy())
+  , resourceName_(component->getName()) {}
+
+void DataBaseTracer::release(Task const *task)
+  { this->addEvent(task, "s"); }
+
+void DataBaseTracer::finishDii(Task const *task)
+  { this->addEvent(task, "d"); }
+
+void DataBaseTracer::finishLatency(Task const *task)
+  { this->addEvent(task, "l"); }
+
+void DataBaseTracer::assign(Task const *task)
+  { this->addEvent(task, "a"); }
+
+void DataBaseTracer::resign(Task const *task)
+  { this->addEvent(task, "r"); }
+
+void DataBaseTracer::block(Task const *task)
+  { this->addEvent(task, "b"); }
+
+// TODO: Can we avoid this function somehow?
+Tracing *DataBaseTracer::getOrCreateTraceSignal(std::string const &name)
+  { return nullptr; }
+
+void DataBaseTracer::addEvent(Task const *task, char const *state) {
+  dbProxy_.addEvent(resourceName_.c_str(),
+      task->getName().c_str(),
+      state,
+      sc_core::sc_time_stamp().value(),
+      task->getInstanceId());
+}
+
+} } // namespace SystemC_VPC::Trace

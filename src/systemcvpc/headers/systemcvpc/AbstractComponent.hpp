@@ -62,9 +62,14 @@
 #include "FunctionTimingPool.hpp"
 #include "ScheduledTask.hpp"
 #include "timetriggered/tt_support.hpp"
+
 #include <list>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
+
+namespace Trace {
+  class TracerIf;
+}
 
 class ComponentObserver;
 
@@ -88,9 +93,7 @@ class ComponentObserver;
   
   public:
 
-    virtual ~AbstractComponent(){
-      this->timingPools.clear();
-    }
+    virtual ~AbstractComponent();
 
     /**
      * \brief Set parameter for Component and Scheduler.
@@ -274,7 +277,8 @@ class ComponentObserver;
         canExecuteTasks(true),
         localGovernorFactory(NULL),
         midPowerGov(NULL),
-        powerAttribute(new Attribute("",""))
+        powerAttribute(new Attribute("","")),
+        taskTracer_(NULL)
     {
       component->componentInterface_ = this;
       if(powerTables.find(getPowerMode()) == powerTables.end()){
@@ -285,6 +289,8 @@ class ComponentObserver;
       powerTable[ComponentState::IDLE]    = 0.0;
       powerTable[ComponentState::RUNNING] = 1.0;
     }
+
+    void addTracer(Trace::TracerIf *tracer);
             
     /**
        * \brief Simulate an execution on this "Virtual Component".
@@ -401,7 +407,10 @@ class ComponentObserver;
       Factories;
     static Factories factories;
     PowerTables powerTables;
-    };
-}
+
+    Trace::TracerIf *taskTracer_;
+  };
+
+} // namespace SystemC_VPC
 
 #endif //HSCD_VPC_ABSTRACTCOMPONENT_H

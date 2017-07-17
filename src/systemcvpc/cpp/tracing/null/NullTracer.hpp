@@ -35,42 +35,29 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TRACING_NULL_NULLTRACER_HPP
 #define _INCLUDED_SYSTEMCVPC_TRACING_NULL_NULLTRACER_HPP
 
-#include <systemcvpc/Task.hpp>
-#include <systemcvpc/config/Component.hpp>
+#include "../TracerIf.hpp"
 
 namespace SystemC_VPC { namespace Trace {
 
-// FIXME: Remove this after method getOrCreateTraceSignal has been removed!
-class Tracing;
-
-class NullTracer {
+class NullTracer: public TracerIf {
 public:
   //
-  NullTracer(Config::Component::Ptr component)
-    {}
+  NullTracer(Config::Component::Ptr component);
 
-  void release(const Task * task) const
-    {}
+  void release(Task const *task);
 
-  void finishDii(const Task * task) const
-    {}
+  void finishDii(Task const *task);
 
-  void finishLatency(const Task * task) const
-    {}
+  void finishLatency(Task const *task);
 
-  void assign(const Task * task) const
-    {}
+  void assign(Task const *task);
 
-  void resign(const Task * task) const
-    {}
+  void resign(Task const *task);
 
-  void block(const Task * task) const
-    {}
+  void block(Task const *task);
 
   // TODO: Can we avoid this function somehow?
-  Tracing *getOrCreateTraceSignal(const std::string name) const
-    { return NULL; }
-
+  Tracing *getOrCreateTraceSignal(std::string const &name);
 };
 
 } } // namespace SystemC_VPC::Trace
