@@ -668,54 +668,46 @@ namespace SystemC_VPC {
 
   }
 
-  //
-  template<template <class> class C>
-  AbstractComponent * createComponent( Config::Component::Ptr component)
-  {
-    switch(component->getTracing()){
-      default:
-      case Config::Traceable::NONE:
-        return new C<Trace::NullTracer>(component);
-        break;
-      case Config::Traceable::PAJE:
-	return new C<Trace::PajeTracer>(component);
-	break;
-      case Config::Traceable::VCD:
-        return new C<Trace::VcdTracer>(component);
-        break;
-      case Config::Traceable::DB:
-        return new C<Trace::DataBaseTracer>(component);
-        break;
-    }
-  }
-
-  //
-  AbstractComponent * createComponent(VC::Component::Ptr component)
-  {
+  AbstractComponent * createComponent(Config::Component::Ptr component) {
     AbstractComponent *comp = NULL;
     switch (component->getScheduler()) {
       case VC::Scheduler::FCFS:
-        comp = createComponent<TtFcfsComponent>(component);
+        comp = new TtFcfsComponent(component);
         break;
       case VC::Scheduler::FCFS_noTT:
-        comp = createComponent<FcfsComponent>(component);
+        comp = new FcfsComponent(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
-        comp = createComponent<TtPriorityComponent>(component);
+        comp = new TtPriorityComponent(component);
         break;
       case VC::Scheduler::StaticPriority_NP_noTT:
-        comp = createComponent<PriorityComponent>(component);
+        comp = new PriorityComponent(component);
         break;
       case VC::Scheduler::RoundRobin_NP:
-        comp = createComponent<RoundRobinComponent>(component);
+        comp = new RoundRobinComponent(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
-        // FIXME: Why does this not support a tracer?
-        //comp = createComponent<DynamicPriorityComponent>(component);
-        comp = DynamicPriorityComponent<Trace::NullTracer>::create(component);
+        comp = DynamicPriorityComponent::create(component);
         break;
       default:
-        comp = createComponent<ComponentImpl>(component);
+        comp = new ComponentImpl(component);
+    }
+
+    switch(component->getTracing()){
+      case Config::Traceable::NONE:
+        comp->addTracer(new Trace::NullTracer(component));
+        break;
+      case Config::Traceable::PAJE:
+        comp->addTracer(new Trace::PajeTracer(component));
+        break;
+      case Config::Traceable::VCD:
+        comp->addTracer(new Trace::VcdTracer(component));
+        break;
+      case Config::Traceable::DB:
+        comp->addTracer(new Trace::DataBaseTracer(component));
+        break;
+      default:
+        assert(!"Oops, I don't know this tracer!");
     }
 
     VC::Mappings::getComponents()[component] = comp;

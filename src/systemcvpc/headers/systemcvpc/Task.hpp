@@ -62,8 +62,8 @@ namespace SystemC_VPC {
   public:
     friend class Trace::VcdTracer;
     friend class Trace::PajeTracer;
-    template<class TASKTRACER> friend class NonPreemptiveComponent;
-    template<class TASKTRACER> friend class RoundRobinComponent;
+    friend class NonPreemptiveComponent;
+    friend class RoundRobinComponent;
 
     Task(TaskPool * pool)
       : pid(-1)
@@ -156,7 +156,7 @@ namespace SystemC_VPC {
       {this->scheduledTask = st;}
     ScheduledTask * getScheduledTask()
       {return this->scheduledTask;}
-    bool hasScheduledTask()
+    bool hasScheduledTask() const
       {return this->scheduledTask != NULL;}
 
     /**
@@ -191,7 +191,7 @@ namespace SystemC_VPC {
       pcb->taskTracer->finishTaskLatency(taskTracerTicket);
     }
 
-    Trace::Tracing* getTraceSignal()
+    Trace::Tracing* getTraceSignal() const
       {assert(pcb != NULL); return pcb->getTraceSignal();}
 
     friend class AssociativePrototypedPool<ProcessId, Task>;

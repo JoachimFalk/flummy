@@ -39,15 +39,23 @@
 #include <systemcvpc/PluggablePowerGovernor.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 
+#include "tracing/TracerIf.hpp"
 
-namespace SystemC_VPC{
-
-  //
-  const ComponentId Delayer::getComponentId() const{
-    return this->componentId_;
-  }
+namespace SystemC_VPC {
 
   AbstractComponent::Factories AbstractComponent::factories;
+
+
+  AbstractComponent::~AbstractComponent() {
+    this->timingPools.clear();
+    if (this->taskTracer_)
+      delete this->taskTracer_;
+  }
+
+  void AbstractComponent::addTracer(Trace::TracerIf *tracer) {
+    assert(taskTracer_ == nullptr);
+    taskTracer_ = tracer;
+  }
 
   bool AbstractComponent::processPower(AttributePtr attPtr)
   {
@@ -208,6 +216,10 @@ namespace SystemC_VPC{
         }
         return (*pool)[pid];
       }
+
+  const ComponentId Delayer::getComponentId() const{
+    return this->componentId_;
+  }
 
   void Delayer::addObserver(ComponentObserver *obs)
   {

@@ -32,18 +32,15 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <tracing/paje/PajeTracer.hpp>
+#include "PajeTracer.hpp"
 
-#include <CoSupport/Tracing/PajeTracer.hpp>
+#include <CoSupport/String/color.hpp>
 #include <CoSupport/String/DoubleQuotedString.hpp>
+#include <CoSupport/Tracing/PajeTracer.hpp>
 
 #include <iomanip>
-
 #include <memory>
 #include <boost/algorithm/string.hpp>
-#include <string>
-#include <vector>
-#include <map>
 
 namespace {
 
@@ -70,7 +67,7 @@ namespace SystemC_VPC { namespace Trace {
     return name_;
   }
 
-  void PajeTracer::release(Task * task) {
+  void PajeTracer::release(Task const *task) {
 
     if(!task->hasScheduledTask()){
       std::string name = task->getName();
@@ -105,7 +102,7 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  void PajeTracer::finishDii(Task * task) {
+  void PajeTracer::finishDii(Task const *task) {
 //    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
 //    sc_core::sc_time t1 = sc_core::sc_time_stamp();
@@ -118,7 +115,7 @@ namespace SystemC_VPC { namespace Trace {
 
   }
 
-  void PajeTracer::finishLatency(Task * task) {
+  void PajeTracer::finishLatency(Task const *task) {
 
 //    taskToEndTime[task->getName()] = sc_core::sc_time_stamp();
 //    taskToResource[task->getName()] = this->res_;
@@ -151,7 +148,7 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  void PajeTracer::assign(Task * task) {
+  void PajeTracer::assign(Task const *task) {
 
     this->startTime = sc_core::sc_time_stamp();
 
@@ -167,7 +164,7 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  void PajeTracer::resign(Task * task) {
+  void PajeTracer::resign(Task const *task) {
 
     this->startTime = sc_core::sc_time_stamp();
 
@@ -185,7 +182,7 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  void PajeTracer::block(Task * task) {
+  void PajeTracer::block(Task const *task) {
 
     std::string event = task->getName().append(" blocked!");
 
@@ -204,17 +201,8 @@ namespace SystemC_VPC { namespace Trace {
 //    logfile.close();
   }
 
-  Tracing * PajeTracer::getOrCreateTraceSignal(std::string name) {
-    Tracing *newsignal = new Tracing(name, this->getName()); // resource, task
-
-    // not relevant for paje tracese, as all components are displayed in one trace.
-
-//    std::ofstream logfile;
-//    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
-//    logfile << "getOrCreateTraceSignal at: " << t1 << "\n";
-//    logfile.close();
-    return newsignal;
+  Tracing *PajeTracer::getOrCreateTraceSignal(std::string const &name) {
+    return nullptr;
   }
 
   int PajeTracer::getNextKey() {

@@ -67,8 +67,8 @@ namespace SystemC_VPC{
    * Director reads allocation and binding from file.
    */
   class Director {
-    template<class TASKTRACER> friend class RoundRobinComponent;
-    template<class TASKTRACER> friend class NonPreemptiveComponent;
+    friend class RoundRobinComponent;
+    friend class NonPreemptiveComponent;
   public:
     bool FALLBACKMODE;
     bool defaultRoute;

@@ -286,7 +286,7 @@ namespace SystemC_VPC{
     this->traceSignal = signal;
   }
 
-  Trace::Tracing* ProcessControlBlock::getTraceSignal(){
+  Trace::Tracing* ProcessControlBlock::getTraceSignal() const {
     return this->traceSignal;
   }
 

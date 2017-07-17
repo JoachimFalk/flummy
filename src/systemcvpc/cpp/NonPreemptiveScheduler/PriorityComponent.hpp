@@ -41,12 +41,11 @@ namespace SystemC_VPC{
 
   typedef PriorityFcfsElement<ScheduledTask*>                    QueueElem;
 
-  template<class TASKTRACER>
-  class PriorityComponent : public NonPreemptiveComponent<TASKTRACER> {
+  class PriorityComponent : public NonPreemptiveComponent {
   public:
     PriorityComponent(Config::Component::Ptr component, Director *director  =
         &Director::getInstance()) :
-      NonPreemptiveComponent<TASKTRACER>(component, director), fcfsOrder(0)
+      NonPreemptiveComponent(component, director), fcfsOrder(0)
     {
     }
 
@@ -83,12 +82,11 @@ namespace SystemC_VPC{
 
   };
 
-  template<class TASKTRACER>
-  class TtPriorityComponent : public PriorityComponent<TASKTRACER> {
+  class TtPriorityComponent : public PriorityComponent{
   public:
     TtPriorityComponent(Config::Component::Ptr component, Director *director =
         &Director::getInstance()) :
-      PriorityComponent<TASKTRACER>(component, director)
+      PriorityComponent(component, director)
     {
     }
 
@@ -126,7 +124,7 @@ namespace SystemC_VPC{
             scheduledTask));
         ttReleaseQueue.pop();
       }
-      bool released = PriorityComponent<TASKTRACER>::releaseActor();
+      bool released = PriorityComponent::releaseActor();
       if(!ttReleaseQueue.empty() && !released){
         sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
         this->notify_scheduler_thread.notify(delta);
@@ -139,8 +137,7 @@ namespace SystemC_VPC{
   };
 
 
-  template<class TASKTRACER>
-  void PriorityComponent<TASKTRACER>::notifyActivation(
+  void PriorityComponent::notifyActivation(
       ScheduledTask * scheduledTask, bool active)
   {
     DBG_OUT(this->name() << " notifyActivation " << scheduledTask
@@ -155,8 +152,7 @@ namespace SystemC_VPC{
     }
   }
 
-  template<class TASKTRACER>
-  bool PriorityComponent<TASKTRACER>::releaseActor()
+  bool PriorityComponent::releaseActor()
   {
     while (!releaseQueue.empty()) {
       ScheduledTask * scheduledTask = releaseQueue.top().payload;
@@ -176,8 +172,7 @@ namespace SystemC_VPC{
     return false;
   }
 
-  template<class TASKTRACER>
-  Task * PriorityComponent<TASKTRACER>::scheduleTask()
+  Task * PriorityComponent::scheduleTask()
   {
     assert(!readyQueue.empty());
     Task* task = readyQueue.top().task;

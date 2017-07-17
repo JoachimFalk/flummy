@@ -35,49 +35,44 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TRACING_PAJE_PAJETRACER_HPP
 #define _INCLUDED_SYSTEMCVPC_TRACING_PAJE_PAJETRACER_HPP
 
-#include <systemcvpc/ProcessControlBlock.hpp>
-#include <systemcvpc/Task.hpp>
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/ScheduledTask.hpp>
-
-#include "../vcd/Tracing.hpp"
+#include "../TracerIf.hpp"
 
 #include <CoSupport/Tracing/PajeTracer.hpp>
-#include <CoSupport/String/color.hpp>
 
 #include <vector>
 #include <map>
+#include <string>
 
 namespace SystemC_VPC { namespace Trace {
 
-class PajeTracer {
+class PajeTracer: public TracerIf {
 public:
   //
   PajeTracer(Config::Component::Ptr component);
 
   ~PajeTracer();
 
-  std::string getName() const;
+  void release(Task const *task);
 
-  void release(Task * task);
+  void finishDii(Task const *task);
 
-  void finishDii(Task * task);
+  void finishLatency(Task const *task);
 
-  void finishLatency(Task * task);
+  void assign(Task const *task);
 
-  void assign(Task * task);
+  void resign(Task const *task);
 
-  void resign(Task * task);
+  void block(Task const *task);
 
-  void block(Task * task);
-
-  Tracing *getOrCreateTraceSignal(std::string name);
+  Tracing *getOrCreateTraceSignal(std::string const &name);
 
 protected:
   unsigned int keyCounter;
   int getNextKey();
 
 private:
+  std::string getName() const;
+
   std::string name_;
   std::map<std::string, Trace::Tracing*> trace_map_by_name_;
   CoSupport::Tracing::PajeTracer::Resource const *res_;

@@ -44,7 +44,6 @@
 
 namespace SystemC_VPC{
 
-  template<class TASKTRACER>
   class RoundRobinComponent : public AbstractComponent {
     SC_HAS_PROCESS(RoundRobinComponent);
   public:
@@ -53,7 +52,6 @@ namespace SystemC_VPC{
       : AbstractComponent(component)
       , useActivationCallback(false)
       , actualTask(NULL)
-      , taskTracer(component)
     {
       /// FIXME: WTF?! SLOW hardcoded?
       this->setPowerMode(this->translatePowerMode("SLOW"));
@@ -133,11 +131,11 @@ namespace SystemC_VPC{
         ProcessId pid = actualTask->getProcessId();
         actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
         actualTask->initDelays();
-        this->taskTracer.release(actualTask);
-        this->taskTracer.assign(actualTask);
+        this->taskTracer_->release(actualTask);
+        this->taskTracer_->assign(actualTask);
         wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
-        this->taskTracer.finishDii(actualTask);
-        this->taskTracer.finishLatency(actualTask);
+        this->taskTracer_->finishDii(actualTask);
+        this->taskTracer_->finishLatency(actualTask);
 
         std::cout << "check: " <<  actualTask->getName() << std::endl;
       }
@@ -183,7 +181,7 @@ namespace SystemC_VPC{
     }
 
     virtual Trace::Tracing * getOrCreateTraceSignal(std::string name) {
-      return taskTracer.getOrCreateTraceSignal(name);
+      return taskTracer_->getOrCreateTraceSignal(name);
     }
 
     bool scheduleMessageTasks() {
@@ -192,15 +190,15 @@ namespace SystemC_VPC{
         Task *messageTask = readyMsgTasks.front();
         readyMsgTasks.pop_front();
         assert(!messageTask->hasScheduledTask());
-        this->taskTracer.release(messageTask);
-        this->taskTracer.assign(messageTask);
+        this->taskTracer_->release(messageTask);
+        this->taskTracer_->assign(messageTask);
         /// This will setup the trigger for schedule_method to be called
         /// again when the task execution time is over.
         wait(messageTask->getDelay());
 //        wait(0.9 * messageTask->getDelay());
         Director::getInstance().signalLatencyEvent(messageTask);
-        this->taskTracer.finishDii(messageTask);
-        this->taskTracer.finishLatency(messageTask);
+        this->taskTracer_->finishDii(messageTask);
+        this->taskTracer_->finishLatency(messageTask);
         /// The scheduledTask, i.e., the SysteMoC actor, should now be in the comm state.
         /// Enable transition out of comm state by notifying the dii event.
         messageTask->getBlockEvent().dii->notify();
@@ -229,11 +227,11 @@ namespace SystemC_VPC{
             assert(actualTask);
             assert(actualTask->hasScheduledTask());
             assert(actualTask->getScheduledTask() == scheduledTask);
-            this->taskTracer.release(actualTask);
-            this->taskTracer.assign(actualTask);
+            this->taskTracer_->release(actualTask);
+            this->taskTracer_->assign(actualTask);
             wait(actualTask->getOverhead());
-            this->taskTracer.finishDii(actualTask);
-            this->taskTracer.finishLatency(actualTask);
+            this->taskTracer_->finishDii(actualTask);
+            this->taskTracer_->finishLatency(actualTask);
 
             /// The scheduledTask, i.e., the SysteMoC actor, should now be in the comm state.
             /// Enable transition out of comm state by notifying the dii event.
@@ -273,7 +271,6 @@ namespace SystemC_VPC{
     /// is currently running.
     Task                         *actualTask;
     sc_core::sc_event             readyEvent;
-    TASKTRACER                    taskTracer;
   };
 
 } // namespace SystemC_VPC

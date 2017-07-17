@@ -51,8 +51,7 @@ namespace SystemC_VPC
 
 typedef std::list<ScheduledTask *> PriorityList;
 
-template<class TASKTRACER>
-class DynamicPriorityComponent: public NonPreemptiveComponent<TASKTRACER>
+class DynamicPriorityComponent: public NonPreemptiveComponent
 {
 public:
 
@@ -94,7 +93,7 @@ public:
 protected:
   DynamicPriorityComponent(Config::Component::Ptr component,
       Director *director = &Director::getInstance()) :
-    NonPreemptiveComponent<TASKTRACER> (component, director), priorities_(),
+    NonPreemptiveComponent(component, director), priorities_(),
         mustYield_(false), lastTask_(NULL), releasedTask_(NULL)
   {
     buildInitialPriorityList(component);
@@ -111,13 +110,13 @@ private:
 
 };
 
-template<class DEBUG_OUT, class TASKTRACER>
-class DynamicPriorityComponentImpl: public DynamicPriorityComponent<TASKTRACER>
+template<class DEBUG_OUT>
+class DynamicPriorityComponentImpl: public DynamicPriorityComponent
 {
 public:
   DynamicPriorityComponentImpl(Config::Component::Ptr component,
       Director *director = &Director::getInstance()) :
-    DynamicPriorityComponent<TASKTRACER> (component, director),
+    DynamicPriorityComponent(component, director),
         debug_(component->getDebugFileName())
   {
   }
@@ -184,21 +183,17 @@ private:
   }
 };
 
-template<class T>
-AbstractComponent* DynamicPriorityComponent<T>::create(
+AbstractComponent *DynamicPriorityComponent::create(
     Config::Component::Ptr component)
 {
   if (component->hasDebugFile()) {
-    return new DynamicPriorityComponentImpl<Diagnostics::PrintDebug,
-        T> (component);
+    return new DynamicPriorityComponentImpl<Diagnostics::PrintDebug> (component);
   } else {
-    return new DynamicPriorityComponentImpl<Diagnostics::DiscardOutput,
-        T> (component);
+    return new DynamicPriorityComponentImpl<Diagnostics::DiscardOutput> (component);
   }
 }
 
-template<class TASKTRACER>
-void DynamicPriorityComponent<TASKTRACER>::buildInitialPriorityList(
+void DynamicPriorityComponent::buildInitialPriorityList(
     Config::Component::Ptr component)
 {
   std::priority_queue<PriorityFcfsElement<ScheduledTask*> > pQueue;
@@ -222,8 +217,7 @@ void DynamicPriorityComponent<TASKTRACER>::buildInitialPriorityList(
   }
 }
 
-template<class TASKTRACER>
-void DynamicPriorityComponent<TASKTRACER>::addTask(Task *newTask)
+void DynamicPriorityComponent::addTask(Task *newTask)
 {
   if (newTask->hasScheduledTask()) {
     assert(releasedTask_ == newTask->getScheduledTask());
@@ -237,8 +231,7 @@ void DynamicPriorityComponent<TASKTRACER>::addTask(Task *newTask)
 
 }
 
-template<class TASKTRACER>
-Task * DynamicPriorityComponent<TASKTRACER>::scheduleTask()
+Task * DynamicPriorityComponent::scheduleTask()
 {
   assert(this->runningTask == NULL);
   assert(lastTask_ != NULL);
