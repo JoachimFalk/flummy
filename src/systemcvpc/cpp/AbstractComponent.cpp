@@ -32,11 +32,11 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/AbstractComponent.hpp>
-#include <systemcvpc/ComponentObserver.hpp>
-#include <systemcvpc/ComponentInfo.hpp>
+#include "AbstractComponent.hpp"
+#include "ComponentObserver.hpp"
+#include "ComponentInfo.hpp"
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include "HysteresisLocalGovernor.hpp"
 
 #include "dynload/dll.hpp"
 #include "PluggablePowerGovernor.hpp"

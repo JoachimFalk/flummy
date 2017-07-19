@@ -39,13 +39,13 @@ typedef boost::minstd_rand base_generator_type;
 #include <systemcvpc/TimingModifier.hpp>
 #include <systemcvpc/vpc_config.h>
 
-#include <systemcvpc/AbstractComponent.hpp>
-#include <systemcvpc/ProcessControlBlock.hpp>
+#include "AbstractComponent.hpp"
+#include "ProcessControlBlock.hpp"
 #include <systemcvpc/Director.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
 #include <ctime> 
 
-#include <systemcvpc/debug_config.hpp>
+#include "debug_config.hpp"
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_PCB
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -54,9 +54,9 @@ typedef boost::minstd_rand base_generator_type;
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include <systemcvpc/debug_on.hpp>
+  #include "debug_on.hpp"
 #else
-  #include <systemcvpc/debug_off.hpp>
+  #include "debug_off.hpp"
 #endif
 
 namespace SystemC_VPC{

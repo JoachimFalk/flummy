@@ -36,9 +36,9 @@
 #include <queue>
 #include <CoSupport/SystemC/algorithm.hpp>
 #include <systemcvpc/Director.hpp>
-#include <PreemptiveScheduler/MostScheduler.hpp>
-#include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
+#include "MostScheduler.hpp"
+#include "MostSecondaryScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 #include <systemcvpc/datatypes.hpp>
 
 

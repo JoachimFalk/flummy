@@ -23,7 +23,7 @@
 include $(auxdir)/jfrules.mk
 include ../BuildSystem/doxygen.am
 
-# SUBDIRS = src/systemcvpc/headers/
+SUBDIRS = src/systemcvpc/headers/
 
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
@@ -84,10 +84,10 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/PreemptiveScheduler/MostSecondaryScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/StreamShaperScheduler.cpp \
 	\
-	src/systemcvpc/cpp/tracing/null/NullTracer.cpp \
-	src/systemcvpc/cpp/tracing/db/DataBaseTracer.cpp \
-	src/systemcvpc/cpp/tracing/vcd/VcdTracer.cpp \
-	src/systemcvpc/cpp/tracing/paje/PajeTracer.cpp \
+	src/systemcvpc/cpp/tracing/NullTracer.cpp \
+	src/systemcvpc/cpp/tracing/DataBaseTracer.cpp \
+	src/systemcvpc/cpp/tracing/VcdTracer.cpp \
+	src/systemcvpc/cpp/tracing/PajeTracer.cpp \
 	\
 	src/systemcvpc/cpp/debug_config.cpp \
 	src/systemcvpc/cpp/BlockingTransport.cpp \

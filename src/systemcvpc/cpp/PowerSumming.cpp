@@ -34,7 +34,7 @@
 
 #include <cassert>
 
-#include <systemcvpc/PowerSumming.hpp>
+#include "PowerSumming.hpp"
 #include <systemcvpc/Director.hpp>
 
 namespace SystemC_VPC{

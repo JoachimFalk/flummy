@@ -35,7 +35,7 @@
 #ifndef AVBSCHEDULER_H
 #define AVBSCHEDULER_H
 
-#include <PreemptiveScheduler/PriorityScheduler.hpp>
+#include "PriorityScheduler.hpp"
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 

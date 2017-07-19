@@ -25,12 +25,7 @@ include $(auxdir)/jfrules.mk
 SUBDIRS=
 
 nobase_include_HEADERS = \
-	systemcvpc/AbstractComponent.hpp \
 	systemcvpc/Attribute.hpp \
-	systemcvpc/BlockingTransport.hpp \
-	systemcvpc/ComponentInfo.hpp \
-	systemcvpc/ComponentModel.hpp \
-	systemcvpc/ComponentObserver.hpp \
 	systemcvpc/config/common.hpp \
 	systemcvpc/config/Component.hpp \
 	systemcvpc/config/ConfigException.hpp \
@@ -41,36 +36,12 @@ nobase_include_HEADERS = \
 	systemcvpc/config/VpcTask.hpp \
 	systemcvpc/coupling/VPCEvent.hpp \
 	systemcvpc/datatypes.hpp \
-	systemcvpc/debug_config.hpp \
-	systemcvpc/debug.hpp \
-	systemcvpc/debug_off.hpp \
-	systemcvpc/debug_on.hpp \
-	systemcvpc/Delayer.hpp \
 	systemcvpc/Director.hpp \
-	systemcvpc/dynload/dll.hpp \
 	systemcvpc/EventPair.hpp \
 	systemcvpc/FastLink.hpp \
-	systemcvpc/FunctionTimingPool.hpp \
-	systemcvpc/HysteresisLocalGovernor.hpp \
 	systemcvpc/InvalidArgumentException.hpp \
-	systemcvpc/PCBPool.hpp \
-	systemcvpc/PluggablePowerGovernor.hpp \
-	systemcvpc/Pool.hpp \
-	systemcvpc/PowerGovernor.hpp \
-	systemcvpc/PowerMode.hpp \
-	systemcvpc/PowerSumming.hpp \
-	systemcvpc/ProcessControlBlock.hpp \
-	systemcvpc/RouteImpl.hpp \
-	systemcvpc/RoutePool.hpp \
 	systemcvpc/ScheduledTask.hpp \
-	systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp \
-	systemcvpc/StaticRoute.hpp \
-	systemcvpc/Task.hpp \
-	systemcvpc/TaskPool.hpp \
-	systemcvpc/timetriggered/tt_support.hpp \
 	systemcvpc/TimingModifier.hpp \
-	systemcvpc/VPCBuilder.hpp \
 	systemcvpc/vpc_config.h \
-	systemcvpc/VpcDomErrorHandler.hpp \
 	vpc_api.hpp \
 	vpc.hpp

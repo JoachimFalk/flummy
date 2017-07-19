@@ -35,7 +35,7 @@
 #ifndef NONPREEMPTIVESCHEUDLER_FCFSCOMPONENT_HPP_
 #define NONPREEMPTIVESCHEUDLER_FCFSCOMPONENT_HPP_
 
-#include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
+#include "NonPreemptiveComponent.hpp"
 
 namespace SystemC_VPC{
 

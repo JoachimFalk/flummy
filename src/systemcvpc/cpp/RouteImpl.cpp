@@ -32,7 +32,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/RouteImpl.hpp>
+#include "RouteImpl.hpp"
 namespace SystemC_VPC {
   size_t Route::createRouteId(){
     static size_t instanceCounter = 0;

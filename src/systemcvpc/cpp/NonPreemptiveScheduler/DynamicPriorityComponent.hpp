@@ -35,14 +35,14 @@
 #ifndef DYNAMICPRIORITYCOMPONENT_HPP_
 #define DYNAMICPRIORITYCOMPONENT_HPP_
 
-#include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
+#include "NonPreemptiveComponent.hpp"
 #include <systemcvpc/ScheduledTask.hpp>
-#include <systemcvpc/Task.hpp>
+#include "../Task.hpp"
 
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
-#include "diagnostics/DebugOutput.hpp"
+#include "../diagnostics/DebugOutput.hpp"
 
 #include <list>
 

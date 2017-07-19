@@ -40,7 +40,7 @@
 #include <deque>
 #include <utility>
 #include <iostream>
-#include <systemcvpc/InvalidArgumentException.hpp>
+#include "InvalidArgumentException.hpp"
 
 namespace SystemC_VPC{
 

@@ -41,7 +41,7 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
-#include <systemcvpc/PowerMode.hpp>
+#include "PowerMode.hpp"
 #include <systemcvpc/Director.hpp>
 #include "PluggablePowerGovernor.hpp"
 

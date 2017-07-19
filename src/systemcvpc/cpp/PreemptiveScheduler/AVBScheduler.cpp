@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <PreemptiveScheduler/AVBScheduler.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
+#include "AVBScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 

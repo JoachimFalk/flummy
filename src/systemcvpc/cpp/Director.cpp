@@ -38,40 +38,40 @@
 #include <boost/foreach.hpp>
 
 #include <CoSupport/SystemC/systemc_time.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
-#include <NonPreemptiveScheduler/DynamicPriorityComponent.hpp>
-#include <NonPreemptiveScheduler/FcfsComponent.hpp>
-#include <NonPreemptiveScheduler/NonPreemptiveComponent.hpp>
-#include <NonPreemptiveScheduler/PriorityComponent.hpp>
-#include <NonPreemptiveScheduler/RoundRobinComponent.hpp>
-#include <tracing/paje/PajeTracer.hpp>
+#include "PreemptiveScheduler/PreemptiveComponent.hpp"
+#include "NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
+#include "NonPreemptiveScheduler/FcfsComponent.hpp"
+#include "NonPreemptiveScheduler/NonPreemptiveComponent.hpp"
+#include "NonPreemptiveScheduler/PriorityComponent.hpp"
+#include "NonPreemptiveScheduler/RoundRobinComponent.hpp"
+#include "tracing/PajeTracer.hpp"
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/AbstractComponent.hpp>
-#include <systemcvpc/VPCBuilder.hpp>
+#include "AbstractComponent.hpp"
+#include "VPCBuilder.hpp"
 #include <systemcvpc/InvalidArgumentException.hpp>
-#include <systemcvpc/PowerSumming.hpp>
-#include <systemcvpc/Task.hpp>
-#include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
-#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include "PowerSumming.hpp"
+#include "Task.hpp"
+#include "SelectFastestPowerModeGlobalGovernor.hpp"
+#include "HysteresisLocalGovernor.hpp"
 #include "PluggablePowerGovernor.hpp"
-#include <systemcvpc/StaticRoute.hpp>
-#include <systemcvpc/RoutePool.hpp>
+#include "StaticRoute.hpp"
+#include "RoutePool.hpp"
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
 #include "ConfigCheck.hpp"
 #include "config/Mappings.hpp"
 
-#include "tracing/null/NullTracer.hpp"
-#include "tracing/db/DataBaseTracer.hpp"
-#include "tracing/vcd/VcdTracer.hpp"
+#include "tracing/NullTracer.hpp"
+#include "tracing/DataBaseTracer.hpp"
+#include "tracing/VcdTracer.hpp"
 #include <systemc>
 #include <map>
 #include <vector>
 
-#include <systemcvpc/debug_config.hpp>
+#include "debug_config.hpp"
 // if compiled with DBG_DIRECTOR create stream and include debug macros
 #ifdef DBG_DIRECTOR
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -79,9 +79,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include <systemcvpc/debug_on.hpp>
+  #include "debug_on.hpp"
 #else
-  #include <systemcvpc/debug_off.hpp>
+  #include "debug_off.hpp"
 #endif
 
 namespace SystemC_VPC {

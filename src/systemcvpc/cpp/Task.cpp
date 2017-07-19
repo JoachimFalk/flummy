@@ -32,7 +32,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/Task.hpp>
+#include "Task.hpp"
 
 namespace SystemC_VPC{
 

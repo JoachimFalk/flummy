@@ -32,19 +32,40 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__TASKPOOL__H__
-#define __INCLUDED__TASKPOOL__H__
+#ifndef _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP
+#define _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP
 
-#include <systemcvpc/Pool.hpp>
-#include <systemcvpc/FastLink.hpp>
+#include "TracerIf.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Trace {
 
-  template<typename KEY, class OBJECT>
-  class AssociativePrototypedPool;
+class VcdTracer: public TracerIf {
+public:
+  VcdTracer(Config::Component::Ptr component);
 
-  class Task;
-  typedef AssociativePrototypedPool<ProcessId, Task> TaskPool;
+  ~VcdTracer();
 
-}
-#endif // __INCLUDED__TASKPOOL__H__
+  void release(Task const *task);
+
+  void finishDii(Task const *task);
+
+  void finishLatency(Task const *task);
+
+  void assign(Task const *task);
+
+  void resign(Task const *task);
+
+  void block(Task const *task);
+
+  Tracing *getOrCreateTraceSignal(std::string const &name);
+private:
+  std::string getName() const;
+
+  sc_core::sc_trace_file *traceFile_;
+  std::string name_;
+  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+};
+
+} } // namespace SystemC_VPC::Trace
+
+#endif /* _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP */

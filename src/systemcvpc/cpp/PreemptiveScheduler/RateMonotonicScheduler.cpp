@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <PreemptiveScheduler/RateMonotonicScheduler.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
+#include "RateMonotonicScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 

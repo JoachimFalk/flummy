@@ -51,8 +51,8 @@
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include "../PluggablePowerGovernor.hpp"
-#include <systemcvpc/HysteresisLocalGovernor.hpp>
-#include <systemcvpc/Task.hpp>
+#include "../HysteresisLocalGovernor.hpp"
+#include "../Task.hpp"
 #include <systemcvpc/config/Component.hpp>
 
 namespace SystemC_VPC{

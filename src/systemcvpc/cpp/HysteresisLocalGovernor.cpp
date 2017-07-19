@@ -32,7 +32,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/HysteresisLocalGovernor.hpp>
+#include "HysteresisLocalGovernor.hpp"
 
 namespace SystemC_VPC{
 

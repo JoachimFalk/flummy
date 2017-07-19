@@ -35,7 +35,7 @@
 #ifndef FLEXRAYSCHEDULER_H
 #define FLEXRAYSCHEDULER_H
 #include <PreemptiveScheduler/Scheduler.hpp>
-#include <PreemptiveScheduler/TDMAScheduler.hpp>
+#include "TDMAScheduler.hpp"
 #include <systemcvpc/datatypes.hpp>
 #include <systemc>
 

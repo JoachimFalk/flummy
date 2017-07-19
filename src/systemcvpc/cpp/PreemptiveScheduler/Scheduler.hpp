@@ -35,8 +35,8 @@
 #ifndef HSCD_VPC_SCHEDULER_H
 #define HSCD_VPC_SCHEDULER_H
 
-#include <systemcvpc/Task.hpp>
-#include <systemcvpc/ComponentModel.hpp>
+#include "../Task.hpp"
+#include "../ComponentModel.hpp"
 #include <systemcvpc/Attribute.hpp>
 
 #include <systemc>

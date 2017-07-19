@@ -36,6 +36,6 @@
 #define __INCLUDED__VPC_API__HPP__
 
 //#include <systemcvpc/vpc.hpp>
-#include <systemcvpc/config/VpcApi.hpp>
+#include "systemcvpc/config/VpcApi.hpp"
 
 #endif // __INCLUDED__VPC_API__HPP__

@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <PreemptiveScheduler/RoundRobinScheduler.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
+#include "RoundRobinScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 #include <systemcvpc/Director.hpp>
 
 

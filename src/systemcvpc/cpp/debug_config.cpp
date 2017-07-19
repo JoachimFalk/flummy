@@ -32,7 +32,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/debug_config.hpp>
+#include "debug_config.hpp"
 #include <iostream>
 
 #ifdef DBG_ENABLE
