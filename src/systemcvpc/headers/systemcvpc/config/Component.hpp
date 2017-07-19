@@ -39,8 +39,8 @@
 #include "ConfigException.hpp"
 #include "Scheduler.hpp"
 #include "Timing.hpp"
-#include "../Attribute.hpp"
-#include "../datatypes.hpp"
+#include <systemcvpc/Attribute.hpp>
+#include <systemcvpc/datatypes.hpp>
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include "../TimingModifier.hpp"
 

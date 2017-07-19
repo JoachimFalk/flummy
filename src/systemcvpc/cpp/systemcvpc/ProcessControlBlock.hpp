@@ -44,11 +44,11 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
-#include "EventPair.hpp"
-#include "datatypes.hpp"
-#include "FastLink.hpp"
+#include <systemcvpc/EventPair.hpp>
+#include <systemcvpc/datatypes.hpp>
+#include <systemcvpc/FastLink.hpp>
 #include "PowerMode.hpp"
-#include "config/Timing.hpp"
+#include <systemcvpc/config/Timing.hpp>
 #include "FunctionTimingPool.hpp"
 
 namespace SystemC_VPC {

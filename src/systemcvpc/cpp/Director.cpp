@@ -55,7 +55,7 @@
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
-#include <systemcvpc/PluggablePowerGovernor.hpp>
+#include "PluggablePowerGovernor.hpp"
 #include <systemcvpc/StaticRoute.hpp>
 #include <systemcvpc/RoutePool.hpp>
 #include <systemcvpc/config/Timing.hpp>
@@ -102,8 +102,9 @@ namespace SystemC_VPC {
     , topPowerGovFactory(NULL)
 #ifndef NO_POWER_SUM
     , powerConsStream("powerconsumption.dat")
-#endif // NO_POWER_SUM
     , powerSumming(NULL)
+#endif // NO_POWER_SUM
+    , taskPool(new TaskPool())
   {
     sc_core::sc_report_handler::set_actions(
         sc_core::SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
@@ -181,6 +182,8 @@ namespace SystemC_VPC {
     }
 
     componentIdMap.clear();
+
+    delete taskPool;
   }
 
   Task *Director::preCompute(FastLink const *fLink) {
@@ -334,8 +337,8 @@ namespace SystemC_VPC {
       mappings.resize( pid + 100, NULL );
     }
 
-    if( !taskPool.contains( pid ) ){
-      Task &task = taskPool.createObject( pid );
+    if( !taskPool->contains( pid ) ){
+      Task &task = taskPool->createObject( pid );
       task.setProcessId( pid );
       task.setName( taskName );
     }
@@ -367,8 +370,8 @@ namespace SystemC_VPC {
     }
     DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< std::endl);
 
-    if( !taskPool.contains( pid ) ){
-      Task &task = taskPool.createObject( pid );
+    if( !taskPool->contains( pid ) ){
+      Task &task = taskPool->createObject( pid );
       task.setProcessId( pid );
       task.setName( taskName );
     }
@@ -393,6 +396,25 @@ namespace SystemC_VPC {
       reverseMapping[hid]->push_back(pid);
     }
 
+  }
+
+  Task* Director::allocateTask(ProcessId pid){
+    return this->taskPool->allocate(pid);
+  }
+
+  void Director::assertMapping(ProcessId const pid){
+    if (mappings.size() < pid ||
+        mappings[pid] == NULL) {
+
+      Task &task = this->taskPool->getPrototype(pid);
+
+      std::cerr << "Unknown mapping <"
+          << task.getName() << "> to ??" << std::endl;
+
+      assert(mappings.size() >= pid &&
+             mappings[pid] != NULL);
+      exit(-1);
+    }
   }
 
   //
@@ -821,14 +843,14 @@ namespace SystemC_VPC {
       ConfigCheck::modelTiming(pid, *iter);
     }
 
-    if (!taskPool.contains( pid )){
+    if (!taskPool->contains( pid )){
       std::cerr << "Unknown Task: name = " << actorName  << std::endl;
       return FastLink(pid, actionIds, guardIds, complexity);
 
       //debugUnknownNames();
       //throw NotAllocatedException(actorName);
     }
-    Task &task = taskPool.getPrototype(pid);
+    Task &task = taskPool->getPrototype(pid);
     task.setScheduledTask(actor);
 
     assertMapping(pid);
@@ -869,7 +891,7 @@ namespace SystemC_VPC {
       exit(-1);
     }
 
-    assert( !taskPool.contains(pid) );
+    assert( !taskPool->contains(pid) );
 
     VC::Route::Ptr configuredRoute = VC::Routing::get(pid);
     Route * route = VC::Routing::create(configuredRoute);
@@ -921,7 +943,7 @@ namespace SystemC_VPC {
           iter = ConfigCheck::routeNames().begin();
         iter != ConfigCheck::routeNames().end();
         ++iter){
-      if( !taskPool.contains( iter->first ) ){
+      if( !taskPool->contains( iter->first ) ){
            if(!route){
              std::cout << "Found unknown routes.\n"
                        <<" Please add the following routes to the config file:"
@@ -941,7 +963,7 @@ namespace SystemC_VPC {
           ConfigCheck::processNames().begin();
         iter != ConfigCheck::processNames().end();
         ++iter){
-      if( !taskPool.contains( iter->first ) ){
+      if( !taskPool->contains( iter->first ) ){
         if(!mappings){
           std::cout << "\n" << std::endl;
           std::cout << "Unknown mapping for tasks.\n"

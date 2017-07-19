@@ -38,8 +38,8 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 
-#include "FastLink.hpp"
-#include "config/Timing.hpp"
+#include <systemcvpc/FastLink.hpp>
+#include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/TimingModifier.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 

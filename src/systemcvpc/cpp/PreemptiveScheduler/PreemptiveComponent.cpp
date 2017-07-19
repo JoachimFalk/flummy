@@ -50,7 +50,7 @@
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/PluggablePowerGovernor.hpp>
+#include "../PluggablePowerGovernor.hpp"
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
 #include <systemcvpc/Task.hpp>
 #include <systemcvpc/config/Component.hpp>

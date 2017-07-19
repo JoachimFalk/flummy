@@ -32,20 +32,19 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__STATICROUTE__H__
-#define __INCLUDED__STATICROUTE__H__
+#ifndef __INCLUDED__BLOCKINGTRANSPORT__H__
+#define __INCLUDED__BLOCKINGTRANSPORT__H__
 #include <list>
+#include <utility>
 
 #include <systemc>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
-#include <CoSupport/Tracing/TracingFactory.hpp>
 
-#include "config/Route.hpp"
-#include "EventPair.hpp"
+#include "AbstractComponent.hpp"
+#include <systemcvpc/EventPair.hpp>
 #include "ProcessControlBlock.hpp"
 #include "RouteImpl.hpp"
-#include "Director.hpp"
 
 namespace SystemC_VPC{
   template<class ROUTE>
@@ -54,7 +53,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  class StaticRoute :
+  class BlockingTransport :
     public Route,
     public CoSupport::SystemC::Event,
     protected CoSupport::SystemC::EventListener {
@@ -72,45 +71,47 @@ namespace SystemC_VPC{
 
     void addHop(std::string name, AbstractComponent * hop);
 
-    void setPool(RoutePool<StaticRoute> * pool);
+    void setPool(RoutePool<BlockingTransport> * pool);
 
     const ComponentList& getHops() const;
 
-    StaticRoute( Config::Route::Ptr configuredRoute );
+    BlockingTransport( Config::Route::Ptr configuredRoute );
 
-    StaticRoute( const StaticRoute & route );
+    BlockingTransport( const BlockingTransport & route );
 
-    ~StaticRoute( );
-
-    virtual bool closeStream(){
-      std::list<AbstractComponent *>::iterator it;
-       for ( it=components.begin() ; it != components.end(); it++ ){
-         ProcessId pid= Director::getInstance().getProcessId(this->getName());
-         (*it)->closeStream(pid);
-       }
-       return true;
-    }
-
-    virtual bool addStream(){
-      std::list<AbstractComponent *>::iterator it;
-        for ( it=components.begin() ; it != components.end(); it++ ){
-          ProcessId pid= Director::getInstance().getProcessId(this->getName());
-          (*it)->addStream(pid);
-        }
-        return true;
-    }
+    ~BlockingTransport( );
+  private:
+    void resetHops();
+    void resetLists();
 
   private:
-    typedef std::list<AbstractComponent *> Components;
+    enum Phase {
+      LOCK_ROUTE,
+      COMPUTE_ROUTE
+    };
+    typedef std::list<std::pair<AbstractComponent *, Task *> > Components;
 
-    Components                             components;
+    Components                             hopList;
+    Components                             lockList;
+    Components::iterator                   nextHop;
+    ComponentList                          components;
+
+    // a rout is either input (read) or output (write)
+    bool                                   isWrite;
+
     Task*                                  task;
     EventPair                              taskEvents;
     Coupling::VPCEvent::Ptr                dummyDii;
     Coupling::VPCEvent::Ptr                routeLat;
-    Components::iterator                   nextHop;
-    RoutePool<StaticRoute>                *pool;
+    RoutePool<BlockingTransport>          *pool;
+
+    // blocking transport has two phases:
+    // - lock the route
+    // - apply the route
+    Phase                                  phase;
+
+    
   };
 }
 
-#endif // __INCLUDED__STATICROUTE__H__
+#endif // __INCLUDED__BLOCKINGTRANSPORT__H__

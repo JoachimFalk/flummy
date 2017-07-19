@@ -62,11 +62,11 @@
 
 #include "AbstractComponent.hpp"
 
-#include "InvalidArgumentException.hpp"
+#include <systemcvpc/InvalidArgumentException.hpp>
 
-#include "config/Component.hpp"
-#include "config/Timing.hpp"
-#include "Attribute.hpp"
+#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/Attribute.hpp>
 
 #include <systemcvpc/TimingModifier.hpp>
 #include <boost/random/linear_congruential.hpp>

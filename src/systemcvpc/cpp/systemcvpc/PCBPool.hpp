@@ -32,68 +32,14 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_ROUTE_H
-#define HSCD_VPC_ROUTE_H
+#ifndef __INCLUDED__PCBPOOL__H__
+#define __INCLUDED__PCBPOOL__H__
 
-#include <vector>
+#include <map>
+#include <systemcvpc/FastLink.hpp>
+#include "ProcessControlBlock.hpp"
 
-#include <CoSupport/Tracing/TracingFactory.hpp>
-
-#include "config/Route.hpp"
-#include "AbstractComponent.hpp"
-
-namespace SystemC_VPC{
-
-  typedef std::list<AbstractComponent *> ComponentList;
-
-  /**
-   * \brief Interface for classes implementing routing simulation.
-   */
-  class Route : public Delayer, public RouteInterface {
-  public:
-    virtual void addHop(std::string name, AbstractComponent * hop) = 0;
-
-    virtual const ComponentList& getHops() const = 0;
-
-    Route(Config::Route::Ptr configuredRoute) : Delayer(
-        configuredRoute->getComponentId(), configuredRoute->getName()),
-        instanceId(createRouteId()),
-        ptpTracer()
-    {
-      if (configuredRoute->getTracing()) {
-        this->ptpTracer
-          = CoSupport::Tracing::TracingFactory::getInstance() .createPtpTracer(
-              this->getName());
-      }
-      configuredRoute->routeInterface_ = this;
-    }
-
-    Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
-        ptpTracer(orig.ptpTracer) {}
-
-    virtual ~Route(){}
-
-    int getInstanceId() const
-    {
-      return instanceId;
-    }
-
-  protected:
-    void traceStart() {
-      if (ptpTracer) ticket = ptpTracer->startOoo();
-    }
-
-    void traceStop() {
-      if (ptpTracer) ptpTracer->stopOoo(ticket);
-    }
-  private:
-    size_t createRouteId();
-
-    const int instanceId;
-    CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
-    CoSupport::Tracing::PtpTracer::Ticket  ticket;
-  };
-
+namespace SystemC_VPC {
+  typedef std::map<ProcessId, ProcessControlBlockPtr>  PCBPool;
 }
-
-#endif // HSCD_VPC_ROUTE_H
+#endif // __INCLUDED__PCBPOOL__H__

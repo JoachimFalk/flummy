@@ -43,7 +43,7 @@
 
 #include <systemcvpc/PowerMode.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/PluggablePowerGovernor.hpp>
+#include "PluggablePowerGovernor.hpp"
 
 namespace SystemC_VPC{
 

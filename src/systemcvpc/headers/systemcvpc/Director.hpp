@@ -36,14 +36,11 @@
 #define HSCD_VPC_DIRECTOR_H
 
 #include <systemcvpc/vpc_config.h>
-#include <systemcvpc/AbstractComponent.hpp>
-#include <systemcvpc/RouteImpl.hpp>
-#include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/FastLink.hpp>
-#include <systemcvpc/TaskPool.hpp>
-#include <systemcvpc/InvalidArgumentException.hpp>
-#include <systemcvpc/PluggablePowerGovernor.hpp>
+#include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/InvalidArgumentException.hpp>
+#include <systemcvpc/Attribute.hpp>
 
 #include <string>
 #include <map>
@@ -55,12 +52,25 @@
 
 #include <boost/function.hpp>
 
+template <class T> class DLLFactory;
+
 namespace SystemC_VPC{
 
   typedef std::vector<std::string> FunctionNames;
 
   class PowerSumming;
- 
+  class Delayer;
+  class Route;
+  class PluggableGlobalPowerGovernor;
+
+  template <class T> class PlugInFactory;
+
+  template<typename KEY, class OBJECT>
+  class AssociativePrototypedPool;
+
+  class Task;
+  typedef AssociativePrototypedPool<ProcessId, Task> TaskPool;
+
   /**
    * \brief Director knows all (Abstract-)Components, all mappings (task -> component).
    *
@@ -220,9 +230,7 @@ namespace SystemC_VPC{
     static FunctionId getFunctionId(const std::string& function);
     static FunctionId createFunctionId(const std::string& function);
 
-    Task* allocateTask(ProcessId pid){
-      return this->taskPool.allocate( pid );
-    }
+    Task *allocateTask(ProcessId pid);
 
     // FIXME !!!
     PluggableGlobalPowerGovernor   *topPowerGov;
@@ -247,20 +255,7 @@ namespace SystemC_VPC{
 
     void debugUnknownNames( ) const;
 
-    void assertMapping(ProcessId const pid){
-      if (mappings.size() < pid ||
-          mappings[pid] == NULL) {
-
-        Task &task = this->taskPool.getPrototype( pid );
-
-        std::cerr << "Unknown mapping <"
-            << task.getName() << "> to ??" << std::endl;
-
-        assert(mappings.size() >= pid &&
-               mappings[pid] != NULL);
-        exit(-1);
-      }
-    }
+    void assertMapping(ProcessId const pid);
 
     /**
      * Singleton design pattern
@@ -273,14 +268,14 @@ namespace SystemC_VPC{
     Director();
 
     typedef std::vector<Delayer* >  Components;
-    Components                           components;
+    Components                      components;
     
     typedef std::vector<Delayer* >  Mappings;
-    Mappings                             mappings;
+    Mappings                        mappings;
 
     typedef std::vector<ProcessId>                ProcessList;  
-    typedef std::map<ComponentId, ProcessList* >  ReverseMapping;
-    ReverseMapping reverseMapping;
+    typedef std::map<ComponentId, ProcessList *>  ReverseMapping;
+    ReverseMapping                                reverseMapping;
 
     // output file to write result to
     std::string vpc_result_file;
@@ -288,18 +283,18 @@ namespace SystemC_VPC{
     // time of latest acknowledge simulated task
     static sc_core::sc_time end;
 
-#ifndef NO_POWER_SUM
-    std::ofstream powerConsStream;
-#endif // NO_POWER_SUM
 
     typedef std::map<std::string, ComponentId> ComponentIdMap;
+    ComponentIdMap                             componentIdMap;
 
-    ComponentIdMap  componentIdMap;
     std::map<ProcessId, std::set<std::string> > debugFunctionNames;
 
-    PowerSumming    *powerSumming;
+#ifndef NO_POWER_SUM
+    std::ofstream  powerConsStream;
+    PowerSumming  *powerSumming;
+#endif // NO_POWER_SUM
 
-    TaskPool        taskPool;
+    TaskPool        *taskPool;
   };
 
 }

@@ -32,51 +32,68 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED_POWERGOVERNOR_H_
-#define __INCLUDED_POWERGOVERNOR_H_
+#ifndef HSCD_VPC_ROUTE_H
+#define HSCD_VPC_ROUTE_H
 
-#include "ComponentObserver.hpp"
-#include "Attribute.hpp"
+#include <vector>
+
+#include <CoSupport/Tracing/TracingFactory.hpp>
+
+#include <systemcvpc/config/Route.hpp>
+#include "AbstractComponent.hpp"
 
 namespace SystemC_VPC{
 
-template <typename T>
-class GlobalPowerGovernor
-{
+  typedef std::list<AbstractComponent *> ComponentList;
+
+  /**
+   * \brief Interface for classes implementing routing simulation.
+   */
+  class Route : public Delayer, public RouteInterface {
   public:
-    GlobalPowerGovernor()
-    {}
+    virtual void addHop(std::string name, AbstractComponent * hop) = 0;
 
-    virtual ~GlobalPowerGovernor()
-    {}
+    virtual const ComponentList& getHops() const = 0;
 
-    virtual void notify_top(ComponentInfo *ci, T val) = 0;
-};
-
-template <class T>
-class LocalPowerGovernor : public ComponentObserver
-{
-  public:
-    LocalPowerGovernor() :
-      m_tpg(NULL)
-    {}
-
-    virtual ~LocalPowerGovernor()
-    {}
-
-    virtual void notify(ComponentInfo *ci) = 0;
-
-    void setGlobalGovernor(GlobalPowerGovernor<T> *tpg)
+    Route(Config::Route::Ptr configuredRoute) : Delayer(
+        configuredRoute->getComponentId(), configuredRoute->getName()),
+        instanceId(createRouteId()),
+        ptpTracer()
     {
-      //std::cerr << "LocalPowerGovernor::setGlobalGovernor" << std::endl;
-      this->m_tpg = tpg;
+      if (configuredRoute->getTracing()) {
+        this->ptpTracer
+          = CoSupport::Tracing::TracingFactory::getInstance() .createPtpTracer(
+              this->getName());
+      }
+      configuredRoute->routeInterface_ = this;
+    }
+
+    Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
+        ptpTracer(orig.ptpTracer) {}
+
+    virtual ~Route(){}
+
+    int getInstanceId() const
+    {
+      return instanceId;
     }
 
   protected:
-    GlobalPowerGovernor<T> *m_tpg;
-};
+    void traceStart() {
+      if (ptpTracer) ticket = ptpTracer->startOoo();
+    }
 
+    void traceStop() {
+      if (ptpTracer) ptpTracer->stopOoo(ticket);
+    }
+  private:
+    size_t createRouteId();
+
+    const int instanceId;
+    CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
+    CoSupport::Tracing::PtpTracer::Ticket  ticket;
+  };
 
 }
 
-#endif // __INCLUDED_POWERGOVERNOR_H_
+#endif // HSCD_VPC_ROUTE_H
