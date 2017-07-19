@@ -46,8 +46,8 @@
 
 #include <systemcvpc/vpc_config.h>
 
-#include "config/Component.hpp"
-#include "datatypes.hpp"
+#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/datatypes.hpp>
 #include "Delayer.hpp"
 #include "ProcessControlBlock.hpp"
 #include "FunctionTimingPool.hpp"
@@ -58,9 +58,9 @@
 #include "PluggablePowerGovernor.hpp"
 #include "ComponentInfo.hpp"
 #include "ComponentModel.hpp"
-#include "Attribute.hpp"
+#include <systemcvpc/Attribute.hpp>
 #include "FunctionTimingPool.hpp"
-#include "ScheduledTask.hpp"
+#include <systemcvpc/ScheduledTask.hpp>
 #include "timetriggered/tt_support.hpp"
 
 #include <list>

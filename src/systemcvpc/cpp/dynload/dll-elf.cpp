@@ -37,7 +37,8 @@
 #include <iostream>
 
 #include <dlfcn.h>
-#include <systemcvpc/dynload/dll.hpp>
+
+#include "dll.hpp"
 
 DLLManager::DLLManager( const char *fname )
 {

@@ -36,8 +36,10 @@
 #include <systemcvpc/ComponentObserver.hpp>
 #include <systemcvpc/ComponentInfo.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/PluggablePowerGovernor.hpp>
 #include <systemcvpc/HysteresisLocalGovernor.hpp>
+
+#include "dynload/dll.hpp"
+#include "PluggablePowerGovernor.hpp"
 
 #include "tracing/TracerIf.hpp"
 

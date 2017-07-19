@@ -32,63 +32,51 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_ROUTEPOOL_H
-#define HSCD_VPC_ROUTEPOOL_H
+#ifndef __INCLUDED_POWERGOVERNOR_H_
+#define __INCLUDED_POWERGOVERNOR_H_
 
-#include <CoSupport/SystemC/systemc_support.hpp>
-
-#include "config/Route.hpp"
-#include <systemcvpc/RouteImpl.hpp>
-#include <systemcvpc/PCBPool.hpp>
+#include "ComponentObserver.hpp"
+#include <systemcvpc/Attribute.hpp>
 
 namespace SystemC_VPC{
 
-  /**
-   * \brief a memory pool for routes
-   */
-  template<class ROUTE>
-  class RoutePool
-    : public PrototypedPool<ROUTE>,
-      public Route
-  {
+template <typename T>
+class GlobalPowerGovernor
+{
   public:
+    GlobalPowerGovernor()
+    {}
 
-    void addHop(std::string name, AbstractComponent * hop)
+    virtual ~GlobalPowerGovernor()
+    {}
+
+    virtual void notify_top(ComponentInfo *ci, T val) = 0;
+};
+
+template <class T>
+class LocalPowerGovernor : public ComponentObserver
+{
+  public:
+    LocalPowerGovernor() :
+      m_tpg(NULL)
+    {}
+
+    virtual ~LocalPowerGovernor()
+    {}
+
+    virtual void notify(ComponentInfo *ci) = 0;
+
+    void setGlobalGovernor(GlobalPowerGovernor<T> *tpg)
     {
-      return this->getPrototype().addHop(name, hop);
+      //std::cerr << "LocalPowerGovernor::setGlobalGovernor" << std::endl;
+      this->m_tpg = tpg;
     }
 
-    const ComponentList& getHops() const
-    {
-      return this->getPrototype().getHops();
-    }
+  protected:
+    GlobalPowerGovernor<T> *m_tpg;
+};
 
-
-    void compute( Task* task )
-    {
-      ROUTE* route = this->allocate();
-      route->setPool(this);
-      route->compute( task );
-    }
-
-    std::string getName() const
-    {
-      return this->getPrototype().getName();
-    }
-
-    void setRouteInterface(Route* route){
-      configuredRoute_->routeInterface_=route;
-    }
-
-    RoutePool( const Config::Route::Ptr configuredRoute )
-      : PrototypedPool<ROUTE>(configuredRoute), Route(configuredRoute)
-    {
-      configuredRoute_=configuredRoute;
-    }
-
-    Config::Route::Ptr configuredRoute_;
-  };
 
 }
 
-#endif // HSCD_VPC_ROUTEPOOL_H
+#endif // __INCLUDED_POWERGOVERNOR_H_

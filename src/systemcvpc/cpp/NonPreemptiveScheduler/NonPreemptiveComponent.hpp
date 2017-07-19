@@ -232,7 +232,7 @@ namespace SystemC_VPC{
 
         moveToRemainingPipelineStages(runningTask);
 
-        Task &task = Director::getInstance().taskPool.getPrototype(pid);
+        Task &task = Director::getInstance().taskPool->getPrototype(pid);
         ScheduledTask * scheduledTask;
 
         DBG_OUT("remove Task " << runningTask->getName() << std::endl);

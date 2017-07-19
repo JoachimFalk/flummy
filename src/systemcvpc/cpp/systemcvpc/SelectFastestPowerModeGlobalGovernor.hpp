@@ -32,14 +32,30 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__PCBPOOL__H__
-#define __INCLUDED__PCBPOOL__H__
+#ifndef __INCLUDED_SELECTFASTESTPOWERMODEGOVERNOR_IMPL_H_
+#define __INCLUDED_SELECTFASTESTPOWERMODEGOVERNOR_IMPL_H_
 
 #include <map>
-#include "FastLink.hpp"
-#include "ProcessControlBlock.hpp"
+#include <deque>
+#include <systemc>
 
-namespace SystemC_VPC {
-  typedef std::map<ProcessId, ProcessControlBlockPtr>  PCBPool;
+#include <systemcvpc/PowerMode.hpp>
+#include "PluggablePowerGovernor.hpp"
+
+namespace SystemC_VPC{
+
+  class InternalSelectFastestPowerModeGovernor :
+    public PluggableGlobalPowerGovernor
+  {
+  public:
+    InternalSelectFastestPowerModeGovernor();
+
+    void notify_top(ComponentInfo *ci, GenericParameter *param);
+
+  private:
+    const PowerMode                           *m_lastMode;
+    std::map<ComponentInfo*, const PowerMode*> m_components;
+  };
 }
-#endif // __INCLUDED__PCBPOOL__H__
+
+#endif // __INCLUDED_SELECTFASTESTPOWERMODEGOVERNOR_IMPL_H_

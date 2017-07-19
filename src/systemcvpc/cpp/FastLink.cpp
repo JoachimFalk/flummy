@@ -34,6 +34,7 @@
 
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/Director.hpp>
+#include <systemcvpc/Delayer.hpp>
 
 namespace SystemC_VPC{
 

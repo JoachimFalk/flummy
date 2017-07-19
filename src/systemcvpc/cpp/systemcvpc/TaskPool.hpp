@@ -32,30 +32,19 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED_SELECTFASTESTPOWERMODEGOVERNOR_IMPL_H_
-#define __INCLUDED_SELECTFASTESTPOWERMODEGOVERNOR_IMPL_H_
+#ifndef __INCLUDED__TASKPOOL__H__
+#define __INCLUDED__TASKPOOL__H__
 
-#include <map>
-#include <deque>
-#include <systemc>
+#include <systemcvpc/Pool.hpp>
+#include <systemcvpc/FastLink.hpp>
 
-#include <systemcvpc/PowerMode.hpp>
-#include <systemcvpc/PluggablePowerGovernor.hpp>
+namespace SystemC_VPC {
 
-namespace SystemC_VPC{
+  template<typename KEY, class OBJECT>
+  class AssociativePrototypedPool;
 
-  class InternalSelectFastestPowerModeGovernor :
-    public PluggableGlobalPowerGovernor
-  {
-  public:
-    InternalSelectFastestPowerModeGovernor();
+  class Task;
+  typedef AssociativePrototypedPool<ProcessId, Task> TaskPool;
 
-    void notify_top(ComponentInfo *ci, GenericParameter *param);
-
-  private:
-    const PowerMode                           *m_lastMode;
-    std::map<ComponentInfo*, const PowerMode*> m_components;
-  };
 }
-
-#endif // __INCLUDED_SELECTFASTESTPOWERMODEGOVERNOR_IMPL_H_
+#endif // __INCLUDED__TASKPOOL__H__

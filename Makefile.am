@@ -23,7 +23,7 @@
 include $(auxdir)/jfrules.mk
 include ../BuildSystem/doxygen.am
 
-SUBDIRS = src/systemcvpc/headers/
+# SUBDIRS = src/systemcvpc/headers/
 
 # This is only needed if there is a configure.in in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4

@@ -32,7 +32,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/PluggablePowerGovernor.hpp>
+#include "PluggablePowerGovernor.hpp"
 
 namespace SystemC_VPC{
   GenericParameter::~GenericParameter() {}

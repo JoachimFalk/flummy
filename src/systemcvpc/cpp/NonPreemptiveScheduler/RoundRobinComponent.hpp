@@ -92,7 +92,7 @@ namespace SystemC_VPC{
       PCBPool const &pcbPool = getPCBPool();
       for (PCBPool::const_iterator it=pcbPool.begin(); it!=pcbPool.end(); ++it) {
         std::cout << "\t " << it->second->getName() << std::endl;
-        Task &task = Director::getInstance().taskPool.getPrototype(it->first);
+        Task &task = Director::getInstance().taskPool->getPrototype(it->first);
         task.setPCB(it->second);
         if (task.hasScheduledTask()) {
           ScheduledTask *scheduledTask = task.getScheduledTask();
