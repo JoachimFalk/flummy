@@ -35,11 +35,11 @@
 #include <CoSupport/Tracing/TracingFactory.hpp>
 #include <CoSupport/Tracing/PtpTracer.hpp>
 
-#include <systemcvpc/StaticRoute.hpp>
-#include <systemcvpc/RoutePool.hpp>
+#include "StaticRoute.hpp"
+#include "RoutePool.hpp"
 #include <systemcvpc/Director.hpp>
 
-#include <systemcvpc/debug_config.hpp>
+#include "debug_config.hpp"
 // if compiled with DBG_STATIC_ROUTE create stream and include debug macros
 #ifdef DBG_STATIC_ROUTE
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -47,9 +47,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include <systemcvpc/debug_on.hpp>
+  #include "debug_on.hpp"
 #else
-  #include <systemcvpc/debug_off.hpp>
+  #include "debug_off.hpp"
 #endif
 
 namespace SystemC_VPC {

@@ -34,10 +34,10 @@
 
 #include "Mappings.hpp"
 
-#include <systemcvpc/BlockingTransport.hpp>
+#include "../BlockingTransport.hpp"
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/RoutePool.hpp>
-#include <systemcvpc/StaticRoute.hpp>
+#include "../RoutePool.hpp"
+#include "../StaticRoute.hpp"
 
 namespace SystemC_VPC
 {

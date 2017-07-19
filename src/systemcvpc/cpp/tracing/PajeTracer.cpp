@@ -36,7 +36,7 @@
 
 #include <CoSupport/String/color.hpp>
 #include <CoSupport/String/DoubleQuotedString.hpp>
-#include <CoSupport/Tracing/PajeTracer.hpp>
+#include "PajeTracer.hpp"
 
 #include <iomanip>
 #include <memory>

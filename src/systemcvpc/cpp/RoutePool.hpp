@@ -32,42 +32,63 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP
-#define _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP
+#ifndef HSCD_VPC_ROUTEPOOL_H
+#define HSCD_VPC_ROUTEPOOL_H
 
-//#define VPC_ENABLE_PLAIN_TRACING
-#include "../TracerIf.hpp"
+#include <CoSupport/SystemC/systemc_support.hpp>
 
-namespace SystemC_VPC { namespace Trace {
+#include <systemcvpc/config/Route.hpp>
+#include "RouteImpl.hpp"
+#include "PCBPool.hpp"
 
-class DataBaseTracer: public TracerIf {
-protected:
-  class DataBaseProxy;
-public:
-  //
-  DataBaseTracer(Config::Component::Ptr component);
+namespace SystemC_VPC{
 
-  void release(Task const *task);
+  /**
+   * \brief a memory pool for routes
+   */
+  template<class ROUTE>
+  class RoutePool
+    : public PrototypedPool<ROUTE>,
+      public Route
+  {
+  public:
 
-  void finishDii(Task const *task);
+    void addHop(std::string name, AbstractComponent * hop)
+    {
+      return this->getPrototype().addHop(name, hop);
+    }
 
-  void finishLatency(Task const *task);
+    const ComponentList& getHops() const
+    {
+      return this->getPrototype().getHops();
+    }
 
-  void assign(Task const *task);
 
-  void resign(Task const *task);
+    void compute( Task* task )
+    {
+      ROUTE* route = this->allocate();
+      route->setPool(this);
+      route->compute( task );
+    }
 
-  void block(Task const *task);
+    std::string getName() const
+    {
+      return this->getPrototype().getName();
+    }
 
-  // TODO: Can we avoid this function somehow?
-  Tracing *getOrCreateTraceSignal(std::string const &name);
-private:
-  void addEvent(Task const *task, char const *state);
+    void setRouteInterface(Route* route){
+      configuredRoute_->routeInterface_=route;
+    }
 
-  DataBaseProxy &dbProxy_;
-  std::string    resourceName_;
-};
+    RoutePool( const Config::Route::Ptr configuredRoute )
+      : PrototypedPool<ROUTE>(configuredRoute), Route(configuredRoute)
+    {
+      configuredRoute_=configuredRoute;
+    }
 
-} } // namespace SystemC_VPC::Trace
+    Config::Route::Ptr configuredRoute_;
+  };
 
-#endif // _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP
+}
+
+#endif // HSCD_VPC_ROUTEPOOL_H

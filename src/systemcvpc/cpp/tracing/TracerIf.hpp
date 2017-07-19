@@ -35,7 +35,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP
 #define _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP
 
-#include <systemcvpc/Task.hpp>
+#include "../Task.hpp"
 #include <systemcvpc/config/Component.hpp>
 
 namespace SystemC_VPC { namespace Trace {

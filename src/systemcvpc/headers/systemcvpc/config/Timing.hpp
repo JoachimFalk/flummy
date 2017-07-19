@@ -35,9 +35,9 @@
 #ifndef TIMING_H_
 #define TIMING_H_
 
-#include <systemcvpc/FastLink.hpp>
+#include "../FastLink.hpp"
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <systemcvpc/TimingModifier.hpp>
+#include "../TimingModifier.hpp"
 
 #include <boost/shared_ptr.hpp>
 

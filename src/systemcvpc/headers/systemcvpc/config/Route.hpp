@@ -35,7 +35,7 @@
 #ifndef ROUTE_HPP_
 #define ROUTE_HPP_
 
-#include <systemcvpc/datatypes.hpp>
+#include "../datatypes.hpp"
 #include "Component.hpp"
 #include <boost/shared_ptr.hpp>
 

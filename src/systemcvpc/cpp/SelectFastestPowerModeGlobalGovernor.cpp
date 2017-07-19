@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/SelectFastestPowerModeGlobalGovernor.hpp>
-#include <systemcvpc/ComponentModel.hpp>
+#include "SelectFastestPowerModeGlobalGovernor.hpp"
+#include "ComponentModel.hpp"
 
 namespace SystemC_VPC{
 

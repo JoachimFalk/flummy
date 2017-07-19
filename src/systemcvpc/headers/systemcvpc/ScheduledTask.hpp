@@ -39,7 +39,7 @@
 #include <cstddef>
 #include <systemc>
 
-#include <smoc/EvalAPI/SchedulingInterface.hpp>
+#include "../smoc/EvalAPI/SchedulingInterface.hpp"
 
 namespace SystemC_VPC {
 

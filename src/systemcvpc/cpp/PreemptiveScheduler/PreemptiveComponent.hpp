@@ -37,24 +37,24 @@
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemc>
 
-#include <systemcvpc/AbstractComponent.hpp>
-#include <systemcvpc/ComponentInfo.hpp>
+#include "../AbstractComponent.hpp"
+#include "../ComponentInfo.hpp"
 #include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Director.hpp>
-#include <systemcvpc/PowerMode.hpp>
-#include <systemcvpc/PowerSumming.hpp>
+#include "../PowerMode.hpp"
+#include "../PowerSumming.hpp"
 #include <systemcvpc/vpc_config.h>
-#include <systemcvpc/timetriggered/tt_support.hpp>
+#include "../timetriggered/tt_support.hpp"
 
-#include "tracing/TracerIf.hpp"
+#include "../tracing/TracerIf.hpp"
 
 #include <vector>
 #include <map>
 #include <deque>
 #include <queue>
 
-#include <systemcvpc/debug_config.hpp>
+#include "../debug_config.hpp"
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_COMPONENT
 #include <CoSupport/Streams/DebugOStream.hpp>
@@ -63,9 +63,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
   #define DBGOUT_STREAM dbgout
-  #include <systemcvpc/debug_on.hpp>
+  #include "../debug_on.hpp"
 #else
-  #include <systemcvpc/debug_off.hpp>
+  #include "../debug_off.hpp"
 #endif
 
 namespace SystemC_VPC{

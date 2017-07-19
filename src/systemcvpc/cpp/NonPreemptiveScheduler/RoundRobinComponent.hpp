@@ -40,7 +40,7 @@
 #include <vector>
 #include <deque>
 
-#include <systemcvpc/AbstractComponent.hpp>
+#include "../AbstractComponent.hpp"
 
 namespace SystemC_VPC{
 

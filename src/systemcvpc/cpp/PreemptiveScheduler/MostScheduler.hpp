@@ -34,7 +34,7 @@
 
 #ifndef MOSTSCHEDULER_H
 #define MOSTSCHEDULER_H
-#include <PreemptiveScheduler/MostSecondaryScheduler.hpp>
+#include "MostSecondaryScheduler.hpp"
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemc>
 #include <systemcvpc/datatypes.hpp>

@@ -39,11 +39,11 @@
 #include <string>
 #include <stdlib.h>
 
-#include <CoSupport/XML/Xerces/common.hpp>
+#include <systemcvpc/config/common.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
-#include <systemcvpc/VPCBuilder.hpp>
-#include <systemcvpc/VpcDomErrorHandler.hpp>
+#include "VPCBuilder.hpp"
+#include "VpcDomErrorHandler.hpp"
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/config/Component.hpp>
@@ -54,7 +54,7 @@
 #include "ConfigCheck.hpp"
 #include "config/Mappings.hpp"
 
-#include <systemcvpc/debug_config.hpp>
+#include "debug_config.hpp"
 // if compiled with DBG_COMPONENT create stream and include debug macros
 #ifdef DBG_VPCBUILDER
 # include <CoSupport/Streams/DebugOStream.hpp>
@@ -63,9 +63,9 @@
   //  with this name exists when DBG.. is used. here every actor creates its
   //  own stream.
 # define DBGOUT_STREAM dbgout
-# include <systemcvpc/debug_on.hpp>
+# include "debug_on.hpp"
 #else
-# include <systemcvpc/debug_off.hpp>
+# include "debug_off.hpp"
 #endif
 
 #include <CoSupport/DataTypes/MaybeValue.hpp>

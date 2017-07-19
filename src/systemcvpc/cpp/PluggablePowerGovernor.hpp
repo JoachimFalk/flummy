@@ -35,8 +35,8 @@
 #ifndef __INCLUDED_PLUGGABLEPOWERGOVERNOR_H_
 #define __INCLUDED_PLUGGABLEPOWERGOVERNOR_H_
 
-#include "systemcvpc/PowerGovernor.hpp"
-#include "systemcvpc/PowerMode.hpp"
+#include "PowerGovernor.hpp"
+#include "PowerMode.hpp"
 #include "dynload/dll.hpp"
 
 namespace SystemC_VPC{

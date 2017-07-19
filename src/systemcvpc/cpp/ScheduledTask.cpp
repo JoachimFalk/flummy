@@ -33,7 +33,7 @@
  */
 
 #include <systemcvpc/ScheduledTask.hpp>
-#include <systemcvpc/Delayer.hpp>
+#include "Delayer.hpp"
 
 namespace SystemC_VPC
 {

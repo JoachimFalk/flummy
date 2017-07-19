@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <PreemptiveScheduler/PriorityScheduler.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
+#include "PriorityScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 

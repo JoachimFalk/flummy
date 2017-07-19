@@ -61,8 +61,8 @@ Sebastian Graf - Mai 2008
 
 */
 
-#include <PreemptiveScheduler/TimeTriggeredCCScheduler.hpp>
-#include <PreemptiveScheduler/PreemptiveComponent.hpp>
+#include "TimeTriggeredCCScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 #include <systemcvpc/Director.hpp>
 
 

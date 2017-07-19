@@ -37,7 +37,7 @@
 
 #include <systemc>
 
-#include <systemcvpc/coupling/VPCEvent.hpp>
+#include "coupling/VPCEvent.hpp"
 
 namespace SystemC_VPC {
 

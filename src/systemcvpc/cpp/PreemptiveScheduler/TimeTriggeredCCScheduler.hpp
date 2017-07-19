@@ -34,9 +34,9 @@
 
 #ifndef TIMETRIGGEREDCCSCHEDULER_H
 #define TIMETRIGGEREDCCSCHEDULER_H
-#include <PreemptiveScheduler/FlexRayScheduler.hpp>
+#include "FlexRayScheduler.hpp"
 #include <PreemptiveScheduler/Scheduler.hpp>
-#include <PreemptiveScheduler/TDMAScheduler.hpp>
+#include "TDMAScheduler.hpp"
 #include <systemcvpc/datatypes.hpp>
 #include <systemc>
 

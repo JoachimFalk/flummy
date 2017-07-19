@@ -32,18 +32,20 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP
-#define _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP
+#define _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP
 
-#include "../TracerIf.hpp"
+//#define VPC_ENABLE_PLAIN_TRACING
+#include "TracerIf.hpp"
 
 namespace SystemC_VPC { namespace Trace {
 
-class VcdTracer: public TracerIf {
+class DataBaseTracer: public TracerIf {
+protected:
+  class DataBaseProxy;
 public:
-  VcdTracer(Config::Component::Ptr component);
-
-  ~VcdTracer();
+  //
+  DataBaseTracer(Config::Component::Ptr component);
 
   void release(Task const *task);
 
@@ -57,15 +59,15 @@ public:
 
   void block(Task const *task);
 
+  // TODO: Can we avoid this function somehow?
   Tracing *getOrCreateTraceSignal(std::string const &name);
 private:
-  std::string getName() const;
+  void addEvent(Task const *task, char const *state);
 
-  sc_core::sc_trace_file *traceFile_;
-  std::string name_;
-  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+  DataBaseProxy &dbProxy_;
+  std::string    resourceName_;
 };
 
 } } // namespace SystemC_VPC::Trace
 
-#endif /* _INCLUDED_SYSTEMCVPC_TRACING_VCD_VCDTRACER_HPP */
+#endif // _INCLUDED_SYSTEMCVPC_TRACING_DB_DATABASETRACER_HPP

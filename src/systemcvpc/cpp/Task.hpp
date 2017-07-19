@@ -44,9 +44,9 @@
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/FastLink.hpp>
-#include <systemcvpc/ProcessControlBlock.hpp>
+#include "ProcessControlBlock.hpp"
 #include <systemcvpc/ScheduledTask.hpp>
-#include <systemcvpc/TaskPool.hpp>
+#include "TaskPool.hpp"
 
 namespace SystemC_VPC {
 

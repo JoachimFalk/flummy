@@ -32,25 +32,17 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_TRACING_PAJE_PAJETRACER_HPP
-#define _INCLUDED_SYSTEMCVPC_TRACING_PAJE_PAJETRACER_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_TRACING_NULL_NULLTRACER_HPP
+#define _INCLUDED_SYSTEMCVPC_TRACING_NULL_NULLTRACER_HPP
 
-#include "../TracerIf.hpp"
-
-#include <CoSupport/Tracing/PajeTracer.hpp>
-
-#include <vector>
-#include <map>
-#include <string>
+#include "TracerIf.hpp"
 
 namespace SystemC_VPC { namespace Trace {
 
-class PajeTracer: public TracerIf {
+class NullTracer: public TracerIf {
 public:
   //
-  PajeTracer(Config::Component::Ptr component);
-
-  ~PajeTracer();
+  NullTracer(Config::Component::Ptr component);
 
   void release(Task const *task);
 
@@ -64,40 +56,10 @@ public:
 
   void block(Task const *task);
 
+  // TODO: Can we avoid this function somehow?
   Tracing *getOrCreateTraceSignal(std::string const &name);
-
-protected:
-  unsigned int keyCounter;
-  int getNextKey();
-
-private:
-  std::string getName() const;
-
-  std::string name_;
-  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
-  CoSupport::Tracing::PajeTracer::Resource const *res_;
-  sc_core::sc_time startTime;
-
-  typedef std::map<std::string, CoSupport::Tracing::PajeTracer::Activity*> TaskToActivity;
-  TaskToActivity taskToActivity;
-
-  typedef std::map<std::string, CoSupport::Tracing::PajeTracer::Event*> TaskToEvent;
-  TaskToEvent taskToEvent;
-
-  typedef std::map<std::string, sc_core::sc_time> TaskToEndTime;
-  TaskToEndTime taskToEndTime;
-
-  typedef std::map<std::string, const CoSupport::Tracing::PajeTracer::Resource*> TaskToResource;
-  TaskToResource taskToResource;
-
-  typedef std::map<std::string, std::string> TaskToPreTask;
-  TaskToPreTask taskToPreTask;
-
-  typedef std::map<std::string, std::string> TaskToDestTask;
-  TaskToDestTask taskToDestTask;
-
 };
 
 } } // namespace SystemC_VPC::Trace
 
-#endif /* _INCLUDED_SYSTEMCVPC_TRACING_PAJE_PAJETRACER_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_TRACING_NULL_NULLTRACER_HPP */
