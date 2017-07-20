@@ -1,7 +1,7 @@
 /* vim: set sw=2 ts=8 syn=c: */
 
-#ifndef _INCLUDED_VPC_CONFIG_H
-#define _INCLUDED_VPC_CONFIG_H
+#ifndef _INCLUDED_SYSTEMCVPC_VPC_CONFIG_H_IN
+#define _INCLUDED_SYSTEMCVPC_VPC_CONFIG_H_IN
 
 /* Define if you want to suppress VCD tracing */
 #undef NO_VCD_TRACES
@@ -9,4 +9,4 @@
 /* Define if you want to suppress power tracing */
 #undef NO_POWER_SUM
 
-#endif /* _INCLUDED_VPC_CONFIG_H */
+#endif /* _INCLUDED_SYSTEMCVPC_VPC_CONFIG_H_IN */

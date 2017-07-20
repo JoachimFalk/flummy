@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef FLEXRAYSCHEDULER_H
-#define FLEXRAYSCHEDULER_H
+#ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_FLEXRAYSCHEDULER_HPP
+#define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_FLEXRAYSCHEDULER_HPP
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include "TDMAScheduler.hpp"
 #include <systemcvpc/datatypes.hpp>
@@ -123,5 +123,5 @@ namespace SystemC_VPC{
     
   };
 }
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_FLEXRAYSCHEDULER_HPP */
 

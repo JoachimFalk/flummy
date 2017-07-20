@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef ROUTE_HPP_
-#define ROUTE_HPP_
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_ROUTE_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIG_ROUTE_HPP
 
 #include "../datatypes.hpp"
 #include "Component.hpp"
@@ -117,4 +117,4 @@ private:
 }
 
 // namespace SystemC_VPC
-#endif /* ROUTE_HPP_ */
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_ROUTE_HPP */

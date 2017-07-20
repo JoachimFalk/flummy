@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__FUNCTION_TIMIG_POOL__H__
-#define __INCLUDED__FUNCTION_TIMIG_POOL__H__
+#ifndef _INCLUDED_SYSTEMCVPC_FUNCTIONTIMINGPOOL_HPP
+#define _INCLUDED_SYSTEMCVPC_FUNCTIONTIMINGPOOL_HPP
 
 #include <map>
 #include <boost/shared_ptr.hpp>
@@ -156,4 +156,4 @@ namespace SystemC_VPC {
   typedef boost::shared_ptr<FunctionTimingPool> FunctionTimingPoolPtr;
 
 }
-#endif // __INCLUDED__FUNCTION_TIMIG_POOL__H__
+#endif /* _INCLUDED_SYSTEMCVPC_FUNCTIONTIMINGPOOL_HPP */

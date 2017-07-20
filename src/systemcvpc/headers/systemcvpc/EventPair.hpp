@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_EVENTPAIR_H
-#define HSCD_VPC_EVENTPAIR_H
+#ifndef _INCLUDED_SYSTEMCVPC_EVENTPAIR_HPP
+#define _INCLUDED_SYSTEMCVPC_EVENTPAIR_HPP
 
 #include <systemc>
 
@@ -62,4 +62,4 @@ namespace SystemC_VPC {
 
 } // namespace SystemC_VPC
 
-#endif //HSCD_VPC_EVENTPAIR_H
+#endif /* _INCLUDED_SYSTEMCVPC_EVENTPAIR_HPP */

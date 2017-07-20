@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef COMPONENT_H_
-#define COMPONENT_H_
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP
 
 #include "common.hpp"
 #include "ConfigException.hpp"
@@ -136,4 +136,4 @@ private:
 };
 } // namespace Config
 } // namespace SystemC_VPC
-#endif /* COMPONENT_H_ */
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP */

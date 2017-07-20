@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef STREAMSHAPERSCHEDULER_H
-#define STREAMSHAPERSCHEDULER_H
+#ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_STREAMSHAPERSCHEDULER_HPP
+#define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_STREAMSHAPERSCHEDULER_HPP
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemc>
@@ -88,4 +88,4 @@ namespace SystemC_VPC{
     std::deque<int> stream_fifo;
   };
 }
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_STREAMSHAPERSCHEDULER_HPP */

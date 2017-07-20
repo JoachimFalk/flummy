@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef TDMASCHEDULER_H
-#define TDMASCHEDULER_H
+#ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_TDMASCHEDULER_HPP
+#define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_TDMASCHEDULER_HPP
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemc>
@@ -107,4 +107,4 @@ namespace SystemC_VPC{
     std::deque<std::pair<std::string, std::string> > _properties;
   };
 }
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_TDMASCHEDULER_HPP */

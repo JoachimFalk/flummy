@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_DELAYER_H
-#define HSCD_VPC_DELAYER_H
+#ifndef _INCLUDED_SYSTEMCVPC_DELAYER_HPP
+#define _INCLUDED_SYSTEMCVPC_DELAYER_HPP
 
 #include <vector>
 
@@ -101,4 +101,4 @@ namespace SystemC_VPC{
   };
 }
 
-#endif // HSCD_VPC_DELAYER_H
+#endif /* _INCLUDED_SYSTEMCVPC_DELAYER_HPP */

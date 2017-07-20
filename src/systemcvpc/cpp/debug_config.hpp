@@ -32,10 +32,10 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#ifndef _INCLUDED_SYSTEMCVPC_DEBUG_CONFIG_HPP
+#define _INCLUDED_SYSTEMCVPC_DEBUG_CONFIG_HPP
 #include <CoSupport/Streams/DebugOStream.hpp>
 
-#ifndef INCLUDED__DEBUG_CONFIG__H__
-#define INCLUDED__DEBUG_CONFIG__H__
 
 /** enable/disable debugging for any module */
 //#define DBG_ENABLE
@@ -69,4 +69,4 @@ extern std::ostream &getDbgOut();
 
 /** enable/disable debugging for VPCBuilder */
 //#define DBG_VPCBUILDER
-#endif // INCLUDED__DEBUG_CONFIG__H__
+#endif /* _INCLUDED_SYSTEMCVPC_DEBUG_CONFIG_HPP */

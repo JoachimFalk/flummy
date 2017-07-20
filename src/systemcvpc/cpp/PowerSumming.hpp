@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_POWERSUMMING_H_
-#define HSCD_VPC_POWERSUMMING_H_
+#ifndef _INCLUDED_SYSTEMCVPC_POWERSUMMING_HPP
+#define _INCLUDED_SYSTEMCVPC_POWERSUMMING_HPP
 
 #include <ostream>
 #include <map>
@@ -81,4 +81,4 @@ namespace SystemC_VPC{
     void calculateNewEnergySum();
   };
 } //namespace SystemC_VPC
-#endif // HSCD_VPC_POWERSUMMING_H_
+#endif /* _INCLUDED_SYSTEMCVPC_POWERSUMMING_HPP */

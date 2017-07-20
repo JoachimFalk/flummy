@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__POWERMODE__H__
-#define __INCLUDED__POWERMODE__H__
+#ifndef _INCLUDED_SYSTEMCVPC_POWERMODE_HPP
+#define _INCLUDED_SYSTEMCVPC_POWERMODE_HPP
 
 #include <cstddef>
 #include <string>
@@ -91,4 +91,4 @@ namespace SystemC_VPC{
   };
 
 }
-#endif // __INCLUDED__POWERMODE__H__
+#endif /* _INCLUDED_SYSTEMCVPC_POWERMODE_HPP */

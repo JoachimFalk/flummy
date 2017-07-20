@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_COMPONENTINFO_H_
-#define HSCD_VPC_COMPONENTINFO_H_
+#ifndef _INCLUDED_SYSTEMCVPC_COMPONENTINFO_HPP
+#define _INCLUDED_SYSTEMCVPC_COMPONENTINFO_HPP
 
 #include "PowerMode.hpp"
 
@@ -126,4 +126,4 @@ namespace SystemC_VPC{
       ComponentModel *model;
   };
 } //namespace SystemC_VPC
-#endif // HSCD_VPC_COMPONENTINFO_H_
+#endif /* _INCLUDED_SYSTEMCVPC_COMPONENTINFO_HPP */

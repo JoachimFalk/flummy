@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__TASKPOOL__H__
-#define __INCLUDED__TASKPOOL__H__
+#ifndef _INCLUDED_SYSTEMCVPC_TASKPOOL_HPP
+#define _INCLUDED_SYSTEMCVPC_TASKPOOL_HPP
 
 #include "Pool.hpp"
 #include <systemcvpc/FastLink.hpp>
@@ -47,4 +47,4 @@ namespace SystemC_VPC {
   typedef AssociativePrototypedPool<ProcessId, Task> TaskPool;
 
 }
-#endif // __INCLUDED__TASKPOOL__H__
+#endif /* _INCLUDED_SYSTEMCVPC_TASKPOOL_HPP */

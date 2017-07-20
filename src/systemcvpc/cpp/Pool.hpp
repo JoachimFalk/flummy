@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__POOL__H_
-#define __INCLUDED__POOL__H_
+#ifndef _INCLUDED_SYSTEMCVPC_POOL_HPP
+#define _INCLUDED_SYSTEMCVPC_POOL_HPP
 
 #include <exception>
 #include <map>
@@ -262,4 +262,4 @@ namespace SystemC_VPC {
 
   };
 }
-#endif //__INCLUDED__POOL__H_
+#endif /* _INCLUDED_SYSTEMCVPC_POOL_HPP */

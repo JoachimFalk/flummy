@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__FASTLINK__H__
-#define __INCLUDED__FASTLINK__H__
+#ifndef _INCLUDED_SYSTEMCVPC_FASTLINK_HPP
+#define _INCLUDED_SYSTEMCVPC_FASTLINK_HPP
 #include <systemc>
 #include "EventPair.hpp"
 #include "datatypes.hpp"
@@ -95,4 +95,4 @@ typedef std::vector<FunctionId> FunctionIds;
   static const FunctionId defaultFunctionId = 0;
 }
 
-#endif // __INCLUDED__FASTLINK__H__
+#endif /* _INCLUDED_SYSTEMCVPC_FASTLINK_HPP */

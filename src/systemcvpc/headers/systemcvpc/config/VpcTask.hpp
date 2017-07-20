@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef VPCTASK_H_
-#define VPCTASK_H_
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP
 
 #include "Component.hpp"
 
@@ -82,4 +82,4 @@ private:
 };
 } // namespace Config
 } // namespace SystemC_VPC
-#endif /* VPCTASK_H_ */
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP */

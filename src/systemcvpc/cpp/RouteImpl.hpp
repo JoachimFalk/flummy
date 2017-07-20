@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_ROUTE_H
-#define HSCD_VPC_ROUTE_H
+#ifndef _INCLUDED_SYSTEMCVPC_ROUTEIMPL_HPP
+#define _INCLUDED_SYSTEMCVPC_ROUTEIMPL_HPP
 
 #include <vector>
 
@@ -96,4 +96,4 @@ namespace SystemC_VPC{
 
 }
 
-#endif // HSCD_VPC_ROUTE_H
+#endif /* _INCLUDED_SYSTEMCVPC_ROUTEIMPL_HPP */
