@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef MOSTSCHEDULER_H
-#define MOSTSCHEDULER_H
+#ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSCHEDULER_HPP
+#define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSCHEDULER_HPP
 #include "MostSecondaryScheduler.hpp"
 #include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemc>
@@ -130,4 +130,4 @@ namespace SystemC_VPC{
     sc_core::sc_time currSlotStartTime;
   };
 }
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSCHEDULER_HPP */

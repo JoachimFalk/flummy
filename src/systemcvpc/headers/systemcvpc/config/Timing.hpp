@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef TIMING_H_
-#define TIMING_H_
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP
 
 #include "../FastLink.hpp"
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -155,4 +155,4 @@ private:
 
 } // namespace Config
 } // namespace SystemC_VPC
-#endif /* TIMING_H_ */
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP */

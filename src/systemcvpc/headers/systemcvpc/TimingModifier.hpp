@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_TIMINGMODIFIER_H_
-#define HSCD_VPC_TIMINGMODIFIER_H_
+#ifndef _INCLUDED_SYSTEMCVPC_TIMINGMODIFIER_HPP
+#define _INCLUDED_SYSTEMCVPC_TIMINGMODIFIER_HPP
 
 #include <systemc>
 #include <fstream>
@@ -500,4 +500,4 @@ namespace SystemC_VPC{
       boost::triangle_distribution<> random;
   };
 } //namespace SystemC_VPC
-#endif // HSCD_VPC_TIMINGMODIFIER_H_
+#endif /* _INCLUDED_SYSTEMCVPC_TIMINGMODIFIER_HPP */

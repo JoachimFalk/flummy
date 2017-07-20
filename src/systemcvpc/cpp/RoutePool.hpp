@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_ROUTEPOOL_H
-#define HSCD_VPC_ROUTEPOOL_H
+#ifndef _INCLUDED_SYSTEMCVPC_ROUTEPOOL_HPP
+#define _INCLUDED_SYSTEMCVPC_ROUTEPOOL_HPP
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
@@ -91,4 +91,4 @@ namespace SystemC_VPC{
 
 }
 
-#endif // HSCD_VPC_ROUTEPOOL_H
+#endif /* _INCLUDED_SYSTEMCVPC_ROUTEPOOL_HPP */

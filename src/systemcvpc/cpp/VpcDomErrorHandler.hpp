@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef VPC_ERROR_HANDLER_H
-#define VPC_ERROR_HANDLER_H
+#ifndef _INCLUDED_SYSTEMCVPC_VPCDOMERRORHANDLER_HPP
+#define _INCLUDED_SYSTEMCVPC_VPCDOMERRORHANDLER_HPP
 
 #include <xercesc/dom/DOMErrorHandler.hpp>
 #include <xercesc/util/XMLString.hpp>
@@ -83,4 +83,4 @@ private :
   bool failed;
 };
 
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_VPCDOMERRORHANDLER_HPP */

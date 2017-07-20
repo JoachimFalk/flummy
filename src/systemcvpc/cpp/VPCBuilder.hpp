@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_VPCBUILDER_H_
-#define HSCD_VPC_VPCBUILDER_H_
+#ifndef _INCLUDED_SYSTEMCVPC_VPCBUILDER_HPP
+#define _INCLUDED_SYSTEMCVPC_VPCBUILDER_HPP
 
 /*
 #include <xercesc/dom/DOMTreeWalker.hpp>
@@ -221,4 +221,4 @@ namespace SystemC_VPC{
     
 }
 
-#endif /*HSCD_VPC_VPCBUILDER_H_*/
+#endif /* _INCLUDED_SYSTEMCVPC_VPCBUILDER_HPP */

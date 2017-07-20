@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__STATICROUTE__H__
-#define __INCLUDED__STATICROUTE__H__
+#ifndef _INCLUDED_SYSTEMCVPC_STATICROUTE_HPP
+#define _INCLUDED_SYSTEMCVPC_STATICROUTE_HPP
 #include <list>
 
 #include <systemc>
@@ -113,4 +113,4 @@ namespace SystemC_VPC{
   };
 }
 
-#endif // __INCLUDED__STATICROUTE__H__
+#endif /* _INCLUDED_SYSTEMCVPC_STATICROUTE_HPP */

@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __DLL_H
-#define __DLL_H
+#ifndef _INCLUDED_SYSTEMCVPC_DYNLOAD_DLL_HPP
+#define _INCLUDED_SYSTEMCVPC_DYNLOAD_DLL_HPP
 
 #ifdef WIN32
 #include <windows.h>
@@ -162,4 +162,4 @@ class DLLFactory : public DLLFactoryBase
 
 
 
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_DYNLOAD_DLL_HPP */

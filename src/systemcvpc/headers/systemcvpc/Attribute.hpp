@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef ATTRIBUTE_H
-#define ATTRIBUTE_H
+#ifndef _INCLUDED_SYSTEMCVPC_ATTRIBUTE_HPP
+#define _INCLUDED_SYSTEMCVPC_ATTRIBUTE_HPP
 
 #include <boost/shared_ptr.hpp>
 
@@ -119,5 +119,5 @@ namespace SystemC_VPC{
   };
 }
 
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_ATTRIBUTE_HPP */
 

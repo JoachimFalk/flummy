@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_DIRECTOR_H
-#define HSCD_VPC_DIRECTOR_H
+#ifndef _INCLUDED_SYSTEMCVPC_DIRECTOR_HPP
+#define _INCLUDED_SYSTEMCVPC_DIRECTOR_HPP
 
 #include <systemcvpc/vpc_config.h>
 #include "FastLink.hpp"
@@ -298,4 +298,4 @@ namespace SystemC_VPC{
   };
 
 }
-#endif
+#endif /* _INCLUDED_SYSTEMCVPC_DIRECTOR_HPP */

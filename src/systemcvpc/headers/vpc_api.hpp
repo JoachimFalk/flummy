@@ -32,10 +32,10 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED__VPC_API__HPP__
-#define __INCLUDED__VPC_API__HPP__
+#ifndef _INCLUDED_SYSTEMCVPC_VPC_API_HPP
+#define _INCLUDED_SYSTEMCVPC_VPC_API_HPP
 
 //#include <systemcvpc/vpc.hpp>
 #include "systemcvpc/config/VpcApi.hpp"
 
-#endif // __INCLUDED__VPC_API__HPP__
+#endif /* _INCLUDED_SYSTEMCVPC_VPC_API_HPP */

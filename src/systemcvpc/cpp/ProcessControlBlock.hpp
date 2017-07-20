@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_PROCESSCONTROLBLOCK_H_
-#define HSCD_VPC_PROCESSCONTROLBLOCK_H_
+#ifndef _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP
+#define _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP
 
 #include <systemc>
 #include <float.h>
@@ -158,4 +158,4 @@ namespace Trace{
   };
 typedef boost::shared_ptr<ProcessControlBlock> ProcessControlBlockPtr;
 }
-#endif // HSCD_VPC_PROCESSCONTROLBLOCK_H_
+#endif /* _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP */

@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef HSCD_VPC_TASK_H_
-#define HSCD_VPC_TASK_H_
+#ifndef _INCLUDED_SYSTEMCVPC_TASK_HPP
+#define _INCLUDED_SYSTEMCVPC_TASK_HPP
 
 #include <sstream>
 
@@ -323,4 +323,4 @@ namespace SystemC_VPC {
   };
 
 }
-#endif // HSCD_VPC_TASK_H_
+#endif /* _INCLUDED_SYSTEMCVPC_TASK_HPP */

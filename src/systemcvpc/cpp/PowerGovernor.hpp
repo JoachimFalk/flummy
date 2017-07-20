@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef __INCLUDED_POWERGOVERNOR_H_
-#define __INCLUDED_POWERGOVERNOR_H_
+#ifndef _INCLUDED_SYSTEMCVPC_POWERGOVERNOR_HPP
+#define _INCLUDED_SYSTEMCVPC_POWERGOVERNOR_HPP
 
 #include "ComponentObserver.hpp"
 #include <systemcvpc/Attribute.hpp>
@@ -79,4 +79,4 @@ class LocalPowerGovernor : public ComponentObserver
 
 }
 
-#endif // __INCLUDED_POWERGOVERNOR_H_
+#endif /* _INCLUDED_SYSTEMCVPC_POWERGOVERNOR_HPP */

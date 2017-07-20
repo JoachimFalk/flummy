@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef VPC_API_HPP_
-#define VPC_API_HPP_
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_VPCAPI_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIG_VPCAPI_HPP
 
 #include "Component.hpp"
 #include "Route.hpp"
@@ -115,4 +115,4 @@ void setActorAsPSM(const char*  name, bool psm);
 
 } // namespace Config
 } // namespace SystemC_VPC
-#endif /* VPC_API_HPP_ */
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_VPCAPI_HPP */

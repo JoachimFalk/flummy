@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef COMMON_HPP_
-#define COMMON_HPP_
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_COMMON_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIG_COMMON_HPP
 
 #include <string>
 
@@ -63,4 +63,4 @@ private:
 
 } // namespace Config
 } // namespace SystemC_VPC
-#endif /* COMMON_HPP_ */
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_COMMON_HPP */

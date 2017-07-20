@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef DATATYPES_H_
-#define DATATYPES_H_
+#ifndef _INCLUDED_SYSTEMCVPC_DATATYPES_HPP
+#define _INCLUDED_SYSTEMCVPC_DATATYPES_HPP
 
 #include <stddef.h>
 
@@ -79,4 +79,4 @@ private:
 };
 
 } // namespace SystemC_VPC
-#endif // DATATYPES_H_
+#endif /* _INCLUDED_SYSTEMCVPC_DATATYPES_HPP */

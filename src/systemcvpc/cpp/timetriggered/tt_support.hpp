@@ -32,8 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef TT_SUPPORT_HPP_
-#define TT_SUPPORT_HPP_
+#ifndef _INCLUDED_SYSTEMCVPC_TIMETRIGGERED_TT_SUPPORT_HPP
+#define _INCLUDED_SYSTEMCVPC_TIMETRIGGERED_TT_SUPPORT_HPP
 
 #include <queue>
 
@@ -71,4 +71,4 @@ typedef std::priority_queue <TimeNodePair,
 
 } // namespace TT
 } // namespace SystemC_VPC
-#endif /* TT_SUPPORT_HPP_ */
+#endif /* _INCLUDED_SYSTEMCVPC_TIMETRIGGERED_TT_SUPPORT_HPP */
