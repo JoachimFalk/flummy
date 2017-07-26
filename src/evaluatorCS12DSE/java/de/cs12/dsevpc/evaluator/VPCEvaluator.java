@@ -7,13 +7,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.jdom.Attribute;
@@ -32,7 +30,6 @@ import de.cs12.dse.model.IApplication;
 import de.cs12.dse.model.IImplementation;
 import de.cs12.dse.model.IMapping;
 import de.cs12.dse.model.Routing;
-import de.cs12.dse.model.Routings;
 import de.cs12.dse.model.components.Attributes;
 import de.cs12.dse.model.components.ICommunication;
 import de.cs12.dse.model.components.IFunction;
@@ -49,7 +46,7 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
   
   static protected final String configFileName = "config.xml";
 
-  static protected final String dtdFileName = "cmx.dtd";
+  static protected final String dtdFileName = "vpc.dtd";
 
   static protected final String VPCCONFIGURATION = "vpcconfiguration";
 
@@ -316,9 +313,7 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
 
   private void routingToJdom(IImplementation<ITask, IResource, IMapping> implementation, Element resources,
       Element topology, ICommunication message, Routing<IResource> routing) {
-    Element route = new Element("route");    
-    topology.addContent(route);
-    
+   
     // find the right succ task
     Collection<ITask> succs = implementation.getApplication().getSuccessors(message);
     ITask successor = null;
@@ -329,10 +324,17 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
       IResource target = implementation.getBindings().get(task).iterator().next().getTarget();
       System.out.println("target " + target.toString());
       ITask predecessor = (ITask) implementation.getApplication().getPredecessors(message).toArray()[0];
-      System.out.println("Message :" +message);
+      
       successor = task;
-      route.setAttribute("source", predecessor.<String> getAttribute("NAME"));
-      route.setAttribute("destination", successor.<String> getAttribute("NAME"));
+      Element route1 = new Element("route");    
+      topology.addContent(route1);      
+      route1.setAttribute("source", predecessor.<String> getAttribute("NAME"));
+      route1.setAttribute("destination", message.<String> getAttribute("NAME"));
+      
+      Element route2 = new Element("route");    
+      topology.addContent(route2);
+      route2.setAttribute("source", message.<String> getAttribute("NAME"));
+      route2.setAttribute("destination", successor.<String> getAttribute("NAME"));
 
     }
   }
