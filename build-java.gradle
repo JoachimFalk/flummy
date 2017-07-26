@@ -3,6 +3,25 @@ apply plugin: 'jvm-component'
 apply plugin: 'java-lang'
 
 // This is for eclipse
+dependencies {
+  compile parent.project("dse")
+  compile parent.project("dsesgx")
+  compile parent.project("dseconstraintcommons")
+//compile parent.project("dseclu").fileTree(dir: 'lib', include: '*.jar')
+  compile group: 'jdom', name: 'jdom', version: '1.1'
+  compile group: 'net.sf.jung', name: 'jung-api',           version: '2.0.1'
+  compile group: 'net.sf.jung', name: 'jung-graph-impl',    version: '2.0.1'
+  compile group: 'net.sf.jung', name: 'jung-algorithms',    version: '2.0.1'
+  compile group: 'net.sf.jung', name: 'jung-visualization', version: '2.0.1'
+  compile group: 'com.google.inject',            name: 'guice', version: '4.1.0'
+  compile group: 'com.google.inject.extensions', name: 'guice-multibindings', version: '4.1.0'
+  compile group: 'net.sourceforge.collections', name: 'collections-generic', version: '4.01'
+  opt4jDependencies.each {
+    compile parent.project('opt4j:'+it)
+  }
+}
+
+// This is for eclipse
 sourceSets {
   evaluatorCS12DSE
 }
@@ -21,7 +40,9 @@ model {
           dependencies {
 //          analysis "dependencies", it
             project ':dse' library 'dse'
+            project ':dsesgx' library 'dsesgx'
             project ':dseconstraintcommons' library 'constraintcommons'
+            module 'jdom:jdom:1.1'
             module 'net.sf.jung:jung-api:2.0.1'
             module 'net.sf.jung:jung-graph-impl:2.0.1'
             module 'net.sf.jung:jung-algorithms:2.0.1'
@@ -29,7 +50,6 @@ model {
             module 'com.google.inject:guice:4.1.0'
             module 'com.google.inject.extensions:guice-multibindings:4.1.0'
             module 'net.sourceforge.collections:collections-generic:4.01'
-            module 'com.google.code.gson:gson:2.3.1'
           }
         }
         
@@ -39,7 +59,7 @@ model {
             opt4jDependencies.each {
               task.dependsOn parent.project("opt4j:"+it).jar
               task.classpath += files(parent.project("opt4j:"+it).jar.archivePath)
-              task.classpath += fileTree(dir: 'lib', include: '*.jar')
+//            task.classpath += parent.project("dseclu").fileTree(dir: 'lib', include: '*.jar')
             }
           }
           tasks.withType(AbstractArchiveTask) {
