@@ -68,27 +68,27 @@ namespace SystemC_VPC { namespace Trace {
 
   void PajeTracer::release(Task const *task) {
 
-    if(!task->hasScheduledTask()){
-      std::string name = task->getName();
-      std::string msg_name;
-      int msg_cf = name.find("msg_cf_");
-      int begin = name.find("_cf_");
-      int end = name.find("_1_");
-      if (msg_cf == -1)
-        msg_name = name.substr(begin+4, name.length()-begin-6);
-      else
-        msg_name = name.substr(7, end-7);
-      int n = msg_name.find("_");
-      std::string from = msg_name.substr(0,n);
-      std::string to = msg_name.substr(n+1,msg_name.length()-n-1);
+//    if(!task->hasScheduledTask()){
+//      std::string name = task->getName();
+//      std::string msg_name;
+//      int msg_cf = name.find("msg_cf_");
+//      int begin = name.find("_cf_");
+//      int end = name.find("_1_");
+//      if (msg_cf == -1)
+//        msg_name = name.substr(begin+4, name.length()-begin-6);
+//      else
+//        msg_name = name.substr(7, end-7);
+//      int n = msg_name.find("_");
+//      std::string from = msg_name.substr(0,n);
+//      std::string to = msg_name.substr(n+1,msg_name.length()-n-1);
 
-      TaskToPreTask::const_iterator iterTask = taskToPreTask.find(to);
+//      TaskToPreTask::const_iterator iterTask = taskToPreTask.find(to);
 
-      if(iterTask == taskToPreTask.end()) {
-        taskToPreTask[to] = from;
-        taskToDestTask[from] = to;
-        myPajeTracer->registerLink(msg_name.c_str());
-      } //else if(taskToPreTask[to] != from) {
+//      if(iterTask == taskToPreTask.end()) {
+//        taskToPreTask[to] = from;
+//        taskToDestTask[from] = to;
+//        myPajeTracer->registerLink(msg_name.c_str());
+//      } //else if(taskToPreTask[to] != from) {
 //        taskToPreTask[to] = from;
 //        myPajeTracer->registerLink(msg_name.c_str());
       //}
@@ -119,23 +119,23 @@ namespace SystemC_VPC { namespace Trace {
 //    taskToEndTime[task->getName()] = sc_core::sc_time_stamp();
 //    taskToResource[task->getName()] = this->res_;
 
-    TaskToDestTask::const_iterator iterDestTask = taskToDestTask.find(task->getName());
-    if (iterDestTask != taskToDestTask.end()){
-      std::string destTask = iterDestTask->second;
-      std::string link_ = task->getName().append("_" + destTask);
+//    TaskToDestTask::const_iterator iterDestTask = taskToDestTask.find(task->getName());
+//    if (iterDestTask != taskToDestTask.end()){
+//      std::string destTask = iterDestTask->second;
+//      std::string link_ = task->getName().append("_" + destTask);
+//
+//      myPajeTracer->traceLinkBegin(link_.c_str(), this->res_, sc_core::sc_time_stamp());
+//    }
 
-      myPajeTracer->traceLinkBegin(link_.c_str(), this->res_, sc_core::sc_time_stamp());
-    }
-
-    TaskToPreTask::const_iterator iterTask = taskToPreTask.find(task->getName());
-    if (iterTask != taskToPreTask.end()){
-      std::string preTask = iterTask->second;
-      std::string link_ = preTask.append("_" + task->getName());
+//    TaskToPreTask::const_iterator iterTask = taskToPreTask.find(task->getName());
+//    if (iterTask != taskToPreTask.end()){
+//      std::string preTask = iterTask->second;
+//      std::string link_ = preTask.append("_" + task->getName());
 
 //      TaskToEndTime::const_iterator iterPre = taskToEndTime.find(preTask.c_str());
 //      assert(iterPre == taskToEndTime.end());
 
-      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, sc_core::sc_time_stamp());
+//      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, sc_core::sc_time_stamp());
 
     }
 
