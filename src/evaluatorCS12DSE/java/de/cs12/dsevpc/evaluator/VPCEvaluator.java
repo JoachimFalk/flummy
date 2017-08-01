@@ -1,9 +1,15 @@
 package de.cs12.dsevpc.evaluator;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +30,7 @@ import org.opt4j.core.Objective;
 import org.opt4j.core.Objectives;
 import org.opt4j.core.problem.Evaluator;
 
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 
 import de.cs12.dse.model.IApplication;
@@ -39,14 +46,21 @@ import de.cs12.dse.optimization.ImplementationWrapper;
 import de.cs12.dsesgx.model.Properties;
 import de.cs12.dsesgx.model.SgxModel;
 
-
 public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
+  
+  Objective SimTime = new Objective("SimTime[ns]", Objective.Sign.MIN);
 
-  Objective blub = new Objective("BLUB", Objective.Sign.MAX);
+  @Retention(RUNTIME)
+  @BindingAnnotation
+  public @interface StartScript {
+  }
+
   
   static protected final String configFileName = "config.xml";
 
   static protected final String dtdFileName = "vpc.dtd";
+  
+  protected final String startscript;
 
   static protected final String VPCCONFIGURATION = "vpcconfiguration";
 
@@ -84,10 +98,10 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
   private final SgxModel systemoc;
   
   @Inject
-  public VPCEvaluator(Properties properties, SgxModel smocModel) {
+  public VPCEvaluator(@StartScript String startscript, Properties properties, SgxModel smocModel) {
     this.properties = properties;
     this.systemoc = smocModel;
-
+    this.startscript = startscript;
   }
   
   @Override
@@ -95,10 +109,9 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
     IImplementation<ITask, IResource, IMapping> implementation = implementationWrapper.getImplementation();
     Objectives objectives = new Objectives();
     if (implementation == null || !implementation.isFeasible()) {
-      objectives.add(blub, Objective.INFEASIBLE);
+      objectives.add(SimTime, Objective.INFEASIBLE);
       return objectives;
     }
-    objectives.add(blub, 999);
     Element root = new Element(VPCCONFIGURATION);
     Element resources = processResources(implementation);
     
@@ -112,47 +125,65 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
     DocType vpcXml = new DocType(VPCCONFIGURATION, dtdFileName);
     Document doc = new Document(root, vpcXml);
 
+    double simTime = Double.MAX_VALUE;
     
     try {
       // generate temporary directory
-      File simDir = File.createTempFile("mjpeg", "sim");
-      simDir.delete();
-      simDir.mkdir();
-      simDir.deleteOnExit();
-      implementation.setAttribute(VPCCONFIGURATION, simDir);
-
+      File clusterDir = implementation.getTempDirectory();
+      
       // generate VPC config
-      File confFile = new File(simDir.getCanonicalPath(), configFileName);
+      File confFile = new File(clusterDir, configFileName);
       BufferedWriter bw = new BufferedWriter(new FileWriter(confFile));
 
       XMLOutputter serializer = new XMLOutputter(Format.getPrettyFormat());
       serializer.output(doc, bw);
       bw.close();
+      
+      // Measurement
+      // generate new process running the bash-script
+      String cmd = startscript + " " + clusterDir.getCanonicalPath();
+      Process exec_process = Runtime.getRuntime().exec(cmd);
+      BufferedReader is = new BufferedReader(new InputStreamReader(exec_process.getInputStream()));
+      while (is.readLine() != null) {
+              // needed under Windows XP if simulation produces some lines of
+              // output
+      }
+      int returnCode = exec_process.waitFor();
+      System.out.println("SIMULATION DONE!");
+      if (returnCode != 0) {
+              System.err.println("Simulation in directory " + clusterDir.getAbsolutePath()
+                              + " exited with abnormal return code " + returnCode);
+
+              throw new IllegalStateException("Simulation exited abnormally");
+      }
+      
+   
+      // read results
+      File logFile = new File(clusterDir.getCanonicalPath(), "log");
+      BufferedReader br = new BufferedReader(new FileReader(logFile));
+      String line;
+      String lastLine = null;
+      while ((line = br.readLine()) != null) {
+        lastLine = line;
+      }
+      if (lastLine.contains("overall simulated time:")){
+              String[] elements = lastLine.split(" ");
+              simTime = Double.parseDouble(elements[elements.length-2]);
+      }
+      br.close();
+      logFile.delete();
+      System.out.println("Simulation time: " + simTime +" ns");
+      objectives.add(SimTime, simTime);
+      
+      
     } catch (IOException e) {
       System.err.println("Got an exception during I/O with simulation:\n" + e);
+    } catch (InterruptedException e) {
+      System.err.println("Got interupted while running simulation:\n" + e);
     }
     return objectives;
 
   }
-
-//  /**
-//   * Add used {@link Distribution}s to the root XML {@link Element}.
-//   * 
-//   * @param root
-//   *            element to add the distributions to
-//   */
-//  private void addDistributions(Element root) {
-//    if (!this.distributions.isEmpty()) {
-//      Element element = new Element(DISTRIBUTIONS);
-//      for (Distribution distribution : this.distributions) {
-//        System.out.println("added " + distribution + " to distributions");
-//        Element d = new Element(DISTRIBUTION);
-//        d.setAttribute(NAMESTR, distribution.getId());
-//        element.addContent(d);
-//      }
-//      root.addContent(0, element);
-//    }
-//  }
 
   private Element processResources(IImplementation<ITask, IResource, IMapping> implementation) {  
     Element resources = new Element(RESOURCES);
@@ -304,7 +335,7 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
       // Collection<IResource> hopsUsed = new LinkedList<IResource>();
       while (siter.hasNext()) {
         Routing<IResource> routing = siter.next();
-        System.out.println("routing: " + routing.toString());
+//        System.out.println("routing: " + routing.toString());
         routingToJdom(implementation, resources, topology, message, routing);
       }
     }
@@ -319,10 +350,10 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
     ITask successor = null;
 
     for (ITask task : succs) {
-      System.out.println("source " + task.toString());
+//      System.out.println("source " + task.toString());
       assert implementation.getBindings().get(task).size() == 1 : "Did not expect task to be bound to more than one resource";
-      IResource target = implementation.getBindings().get(task).iterator().next().getTarget();
-      System.out.println("target " + target.toString());
+//      IResource target = implementation.getBindings().get(task).iterator().next().getTarget();
+//      System.out.println("target " + target.toString());
       ITask predecessor = (ITask) implementation.getApplication().getPredecessors(message).toArray()[0];
       
       successor = task;
