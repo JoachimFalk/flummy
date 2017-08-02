@@ -227,7 +227,11 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
           // create mapping tag for CMX file
           Element mapping = new Element("mapping");
           mappings.addContent(mapping);
-          mapping.setAttribute("source", task.<String>getAttribute("name"));
+          if (task.<String>getAttribute("name") != null) {
+            mapping.setAttribute("source", task.<String>getAttribute("name"));
+          } else {
+            mapping.setAttribute("source", task.<String>getAttribute("NAME"));
+          }
           mapping.setAttribute("target", resource.<String>getAttribute("NAME"));
           
           Attributes attributes = properties.getProperties(imapping);
@@ -344,29 +348,48 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
 
   private void routingToJdom(IImplementation<ITask, IResource, IMapping> implementation, Element resources,
       Element topology, ICommunication message, Routing<IResource> routing) {
-   
-    // find the right succ task
-    Collection<ITask> succs = implementation.getApplication().getSuccessors(message);
-    ITask successor = null;
 
-    for (ITask task : succs) {
-//      System.out.println("source " + task.toString());
-      assert implementation.getBindings().get(task).size() == 1 : "Did not expect task to be bound to more than one resource";
-//      IResource target = implementation.getBindings().get(task).iterator().next().getTarget();
-//      System.out.println("target " + target.toString());
-      ITask predecessor = (ITask) implementation.getApplication().getPredecessors(message).toArray()[0];
+	Collection<ITask> preds = implementation.getApplication().getPredecessors(message);
+	assert preds.size() == 1: "A message must only have one predecessor";
+	ITask predecessor = preds.iterator().next();
+    assert implementation.getBindings().get(predecessor).size() == 1 : "Did not expect task to be bound to more than one resource";
+	
+	// find the right succ task
+    for (ITask successor : implementation.getApplication().getSuccessors(message)) {
+//    System.out.println("source " + task.toString());
+      assert implementation.getBindings().get(successor).size() == 1 : "Did not expect task to be bound to more than one resource";
+//    IResource target = implementation.getBindings().get(task).iterator().next().getTarget();
+//    System.out.println("target " + target.toString());
       
-      successor = task;
-      Element route1 = new Element("route");    
-      topology.addContent(route1);      
-      route1.setAttribute("source", predecessor.<String> getAttribute("NAME"));
-      route1.setAttribute("destination", message.<String> getAttribute("NAME"));
+      String msgName = message.<String> getAttribute("NAME");
+      // Depending on the way the model is read into DSE, a message can either be a FIFO
+      // or an edge connecting an actor to FIFO. Please refer to SysteMoCXMLInputOutput for
+      // details. If the name of the message ends with "_push" this should be the connection
+      // from the actor to the FIFO, otherwise the message ends with "_pull" representing
+      // the edge from the FIFO to the actor.
       
-      Element route2 = new Element("route");    
-      topology.addContent(route2);
-      route2.setAttribute("source", message.<String> getAttribute("NAME"));
-      route2.setAttribute("destination", successor.<String> getAttribute("NAME"));
-
+      if (msgName.endsWith("_push")) {
+	      Element pushRoute = new Element("route");
+	      topology.addContent(pushRoute);
+	      pushRoute.setAttribute("source", predecessor.<String> getAttribute("NAME"));
+	      pushRoute.setAttribute("destination", successor.<String> getAttribute("NAME"));
+      } else if (msgName.endsWith("_pull")) {
+	      Element pullRoute = new Element("route");
+	      topology.addContent(pullRoute);
+	      pullRoute.setAttribute("source", predecessor.<String> getAttribute("NAME"));
+	      pullRoute.setAttribute("destination", successor.<String> getAttribute("NAME"));
+      } else {
+		  // The message is a FIFO, create two route elements for VPC.
+	      Element pushRoute = new Element("route");
+	      topology.addContent(pushRoute);
+	      pushRoute.setAttribute("source", predecessor.<String> getAttribute("NAME"));
+	      pushRoute.setAttribute("destination", msgName);
+	      
+	      Element pullRoute = new Element("route");
+	      topology.addContent(pullRoute);
+	      pullRoute.setAttribute("source", msgName);
+	      pullRoute.setAttribute("destination", successor.<String> getAttribute("NAME"));
+      }
     }
   }
 
