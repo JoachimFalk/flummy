@@ -92,7 +92,7 @@ namespace SystemC_VPC { namespace Trace {
 //        taskToPreTask[to] = from;
 //        myPajeTracer->registerLink(msg_name.c_str());
       //}
-    }
+//  }
 
 //    std::ofstream logfile;
 //    logfile.open("logfile.txt", std::ios_base::app);
@@ -137,7 +137,7 @@ namespace SystemC_VPC { namespace Trace {
 
 //      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, sc_core::sc_time_stamp());
 
-    }
+//  }
 
 
 //    std::ofstream logfile;
