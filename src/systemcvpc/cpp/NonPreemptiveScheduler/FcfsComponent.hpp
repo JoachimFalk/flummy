@@ -39,150 +39,29 @@
 
 namespace SystemC_VPC{
 
-    class FcfsComponent : public NonPreemptiveComponent {
-    public:
-      FcfsComponent(Config::Component::Ptr component, Director *director =
-        &Director::getInstance()) :
-        NonPreemptiveComponent(component, director)
-      {
-      }
+  class FcfsComponent : public NonPreemptiveComponent {
+  public:
+    FcfsComponent(Config::Component::Ptr component,
+        Director *director = &Director::getInstance());
 
-      virtual ~FcfsComponent() {}
+    virtual ~FcfsComponent();
 
-      void addTask(Task *newTask)
-      {
-        DBG_OUT(this->getName() << " add Task: " << newTask->getName()
-                << " @ " << sc_core::sc_time_stamp() << std::endl);
-        readyTasks.push_back(newTask);
-      }
+    void addTask(Task *newTask);
 
+    Task *scheduleTask();
 
-      Task * scheduleTask();
+    virtual void notifyActivation(ScheduledTask *scheduledTask, bool active);
 
-      virtual void notifyActivation(ScheduledTask * scheduledTask,
-          bool active);
+    virtual bool releaseActor();
 
-      virtual bool releaseActor();
+    bool hasReadyTask();
+  protected:
+    std::deque<Task*>           readyTasks;
+    std::list<ScheduledTask *>  fcfsQueue;
+    TT::TimedQueue              ttReleaseQueue;
 
-      bool hasReadyTask(){
-        return !readyTasks.empty();
-      }
-    protected:
-      std::deque<Task*>                readyTasks;
-      std::list<ScheduledTask *>       fcfsQueue;
-
-    };
-
-    class TtFcfsComponent : public FcfsComponent {
-    public:
-      TtFcfsComponent(Config::Component::Ptr component, Director *director =
-        &Director::getInstance()) :
-        FcfsComponent(component, director)
-      {
-      }
-
-      virtual ~TtFcfsComponent() {}
-
-
-      virtual void notifyActivation(ScheduledTask * scheduledTask, bool active)
-      {
-        DBG_OUT(this->name() << " notifyActivation " << scheduledTask
-            << " " << active << std::endl);
-        if (active) {
-          if (scheduledTask->getNextReleaseTime() > sc_core::sc_time_stamp()) {
-            ttReleaseQueue.push(
-                TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
-          } else {
-            this->fcfsQueue.push_back(scheduledTask);
-          }
-          if (this->runningTask == NULL) {
-            this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
-          }
-        }
-      }
-
-      virtual bool releaseActor()
-      {
-        //move active TT actors to fcfsQueue
-        while(!ttReleaseQueue.empty()
-            && ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
-          this->fcfsQueue.push_back(ttReleaseQueue.top().node);
-          ttReleaseQueue.pop();
-        }
-        bool released = FcfsComponent::releaseActor();
-        if(!ttReleaseQueue.empty() && !released){
-          sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
-          this->notify_scheduler_thread.notify(delta);
-        }
-        return released;
-      }
-    private:
-      TT::TimedQueue ttReleaseQueue;
-    };
-
-
-    void FcfsComponent::notifyActivation(ScheduledTask * scheduledTask,
-        bool active)
-    {
-      DBG_OUT(this->name() << " notifyActivation " << scheduledTask
-          << " " << active << std::endl);
-      if (active) {
-        fcfsQueue.push_back(scheduledTask);
-        if (this->runningTask == NULL) {
-          this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
-        }
-      }
-    }
-
-    bool FcfsComponent::releaseActor()
-    {
-      while (!fcfsQueue.empty()) {
-        ScheduledTask * scheduledTask = fcfsQueue.front();
-        fcfsQueue.pop_front();
-
-        bool canExec = scheduledTask->canFire();
-    //    bool canExec = Director::canExecute(scheduledTask);
-        DBG_OUT("FCFS test task: " << scheduledTask
-            << " -> " << canExec << std::endl);
-        if (canExec) {
-          scheduledTask->schedule();
-    //      Director::execute(scheduledTask);
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    Task * FcfsComponent::scheduleTask()
-    {
-      assert(!readyTasks.empty());
-      Task* task = readyTasks.front();
-      readyTasks.pop_front();
-      this->startTime = sc_core::sc_time_stamp();
-      DBG_OUT(this->getName() << " schedule Task: " << task->getName()
-          << " @ " << sc_core::sc_time_stamp() << std::endl);
-
-      /*
-       * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
-       */
-      if (task != NULL and task->isPSM() == true)
-        this->fireStateChanged(ComponentState::IDLE);
-      else
-        this->fireStateChanged(ComponentState::RUNNING);
-
-      if (task->isBlocking() /* && !assignedTask->isExec() */) {
-        //TODO
-      }
-      return task;
-    }
-
-
-
-
-
+  };
 
 } // namespace SystemC_VPC
-
 
 #endif /* _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_FCFSCOMPONENT_HPP */
