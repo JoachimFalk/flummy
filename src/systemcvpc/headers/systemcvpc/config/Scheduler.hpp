@@ -41,7 +41,6 @@ namespace SystemC_VPC { namespace Config {
 
 enum class Scheduler {
   FCFS,
-  FCFS_noTT,
   StaticPriority_P,
   StaticPriority_NP,
   StaticPriority_NP_noTT,

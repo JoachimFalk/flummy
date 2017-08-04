@@ -60,8 +60,6 @@ Scheduler parseScheduler(std::string name) {
     return Scheduler::RateMonotonic;
   } else if (name == "FCFS" || name == "FirstComeFirstServed") {
     return Scheduler::FCFS;
-  } else if (name == "FCFS-noTT") {
-    return Scheduler::FCFS_noTT;
   } else if (name == "AVB") {
     return Scheduler::AVB;
   } else if (name == "MOST"){

@@ -694,9 +694,6 @@ namespace SystemC_VPC {
     AbstractComponent *comp = NULL;
     switch (component->getScheduler()) {
       case VC::Scheduler::FCFS:
-        comp = new TtFcfsComponent(component);
-        break;
-      case VC::Scheduler::FCFS_noTT:
         comp = new FcfsComponent(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
