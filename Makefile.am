@@ -25,7 +25,8 @@ include ../BuildSystem/doxygen.am
 
 SUBDIRS = src/systemcvpc/headers/
 
-# This is only needed if there is a configure.in in this directory
+AUTOMAKE_OPTIONS = nostdinc
+# This is only needed if there is a configure.ac in this directory
 ACLOCAL_AMFLAGS=-I ../BuildSystem/m4
 
 AM_LDFLAGS = @AM_LDFLAGS@
@@ -42,18 +43,18 @@ nodist_pkgconfig_DATA = \
 	     -e 's/\$${srctreemode_\(\w\+\)}/\$${\1}/g' \
 	  < $^ > $@
 
-%-xsd.c: %.xsd
+src/systemcvpc/cpp/%-xsd.c: %.xsd
 	{ set -e; echo "static char const $(notdir $*)XSD[] ="; \
 	  sed -e 's/\(["\\]\)/\\\1/g' -e 's/^\(.*\)$$/  "\1\\n"/' $<; \
 	  echo ";"; \
 	} > $@
-%-dtd.c: %.dtd
+src/systemcvpc/cpp/%-dtd.c: %.dtd
 	{ set -e; echo "static char const $(notdir $*)DTD[] ="; \
 	  sed -e 's/\(["\\]\)/\\\1/g' -e 's/^\(.*\)$$/  "\1\\n"/' $<; \
 	  echo ";"; \
 	} > $@
 
-BUILT_SOURCES=vpc-dtd.c
+BUILT_SOURCES=src/systemcvpc/cpp/vpc-dtd.c
 
 CLEANFILES=$(nodist_pkgconfig_DATA)
 
@@ -120,8 +121,8 @@ libsystemcvpc_la_DEPENDENCIES = \
 	$(COSUPPORT_XERCES_DEPENDENCIES)
 
 libsystemcvpc_la_CPPFLAGS = $(AM_CPPFLAGS) \
-	-Isrc/systemcvpc/cpp \
-	-Isrc/systemcvpc/headers \
+	-I$(builddir)/src/systemcvpc/cpp \
+	-I$(builddir)/src/systemcvpc/headers \
 	-I$(srcdir)/src/systemcvpc/cpp \
 	-I$(srcdir)/src/systemcvpc/headers \
 	$(BOOST_CPPFLAGS) \
