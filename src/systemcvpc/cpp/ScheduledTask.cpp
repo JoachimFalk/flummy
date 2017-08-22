@@ -73,7 +73,7 @@ void ScheduledTask::setActivation(bool active)
 }
 
 void ScheduledTask::scheduleRequestMethod() {
-  while (canFire())
+  while (getActive() && canFire())
     schedule();
 }
 
