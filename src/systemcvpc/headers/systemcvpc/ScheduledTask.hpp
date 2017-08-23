@@ -65,26 +65,22 @@ class ScheduledTask
   SC_HAS_PROCESS(ScheduledTask);
 public:
   ScheduledTask(sc_core::sc_module_name name);
-  virtual ~ScheduledTask();
-  void setDelayer(Delayer *component);
-  Delayer* getDelayer();
-  void setPid(ProcessId pid);
+
+  void      setDelayer(Delayer *component);
+  Delayer  *getDelayer();
+
+  void      setPid(ProcessId pid);
   ProcessId getPid() const;
 
+  // This is here to give access to the friends of this class.
   virtual sc_core::sc_time const &getNextReleaseTime() const = 0;
 
   void setActivation(bool active);
 
-  void setActive(bool a);
-
-  bool getActive() const {
-    return active;
-  }
-
+  virtual ~ScheduledTask();
 private:
   Delayer *component;
   ProcessId pid;
-  bool active;
 
   /// The following member variable are for the fallback
   /// case if VPC scheduling is not enabled due to missing

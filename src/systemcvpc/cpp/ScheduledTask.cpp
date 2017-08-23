@@ -40,7 +40,7 @@ namespace SystemC_VPC
 
 ScheduledTask::ScheduledTask(sc_core::sc_module_name name)
   : sc_core::sc_module(name)
-  , component(NULL), pid(-1), active(true)
+  , component(NULL), pid(-1)
 {
   SC_METHOD(scheduleRequestMethod);
   sensitive << scheduleRequest;
@@ -73,7 +73,7 @@ void ScheduledTask::setActivation(bool active)
 }
 
 void ScheduledTask::scheduleRequestMethod() {
-  while (getActive() && canFire())
+  while (canFire())
     schedule();
 }
 
@@ -85,13 +85,6 @@ void ScheduledTask::setPid(ProcessId pid)
 ProcessId ScheduledTask::getPid() const
 {
   return this->pid;
-}
-
-void ScheduledTask::setActive(bool a){
-  if (a && !active) {
-    component->notifyActivation(this, true);
-  }
-  active=a;
 }
 
 } // namespace SystemC_VPC
