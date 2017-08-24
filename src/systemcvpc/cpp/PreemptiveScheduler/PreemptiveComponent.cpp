@@ -288,7 +288,7 @@ namespace SystemC_VPC{
         assert(tnp.time <= sc_core::sc_time_stamp());
         if(this->getCanExecuteTasks() || this->getPCB(tnp.node->getPid())->isPSM()){
           if(tnp.node->canFire()){
-            tnp.node->schedule();
+            tnp.node->scheduleLegacyWithCommState();
 //          if(Director::canExecute(tnp.node)){
 //            Director::execute(tnp.node);
             pendingTask = true;

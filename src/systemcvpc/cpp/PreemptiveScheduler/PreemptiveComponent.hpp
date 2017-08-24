@@ -440,7 +440,7 @@ namespace SystemC_VPC{
                            (*tasks_iter)->getBlockEvent().dii->notify();
                            if((*tasks_iter)->hasScheduledTask()){
                              assert(((*tasks_iter)->getScheduledTask())->canFire());
-                             ((*tasks_iter)->getScheduledTask())->schedule();
+                             ((*tasks_iter)->getScheduledTask())->scheduleLegacyWithCommState();
 //                             assert(Director::canExecute((*tasks_iter)->getProcessId()));
 //                             Director::execute((*tasks_iter)->getProcessId());
                            }
@@ -458,7 +458,7 @@ namespace SystemC_VPC{
 
               if(task->hasScheduledTask()){
                 assert((task->getScheduledTask())->canFire());
-                (task->getScheduledTask())->schedule();
+                (task->getScheduledTask())->scheduleLegacyWithCommState();
 //                assert(Director::canExecute(task->getProcessId()));
 //                Director::execute(task->getProcessId());
               }

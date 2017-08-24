@@ -87,7 +87,7 @@ void NonPreemptiveComponent::removeTask(){
           (*tasks_iter)->getBlockEvent().dii->notify();
           if ((*tasks_iter)->hasScheduledTask()) {
             assert(((*tasks_iter)->getScheduledTask())->canFire());
-            ((*tasks_iter)->getScheduledTask())->schedule();
+            ((*tasks_iter)->getScheduledTask())->scheduleLegacyWithCommState();
 //                 assert(Director::canExecute((*tasks_iter)->getProcessId()));
 //                 Director::execute((*tasks_iter)->getProcessId());
           }
@@ -127,7 +127,7 @@ void NonPreemptiveComponent::removeTask(){
         " scheduledTask: " << runningTask->getName() << " " << scheduledTask->canFire() << std::endl);
 
     assert(scheduledTask->canFire());
-    scheduledTask->schedule();
+    scheduledTask->scheduleLegacyWithCommState();
 
 //          DBG_OUT(" scheduledTask: " << runningTask->getName()
 //                  << " " << Director::canExecute(pid) << std::endl);
