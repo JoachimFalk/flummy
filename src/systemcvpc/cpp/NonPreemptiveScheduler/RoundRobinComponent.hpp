@@ -233,14 +233,7 @@ namespace SystemC_VPC{
             this->taskTracer_->finishDii(actualTask);
             this->taskTracer_->finishLatency(actualTask);
 
-            /// The scheduledTask, i.e., the SysteMoC actor, should now be in the comm state.
-            /// Enable transition out of comm state by notifying the dii event.
-            actualTask->getBlockEvent().dii->notify();
-            /// Thus, the transition out of the comm state should now be enabled.
-            assert(scheduledTask->canFire());
-            /// Finally, take the transition out of the comm state.
-            scheduledTask->schedule();
-            /// FIXME: What about dii != latency
+            /// FIXME: What about DII != latency
             Director::getInstance().signalLatencyEvent(actualTask);
             actualTask = nullptr;
             scheduleMessageTasks();

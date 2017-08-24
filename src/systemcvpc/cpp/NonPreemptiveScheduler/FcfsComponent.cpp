@@ -48,7 +48,7 @@ namespace SystemC_VPC{
       DBG_OUT("FCFS test task: " << scheduledTask
           << " -> " << canExec << std::endl);
       if (canExec) {
-        scheduledTask->schedule();
+        scheduledTask->scheduleLegacyWithCommState();
 //      Director::execute(scheduledTask);
         return true;
       }
@@ -76,7 +76,7 @@ namespace SystemC_VPC{
       DBG_OUT("FCFS test task: " << scheduledTask
           << " -> " << canExec << std::endl);
       if (canExec) {
-        scheduledTask->schedule();
+        scheduledTask->scheduleLegacyWithCommState();
 //      Director::execute(scheduledTask);
         released = true;
         break;

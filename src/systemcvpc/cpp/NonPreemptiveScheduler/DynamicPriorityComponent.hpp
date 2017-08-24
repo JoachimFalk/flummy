@@ -133,7 +133,7 @@ public:
           this->mustYield_ = false;
           this->releasedTask_ = scheduledTask;
           this->debugDump(debug_, scheduledTask);
-          scheduledTask->schedule();
+          scheduledTask->scheduleLegacyWithCommState();
 //          Director::execute(scheduledTask);
           return true;
         }
@@ -145,7 +145,7 @@ public:
       if (canExec) {
         this->releasedTask_ = this->lastTask_->getScheduledTask();
         this->debugDump(this->debug_, this->releasedTask_);
-        ((this->lastTask_)->getScheduledTask())->schedule();
+        ((this->lastTask_)->getScheduledTask())->scheduleLegacyWithCommState();
 //        Director::execute(this->lastTask_->getProcessId());
         return true;
       }
