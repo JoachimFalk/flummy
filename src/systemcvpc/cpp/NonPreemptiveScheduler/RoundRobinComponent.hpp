@@ -73,10 +73,14 @@ namespace SystemC_VPC{
         for (std::vector<ScheduledTask *>::iterator iter = taskList.begin();
              iter != taskList.end();
              ++iter) {
+          // This will trigger notifyActivation with
+          // either false when the actor is still not fireabke
+          // or     true when the actor is fireable.
           (*iter)->setUseActivationCallback(true);
-          if ((*iter)->canFire()) {
+          // Then, notifyActivation will reset useActivationCallback
+          // back to false.
+          if (!useActivationCallback) {
             /// Oops, undo it
-            useActivationCallback = false;
             (*iter)->setUseActivationCallback(false);
             while (iter != taskList.begin()) {
               --iter;
@@ -119,8 +123,18 @@ namespace SystemC_VPC{
       actualTask->initDelays();
       if (actualTask->hasScheduledTask()) {
         assert(!useActivationCallback);
-        assert(!this->actualTask);
+        scheduleMessageTasks();
         this->actualTask = actualTask;
+        this->taskTracer_->release(actualTask);
+        this->taskTracer_->assign(actualTask);
+        std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
+        wait(actualTask->getDelay());
+        this->taskTracer_->finishDii(actualTask);
+        this->taskTracer_->finishLatency(actualTask);
+        /// This is need to trigger consumption of tokens by the actor.
+        actualTask->getBlockEvent().dii->notify();
+        /// FIXME: What about DII != latency
+        Director::getInstance().signalLatencyEvent(actualTask);
       } else
         readyMsgTasks.push_back(actualTask);
       readyEvent.notify();
@@ -137,7 +151,7 @@ namespace SystemC_VPC{
         this->taskTracer_->finishDii(actualTask);
         this->taskTracer_->finishLatency(actualTask);
 
-        std::cout << "check: " <<  actualTask->getName() << std::endl;
+        std::cout << "check: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
       }
     }
 
@@ -219,22 +233,15 @@ namespace SystemC_VPC{
             std::cout << "Scheduling " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
             assert(!this->actualTask);
             scheduledTask->schedule();
-            while (!actualTask) {
+            while (!actualTask ||
+                   !actualTask->hasScheduledTask() ||
+                   actualTask->getScheduledTask() != scheduledTask) {
               scheduleMessageTasks();
-              if (!actualTask)
+              if (!actualTask ||
+                  !actualTask->hasScheduledTask() ||
+                  actualTask->getScheduledTask() != scheduledTask)
                 wait(readyEvent);
             }
-            assert(actualTask);
-            assert(actualTask->hasScheduledTask());
-            assert(actualTask->getScheduledTask() == scheduledTask);
-            this->taskTracer_->release(actualTask);
-            this->taskTracer_->assign(actualTask);
-            wait(actualTask->getOverhead());
-            this->taskTracer_->finishDii(actualTask);
-            this->taskTracer_->finishLatency(actualTask);
-
-            /// FIXME: What about DII != latency
-            Director::getInstance().signalLatencyEvent(actualTask);
             actualTask = nullptr;
             scheduleMessageTasks();
           }

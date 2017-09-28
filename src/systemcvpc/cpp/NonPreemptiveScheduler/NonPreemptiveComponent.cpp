@@ -304,7 +304,6 @@ void NonPreemptiveComponent::abortBlockingCompute(
  *
  */
 void NonPreemptiveComponent::remainingPipelineStages() {
-  std::cerr << "test";
   while (1) {
     if (pqueue.size() == 0) {
       wait( remainingPipelineStages_WakeUp);
