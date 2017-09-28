@@ -171,7 +171,6 @@ public class VPCEvaluator implements Evaluator<ImplementationWrapper> {
               simTime = Double.parseDouble(elements[elements.length-2]);
       }
       br.close();
-      logFile.delete();
       System.out.println("Simulation time: " + simTime +" ns");
       objectives.add(SimTime, simTime);
       

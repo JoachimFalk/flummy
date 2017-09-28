@@ -46,7 +46,7 @@ namespace SystemC_VPC{
     if(!gids.empty())
       this->setOverhead(this->timingScale * timing->getDelay(gids) + (double)this->factorOverhead * sc_core::sc_time(10, sc_core::SC_NS));
     else
-      this->setOverhead((double)this->factorOverhead * sc_core::sc_time(10, sc_core::SC_NS));
+      this->setOverhead((double)this->factorOverhead * sc_core::sc_time(0.1, sc_core::SC_NS));
 
     //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
     // Initialize with DII
