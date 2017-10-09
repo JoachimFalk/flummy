@@ -34,9 +34,13 @@
 
 #ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSECONDARYSCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSECONDARYSCHEDULER_HPP
-#include <PreemptiveScheduler/Scheduler.hpp>
-#include <systemc>
+
 #include <systemcvpc/datatypes.hpp>
+
+#include "Scheduler.hpp"
+
+#include <systemc>
+
 #include <map>
 #include <deque>
 

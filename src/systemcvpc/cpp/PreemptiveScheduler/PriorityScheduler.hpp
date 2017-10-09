@@ -35,8 +35,10 @@
 #ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_PRIORITYSCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_PRIORITYSCHEDULER_HPP
 
-#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
+
+#include "Scheduler.hpp"
+
 #include <systemc>
 
 #include <map>

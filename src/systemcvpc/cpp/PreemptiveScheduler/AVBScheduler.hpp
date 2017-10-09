@@ -35,9 +35,10 @@
 #ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_AVBSCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_AVBSCHEDULER_HPP
 
-#include "PriorityScheduler.hpp"
-#include <PreemptiveScheduler/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
+
+#include "PriorityScheduler.hpp"
+#include "Scheduler.hpp"
 
 #include <systemc>
 

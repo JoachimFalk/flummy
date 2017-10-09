@@ -34,20 +34,21 @@
 
 #ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_PREEMPTIVECOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_PREEMPTIVECOMPONENT_HPP
-#include <PreemptiveScheduler/Scheduler.hpp>
-#include <systemc>
 
-#include "../AbstractComponent.hpp"
-#include "../ComponentInfo.hpp"
+#include <systemcvpc/vpc_config.h>
 #include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Director.hpp>
+
+#include "Scheduler.hpp"
+#include "../AbstractComponent.hpp"
+#include "../ComponentInfo.hpp"
 #include "../PowerMode.hpp"
 #include "../PowerSumming.hpp"
-#include <systemcvpc/vpc_config.h>
 #include "../timetriggered/tt_support.hpp"
-
 #include "../tracing/TracerIf.hpp"
+
+#include <systemc>
 
 #include <vector>
 #include <map>

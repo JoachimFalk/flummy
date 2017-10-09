@@ -34,15 +34,17 @@
 
 #ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSCHEDULER_HPP
-#include "MostSecondaryScheduler.hpp"
-#include <PreemptiveScheduler/Scheduler.hpp>
-#include <systemc>
+
 #include <systemcvpc/datatypes.hpp>
+
+#include "Scheduler.hpp"
+#include "MostSecondaryScheduler.hpp"
+
+#include <systemc>
+
 #include <map>
 #include <deque>
 #include <string.h>
-
-
 
 namespace SystemC_VPC{
   class PreemptiveComponent;
