@@ -709,7 +709,7 @@ namespace SystemC_VPC {
         comp = DynamicPriorityComponent::create(component);
         break;
       default:
-        comp = new ComponentImpl(component);
+        comp = new PreemptiveComponent(component);
     }
 
     switch(component->getTracing()){
