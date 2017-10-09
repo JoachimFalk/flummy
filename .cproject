@@ -41,7 +41,9 @@
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen.1828624766" name="autogen.sh" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen"/>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc.2110058710" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc">
 								<option id="gnu.c.compiler.option.include.paths.1574367076" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/src/cosupport-base/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-allocators/headers}&quot;"/>
@@ -61,7 +63,9 @@
 							</tool>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp.275374220" name="GCC C++ Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp">
 								<option id="gnu.cpp.compiler.option.include.paths.669900603" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/obj/src/cosupport-base/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Support/src/cosupport-allocators/headers}&quot;"/>
