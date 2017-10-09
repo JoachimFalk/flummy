@@ -34,8 +34,11 @@
 
 #ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_RATEMONOTONICSCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_RATEMONOTONICSCHEDULER_HPP
-#include <PreemptiveScheduler/Scheduler.hpp>
+
 #include <systemcvpc/datatypes.hpp>
+
+#include "Scheduler.hpp"
+
 #include <systemc>
 
 #include <map>

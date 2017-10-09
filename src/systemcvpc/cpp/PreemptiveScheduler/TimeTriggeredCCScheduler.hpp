@@ -34,10 +34,13 @@
 
 #ifndef _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_TIMETRIGGEREDCCSCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_TIMETRIGGEREDCCSCHEDULER_HPP
-#include "FlexRayScheduler.hpp"
-#include <PreemptiveScheduler/Scheduler.hpp>
-#include "TDMAScheduler.hpp"
+
 #include <systemcvpc/datatypes.hpp>
+
+#include "Scheduler.hpp"
+#include "FlexRayScheduler.hpp"
+#include "TDMAScheduler.hpp"
+
 #include <systemc>
 
 #include <map>
