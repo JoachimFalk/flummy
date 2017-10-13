@@ -77,7 +77,6 @@ class ComponentObserver;
 
   typedef std::map<ComponentState, double> PowerTable;
   typedef std::map<const PowerMode*, PowerTable>  PowerTables;
-  typedef std::vector<ProcessId> ScheduledTasks;
   typedef std::string MultiCastGroup;
 
 
@@ -130,15 +129,6 @@ class ComponentObserver;
      */
     const PCBPool& getPCBPool() const {
       return this->pcbPool;
-    }
-
-    /**
-     *
-     */
-    void addScheduledTask(ProcessId pid){
-      if (scheduledTasks.empty() || scheduledTasks.back() != pid){
-        scheduledTasks.push_back(pid);
-      }
     }
 
     virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList)
@@ -214,7 +204,6 @@ class ComponentObserver;
   protected:
 
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
-    ScheduledTasks scheduledTasks;
     std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
     bool requestExecuteTasks;
     std::map<ProcessId, MultiCastGroup> multiCastGroups;
@@ -271,7 +260,6 @@ class ComponentObserver;
         Delayer(component->getComponentId(),
             component->getName()),
         transactionDelays(),
-        scheduledTasks(),
         requestExecuteTasks(false),
         powerMode(NULL),
         canExecuteTasks(true),

@@ -852,10 +852,6 @@ namespace SystemC_VPC {
 
     assertMapping(pid);
     Delayer* delayer = mappings[pid];
-    AbstractComponent * component = dynamic_cast<AbstractComponent*>(delayer);
-    if (component != NULL){
-      component->addScheduledTask(pid);
-    }
     actor->setDelayer(delayer);
     actor->setPid(pid);
 
