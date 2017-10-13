@@ -228,10 +228,10 @@ namespace SystemC_VPC{
           std::cout << "Checking " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
           while (scheduledTask->canFire()) {
             progress = true;
-            // This will invoke our compute callback and setup actualTask.
             assert(readyMsgTasks.empty());
             std::cout << "Scheduling " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
             assert(!this->actualTask);
+            // This will invoke our compute callback and setup actualTask.
             scheduledTask->schedule();
             while (!actualTask ||
                    !actualTask->hasScheduledTask() ||
