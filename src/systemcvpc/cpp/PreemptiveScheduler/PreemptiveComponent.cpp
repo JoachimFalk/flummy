@@ -494,24 +494,22 @@ namespace SystemC_VPC{
     sc_core::sc_time actualRemainingDelay;
     sc_core::sc_time overhead = sc_core::SC_ZERO_TIME;
     int actualRunningIID;
-    bool newTaskDuringOverhead=false;
-    //wait(sc_core::SC_ZERO_TIME);
 
     scheduler->initialize();
     fireStateChanged(ComponentState::IDLE);
-    std::string logName = getName();
-    logName = logName + ".buffer";
-    std::ofstream logBuffer(logName.c_str());
-    if( !logBuffer.is_open() ){
-      assert(false);
-    }
+//  std::string logName = getName();
+//  logName = logName + ".buffer";
+//  std::ofstream logBuffer(logName.c_str());
+//  if( !logBuffer.is_open() ){
+//    assert(false);
+//  }
     unsigned int last_used_buffer = 0;
-    //logBuffer << last_used_buffer << " " << sc_core::sc_time_stamp() << std::endl;
+//  logBuffer << last_used_buffer << " " << sc_core::sc_time_stamp() << std::endl;
 
     //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
-    newTaskDuringOverhead=(newTasks.size()>0);
+    bool newTaskDuringOverhead= !newTasks.empty();
 
-    while(1){
+    while (true) {
     //  std::cout<<"Component " << this->getName() << "schedule_thread @ " << sc_core::sc_time_stamp() << std::endl;
       //determine the time slice for next scheduling decision and wait for
       bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
@@ -519,7 +517,7 @@ namespace SystemC_VPC{
                                                            getRunningTasks());
       startTime = sc_core::sc_time_stamp();
       if(!newTaskDuringOverhead){
-        if(getRunningTasks().size()<=0){                    // no running task
+        if (getRunningTasks().empty()) {                    // no running task
           if(hasTimeSlice){
             wait( timeslice - overhead,
                   notify_scheduler_thread );
@@ -724,10 +722,9 @@ namespace SystemC_VPC{
           }
           blockMutex--;
         }
-        /* */
       }
       if(readyTasks.size() != last_used_buffer){
-        //logBuffer<< readyTasks.size() << " " << sc_core::sc_time_stamp() << std::endl;
+//      logBuffer<< readyTasks.size() << " " << sc_core::sc_time_stamp() << std::endl;
         last_used_buffer = readyTasks.size();
         if(last_used_buffer > max_used_buffer){
           max_used_buffer = readyTasks.size();
@@ -735,8 +732,8 @@ namespace SystemC_VPC{
         }
       }
     }
-    //fixme: close is never reached cause of while
-    logBuffer.close();
+//  // FIXME: Close is never reached cause of while!
+//  logBuffer.close();
   }
 
 } //namespace SystemC_VPC
