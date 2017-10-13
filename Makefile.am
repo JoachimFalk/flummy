@@ -73,8 +73,11 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/dynload/dll-elf.cpp \
 	src/systemcvpc/cpp/dynload/dll-win32.cpp \
 	\
+	src/systemcvpc/cpp/NonPreemptiveScheduler/DynamicPriorityComponent.cpp \
 	src/systemcvpc/cpp/NonPreemptiveScheduler/FcfsComponent.cpp \
 	src/systemcvpc/cpp/NonPreemptiveScheduler/NonPreemptiveComponent.cpp \
+	src/systemcvpc/cpp/NonPreemptiveScheduler/PriorityComponent.cpp \
+	src/systemcvpc/cpp/NonPreemptiveScheduler/RoundRobinComponent.cpp \
 	\
 	src/systemcvpc/cpp/PreemptiveScheduler/PreemptiveComponent.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/AVBScheduler.cpp \

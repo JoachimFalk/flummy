@@ -54,8 +54,6 @@ Scheduler parseScheduler(std::string name) {
     return Scheduler::StaticPriority_P;
   } else if (name == "PSNOPRE" || name == "PrioritySchedulerNoPreempt") {
     return Scheduler::StaticPriority_NP;
-  } else if (name == "PSNOPRE-noTT") {
-    return Scheduler::StaticPriority_NP_noTT;
   } else if (name == "RM" || name == "RateMonotonic") {
     return Scheduler::RateMonotonic;
   } else if (name == "FCFS" || name == "FirstComeFirstServed") {

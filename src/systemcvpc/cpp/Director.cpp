@@ -697,16 +697,13 @@ namespace SystemC_VPC {
         comp = new FcfsComponent(component);
         break;
       case VC::Scheduler::StaticPriority_NP:
-        comp = new TtPriorityComponent(component);
-        break;
-      case VC::Scheduler::StaticPriority_NP_noTT:
         comp = new PriorityComponent(component);
         break;
       case VC::Scheduler::RoundRobin_NP:
         comp = new RoundRobinComponent(component);
         break;
       case VC::Scheduler::DynamicPriorityUserYield:
-        comp = DynamicPriorityComponent::create(component);
+        comp = new DynamicPriorityComponent(component);
         break;
       default:
         comp = new PreemptiveComponent(component);

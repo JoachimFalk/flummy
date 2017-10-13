@@ -43,7 +43,6 @@ enum class Scheduler {
   FCFS,
   StaticPriority_P,
   StaticPriority_NP,
-  StaticPriority_NP_noTT,
   DynamicPriorityUserYield,
   RoundRobin,
   RoundRobin_NP,
