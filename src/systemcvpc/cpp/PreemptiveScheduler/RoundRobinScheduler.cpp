@@ -51,8 +51,8 @@ namespace SystemC_VPC{
     const  TaskMap &running_tasks )
   {
     if(rr_fifo.size()==0 && running_tasks.size()==0) return 0;
-    time=timeSlice_;
-    return true;
+    time = timeSliceExpires_ - sc_core::sc_time_stamp();
+    return time > sc_core::SC_ZERO_TIME;
   }
   void RoundRobinScheduler::addedNewTask(Task *task){
     rr_fifo.push_back(task->getInstanceId());
@@ -100,6 +100,7 @@ int RoundRobinScheduler::assignFromFront()
         }
       }    
     }else{
+      assert(sc_core::sc_time_stamp() < timeSliceExpires_ || running_tasks.empty());
       // either a new task was added
       // or the running tasks delay is expired
 
