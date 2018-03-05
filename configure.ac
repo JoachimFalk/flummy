@@ -3,7 +3,7 @@
 
 AC_INIT(
  [SystemC-VPC], [1.0],
- [sebastian.graf@informatik.uni-erlangen.de],
+ [joachim.falk@fau.de],
  [SystemC-VPC--devel-])
 AC_PREREQ(2.57)
 ACJF_INIT
@@ -12,15 +12,17 @@ AC_CONFIG_SRCDIR([src/systemcvpc/cpp/Director.cpp])
 AC_CONFIG_AUX_DIR([../BuildSystem])
 AC_CONFIG_MACRO_DIR([../BuildSystem/m4])
 
+AM_INIT_AUTOMAKE([subdir-objects])
+
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
 dnl Checks for programs.
-ACJF_CHECK_CROSSTOOL( CC, gcc)
-ACJF_CHECK_CROSSTOOL( CXX, g++)
-ACJF_CHECK_CROSSTOOL( AR, ar)
-ACJF_CHECK_CROSSTOOL( RANLIB, ranlib)
-ACJF_CHECK_CROSSTOOL( NM, nm)
+ACJF_CHECK_CROSSTOOL(CC, gcc)
+ACJF_CHECK_CROSSTOOL(CXX, g++)
+ACJF_CHECK_CROSSTOOL(AR, ar)
+ACJF_CHECK_CROSSTOOL(RANLIB, ranlib)
+ACJF_CHECK_CROSSTOOL(NM, nm)
 AC_PROG_CXXCPP
 AC_PROG_CPP
 # Checks for programs.
@@ -33,9 +35,12 @@ AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 
 ACJF_ARG_DEBUG([yes], [], [-DNDEBUG])
+if test x"$enable_debug" = x"yes"; then
+  AC_DEFINE([SYSTEMCVPC_ENABLE_DEBUG], [yes], [Defined if debug support is enabled])
+fi
 
-AM_INIT_AUTOMAKE([subdir-objects])
-AC_CONFIG_HEADER([config.h src/systemcvpc/headers/systemcvpc/vpc_config.h])
+AC_DEFINE([SYSTEMOC_SIMULATOR_COUPLING_COMPILATION], [yes],
+ [This is defined to enable the coupling interface between SystemC-VPC and SysteMoC])
 
 DX_HTML_FEATURE(ON)
 DX_CHM_FEATURE(OFF)
@@ -109,11 +114,15 @@ if test x"$enable_vcd_tracing" = x"no"; then
   AC_DEFINE([NO_VCD_TRACES], [yes], [Define to suppress vcd tracing for VPC])
 fi
 
-AC_CONFIG_FILES([
-  Makefile
-  src/systemcvpc/headers/Makefile
-  pkgconfig/libsystemcvpc.pc
-])
+AC_CONFIG_FILES(
+ [Makefile]dnl
+ [src/systemcvpc/headers/Makefile]dnl
+ [pkgconfig/libsystemcvpc.pc]dnl
+)
+AC_CONFIG_HEADER(
+ [src/systemcvpc/cpp/config.h]dnl
+ [src/systemcvpc/headers/systemcvpc/vpc_config.h]dnl
+)
 
 ACJF_DONE
 

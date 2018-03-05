@@ -35,60 +35,13 @@
 #ifndef _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP
 #define _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP
 
-#include <list>
-#include <cstddef>
-#include <systemc>
-
-#include "../smoc/EvalAPI/SchedulingInterface.hpp"
+#include <smoc/SimulatorAPI/TaskInterface.hpp>
 
 namespace SystemC_VPC {
 
-typedef size_t ProcessId;
+typedef smoc::SimulatorAPI::TaskInterface       TaskInterface;
+typedef smoc::SimulatorAPI::TaskHandle          ScheduledTask;
 
-class Delayer;
-
-class ScheduledTask
-  : public sc_core::sc_module
-  , protected smoc::EvalAPI::SchedulingInterface
-{
-  friend class PajeTracer;
-  friend class PreemptiveComponent;
-  friend class ComponentImpl;
-  friend class RoundRobinComponent;
-  friend class FcfsComponent;
-  friend class PriorityComponent;
-  friend class DynamicPriorityComponent;
-  template<class DEBUG_OUT>
-  friend class DynamicPriorityComponentImpl;
-  friend class NonPreemptiveComponent;
-
-  SC_HAS_PROCESS(ScheduledTask);
-public:
-  ScheduledTask(sc_core::sc_module_name name);
-
-  void      setDelayer(Delayer *component);
-  Delayer  *getDelayer();
-
-  void      setPid(ProcessId pid);
-  ProcessId getPid() const;
-
-  // This is here to give access to the friends of this class.
-  virtual sc_core::sc_time const &getNextReleaseTime() const = 0;
-
-  void setActivation(bool active);
-
-  virtual ~ScheduledTask();
-private:
-  Delayer *component;
-  ProcessId pid;
-
-  /// The following member variable are for the fallback
-  /// case if VPC scheduling is not enabled due to missing
-  /// configuration.
-  sc_core::sc_event scheduleRequest;
-  void scheduleRequestMethod();
-};
-
-}
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_SCHEDULEDTASK_HPP */

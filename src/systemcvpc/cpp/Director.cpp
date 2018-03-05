@@ -37,6 +37,8 @@
 
 #include <boost/foreach.hpp>
 
+#include "config.h"
+
 #include <CoSupport/SystemC/systemc_time.hpp>
 #include "PreemptiveScheduler/PreemptiveComponent.hpp"
 #include "NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
@@ -71,22 +73,208 @@
 #include <map>
 #include <vector>
 
-#include "debug_config.hpp"
-// if compiled with DBG_DIRECTOR create stream and include debug macros
-#ifdef DBG_DIRECTOR
-#include <CoSupport/Streams/DebugOStream.hpp>
-  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
-  //  with this name exists when DBG.. is used. here every actor creates its
-  //  own stream.
-  #define DBGOUT_STREAM dbgout
-  #include "debug_on.hpp"
-#else
-  #include "debug_off.hpp"
-#endif
+#include "DebugOStream.hpp"
+
 
 namespace SystemC_VPC {
 
-  //
+  namespace {
+    namespace VC = Config;
+
+    static
+    void injectTaskName(TaskInterface * actor,
+        std::string actorName)
+    {
+      if (VC::hasTask(actorName) && VC::hasTask(*actor)) {
+        if (VC::getCachedTask(actorName) != VC::getCachedTask(*actor)) {
+          // TODO: Check if a merging strategy is required.
+          throw VC::ConfigException(actorName +
+              " has configuration data from XML and from configuration API.");
+        }
+      } else if (!VC::hasTask(actorName) && !VC::hasTask(*actor)) {
+        throw VC::ConfigException(actorName + " has NO configuration data at all.");
+      } else if (VC::hasTask(actorName)){
+        VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
+        VC::setCachedTask(&static_cast<ScheduledTask &>(*actor), task);
+        task->inject(&static_cast<ScheduledTask &>(*actor));
+      } else if (VC::hasTask(*actor)){
+        VC::VpcTask::Ptr task = VC::getCachedTask(*actor);
+        VC::setCachedTask(actorName, task);
+      }
+      assert(VC::hasTask(actorName) && VC::hasTask(*actor));
+      assert(VC::getCachedTask(actorName) == VC::getCachedTask(*actor));
+    }
+
+    static
+    void injectRoute(std::string src, std::string dest, sc_core::sc_port_base * leafPort)
+    {
+      ProcessId pid = Director::getProcessId(src, dest);
+      if (VC::Routing::has(pid) && VC::Routing::has(leafPort)) {
+        if(VC::Routing::get(pid) != VC::Routing::get(leafPort)) {
+            std::cout<<"debug Multicast: " << VC::Routing::get(pid)->getDestination() << " and " << VC::Routing::get(leafPort)->getDestination() << std::endl;
+          /*throw VC::ConfigException("Route " + src + " -> " + dest +
+              " has configuration data from XML and from configuration API.");*/
+        }
+      } else if (!VC::Routing::has(pid) && !VC::Routing::has(leafPort)) {
+        throw VC::ConfigException("Route " + src + " -> " + dest +
+            " has NO configuration data at all.");
+      } else if (VC::Routing::has(pid)) {
+        VC::Route::Ptr route = VC::Routing::get(pid);
+        VC::Routing::set(leafPort, route);
+      } else if (VC::Routing::has(leafPort)) {
+        VC::Route::Ptr route = VC::Routing::get(leafPort);
+        VC::Routing::set(pid, route);
+        route->inject(src, dest);
+      }
+
+      assert(VC::Routing::has(pid) && VC::Routing::has(leafPort));
+      //assert(VC::Routing::get(pid) == VC::Routing::get(leafPort));
+    }
+
+    static
+    void finalizeMapping(
+        TaskInterface       *actor,
+        std::string   const &actorName,
+        FunctionNames const &actionNames,
+        FunctionNames const &guardNames)
+    {
+      VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
+      assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
+      VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
+#ifndef NDEBUG
+      if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
+        for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
+             iter != VC::Mappings::getComponents().end();
+             ++iter) {
+          std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
+        }
+        std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
+        assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
+      }
+#endif //NDEBUG
+      AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
+      Director::getInstance().registerMapping(actorName.c_str(),
+          comp->getName());
+
+      //generate new ProcessControlBlock or get existing one for
+      // initialization
+      const ProcessId pid = Director::getInstance().getProcessId(actorName);
+      if (!comp->hasPCB(pid)) {
+        ProcessControlBlockPtr pcb = comp->createPCB(pid);
+        pcb->configure(actorName.c_str(), true);
+        pcb->setTraceSignal(comp->getOrCreateTraceSignal(actorName));
+      }
+      ProcessControlBlockPtr pcb = comp->getPCB(pid);
+      //Delayer* delayer = mappings[pid];
+      actor->setScheduler(comp);
+      actor->setSchedulerInfo(pcb.get());
+
+      //TODO: VC::Timing -> Timing
+      const VC::Components & components = VC::getComponents();
+      BOOST_FOREACH(VC::Components::value_type component_pair, components)
+      {
+        std::string componentName = component_pair.first;
+        VC::Component::Ptr component = component_pair.second;
+
+        if (VC::Mappings::isMapped(task, component)) {
+          VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
+          pcb->setPriority(task->getPriority());  // GFR BUGFIX
+          pcb->setActorAsPSM(task->isPSM());
+          if (provider->hasDefaultActorTiming(actorName)) {
+
+                  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
+
+                  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+                  {
+                          std::string powermode = (*it).first;
+                          pcb->setTiming(provider->getActionTiming(actorName,powermode));
+                  }
+
+          }
+          BOOST_FOREACH(std::string guard, guardNames)
+          {
+            if (provider->hasGuardTimings(guard)) {
+
+                    SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
+                  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+                  {
+                          std::string powermode = (*it).first;
+                          pcb->setTiming(provider->getGuardTiming(guard,powermode));
+
+                          ConfigCheck::configureTiming(pid, guard);
+                  }
+            }
+          }
+          BOOST_FOREACH(std::string action, actionNames)
+          {
+            if (provider->hasActionTimings(action)) {
+
+                    SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
+                    for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+                    {
+                            std::string powermode = (*it).first;
+                            pcb->setTiming(provider->getActionTiming(action,powermode));
+                            ConfigCheck::configureTiming(pid, action);
+                    }
+            }
+          }
+        }
+      }
+  //TODO:
+  //    p.setPeriod(1);
+  //    p.setBaseDelay();
+  //    p.setBaseLatency();
+    }
+
+    static
+    AbstractComponent * createComponent(Config::Component::Ptr component) {
+      AbstractComponent *comp = NULL;
+      switch (component->getScheduler()) {
+        case VC::Scheduler::FCFS:
+          comp = new FcfsComponent(component);
+          break;
+        case VC::Scheduler::StaticPriority_NP:
+          comp = new PriorityComponent(component);
+          break;
+        case VC::Scheduler::RoundRobin_NP:
+          comp = new RoundRobinComponent(component);
+          break;
+        case VC::Scheduler::DynamicPriorityUserYield:
+          comp = new DynamicPriorityComponent(component);
+          break;
+        default:
+          comp = new PreemptiveComponent(component);
+      }
+
+      switch(component->getTracing()){
+        case Config::Traceable::NONE:
+          comp->addTracer(new Trace::NullTracer(component));
+          break;
+        case Config::Traceable::PAJE:
+          comp->addTracer(new Trace::PajeTracer(component));
+          break;
+        case Config::Traceable::VCD:
+          comp->addTracer(new Trace::VcdTracer(component));
+          break;
+        case Config::Traceable::DB:
+          comp->addTracer(new Trace::DataBaseTracer(component));
+          break;
+        default:
+          assert(!"Oops, I don't know this tracer!");
+      }
+
+      VC::Mappings::getComponents()[component] = comp;
+      Director::getInstance().registerComponent(comp);
+      std::vector<AttributePtr> atts = component->getAttributes();
+      for(std::vector<AttributePtr>::const_iterator iter = atts.begin();
+          iter != atts.end(); ++iter){
+        comp->setAttribute(*iter);
+      }
+      return comp;
+    }
+
+  } // namespace anonymous
+
   std::unique_ptr<Director> Director::singleton;
 
   sc_core::sc_time Director::end = sc_core::SC_ZERO_TIME;
@@ -127,9 +315,6 @@ namespace SystemC_VPC {
                 << e.what() << std::endl;
       exit(-1);
     }
-
-
-
   }
 
   /**
@@ -548,195 +733,7 @@ namespace SystemC_VPC {
   }
 
   /// begin section: VpcApi.hpp related stuff
-  namespace VC = Config;
 
-  //
-  void injectTaskName(ScheduledTask * actor,
-      std::string actorName)
-  {
-    if (VC::hasTask(actorName) && VC::hasTask(*actor)) {
-      if (VC::getCachedTask(actorName) != VC::getCachedTask(*actor)) {
-        // TODO: Check if a merging strategy is required.
-        throw VC::ConfigException(actorName +
-            " has configuration data from XML and from configuration API.");
-      }
-    } else if (!VC::hasTask(actorName) && !VC::hasTask(*actor)) {
-      throw VC::ConfigException(actorName + " has NO configuration data at all.");
-    } else if (VC::hasTask(actorName)){
-      VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
-      VC::setCachedTask(actor, task);
-      task->inject(actor);
-    } else if (VC::hasTask(*actor)){
-      VC::VpcTask::Ptr task = VC::getCachedTask(*actor);
-      VC::setCachedTask(actorName, task);
-    }
-    assert(VC::hasTask(actorName) && VC::hasTask(*actor));
-    assert(VC::getCachedTask(actorName) == VC::getCachedTask(*actor));
-  }
-
-  //
-  void injectRoute(std::string src, std::string dest, sc_core::sc_port_base * leafPort)
-  {
-    ProcessId pid = Director::getProcessId(src, dest);
-    if (VC::Routing::has(pid) && VC::Routing::has(leafPort)) {
-      if(VC::Routing::get(pid) != VC::Routing::get(leafPort)) {
-          std::cout<<"debug Multicast: " << VC::Routing::get(pid)->getDestination() << " and " << VC::Routing::get(leafPort)->getDestination() << std::endl;
-        /*throw VC::ConfigException("Route " + src + " -> " + dest +
-            " has configuration data from XML and from configuration API.");*/
-      }
-    } else if (!VC::Routing::has(pid) && !VC::Routing::has(leafPort)) {
-      throw VC::ConfigException("Route " + src + " -> " + dest +
-          " has NO configuration data at all.");
-    } else if (VC::Routing::has(pid)) {
-      VC::Route::Ptr route = VC::Routing::get(pid);
-      VC::Routing::set(leafPort, route);
-    } else if (VC::Routing::has(leafPort)) {
-      VC::Route::Ptr route = VC::Routing::get(leafPort);
-      VC::Routing::set(pid, route);
-      route->inject(src, dest);
-    }
-
-    assert(VC::Routing::has(pid) && VC::Routing::has(leafPort));
-    //assert(VC::Routing::get(pid) == VC::Routing::get(leafPort));
-  }
-
-  void finalizeMapping(std::string actorName,
-      const FunctionNames &actionNames,
-      const FunctionNames &guardNames)
-  {
-    VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
-    assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
-    VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
-#ifndef NDEBUG
-    if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
-      for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
-           iter != VC::Mappings::getComponents().end();
-           ++iter) {
-        std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
-      }
-      std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
-      assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
-    }
-#endif //NDEBUG
-    AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
-    Director::getInstance().registerMapping(actorName.c_str(),
-        comp->getName());
-
-    //generate new ProcessControlBlock or get existing one for
-    // initialization
-    const ProcessId pid = Director::getInstance().getProcessId(actorName);
-    if (!comp->hasPCB(pid)) {
-      ProcessControlBlockPtr pcb = comp->createPCB(pid);
-      pcb->configure(actorName.c_str(), true);
-      pcb->setTraceSignal(comp->getOrCreateTraceSignal(actorName));
-    }
-    ProcessControlBlockPtr pcb = comp->getPCB(pid);
-
-    //TODO: VC::Timing -> Timing
-    const VC::Components & components = VC::getComponents();
-    BOOST_FOREACH(VC::Components::value_type component_pair, components)
-    {
-      std::string componentName = component_pair.first;
-      VC::Component::Ptr component = component_pair.second;
-
-      if (VC::Mappings::isMapped(task, component)) {
-        VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
-        pcb->setPriority(task->getPriority());  // GFR BUGFIX
-        pcb->setActorAsPSM(task->isPSM());
-        if (provider->hasDefaultActorTiming(actorName)) {
-
-        	SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
-
-        	for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-        	{
-        		std::string powermode = (*it).first;
-        		pcb->setTiming(provider->getActionTiming(actorName,powermode));
-        	}
-
-        }
-        BOOST_FOREACH(std::string guard, guardNames)
-        {
-          if (provider->hasGuardTimings(guard)) {
-
-        	  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
-        	for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-        	{
-        		std::string powermode = (*it).first;
-        		pcb->setTiming(provider->getGuardTiming(guard,powermode));
-
-        		ConfigCheck::configureTiming(pid, guard);
-        	}
-          }
-        }
-        BOOST_FOREACH(std::string action, actionNames)
-        {
-          if (provider->hasActionTimings(action)) {
-
-        	  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
-        	  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-        	  {
-        		  std::string powermode = (*it).first;
-        		  pcb->setTiming(provider->getActionTiming(action,powermode));
-        		  ConfigCheck::configureTiming(pid, action);
-        	  }
-          }
-        }
-      }
-    }
-//TODO:
-//    p.setPeriod(1);
-//    p.setBaseDelay();
-//    p.setBaseLatency();
-
-  }
-
-  AbstractComponent * createComponent(Config::Component::Ptr component) {
-    AbstractComponent *comp = NULL;
-    switch (component->getScheduler()) {
-      case VC::Scheduler::FCFS:
-        comp = new FcfsComponent(component);
-        break;
-      case VC::Scheduler::StaticPriority_NP:
-        comp = new PriorityComponent(component);
-        break;
-      case VC::Scheduler::RoundRobin_NP:
-        comp = new RoundRobinComponent(component);
-        break;
-      case VC::Scheduler::DynamicPriorityUserYield:
-        comp = new DynamicPriorityComponent(component);
-        break;
-      default:
-        comp = new PreemptiveComponent(component);
-    }
-
-    switch(component->getTracing()){
-      case Config::Traceable::NONE:
-        comp->addTracer(new Trace::NullTracer(component));
-        break;
-      case Config::Traceable::PAJE:
-        comp->addTracer(new Trace::PajeTracer(component));
-        break;
-      case Config::Traceable::VCD:
-        comp->addTracer(new Trace::VcdTracer(component));
-        break;
-      case Config::Traceable::DB:
-        comp->addTracer(new Trace::DataBaseTracer(component));
-        break;
-      default:
-        assert(!"Oops, I don't know this tracer!");
-    }
-
-    VC::Mappings::getComponents()[component] = comp;
-    Director::getInstance().registerComponent(comp);
-    std::vector<AttributePtr> atts = component->getAttributes();
-    for(std::vector<AttributePtr>::const_iterator iter = atts.begin();
-        iter != atts.end(); ++iter){
-      comp->setAttribute(*iter);
-    }
-    return comp;
-  }
-
-  //
   void Director::beforeVpcFinalize()
   {
     // create AbstractComponents and configure mappings given from config API
@@ -752,7 +749,7 @@ namespace SystemC_VPC {
       AbstractComponent *comp = createComponent(component);
       assert(comp != NULL);
 
-      BOOST_FOREACH(ScheduledTask* task, tasks) {
+      BOOST_FOREACH(TaskInterface* task, tasks) {
         VC::Mappings::getConfiguredMappings()[VC::getCachedTask(*task)] = component;
       }
     }
@@ -773,9 +770,6 @@ namespace SystemC_VPC {
 
       }
     }
-
-
-
   }
   /// end section: VpcApi.hpp related stuff
 
@@ -793,7 +787,7 @@ namespace SystemC_VPC {
     return !FALLBACKMODE;
   }
 
-  FastLink Director::registerActor(ScheduledTask * actor,
+  FastLink Director::registerActor(TaskInterface * actor,
       std::string actorName,
       const FunctionNames &actionNames,
       const FunctionNames &guardNames,
@@ -806,7 +800,7 @@ namespace SystemC_VPC {
 
     try {
       injectTaskName(actor, actorName);
-      finalizeMapping(actorName, actionNames, guardNames);
+      finalizeMapping(actor, actorName, actionNames, guardNames);
     }catch(std::exception & e){
       std::cerr << "Actor registration failed for \"" << actorName <<
           "\". Got exception:\n" << e.what() << std::endl;
@@ -848,10 +842,6 @@ namespace SystemC_VPC {
     task.setScheduledTask(actor);
 
     assertMapping(pid);
-    Delayer* delayer = mappings[pid];
-    actor->setDelayer(delayer);
-    actor->setPid(pid);
-
     return FastLink(pid, actionIds, guardIds, complexity);
   }
 
@@ -1005,5 +995,12 @@ namespace SystemC_VPC {
         " to: " + ConfigCheck::getRouteName(id).second;
     }
   }
+
+  /// This stuff is here to pull SystemCVPCSimulator.cpp into the link.
+  class SystemCVPCSimulator;
+  extern SystemCVPCSimulator systemCVPCSimulator;
+  static __attribute__ ((unused))
+  SystemCVPCSimulator *pSimulator = &systemCVPCSimulator;
+
 }
 

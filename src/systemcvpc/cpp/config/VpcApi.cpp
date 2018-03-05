@@ -32,6 +32,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#include "config.h"
+
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/ConfigException.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
@@ -67,7 +69,7 @@ std::map<std::string, VpcTask::Ptr>& getVpcTasksByName()
   return vpcTasksByName;
 }
 
-static std::map<const ScheduledTask *, VpcTask::Ptr> vpcTasks;
+static std::map<const TaskInterface *, VpcTask::Ptr> vpcTasks;
 
 void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier)
 {

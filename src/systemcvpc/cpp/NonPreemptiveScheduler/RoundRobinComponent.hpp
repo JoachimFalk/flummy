@@ -59,7 +59,7 @@ protected:
 
   void end_of_elaboration();
 
-  void notifyActivation(ScheduledTask * scheduledTask, bool active);
+  void notifyActivation(TaskInterface * scheduledTask, bool active);
 
   void compute(Task *actualTask);
 
@@ -105,7 +105,7 @@ private:
   /// This list represent all the SysteMoC actors that
   /// are mapped to this component. The list will be
   /// filled by the the end_of_elaboration method.
-  std::vector<ScheduledTask *>  taskList;
+  std::vector<TaskInterface *>  taskList;
   /// This is the actual running task that will
   /// be assigned by the compute method if
   /// on of the SysteMoC actors of the component

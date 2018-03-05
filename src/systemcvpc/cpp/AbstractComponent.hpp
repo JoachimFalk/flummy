@@ -51,7 +51,6 @@
 #include "Delayer.hpp"
 #include "ProcessControlBlock.hpp"
 #include "FunctionTimingPool.hpp"
-#include "PCBPool.hpp"
 #include "Task.hpp"
 #include "PowerSumming.hpp"
 #include "PowerMode.hpp"

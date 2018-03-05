@@ -39,17 +39,12 @@
 #include "Route.hpp"
 #include "Timing.hpp"
 #include "VpcTask.hpp"
+#include "../ScheduledTask.hpp"
 
 #include <string>
 #include <map>
 
-namespace SystemC_VPC
-{
-
-class ScheduledTask;
-
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 typedef std::map<std::string, Component::Ptr> Components;
 typedef std::map<std::string, boost::shared_ptr<DistributionTimingModifier> > Modifiers;
@@ -113,6 +108,6 @@ void setCanExec(ScheduledTask & actor, bool canExec);
  */
 void setActorAsPSM(const char*  name, bool psm);
 
-} // namespace Config
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config
+
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIG_VPCAPI_HPP */

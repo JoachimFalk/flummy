@@ -44,10 +44,10 @@ namespace TT
 
 /* struct used to store an event with a certain release-time */
 struct TimeNodePair{
-  TimeNodePair(sc_core::sc_time time,  ScheduledTask *node)
+  TimeNodePair(sc_core::sc_time time,  TaskInterface *node)
     : time(time), node(node) {}
   sc_core::sc_time time;
-  ScheduledTask *node;
+  TaskInterface *node;
 };
 
 /* struct used for comparison

@@ -48,7 +48,7 @@
 
 namespace SystemC_VPC {
 
-typedef std::list<ScheduledTask *> PriorityList;
+typedef std::list<TaskInterface *> PriorityList;
 
 class DynamicPriorityComponent: public NonPreemptiveComponent {
 public:
@@ -59,18 +59,18 @@ public:
 
   Task *scheduleTask();
 
-  void notifyActivation(ScheduledTask *scheduledTask, bool active);
+  void notifyActivation(TaskInterface *scheduledTask, bool active);
 
   bool releaseActor();
 
   bool hasReadyTask()
     { return releasedTask_ != NULL; }
 
-  virtual void setDynamicPriority(PriorityList priorityList)
-    { priorities_ = priorityList; }
+  virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList)
+    { priorities_ = reinterpret_cast<PriorityList &>(priorityList); }
 
   virtual std::list<ScheduledTask *> getDynamicPriority()
-    { return priorities_; }
+    { return reinterpret_cast<std::list<ScheduledTask *> &>(priorities_); }
 
   virtual void scheduleAfterTransition()
     { mustYield_ = true; }
@@ -81,12 +81,12 @@ protected:
   PriorityList   priorities_;
   bool           mustYield_;
   Task          *lastTask_;
-  ScheduledTask *releasedTask_;
+  TaskInterface *releasedTask_;
   std::ostream  *debugOut;
 private:
   void buildInitialPriorityList(Config::Component::Ptr component);
 
-  void debugDump(const ScheduledTask * toBeExecuted) const;
+  void debugDump(const TaskInterface * toBeExecuted) const;
 };
 
 } //namespace SystemC_VPC

@@ -9,4 +9,7 @@
 /* Define if you want to suppress power tracing */
 #undef NO_POWER_SUM
 
+/* Defined if debug support is enabled */
+#undef SYSTEMCVPC_ENABLE_DEBUG
+
 #endif /* _INCLUDED_SYSTEMCVPC_VPC_CONFIG_H_IN */

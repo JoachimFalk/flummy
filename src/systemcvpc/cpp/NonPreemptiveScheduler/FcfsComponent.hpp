@@ -50,14 +50,14 @@ namespace SystemC_VPC{
 
     Task *scheduleTask();
 
-    virtual void notifyActivation(ScheduledTask *scheduledTask, bool active);
+    virtual void notifyActivation(TaskInterface *scheduledTask, bool active);
 
     virtual bool releaseActor();
 
     bool hasReadyTask();
   protected:
     std::deque<Task*>           readyTasks;
-    std::list<ScheduledTask *>  fcfsQueue;
+    std::list<TaskInterface *>  fcfsQueue;
     TT::TimedQueue              ttReleaseQueue;
 
   };

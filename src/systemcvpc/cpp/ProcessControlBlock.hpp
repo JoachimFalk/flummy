@@ -47,15 +47,17 @@
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/FastLink.hpp>
-#include "PowerMode.hpp"
 #include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+
+#include "PowerMode.hpp"
 #include "FunctionTimingPool.hpp"
 
 namespace SystemC_VPC {
 
-namespace Trace{
-  class Tracing;
-}
+  namespace Trace{
+    class Tracing;
+  }
 
   class AbstractComponent;
 
@@ -156,6 +158,14 @@ namespace Trace{
       void init();
  
   };
-typedef boost::shared_ptr<ProcessControlBlock> ProcessControlBlockPtr;
-}
+
+  typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
+  typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
+
+  static inline
+  ProcessControlBlock *getPCBofTask(TaskInterface const *task)
+    { return reinterpret_cast<ProcessControlBlock *>(task->getSchedulerInfo()); }
+
+} // namespace SystemC_VPC
+
 #endif /* _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP */

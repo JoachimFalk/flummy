@@ -38,25 +38,14 @@
 #include <stdexcept>
 #include <string>
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC { namespace Config {
 
-class ScheduledTask;
+  class ConfigException: public std::runtime_error {
+    public:
+      ConfigException(std::string const &msg)
+        : std::runtime_error("[VPC] Got Error:\n" + msg) {}
+  };
 
-namespace Config
-{
-class ConfigException: public std::runtime_error
-{
-public:
-  ConfigException(std::string msg) :
-    std::runtime_error("[VPC] Got Error:\n" + msg)
-  {
-
-  }
-};
-
-}
-
-}
+} } // namespace SystemC_VPC::Config
 
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIG_CONFIGEXCEPTION_HPP */

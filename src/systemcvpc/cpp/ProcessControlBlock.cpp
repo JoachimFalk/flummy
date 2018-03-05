@@ -45,19 +45,7 @@ typedef boost::minstd_rand base_generator_type;
 #include <CoSupport/Tracing/TracingFactory.hpp>
 #include <ctime> 
 
-#include "debug_config.hpp"
-// if compiled with DBG_COMPONENT create stream and include debug macros
-#ifdef DBG_PCB
-#include <CoSupport/Streams/DebugOStream.hpp>
-#include <CoSupport/Streams/FilterOStream.hpp>
-  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
-  //  with this name exists when DBG.. is used. here every actor creates its
-  //  own stream.
-  #define DBGOUT_STREAM dbgout
-  #include "debug_on.hpp"
-#else
-  #include "debug_off.hpp"
-#endif
+#include "DebugOStream.hpp"
 
 namespace SystemC_VPC{
 

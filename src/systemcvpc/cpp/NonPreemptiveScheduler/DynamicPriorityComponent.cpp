@@ -2,6 +2,20 @@
  * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
+ *   This library is free software; you can redistribute it and/or modify it under
+ *   the terms of the GNU Lesser General Public License as published by the Free
+ *   Software Foundation; either version 2 of the License, or (at your option) any
+ *   later version.
+ * 
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ *   details.
+ * 
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation, Inc.,
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+ * 
  * --- This software and any associated documentation is provided "as is"
  * 
  * IN NO EVENT SHALL HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG
@@ -18,11 +32,12 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#include "config.h"
 #include "DynamicPriorityComponent.hpp"
 
 namespace SystemC_VPC {
 
-void DynamicPriorityComponent::notifyActivation(ScheduledTask * scheduledTask, bool active)
+void DynamicPriorityComponent::notifyActivation(TaskInterface * scheduledTask, bool active)
 {
   if (active && (this->runningTask == NULL)) {
     this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
@@ -50,22 +65,22 @@ DynamicPriorityComponent::~DynamicPriorityComponent() {
 
 void DynamicPriorityComponent::buildInitialPriorityList(
     Config::Component::Ptr component) {
-  std::priority_queue<PriorityFcfsElement<ScheduledTask*> > pQueue;
+  std::priority_queue<PriorityFcfsElement<TaskInterface*> > pQueue;
   size_t fcfsOrder = 0;
 
   // put every task in a priority queue
   Config::Component::MappedTasks mp = component->getMappedTasks();
   for (Config::Component::MappedTasks::iterator iter = mp.begin(); iter
       != mp.end(); ++iter) {
-    ScheduledTask *actor = *iter;
+    TaskInterface *actor = *iter;
     size_t priority = Config::getCachedTask(*actor)->getPriority();
     pQueue.push(
-        PriorityFcfsElement<ScheduledTask*> (priority, fcfsOrder++, actor));
+        PriorityFcfsElement<TaskInterface*> (priority, fcfsOrder++, actor));
   }
 
   // pop tasks (in order of priority) from queue and build priority list
   while (!pQueue.empty()) {
-    ScheduledTask *actor = pQueue.top().payload;
+    TaskInterface *actor = pQueue.top().payload;
     priorities_.push_back(actor);
     pQueue.pop();
   }
@@ -109,7 +124,7 @@ bool DynamicPriorityComponent::releaseActor()
   if (this->mustYield_ || (this->lastTask_ == NULL)) {
     for (PriorityList::const_iterator iter = this->priorities_.begin(); iter
         != this->priorities_.end(); ++iter) {
-      ScheduledTask * scheduledTask = *iter;
+      TaskInterface * scheduledTask = *iter;
       bool canExec = scheduledTask->canFire();
 //        bool canExec = Director::canExecute(scheduledTask);
       if (canExec) {
@@ -136,11 +151,7 @@ bool DynamicPriorityComponent::releaseActor()
   }
 }
 
-static
-std::string getActorName(ProcessId pid)
-  { return Director::getInstance().getTaskName(pid); }
-
-void DynamicPriorityComponent::debugDump(const ScheduledTask * toBeExecuted) const
+void DynamicPriorityComponent::debugDump(const TaskInterface * toBeExecuted) const
 {
   if (debugOut) {
     std::stringstream canExec;
@@ -149,16 +160,14 @@ void DynamicPriorityComponent::debugDump(const ScheduledTask * toBeExecuted) con
         << this->getName() << "] " << "priority list: (";
     for (PriorityList::const_iterator iter = this->priorities_.begin(); iter
         != this->priorities_.end(); ++iter) {
-      ProcessId pid = (*iter)->getPid();
-      *debugOut << getActorName(pid) << " ";
+      *debugOut << (*iter)->name() << " ";
 
       if((*iter)->canFire()){
-  //      if (Director::canExecute(pid)) {
-        canExec << getActorName(pid) << " ";
+        canExec << (*iter)->name() << " ";
       }
     }
-    *debugOut << ") executable: (" << canExec.str() << ") execute: " << getActorName(
-        toBeExecuted->getPid()) << std::endl;
+    *debugOut << ") executable: (" << canExec.str() << ") execute: " <<
+        toBeExecuted->name() << std::endl;
   }
 }
 
