@@ -205,7 +205,7 @@ namespace SystemC_VPC{
 
     ComponentId getComponentId(std::string component);
 
-    FastLink registerActor(ScheduledTask * actor,
+    FastLink registerActor(TaskInterface * actor,
                              std::string actorName,
                              const FunctionNames& actionNames,
                              const FunctionNames& guardNames,

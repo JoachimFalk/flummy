@@ -54,20 +54,6 @@
 #include "ConfigCheck.hpp"
 #include "config/Mappings.hpp"
 
-#include "debug_config.hpp"
-// if compiled with DBG_COMPONENT create stream and include debug macros
-#ifdef DBG_VPCBUILDER
-# include <CoSupport/Streams/DebugOStream.hpp>
-# include <CoSupport/Streams/FilterOStream.hpp>
-  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
-  //  with this name exists when DBG.. is used. here every actor creates its
-  //  own stream.
-# define DBGOUT_STREAM dbgout
-# include "debug_on.hpp"
-#else
-# include "debug_off.hpp"
-#endif
-
 #include <CoSupport/DataTypes/MaybeValue.hpp>
 
 #include <systemcvpc/TimingModifier.hpp>
@@ -95,6 +81,8 @@
 #define MAX(x,y) ((x > y) ? x : y)
 
 #include "vpc-dtd.c" // get DTD
+
+#include "DebugOStream.hpp"
 
 namespace SystemC_VPC {
 

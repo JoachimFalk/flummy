@@ -1,5 +1,6 @@
+// vim: set sw=2 sts=2 ts=8 et syn=cpp:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -32,5 +33,23 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#define ENABLE_DEBUG
-#include "debug.hpp"
+#include "DebugOStream.hpp"
+
+#include <iostream>
+
+namespace SystemC_VPC {
+
+// Global CTOR initialization order is undefined between translation units.
+// Hence, using a global variable CoSupport::Streams::DebugOStream dbgout does
+// not insure that this variable will already have been initialized during the
+// CTOR call used for other global variables. Hence, we use the below given
+// helper function to guarantee this property.
+DebugOStream &getDbgOut() {
+  static DebugOStream *dbgout = NULL;
+
+  if (!dbgout)
+    dbgout = new DebugOStream(std::cerr);
+  return *dbgout;
+}
+
+} // namespace SystemC_VPC

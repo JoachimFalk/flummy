@@ -43,6 +43,7 @@
 #include "../datatypes.hpp"
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include "../TimingModifier.hpp"
+#include "../ScheduledTask.hpp"
 
 #include <boost/shared_ptr.hpp>
 
@@ -50,10 +51,8 @@
 #include <set>
 #include <string>
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC {
 
-class ScheduledTask;
 class AbstractComponent;
 class Task;
 
@@ -134,6 +133,8 @@ private:
   std::vector<AttributePtr> attributes_;
   ComponentInterface::Ptr componentInterface_;
 };
+
 } // namespace Config
 } // namespace SystemC_VPC
+
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP */

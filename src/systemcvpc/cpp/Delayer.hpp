@@ -35,21 +35,25 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DELAYER_HPP
 #define _INCLUDED_SYSTEMCVPC_DELAYER_HPP
 
-#include <vector>
+#include <smoc/SimulatorAPI/SchedulerInterface.hpp>
+#include <smoc/SimulatorAPI/TaskInterface.hpp>
+
+#include <systemcvpc/ScheduledTask.hpp>
 
 #include "ComponentInfo.hpp"
 #include "ComponentObserver.hpp"
 #include "Task.hpp"
 
-namespace SystemC_VPC{
+#include <vector>
+
+namespace SystemC_VPC {
 
   class Director;
-  class ScheduledTask;
 
   /**
    * \brief Interface for classes implementing delay simulation.
    */
-  class Delayer {
+  class Delayer: public smoc::SimulatorAPI::SchedulerInterface {
   public:
     /**
      * \brief Simulate the delay caused by the transition execution on this Delayer.
@@ -78,7 +82,7 @@ namespace SystemC_VPC{
 
     virtual void initialize(const Director* d) {};
 
-    virtual void notifyActivation(ScheduledTask * scheduledTask,
+    virtual void notifyActivation(smoc::SimulatorAPI::TaskInterface *scheduledTask,
         bool active) {}
 
     virtual ~Delayer() {}

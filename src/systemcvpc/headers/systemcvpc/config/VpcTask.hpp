@@ -36,19 +36,13 @@
 #define _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP
 
 #include "Component.hpp"
+#include "../ScheduledTask.hpp"
 
 #include <boost/shared_ptr.hpp>
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC { namespace Config {
 
-class ScheduledTask;
-
-namespace Config
-{
-
-class VpcTask
-{
+class VpcTask {
 public:
   typedef boost::shared_ptr<VpcTask> Ptr;
 
@@ -80,6 +74,7 @@ private:
   size_t priority_;
   bool psm_;
 };
-} // namespace Config
-} // namespace SystemC_VPC
+
+} } // namespace SystemC_VPC::Config
+
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP */

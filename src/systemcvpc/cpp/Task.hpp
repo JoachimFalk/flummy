@@ -152,9 +152,9 @@ namespace SystemC_VPC {
     void setTimingScale( double scale )         {this->timingScale = scale;}
     double getTimingScale()                     {return this->timingScale;}
 
-    void setScheduledTask(ScheduledTask * st)
+    void setScheduledTask(TaskInterface * st)
       {this->scheduledTask = st;}
-    ScheduledTask * getScheduledTask()
+    TaskInterface * getScheduledTask()
       {return this->scheduledTask;}
     bool hasScheduledTask() const
       {return this->scheduledTask != NULL;}
@@ -253,7 +253,7 @@ namespace SystemC_VPC {
     std::string name;
     double timingScale;
     CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
-    ScheduledTask * scheduledTask;
+    TaskInterface * scheduledTask;
     std::string preState;
     std::string destState;
   };

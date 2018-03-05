@@ -1,5 +1,6 @@
+// vim: set sw=2 sts=2 ts=8 et syn=cpp:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -32,20 +33,56 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "debug_config.hpp"
-#include <iostream>
+#ifndef _INCLUDED_SYSTEMCVPC_DEBUGOSTREAM_HPP
+#define _INCLUDED_SYSTEMCVPC_DEBUGOSTREAM_HPP
 
-#ifdef DBG_ENABLE
-static CoSupport::Streams::DebugOStream *dbgout = NULL;
+#include <systemcvpc/vpc_config.h>
+
+#include <CoSupport/Streams/NullStreambuf.hpp>
+#include <CoSupport/Streams/DebugStreambuf.hpp>
+#include <CoSupport/Streams/IndentStreambuf.hpp>
+#include <CoSupport/Streams/HeaderFooterStreambuf.hpp>
+
+namespace SystemC_VPC {
+
+using CoSupport::Streams::Debug;
+using CoSupport::Streams::ScopedDebug;
+using CoSupport::Streams::Indent;
+using CoSupport::Streams::ScopedIndent;
+
+typedef
+#ifndef SYSTEMCVPC_ENABLE_DEBUG
+  CoSupport::Streams::NullStreambuf::Stream<
+#endif //SYSTEMCVPC_ENABLE_DEBUG
+    CoSupport::Streams::DebugStreambuf::Stream<
+      CoSupport::Streams::IndentStreambuf::Stream<
+        CoSupport::Streams::HeaderFooterStreambuf::Stream<
+    > > >
+#ifndef SYSTEMCVPC_ENABLE_DEBUG
+  >
+#endif //SYSTEMCVPC_ENABLE_DEBUG
+  DebugOStream;
 
 // Global CTOR initialization order is undefined between translation units.
 // Hence, using a global variable CoSupport::Streams::DebugOStream dbgout does
 // not insure that this variable will already have been initialized during the
 // CTOR call used for other global variables. Hence, we use the below given
 // helper function to guarantee this property.
-std::ostream &getDbgOut() {
-  if (!dbgout)
-    dbgout = new CoSupport::Streams::DebugOStream(std::cerr);
-  return *dbgout;
-}
-#endif //DBG_ENABLE
+extern DebugOStream &getDbgOut();
+
+} // namespace SystemC_VPC
+
+#define DBG_STREAM getDbgOut()
+#ifndef SYSTEMCVPC_ENABLE_DEBUG
+# define DBG(e) do {} while(0)
+# define DBG_OUT(s) do {} while(0)
+# define DBG_SC_OUT(s) do {} while(0)
+# define DBG_DOBJ(s) do {} while(0)
+#else //defined(SYSTEMCVPC_ENABLE_DEBUG)
+# define DBG(e) e
+# define DBG_OUT(s) DBG_STREAM <<  s
+# define DBG_SC_OUT(s) DBG_STREAM << "[" << sc_core::sc_time_stamp() << "]: " << s
+# define DBG_DOBJ(o) DBG_STREAM << " Object " #o ": " << o << std::endl
+#endif //defined(SYSTEMCVPC_ENABLE_DEBUG)
+
+#endif // _INCLUDED_SYSTEMCVPC_DEBUGOSTREAM_HPP

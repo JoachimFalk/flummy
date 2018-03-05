@@ -1,8 +1,35 @@
 /*
- * RoundRobinComponent.hpp
- *
- *  Created on: 17.05.2017
- *      Author: muellersi
+ * Copyright (c) 2004-2017 Hardware-Software-CoDesign, University of
+ * Erlangen-Nuremberg. All rights reserved.
+ * 
+ *   This library is free software; you can redistribute it and/or modify it under
+ *   the terms of the GNU Lesser General Public License as published by the Free
+ *   Software Foundation; either version 2 of the License, or (at your option) any
+ *   later version.
+ * 
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ *   details.
+ * 
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation, Inc.,
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+ * 
+ * --- This software and any associated documentation is provided "as is"
+ * 
+ * IN NO EVENT SHALL HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG
+ * BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
+ * CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
+ * DOCUMENTATION, EVEN IF HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN
+ * NUREMBERG HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG, SPECIFICALLY
+ * DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED
+ * HEREUNDER IS ON AN "AS IS" BASIS, AND HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF
+ * ERLANGEN NUREMBERG HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
 #include "RoundRobinComponent.hpp"
@@ -27,10 +54,10 @@ void RoundRobinComponent::setActivationCallback(bool flag) {
     return;
   useActivationCallback = flag;
   if (!flag) {
-    for (ScheduledTask *scheduledTask: taskList)
+    for (TaskInterface *scheduledTask: taskList)
       scheduledTask->setUseActivationCallback(flag);
   } else {
-    for (std::vector<ScheduledTask *>::iterator iter = taskList.begin();
+    for (std::vector<TaskInterface *>::iterator iter = taskList.begin();
          iter != taskList.end();
          ++iter) {
       // This will trigger notifyActivation with
@@ -59,14 +86,14 @@ void RoundRobinComponent::end_of_elaboration() {
     Task &task = Director::getInstance().taskPool->getPrototype(it->first);
     task.setPCB(it->second);
     if (task.hasScheduledTask()) {
-      ScheduledTask *scheduledTask = task.getScheduledTask();
+      TaskInterface *scheduledTask = task.getScheduledTask();
       scheduledTask->setUseActivationCallback(false);
       taskList.push_back(scheduledTask);
     }
   }
 }
 
-void RoundRobinComponent::notifyActivation(ScheduledTask * scheduledTask, bool active) {
+void RoundRobinComponent::notifyActivation(TaskInterface * scheduledTask, bool active) {
   if (active) {
     setActivationCallback(false);
     readyEvent.notify();
@@ -185,7 +212,7 @@ bool RoundRobinComponent::scheduleMessageTasks() {
 void RoundRobinComponent::scheduleThread() {
   while (true) {
     bool progress = scheduleMessageTasks();
-    for (ScheduledTask *scheduledTask: taskList) {
+    for (TaskInterface *scheduledTask: taskList) {
       std::cout << "Checking " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
       while (scheduledTask->canFire()) {
         progress = true;

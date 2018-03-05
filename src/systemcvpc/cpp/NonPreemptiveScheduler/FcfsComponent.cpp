@@ -1,15 +1,29 @@
 /*
  * Copyright (c) 2004-2017 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
- *
+ * 
+ *   This library is free software; you can redistribute it and/or modify it under
+ *   the terms of the GNU Lesser General Public License as published by the Free
+ *   Software Foundation; either version 2 of the License, or (at your option) any
+ *   later version.
+ * 
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ *   details.
+ * 
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation, Inc.,
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+ * 
  * --- This software and any associated documentation is provided "as is"
- *
+ * 
  * IN NO EVENT SHALL HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG
  * BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
  * CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
  * DOCUMENTATION, EVEN IF HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN
  * NUREMBERG HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * 
  * HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG, SPECIFICALLY
  * DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED
@@ -19,6 +33,8 @@
  */
 
 #include "FcfsComponent.hpp"
+
+#include "../DebugOStream.hpp"
 
 namespace SystemC_VPC{
 
@@ -40,7 +56,7 @@ namespace SystemC_VPC{
 /*
   bool FcfsComponent::releaseActor() {
     while (!fcfsQueue.empty()) {
-      ScheduledTask * scheduledTask = fcfsQueue.front();
+      TaskInterface * scheduledTask = fcfsQueue.front();
       fcfsQueue.pop_front();
 
       bool canExec = scheduledTask->canFire();
@@ -68,12 +84,12 @@ namespace SystemC_VPC{
       ttReleaseQueue.pop();
     }
     while (!fcfsQueue.empty()) {
-      ScheduledTask * scheduledTask = fcfsQueue.front();
+      TaskInterface * scheduledTask = fcfsQueue.front();
       fcfsQueue.pop_front();
 
       bool canExec = scheduledTask->canFire();
 //    bool canExec = Director::canExecute(scheduledTask);
-      DBG_OUT("FCFS test task: " << scheduledTask
+      DBG_SC_OUT("FCFS test task: " << scheduledTask->name()
           << " -> " << canExec << std::endl);
       if (canExec) {
         scheduledTask->scheduleLegacyWithCommState();
@@ -94,8 +110,7 @@ namespace SystemC_VPC{
     Task* task = readyTasks.front();
     readyTasks.pop_front();
     this->startTime = sc_core::sc_time_stamp();
-    DBG_OUT(this->getName() << " schedule Task: " << task->getName()
-        << " @ " << sc_core::sc_time_stamp() << std::endl);
+    DBG_SC_OUT(this->getName() << " schedule Task: " << task->getName() << std::endl);
 
     /*
      * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
@@ -112,7 +127,7 @@ namespace SystemC_VPC{
   }
 
 /*
-  void FcfsComponent::notifyActivation(ScheduledTask * scheduledTask,
+  void FcfsComponent::notifyActivation(TaskInterface * scheduledTask,
       bool active)
   {
     DBG_OUT(this->name() << " notifyActivation " << scheduledTask
@@ -126,8 +141,8 @@ namespace SystemC_VPC{
   }
  */
 
-  void FcfsComponent::notifyActivation(ScheduledTask *scheduledTask, bool active) {
-    DBG_OUT(this->name() << " notifyActivation " << scheduledTask
+  void FcfsComponent::notifyActivation(TaskInterface *scheduledTask, bool active) {
+    DBG_SC_OUT(this->name() << " notifyActivation " << scheduledTask->name()
         << " " << active << std::endl);
     if (active) {
       if (scheduledTask->getNextReleaseTime() > sc_core::sc_time_stamp()) {

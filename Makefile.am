@@ -96,24 +96,24 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/tracing/VcdTracer.cpp \
 	src/systemcvpc/cpp/tracing/PajeTracer.cpp \
 	\
-	src/systemcvpc/cpp/debug_config.cpp \
-	src/systemcvpc/cpp/BlockingTransport.cpp \
-	src/systemcvpc/cpp/ConfigCheck.cpp \
-	src/systemcvpc/cpp/Director.cpp \
-	src/systemcvpc/cpp/ScheduledTask.cpp \
+	src/systemcvpc/cpp/AbstractComponent.cpp \
 	src/systemcvpc/cpp/Attribute.cpp \
-	src/systemcvpc/cpp/Task.cpp \
-	src/systemcvpc/cpp/VPCBuilder.cpp \
-	src/systemcvpc/cpp/ProcessControlBlock.cpp \
-	src/systemcvpc/cpp/FastLink.cpp \
-	src/systemcvpc/cpp/StaticRoute.cpp \
-	src/systemcvpc/cpp/RouteImpl.cpp \
-	src/systemcvpc/cpp/PowerSumming.cpp \
-	src/systemcvpc/cpp/HysteresisLocalGovernor.cpp \
-	src/systemcvpc/cpp/SelectFastestPowerModeGlobalGovernor.cpp \
-	src/systemcvpc/cpp/PluggablePowerGovernor.cpp \
+	src/systemcvpc/cpp/BlockingTransport.cpp \
 	src/systemcvpc/cpp/ComponentInfo.cpp \
-	src/systemcvpc/cpp/AbstractComponent.cpp
+	src/systemcvpc/cpp/ConfigCheck.cpp \
+	src/systemcvpc/cpp/DebugOStream.cpp \
+	src/systemcvpc/cpp/Director.cpp \
+	src/systemcvpc/cpp/FastLink.cpp \
+	src/systemcvpc/cpp/HysteresisLocalGovernor.cpp \
+	src/systemcvpc/cpp/PluggablePowerGovernor.cpp \
+	src/systemcvpc/cpp/PowerSumming.cpp \
+	src/systemcvpc/cpp/ProcessControlBlock.cpp \
+	src/systemcvpc/cpp/RouteImpl.cpp \
+	src/systemcvpc/cpp/SelectFastestPowerModeGlobalGovernor.cpp \
+	src/systemcvpc/cpp/StaticRoute.cpp \
+	src/systemcvpc/cpp/SystemCVPCSimulator.cpp \
+	src/systemcvpc/cpp/Task.cpp \
+	src/systemcvpc/cpp/VPCBuilder.cpp
 
 libsystemcvpc_la_DEPENDENCIES = \
 	$(COSUPPORT_STRING_DEPENDENCIES) \

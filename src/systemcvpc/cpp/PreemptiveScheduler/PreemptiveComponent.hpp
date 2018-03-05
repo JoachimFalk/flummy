@@ -55,21 +55,7 @@
 #include <deque>
 #include <queue>
 
-#include "../debug_config.hpp"
-// if compiled with DBG_COMPONENT create stream and include debug macros
-#ifdef DBG_COMPONENT
-#include <CoSupport/Streams/DebugOStream.hpp>
-#include <CoSupport/Streams/FilterOStream.hpp>
-  // debug macros presume some stream behind DBGOUT_STREAM. so make sure stream
-  //  with this name exists when DBG.. is used. here every actor creates its
-  //  own stream.
-  #define DBGOUT_STREAM dbgout
-  #include "../debug_on.hpp"
-#else
-  #include "../debug_off.hpp"
-#endif
-
-namespace SystemC_VPC{
+namespace SystemC_VPC {
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -129,7 +115,7 @@ namespace SystemC_VPC{
 
     void reactivateExecution();
 
-    void notifyActivation(ScheduledTask * scheduledTask,
+    void notifyActivation(TaskInterface * scheduledTask,
         bool active);
 
     bool addStream(ProcessId pid);

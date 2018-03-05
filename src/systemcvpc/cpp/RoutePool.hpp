@@ -39,7 +39,6 @@
 
 #include <systemcvpc/config/Route.hpp>
 #include "RouteImpl.hpp"
-#include "PCBPool.hpp"
 
 namespace SystemC_VPC{
 

@@ -55,6 +55,8 @@
 #include "../Task.hpp"
 #include <systemcvpc/config/Component.hpp>
 
+#include "../DebugOStream.hpp"
+
 namespace SystemC_VPC{
 
   /**
@@ -305,12 +307,12 @@ namespace SystemC_VPC{
     blockCompute.notify();
   }
 
-  void PreemptiveComponent::notifyActivation(ScheduledTask * scheduledTask,
+  void PreemptiveComponent::notifyActivation(TaskInterface * scheduledTask,
       bool active){
     if(active) {
       TT::TimeNodePair newTask = TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask);
       //std::cout<<"Component " << this->getName() << " notifyActivation("<<scheduledTask->getPid()<<", " << (this->getPCB(scheduledTask->getPid()))->getName() << " isPSM=" << this->getPCB(scheduledTask->getPid())->isPSM() << " @ " << newTask.time << " @ " << sc_core::sc_time_stamp() << std::endl;
-      if(this->getCanExecuteTasks() || this->getPCB(scheduledTask->getPid())->isPSM()){
+      if(this->getCanExecuteTasks() || getPCBofTask(scheduledTask)->isPSM()){
         pendingTask = true;
         ttReleaseQueue.push(newTask);
 
@@ -334,7 +336,7 @@ namespace SystemC_VPC{
       if(tnp.time <= sc_core::sc_time_stamp()){
         ttReleaseQueue.pop();
         assert(tnp.time <= sc_core::sc_time_stamp());
-        if(this->getCanExecuteTasks() || this->getPCB(tnp.node->getPid())->isPSM()){
+        if(this->getCanExecuteTasks() || getPCBofTask(tnp.node)->isPSM()){
           if(tnp.node->canFire()){
             tnp.node->scheduleLegacyWithCommState();
 //          if(Director::canExecute(tnp.node)){
@@ -400,7 +402,7 @@ namespace SystemC_VPC{
       while(newTasks.size()>0){
         Task *newTask;
         newTask=newTasks.front();
-        ScheduledTask* actor = newTask->getScheduledTask();
+        TaskInterface* actor = newTask->getScheduledTask();
         newTasks.pop_front();
         if(actor!=NULL && !actor->getActive()){
             std::cout<<"actor disabled"<<std::endl;
