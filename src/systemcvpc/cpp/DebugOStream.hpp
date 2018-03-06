@@ -74,15 +74,13 @@ extern DebugOStream &getDbgOut();
 
 #define DBG_STREAM getDbgOut()
 #ifndef SYSTEMCVPC_ENABLE_DEBUG
-# define DBG(e) do {} while(0)
-# define DBG_OUT(s) do {} while(0)
+# define DBG_OUT(s)    do {} while(0)
 # define DBG_SC_OUT(s) do {} while(0)
-# define DBG_DOBJ(s) do {} while(0)
+# define DBG_DOBJ(s)   do {} while(0)
 #else //defined(SYSTEMCVPC_ENABLE_DEBUG)
-# define DBG(e) e
-# define DBG_OUT(s) DBG_STREAM <<  s
-# define DBG_SC_OUT(s) DBG_STREAM << "[" << sc_core::sc_time_stamp() << "]: " << s
-# define DBG_DOBJ(o) DBG_STREAM << " Object " #o ": " << o << std::endl
+# define DBG_OUT(s)    do { if (DBG_STREAM.isVisible(Debug::Low)) { DBG_STREAM <<  s; } } while (0)
+# define DBG_SC_OUT(s) do { if (DBG_STREAM.isVisible(Debug::Low)) { DBG_STREAM << "[" << sc_core::sc_time_stamp() << "]: " << s; } } while (0)
+# define DBG_DOBJ(o)   do { if (DBG_STREAM.isVisible(Debug::Low)) { DBG_STREAM << " Object " #o ": " << o << std::endl; } } while (0)
 #endif //defined(SYSTEMCVPC_ENABLE_DEBUG)
 
 #endif // _INCLUDED_SYSTEMCVPC_DEBUGOSTREAM_HPP
