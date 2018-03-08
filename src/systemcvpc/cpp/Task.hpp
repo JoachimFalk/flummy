@@ -258,6 +258,10 @@ namespace SystemC_VPC {
     std::string destState;
   };
 
+  static inline
+  Task *getTaskOfTaskInterface(TaskInterface const *task)
+    { return reinterpret_cast<Task *>(task->getSchedulerInfo()); }
+
   typedef std::map<int, Task*>  TaskMap;
 
   template<typename PAYLOAD>

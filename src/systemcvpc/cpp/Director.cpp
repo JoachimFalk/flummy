@@ -132,101 +132,6 @@ namespace SystemC_VPC {
     }
 
     static
-    void finalizeMapping(
-        TaskInterface       *actor,
-        std::string   const &actorName,
-        FunctionNames const &actionNames,
-        FunctionNames const &guardNames)
-    {
-      VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
-      assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
-      VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
-#ifndef NDEBUG
-      if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
-        for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
-             iter != VC::Mappings::getComponents().end();
-             ++iter) {
-          std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
-        }
-        std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
-        assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
-      }
-#endif //NDEBUG
-      AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
-      Director::getInstance().registerMapping(actorName.c_str(),
-          comp->getName());
-
-      //generate new ProcessControlBlock or get existing one for
-      // initialization
-      const ProcessId pid = Director::getInstance().getProcessId(actorName);
-      if (!comp->hasPCB(pid)) {
-        ProcessControlBlockPtr pcb = comp->createPCB(pid);
-        pcb->configure(actorName.c_str(), true);
-        pcb->setTraceSignal(comp->getOrCreateTraceSignal(actorName));
-      }
-      ProcessControlBlockPtr pcb = comp->getPCB(pid);
-      //Delayer* delayer = mappings[pid];
-      actor->setScheduler(comp);
-      actor->setSchedulerInfo(pcb.get());
-
-      //TODO: VC::Timing -> Timing
-      const VC::Components & components = VC::getComponents();
-      BOOST_FOREACH(VC::Components::value_type component_pair, components)
-      {
-        std::string componentName = component_pair.first;
-        VC::Component::Ptr component = component_pair.second;
-
-        if (VC::Mappings::isMapped(task, component)) {
-          VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
-          pcb->setPriority(task->getPriority());  // GFR BUGFIX
-          pcb->setActorAsPSM(task->isPSM());
-          if (provider->hasDefaultActorTiming(actorName)) {
-
-                  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
-
-                  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-                  {
-                          std::string powermode = (*it).first;
-                          pcb->setTiming(provider->getActionTiming(actorName,powermode));
-                  }
-
-          }
-          BOOST_FOREACH(std::string guard, guardNames)
-          {
-            if (provider->hasGuardTimings(guard)) {
-
-                    SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
-                  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-                  {
-                          std::string powermode = (*it).first;
-                          pcb->setTiming(provider->getGuardTiming(guard,powermode));
-
-                          ConfigCheck::configureTiming(pid, guard);
-                  }
-            }
-          }
-          BOOST_FOREACH(std::string action, actionNames)
-          {
-            if (provider->hasActionTimings(action)) {
-
-                    SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
-                    for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-                    {
-                            std::string powermode = (*it).first;
-                            pcb->setTiming(provider->getActionTiming(action,powermode));
-                            ConfigCheck::configureTiming(pid, action);
-                    }
-            }
-          }
-        }
-      }
-  //TODO:
-  //    p.setPeriod(1);
-  //    p.setBaseDelay();
-  //    p.setBaseLatency();
-    }
-
-    static
     AbstractComponent * createComponent(Config::Component::Ptr component) {
       AbstractComponent *comp = NULL;
       switch (component->getScheduler()) {
@@ -540,6 +445,103 @@ namespace SystemC_VPC {
     reverseMapping[cid]->push_back(pid);
   }
    
+  void Director::finalizeMapping(
+      TaskInterface       *actor,
+      std::string   const &actorName,
+      FunctionNames const &actionNames,
+      FunctionNames const &guardNames)
+  {
+    VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
+    assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
+    VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
+#ifndef NDEBUG
+    if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
+      for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
+           iter != VC::Mappings::getComponents().end();
+           ++iter) {
+        std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
+      }
+      std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
+      assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
+    }
+#endif //NDEBUG
+    AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
+    Director::getInstance().registerMapping(actorName.c_str(),
+        comp->getName());
+
+    //generate new ProcessControlBlock or get existing one for
+    // initialization
+    const ProcessId pid = Director::getInstance().getProcessId(actorName);
+    if (!comp->hasPCB(pid)) {
+      // This should be the first time the actor appeared here.
+      ProcessControlBlockPtr pcb = comp->createPCB(pid);
+      pcb->configure(actorName.c_str(), true);
+      pcb->setTraceSignal(comp->getOrCreateTraceSignal(actorName));
+      Task &task = taskPool->getPrototype(pid);
+      task.setPCB(pcb);
+      task.setScheduledTask(actor);
+      actor->setScheduler(comp);
+      actor->setSchedulerInfo(allocateTask(pid));
+    }
+    ProcessControlBlockPtr pcb = comp->getPCB(pid);
+
+    //TODO: VC::Timing -> Timing
+    const VC::Components & components = VC::getComponents();
+    BOOST_FOREACH(VC::Components::value_type component_pair, components)
+    {
+      std::string componentName = component_pair.first;
+      VC::Component::Ptr component = component_pair.second;
+
+      if (VC::Mappings::isMapped(task, component)) {
+        VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
+        pcb->setPriority(task->getPriority());  // GFR BUGFIX
+        pcb->setActorAsPSM(task->isPSM());
+        if (provider->hasDefaultActorTiming(actorName)) {
+
+                SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
+
+                for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+                {
+                        std::string powermode = (*it).first;
+                        pcb->setTiming(provider->getActionTiming(actorName,powermode));
+                }
+
+        }
+        BOOST_FOREACH(std::string guard, guardNames)
+        {
+          if (provider->hasGuardTimings(guard)) {
+
+                  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
+                for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+                {
+                        std::string powermode = (*it).first;
+                        pcb->setTiming(provider->getGuardTiming(guard,powermode));
+
+                        ConfigCheck::configureTiming(pid, guard);
+                }
+          }
+        }
+        BOOST_FOREACH(std::string action, actionNames)
+        {
+          if (provider->hasActionTimings(action)) {
+
+                  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
+                  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+                  {
+                          std::string powermode = (*it).first;
+                          pcb->setTiming(provider->getActionTiming(action,powermode));
+                          ConfigCheck::configureTiming(pid, action);
+                  }
+          }
+        }
+      }
+    }
+//TODO:
+//    p.setPeriod(1);
+//    p.setBaseDelay();
+//    p.setBaseLatency();
+  }
+
   /**
    *
    */ 
@@ -798,6 +800,8 @@ namespace SystemC_VPC {
     //TODO: check if this is really required.
     if(FALLBACKMODE) return FastLink();
 
+    ProcessId pid = getProcessId(  actorName  );
+
     try {
       injectTaskName(actor, actorName);
       finalizeMapping(actor, actorName, actionNames, guardNames);
@@ -807,7 +811,6 @@ namespace SystemC_VPC {
       exit(-1);
     }
 
-    ProcessId       pid = getProcessId(  actorName  );
     FunctionIds     actionIds;
     FunctionIds     guardIds;
 
@@ -830,16 +833,6 @@ namespace SystemC_VPC {
       }
       ConfigCheck::modelTiming(pid, *iter);
     }
-
-    if (!taskPool->contains( pid )){
-      std::cerr << "Unknown Task: name = " << actorName  << std::endl;
-      return FastLink(pid, actionIds, guardIds, complexity);
-
-      //debugUnknownNames();
-      //throw NotAllocatedException(actorName);
-    }
-    Task &task = taskPool->getPrototype(pid);
-    task.setScheduledTask(actor);
 
     assertMapping(pid);
     return FastLink(pid, actionIds, guardIds, complexity);

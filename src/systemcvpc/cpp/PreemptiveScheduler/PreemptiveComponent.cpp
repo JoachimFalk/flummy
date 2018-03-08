@@ -312,7 +312,7 @@ namespace SystemC_VPC{
     if(active) {
       TT::TimeNodePair newTask = TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask);
       //std::cout<<"Component " << this->getName() << " notifyActivation("<<scheduledTask->getPid()<<", " << (this->getPCB(scheduledTask->getPid()))->getName() << " isPSM=" << this->getPCB(scheduledTask->getPid())->isPSM() << " @ " << newTask.time << " @ " << sc_core::sc_time_stamp() << std::endl;
-      if(this->getCanExecuteTasks() || getPCBofTask(scheduledTask)->isPSM()){
+      if(this->getCanExecuteTasks() || getTaskOfTaskInterface(scheduledTask)->isPSM()){
         pendingTask = true;
         ttReleaseQueue.push(newTask);
 
@@ -336,7 +336,7 @@ namespace SystemC_VPC{
       if(tnp.time <= sc_core::sc_time_stamp()){
         ttReleaseQueue.pop();
         assert(tnp.time <= sc_core::sc_time_stamp());
-        if(this->getCanExecuteTasks() || getPCBofTask(tnp.node)->isPSM()){
+        if(this->getCanExecuteTasks() || getTaskOfTaskInterface(tnp.node)->isPSM()){
           if(tnp.node->canFire()){
             tnp.node->scheduleLegacyWithCommState();
 //          if(Director::canExecute(tnp.node)){

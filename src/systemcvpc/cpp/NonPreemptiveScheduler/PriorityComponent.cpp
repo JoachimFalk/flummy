@@ -54,7 +54,7 @@ void PriorityComponent::addTask(Task *newTask) {
 }
 
 int PriorityComponent::getPriority(const TaskInterface * scheduledTask) {
-  return getPCBofTask(scheduledTask)->getPriority();
+  return getTaskOfTaskInterface(scheduledTask)->getPriority();
 }
 
 /*
