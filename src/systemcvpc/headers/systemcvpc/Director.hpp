@@ -257,6 +257,12 @@ namespace SystemC_VPC{
 
     void assertMapping(ProcessId const pid);
 
+    void finalizeMapping(
+         TaskInterface       *actor,
+         std::string   const &actorName,
+         FunctionNames const &actionNames,
+         FunctionNames const &guardNames);
+
     /**
      * Singleton design pattern
      */

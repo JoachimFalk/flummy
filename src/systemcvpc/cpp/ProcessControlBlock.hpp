@@ -162,10 +162,6 @@ namespace SystemC_VPC {
   typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
   typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
 
-  static inline
-  ProcessControlBlock *getPCBofTask(TaskInterface const *task)
-    { return reinterpret_cast<ProcessControlBlock *>(task->getSchedulerInfo()); }
-
 } // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP */

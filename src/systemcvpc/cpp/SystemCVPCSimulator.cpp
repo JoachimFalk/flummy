@@ -36,6 +36,8 @@
 #include <smoc/SimulatorAPI/TaskInterface.hpp>
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
+#include <systemcvpc/Director.hpp>
+
 #include "DebugOStream.hpp"
 
 namespace SystemC_VPC {
@@ -85,17 +87,21 @@ void SystemCVPCSimulator::populateOptionsDescription(
        sstr.str().c_str())
       ;
   }
-
-  pub.add_options()
-    ("systemoc-vpc-config",
-     po::value<std::string>(),
-     "use specified SystemC-VPC configuration file")
-    ;
-  // Backward compatibility cruft
-  priv.add_options()
-    ("vpc-config",
-     po::value<std::string>())
-    ;
+  // Provide --systemoc-vpc-config option and its backward compatibility version
+  {
+    pub.add_options()
+      ("systemoc-vpc-config",
+       getenv("VPCCONFIGURATION")
+         ? po::value<std::string>()->default_value(getenv("VPCCONFIGURATION"))
+         : po::value<std::string>(),
+       "use specified SystemC-VPC configuration file")
+      ;
+    // Backward compatibility cruft
+    priv.add_options()
+      ("vpc-config",
+       po::value<std::string>())
+      ;
+  }
 }
 
 SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
@@ -103,23 +109,45 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 {
   EnablementStatus retval;
 
-  if (vm.count("systemoc-vpc-config") ||
-      vm.count("vpc-config")) {
+  std::string vpcConfigFile;
+  if (vm.count("systemoc-vpc-config")) {
+    vpcConfigFile = vm["systemoc-vpc-config"].as<std::string>();
+    retval = MUSTBE_ACTIVE;
+  } else if (vm.count("vpc-config")) {
+    vpcConfigFile = vm["systemoc-vpc-config"].as<std::string>();
     retval = MUSTBE_ACTIVE;
   } else {
     retval = IS_DISABLED;
   }
 
-  #ifdef SYSTEMCVPC_ENABLE_DEBUG
-    int debugLevel = Debug::None.level - vm["systemoc-vpc-debug"].as<size_t>();
-    getDbgOut().setLevel(debugLevel < 0 ? 0 : debugLevel);
-    getDbgOut() << Debug::High;
+#ifdef SYSTEMCVPC_ENABLE_DEBUG
+  int debugLevel = Debug::None.level - vm["systemoc-vpc-debug"].as<size_t>();
+  getDbgOut().setLevel(debugLevel < 0 ? 0 : debugLevel);
+  getDbgOut() << Debug::High;
 #else  //!defined(SYSTEMCVPC_ENABLE_DEBUG)
-    if (vm["systemoc-vpc-debug"].as<size_t>() != 0)
-      std::cerr << "libsystemc-vpc: Warning debug support not compiled in and, thus, --systemoc-vpc-debug option ignored!" << std::endl;
+  if (vm["systemoc-vpc-debug"].as<size_t>() != 0)
+    std::cerr << "libsystemc-vpc: Warning debug support not compiled in and, thus, --systemoc-vpc-debug option ignored!" << std::endl;
 #endif //!defined(SYSTEMCVPC_ENABLE_DEBUG)
 
-    return retval;
+  if (retval != IS_DISABLED) {
+#ifdef _MSC_VER
+    std::string envVar("VPCCONFIGURATION=" + vpcConfigFile);
+    putenv((char *) envVar.c_str());
+#else
+    setenv("VPCCONFIGURATION", vpcConfigFile.c_str(), 1);
+#endif // _MSC_VER
+    if (Director::getInstance().FALLBACKMODE) {
+      if (getDbgOut().isVisible(Debug::High))
+        getDbgOut() << "SystemC_VPC has invalid configuration " << getenv("VPCCONFIGURATION") << " => VPC still off" << std::endl;
+      retval = IS_DISABLED;
+    } else {
+      if (getDbgOut().isVisible(Debug::High))
+        getDbgOut() << "SystemC_VPC has valid configuration " << getenv("VPCCONFIGURATION") << " => turning VPC on" << std::endl;
+    }
+    unsetenv("VPCCONFIGURATION");
+  }
+
+  return retval;
 }
 
 SchedulerInterface *SystemCVPCSimulator::registerTask(TaskInterface *task)
