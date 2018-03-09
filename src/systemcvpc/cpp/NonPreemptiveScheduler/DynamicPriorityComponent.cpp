@@ -37,34 +37,16 @@
 
 namespace SystemC_VPC {
 
-void DynamicPriorityComponent::notifyActivation(TaskInterface * scheduledTask, bool active)
-{
-  if (active && (this->runningTask == NULL)) {
-    this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
-  }
-}
-
 DynamicPriorityComponent::DynamicPriorityComponent(
     Config::Component::Ptr  component, Director *director)
   : NonPreemptiveComponent(component, director)
-  , mustYield_(false)
-  , lastTask_(nullptr)
-  , releasedTask_(nullptr)
+  , yieldTask(nullptr)
+  , selectedTask(nullptr)
   , debugOut(component->hasDebugFile()
       ? new Diagnostics::PrintDebug(component->getDebugFileName())
       : nullptr)
 {
-  buildInitialPriorityList(component);
-}
-
-DynamicPriorityComponent::~DynamicPriorityComponent() {
-  if (debugOut)
-    delete debugOut;
-  debugOut = nullptr;
-}
-
-void DynamicPriorityComponent::buildInitialPriorityList(
-    Config::Component::Ptr component) {
+  // build initial priority list
   std::priority_queue<PriorityFcfsElement<TaskInterface*> > pQueue;
   size_t fcfsOrder = 0;
 
@@ -86,69 +68,52 @@ void DynamicPriorityComponent::buildInitialPriorityList(
   }
 }
 
-void DynamicPriorityComponent::addTask(Task *newTask) {
-  if (newTask->hasScheduledTask()) {
-    assert(releasedTask_ == newTask->getScheduledTask());
-    lastTask_ = newTask;
-  } else {
-    throw Config::ConfigException(
-        std::string("DynamicPriorityComponent ") + this->getName()
-            + " doesn't support messages! "
-            + "Please do not include it in any Route!");
-  }
+// Implement ComponentInterface
+void DynamicPriorityComponent::setDynamicPriority(std::list<ScheduledTask *> priorityList)
+  { priorities_ = reinterpret_cast<PriorityList &>(priorityList); }
 
+// Implement ComponentInterface
+std::list<ScheduledTask *> DynamicPriorityComponent::getDynamicPriority()
+  { return reinterpret_cast<std::list<ScheduledTask *> &>(priorities_); }
+
+// Implement ComponentInterface
+void DynamicPriorityComponent::scheduleAfterTransition() {
+  yieldTask = selectedTask->getScheduledTask();
+  assert(yieldTask);
 }
 
-Task * DynamicPriorityComponent::scheduleTask() {
-  assert(this->runningTask == NULL);
-  assert(lastTask_ != NULL);
-  assert(releasedTask_ != NULL);
-  this->startTime = sc_core::sc_time_stamp();
-
-  releasedTask_ = NULL;
-
-  /*
-    * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
-    */
-   if (lastTask_->isPSM() == true){
-     this->fireStateChanged(ComponentState::IDLE);
-   }else{
-     this->fireStateChanged(ComponentState::RUNNING);
-   }
-
-  return lastTask_;
+DynamicPriorityComponent::~DynamicPriorityComponent() {
+  if (debugOut)
+    delete debugOut;
+  debugOut = nullptr;
 }
 
-bool DynamicPriorityComponent::releaseActor()
-{
-  if (this->mustYield_ || (this->lastTask_ == NULL)) {
-    for (PriorityList::const_iterator iter = this->priorities_.begin(); iter
-        != this->priorities_.end(); ++iter) {
-      TaskInterface * scheduledTask = *iter;
-      bool canExec = scheduledTask->canFire();
-//        bool canExec = Director::canExecute(scheduledTask);
-      if (canExec) {
-        this->mustYield_ = false;
-        this->releasedTask_ = scheduledTask;
-        this->debugDump(scheduledTask);
-        scheduledTask->scheduleLegacyWithCommState();
-//          Director::execute(scheduledTask);
-        return true;
+void DynamicPriorityComponent::newReadyTask(Task *newTask) {
+  readyTasks.push_back(newTask);
+}
+
+Task *DynamicPriorityComponent::selectReadyTask() {
+  assert(!readyTasks.empty());
+  for (TaskInterface *priorityTask : priorities_) {
+    if (yieldTask == priorityTask)
+      continue;
+    for (std::list<Task *>::iterator readyTaskIter = readyTasks.begin();
+         readyTaskIter != readyTasks.end();
+         ++readyTaskIter) {
+      if ((*readyTaskIter)->getScheduledTask() == priorityTask) {
+        yieldTask    = nullptr;
+        selectedTask = *readyTaskIter;
+        readyTasks.erase(readyTaskIter);
+        debugDump(priorityTask);
+        return *readyTaskIter;
       }
     }
-    return false;
-  } else {
-    bool canExec = ((this->lastTask_)->getScheduledTask())->canFire();
-//      bool canExec = Director::canExecute(this->lastTask_->getProcessId());
-    if (canExec) {
-      this->releasedTask_ = this->lastTask_->getScheduledTask();
-      this->debugDump(this->releasedTask_);
-      ((this->lastTask_)->getScheduledTask())->scheduleLegacyWithCommState();
-//        Director::execute(this->lastTask_->getProcessId());
-      return true;
-    }
-    return false;
   }
+  // Fall back to FCFS
+  yieldTask    = nullptr;
+  selectedTask = readyTasks.front();
+  readyTasks.pop_front();
+  return selectedTask;
 }
 
 void DynamicPriorityComponent::debugDump(const TaskInterface * toBeExecuted) const
