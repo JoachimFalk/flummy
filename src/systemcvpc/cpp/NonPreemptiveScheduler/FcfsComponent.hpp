@@ -45,21 +45,14 @@ namespace SystemC_VPC{
         Director *director = &Director::getInstance());
 
     virtual ~FcfsComponent();
-
-    void addTask(Task *newTask);
-
-    Task *scheduleTask();
-
-    virtual void notifyActivation(TaskInterface *scheduledTask, bool active);
-
-    virtual bool releaseActor();
-
-    bool hasReadyTask();
   protected:
-    std::deque<Task*>           readyTasks;
-    std::list<TaskInterface *>  fcfsQueue;
-    TT::TimedQueue              ttReleaseQueue;
+    // Implement interface for NonPreemptiveComponent
+    void newReadyTask(Task *newTask);
 
+    // Implement interface for NonPreemptiveComponent
+    Task *selectReadyTask();
+  private:
+    std::list<Task *> fcfsQueue;
   };
 
 } // namespace SystemC_VPC

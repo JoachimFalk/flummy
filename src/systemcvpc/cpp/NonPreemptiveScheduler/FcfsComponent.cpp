@@ -43,118 +43,17 @@ namespace SystemC_VPC{
 
   FcfsComponent::~FcfsComponent() {}
 
-  void FcfsComponent::addTask(Task *newTask) {
-    DBG_OUT(this->getName() << " add Task: " << newTask->getName()
+  void FcfsComponent::newReadyTask(Task *newTask) {
+    DBG_OUT(this->getName() << " newReadyTask: " << newTask->getName()
             << " @ " << sc_core::sc_time_stamp() << std::endl);
-    readyTasks.push_back(newTask);
+    fcfsQueue.push_back(newTask);
   }
 
-  bool FcfsComponent::hasReadyTask() {
-    return !readyTasks.empty();
-  }
-
-/*
-  bool FcfsComponent::releaseActor() {
-    while (!fcfsQueue.empty()) {
-      TaskInterface * scheduledTask = fcfsQueue.front();
-      fcfsQueue.pop_front();
-
-      bool canExec = scheduledTask->canFire();
-//    bool canExec = Director::canExecute(scheduledTask);
-      DBG_OUT("FCFS test task: " << scheduledTask
-          << " -> " << canExec << std::endl);
-      if (canExec) {
-        scheduledTask->scheduleLegacyWithCommState();
-//      Director::execute(scheduledTask);
-        return true;
-      }
-    }
-
-    return false;
-  }
- */
-
-  bool FcfsComponent::releaseActor() {
-    bool released = false;
-
-    //move active TT actors to fcfsQueue
-    while(!ttReleaseQueue.empty() &&
-          ttReleaseQueue.top().time <= sc_core::sc_time_stamp()) {
-      this->fcfsQueue.push_back(ttReleaseQueue.top().node);
-      ttReleaseQueue.pop();
-    }
-    while (!fcfsQueue.empty()) {
-      TaskInterface * scheduledTask = fcfsQueue.front();
-      fcfsQueue.pop_front();
-
-      bool canExec = scheduledTask->canFire();
-//    bool canExec = Director::canExecute(scheduledTask);
-      DBG_SC_OUT("FCFS test task: " << scheduledTask->name()
-          << " -> " << canExec << std::endl);
-      if (canExec) {
-        scheduledTask->scheduleLegacyWithCommState();
-//      Director::execute(scheduledTask);
-        released = true;
-        break;
-      }
-    }
-    if(!ttReleaseQueue.empty() && !released) {
-      sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
-      this->notify_scheduler_thread.notify(delta);
-    }
-    return released;
-  }
-
-  Task * FcfsComponent::scheduleTask() {
-    assert(!readyTasks.empty());
-    Task* task = readyTasks.front();
-    readyTasks.pop_front();
-    this->startTime = sc_core::sc_time_stamp();
-    DBG_SC_OUT(this->getName() << " schedule Task: " << task->getName() << std::endl);
-
-    /*
-     * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
-     */
-    if (task != NULL and task->isPSM() == true)
-      this->fireStateChanged(ComponentState::IDLE);
-    else
-      this->fireStateChanged(ComponentState::RUNNING);
-
-    if (task->isBlocking() /* && !assignedTask->isExec() */) {
-      //TODO
-    }
-    return task;
-  }
-
-/*
-  void FcfsComponent::notifyActivation(TaskInterface * scheduledTask,
-      bool active)
-  {
-    DBG_OUT(this->name() << " notifyActivation " << scheduledTask
-        << " " << active << std::endl);
-    if (active) {
-      fcfsQueue.push_back(scheduledTask);
-      if (this->runningTask == NULL) {
-        this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
-      }
-    }
-  }
- */
-
-  void FcfsComponent::notifyActivation(TaskInterface *scheduledTask, bool active) {
-    DBG_SC_OUT(this->name() << " notifyActivation " << scheduledTask->name()
-        << " " << active << std::endl);
-    if (active) {
-      if (scheduledTask->getNextReleaseTime() > sc_core::sc_time_stamp()) {
-        ttReleaseQueue.push(
-            TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
-      } else {
-        this->fcfsQueue.push_back(scheduledTask);
-      }
-      if (this->runningTask == NULL) {
-        this->notify_scheduler_thread.notify(sc_core::SC_ZERO_TIME);
-      }
-    }
+  Task *FcfsComponent::selectReadyTask() {
+    assert(!fcfsQueue.empty());
+    Task *selectedTask = fcfsQueue.front();
+    fcfsQueue.pop_front();
+    return selectedTask;
   }
 
 } // namespace SystemC_VPC

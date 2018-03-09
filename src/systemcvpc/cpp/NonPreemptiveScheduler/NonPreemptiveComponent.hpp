@@ -50,6 +50,7 @@
 #include "../PowerMode.hpp"
 #include "../Task.hpp"
 #include "../tracing/TracerIf.hpp"
+#include "../timetriggered/tt_support.hpp"
 
 #include <vector>
 #include <map>
@@ -59,24 +60,19 @@
 
 namespace SystemC_VPC{
 
-  typedef std::map<ComponentState, double> PowerTable;
-  typedef std::map<const PowerMode*, PowerTable>  PowerTables;
-
   /**
    * \brief An implementation of AbstractComponent.
    * 
    */
-  class NonPreemptiveComponent : public AbstractComponent{
+  class NonPreemptiveComponent: public AbstractComponent {
     
     SC_HAS_PROCESS(NonPreemptiveComponent);
 
   public:
-
     /**
      * implementation of AbstractComponent::compute(ProcessControlBlock*)
      */
     virtual void compute(Task* task);
-
 
     /**
      *
@@ -102,40 +98,52 @@ namespace SystemC_VPC{
      * from ComponentInterface
      */
     bool hasWaitingOrRunningTasks();
-
-    /**
-     * \brief An implementation of AbstractComponent used together with
-     * passive actors and global SMoC v2 Schedulers.
-     */
-    NonPreemptiveComponent(Config::Component::Ptr component, Director *director);
       
-    virtual ~NonPreemptiveComponent();
-    
     void addPowerGovernor(PluggableLocalPowerGovernor *gov);
 
     virtual Trace::Tracing *getOrCreateTraceSignal(std::string name);
 
   protected:
+    /**
+     * \brief An implementation of AbstractComponent used together with
+     * passive actors and global SMoC v2 Schedulers.
+     */
+    NonPreemptiveComponent(Config::Component::Ptr component, Director *director);
 
-    void schedule_method();
+    virtual void newReadyTask(Task *newTask) = 0;
 
-    void remainingPipelineStages();
+    virtual Task *selectReadyTask() = 0;
 
-    void fireStateChanged(const ComponentState &state);
+    virtual ~NonPreemptiveComponent();
 
-    Task*                  runningTask;
-    sc_core::sc_event notify_scheduler_thread;
-
-    // time last task started
-    sc_core::sc_time startTime;
   private:
+    // This is the set of active tasks that are signaled by notifyActivation.
+    // Note that these tasks might not be ready due to
+    // getNextReleaseTime() > sc_core::sc_time_stamp().
+    std::set<TaskInterface *> activeTasks;
+
+    // This is the queue for tasks arriving via notifyActivation but where
+    // getNextReleaseTime() > sc_core::sc_time_stamp().
+    TT::TimedQueue ttReleaseQueue;
+
+    void ttReleaseQueueMethod();
+    sc_core::sc_event ttReleaseQueueEvent;
+
+    void addTask(Task *newTask);
+
+    unsigned int  readyTasks;
+    Task         *runningTask;
+
+    void scheduleThread();
+    sc_core::sc_event scheduleEvent;
+
+
     sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
 
-    //PowerTables powerTables;
-    
+    void fireStateChanged(const ComponentState &state);
+
     Event blockCompute;
-    size_t   blockMutex;
 #ifndef NO_POWER_SUM
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
@@ -143,26 +151,16 @@ namespace SystemC_VPC{
 
     InternalLoadHysteresisGovernor *midPowerGov;
 
-    bool releasePhase;
+    void removeTask();
 
     bool processPower(Attribute att);
 
     void moveToRemainingPipelineStages(Task *task);
     
-    void setScheduler(const char *schedulername);
+    void notifyActivation(TaskInterface *scheduledTask,
+        bool active);
 
-    void removeTask();
-
-    virtual void addTask(Task *newTask) = 0;
-
-    virtual Task *scheduleTask() = 0;
-
-    virtual void notifyActivation(TaskInterface * scheduledTask,
-        bool active) = 0;
-
-    virtual bool releaseActor() = 0;
-
-    virtual bool hasReadyTask() = 0;
+    void remainingPipelineStages();
   };
 
 } // namespace SystemC_VPC

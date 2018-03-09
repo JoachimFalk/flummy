@@ -39,7 +39,6 @@
 
 namespace SystemC_VPC {
 
-typedef PriorityFcfsElement<TaskInterface*>                    QueueElem;
 
 class PriorityComponent : public NonPreemptiveComponent {
 public:
@@ -47,26 +46,17 @@ public:
       Director *director  = &Director::getInstance());
 
   virtual ~PriorityComponent();
+protected:
+  // Implement interface for NonPreemptiveComponent
+  void newReadyTask(Task *newTask);
 
-  void addTask(Task *newTask);
-
-  Task *scheduleTask();
-
-  void notifyActivation(TaskInterface * scheduledTask,
-      bool active);
-
-  bool releaseActor();
-
-  bool hasReadyTask()
-    { return !readyQueue.empty(); }
+  // Implement interface for NonPreemptiveComponent
+  Task *selectReadyTask();
 private:
-  size_t                                                        fcfsOrder;
-  TT::TimedQueue                                                ttReleaseQueue;
-  std::priority_queue<PriorityFcfsElement<TaskInterface *> >    releaseQueue;
-  std::priority_queue<p_queue_entry>                            readyQueue;
+  typedef PriorityFcfsElement<Task *> QueueElem;
 
-  int getPriority(const TaskInterface * scheduledTask);
-
+  size_t                              fcfsOrder;
+  std::priority_queue<QueueElem>      priorityQueue;
 };
 
 } // namespace SystemC_VPC

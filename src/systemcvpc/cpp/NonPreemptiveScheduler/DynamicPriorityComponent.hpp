@@ -55,36 +55,29 @@ public:
   DynamicPriorityComponent(Config::Component::Ptr component,
       Director *director = &Director::getInstance());
 
-  void addTask(Task *newTask);
+  // Implement ComponentInterface
+  void setDynamicPriority(std::list<ScheduledTask *> priorityList);
+  // Implement ComponentInterface
+  std::list<ScheduledTask *> getDynamicPriority();
+  // Implement ComponentInterface
+  void scheduleAfterTransition();
 
-  Task *scheduleTask();
-
-  void notifyActivation(TaskInterface *scheduledTask, bool active);
-
-  bool releaseActor();
-
-  bool hasReadyTask()
-    { return releasedTask_ != NULL; }
-
-  virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList)
-    { priorities_ = reinterpret_cast<PriorityList &>(priorityList); }
-
-  virtual std::list<ScheduledTask *> getDynamicPriority()
-    { return reinterpret_cast<std::list<ScheduledTask *> &>(priorities_); }
-
-  virtual void scheduleAfterTransition()
-    { mustYield_ = true; }
-
-  virtual ~DynamicPriorityComponent();
-
+  ~DynamicPriorityComponent();
 protected:
-  PriorityList   priorities_;
-  bool           mustYield_;
-  Task          *lastTask_;
-  TaskInterface *releasedTask_;
-  std::ostream  *debugOut;
+  // Implement interface for NonPreemptiveComponent
+  void newReadyTask(Task *newTask);
+
+  // Implement interface for NonPreemptiveComponent
+  Task *selectReadyTask();
+
 private:
-  void buildInitialPriorityList(Config::Component::Ptr component);
+  PriorityList   priorities_;
+
+  std::list<Task *> readyTasks;
+
+  TaskInterface *yieldTask;
+  Task          *selectedTask;
+  std::ostream  *debugOut;
 
   void debugDump(const TaskInterface * toBeExecuted) const;
 };
