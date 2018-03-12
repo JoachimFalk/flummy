@@ -214,6 +214,7 @@ namespace SystemC_VPC {
           // the executing state of the component should be IDLE.
           fireStateChanged(ComponentState::IDLE);
         wait(runningTask->getDelay());
+        removeTask();
         TaskInterface *scheduledTask = runningTask->getScheduledTask();
         if (scheduledTask) {
           // Don't remove the activeTasks.erase here.
@@ -229,7 +230,7 @@ namespace SystemC_VPC {
             scheduledTask->schedule();
           }
         }
-        removeTask();
+        runningTask = NULL;
       }
       assert(runningTask == nullptr);
       fireStateChanged(ComponentState::IDLE);
@@ -287,8 +288,6 @@ namespace SystemC_VPC {
     moveToRemainingPipelineStages(runningTask);
 
     DBG_OUT("remove Task " << runningTask->getName() << std::endl);
-
-    runningTask = NULL;
   }
 
   /**
