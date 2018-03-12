@@ -65,7 +65,6 @@ public:
 };
 
 SystemCVPCSimulator::SystemCVPCSimulator() {
-  registeredSimulators.push_back(this);
 }
 
 void SystemCVPCSimulator::populateOptionsDescription(
