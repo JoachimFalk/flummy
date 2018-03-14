@@ -102,6 +102,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/ComponentInfo.cpp \
 	src/systemcvpc/cpp/ConfigCheck.cpp \
 	src/systemcvpc/cpp/DebugOStream.cpp \
+	src/systemcvpc/cpp/Delayer.cpp \
 	src/systemcvpc/cpp/Director.cpp \
 	src/systemcvpc/cpp/FastLink.cpp \
 	src/systemcvpc/cpp/FunctionTiming.cpp \

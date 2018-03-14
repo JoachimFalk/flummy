@@ -49,7 +49,6 @@
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include "Delayer.hpp"
-#include "ProcessControlBlock.hpp"
 #include "FunctionTiming.hpp"
 #include "Task.hpp"
 #include "PowerSumming.hpp"
@@ -88,11 +87,7 @@ namespace SystemC_VPC {
     public ComponentModel,
     public ComponentInterface
   {
-  
   public:
-
-    virtual ~AbstractComponent();
-
     /**
      * \brief Set parameter for Component and Scheduler.
      */
@@ -101,181 +96,29 @@ namespace SystemC_VPC {
     /**
      * \brief Create the process control block.
      */
-    ProcessControlBlock *createPCB(const ProcessId pid) {
-      std::pair<PCBPool::iterator, bool> status
-        (pcbPool.insert(PCBPool::value_type(
-            pid,
-            ProcessControlBlockPtr(new ProcessControlBlock(this)))));
-      assert(status.second);
-      status.first->second->setPid(pid);
-      return status.first->second.get();
-    }
+    ProcessControlBlock *createPCB(const ProcessId pid);
 
-    bool hasPCB(ProcessId const pid) const {
-      return pcbPool.find(pid) != pcbPool.end();
-    }
+    bool hasPCB(ProcessId const pid) const;
 
-    ProcessControlBlock *getPCB(ProcessId const pid) const {
-      PCBPool::const_iterator iter = pcbPool.find(pid);
-      assert(iter != pcbPool.end());
-      return iter->second.get();
-    }
+    ProcessControlBlock *getPCB(ProcessId const pid) const;
 
-    virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList)
-    {
-      throw Config::ConfigException(std::string("Component ") + this->name() +
-          " doesn't support dynamic priorities!");
-    }
+    virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList);
+    virtual std::list<ScheduledTask *> getDynamicPriority();
 
-    virtual std::list<ScheduledTask *> getDynamicPriority()
-    {
-      throw Config::ConfigException(std::string("Component ") + this->name() +
-          " doesn't support dynamic priorities!");
-    }
-
-
-    virtual void scheduleAfterTransition()
-    {
-      throw Config::ConfigException(std::string("Component ") + this->name() +
-          " doesn't support scheduleAfterTransition()!");
-    }
+    virtual void scheduleAfterTransition();
 
     virtual Trace::Tracing * getOrCreateTraceSignal(std::string name) = 0;
 
-    void requestCanExecute(){
+    void requestCanExecute();
 
-      //assert(this->canExecuteTasks == false);
-      componentIdle->reset();
-      if(!requestExecuteTasks && componentWakeup != 0){
-        //std::cout<< "Comp: " << this->getName()<<" requestCanExecute() - componentWakeup->notify() @ " << sc_core::sc_time_stamp() <<  std::endl;
-        //First request
-        requestExecuteTasks=true;
-        componentWakeup->notify();
-      }
-    }
+    bool requestShutdown();
 
-    bool requestShutdown(){
+    bool getCanExecuteTasks() const;
 
-        //FIXME: why did I use sc_pending_activity_at_current_time() here? what special-case?
-      if(!hasWaitingOrRunningTasks() && (shutdownRequestAtTime == sc_core::sc_time_stamp()) /*&& !sc_pending_activity_at_current_time()*/){
-        if(componentIdle != 0){
-          //std::cout<< "Comp: " << this->getName()<<" requestShutdown() - componentIdle->notify() @ " << sc_core::sc_time_stamp() << " hasWaitingOrRunningTasks=" << hasWaitingOrRunningTasks()<< " " << sc_pending_activity_at_current_time() /*<< " " << m_simcontext->next_time()*/ <<  std::endl;
-          //TODO: maybe notify it in the future?
-          componentIdle->notify();
-          if(sc_core::sc_pending_activity_at_current_time()){
-              return false;
-          }
-        }
-      }else{
-        shutdownRequestAtTime = sc_core::sc_time_stamp();
-        return false;
-      }
-      return true;
-    }
+    void setCanExecuteTasks(bool canExecuteTasks);
 
-    bool getCanExecuteTasks() const
-    {
-        return canExecuteTasks;
-    }
+    virtual void reactivateExecution();
 
-    void setCanExecuteTasks(bool canExecuteTasks)
-    {
-      bool oldCanExecuteTasks = this->canExecuteTasks;
-      this->canExecuteTasks = canExecuteTasks;
-      if(!oldCanExecuteTasks && this->canExecuteTasks){
-        requestExecuteTasks = false;
-        this->reactivateExecution();
-      }
-    }
-
-    virtual void reactivateExecution(){};
-
-
-  protected:
-    typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
-    typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
-
-    std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
-    std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
-    bool requestExecuteTasks;
-    std::map<ProcessId, MultiCastGroup> multiCastGroups;
-
-    struct MultiCastGroupInstance{
-      MultiCastGroup mcg;
-      sc_core::sc_time timestamp;
-      Task* task;
-      std::list<Task*>* additional_tasks;
-    };
-
-    std::list<MultiCastGroupInstance*> multiCastGroupInstances;
-
-
-    MultiCastGroupInstance* getMultiCastGroupInstance(Task* actualTask){
-      if(multiCastGroupInstances.size()!=0 ){
-        //there are MultiCastGroupInstances, let's find the correct one
-        for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
-            list_iter != multiCastGroupInstances.end(); list_iter++)
-        {
-              MultiCastGroupInstance* mcgi = *list_iter;
-            if(mcgi->mcg == multiCastGroups[actualTask->getProcessId()]){
-              bool existing =  (mcgi->task->getProcessId() == actualTask->getProcessId());
-              for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
-                  tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
-                  Task* task = *tasks_iter;
-                  if(task->getProcessId() == actualTask->getProcessId()){
-                      existing = true;
-                  }
-              }
-              //we assume a fixed order of token-events, thus, the first free one is the correct one.
-              if(!existing){
-                  mcgi->additional_tasks->push_back(actualTask);
-                  assert(mcgi->timestamp == sc_core::sc_time_stamp()); // if not, MultiCastMessage reached at different times...
-                  return mcgi;
-              }
-            }
-        }
-      }
-      // no Instance found, create new one
-      MultiCastGroupInstance* newInstance = new MultiCastGroupInstance();
-      newInstance->mcg = multiCastGroups[actualTask->getProcessId()];
-      newInstance->timestamp = sc_core::sc_time_stamp();
-      newInstance->task = actualTask;
-      newInstance->additional_tasks = new  std::list<Task*>();
-      multiCastGroupInstances.push_back(newInstance);
-      return newInstance;
-    }
-
-    AbstractComponent(Config::Component::Ptr component) :
-        sc_core::sc_module(sc_core::sc_module_name(component->getName().c_str())),
-        Delayer(component->getComponentId(),
-            component->getName()),
-        transactionDelays(),
-        requestExecuteTasks(false),
-        powerMode(NULL),
-        canExecuteTasks(true),
-        localGovernorFactory(NULL),
-        midPowerGov(NULL),
-        powerAttribute(new Attribute("","")),
-        taskTracer_(NULL)
-    {
-      component->componentInterface_ = this;
-      if(powerTables.find(getPowerMode()) == powerTables.end()){
-        powerTables[getPowerMode()] = PowerTable();
-      }
-
-      PowerTable &powerTable=powerTables[getPowerMode()];
-      powerTable[ComponentState::IDLE]    = 0.0;
-      powerTable[ComponentState::RUNNING] = 1.0;
-    }
-
-    /**
-     *
-     */
-    const PCBPool& getPCBPool() const {
-      return this->pcbPool;
-    }
-
-  public:
 
     void addTracer(Trace::TracerIf *tracer);
             
@@ -307,43 +150,33 @@ namespace SystemC_VPC {
     virtual void updatePowerConsumption() = 0;
 
     /**
-     * 
+     * from ComponentInterface
      */
-    void setPowerMode(const PowerMode* mode);
-
-
-    const PowerMode* getPowerMode() const {
-      return this->powerMode;
-    }
+    void             setPowerMode(const PowerMode *mode);
+    /**
+     * from ComponentInterface
+     */
+    const PowerMode *getPowerMode() const;
 
     /*
      * from ComponentInterface
      */
-    void changePowerMode(std::string powerMode) {
-      setPowerMode(translatePowerMode(powerMode));
-    }
+    void changePowerMode(std::string powerMode);
 
     /*
      * from ComponentInterface
      */
-    void setCanExec(bool canExec){
-      this->setCanExecuteTasks(canExec);
-    }
+    void setCanExec(bool canExec);
 
     /*
      * from ComponentInterface
      */
-    void registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
-      componentWakeup = event;
-     }
+    void registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event);
 
     /*
      * from ComponentInterface
      */
-    void registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
-      //std::cout<<"registerComponentIdle" << std::endl;
-      componentIdle = event;
-     }
+    void registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event);
 
     /* This function sets the appropriate execution state of the component according to the component powerstate
      * (component's power state info is not encapsulated here, so it is the responsability of the powerState object to call this
@@ -361,6 +194,47 @@ namespace SystemC_VPC {
      */
     FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid);
 
+  protected:
+    typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
+    typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
+
+    std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
+    std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
+    bool requestExecuteTasks;
+    std::map<ProcessId, MultiCastGroup> multiCastGroups;
+
+    struct MultiCastGroupInstance{
+      MultiCastGroup mcg;
+      sc_core::sc_time timestamp;
+      Task* task;
+      std::list<Task*>* additional_tasks;
+    };
+
+    std::list<MultiCastGroupInstance*> multiCastGroupInstances;
+
+    PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
+    PluggableLocalPowerGovernor *midPowerGov;
+    AttributePtr powerAttribute;
+    typedef std::map<std::string,
+                     DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
+      Factories;
+    static Factories factories;
+    PowerTables powerTables;
+
+    Trace::TracerIf *taskTracer_;
+
+    AbstractComponent(Config::Component::Ptr component);
+
+    MultiCastGroupInstance* getMultiCastGroupInstance(Task* actualTask);
+
+    /**
+     *
+     */
+    const PCBPool& getPCBPool() const {
+      return this->pcbPool;
+    }
+
+    virtual ~AbstractComponent();
   private:
 
     bool processPower(AttributePtr att);
@@ -372,10 +246,6 @@ namespace SystemC_VPC {
 
     void loadLocalGovernorPlugin(std::string plugin);
 
-
-    /**
-     *
-     */
     PCBPool pcbPool;
     FunctionTimingPoolPtr timingPool;
     std::map<const PowerMode*, FunctionTimingPoolPtr> timingPools;
@@ -384,18 +254,6 @@ namespace SystemC_VPC {
     sc_core::sc_time shutdownRequestAtTime;
     Coupling::VPCEvent::Ptr componentWakeup;
     Coupling::VPCEvent::Ptr componentIdle;
-
-  protected:
-    PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
-    PluggableLocalPowerGovernor *midPowerGov;
-    AttributePtr powerAttribute;
-    typedef std::map<std::string,
-                     DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
-      Factories;
-    static Factories factories;
-    PowerTables powerTables;
-
-    Trace::TracerIf *taskTracer_;
   };
 
 } // namespace SystemC_VPC
