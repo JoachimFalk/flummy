@@ -33,15 +33,17 @@
  */
 
 #include "AbstractComponent.hpp"
+#include "ProcessControlBlock.hpp"
 #include "ComponentObserver.hpp"
 #include "ComponentInfo.hpp"
-#include <systemcvpc/Director.hpp>
 #include "HysteresisLocalGovernor.hpp"
 
 #include "dynload/dll.hpp"
 #include "PluggablePowerGovernor.hpp"
 
 #include "tracing/TracerIf.hpp"
+
+#include <systemcvpc/Director.hpp>
 
 namespace SystemC_VPC {
 
@@ -219,36 +221,178 @@ namespace SystemC_VPC {
         return (*pool)[pid];
       }
 
-  const ComponentId Delayer::getComponentId() const{
-    return this->componentId_;
+  /**
+   * \brief Create the process control block.
+   */
+  ProcessControlBlock *AbstractComponent::createPCB(const ProcessId pid) {
+    std::pair<PCBPool::iterator, bool> status
+      (pcbPool.insert(PCBPool::value_type(
+          pid,
+          ProcessControlBlockPtr(new ProcessControlBlock(this)))));
+    assert(status.second);
+    status.first->second->setPid(pid);
+    return status.first->second.get();
   }
 
-  void Delayer::addObserver(ComponentObserver *obs)
-  {
-    observers.push_back(obs);
+  bool AbstractComponent::hasPCB(ProcessId const pid) const {
+    return pcbPool.find(pid) != pcbPool.end();
   }
 
-  void Delayer::removeObserver(ComponentObserver *obs)
-  {
-    for(Observers::iterator iter = observers.begin();
-        iter != observers.end();
-        ++iter)
-    {
-      if(*iter == obs) {
-        observers.erase(iter);
-        break;
+  ProcessControlBlock *AbstractComponent::getPCB(ProcessId const pid) const {
+    PCBPool::const_iterator iter = pcbPool.find(pid);
+    assert(iter != pcbPool.end());
+    return iter->second.get();
+  }
+
+  void AbstractComponent::setDynamicPriority(std::list<ScheduledTask *> priorityList) {
+    throw Config::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support dynamic priorities!");
+  }
+
+  std::list<ScheduledTask *> AbstractComponent::getDynamicPriority() {
+    throw Config::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support dynamic priorities!");
+  }
+
+  void AbstractComponent::scheduleAfterTransition() {
+    throw Config::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support scheduleAfterTransition()!");
+  }
+
+  void AbstractComponent::requestCanExecute(){
+    //assert(this->canExecuteTasks == false);
+    componentIdle->reset();
+    if(!requestExecuteTasks && componentWakeup != 0){
+      //std::cout<< "Comp: " << this->getName()<<" requestCanExecute() - componentWakeup->notify() @ " << sc_core::sc_time_stamp() <<  std::endl;
+      //First request
+      requestExecuteTasks=true;
+      componentWakeup->notify();
+    }
+  }
+
+  bool AbstractComponent::requestShutdown(){
+      //FIXME: why did I use sc_pending_activity_at_current_time() here? what special-case?
+    if(!hasWaitingOrRunningTasks() && (shutdownRequestAtTime == sc_core::sc_time_stamp()) /*&& !sc_pending_activity_at_current_time()*/){
+      if(componentIdle != 0){
+        //std::cout<< "Comp: " << this->getName()<<" requestShutdown() - componentIdle->notify() @ " << sc_core::sc_time_stamp() << " hasWaitingOrRunningTasks=" << hasWaitingOrRunningTasks()<< " " << sc_pending_activity_at_current_time() /*<< " " << m_simcontext->next_time()*/ <<  std::endl;
+        //TODO: maybe notify it in the future?
+        componentIdle->notify();
+        if(sc_core::sc_pending_activity_at_current_time()){
+            return false;
+        }
+      }
+    }else{
+      shutdownRequestAtTime = sc_core::sc_time_stamp();
+      return false;
+    }
+    return true;
+  }
+
+  bool AbstractComponent::getCanExecuteTasks() const {
+      return canExecuteTasks;
+  }
+
+  void AbstractComponent::setCanExecuteTasks(bool canExecuteTasks) {
+    bool oldCanExecuteTasks = this->canExecuteTasks;
+    this->canExecuteTasks = canExecuteTasks;
+    if(!oldCanExecuteTasks && this->canExecuteTasks){
+      requestExecuteTasks = false;
+      this->reactivateExecution();
+    }
+  }
+
+  void AbstractComponent::reactivateExecution() {
+
+  }
+
+  AbstractComponent::MultiCastGroupInstance* AbstractComponent::getMultiCastGroupInstance(Task* actualTask){
+    if(multiCastGroupInstances.size()!=0 ){
+      //there are MultiCastGroupInstances, let's find the correct one
+      for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
+          list_iter != multiCastGroupInstances.end(); list_iter++)
+      {
+            MultiCastGroupInstance* mcgi = *list_iter;
+          if(mcgi->mcg == multiCastGroups[actualTask->getProcessId()]){
+            bool existing =  (mcgi->task->getProcessId() == actualTask->getProcessId());
+            for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
+                tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
+                Task* task = *tasks_iter;
+                if(task->getProcessId() == actualTask->getProcessId()){
+                    existing = true;
+                }
+            }
+            //we assume a fixed order of token-events, thus, the first free one is the correct one.
+            if(!existing){
+                mcgi->additional_tasks->push_back(actualTask);
+                assert(mcgi->timestamp == sc_core::sc_time_stamp()); // if not, MultiCastMessage reached at different times...
+                return mcgi;
+            }
+          }
       }
     }
+    // no Instance found, create new one
+    MultiCastGroupInstance* newInstance = new MultiCastGroupInstance();
+    newInstance->mcg = multiCastGroups[actualTask->getProcessId()];
+    newInstance->timestamp = sc_core::sc_time_stamp();
+    newInstance->task = actualTask;
+    newInstance->additional_tasks = new  std::list<Task*>();
+    multiCastGroupInstances.push_back(newInstance);
+    return newInstance;
   }
-      
-  void Delayer::fireNotification(ComponentInfo *compInf)
+
+  AbstractComponent::AbstractComponent(Config::Component::Ptr component)
+    : sc_core::sc_module(sc_core::sc_module_name(component->getName().c_str()))
+    , Delayer(component->getComponentId(), component->getName())
+    , requestExecuteTasks(false)
+    , localGovernorFactory(nullptr)
+    , midPowerGov(nullptr)
+    , powerAttribute(new Attribute("",""))
+    , taskTracer_(nullptr)
+    , powerMode(nullptr)
+    , canExecuteTasks(true)
   {
-    for(Observers::iterator iter = observers.begin();
-        iter != observers.end();
-        ++iter)
-    {
-      (*iter)->notify(compInf);
+    component->componentInterface_ = this;
+    if(powerTables.find(getPowerMode()) == powerTables.end()){
+      powerTables[getPowerMode()] = PowerTable();
     }
+
+    PowerTable &powerTable=powerTables[getPowerMode()];
+    powerTable[ComponentState::IDLE]    = 0.0;
+    powerTable[ComponentState::RUNNING] = 1.0;
   }
+
+
+  const PowerMode* AbstractComponent::getPowerMode() const {
+    return this->powerMode;
+  }
+
+  /*
+   * from ComponentInterface
+   */
+  void AbstractComponent::changePowerMode(std::string powerMode) {
+    setPowerMode(translatePowerMode(powerMode));
+  }
+
+  /*
+   * from ComponentInterface
+   */
+  void AbstractComponent::setCanExec(bool canExec){
+    this->setCanExecuteTasks(canExec);
+  }
+
+  /*
+   * from ComponentInterface
+   */
+  void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
+    componentWakeup = event;
+   }
+
+  /*
+   * from ComponentInterface
+   */
+  void AbstractComponent::registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
+    //std::cout<<"registerComponentIdle" << std::endl;
+    componentIdle = event;
+   }
 
 } //namespace SystemC_VPC
