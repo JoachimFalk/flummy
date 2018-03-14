@@ -43,7 +43,6 @@
 
 #include <systemcvpc/config/Route.hpp>
 #include <systemcvpc/EventPair.hpp>
-#include "ProcessControlBlock.hpp"
 #include "RouteImpl.hpp"
 #include <systemcvpc/Director.hpp>
 

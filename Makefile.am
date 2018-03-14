@@ -104,6 +104,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/DebugOStream.cpp \
 	src/systemcvpc/cpp/Director.cpp \
 	src/systemcvpc/cpp/FastLink.cpp \
+	src/systemcvpc/cpp/FunctionTiming.cpp \
 	src/systemcvpc/cpp/HysteresisLocalGovernor.cpp \
 	src/systemcvpc/cpp/PluggablePowerGovernor.cpp \
 	src/systemcvpc/cpp/PowerSumming.cpp \

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -36,7 +36,7 @@
 #define _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP
 
 #include <systemc>
-#include <float.h>
+
 #include <map>
 #include <vector>
 #include <string>
@@ -51,7 +51,9 @@
 #include <systemcvpc/ScheduledTask.hpp>
 
 #include "PowerMode.hpp"
-#include "FunctionTimingPool.hpp"
+#include "FunctionTiming.hpp"
+
+#include <boost/shared_ptr.hpp>
 
 namespace SystemC_VPC {
 
@@ -60,107 +62,93 @@ namespace SystemC_VPC {
   }
 
   class AbstractComponent;
-
-  typedef size_t ComponentId;
+  class Task;
 
  /**
   * This class represents all necessary data of a simulated process within VPC
   * and provides necessary access methods for its data.
   */
   class ProcessControlBlock {
-
-    public:
+    friend class AbstractComponent;
     friend class Task;
-      /**
-       * \brief Default constructor of an PCB instance
-       */
-      ProcessControlBlock( AbstractComponent * component );
+
+  public:
+    /**
+     * \brief Sets name of instance
+     */
+    void configure(std::string name, bool tracing);
+
+    void setTraceSignal(Trace::Tracing* signal);
+
+    void setTiming(const Config::Timing& timing);
+
+    void setPriority(int priority);
+
+    void setActorAsPSM(bool psm);
+  protected:
+    /**
+     * \brief Default constructor of an PCB instance
+     * Initialize a newly created instance of ProcessControlBlock
+     */
+    ProcessControlBlock( AbstractComponent * component );
+
+    /**
+     * \brief Used to access name of PCB
+     */
+    std::string const& getName() const;
+
+    void setPid( ProcessId pid);
+    ProcessId getPid( ) const;
+
+    /**
+     * \brief Sets currently associated function id of process
+     */
+    void setFunctionId( FunctionId fid);
+    FunctionId getFunctionId( ) const;
+
+    /**
+     * \brief due to pipelining, there may be several instances of a process
+     */
+    int getInstanceId() const;
 
 
-      /**
-       * \brief Sets name of instance
-       */
-      void configure(std::string name, bool tracing);
+    /**
+     * \brief Gets currently associated function name of PCB instance
+     */
+    const char* getFuncName() const;
 
-      /**
-       * \brief Used to access name of PCB
-       */
-      std::string const& getName() const;
+    void setPeriod(sc_core::sc_time period);
 
-      void setPid( ProcessId pid);
-      ProcessId getPid( ) const;
-      
-      /**
-       * \brief Sets currently associated function id of process
-       */
-      void setFunctionId( FunctionId fid);
-      FunctionId getFunctionId( ) const;
-      
-      /**
-       * \brief due to pipelining, there may be several instances of a process
-       */
-      int getInstanceId() const;
-      
+    sc_core::sc_time getPeriod() const;
 
-      /**
-       * \brief Gets currently associated function name of PCB instance
-       */
-      const char* getFuncName() const;
+    int getPriority() const;
 
-      void setPeriod(sc_core::sc_time period);
+    void setDeadline(sc_core::sc_time deadline);
 
-      sc_core::sc_time getPeriod() const;
-      
-      void setPriority(int priority);
+    sc_core::sc_time getDeadline() const;
 
-      int getPriority() const;
+    Trace::Tracing *getTraceSignal() const;
 
-      void setDeadline(sc_core::sc_time deadline);
+    void setBaseDelay(sc_core::sc_time delay);
+    void setBaseLatency(sc_core::sc_time latency);
+    void addDelay(FunctionId fid, sc_core::sc_time delay);
+    void addLatency(FunctionId fid, sc_core::sc_time latency);
 
-      sc_core::sc_time getDeadline() const;
+    bool isPSM();
 
-      /**
-       * \brief Used to increment activation count of this PCB instance
-       */
-      void incrementActivationCount();
+  private:
+    std::string name;
+    ProcessId   pid;
+    FunctionId  fid;
 
-      unsigned int getActivationCount() const;
-
-      void setTraceSignal(Trace::Tracing* signal);
-
-      Trace::Tracing *getTraceSignal() const;
-
-      void setTiming(const Config::Timing& timing);
-      void setBaseDelay(sc_core::sc_time delay);
-      void setBaseLatency(sc_core::sc_time latency);
-      void addDelay(FunctionId fid, sc_core::sc_time delay);
-      void addLatency(FunctionId fid, sc_core::sc_time latency);
-
-      void setActorAsPSM(bool psm);
-      bool isPSM();
-
-    private:
-
-      std::string name;
-      ProcessId   pid;
-      FunctionId  fid;
-
-      int priority;
-      sc_core::sc_time period;
-      sc_core::sc_time deadline;
-      Trace::Tracing * traceSignal;
-      AbstractComponent * component;
-      CoSupport::Tracing::TaskTracer::Ptr taskTracer;
-      bool psm;
-      /**
-       * \brief Initialize a newly created instance of ProcessControlBlock
-       */
-      void init();
- 
+    int priority;
+    sc_core::sc_time period;
+    sc_core::sc_time deadline;
+    Trace::Tracing * traceSignal;
+    AbstractComponent * component;
+    CoSupport::Tracing::TaskTracer::Ptr taskTracer;
+    bool psm;
   };
-
-  typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
-  typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
 
 } // namespace SystemC_VPC
 

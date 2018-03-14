@@ -51,7 +51,7 @@ namespace SystemC_VPC{
   /**
    * \brief A call-back class called from Component to do Scheduling.
    *
-   * Main part is virtual function scheduling_decision schedulingDecision(int&, int&, std::map<int,ProcessControlBlock>, std::map<int,ProcessControlBlock>)
+   * Main part is virtual function scheduling_decision schedulingDecision(int&, int&, const TaskMap &, const TaskMap &)
    */
   class Scheduler{
   public:

@@ -146,8 +146,7 @@ namespace SystemC_VPC {
               actualTask->getBlockEvent().latency->setDropped(true);
           }else{
               ProcessId pid = actualTask->getProcessId();
-              ProcessControlBlockPtr pcb = this->getPCB(pid);
-                    actualTask->setPCB(pcb);
+              actualTask->setPCB(getPCB(pid));
             this->taskTracer_->release(actualTask);
           }
             return;
@@ -155,8 +154,7 @@ namespace SystemC_VPC {
     }
 
     ProcessId pid = actualTask->getProcessId();
-    ProcessControlBlockPtr pcb = this->getPCB(pid);
-    actualTask->setPCB(pcb);
+    actualTask->setPCB(getPCB(pid));
     actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()

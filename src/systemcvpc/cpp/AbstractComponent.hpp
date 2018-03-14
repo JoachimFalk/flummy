@@ -50,7 +50,7 @@
 #include <systemcvpc/datatypes.hpp>
 #include "Delayer.hpp"
 #include "ProcessControlBlock.hpp"
-#include "FunctionTimingPool.hpp"
+#include "FunctionTiming.hpp"
 #include "Task.hpp"
 #include "PowerSumming.hpp"
 #include "PowerMode.hpp"
@@ -58,7 +58,6 @@
 #include "ComponentInfo.hpp"
 #include "ComponentModel.hpp"
 #include <systemcvpc/Attribute.hpp>
-#include "FunctionTimingPool.hpp"
 #include <systemcvpc/ScheduledTask.hpp>
 #include "timetriggered/tt_support.hpp"
 
@@ -66,11 +65,12 @@
 
 namespace SystemC_VPC {
 
-namespace Trace {
-  class TracerIf;
-}
+  namespace Trace {
+    class TracerIf;
+  }
 
-class ComponentObserver;
+  class ComponentObserver;
+  class ProcessControlBlock;
 
   using CoSupport::SystemC::Event;
 
@@ -87,7 +87,7 @@ class ComponentObserver;
     public Delayer,
     public ComponentModel,
     public ComponentInterface
-{
+  {
   
   public:
 
@@ -101,33 +101,24 @@ class ComponentObserver;
     /**
      * \brief Create the process control block.
      */
-    ProcessControlBlockPtr createPCB(const ProcessId pid){
-      assert(!hasPCB(pid));
-
-      pcbPool[pid].reset(new ProcessControlBlock( this ));
-      pcbPool[pid]->setPid(pid);
-
-      return getPCB(pid);
+    ProcessControlBlock *createPCB(const ProcessId pid) {
+      std::pair<PCBPool::iterator, bool> status
+        (pcbPool.insert(PCBPool::value_type(
+            pid,
+            ProcessControlBlockPtr(new ProcessControlBlock(this)))));
+      assert(status.second);
+      status.first->second->setPid(pid);
+      return status.first->second.get();
     }
 
-    bool hasPCB(const ProcessId pid) const
-    {
-      const PCBPool& pool = this->getPCBPool();
-      return (pool.find(pid) != pool.end());
+    bool hasPCB(ProcessId const pid) const {
+      return pcbPool.find(pid) != pcbPool.end();
     }
 
-    ProcessControlBlockPtr getPCB(const ProcessId pid) const
-    {
-      const PCBPool& pool = this->getPCBPool();
-      assert(hasPCB(pid));
-      return pool.find(pid)->second;
-    }
-
-    /**
-     *
-     */
-    const PCBPool& getPCBPool() const {
-      return this->pcbPool;
+    ProcessControlBlock *getPCB(ProcessId const pid) const {
+      PCBPool::const_iterator iter = pcbPool.find(pid);
+      assert(iter != pcbPool.end());
+      return iter->second.get();
     }
 
     virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList)
@@ -201,6 +192,8 @@ class ComponentObserver;
 
 
   protected:
+    typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
+    typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
 
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
     std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
@@ -252,8 +245,6 @@ class ComponentObserver;
       return newInstance;
     }
 
-  public:
-  
     AbstractComponent(Config::Component::Ptr component) :
         sc_core::sc_module(sc_core::sc_module_name(component->getName().c_str())),
         Delayer(component->getComponentId(),
@@ -276,6 +267,15 @@ class ComponentObserver;
       powerTable[ComponentState::IDLE]    = 0.0;
       powerTable[ComponentState::RUNNING] = 1.0;
     }
+
+    /**
+     *
+     */
+    const PCBPool& getPCBPool() const {
+      return this->pcbPool;
+    }
+
+  public:
 
     void addTracer(Trace::TracerIf *tracer);
             

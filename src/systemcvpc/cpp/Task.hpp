@@ -97,7 +97,7 @@ namespace SystemC_VPC {
     void        setGuardIds(FunctionIds gid)             {this->gid = gid;}
     EventPair   getBlockEvent()                          {return blockEvent;}
     void        setBlockEvent(EventPair p)               {this->blockEvent = p;}
-    void        setPCB(ProcessControlBlockPtr pcb)       {this->pcb = pcb;}
+    void        setPCB(ProcessControlBlock *pcb)         {this->pcb = pcb;}
     void        setTiming(FunctionTimingPtr timing)      {this->timing = timing;}
 
     void       ackBlockingCompute(){
@@ -244,8 +244,8 @@ namespace SystemC_VPC {
     
     int factorOverhead;
 
-    FunctionTimingPtr       timing;
-    ProcessControlBlockPtr  pcb;
+    FunctionTimingPtr    timing;
+    ProcessControlBlock *pcb;
     TaskPool            *pool;
 
     static int globalInstanceId;

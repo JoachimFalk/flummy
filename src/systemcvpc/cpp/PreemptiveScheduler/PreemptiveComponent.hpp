@@ -70,7 +70,7 @@ namespace SystemC_VPC {
     PreemptiveComponent( Config::Component::Ptr component);
 
     /**
-     * implementation of AbstractComponent::compute(ProcessControlBlock*)
+     * implementation of AbstractComponent::compute(Task *)
      */
     virtual void compute(Task* task);
 
