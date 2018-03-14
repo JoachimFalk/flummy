@@ -72,6 +72,9 @@ extern DebugOStream &getDbgOut();
 
 } // namespace SystemC_VPC
 
+// set for debugging output
+//#define VPC_DEBUG true;
+
 #define DBG_STREAM getDbgOut()
 #ifndef SYSTEMCVPC_ENABLE_DEBUG
 # define DBG_OUT(s)    do {} while(0)

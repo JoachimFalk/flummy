@@ -472,9 +472,10 @@ namespace SystemC_VPC {
     //generate new ProcessControlBlock or get existing one for
     // initialization
     const ProcessId pid = Director::getInstance().getProcessId(actorName);
+    ProcessControlBlock *pcb;
     if (!comp->hasPCB(pid)) {
       // This should be the first time the actor appeared here.
-      ProcessControlBlockPtr pcb = comp->createPCB(pid);
+      pcb = comp->createPCB(pid);
       pcb->configure(actorName.c_str(), true);
       pcb->setTraceSignal(comp->getOrCreateTraceSignal(actorName));
       Task &task = taskPool->getPrototype(pid);
@@ -482,8 +483,8 @@ namespace SystemC_VPC {
       task.setScheduledTask(actor);
       actor->setScheduler(comp);
       actor->setSchedulerInfo(allocateTask(pid));
-    }
-    ProcessControlBlockPtr pcb = comp->getPCB(pid);
+    } else
+      pcb = comp->getPCB(pid);
 
     //TODO: VC::Timing -> Timing
     const VC::Components & components = VC::getComponents();

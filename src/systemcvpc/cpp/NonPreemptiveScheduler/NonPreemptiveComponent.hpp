@@ -70,7 +70,7 @@ namespace SystemC_VPC{
 
   public:
     /**
-     * implementation of AbstractComponent::compute(ProcessControlBlock*)
+     * implementation of AbstractComponent::compute(Task *)
      */
     virtual void compute(Task* task);
 

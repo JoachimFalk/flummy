@@ -43,7 +43,6 @@
 
 #include "AbstractComponent.hpp"
 #include <systemcvpc/EventPair.hpp>
-#include "ProcessControlBlock.hpp"
 #include "RouteImpl.hpp"
 
 namespace SystemC_VPC{

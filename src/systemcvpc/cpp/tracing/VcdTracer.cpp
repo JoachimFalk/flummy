@@ -32,7 +32,6 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "../ProcessControlBlock.hpp"
 #include "../Task.hpp"
 #include <systemcvpc/config/Component.hpp>
 

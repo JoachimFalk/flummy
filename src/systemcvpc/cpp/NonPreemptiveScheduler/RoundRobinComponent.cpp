@@ -82,9 +82,9 @@ void RoundRobinComponent::setActivationCallback(bool flag) {
 void RoundRobinComponent::end_of_elaboration() {
   PCBPool const &pcbPool = getPCBPool();
   for (PCBPool::const_iterator it=pcbPool.begin(); it!=pcbPool.end(); ++it) {
-    std::cout << "\t " << it->second->getName() << std::endl;
+//  std::cout << "\t " << it->second->getName() << std::endl;
     Task &task = Director::getInstance().taskPool->getPrototype(it->first);
-    task.setPCB(it->second);
+    task.setPCB(it->second.get());
     if (task.hasScheduledTask()) {
       TaskInterface *scheduledTask = task.getScheduledTask();
       scheduledTask->setUseActivationCallback(false);

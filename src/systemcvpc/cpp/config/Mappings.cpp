@@ -34,10 +34,12 @@
 
 #include "Mappings.hpp"
 
-#include "../BlockingTransport.hpp"
 #include <systemcvpc/Director.hpp>
+
+#include "../BlockingTransport.hpp"
 #include "../RoutePool.hpp"
 #include "../StaticRoute.hpp"
+#include "../ProcessControlBlock.hpp"
 
 namespace SystemC_VPC
 {
@@ -199,7 +201,7 @@ SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute)
     AbstractComponent * c = Config::Mappings::getComponents()[component];
     route->addHop(component->getName(), c);
 
-    ProcessControlBlockPtr pcb = c->createPCB(Director::getProcessId(route->getName()));
+    ProcessControlBlock *pcb = c->createPCB(Director::getProcessId(route->getName()));
     pcb->configure(route->getName(), false);
     pcb->setTraceSignal(c->getOrCreateTraceSignal(route->getName()));
     pcb->setTiming(iter->getTransferTiming());
