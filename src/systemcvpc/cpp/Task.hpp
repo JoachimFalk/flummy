@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -42,13 +42,13 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
-
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/FastLink.hpp>
-#include "ProcessControlBlock.hpp"
 #include <systemcvpc/ScheduledTask.hpp>
+
 #include "TaskPool.hpp"
+#include "FunctionTiming.hpp"
 
 namespace SystemC_VPC {
 
@@ -58,35 +58,19 @@ namespace SystemC_VPC {
     class PajeTracer;
   }
 
+  class ProcessControlBlock;
+
   using CoSupport::SystemC::Event;
 
-  class Task{
-  public:
+  class Task {
     friend class Trace::VcdTracer;
     friend class Trace::PajeTracer;
     friend class NonPreemptiveComponent;
     friend class RoundRobinComponent;
-
-    Task(TaskPool * pool)
-      : pid(-1)
-      , fid()
-      , gid()
-      , blockEvent()
-      , blockingCompute(NULL)
-      , blockAck(false)
-      , exec(false)
-      , write(false)
-      , factorOverhead(0)
-      , timing()
-      , pcb()
-      , pool(pool)
-      , name("NN")
-      , timingScale(1)
-      , taskTracerTicket()
-      , scheduledTask(NULL)
-    {
-          this->instanceId = Task::globalInstanceId++;
-    }
+    friend class AssociativePrototypedPool<ProcessId, Task>;
+    friend class PrototypedPool<Task>;
+  public:
+    Task(TaskPool *pool);
 
     // getter, setter
     std::string getName() const                          {return name;}
@@ -127,19 +111,15 @@ namespace SystemC_VPC {
     // Begin from Simone Mueller //
     //////////////////////////////
 
-    //getter/setter of states that have to executed before the actual task can be.
-    void setPreState(std::string state)        {this->preState = state;}
-    std::string getPreState()                  {return this->preState;}
+    void setFactorOverhead(int complexity)
+      { this->factorOverhead = complexity; }
+    int getFactorOverhead() const
+      { return this->factorOverhead; }
 
-    //not used right now
-    void setRuntime(const sc_core::sc_time& runtime)     {this->runtime = runtime;}
-    sc_core::sc_time getRuntime()const                   {return this->runtime;}
-
-
-    void setFactorOverhead(int complexity)      {this->factorOverhead = complexity;}
-    int getFactorOverhead()                     {return this->factorOverhead;}
-    void setOverhead(const sc_core::sc_time& overhead)   {this->overhead = overhead;}
-    sc_core::sc_time getOverhead()const                  {return this->overhead;}
+    void setOverhead(const sc_core::sc_time &overhead)
+      { this->overhead = overhead; }
+    sc_core::sc_time getOverhead() const
+      { return this->overhead; }
     //////////////////////////////
     // End from Simone Mueller //
     //////////////////////////////
@@ -167,10 +147,11 @@ namespace SystemC_VPC {
     void initDelays();
 
     // Adaptor setter / getter for ProcessControlBlock
-    int getPriority()
-      {assert(pcb != NULL); return pcb->getPriority();}
-    sc_core::sc_time getPeriod()
-      {assert(pcb != NULL); return pcb->getPeriod();}
+    int              getPriority() const;
+
+    sc_core::sc_time getPeriod() const;
+
+    bool             isPSM() const;
 
     void release() {
       //this->setBlockEvent(EventPair(NULL, NULL));
@@ -179,51 +160,17 @@ namespace SystemC_VPC {
       pool->free(this->getProcessId(), this);
     }
 
-    bool isPSM()
-    {
-      return pcb->isPSM();
-    }
-
   private:
-    void traceReleaseTask(){
-      taskTracerTicket = pcb->taskTracer->releaseTask();
-    }
+    void traceReleaseTask();
+    void traceFinishTaskLatency();
 
-    void traceFinishTaskLatency(){
-      pcb->taskTracer->finishTaskLatency(taskTracerTicket);
-    }
-
-    Trace::Tracing* getTraceSignal() const
-      {assert(pcb != NULL); return pcb->getTraceSignal();}
-
-    friend class AssociativePrototypedPool<ProcessId, Task>;
-    friend class PrototypedPool<Task>;
-
-    Task(const Task &task) :
-      pid(task.pid),
-      fid(task.fid),
-      blockEvent(task.blockEvent),
-      blockingCompute(task.blockingCompute),
-      blockAck(task.blockAck),
-      exec(task.exec),
-      write(task.write),
-      delay(task.delay),
-      latency(task.latency),
-      remainingDelay(task.remainingDelay),
-      overhead(task.overhead),
-      runtime(task.runtime),
-      factorOverhead(task.factorOverhead),
-      timing(task.timing),
-      pcb(task.pcb),
-      pool(task.pool),
-      name(task.name),
-      timingScale(task.timingScale),
-      taskTracerTicket(task.taskTracerTicket),
-      scheduledTask(task.scheduledTask)
-    {
-          this->instanceId = Task::globalInstanceId++;
-    }
+    Task(const Task &task);
         
+    Trace::Tracing* getTraceSignal() const;
+
+    static int globalInstanceId;
+
+    int instanceId;
 
     ProcessId        pid;
     FunctionIds      fid;
@@ -242,7 +189,6 @@ namespace SystemC_VPC {
     sc_core::sc_time latency;
     sc_core::sc_time remainingDelay;
     sc_core::sc_time overhead;
-    sc_core::sc_time runtime;
     
     int factorOverhead;
 
@@ -250,14 +196,10 @@ namespace SystemC_VPC {
     ProcessControlBlock *pcb;
     TaskPool            *pool;
 
-    static int globalInstanceId;
-    int instanceId;
     std::string name;
     double timingScale;
     CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
     TaskInterface * scheduledTask;
-    std::string preState;
-    std::string destState;
   };
 
   static inline

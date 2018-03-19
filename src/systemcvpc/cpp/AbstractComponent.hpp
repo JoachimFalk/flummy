@@ -71,7 +71,6 @@ namespace SystemC_VPC {
   }
 
   class ComponentObserver;
-  class ProcessControlBlock;
 
   using CoSupport::SystemC::Event;
 
