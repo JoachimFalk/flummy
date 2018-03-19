@@ -34,49 +34,49 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <iostream>
-#include <sstream>
-
-#include <boost/foreach.hpp>
-
 #include "config.h"
+//#include <systemcvpc/vpc_config.h>
 
-#include <CoSupport/SystemC/systemc_time.hpp>
-#include "PreemptiveScheduler/PreemptiveComponent.hpp"
+#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/Director.hpp>
+#include <systemcvpc/InvalidArgumentException.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+
+#include "AbstractComponent.hpp"
+#include "ConfigCheck.hpp"
+#include "config/Mappings.hpp"
+#include "DebugOStream.hpp"
+#include "HysteresisLocalGovernor.hpp"
 #include "NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
 #include "NonPreemptiveScheduler/FcfsComponent.hpp"
 #include "NonPreemptiveScheduler/NonPreemptiveComponent.hpp"
 #include "NonPreemptiveScheduler/PriorityComponent.hpp"
 #include "NonPreemptiveScheduler/RoundRobinComponent.hpp"
-#include "tracing/PajeTracer.hpp"
-#include <systemcvpc/vpc_config.h>
-
-#include <systemcvpc/Director.hpp>
-#include "AbstractComponent.hpp"
-#include "VPCBuilder.hpp"
-#include <systemcvpc/InvalidArgumentException.hpp>
-#include "PowerSumming.hpp"
-#include "Task.hpp"
-#include "SelectFastestPowerModeGlobalGovernor.hpp"
-#include "HysteresisLocalGovernor.hpp"
 #include "PluggablePowerGovernor.hpp"
-#include "StaticRoute.hpp"
+#include "PowerSumming.hpp"
+#include "PreemptiveScheduler/PreemptiveComponent.hpp"
+#include "ProcessControlBlock.hpp"
 #include "RoutePool.hpp"
-#include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/config/VpcApi.hpp>
-
-#include "ConfigCheck.hpp"
-#include "config/Mappings.hpp"
-
-#include "tracing/NullTracer.hpp"
+#include "SelectFastestPowerModeGlobalGovernor.hpp"
+#include "StaticRoute.hpp"
+#include "Task.hpp"
 #include "tracing/DataBaseTracer.hpp"
+#include "tracing/NullTracer.hpp"
+#include "tracing/PajeTracer.hpp"
 #include "tracing/VcdTracer.hpp"
+#include "VPCBuilder.hpp"
+
+#include <CoSupport/SystemC/systemc_time.hpp>
+
 #include <systemc>
+
+#include <boost/foreach.hpp>
+
+#include <iostream>
 #include <map>
+#include <sstream>
 #include <vector>
-
-#include "DebugOStream.hpp"
-
 
 namespace SystemC_VPC {
 

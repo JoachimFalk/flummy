@@ -35,10 +35,58 @@
  */
 
 #include "Task.hpp"
+#include "ProcessControlBlock.hpp"
 
 namespace SystemC_VPC{
 
   int Task::globalInstanceId = 0;
+
+  Task::Task(TaskPool *pool)
+    : instanceId(globalInstanceId++)
+    , pid(-1)
+    , fid()
+    , gid()
+    , blockEvent()
+    , blockingCompute(NULL)
+    , blockAck(false)
+    , exec(false)
+    , write(false)
+    , factorOverhead(0)
+    , timing()
+    , pcb()
+    , pool(pool)
+    , name("NN")
+    , timingScale(1)
+    , taskTracerTicket()
+    , scheduledTask(NULL)
+    {}
+
+  Task::Task(const Task &task)
+    : instanceId(globalInstanceId++)
+    , pid(task.pid)
+    , fid(task.fid)
+    , gid(task.gid)
+    , blockEvent(task.blockEvent)
+    , blockingCompute(task.blockingCompute)
+    , blockAck(task.blockAck)
+    , exec(task.exec)
+    , write(task.write)
+    , startTime(task.startTime)
+    , endTime(task.endTime)
+    , blockingTime(task.blockingTime)
+    , delay(task.delay)
+    , latency(task.latency)
+    , remainingDelay(task.remainingDelay)
+    , overhead(task.overhead)
+    , factorOverhead(task.factorOverhead)
+    , timing(task.timing)
+    , pcb(task.pcb)
+    , pool(task.pool)
+    , name(task.name)
+    , timingScale(task.timingScale)
+    , taskTracerTicket(task.taskTracerTicket)
+    , scheduledTask(task.scheduledTask)
+    {}
 
   void Task::initDelays() {
     assert(pcb != NULL);
@@ -58,5 +106,25 @@ namespace SystemC_VPC{
     // Initialize with Latency
     this->setLatency(this->timingScale * timing->getLatency(fids));
   }
+
+  // Adaptor setter / getter for ProcessControlBlock
+  int Task::getPriority() const
+    { assert(pcb != NULL); return pcb->getPriority();}
+  sc_core::sc_time Task::getPeriod() const
+    { assert(pcb != NULL); return pcb->getPeriod();}
+
+  bool Task::isPSM() const
+    { return pcb->isPSM(); }
+
+  void Task::traceReleaseTask(){
+    taskTracerTicket = pcb->taskTracer->releaseTask();
+  }
+
+  void Task::traceFinishTaskLatency(){
+    pcb->taskTracer->finishTaskLatency(taskTracerTicket);
+  }
+
+  Trace::Tracing* Task::getTraceSignal() const
+    {assert(pcb != NULL); return pcb->getTraceSignal();}
 
 }
