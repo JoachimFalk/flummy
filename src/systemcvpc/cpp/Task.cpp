@@ -114,14 +114,14 @@ namespace SystemC_VPC{
     { assert(pcb != NULL); return pcb->getPeriod();}
 
   bool Task::isPSM() const
-    { return pcb->isPSM(); }
+    { return pcb->getTaskIsPSM(); }
 
   void Task::traceReleaseTask(){
-    taskTracerTicket = pcb->taskTracer->releaseTask();
+    taskTracerTicket = pcb->getTaskTracer()->releaseTask();
   }
 
   void Task::traceFinishTaskLatency(){
-    pcb->taskTracer->finishTaskLatency(taskTracerTicket);
+    pcb->getTaskTracer()->finishTaskLatency(taskTracerTicket);
   }
 
   Trace::Tracing* Task::getTraceSignal() const
