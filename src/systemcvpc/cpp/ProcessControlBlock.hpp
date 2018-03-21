@@ -71,23 +71,7 @@ namespace SystemC_VPC {
   * and provides necessary access methods for its data.
   */
   class ProcessControlBlock {
-    friend class AbstractComponent;
-    friend class Task;
-
   public:
-    /**
-     * \brief Sets name of instance
-     */
-    void configure(std::string name, bool tracing);
-
-    void setTraceSignal(Trace::Tracing* signal);
-
-    void setTiming(const Config::Timing& timing);
-
-    void setPriority(int priority);
-
-    void setActorAsPSM(bool psm);
-  protected:
     /**
      * \brief Default constructor of an PCB instance
      * Initialize a newly created instance of ProcessControlBlock
@@ -95,59 +79,42 @@ namespace SystemC_VPC {
     ProcessControlBlock( AbstractComponent * component );
 
     /**
-     * \brief Used to access name of PCB
+     * \brief Sets name of instance
      */
-    std::string const& getName() const;
+    void configure(std::string name, bool tracing);
 
-    void setPid( ProcessId pid);
-    ProcessId getPid( ) const;
+    void            setTraceSignal(Trace::Tracing *signal)
+      { traceSignal = signal; }
+    Trace::Tracing *getTraceSignal() const
+      { return traceSignal; }
 
-    /**
-     * \brief Sets currently associated function id of process
-     */
-    void setFunctionId( FunctionId fid);
-    FunctionId getFunctionId( ) const;
+    CoSupport::Tracing::TaskTracer *getTaskTracer() const
+      { return taskTracer.get(); }
 
-    /**
-     * \brief due to pipelining, there may be several instances of a process
-     */
-    int getInstanceId() const;
+    void setTiming(const Config::Timing &timing);
 
+    void      setPid(ProcessId pid)
+      { this->pid = pid; }
+    ProcessId getPid() const
+      { return pid; }
 
-    /**
-     * \brief Gets currently associated function name of PCB instance
-     */
-    const char* getFuncName() const;
-
-    void setPeriod(sc_core::sc_time period);
+    void      setPriority(int priority)
+      { this->priority = priority; }
+    int       getPriority() const
+      { return priority; }
 
     sc_core::sc_time getPeriod() const;
 
-    int getPriority() const;
-
-    void setDeadline(sc_core::sc_time deadline);
-
-    sc_core::sc_time getDeadline() const;
-
-    Trace::Tracing *getTraceSignal() const;
-
-    void setBaseDelay(sc_core::sc_time delay);
-    void setBaseLatency(sc_core::sc_time latency);
-    void addDelay(FunctionId fid, sc_core::sc_time delay);
-    void addLatency(FunctionId fid, sc_core::sc_time latency);
-
-    bool isPSM();
-
+    void setTaskIsPSM(bool flag)
+      { psm = flag; }
+    bool getTaskIsPSM() const
+      { return psm; }
   private:
-    std::string name;
     ProcessId   pid;
-    FunctionId  fid;
 
     int priority;
-    sc_core::sc_time period;
-    sc_core::sc_time deadline;
-    Trace::Tracing * traceSignal;
-    AbstractComponent * component;
+    Trace::Tracing    *traceSignal;
+    AbstractComponent *component;
     CoSupport::Tracing::TaskTracer::Ptr taskTracer;
     bool psm;
   };

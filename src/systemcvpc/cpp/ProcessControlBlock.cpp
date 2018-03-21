@@ -50,120 +50,26 @@
 namespace SystemC_VPC{
 
   ProcessControlBlock::ProcessControlBlock( AbstractComponent * component )
-    : name("NN"), component(component), psm(false)
-  {
-    this->deadline = sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
-    this->period = sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
-    this->priority = 0;
-    this->traceSignal = NULL;
-  }
+    : pid(-1)
+    , priority(0)
+    , traceSignal(nullptr)
+    , component(component)
+    , psm(false) {}
 
   void ProcessControlBlock::configure(std::string name, bool tracing){
-    this->name = name;
     taskTracer =
         CoSupport::Tracing::TracingFactory::getInstance().createTaskTracer(name,
             component->getName());
   }
 
-  std::string const& ProcessControlBlock::getName() const{
-    return this->name;
-  }
-
-  void ProcessControlBlock::setPid( ProcessId pid){
-    this->pid=pid;
-  }
-
-  ProcessId ProcessControlBlock::getPid( ) const{
-    return this->pid;
-  }
-      
-  void ProcessControlBlock::setFunctionId( FunctionId fid){
-    this->fid=fid;
-  }
-
-  FunctionId ProcessControlBlock::getFunctionId( ) const{
-    return this->fid;
-  }
-
-  const char* ProcessControlBlock::getFuncName() const{
-    assert(0);
-    return "";
-  }
-
-  void ProcessControlBlock::setPeriod(sc_core::sc_time period){
-    this->period = period;
-  }
-
   sc_core::sc_time ProcessControlBlock::getPeriod() const{
-    return this->period;
+    return sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
   }
 
-  void ProcessControlBlock::setPriority(int priority){
-    this->priority = priority;
-  }
-
-  int ProcessControlBlock::getPriority() const{
-    return this->priority;
-  }
-
-  void ProcessControlBlock::setDeadline(sc_core::sc_time deadline){
-    if(deadline > sc_core::SC_ZERO_TIME){
-      this->deadline = deadline;
-    }else{
-      this->deadline = sc_core::SC_ZERO_TIME;
-    }
-  }
-
-  sc_core::sc_time ProcessControlBlock::getDeadline() const{
-    return this->deadline;
-  }
-
-  void ProcessControlBlock::setTraceSignal(Trace::Tracing* signal){
-    this->traceSignal = signal;
-  }
-
-  Trace::Tracing* ProcessControlBlock::getTraceSignal() const {
-    return this->traceSignal;
-  }
-
-  void ProcessControlBlock::setTiming(const Config::Timing& timing){
+  void ProcessControlBlock::setTiming(const Config::Timing &timing) {
     const PowerMode *mode = this->component->translatePowerMode(timing.getPowerMode());
     FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
     ft->setTiming(timing);
-  }
-
-  void ProcessControlBlock::setBaseDelay(sc_core::sc_time delay){
-    const PowerMode *mode = this->component->translatePowerMode("SLOW");
-    FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
-    ft->setBaseDelay(delay);
-  }
-
-  void ProcessControlBlock::setBaseLatency(sc_core::sc_time latency){
-    const PowerMode *mode = this->component->translatePowerMode("SLOW");
-    FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
-    ft->setBaseLatency(latency);
-  }
-
-  void ProcessControlBlock::addDelay(FunctionId fid, sc_core::sc_time delay){
-    const PowerMode *mode = this->component->translatePowerMode("SLOW");
-    FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
-    ft->addDelay(fid, delay);
-  }
-
-  void ProcessControlBlock::addLatency(FunctionId fid, sc_core::sc_time latency){
-    const PowerMode *mode = this->component->translatePowerMode("SLOW");
-    FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
-    ft->addLatency(fid, latency);
-  }
-
-  void ProcessControlBlock::setActorAsPSM(bool psm)
-  {
-    this->psm = psm;
-  }
-
-  bool ProcessControlBlock::isPSM()
-  {
-    return this->psm;
   }
 
 } // namespace SystemC_VPC
