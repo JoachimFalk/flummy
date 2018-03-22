@@ -36,6 +36,7 @@
 
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
 #include <smoc/SimulatorAPI/TaskInterface.hpp>
+#include <smoc/SimulatorAPI/TransitionInterface.hpp>
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/Director.hpp>
@@ -62,8 +63,8 @@ public:
   EnablementStatus evaluateOptionsMap(
       boost::program_options::variables_map &vm);
 
-  SchedulerInterface *registerTask(TaskInterface *task);
-
+  void registerTask(TaskInterface *task);
+  void registerTransition(TransitionInterface *transition);
 };
 
 SystemCVPCSimulator::SystemCVPCSimulator() {
@@ -151,9 +152,12 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
   return retval;
 }
 
-SchedulerInterface *SystemCVPCSimulator::registerTask(TaskInterface *task)
+void SystemCVPCSimulator::registerTask(TaskInterface *task)
 {
-  return nullptr;
+}
+
+void SystemCVPCSimulator::registerTransition(TransitionInterface *transition)
+{
 }
 
 SystemCVPCSimulator systemCVPCSimulator;
