@@ -83,6 +83,7 @@ namespace SystemC_VPC {
   namespace {
     namespace VC = Config;
 
+/*
     static
     void injectTaskName(TaskInterface * actor,
         std::string actorName)
@@ -106,6 +107,7 @@ namespace SystemC_VPC {
       assert(VC::hasTask(actorName) && VC::hasTask(*actor));
       assert(VC::getCachedTask(actorName) == VC::getCachedTask(*actor));
     }
+ */
 
     static
     void injectRoute(std::string src, std::string dest, sc_core::sc_port_base * leafPort)
@@ -806,7 +808,7 @@ namespace SystemC_VPC {
     ProcessId pid = getProcessId(  actorName  );
 
     try {
-      injectTaskName(actor, actorName);
+      //injectTaskName(actor, actorName);
       finalizeMapping(actor, actorName, actionNames, guardNames);
     }catch(std::exception & e){
       std::cerr << "Actor registration failed for \"" << actorName <<

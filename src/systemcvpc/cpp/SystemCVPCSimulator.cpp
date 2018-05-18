@@ -34,12 +34,15 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#include "config.h"
+
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
 #include <smoc/SimulatorAPI/TaskInterface.hpp>
 #include <smoc/SimulatorAPI/TransitionInterface.hpp>
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/Director.hpp>
+#include <systemcvpc/config/VpcApi.hpp>
 
 #include "DebugOStream.hpp"
 
@@ -48,6 +51,7 @@ namespace SystemC_VPC {
 using namespace smoc::SimulatorAPI;
 
 namespace po = boost::program_options;
+namespace VC = Config;
 
 class SystemCVPCSimulator
   : public SimulatorInterface
@@ -64,7 +68,6 @@ public:
       boost::program_options::variables_map &vm);
 
   void registerTask(TaskInterface *task);
-  void registerTransition(TransitionInterface *transition);
 };
 
 SystemCVPCSimulator::SystemCVPCSimulator() {
@@ -152,12 +155,30 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
   return retval;
 }
 
-void SystemCVPCSimulator::registerTask(TaskInterface *task)
-{
-}
+void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
+  VC::VpcTask::Ptr vpcTask1 = VC::hasTask(static_cast<ScheduledTask &>(*actor))
+    ? VC::getCachedTask(static_cast<ScheduledTask &>(*actor))
+    : nullptr;
+  VC::VpcTask::Ptr vpcTask2 = VC::hasTask(actor->name())
+    ? VC::getCachedTask(actor->name())
+    : nullptr;
+  if (!vpcTask1 && !vpcTask2)
+    throw VC::ConfigException(std::string(actor->name()) +
+        " has NO configuration data at all.");
+  if (vpcTask1 && vpcTask2 && vpcTask1 != vpcTask2) {
+    // TODO: Check if a merging strategy is required.
+    throw VC::ConfigException(std::string(actor->name()) +
+        " has configuration data from XML and from configuration API.");
+  }
+  if (!vpcTask1)
+    VC::setCachedTask(&static_cast<ScheduledTask &>(*actor), (vpcTask1 = vpcTask2));
+  else if (!vpcTask2)
+    VC::setCachedTask(actor->name(), (vpcTask2 = vpcTask1));
+  assert(VC::hasTask(actor->name()) && VC::hasTask(static_cast<ScheduledTask &>(*actor)));
+  assert(VC::getCachedTask(actor->name()) == VC::getCachedTask(static_cast<ScheduledTask &>(*actor)));
 
-void SystemCVPCSimulator::registerTransition(TransitionInterface *transition)
-{
+
+
 }
 
 SystemCVPCSimulator systemCVPCSimulator;
