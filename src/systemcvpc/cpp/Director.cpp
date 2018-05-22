@@ -445,8 +445,6 @@ namespace SystemC_VPC {
 
     assert( comp != NULL );
     mappings[pid] = comp;
-    if(reverseMapping[cid] == NULL) reverseMapping[cid] = new ProcessList();
-    reverseMapping[cid]->push_back(pid);
   }
    
   void Director::finalizeMapping(
@@ -581,11 +579,6 @@ namespace SystemC_VPC {
         iter != hops.end();
         ++iter){
       ComponentId hid = this->getComponentId((*iter)->getName());
-      if(reverseMapping[hid] == NULL) reverseMapping[hid] = new ProcessList();
-      DBG_OUT("register reverse Route-mapping: " << (*iter)->getName()
-                << " " << hid << " -> "
-                << pid << std::endl);
-      reverseMapping[hid]->push_back(pid);
     }
 
   }
@@ -909,11 +902,6 @@ namespace SystemC_VPC {
     }
   }
 
-  std::vector<ProcessId> * Director::getTaskAnnotation(std::string compName){
-    ComponentId cid=getComponentId(compName);
-    return reverseMapping[cid];
-  }
-  
   void Director::debugUnknownNames( ) const {
     bool route = false;
     bool mappings = false;
