@@ -226,8 +226,6 @@ namespace SystemC_VPC{
      */
     static sc_core::sc_time createSC_Time(std::string timeString) throw(InvalidArgumentException);
     
-    std::vector<ProcessId> * getTaskAnnotation(std::string compName);
-
     static bool hasFunctionId(const std::string& function);
     static FunctionId getFunctionId(const std::string& function);
     static FunctionId createFunctionId(const std::string& function);
@@ -282,8 +280,6 @@ namespace SystemC_VPC{
     Mappings                        mappings;
 
     typedef std::vector<ProcessId>                ProcessList;  
-    typedef std::map<ComponentId, ProcessList *>  ReverseMapping;
-    ReverseMapping                                reverseMapping;
 
     // output file to write result to
     std::string vpc_result_file;
