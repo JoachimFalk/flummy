@@ -44,6 +44,9 @@
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
+#include "AbstractComponent.hpp"
+#include "config/Mappings.hpp"
+
 #include "DebugOStream.hpp"
 
 namespace SystemC_VPC {
@@ -177,8 +180,30 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   assert(VC::hasTask(actor->name()) && VC::hasTask(static_cast<ScheduledTask &>(*actor)));
   assert(VC::getCachedTask(actor->name()) == VC::getCachedTask(static_cast<ScheduledTask &>(*actor)));
 
+  VC::VpcTask::Ptr &task = vpcTask1;
+  assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
+  VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
+#ifndef NDEBUG
+  if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
+    for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
+         iter != VC::Mappings::getComponents().end();
+         ++iter) {
+      std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
+    }
+    std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
+    assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
+  }
+#endif //NDEBUG
+  AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
 
-
+  // Generate new ProcessControlBlock.
+  const ProcessId pid = Director::getInstance().getProcessId(actor->name());
+  // This should be the first time the actor appeared here.
+  assert(!comp->hasPCB(pid));
+  ProcessControlBlock *pcb = comp->createPCB(pid);
+  pcb->configure(actor->name(), true);
+  pcb->setTraceSignal(comp->getOrCreateTraceSignal(actor->name()));
+  actor->setScheduler(comp);
 }
 
 SystemCVPCSimulator systemCVPCSimulator;
