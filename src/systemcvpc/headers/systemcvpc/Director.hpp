@@ -172,15 +172,6 @@ namespace SystemC_VPC{
     void registerComponent(Delayer *comp);
     
     /**
-     * \brief Register mapping between task and component to Director
-     * \param taskName specifies name of task
-     * \param compName specifies name of component
-     */
-    void registerMapping(
-        const std::string &taskName,
-        const std::string &compName);
-
-    /**
      * \brief Register a communication route.
      * \param route the route
      */

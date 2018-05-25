@@ -83,32 +83,6 @@ namespace SystemC_VPC {
   namespace {
     namespace VC = Config;
 
-/*
-    static
-    void injectTaskName(TaskInterface * actor,
-        std::string actorName)
-    {
-      if (VC::hasTask(actorName) && VC::hasTask(*actor)) {
-        if (VC::getCachedTask(actorName) != VC::getCachedTask(*actor)) {
-          // TODO: Check if a merging strategy is required.
-          throw VC::ConfigException(actorName +
-              " has configuration data from XML and from configuration API.");
-        }
-      } else if (!VC::hasTask(actorName) && !VC::hasTask(*actor)) {
-        throw VC::ConfigException(actorName + " has NO configuration data at all.");
-      } else if (VC::hasTask(actorName)){
-        VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
-        VC::setCachedTask(&static_cast<ScheduledTask &>(*actor), task);
-        task->inject(&static_cast<ScheduledTask &>(*actor));
-      } else if (VC::hasTask(*actor)){
-        VC::VpcTask::Ptr task = VC::getCachedTask(*actor);
-        VC::setCachedTask(actorName, task);
-      }
-      assert(VC::hasTask(actorName) && VC::hasTask(*actor));
-      assert(VC::getCachedTask(actorName) == VC::getCachedTask(*actor));
-    }
- */
-
     static
     void injectRoute(std::string src, std::string dest, sc_core::sc_port_base * leafPort)
     {
@@ -416,73 +390,29 @@ namespace SystemC_VPC {
             << ") [" << comp->getComponentId() << "] # " << components.size()
             << std::endl);
   }
-    
-  /**
-   * \brief Implementation of Director::registerMapping
-   */
-  void Director::registerMapping(const std::string& taskName,
-      const std::string& compName)
-  {
-    assert(!FALLBACKMODE);
-    DBG_OUT("registerMapping( " << taskName<< ", " << compName << " )"<< std::endl);
-    ProcessId       pid = getProcessId( taskName );
-//  if( pid >= mappings.size() ){
-//    mappings.resize( pid + 100, NULL );
-//  }
 
-    if( !taskPool->contains( pid ) ){
-      Task &task = taskPool->createObject( pid );
-      task.setProcessId( pid );
-      task.setName( taskName );
-    }
-
-//  assert(pid <= mappings.size());
-//  ComponentId cid = this->getComponentId(compName);
-//  Delayer * comp = components[cid];
-//  assert( comp != NULL );
-//  mappings[pid] = comp;
-  }
-   
   void Director::finalizeMapping(
       TaskInterface       *actor,
       std::string   const &actorName,
       FunctionNames const &actionNames,
       FunctionNames const &guardNames)
   {
-    VC::VpcTask::Ptr task = VC::getCachedTask(actorName);
-    assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
-    VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
-#ifndef NDEBUG
-    if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
-      for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
-           iter != VC::Mappings::getComponents().end();
-           ++iter) {
-        std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
-      }
-      std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
-      assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
-    }
-#endif //NDEBUG
-    AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
-    Director::getInstance().registerMapping(actorName.c_str(),
-        comp->getName());
+    AbstractComponent * comp = static_cast<AbstractComponent *>(actor->getScheduler());
 
-    //generate new ProcessControlBlock or get existing one for
-    // initialization
     const ProcessId pid = Director::getInstance().getProcessId(actorName);
-    ProcessControlBlock *pcb;
-    if (!comp->hasPCB(pid)) {
-      // This should be the first time the actor appeared here.
-      pcb = comp->createPCB(pid);
-      pcb->configure(actorName.c_str(), true);
-      pcb->setTraceSignal(comp->getOrCreateTraceSignal(actorName));
-      Task &task = taskPool->getPrototype(pid);
+    // Get existing ProcessControlBlock
+    ProcessControlBlock *pcb = comp->getPCB(pid);
+
+    if (!taskPool->contains( pid )) {
+      Task &task = taskPool->createObject(pid);
       task.setPCB(pcb);
+      task.setProcessId( pid );
       task.setScheduledTask(actor);
-      actor->setScheduler(comp);
+      task.setName(actor->name());
       actor->setSchedulerInfo(allocateTask(pid));
-    } else
-      pcb = comp->getPCB(pid);
+    }
+
+    VC::VpcTask::Ptr task = VC::getCachedTask(static_cast<ScheduledTask &>(*actor));
 
     //TODO: VC::Timing -> Timing
     const VC::Components & components = VC::getComponents();
@@ -579,22 +509,6 @@ namespace SystemC_VPC {
   Task* Director::allocateTask(ProcessId pid){
     return this->taskPool->allocate(pid);
   }
-
-/*void Director::assertMapping(ProcessId const pid){
-    if (mappings.size() < pid ||
-        mappings[pid] == NULL) {
-
-      Task &task = this->taskPool->getPrototype(pid);
-
-      std::cerr << "Unknown mapping <"
-          << task.getName() << "> to ??" << std::endl;
-
-      assert(mappings.size() >= pid &&
-             mappings[pid] != NULL);
-      exit(-1);
-    }
-  }
- */
 
   //
   const Delayer * Director::getComponent(FastLink const *vpcLink) const {
@@ -706,7 +620,7 @@ namespace SystemC_VPC {
 
   // FunctionIds are used (get) by SysteMoC.
   // The default ID (and a default timing) is used if no ID was created during
-  // parsing. (The function name was not given in the XM.L)
+  // parsing. (The function name was not given in the XML.)
   FunctionId Director::getFunctionId(const std::string& function){
     FunctionIdMap::const_iterator iter = getFunctionIdMap().find(function);
 
