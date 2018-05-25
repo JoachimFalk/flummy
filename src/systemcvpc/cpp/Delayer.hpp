@@ -40,7 +40,7 @@
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
 #include <smoc/SimulatorAPI/TaskInterface.hpp>
 
-#include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/datatypes.hpp>
 
 #include "ComponentInfo.hpp"
 #include "ComponentObserver.hpp"

@@ -39,11 +39,15 @@
 
 #include <stddef.h>
 
+#include <vector>
+
 namespace SystemC_VPC {
 
 typedef size_t ComponentId;
 typedef size_t ProcessId;
-typedef size_t FunctionId;
+
+typedef size_t                  FunctionId;
+typedef std::vector<FunctionId> FunctionIds;
 
 /******************************************************************************
  *
@@ -76,4 +80,5 @@ private:
 };
 
 } // namespace SystemC_VPC
+
 #endif /* _INCLUDED_SYSTEMCVPC_DATATYPES_HPP */

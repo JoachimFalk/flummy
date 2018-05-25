@@ -36,15 +36,18 @@
 
 #ifndef _INCLUDED_SYSTEMCVPC_FASTLINK_HPP
 #define _INCLUDED_SYSTEMCVPC_FASTLINK_HPP
-#include <systemc>
+
 #include "EventPair.hpp"
+
 #include "datatypes.hpp"
+
+#include <systemc>
 
 #include <vector>
 
 namespace SystemC_VPC{
 
-typedef std::vector<FunctionId> FunctionIds;
+  class Delayer;
 
   /**
    *
@@ -77,17 +80,19 @@ typedef std::vector<FunctionId> FunctionIds;
      */
     ComponentId getComponentId() const;
 
-    FastLink(ProcessId pid, FunctionIds actionIds, FunctionIds guardIds, int complexity)
-      : process(pid)
+    FastLink(Delayer *component, ProcessId pid, FunctionIds actionIds, FunctionIds guardIds, int complexity)
+      : component(component)
+      , process(pid)
       , actionIds(actionIds)
       , guardIds(guardIds)
       , complexity(complexity)
     { }
 
     FastLink()
-      : process(-1), complexity(0)
+      : component(nullptr), process(-1), complexity(0)
     { }
 
+    Delayer             *component;
     ProcessId            process;
     FunctionIds          actionIds;
     FunctionIds          guardIds;
