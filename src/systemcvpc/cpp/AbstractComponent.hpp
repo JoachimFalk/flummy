@@ -50,6 +50,9 @@
 
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/datatypes.hpp>
+#include <systemcvpc/Attribute.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+
 #include "Delayer.hpp"
 #include "FunctionTiming.hpp"
 #include "Task.hpp"
@@ -58,9 +61,8 @@
 #include "PluggablePowerGovernor.hpp"
 #include "ComponentInfo.hpp"
 #include "ComponentModel.hpp"
-#include <systemcvpc/Attribute.hpp>
-#include <systemcvpc/ScheduledTask.hpp>
 #include "timetriggered/tt_support.hpp"
+#include "ProcessControlBlock.hpp"
 
 #include <list>
 

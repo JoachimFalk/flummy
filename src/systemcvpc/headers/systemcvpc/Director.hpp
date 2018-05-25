@@ -255,7 +255,7 @@ namespace SystemC_VPC{
 
     void debugUnknownNames( ) const;
 
-    void assertMapping(ProcessId const pid);
+//  void assertMapping(ProcessId const pid);
 
     void finalizeMapping(
          TaskInterface       *actor,
@@ -276,10 +276,8 @@ namespace SystemC_VPC{
     typedef std::vector<Delayer* >  Components;
     Components                      components;
     
-    typedef std::vector<Delayer* >  Mappings;
-    Mappings                        mappings;
-
-    typedef std::vector<ProcessId>                ProcessList;  
+//  typedef std::vector<Delayer* >  Mappings;
+//  Mappings                        mappings;
 
     // output file to write result to
     std::string vpc_result_file;

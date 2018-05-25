@@ -38,6 +38,8 @@
 #define _INCLUDED_SYSTEMCVPC_TASKPOOL_HPP
 
 #include "Pool.hpp"
+
+#include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/FastLink.hpp>
 
 namespace SystemC_VPC {

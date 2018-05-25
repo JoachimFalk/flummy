@@ -289,9 +289,7 @@ namespace SystemC_VPC {
     
       //HINT: also treat mode!!
       //if( endPair.latency != NULL ) endPair.latency->notify();
-    
-      assertMapping(fLink->process);
-      
+      assert(fLink->component);
       return task;
     } catch (NotAllocatedException &e) {
       std::cerr << "Unknown Task: ID = " << fLink->process
@@ -324,7 +322,8 @@ namespace SystemC_VPC {
     task->setName(task->getName().append("_check"));
     task->setTimingScale(1);
 
-    Delayer *comp = mappings[fLink->process];
+    Delayer *comp = fLink->component;
+    assert(comp);
     comp->check(task);
   }
 
@@ -344,7 +343,7 @@ namespace SystemC_VPC {
     task->setBlockEvent( endPair );
     task->setTimingScale(1);
 
-    Delayer* comp = mappings[fLink->process];
+    Delayer* comp = fLink->component;
     comp->compute(task);
     postCompute(task, endPair);
   }
@@ -370,7 +369,7 @@ namespace SystemC_VPC {
     task->setTimingScale(quantum);
     assert(!FALLBACKMODE);
 
-    Delayer* comp = mappings[fLink->process];
+    Delayer* comp = fLink->component;
     comp->compute(task);
     postCompute(task, endPair);
   }
@@ -396,7 +395,7 @@ namespace SystemC_VPC {
     task->setTimingScale(quantum);
     assert(!FALLBACKMODE);
 
-    Delayer* comp = mappings[fLink->process];
+    Delayer* comp = fLink->component;
     comp->compute(task);
     postCompute(task, endPair);
   }
@@ -427,9 +426,9 @@ namespace SystemC_VPC {
     assert(!FALLBACKMODE);
     DBG_OUT("registerMapping( " << taskName<< ", " << compName << " )"<< std::endl);
     ProcessId       pid = getProcessId( taskName );
-    if( pid >= mappings.size() ){
-      mappings.resize( pid + 100, NULL );
-    }
+//  if( pid >= mappings.size() ){
+//    mappings.resize( pid + 100, NULL );
+//  }
 
     if( !taskPool->contains( pid ) ){
       Task &task = taskPool->createObject( pid );
@@ -437,14 +436,11 @@ namespace SystemC_VPC {
       task.setName( taskName );
     }
 
-    assert(pid <= mappings.size());
-    
-    ComponentId cid = this->getComponentId(compName);
-
-    Delayer * comp = components[cid];
-
-    assert( comp != NULL );
-    mappings[pid] = comp;
+//  assert(pid <= mappings.size());
+//  ComponentId cid = this->getComponentId(compName);
+//  Delayer * comp = components[cid];
+//  assert( comp != NULL );
+//  mappings[pid] = comp;
   }
    
   void Director::finalizeMapping(
@@ -555,9 +551,9 @@ namespace SystemC_VPC {
     const std::string & compName = route->getName();
 
     ProcessId       pid = getProcessId( taskName );
-    if( pid >= mappings.size() ){
-      mappings.resize( pid + 100, NULL );
-    }
+//  if( pid >= mappings.size() ){
+//    mappings.resize( pid + 100, NULL );
+//  }
     DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< std::endl);
 
     if( !taskPool->contains( pid ) ){
@@ -566,28 +562,25 @@ namespace SystemC_VPC {
       task.setName( taskName );
     }
 
-    assert(pid <= mappings.size());
-    
-    ComponentId cid = this->getComponentId(compName);
+//  assert(pid <= mappings.size());
+//  ComponentId cid = this->getComponentId(compName);
+//  Delayer * comp = components[cid];
 
-    Delayer * comp = components[cid];
-
-    assert( comp != NULL );
-    mappings[pid] = comp;
-    const ComponentList& hops = route->getHops();
-    for(ComponentList::const_iterator iter = hops.begin();
-        iter != hops.end();
-        ++iter){
-      ComponentId hid = this->getComponentId((*iter)->getName());
-    }
-
+//  assert( comp != NULL );
+//  mappings[pid] = comp;
+//  const ComponentList& hops = route->getHops();
+//  for(ComponentList::const_iterator iter = hops.begin();
+//      iter != hops.end();
+//      ++iter){
+//    ComponentId hid = this->getComponentId((*iter)->getName());
+//  }
   }
 
   Task* Director::allocateTask(ProcessId pid){
     return this->taskPool->allocate(pid);
   }
 
-  void Director::assertMapping(ProcessId const pid){
+/*void Director::assertMapping(ProcessId const pid){
     if (mappings.size() < pid ||
         mappings[pid] == NULL) {
 
@@ -601,18 +594,12 @@ namespace SystemC_VPC {
       exit(-1);
     }
   }
+ */
 
   //
   const Delayer * Director::getComponent(FastLink const *vpcLink) const {
-    if (mappings.size() < vpcLink->process ||
-        mappings[vpcLink->process] == NULL) {
-      std::string name = ConfigCheck::getProcessName(vpcLink->process);
-      std::cerr << "Unknown mapping for task " << name << std::endl;
-
-      debugUnknownNames();
-    }
-
-    return mappings[vpcLink->process];
+    assert(vpcLink->component);
+    return vpcLink->component;
   }
 
   //
@@ -832,8 +819,10 @@ namespace SystemC_VPC {
       ConfigCheck::modelTiming(pid, *iter);
     }
 
-    assertMapping(pid);
-    return FastLink(pid, actionIds, guardIds, complexity);
+    AbstractComponent *comp =
+        static_cast<AbstractComponent *>(actor->getScheduler());
+    assert(comp);
+    return FastLink(comp, pid, actionIds, guardIds, complexity);
   }
 
   FastLink Director::registerRoute(std::string source,
@@ -869,7 +858,7 @@ namespace SystemC_VPC {
 
     Director::registerRoute(route);
 
-    return FastLink(pid, fids, FunctionIds(),0);
+    return FastLink(route, pid, fids, FunctionIds(),0);
   }
 
   sc_core::sc_time Director::createSC_Time(const char* timeString)
