@@ -39,6 +39,7 @@
 
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
 #include <smoc/SimulatorAPI/TaskInterface.hpp>
+#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
 
 #include <systemcvpc/datatypes.hpp>
 
@@ -86,6 +87,9 @@ namespace SystemC_VPC {
 
     virtual void notifyActivation(smoc::SimulatorAPI::TaskInterface *scheduledTask,
         bool active) {}
+
+    virtual void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr)
+        {}
 
     virtual ~Delayer() {}
 

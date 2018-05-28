@@ -38,7 +38,6 @@
 
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
 #include <smoc/SimulatorAPI/TaskInterface.hpp>
-#include <smoc/SimulatorAPI/TransitionInterface.hpp>
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/Director.hpp>
