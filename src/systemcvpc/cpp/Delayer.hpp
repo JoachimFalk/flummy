@@ -85,9 +85,6 @@ namespace SystemC_VPC {
 
     virtual void initialize(const Director* d) {};
 
-    virtual void notifyActivation(smoc::SimulatorAPI::TaskInterface *scheduledTask,
-        bool active) {}
-
     virtual void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr)
         {}
 

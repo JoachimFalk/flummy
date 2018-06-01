@@ -80,6 +80,8 @@ namespace SystemC_VPC{
       return instanceId;
     }
 
+    virtual void notifyActivation(smoc::SimulatorAPI::TaskInterface *scheduledTask,
+        bool active);
   protected:
     void traceStart() {
       if (ptpTracer) ticket = ptpTracer->startOoo();

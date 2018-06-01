@@ -47,16 +47,6 @@ namespace SystemC_VPC{
   public:
     ComponentModel() : ComponentInfo(this){}
 
-/*
-    const TaskMap &getReadyTasks(){
-      return readyTasks;
-    }
-
-    const TaskMap &getRunningTasks(){
-      return runningTasks;
-    }
- */
-
     virtual void setPowerMode(const PowerMode *mode) = 0;
 
   protected:
@@ -65,16 +55,10 @@ namespace SystemC_VPC{
       componentState = cs;
     }
 
-
-
     void setPowerConsumption(const double pc)
     {
       powerConsumption = pc;
     }
-
-  private:
-//  TaskMap readyTasks;
-//  TaskMap runningTasks;
   };
 }
 #endif /* _INCLUDED_SYSTEMCVPC_COMPONENTMODEL_HPP */

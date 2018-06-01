@@ -183,9 +183,12 @@ namespace SystemC_VPC {
     ++readyTasks;
     //awake scheduler thread
     if (runningTask == NULL) {
-      DBG_SC_OUT("NonPreemptiveComponent::addTask (" << this->getName()
-          << ") notify scheduler" << std::endl);
+      DBG_SC_OUT("NonPreemptiveComponent::addTask (" << newReadyTask->getName()
+          << ") for " << this->getName() << " notifying scheduler" << std::endl);
       scheduleEvent.notify(sc_core::SC_ZERO_TIME);
+    } else {
+      DBG_SC_OUT("NonPreemptiveComponent::addTask (" << newReadyTask->getName()
+          << ") for " << this->getName() << std::endl);
     }
   }
 
@@ -217,7 +220,6 @@ namespace SystemC_VPC {
         removeTask();
         TaskInterface *scheduledTask = runningTask->getScheduledTask();
         if (scheduledTask) {
-          // Don't remove the activeTasks.erase here.
           // The scheduledTask->canFire() method call might call notifyActivation in
           // case that scheduledTask is a periodic actor. For this case, the
           // scheduledTask must not be present in activeTasks. Otherwise,
@@ -258,9 +260,7 @@ namespace SystemC_VPC {
             (*tasks_iter)->getBlockEvent().dii->notify();
             if ((*tasks_iter)->hasScheduledTask()) {
               assert(((*tasks_iter)->getScheduledTask())->canFire());
-              ((*tasks_iter)->getScheduledTask())->scheduleLegacyWithCommState();
-  //                 assert(Director::canExecute((*tasks_iter)->getProcessId()));
-  //                 Director::execute((*tasks_iter)->getProcessId());
+              ((*tasks_iter)->getScheduledTask())->schedule();
             }
             this->taskTracer_->finishDii((*tasks_iter));
             this->taskTracer_->finishLatency((*tasks_iter));
@@ -362,10 +362,6 @@ void NonPreemptiveComponent::updatePowerConsumption() {
   this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
   // Notify observers (e.g. powersum)
   this->fireNotification(this);
-}
-
-void NonPreemptiveComponent::addPowerGovernor(PluggableLocalPowerGovernor *gov) {
-  this->addObserver(gov);
 }
 
 Trace::Tracing * NonPreemptiveComponent::getOrCreateTraceSignal(std::string name) {

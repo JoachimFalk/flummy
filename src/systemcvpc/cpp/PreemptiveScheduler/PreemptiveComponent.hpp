@@ -54,6 +54,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <deque>
 #include <queue>
 
@@ -111,10 +112,6 @@ namespace SystemC_VPC {
      */
     bool hasWaitingOrRunningTasks();
       
-    void addPowerGovernor(PluggableLocalPowerGovernor * gov){
-      this->addObserver(gov);
-    }
-
     void reactivateExecution();
 
     void notifyActivation(TaskInterface * scheduledTask,
@@ -124,29 +121,51 @@ namespace SystemC_VPC {
 
     bool closeStream(ProcessId pid);
 
-    void addTasks();
+    void initialize(const Director* d);
 
     virtual ~PreemptiveComponent();
-  protected:
-    virtual void schedule_thread();
-    virtual void remainingPipelineStages();
-    virtual void moveToRemainingPipelineStages(Task *task);
+  private:
+    // This is the set of active tasks that are signaled by notifyActivation.
+    // Note that these tasks might not be ready due to
+    // actor->getNextReleaseTime() > sc_core::sc_time_stamp() or
+    // !this->getCanExecuteTasks()
+    std::set<TaskInterface *> activeTasks;
+
+    // This is the queue for tasks arriving via notifyActivation but where
+    // actor->getNextReleaseTime() > sc_core::sc_time_stamp() or
+    // !this->getCanExecuteTasks()
+    TT::TimedQueue ttReleaseQueue;
+
+    void ttReleaseQueueMethod();
+    sc_core::sc_event ttReleaseQueueEvent;
+
+    // This is the queue for PSM tasks arriving via notifyActivation but where
+    // actor->getNextReleaseTime() > sc_core::sc_time_stamp().
+    TT::TimedQueue ttReleaseQueuePSM;
+
+    void ttReleaseQueuePSMMethod();
+    sc_core::sc_event ttReleaseQueuePSMEvent;
+
+    void addTask(Task *newTask);
+
+    void scheduleThread();
+    sc_core::sc_event scheduleEvent;
+
+    void removeTask(Task *removedTask);
+
+    void remainingPipelineStages();
+    void moveToRemainingPipelineStages(Task *task);
 
     sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
     bool pendingTask;
 
     Scheduler *scheduler;
-    std::deque<Task*>      newTasks;
-    std::deque<Task*>      disabledTasks;
-    sc_core::sc_event notify_scheduler_thread;
+//  std::deque<Task*>      newTasks;
+//  std::deque<Task*>      disabledTasks;
+
     Event blockCompute;
     size_t   blockMutex;
-    unsigned int max_used_buffer;
-    unsigned int max_avail_buffer;
-
-    // time last task started
-    sc_core::sc_time startTime;
 
     void fireStateChanged(const ComponentState &state);
 
@@ -159,20 +178,15 @@ namespace SystemC_VPC {
     TaskMap readyTasks;
     TaskMap runningTasks;
 
-  private:
-    sc_core::sc_event releaseActors;
-    TT::TimedQueue ttReleaseQueue;
+//  std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
 
 #ifndef NO_POWER_SUM
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
 #endif // NO_POWER_SUM
 
-    void initialize(const Director* d);
-
     void setScheduler(Config::Component::Ptr component);
 
-    void releaseActorsMethod();
   };
 
 } 

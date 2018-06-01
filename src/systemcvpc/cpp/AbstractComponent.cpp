@@ -164,41 +164,8 @@ namespace SystemC_VPC {
     localGovernorFactory = AbstractComponent::factories[plugin]->factory;
   }
 
-  /*
-   * This function sets the appropriate execution state of the component according to the component powerstate
-   * (component's power state info is not encapsulated here, so it is the responsability of the powerState object to call this
-   * function whenever a powermode change takes place.
-   *
-   * Assumptions:
-   * "Disabling" a component (i.e. SLEEPING execution state) will remember the previous state and come back to it
-   * when leaving SLEEPING state)
-   *
-  */
-  void AbstractComponent::forceComponentState(const PowerMode * newPowerMode)
-  {
-	  //TODO: Generelize for new powermodes
-
-	  // Moving into powerGated mode and not already there? then change to sleeping mode
-	  if(newPowerMode->getName() == PowerMode::powerGated && this->powerMode->getName() != PowerMode::powerGated)
-	  {
-		  //this->previousComponentState = this->componentState;
-		  //this->componentState = ComponentState::SLEEPING;
-	  }
-	  else
-	  {
-		  //Leaving powerGated? then return to previous execution state
-		  if(this->powerMode->getName() == PowerMode::powerGated && newPowerMode->getName() != PowerMode::powerGated)
-		  {
-			 // this->componentState = this->previousComponentState;
-			 // this->previousComponentState = ComponentState::SLEEPING;
-		  }
-
-	  }
-  }
-
   void AbstractComponent::setPowerMode(const PowerMode* mode){
     this->powerMode = translatePowerMode(mode->getName());
-    this->forceComponentState(mode);
     this->updatePowerConsumption();
 
     if(timingPools.find(powerMode) == timingPools.end()){
@@ -283,11 +250,11 @@ namespace SystemC_VPC {
             return false;
         }
       }
+      return true;
     }else{
       shutdownRequestAtTime = sc_core::sc_time_stamp();
       return false;
     }
-    return true;
   }
 
   bool AbstractComponent::getCanExecuteTasks() const {

@@ -101,8 +101,6 @@ namespace SystemC_VPC{
      */
     bool hasWaitingOrRunningTasks();
       
-    void addPowerGovernor(PluggableLocalPowerGovernor *gov);
-
     virtual Trace::Tracing *getOrCreateTraceSignal(std::string name);
 
   protected:

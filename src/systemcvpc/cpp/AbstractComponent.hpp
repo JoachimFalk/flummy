@@ -114,8 +114,6 @@ namespace SystemC_VPC {
 
     void requestCanExecute();
 
-    bool requestShutdown();
-
     bool getCanExecuteTasks() const;
 
     void setCanExecuteTasks(bool canExecuteTasks);
@@ -181,17 +179,6 @@ namespace SystemC_VPC {
      */
     void registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event);
 
-    /* This function sets the appropriate execution state of the component according to the component powerstate
-     * (component's power state info is not encapsulated here, so it is the responsability of the powerState object to call this
-     * function whenever a powermode change takes place.
-     *
-     * Assumptions:
-     * "Disabling" a component (i.e. SLEEPING execution state) will remember the previous state and come back to it
-     * when leaving SLEEPING state)
-     *
-     */
-    void forceComponentState(const PowerMode * powerMode);
-
     /**
      *
      */
@@ -202,7 +189,6 @@ namespace SystemC_VPC {
     typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
 
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
-    std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
     bool requestExecuteTasks;
     std::map<ProcessId, MultiCastGroup> multiCastGroups;
 
@@ -236,6 +222,8 @@ namespace SystemC_VPC {
     const PCBPool& getPCBPool() const {
       return this->pcbPool;
     }
+
+    bool requestShutdown();
 
     virtual ~AbstractComponent();
   private:
