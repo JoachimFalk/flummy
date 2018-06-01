@@ -59,20 +59,29 @@
 
 #include "../DebugOStream.hpp"
 
+#include <CoSupport/sassert.h>
+
 namespace SystemC_VPC{
 
   /**
    * \brief An implementation of AbstractComponent.
    */
   PreemptiveComponent::PreemptiveComponent(Config::Component::Ptr component)
-    : AbstractComponent(component),
-      blockMutex(0), max_used_buffer(0), max_avail_buffer(0)
+    : AbstractComponent(component)
+    , blockMutex(0)
   {
-    SC_THREAD(schedule_thread);
-    SC_THREAD(remainingPipelineStages);
-    SC_METHOD(releaseActorsMethod);
+    SC_METHOD(ttReleaseQueueMethod);
     dont_initialize();
-    sensitive << releaseActors;
+    sensitive << ttReleaseQueueEvent;
+
+    SC_METHOD(ttReleaseQueuePSMMethod);
+    dont_initialize();
+    sensitive << ttReleaseQueuePSMEvent;
+
+    SC_THREAD(scheduleThread);
+
+    SC_THREAD(remainingPipelineStages);
+
     this->setPowerMode(this->translatePowerMode("SLOW"));
     setScheduler(component);
 
@@ -125,6 +134,103 @@ namespace SystemC_VPC{
     }
   }
 
+  void PreemptiveComponent::notifyActivation(
+      TaskInterface *scheduledTask,
+      bool           active)
+  {
+    DBG_SC_OUT(this->name() << " notifyActivation " << scheduledTask->name()
+        << " " << active << std::endl);
+    if (active) {
+      if (activeTasks.find(scheduledTask) != activeTasks.end())
+        // Nothing to do
+        return;
+      activeTasks.insert(scheduledTask);
+      sc_core::sc_time delta = scheduledTask->getNextReleaseTime() - sc_core::sc_time_stamp();
+      if (getTaskOfTaskInterface(scheduledTask)->isPSM()) {
+        // PSM tasks are always executed even if the component is in power down mode, i.e.,
+        // !this->getCanExecuteTasks().
+        if (delta > sc_core::SC_ZERO_TIME) {
+          ttReleaseQueuePSM.push(
+              TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
+          ttReleaseQueuePSMEvent.notify(delta);
+        } else {
+          // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+          scheduledTask->schedule();
+        }
+      } else {
+        if (delta > sc_core::SC_ZERO_TIME || !this->getCanExecuteTasks()) {
+          ttReleaseQueue.push(
+              TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
+          ttReleaseQueueEvent.notify(delta);
+        } else {
+          // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+          scheduledTask->schedule();
+        }
+      }
+    } else {
+      if (activeTasks.find(scheduledTask) == activeTasks.end())
+        // Nothing to do
+        return;
+      assert(!"Oops, Removal of task from the active list not supported!");
+    }
+  }
+
+  static
+  void ttReleaseQueueRelease(TT::TimedQueue &ttReleaseQueue, sc_core::sc_event &ttReleaseQueueEvent) {
+    assert(!ttReleaseQueue.empty());
+
+    sc_core::sc_time const &now = sc_core::sc_time_stamp();
+
+    while (true) {
+      assert(ttReleaseQueue.top().time <= now); // Less than or equal to now due to component power down mode.
+      TaskInterface *scheduledTask = ttReleaseQueue.top().node;
+      ttReleaseQueue.pop();
+      // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+      scheduledTask->schedule();
+      if (ttReleaseQueue.empty())
+        break;
+      sc_core::sc_time delta = ttReleaseQueue.top().time - now;
+      if (delta > sc_core::SC_ZERO_TIME) {
+        ttReleaseQueueEvent.notify(delta);
+        break;
+      }
+    }
+  }
+
+  void PreemptiveComponent::ttReleaseQueueMethod() {
+    if (!this->getCanExecuteTasks()) {
+      this->requestCanExecute();
+      return;
+    }
+    ttReleaseQueueRelease(this->ttReleaseQueue, this->ttReleaseQueueEvent);
+  }
+
+  void PreemptiveComponent::ttReleaseQueuePSMMethod() {
+    ttReleaseQueueRelease(this->ttReleaseQueuePSM, this->ttReleaseQueuePSMEvent);
+  }
+
+  /*
+   * used to reactivate a halted execution of the component
+   */
+  void PreemptiveComponent::reactivateExecution() {
+    requestExecuteTasks=false;
+
+    // Awake ttReleaseQueueMethod processing if queue not empty.
+    if (!ttReleaseQueue.empty()) {
+      sc_core::sc_time const &now = sc_core::sc_time_stamp();
+
+      sc_core::sc_time delta = ttReleaseQueue.top().time - now;
+      if (delta > sc_core::SC_ZERO_TIME)
+        ttReleaseQueueEvent.notify(delta);
+      else
+        ttReleaseQueueEvent.notify(sc_core::SC_ZERO_TIME);
+    }
+
+    //awake scheduler thread
+    scheduleEvent.notify();
+    blockCompute.notify();
+  }
+
   /**
    *
    */
@@ -146,40 +252,379 @@ namespace SystemC_VPC{
             return;
         }
     }
-    pendingTask = false;
-    if(max_avail_buffer == 0 || (getReadyTasks().size() + newTasks.size() + tasksDuringNoExecutionPhase.size()) < max_avail_buffer){
-      ProcessId pid = actualTask->getProcessId();
-      actualTask->setPCB(getPCB(pid));
-      actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
-      DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
-              << " ) at time: " << sc_core::sc_time_stamp()
-              << " mode: " << this->getPowerMode()->getName()
-              << std::endl);
+    ProcessId pid = actualTask->getProcessId();
+    actualTask->setPCB(getPCB(pid));
+    actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
 
-      // reset the execution delay
-      actualTask->initDelays();
-      DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
-      DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
+    DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
+        << " ) at time: " << sc_core::sc_time_stamp()
+        << " mode: " << this->getPowerMode()->getName()
+        << " schedTask: " << actualTask->getScheduledTask()
+        << std::endl);
 
-      //store added task
-      newTasks.push_back(actualTask);
+    // reset the execution delay
+    actualTask->initDelays();
+    DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
+    DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
 
-      if(this->getCanExecuteTasks() || actualTask->isPSM()){
-        //awake scheduler thread
-        notify_scheduler_thread.notify();
-        blockCompute.notify();
-      }else{
-        //TODO: This has to notify the scheduler after the CanExecute is set correctly
-        this->requestCanExecute();
-      }
-    }else{
-      //std::cout<< "Message/Task " << actualTask->getName() << " dropped due to less buffer-space of component "<< getName() << " @ " << sc_core::sc_time_stamp() << std::endl;
-      actualTask->getBlockEvent().latency->setDropped(true);
-    }
+    assert(this->getCanExecuteTasks() || actualTask->isPSM());
+    // Now add task to the ready list of the scheduler
+    this->addTask(actualTask);
   }
 
+  /**
+   *
+   */
+  void PreemptiveComponent::addTask(Task *newReadyTask) {
+    // A task can call compute only one time!
+    assert(readyTasks.find(newReadyTask->getInstanceId())   == readyTasks.end());
+    assert(runningTasks.find(newReadyTask->getInstanceId()) == runningTasks.end());
+    //insert new task in ready list
+    readyTasks[newReadyTask->getInstanceId()]=newReadyTask;
+    taskTracer_->release(newReadyTask);
+    scheduler->addedNewTask(newReadyTask);
+    DBG_SC_OUT("PreemptiveComponent::addTask (" << newReadyTask->getName()
+        << ") for " << this->getName() << " notifying scheduler" << std::endl);
+    scheduleEvent.notify();
+  }
 
+  /**
+   *
+   */
+  void PreemptiveComponent::scheduleThread() {
+    // Time of last scheduling decision.
+    sc_core::sc_time startTime = sc_core::SC_ZERO_TIME;
+
+    scheduler->initialize();
+    fireStateChanged(ComponentState::IDLE);
+
+    while (true) {
+      sc_core::sc_time    now = sc_core::sc_time_stamp();
+      sc_core::sc_time    runTime = now - startTime;
+      assert(runTime >= sc_core::SC_ZERO_TIME);
+      for (TaskMap::iterator niter, iter = runningTasks.begin();
+           iter != runningTasks.end();
+           iter = niter) {
+        iter->second->setRemainingDelay(iter->second->getRemainingDelay() - runTime);
+        DBG_OUT(this->getName() << " IID: " << iter->first << "> Remaining delay for "
+             << iter->second->getName() << " is " << iter->second->getRemainingDelay() << std::endl);
+        assert(iter->second->getRemainingDelay() >= sc_core::SC_ZERO_TIME);
+        if (iter->second->getRemainingDelay() == sc_core::SC_ZERO_TIME) {
+          removeTask(iter->second);
+          niter = runningTasks.erase(iter);
+          TaskInterface *scheduledTask = iter->second->getScheduledTask();
+          if (scheduledTask) {
+            // The scheduledTask->canFire() method call might call notifyActivation in
+            // case that scheduledTask is a periodic actor. For this case, the
+            // scheduledTask must not be present in activeTasks. Otherwise,
+            // NonPreemptiveComponent::notifyActivation will ignored it and an
+            // activation might be lost.
+            sassert(activeTasks.erase(scheduledTask) == 1);
+            if (scheduledTask->canFire()) {
+              sassert(activeTasks.insert(scheduledTask).second);
+              // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+              scheduledTask->schedule();
+            }
+          }
+        } else
+          ++(niter = iter);
+      }
+
+      int                 taskToResign = -1;
+      int                 taskToAssign = -1;
+      scheduling_decision decision =
+        scheduler->schedulingDecision(
+            taskToResign, taskToAssign, readyTasks, runningTasks);
+
+      // Resign task, i.e., move taskToResign from  runningTasks to readyTasks.
+      if (decision==RESIGNED || decision==PREEMPT) {
+        TaskMap::iterator iter = runningTasks.find(taskToResign);
+        assert(iter != runningTasks.end());
+        DBG_OUT(this->getName() << " IID: " << iter->first << "> Resigning task " << iter->second->getName()
+            << "; Remaining delay " << iter->second->getRemainingDelay() << std::endl);
+        this->taskTracer_->resign(iter->second);
+        sassert(readyTasks.insert(*iter).second);
+        runningTasks.erase(iter);
+      }
+
+      sc_core::sc_time waitTime;
+
+      bool validWaitTime= scheduler->getSchedulerTimeSlice(
+          waitTime, readyTasks, runningTasks);
+
+      if (sc_core::sc_time *newOverhead = scheduler->schedulingOverhead()) {
+        if (*newOverhead != sc_core::SC_ZERO_TIME) {
+          wait(*newOverhead);
+          if (validWaitTime) {
+            assert(waitTime > *newOverhead);
+            waitTime -= *newOverhead;
+          }
+        }
+        delete newOverhead;
+      }
+
+      // Assign task, i.e.,  move taskToAssign from readyTasks to runningTasks.
+      if (decision==ONLY_ASSIGN || decision==PREEMPT) {
+        TaskMap::iterator iter = readyTasks.find(taskToAssign);
+        assert(iter != readyTasks.end());
+        DBG_OUT(this->getName() << " IID: " << iter->first << "> Assigning task " << iter->second->getName()
+            << "; Remaining delay " << iter->second->getRemainingDelay() << std::endl);
+        this->taskTracer_->assign(iter->second);
+        sassert(runningTasks.insert(*iter).second);
+        readyTasks.erase(iter);
+      }
+
+      for (TaskMap::value_type t : runningTasks) {
+        assert(t.second->getRemainingDelay() > sc_core::SC_ZERO_TIME);
+        if (!validWaitTime) {
+          waitTime = t.second->getRemainingDelay();
+          validWaitTime = true;
+        } else if (t.second->getRemainingDelay() < waitTime) {
+          waitTime = t.second->getRemainingDelay();
+        }
+      }
+
+      startTime = sc_core::sc_time_stamp();
+
+      if (validWaitTime)
+        wait(waitTime, scheduleEvent);
+      else
+        wait(scheduleEvent);
+    }
+
+
+
+/*
+
+
+
+
+    sc_core::sc_time timeslice;
+    sc_core::sc_time actualRemainingDelay;
+    sc_core::sc_time overhead = sc_core::SC_ZERO_TIME;
+
+
+
+//  std::string logName = getName();
+//  logName = logName + ".buffer";
+//  std::ofstream logBuffer(logName.c_str());
+//  if( !logBuffer.is_open() ){
+//    assert(false);
+//  }
+
+    //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
+    bool newTaskDuringOverhead= !newTasks.empty();
+
+    while (true) {
+    //  std::cout<<"Component " << this->getName() << "schedule_thread @ " << sc_core::sc_time_stamp() << std::endl;
+      //determine the time slice for next scheduling decision and wait for
+      bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
+                                                           getReadyTasks(),
+                                                           getRunningTasks());
+      startTime = sc_core::sc_time_stamp();
+      if(!newTaskDuringOverhead){
+        if (getRunningTasks().empty()) {                    // no running task
+          if(hasTimeSlice){
+            wait( timeslice - overhead,
+                  scheduleEvent );
+          }else{
+            if(!pendingTask && !hasWaitingOrRunningTasks()){
+              if(!requestShutdown()){
+                scheduleEvent.notify();
+              }
+            }
+            wait( scheduleEvent );
+          }
+        }else{                                        // a task already runs
+          if(hasTimeSlice && (timeslice - overhead) < actualRemainingDelay){
+            wait( timeslice - overhead,
+                  scheduleEvent );
+          }else{
+            wait( actualRemainingDelay,
+                  scheduleEvent );
+          }
+          sc_core::sc_time runTime=sc_core::sc_time_stamp()-startTime;
+          assert(runTime.value()>=0);
+          actualRemainingDelay-=runTime;
+
+          assert(actualRemainingDelay.value()>=0);
+
+          DBG_OUT("Component " << this->getName()
+                    << "> actualRemainingDelay= "
+                    << actualRemainingDelay.value() << " for iid="
+                    << actualRunningIID << " at: "
+                    << sc_core::sc_time_stamp().to_default_time_units()
+                    << std::endl);
+
+          if(actualRemainingDelay.value()==0){
+            removeTask(runningTasks[actualRunningIID]);
+            fireStateChanged(ComponentState::IDLE);
+          }else{
+
+            // store remainingDelay
+            runningTasks[actualRunningIID]->setRemainingDelay(
+              actualRemainingDelay );
+          }
+        }
+      }else{
+        newTaskDuringOverhead=false;
+      }
+
+      this->addTasks();
+
+      if(!pendingTask && !hasWaitingOrRunningTasks())
+        if(!requestShutdown()){
+          scheduleEvent.notify();
+        }
+
+      int taskToResign,taskToAssign;
+      scheduling_decision decision =
+        scheduler->schedulingDecision(taskToResign,
+                                      taskToAssign,
+                                      readyTasks,
+                                      runningTasks);
+
+      //resign task
+      if(decision==RESIGNED || decision==PREEMPT){
+        readyTasks[taskToResign]=runningTasks[taskToResign];
+        runningTasks.erase(taskToResign);
+        actualRunningIID=-1;
+        readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
+        fireStateChanged(ComponentState::IDLE);
+        this->taskTracer_->resign(readyTasks[taskToResign]);
+      }
+
+      {
+        sc_core::sc_time *newOverhead = scheduler->schedulingOverhead();
+        overhead = newOverhead ? *newOverhead : sc_core::SC_ZERO_TIME;
+        delete newOverhead;
+      }
+
+      if (overhead != sc_core::SC_ZERO_TIME) {
+        wait(overhead);
+        // true if some task becames ready during overhead waiting
+        newTaskDuringOverhead = newTasks.size()>0;
+      }
+
+      //assign task
+      if(decision==ONLY_ASSIGN || decision==PREEMPT){
+        runningTasks[taskToAssign]=readyTasks[taskToAssign];
+        this->taskTracer_->assign(runningTasks[taskToAssign]);
+        readyTasks.erase(taskToAssign);
+        actualRunningIID=taskToAssign;
+        DBG_OUT("IID: " << taskToAssign << "> remaining delay for "
+             << runningTasks[taskToAssign]->getName());
+        actualRemainingDelay
+          = sc_core::sc_time(runningTasks[taskToAssign]->getRemainingDelay());
+        DBG_OUT(" is " << runningTasks[taskToAssign]->getRemainingDelay()
+             << std::endl);
+
+        Task * assignedTask = runningTasks[taskToAssign];
+
+        // Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
+        if (assignedTask->isPSM() == true){
+            this->fireStateChanged(ComponentState::IDLE);
+        }else{
+            this->fireStateChanged(ComponentState::RUNNING);
+        }
+
+        if(assignedTask->isBlocking()) {
+          blockMutex++;
+          if(blockMutex == 1) {
+            DBG_OUT(this->getName() << " scheduled blocking task: "
+                    << assignedTask->getName() << std::endl);
+            assignedTask->ackBlockingCompute();
+            DBG_OUT(this->getName() << " enter wait: " << std::endl);
+            fireStateChanged(ComponentState::STALLED);
+            this->taskTracer_->block(assignedTask);
+            while(!assignedTask->isExec()){
+              blockCompute.reset();
+              CoSupport::SystemC::wait(blockCompute);
+              this->addTasks();
+            }
+            DBG_OUT(this->getName() << " exit wait: " << std::endl);
+            fireStateChanged(ComponentState::RUNNING);
+            this->taskTracer_->assign(assignedTask);
+            if(assignedTask->isBlocking()){
+              DBG_OUT(this->getName() << " exec Task: "
+                      << assignedTask->getName() << " @  " << sc_core::sc_time_stamp()
+                      << std::endl);
+              // task is still blocking: exec task
+            } else {
+              DBG_OUT(this->getName() << " abort Task: "
+                      << assignedTask->getName() << " @  " << sc_core::sc_time_stamp()
+                      << std::endl);
+
+              //notify(*(task->blockEvent));
+              scheduler->removedTask(assignedTask);
+              fireStateChanged(ComponentState::IDLE);
+              this->taskTracer_->finishDii(assignedTask);
+              //FIXME: notify latency ??
+              //assignedTask->traceFinishTaskLatency();
+              runningTasks.erase(actualRunningIID);
+
+            }
+          }else{
+            assert(blockMutex>1);
+            scheduler->removedTask(assignedTask);
+            fireStateChanged(ComponentState::IDLE);
+            this->taskTracer_->finishDii(assignedTask);
+            //FIXME: notify latency ??
+            //assignedTask->traceFinishTaskLatency();
+            runningTasks.erase(actualRunningIID);
+            assignedTask->abortBlockingCompute();
+          }
+          blockMutex--;
+        }
+      }
+    }
+//  // FIXME: Close is never reached cause of while!
+//  logBuffer.close();
+ */
+  }
+
+  void PreemptiveComponent::removeTask(Task *task) {
+    // all execution time simulated -> BLOCK running task.
+
+    DBG_OUT(this->getName() << " IID: " << task->getInstanceId() << " > ");
+    DBG_OUT(this->getName() << " removed Task: " << task->getName()
+          << " at: " << sc_core::sc_time_stamp().to_default_time_units()
+          << std::endl);
+
+    //notify(*(task->blockEvent));
+    scheduler->removedTask(task);
+    this->taskTracer_->finishDii(task);
+
+    task->getBlockEvent().dii->notify();
+
+    if(multiCastGroups.size() != 0 && multiCastGroups.find(task->getProcessId()) != multiCastGroups.end()){
+     for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
+                 list_iter != multiCastGroupInstances.end(); list_iter++)
+       {
+         MultiCastGroupInstance* mcgi = *list_iter;
+         if(mcgi->task == task){
+             for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
+                 tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
+                 (*tasks_iter)->getBlockEvent().dii->notify();
+                 if((*tasks_iter)->hasScheduledTask()){
+                   assert(((*tasks_iter)->getScheduledTask())->canFire());
+                   ((*tasks_iter)->getScheduledTask())->schedule();
+                 }
+                 this->taskTracer_->finishDii((*tasks_iter));
+                 this->taskTracer_->finishLatency((*tasks_iter));
+                 Director::getInstance().signalLatencyEvent((*tasks_iter));
+             }
+             multiCastGroupInstances.remove(mcgi);
+             delete(mcgi->additional_tasks);
+             delete(mcgi);
+             break;
+         }
+       }
+    }
+    moveToRemainingPipelineStages(task);
+    //wait(sc_core::SC_ZERO_TIME);
+  }
 
   /**
    *
@@ -225,8 +670,7 @@ namespace SystemC_VPC{
    */
   bool PreemptiveComponent::hasWaitingOrRunningTasks()
   {
-    //std::cout<<"hasWaitingOrRunningTasks() " << readyTasks.size() <<" " <<  runningTasks.size() << " " << tasksDuringNoExecutionPhase.size() << std::endl;
-    return (getReadyTasks().size() + getRunningTasks().size() + tasksDuringNoExecutionPhase.size()) > 0;
+    return !getReadyTasks().empty() || !getRunningTasks().empty();
   }
 
   void PreemptiveComponent::fireStateChanged(const ComponentState &state)
@@ -252,8 +696,7 @@ namespace SystemC_VPC{
     //create local governor
     midPowerGov=localGovernorFactory->createPlugIn();
     midPowerGov->setGlobalGovernor(d->topPowerGov);
-    this->addPowerGovernor(midPowerGov);
-    
+    addObserver(midPowerGov);
   }
 
   bool PreemptiveComponent::setAttribute(AttributePtr attribute){
@@ -275,153 +718,11 @@ namespace SystemC_VPC{
   PreemptiveComponent::~PreemptiveComponent(){
     this->setPowerConsumption(0.0);
     this->fireNotification(this);
-    //std::cout<<"MAX used Buffer of Component " << this->name() << " was " << max_used_buffer << std::endl;
 #ifndef NO_POWER_SUM
     this->removeObserver(powerSumming);
     delete powerSumming;
     delete powerSumStream;
 #endif // NO_POWER_SUM
-  }
-
-/*
- * used to reactivate a halted execution of the component
- */
-  void PreemptiveComponent::reactivateExecution(){
-    requestExecuteTasks=false;
-    while(!tasksDuringNoExecutionPhase.empty()){
-      TT::TimeNodePair pair = tasksDuringNoExecutionPhase.front();
-      ttReleaseQueue.push(pair);
-      tasksDuringNoExecutionPhase.pop_front();
-    }
-
-    if(!ttReleaseQueue.empty()){
-      if(ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
-        releaseActors.notify();
-      }else{
-       sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
-       releaseActors.notify(delta);
-      }
-    }
-    //awake scheduler thread
-    notify_scheduler_thread.notify();
-    blockCompute.notify();
-  }
-
-  void PreemptiveComponent::notifyActivation(TaskInterface * scheduledTask,
-      bool active){
-    if(active) {
-      TT::TimeNodePair newTask = TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask);
-      //std::cout<<"Component " << this->getName() << " notifyActivation("<<scheduledTask->getPid()<<", " << (this->getPCB(scheduledTask->getPid()))->getName() << " isPSM=" << this->getPCB(scheduledTask->getPid())->isPSM() << " @ " << newTask.time << " @ " << sc_core::sc_time_stamp() << std::endl;
-      if(this->getCanExecuteTasks() || getTaskOfTaskInterface(scheduledTask)->isPSM()){
-        pendingTask = true;
-        ttReleaseQueue.push(newTask);
-
-        if(ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
-          releaseActors.notify(sc_core::SC_ZERO_TIME);
-        }else{
-         sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
-         releaseActors.notify(delta);
-        }
-      }else{
-        tasksDuringNoExecutionPhase.push_back(newTask);
-        this->requestCanExecute();
-      }
-    }
-  }
-
-  void PreemptiveComponent::releaseActorsMethod(){
-//     if(this->getCanExecuteTasks()){ //not required, no "normal" task will be added to ttReleaseQueue
-    //std::cout<<"Component " << this->getName() << " releaseActorsMethod " << ttReleaseQueue.top().node->getPid() << " @ " << sc_core::sc_time_stamp() << std::endl;
-      TT::TimeNodePair tnp = ttReleaseQueue.top();
-      if(tnp.time <= sc_core::sc_time_stamp()){
-        ttReleaseQueue.pop();
-        assert(tnp.time <= sc_core::sc_time_stamp());
-        if(this->getCanExecuteTasks() || getTaskOfTaskInterface(tnp.node)->isPSM()){
-          if(tnp.node->canFire()){
-            tnp.node->scheduleLegacyWithCommState();
-//          if(Director::canExecute(tnp.node)){
-//            Director::execute(tnp.node);
-            pendingTask = true;
-          }else{
-            pendingTask = false;
-            notify_scheduler_thread.notify();
-          }
-        }else{
-          tasksDuringNoExecutionPhase.push_back(tnp);
-        }
-      }else{
-        //std::cout<<"Spezial!" << std::endl;
-      }
-
-      if(!ttReleaseQueue.empty()){
-        if(ttReleaseQueue.top().time<=sc_core::sc_time_stamp()){
-          // The sc_core::SC_ZERO_TIME is needed, otherwise releaseActorsMethod won't
-          // be recalled.
-          releaseActors.notify(sc_core::SC_ZERO_TIME);
-        }else{
-          assert(ttReleaseQueue.top().time>=sc_core::sc_time_stamp());
-          sc_core::sc_time delta = ttReleaseQueue.top().time-sc_core::sc_time_stamp();
-          releaseActors.notify(delta);
-        }
-      }
-  }
-
-  /**
-   *
-   */
-  void PreemptiveComponent::addTasks() {
-    if(!this->getCanExecuteTasks()){
-      std::deque<Task*>::iterator iter = newTasks.begin();
-      for(;newTasks.size() > 0 && iter!=newTasks.end(); iter++){
-        if((*iter)->isPSM()){ //PSM - actors need to be executed - even if Component can not execute tasks
-          Task *newTask = *iter;
-          this->taskTracer_->release(newTask);
-          assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
-                  /* A task can call compute only one time! */);
-          assert( runningTasks.find(newTask->getInstanceId()) == runningTasks.end()
-                  /* A task can call compute only one time! */);
-          readyTasks[newTask->getInstanceId()]=newTask;
-          scheduler->addedNewTask(newTask);
-          newTasks.erase(iter);
-          iter = newTasks.begin();
-        }
-      }
-    }else{
-      //look for new tasks (they called compute)
-      if(disabledTasks.size()>0){
-          std::deque<Task*>::iterator iter = disabledTasks.begin();
-          for(;disabledTasks.size() > 0 && iter!=disabledTasks.end(); iter++){
-            if((*iter)->getScheduledTask()->getActive()){
-                newTasks.push_back(*iter);
-                disabledTasks.erase(iter);
-                iter = disabledTasks.begin();
-            }
-          }
-      }
-
-      while(newTasks.size()>0){
-        Task *newTask;
-        newTask=newTasks.front();
-        TaskInterface* actor = newTask->getScheduledTask();
-        newTasks.pop_front();
-        if(actor!=NULL && !actor->getActive()){
-            std::cout<<"actor disabled"<<std::endl;
-            disabledTasks.push_back(newTask);
-        }else{
-          DBG_OUT(this->getName() << " received new Task: "
-                  << newTask->getName() << " at: "
-                  << sc_core::sc_time_stamp().to_default_time_units() << std::endl);
-          this->taskTracer_->release(newTask);
-          //insert new task in read list
-          assert( readyTasks.find(newTask->getInstanceId())   == readyTasks.end()
-                  /* A task can call compute only one time! */);
-          assert( runningTasks.find(newTask->getInstanceId()) == runningTasks.end()
-                  /* A task can call compute only one time! */);
-          readyTasks[newTask->getInstanceId()]=newTask;
-          scheduler->addedNewTask(newTask);
-          }
-      }
-    }
   }
 
   /**
@@ -486,256 +787,6 @@ namespace SystemC_VPC{
       }
 
     }
-  }
-
-  /**
-   *
-   */
-  void PreemptiveComponent::schedule_thread() {
-    sc_core::sc_time timeslice;
-    sc_core::sc_time actualRemainingDelay;
-    sc_core::sc_time overhead = sc_core::SC_ZERO_TIME;
-    int actualRunningIID;
-
-    scheduler->initialize();
-    fireStateChanged(ComponentState::IDLE);
-//  std::string logName = getName();
-//  logName = logName + ".buffer";
-//  std::ofstream logBuffer(logName.c_str());
-//  if( !logBuffer.is_open() ){
-//    assert(false);
-//  }
-    unsigned int last_used_buffer = 0;
-//  logBuffer << last_used_buffer << " " << sc_core::sc_time_stamp() << std::endl;
-
-    //QUICKFIX solve thread initialization: actors are released before schedule_thread is called
-    bool newTaskDuringOverhead= !newTasks.empty();
-
-    while (true) {
-    //  std::cout<<"Component " << this->getName() << "schedule_thread @ " << sc_core::sc_time_stamp() << std::endl;
-      //determine the time slice for next scheduling decision and wait for
-      bool hasTimeSlice= scheduler->getSchedulerTimeSlice( timeslice,
-                                                           getReadyTasks(),
-                                                           getRunningTasks());
-      startTime = sc_core::sc_time_stamp();
-      if(!newTaskDuringOverhead){
-        if (getRunningTasks().empty()) {                    // no running task
-          if(hasTimeSlice){
-            wait( timeslice - overhead,
-                  notify_scheduler_thread );
-          }else{
-            if(!pendingTask && !hasWaitingOrRunningTasks()){
-              if(!requestShutdown()){
-                notify_scheduler_thread.notify();
-              }
-            }
-            wait( notify_scheduler_thread );
-          }
-        }else{                                        // a task already runs
-          if(hasTimeSlice && (timeslice - overhead) < actualRemainingDelay){
-            wait( timeslice - overhead,
-                  notify_scheduler_thread );
-          }else{
-            wait( actualRemainingDelay,
-                  notify_scheduler_thread );
-          }
-          sc_core::sc_time runTime=sc_core::sc_time_stamp()-startTime;
-          assert(runTime.value()>=0);
-          actualRemainingDelay-=runTime;
-
-          assert(actualRemainingDelay.value()>=0);
-
-          DBG_OUT("Component " << this->getName()
-                    << "> actualRemainingDelay= "
-                    << actualRemainingDelay.value() << " for iid="
-                    << actualRunningIID << " at: "
-                    << sc_core::sc_time_stamp().to_default_time_units()
-                    << std::endl);
-
-          if(actualRemainingDelay.value()==0){
-            // all execution time simulated -> BLOCK running task.
-            Task *task=runningTasks[actualRunningIID];
-
-          DBG_OUT(this->getName() << " IID: " << actualRunningIID<< " > ");
-          DBG_OUT(this->getName() << " removed Task: " << task->getName()
-                  << " at: " << sc_core::sc_time_stamp().to_default_time_units()
-                  << std::endl);
-
-            //notify(*(task->blockEvent));
-            scheduler->removedTask(task);
-            fireStateChanged(ComponentState::IDLE);
-            this->taskTracer_->finishDii(task);
-            runningTasks.erase(actualRunningIID);
-
-            task->getBlockEvent().dii->notify();
-
-            if(multiCastGroups.size() != 0 && multiCastGroups.find(task->getProcessId()) != multiCastGroups.end()){
-             for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
-                         list_iter != multiCastGroupInstances.end(); list_iter++)
-               {
-                 MultiCastGroupInstance* mcgi = *list_iter;
-                 if(mcgi->task == task){
-                     for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
-                         tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
-                         (*tasks_iter)->getBlockEvent().dii->notify();
-                         if((*tasks_iter)->hasScheduledTask()){
-                           assert(((*tasks_iter)->getScheduledTask())->canFire());
-                           ((*tasks_iter)->getScheduledTask())->scheduleLegacyWithCommState();
-//                             assert(Director::canExecute((*tasks_iter)->getProcessId()));
-//                             Director::execute((*tasks_iter)->getProcessId());
-                         }
-                         this->taskTracer_->finishDii((*tasks_iter));
-                         this->taskTracer_->finishLatency((*tasks_iter));
-                         Director::getInstance().signalLatencyEvent((*tasks_iter));
-                     }
-                     multiCastGroupInstances.remove(mcgi);
-                     delete(mcgi->additional_tasks);
-                     delete(mcgi);
-                     break;
-                 }
-               }
-            }
-
-            if(task->hasScheduledTask()){
-              assert((task->getScheduledTask())->canFire());
-              (task->getScheduledTask())->scheduleLegacyWithCommState();
-//                assert(Director::canExecute(task->getProcessId()));
-//                Director::execute(task->getProcessId());
-            }
-            moveToRemainingPipelineStages(task);
-            //wait(sc_core::SC_ZERO_TIME);
-          }else{
-
-            // store remainingDelay
-            runningTasks[actualRunningIID]->setRemainingDelay(
-              actualRemainingDelay );
-          }
-        }
-      }else{
-        newTaskDuringOverhead=false;
-      }
-
-      this->addTasks();
-
-      if(!pendingTask && !hasWaitingOrRunningTasks())
-        if(!requestShutdown()){
-          notify_scheduler_thread.notify();
-        }
-
-      int taskToResign,taskToAssign;
-      scheduling_decision decision =
-        scheduler->schedulingDecision(taskToResign,
-                                      taskToAssign,
-                                      readyTasks,
-                                      runningTasks);
-
-      //resign task
-      if(decision==RESIGNED || decision==PREEMPT){
-        readyTasks[taskToResign]=runningTasks[taskToResign];
-        runningTasks.erase(taskToResign);
-        actualRunningIID=-1;
-        readyTasks[taskToResign]->setRemainingDelay(actualRemainingDelay);
-        fireStateChanged(ComponentState::IDLE);
-        this->taskTracer_->resign(readyTasks[taskToResign]);
-      }
-
-      {
-        sc_core::sc_time *newOverhead = scheduler->schedulingOverhead();
-        overhead = newOverhead ? *newOverhead : sc_core::SC_ZERO_TIME;
-        delete newOverhead;
-      }
-
-      if (overhead != sc_core::SC_ZERO_TIME) {
-        wait(overhead);
-        // true if some task becames ready during overhead waiting
-        newTaskDuringOverhead = newTasks.size()>0;
-      }
-
-      //assign task
-      if(decision==ONLY_ASSIGN || decision==PREEMPT){
-        runningTasks[taskToAssign]=readyTasks[taskToAssign];
-        this->taskTracer_->assign(runningTasks[taskToAssign]);
-        readyTasks.erase(taskToAssign);
-        actualRunningIID=taskToAssign;
-        DBG_OUT("IID: " << taskToAssign << "> remaining delay for "
-             << runningTasks[taskToAssign]->getName());
-        actualRemainingDelay
-          = sc_core::sc_time(runningTasks[taskToAssign]->getRemainingDelay());
-        DBG_OUT(" is " << runningTasks[taskToAssign]->getRemainingDelay()
-             << std::endl);
-
-        /* */
-        Task * assignedTask = runningTasks[taskToAssign];
-
-        /*
-         * Assuming PSM actors are assigned to the same component they model, the executing state of the component should be IDLE
-         */
-        if (assignedTask->isPSM() == true){
-            this->fireStateChanged(ComponentState::IDLE);
-        }else{
-            this->fireStateChanged(ComponentState::RUNNING);
-        }
-
-        if(assignedTask->isBlocking() /* && !assignedTask->isExec() */) {
-          blockMutex++;
-          if(blockMutex == 1) {
-            DBG_OUT(this->getName() << " scheduled blocking task: "
-                    << assignedTask->getName() << std::endl);
-            assignedTask->ackBlockingCompute();
-            DBG_OUT(this->getName() << " enter wait: " << std::endl);
-            fireStateChanged(ComponentState::STALLED);
-            this->taskTracer_->block(assignedTask);
-            while(!assignedTask->isExec()){
-              blockCompute.reset();
-              CoSupport::SystemC::wait(blockCompute);
-              this->addTasks();
-            }
-            DBG_OUT(this->getName() << " exit wait: " << std::endl);
-            fireStateChanged(ComponentState::RUNNING);
-            this->taskTracer_->assign(assignedTask);
-            if(assignedTask->isBlocking()){
-              DBG_OUT(this->getName() << " exec Task: "
-                      << assignedTask->getName() << " @  " << sc_core::sc_time_stamp()
-                      << std::endl);
-              // task is still blocking: exec task
-            } else {
-              DBG_OUT(this->getName() << " abort Task: "
-                      << assignedTask->getName() << " @  " << sc_core::sc_time_stamp()
-                      << std::endl);
-
-              //notify(*(task->blockEvent));
-              scheduler->removedTask(assignedTask);
-              fireStateChanged(ComponentState::IDLE);
-              this->taskTracer_->finishDii(assignedTask);
-              //FIXME: notify latency ??
-              //assignedTask->traceFinishTaskLatency();
-              runningTasks.erase(actualRunningIID);
-
-            }
-          }else{
-            assert(blockMutex>1);
-            scheduler->removedTask(assignedTask);
-            fireStateChanged(ComponentState::IDLE);
-            this->taskTracer_->finishDii(assignedTask);
-            //FIXME: notify latency ??
-            //assignedTask->traceFinishTaskLatency();
-            runningTasks.erase(actualRunningIID);
-            assignedTask->abortBlockingCompute();
-          }
-          blockMutex--;
-        }
-      }
-      if(readyTasks.size() != last_used_buffer){
-//      logBuffer<< readyTasks.size() << " " << sc_core::sc_time_stamp() << std::endl;
-        last_used_buffer = readyTasks.size();
-        if(last_used_buffer > max_used_buffer){
-          max_used_buffer = readyTasks.size();
-          //std::cout<<"MAX used Buffer of Component " << this->getName() << " increased to " << max_used_buffer << " @ " << sc_core::sc_time_stamp() << std::endl;
-        }
-      }
-    }
-//  // FIXME: Close is never reached cause of while!
-//  logBuffer.close();
   }
 
 } //namespace SystemC_VPC
