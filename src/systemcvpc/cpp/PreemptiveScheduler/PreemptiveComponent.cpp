@@ -607,10 +607,6 @@ namespace SystemC_VPC{
              for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
                  tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
                  (*tasks_iter)->getBlockEvent().dii->notify();
-                 if((*tasks_iter)->hasScheduledTask()){
-                   assert(((*tasks_iter)->getScheduledTask())->canFire());
-                   ((*tasks_iter)->getScheduledTask())->schedule();
-                 }
                  this->taskTracer_->finishDii((*tasks_iter));
                  this->taskTracer_->finishLatency((*tasks_iter));
                  Director::getInstance().signalLatencyEvent((*tasks_iter));
@@ -670,7 +666,7 @@ namespace SystemC_VPC{
    */
   bool PreemptiveComponent::hasWaitingOrRunningTasks()
   {
-    return !getReadyTasks().empty() || !getRunningTasks().empty();
+    return !readyTasks.empty() || !runningTasks.empty();
   }
 
   void PreemptiveComponent::fireStateChanged(const ComponentState &state)

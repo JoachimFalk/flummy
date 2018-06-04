@@ -158,27 +158,16 @@ namespace SystemC_VPC {
 
     sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
-    bool pendingTask;
 
     Scheduler *scheduler;
-//  std::deque<Task*>      newTasks;
-//  std::deque<Task*>      disabledTasks;
 
-    Event blockCompute;
+    Event    blockCompute;
     size_t   blockMutex;
 
     void fireStateChanged(const ComponentState &state);
 
-    const TaskMap &getReadyTasks()
-      { return readyTasks; }
-
-    const TaskMap &getRunningTasks()
-      { return runningTasks; }
-
     TaskMap readyTasks;
     TaskMap runningTasks;
-
-//  std::list<TT::TimeNodePair> tasksDuringNoExecutionPhase;
 
 #ifndef NO_POWER_SUM
     std::ofstream *powerSumStream;

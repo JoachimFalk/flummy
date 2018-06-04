@@ -258,10 +258,6 @@ namespace SystemC_VPC {
                tasks_iter++)
           {
             (*tasks_iter)->getBlockEvent().dii->notify();
-            if ((*tasks_iter)->hasScheduledTask()) {
-              assert(((*tasks_iter)->getScheduledTask())->canFire());
-              ((*tasks_iter)->getScheduledTask())->schedule();
-            }
             this->taskTracer_->finishDii((*tasks_iter));
             this->taskTracer_->finishLatency((*tasks_iter));
             Director::getInstance().signalLatencyEvent((*tasks_iter));
