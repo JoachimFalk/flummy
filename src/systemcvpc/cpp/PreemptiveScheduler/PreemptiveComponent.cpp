@@ -105,7 +105,7 @@ namespace SystemC_VPC{
       case Config::Scheduler::RoundRobin:
         scheduler = new RoundRobinScheduler();
         break;
-      case Config::Scheduler::StaticPriority_P:
+      case Config::Scheduler::StaticPriority:
         scheduler = new PriorityScheduler();
         break;
       case Config::Scheduler::RateMonotonic:
