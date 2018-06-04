@@ -51,11 +51,11 @@ Scheduler parseScheduler(std::string name) {
   } else if (name == "RR" || name == "RoundRobin") {
     return Scheduler::RoundRobin;
   } else if (name == "RRNOPRE" || name == "RoundRobinNoPreempt") {
-    return Scheduler::RoundRobin_NP;
-  } else if (name == "PS" || name == "PriorityScheduler") {
-    return Scheduler::StaticPriority_P;
-  } else if (name == "PSNOPRE" || name == "PrioritySchedulerNoPreempt") {
-    return Scheduler::StaticPriority_NP;
+    return Scheduler::RoundRobinNoPreempt;
+  } else if (name == "SP" || name == "StaticPriority") {
+    return Scheduler::StaticPriority;
+  } else if (name == "SPNOPRE" || name == "StaticPriorityNoPreempt") {
+    return Scheduler::StaticPriorityNoPreempt;
   } else if (name == "RM" || name == "RateMonotonic") {
     return Scheduler::RateMonotonic;
   } else if (name == "FCFS" || name == "FirstComeFirstServed") {

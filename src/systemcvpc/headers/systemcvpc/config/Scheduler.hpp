@@ -43,11 +43,11 @@ namespace SystemC_VPC { namespace Config {
 
 enum class Scheduler {
   FCFS,
-  StaticPriority_P,
-  StaticPriority_NP,
+  StaticPriority,
+  StaticPriorityNoPreempt,
   DynamicPriorityUserYield,
   RoundRobin,
-  RoundRobin_NP,
+  RoundRobinNoPreempt,
   RateMonotonic,
   FlexRay,
   TDMA,

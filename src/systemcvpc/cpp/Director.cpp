@@ -116,10 +116,10 @@ namespace SystemC_VPC {
         case VC::Scheduler::FCFS:
           comp = new FcfsComponent(component);
           break;
-        case VC::Scheduler::StaticPriority_NP:
+        case VC::Scheduler::StaticPriorityNoPreempt:
           comp = new PriorityComponent(component);
           break;
-        case VC::Scheduler::RoundRobin_NP:
+        case VC::Scheduler::RoundRobinNoPreempt:
           comp = new RoundRobinComponent(component);
           break;
         case VC::Scheduler::DynamicPriorityUserYield:
