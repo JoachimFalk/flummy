@@ -203,10 +203,6 @@ namespace SystemC_VPC {
     return status.first->second.get();
   }
 
-  bool AbstractComponent::hasPCB(ProcessId const pid) const {
-    return pcbPool.find(pid) != pcbPool.end();
-  }
-
   ProcessControlBlock *AbstractComponent::getPCB(ProcessId const pid) const {
     PCBPool::const_iterator iter = pcbPool.find(pid);
     assert(iter != pcbPool.end());
