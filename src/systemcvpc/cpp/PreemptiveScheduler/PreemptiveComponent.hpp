@@ -70,7 +70,7 @@ namespace SystemC_VPC {
     /**
      * \brief An implementation of AbstractComponent.
      */
-    PreemptiveComponent( Config::Component::Ptr component);
+    PreemptiveComponent(Config::Component::Ptr component, Scheduler *scheduler);
 
     /**
      * implementation of AbstractComponent::compute(Task *)
@@ -173,8 +173,6 @@ namespace SystemC_VPC {
     std::ofstream *powerSumStream;
     PowerSumming  *powerSumming;
 #endif // NO_POWER_SUM
-
-    void setScheduler(Config::Component::Ptr component);
 
   };
 

@@ -35,17 +35,6 @@
  */
 
 #include "PreemptiveComponent.hpp"
-#include "AVBScheduler.hpp"
-#include "FlexRayScheduler.hpp"
-#include "MostScheduler.hpp"
-#include "MostSecondaryScheduler.hpp"
-#include "PriorityScheduler.hpp"
-#include "RateMonotonicScheduler.hpp"
-#include "RoundRobinScheduler.hpp"
-#include "Scheduler.hpp"
-#include "StreamShaperScheduler.hpp"
-#include "TDMAScheduler.hpp"
-#include "TimeTriggeredCCScheduler.hpp"
 
 #include <systemcvpc/vpc_config.h>
 
@@ -66,8 +55,9 @@ namespace SystemC_VPC{
   /**
    * \brief An implementation of AbstractComponent.
    */
-  PreemptiveComponent::PreemptiveComponent(Config::Component::Ptr component)
+  PreemptiveComponent::PreemptiveComponent(Config::Component::Ptr component, Scheduler *scheduler)
     : AbstractComponent(component)
+    , scheduler(scheduler)
     , blockMutex(0)
   {
     SC_METHOD(ttReleaseQueueMethod);
@@ -83,7 +73,6 @@ namespace SystemC_VPC{
     SC_THREAD(remainingPipelineStages);
 
     this->setPowerMode(this->translatePowerMode("SLOW"));
-    setScheduler(component);
 
 #ifndef NO_POWER_SUM
     std::string powerSumFileName(this->getName());
@@ -93,45 +82,6 @@ namespace SystemC_VPC{
     powerSumming   = new PowerSumming(*powerSumStream);
     this->addObserver(powerSumming);
 #endif // NO_POWER_SUM
-  }
-
-  /**
-   *
-   */
-  void PreemptiveComponent::setScheduler(Config::Component::Ptr component)
-  {
-    Config::Scheduler schedulerType = component->getScheduler();
-    switch (schedulerType) {
-      case Config::Scheduler::RoundRobin:
-        scheduler = new RoundRobinScheduler();
-        break;
-      case Config::Scheduler::StaticPriority:
-        scheduler = new PriorityScheduler();
-        break;
-      case Config::Scheduler::RateMonotonic:
-        scheduler = new RateMonotonicScheduler();
-        break;
-      case Config::Scheduler::TDMA:
-        scheduler = new TDMAScheduler();
-        break;
-      case Config::Scheduler::FlexRay:
-        scheduler = new FlexRayScheduler();
-        break;
-      case Config::Scheduler::AVB:
-        scheduler = new AVBScheduler();
-        break;
-      case Config::Scheduler::TTCC:
-        scheduler = new TimeTriggeredCCScheduler();
-        break;
-      case Config::Scheduler::MOST:
-        scheduler = new MostScheduler();
-        break;
-      case Config::Scheduler::StreamShaper:
-        scheduler = new StreamShaperScheduler();
-        break;
-      default:
-        assert(!"Oops, I don't know this scheduler!");
-    }
   }
 
   void PreemptiveComponent::notifyActivation(
@@ -714,6 +664,7 @@ namespace SystemC_VPC{
   PreemptiveComponent::~PreemptiveComponent(){
     this->setPowerConsumption(0.0);
     this->fireNotification(this);
+    delete scheduler;
 #ifndef NO_POWER_SUM
     this->removeObserver(powerSumming);
     delete powerSumming;
