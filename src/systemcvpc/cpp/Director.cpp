@@ -48,11 +48,23 @@
 #include "config/Mappings.hpp"
 #include "DebugOStream.hpp"
 #include "HysteresisLocalGovernor.hpp"
+
 #include "NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
 #include "NonPreemptiveScheduler/FcfsComponent.hpp"
 #include "NonPreemptiveScheduler/NonPreemptiveComponent.hpp"
 #include "NonPreemptiveScheduler/PriorityComponent.hpp"
 #include "NonPreemptiveScheduler/RoundRobinComponent.hpp"
+#include "PreemptiveScheduler/AVBScheduler.hpp"
+#include "PreemptiveScheduler/FlexRayScheduler.hpp"
+#include "PreemptiveScheduler/MostScheduler.hpp"
+#include "PreemptiveScheduler/MostSecondaryScheduler.hpp"
+#include "PreemptiveScheduler/PriorityScheduler.hpp"
+#include "PreemptiveScheduler/RateMonotonicScheduler.hpp"
+#include "PreemptiveScheduler/RoundRobinScheduler.hpp"
+#include "PreemptiveScheduler/StreamShaperScheduler.hpp"
+#include "PreemptiveScheduler/TDMAScheduler.hpp"
+#include "PreemptiveScheduler/TimeTriggeredCCScheduler.hpp"
+
 #include "PluggablePowerGovernor.hpp"
 #include "PowerSumming.hpp"
 #include "PreemptiveScheduler/PreemptiveComponent.hpp"
@@ -125,8 +137,35 @@ namespace SystemC_VPC {
         case VC::Scheduler::DynamicPriorityUserYield:
           comp = new DynamicPriorityComponent(component);
           break;
+        case Config::Scheduler::RoundRobin:
+          comp = new PreemptiveComponent(component, new RoundRobinScheduler());
+          break;
+        case Config::Scheduler::StaticPriority:
+          comp = new PreemptiveComponent(component, new PriorityScheduler());
+          break;
+        case Config::Scheduler::RateMonotonic:
+          comp = new PreemptiveComponent(component, new RateMonotonicScheduler());
+          break;
+        case Config::Scheduler::TDMA:
+          comp = new PreemptiveComponent(component, new TDMAScheduler());
+          break;
+        case Config::Scheduler::FlexRay:
+          comp = new PreemptiveComponent(component, new FlexRayScheduler());
+          break;
+        case Config::Scheduler::AVB:
+          comp = new PreemptiveComponent(component, new AVBScheduler());
+          break;
+        case Config::Scheduler::TTCC:
+          comp = new PreemptiveComponent(component, new TimeTriggeredCCScheduler());
+          break;
+        case Config::Scheduler::MOST:
+          comp = new PreemptiveComponent(component, new MostScheduler());
+          break;
+        case Config::Scheduler::StreamShaper:
+          comp = new PreemptiveComponent(component, new StreamShaperScheduler());
+          break;
         default:
-          comp = new PreemptiveComponent(component);
+          assert(!"Oops, I don't know this scheduler!");
       }
 
       switch(component->getTracing()){
