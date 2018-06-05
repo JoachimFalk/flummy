@@ -124,10 +124,10 @@ namespace SystemC_VPC {
     void addTracer(Trace::TracerIf *tracer);
             
     /**
-       * \brief Simulate an execution on this "Virtual Component".
-       *
-       * While this simulation is running SystemC simulation time is consumed.
-       */
+     * \brief Simulate an execution on this "Virtual Component".
+     *
+     * While this simulation is running SystemC simulation time is consumed.
+     */
     virtual void compute(Task* task)=0;
 
     /**
