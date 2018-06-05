@@ -97,12 +97,15 @@ namespace SystemC_VPC {
     virtual bool setAttribute(AttributePtr attributePtr);
 
     /**
-     * \brief Create the process control block.
+     * \brief Create the Process Control Block (PCB).
+     * The PCB must not previously exist.
      */
-    ProcessControlBlock *createPCB(const ProcessId pid);
+    ProcessControlBlock *createPCB(ProcessId const pid);
 
-    bool hasPCB(ProcessId const pid) const;
-
+    /**
+     * \brief Get the Process Control Block (PCB) for pid.
+     * The PCB must previously have been created via createPCB.
+     */
     ProcessControlBlock *getPCB(ProcessId const pid) const;
 
     virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList);

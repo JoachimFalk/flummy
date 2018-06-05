@@ -198,7 +198,6 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   // Generate new ProcessControlBlock.
   const ProcessId pid = Director::getInstance().getProcessId(actor->name());
   // This should be the first time the actor appeared here.
-  assert(!comp->hasPCB(pid));
   ProcessControlBlock *pcb = comp->createPCB(pid);
   pcb->configure(actor->name(), true);
   pcb->setTraceSignal(comp->getOrCreateTraceSignal(actor->name()));
