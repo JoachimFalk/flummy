@@ -92,8 +92,6 @@ protected:
    */
   bool hasWaitingOrRunningTasks();
 
-  virtual Trace::Tracing * getOrCreateTraceSignal(std::string name);
-
   bool scheduleMessageTasks();
 
   void scheduleThread();

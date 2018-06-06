@@ -137,22 +137,22 @@ namespace SystemC_VPC {
    *
    */
   void NonPreemptiveComponent::compute(Task *actualTask) {
-    if(multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()){
-        //MCG vorhanden und Task auch als MultiCast zu behandeln
-        MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
+    if (multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()) {
+      //MCG vorhanden und Task auch als MultiCast zu behandeln
+      MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
 
-        if(instance->task != actualTask){
-          //instance already running...
-          if(instance->task->getBlockEvent().latency->getDropped()){
-              //handling of buffer overflow
-              actualTask->getBlockEvent().latency->setDropped(true);
-          }else{
-              ProcessId pid = actualTask->getProcessId();
-              actualTask->setPCB(getPCB(pid));
-            this->taskTracer_->release(actualTask);
-          }
-            return;
+      if (instance->task != actualTask) {
+        //instance already running...
+        if (instance->task->getBlockEvent().latency->getDropped()) {
+          //handling of buffer overflow
+          actualTask->getBlockEvent().latency->setDropped(true);
+        } else {
+          ProcessId pid = actualTask->getProcessId();
+          actualTask->setPCB(getPCB(pid));
+          actualTask->setTraceTaskInstance(taskTracer_->release(actualTask->getTraceTask()));
         }
+        return;
+      }
     }
 
     ProcessId pid = actualTask->getProcessId();
@@ -178,7 +178,7 @@ namespace SystemC_VPC {
   }
 
   void NonPreemptiveComponent::addTask(Task *newReadyTask) {
-    taskTracer_->release(newReadyTask);
+    newReadyTask->setTraceTaskInstance(taskTracer_->release(newReadyTask->getTraceTask()));
     this->newReadyTask(newReadyTask);
     ++readyTasks;
     //awake scheduler thread
@@ -209,7 +209,7 @@ namespace SystemC_VPC {
         runningTask = selectReadyTask();
         assert(runningTask != nullptr);
         --readyTasks;
-        taskTracer_->assign(runningTask);
+        taskTracer_->assign(runningTask->getTraceTaskInstance());
         if (!runningTask->isPSM())
           fireStateChanged(ComponentState::RUNNING);
         else
@@ -258,8 +258,8 @@ namespace SystemC_VPC {
                tasks_iter++)
           {
             (*tasks_iter)->getBlockEvent().dii->notify();
-            this->taskTracer_->finishDii((*tasks_iter));
-            this->taskTracer_->finishLatency((*tasks_iter));
+            this->taskTracer_->finishDii((*tasks_iter)->getTraceTaskInstance());
+            this->taskTracer_->finishLatency((*tasks_iter)->getTraceTaskInstance());
             Director::getInstance().signalLatencyEvent((*tasks_iter));
           }
           multiCastGroupInstances.remove(mcgi);
@@ -270,7 +270,7 @@ namespace SystemC_VPC {
       }
     }
     fireStateChanged(ComponentState::IDLE);
-    this->taskTracer_->finishDii(runningTask);
+    this->taskTracer_->finishDii(runningTask->getTraceTaskInstance());
 
     DBG_OUT(
         this->getName() << " resign Task: " << runningTask->getName() << " @ " << sc_core::sc_time_stamp().to_default_time_units() << std::endl);
@@ -298,7 +298,7 @@ namespace SystemC_VPC {
     if (end <= now) {
       //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
-      this->taskTracer_->finishLatency(task);
+      this->taskTracer_->finishLatency(task->getTraceTaskInstance());
       // signalLatencyEvent will release runningTask (back to TaskPool)
       Director::getInstance().signalLatencyEvent(task);
       return;
@@ -340,7 +340,7 @@ namespace SystemC_VPC {
           //<< sc_core::sc_time_stamp() << std::endl;
 
           // Latency over -> remove Task
-          this->taskTracer_->finishLatency(front.task);
+          this->taskTracer_->finishLatency(front.task->getTraceTaskInstance());
           // signalLatencyEvent will release runningTask (back to TaskPool)
           Director::getInstance().signalLatencyEvent(front.task);
 
@@ -358,10 +358,6 @@ void NonPreemptiveComponent::updatePowerConsumption() {
   this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
   // Notify observers (e.g. powersum)
   this->fireNotification(this);
-}
-
-Trace::Tracing * NonPreemptiveComponent::getOrCreateTraceSignal(std::string name) {
-  return taskTracer_->getOrCreateTraceSignal(name);
 }
 
 void NonPreemptiveComponent::fireStateChanged(const ComponentState &state) {

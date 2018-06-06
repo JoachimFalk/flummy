@@ -39,67 +39,44 @@
 
 #include "TracerIf.hpp"
 
+#include <systemcvpc/config/Component.hpp>
+
 #include <CoSupport/Tracing/PajeTracer.hpp>
 
-#include <vector>
 #include <map>
 #include <string>
 
-namespace SystemC_VPC { namespace Trace {
+namespace SystemC_VPC { namespace Tracing {
 
 class PajeTracer: public TracerIf {
 public:
-  //
   PajeTracer(Config::Component::Ptr component);
 
+  TTask         *registerTask(std::string const &name);
+
+  TTaskInstance *release(TTask *ttask);
+
+  void           assign(TTaskInstance *ttaskInstance);
+
+  void           resign(TTaskInstance *ttaskInstance);
+
+  void           block(TTaskInstance *ttaskInstance);
+
+  void           finishDii(TTaskInstance *ttaskInstance);
+
+  void           finishLatency(TTaskInstance *ttaskInstance);
+
   ~PajeTracer();
-
-  void release(Task const *task);
-
-  void finishDii(Task const *task);
-
-  void finishLatency(Task const *task);
-
-  void assign(Task const *task);
-
-  void resign(Task const *task);
-
-  void block(Task const *task);
-
-  Tracing *getOrCreateTraceSignal(std::string const &name);
-
-protected:
-  unsigned int keyCounter;
-  int getNextKey();
-
 private:
-  std::string getName() const;
+  class PajeTask;
+  class PajeTaskInstance;
 
-  std::string name_;
-  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+  std::string  name_;
+
   CoSupport::Tracing::PajeTracer::Resource const *res_;
   sc_core::sc_time startTime;
-
-  typedef std::map<std::string, CoSupport::Tracing::PajeTracer::Activity*> TaskToActivity;
-  TaskToActivity taskToActivity;
-
-  typedef std::map<std::string, CoSupport::Tracing::PajeTracer::Event*> TaskToEvent;
-  TaskToEvent taskToEvent;
-
-  typedef std::map<std::string, sc_core::sc_time> TaskToEndTime;
-  TaskToEndTime taskToEndTime;
-
-  typedef std::map<std::string, const CoSupport::Tracing::PajeTracer::Resource*> TaskToResource;
-  TaskToResource taskToResource;
-
-  typedef std::map<std::string, std::string> TaskToPreTask;
-  TaskToPreTask taskToPreTask;
-
-  typedef std::map<std::string, std::string> TaskToDestTask;
-  TaskToDestTask taskToDestTask;
-
 };
 
-} } // namespace SystemC_VPC::Trace
+} } // namespace SystemC_VPC::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_PAJETRACER_HPP */

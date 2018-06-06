@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -39,7 +39,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-namespace SystemC_VPC { namespace Trace {
+namespace SystemC_VPC { namespace Tracing {
 
 class DataBaseTracer::DataBaseProxy {
 public:
@@ -106,7 +106,7 @@ void DataBaseTracer::DataBaseProxy::open() {
     exit(EXIT_FAILURE);
   }
 
-  if ((socket_ = fdopen(socketFD, "a+")) == NULL) {
+  if ((socket_ = fdopen(socketFD, "a+")) == nullptr) {
     perror("fdopen");
     exit(EXIT_FAILURE);
   }
@@ -118,38 +118,68 @@ void DataBaseTracer::DataBaseProxy::close() {
   fprintf(socket_, "CLOSE\r\n");
 }
 
+class DataBaseTracer::DBTask: public TTask {
+public:
+  DBTask(std::string const &name)
+    : name(name) {}
+
+  std::string name;
+
+  ~DBTask() {}
+};
+
+class DataBaseTracer::DBTaskInstance: public TTaskInstance {
+public:
+  DBTaskInstance(DBTask *dbTask)
+    : dbTask(dbTask), instanceId(instanceIdCounter++) {}
+
+  static size_t instanceIdCounter;
+
+  DBTask *dbTask;
+  size_t  instanceId;
+
+  ~DBTaskInstance() {}
+};
+
+size_t DataBaseTracer::DBTaskInstance::instanceIdCounter = 0;
+
 DataBaseTracer::DataBaseTracer(Config::Component::Ptr component)
   : dbProxy_(DataBaseProxy::getDataBaseProxy())
   , resourceName_(component->getName()) {}
 
-void DataBaseTracer::release(Task const *task)
-  { this->addEvent(task, "s"); }
+TTask         *DataBaseTracer::registerTask(std::string const &name)
+  { return new DBTask(name); }
 
-void DataBaseTracer::finishDii(Task const *task)
-  { this->addEvent(task, "d"); }
-
-void DataBaseTracer::finishLatency(Task const *task)
-  { this->addEvent(task, "l"); }
-
-void DataBaseTracer::assign(Task const *task)
-  { this->addEvent(task, "a"); }
-
-void DataBaseTracer::resign(Task const *task)
-  { this->addEvent(task, "r"); }
-
-void DataBaseTracer::block(Task const *task)
-  { this->addEvent(task, "b"); }
-
-// TODO: Can we avoid this function somehow?
-Tracing *DataBaseTracer::getOrCreateTraceSignal(std::string const &name)
-  { return nullptr; }
-
-void DataBaseTracer::addEvent(Task const *task, char const *state) {
-  dbProxy_.addEvent(resourceName_.c_str(),
-      task->getName().c_str(),
-      state,
-      sc_core::sc_time_stamp().value(),
-      task->getInstanceId());
+TTaskInstance *DataBaseTracer::release(TTask *ttask) {
+  TTaskInstance *ttaskInstance =
+      new DBTaskInstance(static_cast<DBTask *>(ttask));
+  this->addEvent(ttaskInstance, "s");
+  return ttaskInstance;
 }
 
-} } // namespace SystemC_VPC::Trace
+void DataBaseTracer::finishDii(TTaskInstance *ttaskInstance)
+  { this->addEvent(ttaskInstance, "d"); }
+
+void DataBaseTracer::finishLatency(TTaskInstance *ttaskInstance)
+  { this->addEvent(ttaskInstance, "l"); }
+
+void DataBaseTracer::assign(TTaskInstance *ttaskInstance)
+  { this->addEvent(ttaskInstance, "a"); }
+
+void DataBaseTracer::resign(TTaskInstance *ttaskInstance)
+  { this->addEvent(ttaskInstance, "r"); }
+
+void DataBaseTracer::block(TTaskInstance *ttaskInstance)
+  { this->addEvent(ttaskInstance, "b"); }
+
+void DataBaseTracer::addEvent(TTaskInstance const *ttaskInstance_, char const *state) {
+  DBTaskInstance const *ttaskInstance = static_cast<DBTaskInstance const *>(ttaskInstance_);
+
+  dbProxy_.addEvent(resourceName_.c_str(),
+      ttaskInstance->dbTask->name.c_str(),
+      state,
+      sc_core::sc_time_stamp().value(),
+      ttaskInstance->instanceId);
+}
+
+} } // namespace SystemC_VPC::Tracing

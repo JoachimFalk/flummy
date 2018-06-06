@@ -49,12 +49,16 @@
 
 namespace SystemC_VPC{
 
-  ProcessControlBlock::ProcessControlBlock( AbstractComponent * component )
+  ProcessControlBlock::ProcessControlBlock(AbstractComponent *component)
     : pid(-1)
     , priority(0)
-    , traceSignal(nullptr)
+    , ttask(nullptr)
     , component(component)
     , psm(false) {}
+
+  ProcessControlBlock::~ProcessControlBlock() {
+    delete ttask;
+  }
 
   void ProcessControlBlock::configure(std::string name, bool tracing){
     taskTracer =

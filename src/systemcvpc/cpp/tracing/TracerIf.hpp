@@ -37,42 +37,48 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP
 #define _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP
 
-#include "../Task.hpp"
-#include <systemcvpc/config/Component.hpp>
+#include <string>
 
-namespace SystemC_VPC { namespace Trace {
+namespace SystemC_VPC { namespace Tracing {
 
-// FIXME: Remove this after method getOrCreateTraceSignal has been removed!
-class Tracing;
+// Custom data for a tracer in the PCB.
+class TTask {
+public:
+  virtual ~TTask() {}
+};
+
+// Custom data for a tracer in the Task instance.
+class TTaskInstance {
+public:
+  virtual ~TTaskInstance() {}
+};
 
 class TracerIf {
 public:
-  virtual
-  void release(Task const *task) = 0;
+  /// Called once per actor
+  virtual TTask         *registerTask(std::string const &name) = 0;
 
-  virtual
-  void finishDii(Task const *task) = 0;
+  /// Called once per actor firing to create a task instance.
+  virtual TTaskInstance *release(TTask *ttask) = 0;
 
-  virtual
-  void finishLatency(Task const *task) = 0;
+  /// Called possibly multiple times to assign the task instance to the resource.
+  virtual void           assign(TTaskInstance *ttaskInstance) = 0;
 
-  virtual
-  void assign(Task const *task) = 0;
+  /// Called possibly multiple times to resign the task instance from the resource.
+  virtual void           resign(TTaskInstance *ttaskInstance) = 0;
 
-  virtual
-  void resign(Task const *task) = 0;
+  /// Called possibly multiple times to indicate that the task is blocked waiting for something.
+  virtual void           block(TTaskInstance *ttaskInstance) = 0;
 
-  virtual
-  void block(Task const *task) = 0;
+  /// Called once per actor firing to indicate that the DII of the task instance is over.
+  virtual void           finishDii(TTaskInstance *ttaskInstance) = 0;
 
-  // TODO: Can we avoid this function somehow?
-  virtual
-  Tracing *getOrCreateTraceSignal(std::string const &name) = 0;
+  /// Called once per actor firing to indicate that the latency of the task instance is over.
+  virtual void           finishLatency(TTaskInstance *ttaskInstance) = 0;
 
-  virtual
-  ~TracerIf() {}
+  virtual ~TracerIf() {}
 };
 
-} } // namespace SystemC_VPC::Trace
+} } // namespace SystemC_VPC::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP */

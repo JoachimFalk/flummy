@@ -53,6 +53,8 @@
 #include <systemcvpc/Attribute.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
+#include "tracing/TracerIf.hpp"
+
 #include "Delayer.hpp"
 #include "FunctionTiming.hpp"
 #include "Task.hpp"
@@ -67,10 +69,6 @@
 #include <list>
 
 namespace SystemC_VPC {
-
-  namespace Trace {
-    class TracerIf;
-  }
 
   class ComponentObserver;
 
@@ -100,7 +98,7 @@ namespace SystemC_VPC {
      * \brief Create the Process Control Block (PCB).
      * The PCB must not previously exist.
      */
-    ProcessControlBlock *createPCB(ProcessId const pid);
+    ProcessControlBlock *createPCB(std::string const &taskName);
 
     /**
      * \brief Get the Process Control Block (PCB) for pid.
@@ -113,8 +111,6 @@ namespace SystemC_VPC {
 
     virtual void scheduleAfterTransition();
 
-    virtual Trace::Tracing * getOrCreateTraceSignal(std::string name) = 0;
-
     void requestCanExecute();
 
     bool getCanExecuteTasks() const;
@@ -124,7 +120,7 @@ namespace SystemC_VPC {
     virtual void reactivateExecution();
 
 
-    void addTracer(Trace::TracerIf *tracer);
+    void addTracer(Tracing::TracerIf *tracer);
             
     /**
      * \brief Simulate an execution on this "Virtual Component".
@@ -213,7 +209,7 @@ namespace SystemC_VPC {
     static Factories factories;
     PowerTables powerTables;
 
-    Trace::TracerIf *taskTracer_;
+    Tracing::TracerIf *taskTracer_;
 
     AbstractComponent(Config::Component::Ptr component);
 

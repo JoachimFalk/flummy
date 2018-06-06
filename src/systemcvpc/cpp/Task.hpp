@@ -49,22 +49,16 @@
 
 #include "TaskPool.hpp"
 #include "FunctionTiming.hpp"
+#include "tracing/TracerIf.hpp"
 
 namespace SystemC_VPC {
-
-  namespace Trace {
-    class Tracing;
-    class VcdTracer;
-    class PajeTracer;
-  }
 
   class ProcessControlBlock;
 
   using CoSupport::SystemC::Event;
 
+  // Class representing a task instance, i.e., one execution of the task represented by the PCB.
   class Task {
-    friend class Trace::VcdTracer;
-    friend class Trace::PajeTracer;
     friend class NonPreemptiveComponent;
     friend class RoundRobinComponent;
     friend class AssociativePrototypedPool<ProcessId, Task>;
@@ -85,6 +79,13 @@ namespace SystemC_VPC {
     void        setBlockEvent(EventPair p)               {this->blockEvent = p;}
     void        setPCB(ProcessControlBlock *pcb)         {this->pcb = pcb;}
     void        setTiming(FunctionTimingPtr timing)      {this->timing = timing;}
+
+    // Custom data for a tracer in the PCB.
+    Tracing::TTask         *getTraceTask() const;
+
+    // Custom data for a tracer in the Task instance.
+    void                    setTraceTaskInstance(Tracing::TTaskInstance *ttaskInstance);
+    Tracing::TTaskInstance *getTraceTaskInstance() const;
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -160,17 +161,17 @@ namespace SystemC_VPC {
       pool->free(this->getProcessId(), this);
     }
 
+    ~Task();
   private:
     void traceReleaseTask();
     void traceFinishTaskLatency();
 
-    Task(const Task &task);
-        
-    Trace::Tracing* getTraceSignal() const;
-
     static int globalInstanceId;
 
     int instanceId;
+
+    // Custom data for a tracer in the Task instance.
+    Tracing::TTaskInstance *ttaskInstance;
 
     ProcessId        pid;
     FunctionIds      fid;

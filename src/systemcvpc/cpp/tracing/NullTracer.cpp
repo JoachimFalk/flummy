@@ -36,31 +36,30 @@
 
 #include "NullTracer.hpp"
 
-namespace SystemC_VPC { namespace Trace {
+namespace SystemC_VPC { namespace Tracing {
 
 NullTracer::NullTracer(Config::Component::Ptr component)
   {}
 
-void NullTracer::release(Task const *task)
-  {}
-
-void NullTracer::finishDii(Task const *task)
-  {}
-
-void NullTracer::finishLatency(Task const *task)
-  {}
-
-void NullTracer::assign(Task const *task)
-  {}
-
-void NullTracer::resign(Task const *task)
-  {}
-
-void NullTracer::block(Task const *task)
-  {}
-
-// TODO: Can we avoid this function somehow?
-Tracing *NullTracer::getOrCreateTraceSignal(std::string const &name)
+TTask         *NullTracer::registerTask(std::string const &name)
   { return nullptr; }
 
-} } // namespace SystemC_VPC::Trace
+TTaskInstance *NullTracer::release(TTask *ttask)
+  { return nullptr; }
+
+void           NullTracer::assign(TTaskInstance *ttaskInstance)
+  {}
+
+void           NullTracer::resign(TTaskInstance *ttaskInstance)
+  {}
+
+void           NullTracer::block(TTaskInstance *ttaskInstance)
+  {}
+
+void           NullTracer::finishDii(TTaskInstance *ttaskInstance)
+  {}
+
+void           NullTracer::finishLatency(TTaskInstance *ttaskInstance)
+  {}
+
+} } // namespace SystemC_VPC::Tracing

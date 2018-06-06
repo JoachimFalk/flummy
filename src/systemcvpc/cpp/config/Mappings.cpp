@@ -203,12 +203,10 @@ SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute)
     AbstractComponent * c = Config::Mappings::getComponents()[component];
     route->addHop(component->getName(), c);
 
-    ProcessControlBlock *pcb = c->createPCB(Director::getProcessId(route->getName()));
+    ProcessControlBlock *pcb = c->createPCB(route->getName());
     pcb->configure(route->getName(), false);
-    pcb->setTraceSignal(c->getOrCreateTraceSignal(route->getName()));
     pcb->setTiming(iter->getTransferTiming());
     pcb->setPriority(iter->getPriority());
-
   }
   return route;
 }
