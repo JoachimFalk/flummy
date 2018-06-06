@@ -49,11 +49,36 @@ namespace {
 
 }
 
-namespace SystemC_VPC { namespace Trace {
+namespace SystemC_VPC { namespace Tracing {
+
+  class PajeTracer::PajeTask: public TTask {
+  public:
+    PajeTask(std::string const &name)
+      : task(myPajeTracer->registerActivity(name.c_str(),true))
+      , releaseEvent(myPajeTracer->registerEvent((name+" released").c_str(),true))
+      , latencyEvent(myPajeTracer->registerEvent((name+" latency").c_str(),true))
+      {}
+
+    CoSupport::Tracing::PajeTracer::Activity *task;
+    CoSupport::Tracing::PajeTracer::Event    *releaseEvent;
+    CoSupport::Tracing::PajeTracer::Event    *latencyEvent;
+
+    ~PajeTask() {}
+  };
+
+  class PajeTracer::PajeTaskInstance: public TTaskInstance {
+  public:
+    PajeTaskInstance(PajeTask *pajeTask)
+      : pajeTask(pajeTask) {}
+
+    PajeTask *pajeTask;
+
+    ~PajeTaskInstance() {}
+  };
+
 
   PajeTracer::PajeTracer(Config::Component::Ptr component)
-      : keyCounter(0)
-      , name_(component->getName()) {
+      : name_(component->getName()) {
     if (!myPajeTracer){
       myPajeTracer.reset(new CoSupport::Tracing::PajeTracer("paje.trace"));
     }
@@ -64,151 +89,44 @@ namespace SystemC_VPC { namespace Trace {
 
   }
 
-  std::string PajeTracer::getName() const {
-    return name_;
+  TTask         *PajeTracer::registerTask(std::string const &name) {
+    return new PajeTask(name);
   }
 
-  void PajeTracer::release(Task const *task) {
-
-//    if(!task->hasScheduledTask()){
-//      std::string name = task->getName();
-//      std::string msg_name;
-//      int msg_cf = name.find("msg_cf_");
-//      int begin = name.find("_cf_");
-//      int end = name.find("_1_");
-//      if (msg_cf == -1)
-//        msg_name = name.substr(begin+4, name.length()-begin-6);
-//      else
-//        msg_name = name.substr(7, end-7);
-//      int n = msg_name.find("_");
-//      std::string from = msg_name.substr(0,n);
-//      std::string to = msg_name.substr(n+1,msg_name.length()-n-1);
-
-//      TaskToPreTask::const_iterator iterTask = taskToPreTask.find(to);
-
-//      if(iterTask == taskToPreTask.end()) {
-//        taskToPreTask[to] = from;
-//        taskToDestTask[from] = to;
-//        myPajeTracer->registerLink(msg_name.c_str());
-//      } //else if(taskToPreTask[to] != from) {
-//        taskToPreTask[to] = from;
-//        myPajeTracer->registerLink(msg_name.c_str());
-      //}
-//  }
-
-//    std::ofstream logfile;
-//    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
-//    logfile << "release Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
-//    logfile.close();
+  TTaskInstance *PajeTracer::release(TTask *ttask) {
+    PajeTaskInstance *ttaskInstance = new PajeTaskInstance(static_cast<PajeTask *>(ttask));
+    myPajeTracer->traceEvent(this->res_,
+        ttaskInstance->pajeTask->releaseEvent,
+        sc_core::sc_time_stamp());
+    return  ttaskInstance;
   }
 
-  void PajeTracer::finishDii(Task const *task) {
-//    std::ofstream logfile;
-//    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
-//    logfile << "finishDii Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
-//    logfile.close();
-
-    TaskToActivity::const_iterator iterAction = taskToActivity.find(task->getName());
-    assert(iterAction != taskToActivity.end());
-    myPajeTracer->traceActivity(this->res_, iterAction->second, this->startTime, sc_core::sc_time_stamp()); //
-
-  }
-
-  void PajeTracer::finishLatency(Task const *task) {
-
-//    taskToEndTime[task->getName()] = sc_core::sc_time_stamp();
-//    taskToResource[task->getName()] = this->res_;
-
-//    TaskToDestTask::const_iterator iterDestTask = taskToDestTask.find(task->getName());
-//    if (iterDestTask != taskToDestTask.end()){
-//      std::string destTask = iterDestTask->second;
-//      std::string link_ = task->getName().append("_" + destTask);
-//
-//      myPajeTracer->traceLinkBegin(link_.c_str(), this->res_, sc_core::sc_time_stamp());
-//    }
-
-//    TaskToPreTask::const_iterator iterTask = taskToPreTask.find(task->getName());
-//    if (iterTask != taskToPreTask.end()){
-//      std::string preTask = iterTask->second;
-//      std::string link_ = preTask.append("_" + task->getName());
-
-//      TaskToEndTime::const_iterator iterPre = taskToEndTime.find(preTask.c_str());
-//      assert(iterPre == taskToEndTime.end());
-
-//      myPajeTracer->traceLinkEnd(link_.c_str(), this->res_, sc_core::sc_time_stamp());
-
-//  }
-
-
-//    std::ofstream logfile;
-//    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
-//    logfile << "finishLatency Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
-//    logfile.close();
-  }
-
-  void PajeTracer::assign(Task const *task) {
-
+  void           PajeTracer::assign(TTaskInstance *ttaskInstance) {
     this->startTime = sc_core::sc_time_stamp();
-
-    TaskToActivity::const_iterator iterActivity = taskToActivity.find(task->getName());
-    if (iterActivity == taskToActivity.end()) {
-      taskToActivity[task->getName()] = myPajeTracer->registerActivity(task->getName().c_str(),true);
-    }
-
-//    std::ofstream logfile;
-//    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
-//    logfile << "assign Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
-//    logfile.close();
   }
 
-  void PajeTracer::resign(Task const *task) {
-
-    this->startTime = sc_core::sc_time_stamp();
-
-    std::string event = task->getName().append(" resigned!");
-
-    TaskToEvent::const_iterator iterEvent = taskToEvent.find(event);
-    if (iterEvent == taskToEvent.end())
-      taskToEvent[event] = myPajeTracer->registerEvent(task->getName().c_str(),true);
-
-    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_core::sc_time_stamp());
-//    std::ofstream logfile;
-//    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
-//    logfile << "resign Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
-//    logfile.close();
+  void           PajeTracer::resign(TTaskInstance *ttaskInstance) {
+    myPajeTracer->traceActivity(this->res_,
+        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
+        this->startTime, sc_core::sc_time_stamp());
   }
 
-  void PajeTracer::block(Task const *task) {
-
-    std::string event = task->getName().append(" blocked!");
-
-    TaskToEvent::const_iterator iterEvent = taskToEvent.find(event);
-    if (iterEvent == taskToEvent.end())
-      taskToEvent[event] = myPajeTracer->registerEvent(task->getName().c_str(),true);
-
-    myPajeTracer->traceEvent(this->res_, taskToEvent.find(event)->second, sc_core::sc_time_stamp());
-
-    myPajeTracer->traceActivity(this->res_, taskToActivity.find(task->getName())->second, this->startTime, sc_core::sc_time_stamp());
-
-//    std::ofstream logfile;
-//    logfile.open("logfile.txt", std::ios_base::app);
-//    sc_core::sc_time t1 = sc_core::sc_time_stamp();
-//    logfile << "block Task " << task->getName() << " "<< task->pid << " on " << this->res_ << " at: " << t1 << "\n";
-//    logfile.close();
+  void           PajeTracer::block(TTaskInstance *ttaskInstance) {
+    myPajeTracer->traceActivity(this->res_,
+        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
+        this->startTime, sc_core::sc_time_stamp());
   }
 
-  Tracing *PajeTracer::getOrCreateTraceSignal(std::string const &name) {
-    return nullptr;
+  void           PajeTracer::finishDii(TTaskInstance *ttaskInstance) {
+    myPajeTracer->traceActivity(this->res_,
+        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
+        this->startTime, sc_core::sc_time_stamp());
   }
 
-  int PajeTracer::getNextKey() {
-    return (keyCounter++);
+  void           PajeTracer::finishLatency(TTaskInstance *ttaskInstance) {
+    myPajeTracer->traceEvent(this->res_,
+        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->latencyEvent,
+        sc_core::sc_time_stamp());
   }
 
-
-} } // namespace SystemC_VPC::Trace
+} } // namespace SystemC_VPC::Tracing

@@ -39,7 +39,13 @@
 
 #include "TracerIf.hpp"
 
-namespace SystemC_VPC { namespace Trace {
+#include <systemcvpc/config/Component.hpp>
+
+#include <systemc>
+
+#include <string>
+
+namespace SystemC_VPC { namespace Tracing {
 
 class VcdTracer: public TracerIf {
 public:
@@ -47,27 +53,30 @@ public:
 
   ~VcdTracer();
 
-  void release(Task const *task);
+  TTask         *registerTask(std::string const &name);
 
-  void finishDii(Task const *task);
+  TTaskInstance *release(TTask *ttask);
 
-  void finishLatency(Task const *task);
+  void           assign(TTaskInstance *ttaskInstance);
 
-  void assign(Task const *task);
+  void           resign(TTaskInstance *ttaskInstance);
 
-  void resign(Task const *task);
+  void           block(TTaskInstance *ttaskInstance);
 
-  void block(Task const *task);
+  void           finishDii(TTaskInstance *ttaskInstance);
 
-  Tracing *getOrCreateTraceSignal(std::string const &name);
+  void           finishLatency(TTaskInstance *ttaskInstance);
 private:
+  class VcdTask;
+  class VcdTaskInstance;
+
   std::string getName() const;
 
   sc_core::sc_trace_file *traceFile_;
   std::string name_;
-  std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+//std::map<std::string, Trace::Tracing*> trace_map_by_name_;
 };
 
-} } // namespace SystemC_VPC::Trace
+} } // namespace SystemC_VPC::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_VCDTRACER_HPP */

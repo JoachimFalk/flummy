@@ -54,17 +54,13 @@
 
 #include "PowerMode.hpp"
 #include "FunctionTiming.hpp"
+#include "tracing/TracerIf.hpp"
 
 #include <boost/shared_ptr.hpp>
 
 namespace SystemC_VPC {
 
-  namespace Trace{
-    class Tracing;
-  }
-
   class AbstractComponent;
-  class Task;
 
  /**
   * This class represents all necessary data of a simulated process within VPC
@@ -83,10 +79,10 @@ namespace SystemC_VPC {
      */
     void configure(std::string name, bool tracing);
 
-    void            setTraceSignal(Trace::Tracing *signal)
-      { traceSignal = signal; }
-    Trace::Tracing *getTraceSignal() const
-      { return traceSignal; }
+    void            setTraceTask(Tracing::TTask *ttask)
+      { assert(!this->ttask); this->ttask = ttask; }
+    Tracing::TTask *getTraceTask() const
+      { return this->ttask; }
 
     CoSupport::Tracing::TaskTracer *getTaskTracer() const
       { return taskTracer.get(); }
@@ -109,14 +105,18 @@ namespace SystemC_VPC {
       { psm = flag; }
     bool getTaskIsPSM() const
       { return psm; }
-  private:
-    ProcessId   pid;
 
-    int priority;
-    Trace::Tracing    *traceSignal;
-    AbstractComponent *component;
-    CoSupport::Tracing::TaskTracer::Ptr taskTracer;
-    bool psm;
+    ~ProcessControlBlock();
+  private:
+    ProcessId                            pid;
+    int                                  priority;
+
+    // Custom data for a tracer in the PCB.
+    Tracing::TTask                      *ttask;
+
+    AbstractComponent                   *component;
+    CoSupport::Tracing::TaskTracer::Ptr  taskTracer;
+    bool                                 psm;
   };
 
 } // namespace SystemC_VPC

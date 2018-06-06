@@ -170,16 +170,16 @@ namespace SystemC_VPC {
 
       switch(component->getTracing()){
         case Config::Traceable::NONE:
-          comp->addTracer(new Trace::NullTracer(component));
+          comp->addTracer(new Tracing::NullTracer(component));
           break;
         case Config::Traceable::PAJE:
-          comp->addTracer(new Trace::PajeTracer(component));
+          comp->addTracer(new Tracing::PajeTracer(component));
           break;
         case Config::Traceable::VCD:
-          comp->addTracer(new Trace::VcdTracer(component));
+          comp->addTracer(new Tracing::VcdTracer(component));
           break;
         case Config::Traceable::DB:
-          comp->addTracer(new Trace::DataBaseTracer(component));
+          comp->addTracer(new Tracing::DataBaseTracer(component));
           break;
         default:
           assert(!"Oops, I don't know this tracer!");

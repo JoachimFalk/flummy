@@ -195,12 +195,9 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
 #endif //NDEBUG
   AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
 
-  // Generate new ProcessControlBlock.
-  const ProcessId pid = Director::getInstance().getProcessId(actor->name());
   // This should be the first time the actor appeared here.
-  ProcessControlBlock *pcb = comp->createPCB(pid);
+  ProcessControlBlock *pcb = comp->createPCB(actor->name());
   pcb->configure(actor->name(), true);
-  pcb->setTraceSignal(comp->getOrCreateTraceSignal(actor->name()));
   actor->setScheduler(comp);
 }
 

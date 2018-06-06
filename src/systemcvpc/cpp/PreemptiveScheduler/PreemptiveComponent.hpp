@@ -102,11 +102,6 @@ namespace SystemC_VPC {
      */
     virtual void updatePowerConsumption();
 
-    /**
-     *
-     */
-    virtual Trace::Tracing *getOrCreateTraceSignal(std::string name);
-
     /*
      * from ComponentInterface
      */

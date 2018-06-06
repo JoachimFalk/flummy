@@ -101,8 +101,6 @@ namespace SystemC_VPC{
      */
     bool hasWaitingOrRunningTasks();
       
-    virtual Trace::Tracing *getOrCreateTraceSignal(std::string name);
-
   protected:
     /**
      * \brief An implementation of AbstractComponent used together with

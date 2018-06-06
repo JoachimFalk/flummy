@@ -185,22 +185,22 @@ namespace SystemC_VPC{
    *
    */
   void PreemptiveComponent::compute(Task* actualTask){
-    if(multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()){
-        //MCG vorhanden und Task auch als MultiCast zu behandeln
-        MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
+    if (multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()) {
+      //MCG vorhanden und Task auch als MultiCast zu behandeln
+      MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
 
-        if(instance->task != actualTask){
-          //instance already running...
-          if(instance->task->getBlockEvent().latency->getDropped()){
-              //handling of buffer overflow
-              actualTask->getBlockEvent().latency->setDropped(true);
-          }else{
-              ProcessId pid = actualTask->getProcessId();
-              actualTask->setPCB(getPCB(pid));
-            this->taskTracer_->release(actualTask);
-          }
-            return;
+      if (instance->task != actualTask) {
+        //instance already running...
+        if (instance->task->getBlockEvent().latency->getDropped()) {
+          //handling of buffer overflow
+          actualTask->getBlockEvent().latency->setDropped(true);
+        } else {
+          ProcessId pid = actualTask->getProcessId();
+          actualTask->setPCB(getPCB(pid));
+          actualTask->setTraceTaskInstance(taskTracer_->release(actualTask->getTraceTask()));
         }
+        return;
+      }
     }
 
     ProcessId pid = actualTask->getProcessId();
@@ -230,9 +230,9 @@ namespace SystemC_VPC{
     // A task can call compute only one time!
     assert(readyTasks.find(newReadyTask->getInstanceId())   == readyTasks.end());
     assert(runningTasks.find(newReadyTask->getInstanceId()) == runningTasks.end());
+    newReadyTask->setTraceTaskInstance(taskTracer_->release(newReadyTask->getTraceTask()));
     //insert new task in ready list
     readyTasks[newReadyTask->getInstanceId()]=newReadyTask;
-    taskTracer_->release(newReadyTask);
     scheduler->addedNewTask(newReadyTask);
     DBG_SC_OUT("PreemptiveComponent::addTask (" << newReadyTask->getName()
         << ") for " << this->getName() << " notifying scheduler" << std::endl);
@@ -293,7 +293,7 @@ namespace SystemC_VPC{
         assert(iter != runningTasks.end());
         DBG_OUT(this->getName() << " IID: " << iter->first << "> Resigning task " << iter->second->getName()
             << "; Remaining delay " << iter->second->getRemainingDelay() << std::endl);
-        this->taskTracer_->resign(iter->second);
+        this->taskTracer_->resign(iter->second->getTraceTaskInstance());
         sassert(readyTasks.insert(*iter).second);
         runningTasks.erase(iter);
       }
@@ -320,7 +320,7 @@ namespace SystemC_VPC{
         assert(iter != readyTasks.end());
         DBG_OUT(this->getName() << " IID: " << iter->first << "> Assigning task " << iter->second->getName()
             << "; Remaining delay " << iter->second->getRemainingDelay() << std::endl);
-        this->taskTracer_->assign(iter->second);
+        this->taskTracer_->assign(iter->second->getTraceTaskInstance());
         sassert(runningTasks.insert(*iter).second);
         readyTasks.erase(iter);
       }
@@ -544,7 +544,7 @@ namespace SystemC_VPC{
 
     //notify(*(task->blockEvent));
     scheduler->removedTask(task);
-    this->taskTracer_->finishDii(task);
+    this->taskTracer_->finishDii(task->getTraceTaskInstance());
 
     task->getBlockEvent().dii->notify();
 
@@ -557,8 +557,8 @@ namespace SystemC_VPC{
              for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
                  tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
                  (*tasks_iter)->getBlockEvent().dii->notify();
-                 this->taskTracer_->finishDii((*tasks_iter));
-                 this->taskTracer_->finishLatency((*tasks_iter));
+                 this->taskTracer_->finishDii((*tasks_iter)->getTraceTaskInstance());
+                 this->taskTracer_->finishLatency((*tasks_iter)->getTraceTaskInstance());
                  Director::getInstance().signalLatencyEvent((*tasks_iter));
              }
              multiCastGroupInstances.remove(mcgi);
@@ -604,11 +604,6 @@ namespace SystemC_VPC{
     this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
     // Notify observers (e.g. powersum)
     this->fireNotification(this);
-  }
-
-  Trace::Tracing *PreemptiveComponent::getOrCreateTraceSignal(std::string name)
-  {
-    return taskTracer_->getOrCreateTraceSignal(name);
   }
 
   /*
@@ -682,7 +677,7 @@ namespace SystemC_VPC{
     if(end <= now){
       //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
-      this->taskTracer_->finishLatency(task);
+      this->taskTracer_->finishLatency(task->getTraceTaskInstance());
       Director::getInstance().signalLatencyEvent(task);
       return;
     }
@@ -723,7 +718,7 @@ namespace SystemC_VPC{
           //std::cerr << "Ready! releasing task (" <<  front.time <<") at: "
           //<< sc_core::sc_time_stamp() << std::endl;
 
-          this->taskTracer_->finishLatency(front.task);
+          this->taskTracer_->finishLatency(front.task->getTraceTaskInstance());
 
           // Latency over -> remove Task
           Director::getInstance().signalLatencyEvent(front.task);

@@ -40,36 +40,37 @@
 //#define VPC_ENABLE_PLAIN_TRACING
 #include "TracerIf.hpp"
 
-namespace SystemC_VPC { namespace Trace {
+#include <systemcvpc/config/Component.hpp>
+
+namespace SystemC_VPC { namespace Tracing {
 
 class DataBaseTracer: public TracerIf {
-protected:
-  class DataBaseProxy;
 public:
-  //
   DataBaseTracer(Config::Component::Ptr component);
 
-  void release(Task const *task);
+  TTask         *registerTask(std::string const &name);
 
-  void finishDii(Task const *task);
+  TTaskInstance *release(TTask *ttask);
 
-  void finishLatency(Task const *task);
+  void           assign(TTaskInstance *ttaskInstance);
 
-  void assign(Task const *task);
+  void           resign(TTaskInstance *ttaskInstance);
 
-  void resign(Task const *task);
+  void           block(TTaskInstance *ttaskInstance);
 
-  void block(Task const *task);
+  void           finishDii(TTaskInstance *ttaskInstance);
 
-  // TODO: Can we avoid this function somehow?
-  Tracing *getOrCreateTraceSignal(std::string const &name);
+  void           finishLatency(TTaskInstance *ttaskInstance);
 private:
-  void addEvent(Task const *task, char const *state);
+  class DataBaseProxy;
+  class DBTask;
+  class DBTaskInstance;
 
+  void addEvent(TTaskInstance const *ttaskInstance_, char const *state);
   DataBaseProxy &dbProxy_;
   std::string    resourceName_;
 };
 
-} } // namespace SystemC_VPC::Trace
+} } // namespace SystemC_VPC::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_DATABASETRACER_HPP */

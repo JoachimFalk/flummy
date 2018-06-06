@@ -37,12 +37,13 @@
 #include "Task.hpp"
 #include "ProcessControlBlock.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
 
   int Task::globalInstanceId = 0;
 
   Task::Task(TaskPool *pool)
     : instanceId(globalInstanceId++)
+    , ttaskInstance(nullptr)
     , pid(-1)
     , fid()
     , gid()
@@ -61,32 +62,21 @@ namespace SystemC_VPC{
     , scheduledTask(NULL)
     {}
 
-  Task::Task(const Task &task)
-    : instanceId(globalInstanceId++)
-    , pid(task.pid)
-    , fid(task.fid)
-    , gid(task.gid)
-    , blockEvent(task.blockEvent)
-    , blockingCompute(task.blockingCompute)
-    , blockAck(task.blockAck)
-    , exec(task.exec)
-    , write(task.write)
-    , startTime(task.startTime)
-    , endTime(task.endTime)
-    , blockingTime(task.blockingTime)
-    , delay(task.delay)
-    , latency(task.latency)
-    , remainingDelay(task.remainingDelay)
-    , overhead(task.overhead)
-    , factorOverhead(task.factorOverhead)
-    , timing(task.timing)
-    , pcb(task.pcb)
-    , pool(task.pool)
-    , name(task.name)
-    , timingScale(task.timingScale)
-    , taskTracerTicket(task.taskTracerTicket)
-    , scheduledTask(task.scheduledTask)
-    {}
+  Task::~Task() {
+    delete ttaskInstance;
+  }
+
+  // Custom data for a tracer in the Task instance.
+  void                    Task::setTraceTaskInstance(Tracing::TTaskInstance *ttaskInstance) {
+    if (this->ttaskInstance) {
+      assert(this->ttaskInstance != ttaskInstance);
+      delete this->ttaskInstance;
+    }
+    this->ttaskInstance = ttaskInstance;
+  }
+
+  Tracing::TTaskInstance *Task::getTraceTaskInstance() const
+    { return this->ttaskInstance; }
 
   void Task::initDelays() {
     assert(pcb != NULL);
@@ -107,6 +97,9 @@ namespace SystemC_VPC{
     this->setLatency(this->timingScale * timing->getLatency(fids));
   }
 
+  Tracing::TTask *Task::getTraceTask() const
+    { assert(pcb != NULL); return pcb->getTraceTask();}
+
   // Adaptor setter / getter for ProcessControlBlock
   int Task::getPriority() const
     { assert(pcb != NULL); return pcb->getPriority();}
@@ -123,8 +116,5 @@ namespace SystemC_VPC{
   void Task::traceFinishTaskLatency(){
     pcb->getTaskTracer()->finishTaskLatency(taskTracerTicket);
   }
-
-  Trace::Tracing* Task::getTraceSignal() const
-    {assert(pcb != NULL); return pcb->getTraceSignal();}
 
 }
