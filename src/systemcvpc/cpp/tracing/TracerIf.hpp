@@ -38,19 +38,40 @@
 #define _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP
 
 #include <string>
+#include <vector>
 
 namespace SystemC_VPC { namespace Tracing {
 
 // Custom data for a tracer in the PCB.
 class TTask {
 public:
-  virtual ~TTask() {}
+  virtual ~TTask();
+};
+
+class TTaskHolder {
+  friend class TraceableComponent;
+private:
+  // Custom data for a tracer in the PCB.
+  // This can only be managed by TraceableComponent.
+  std::vector<TTask *> ttasks;
+protected:
+  ~TTaskHolder();
 };
 
 // Custom data for a tracer in the Task instance.
 class TTaskInstance {
 public:
-  virtual ~TTaskInstance() {}
+  virtual ~TTaskInstance();
+};
+
+class TTaskInstanceHolder {
+  friend class TraceableComponent;
+private:
+  // Custom data for a tracer in the PCB.
+  // This can only be managed by TraceableComponent.
+  std::vector<TTaskInstance *> ttaskInstances;
+protected:
+  ~TTaskInstanceHolder();
 };
 
 class TracerIf {
@@ -76,7 +97,7 @@ public:
   /// Called once per actor firing to indicate that the latency of the task instance is over.
   virtual void           finishLatency(TTaskInstance *ttaskInstance) = 0;
 
-  virtual ~TracerIf() {}
+  virtual ~TracerIf();
 };
 
 } } // namespace SystemC_VPC::Tracing

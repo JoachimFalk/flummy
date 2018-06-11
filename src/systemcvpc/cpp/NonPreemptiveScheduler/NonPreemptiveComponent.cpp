@@ -149,7 +149,7 @@ namespace SystemC_VPC {
         } else {
           ProcessId pid = actualTask->getProcessId();
           actualTask->setPCB(getPCB(pid));
-          actualTask->setTraceTaskInstance(taskTracer_->release(actualTask->getTraceTask()));
+          releaseTask(actualTask);
         }
         return;
       }
@@ -178,7 +178,7 @@ namespace SystemC_VPC {
   }
 
   void NonPreemptiveComponent::addTask(Task *newReadyTask) {
-    newReadyTask->setTraceTaskInstance(taskTracer_->release(newReadyTask->getTraceTask()));
+    releaseTask(newReadyTask);
     this->newReadyTask(newReadyTask);
     ++readyTasks;
     //awake scheduler thread
@@ -209,7 +209,7 @@ namespace SystemC_VPC {
         runningTask = selectReadyTask();
         assert(runningTask != nullptr);
         --readyTasks;
-        taskTracer_->assign(runningTask->getTraceTaskInstance());
+        assignTaskInstance(runningTask);
         if (!runningTask->isPSM())
           fireStateChanged(ComponentState::RUNNING);
         else
@@ -258,9 +258,9 @@ namespace SystemC_VPC {
                tasks_iter++)
           {
             (*tasks_iter)->getBlockEvent().dii->notify();
-            this->taskTracer_->finishDii((*tasks_iter)->getTraceTaskInstance());
-            this->taskTracer_->finishLatency((*tasks_iter)->getTraceTaskInstance());
-            Director::getInstance().signalLatencyEvent((*tasks_iter));
+            finishDiiTaskInstance(*tasks_iter);
+            finishLatencyTaskInstance(*tasks_iter);
+            Director::getInstance().signalLatencyEvent(*tasks_iter);
           }
           multiCastGroupInstances.remove(mcgi);
           delete (mcgi->additional_tasks);
@@ -270,7 +270,7 @@ namespace SystemC_VPC {
       }
     }
     fireStateChanged(ComponentState::IDLE);
-    this->taskTracer_->finishDii(runningTask->getTraceTaskInstance());
+    finishDiiTaskInstance(runningTask);
 
     DBG_OUT(
         this->getName() << " resign Task: " << runningTask->getName() << " @ " << sc_core::sc_time_stamp().to_default_time_units() << std::endl);
@@ -298,7 +298,7 @@ namespace SystemC_VPC {
     if (end <= now) {
       //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
-      this->taskTracer_->finishLatency(task->getTraceTaskInstance());
+      finishLatencyTaskInstance(task);
       // signalLatencyEvent will release runningTask (back to TaskPool)
       Director::getInstance().signalLatencyEvent(task);
       return;
@@ -340,7 +340,7 @@ namespace SystemC_VPC {
           //<< sc_core::sc_time_stamp() << std::endl;
 
           // Latency over -> remove Task
-          this->taskTracer_->finishLatency(front.task->getTraceTaskInstance());
+          finishLatencyTaskInstance(front.task);
           // signalLatencyEvent will release runningTask (back to TaskPool)
           Director::getInstance().signalLatencyEvent(front.task);
 

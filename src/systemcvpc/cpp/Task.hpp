@@ -58,7 +58,8 @@ namespace SystemC_VPC {
   using CoSupport::SystemC::Event;
 
   // Class representing a task instance, i.e., one execution of the task represented by the PCB.
-  class Task {
+  class Task
+    : public Tracing::TTaskInstanceHolder {
     friend class NonPreemptiveComponent;
     friend class RoundRobinComponent;
     friend class AssociativePrototypedPool<ProcessId, Task>;
@@ -77,15 +78,9 @@ namespace SystemC_VPC {
     void        setGuardIds(FunctionIds gid)             {this->gid = gid;}
     EventPair   getBlockEvent()                          {return blockEvent;}
     void        setBlockEvent(EventPair p)               {this->blockEvent = p;}
+    ProcessControlBlock *getPCB()                        {return this->pcb;}
     void        setPCB(ProcessControlBlock *pcb)         {this->pcb = pcb;}
     void        setTiming(FunctionTimingPtr timing)      {this->timing = timing;}
-
-    // Custom data for a tracer in the PCB.
-    Tracing::TTask         *getTraceTask() const;
-
-    // Custom data for a tracer in the Task instance.
-    void                    setTraceTaskInstance(Tracing::TTaskInstance *ttaskInstance);
-    Tracing::TTaskInstance *getTraceTaskInstance() const;
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -169,9 +164,6 @@ namespace SystemC_VPC {
     static int globalInstanceId;
 
     int instanceId;
-
-    // Custom data for a tracer in the Task instance.
-    Tracing::TTaskInstance *ttaskInstance;
 
     ProcessId        pid;
     FunctionIds      fid;

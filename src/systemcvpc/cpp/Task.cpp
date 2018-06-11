@@ -43,7 +43,6 @@ namespace SystemC_VPC {
 
   Task::Task(TaskPool *pool)
     : instanceId(globalInstanceId++)
-    , ttaskInstance(nullptr)
     , pid(-1)
     , fid()
     , gid()
@@ -63,20 +62,7 @@ namespace SystemC_VPC {
     {}
 
   Task::~Task() {
-    delete ttaskInstance;
   }
-
-  // Custom data for a tracer in the Task instance.
-  void                    Task::setTraceTaskInstance(Tracing::TTaskInstance *ttaskInstance) {
-    if (this->ttaskInstance) {
-      assert(this->ttaskInstance != ttaskInstance);
-      delete this->ttaskInstance;
-    }
-    this->ttaskInstance = ttaskInstance;
-  }
-
-  Tracing::TTaskInstance *Task::getTraceTaskInstance() const
-    { return this->ttaskInstance; }
 
   void Task::initDelays() {
     assert(pcb != NULL);
@@ -96,9 +82,6 @@ namespace SystemC_VPC {
     // Initialize with Latency
     this->setLatency(this->timingScale * timing->getLatency(fids));
   }
-
-  Tracing::TTask *Task::getTraceTask() const
-    { assert(pcb != NULL); return pcb->getTraceTask();}
 
   // Adaptor setter / getter for ProcessControlBlock
   int Task::getPriority() const

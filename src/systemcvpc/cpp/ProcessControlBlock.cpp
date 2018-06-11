@@ -49,15 +49,14 @@
 
 namespace SystemC_VPC{
 
-  ProcessControlBlock::ProcessControlBlock(AbstractComponent *component)
-    : pid(-1)
+  ProcessControlBlock::ProcessControlBlock(AbstractComponent *component, std::string const &taskName)
+    : component(component)
+    , name(taskName)
+    , pid(Director::getProcessId(taskName))
     , priority(0)
-    , ttask(nullptr)
-    , component(component)
     , psm(false) {}
 
   ProcessControlBlock::~ProcessControlBlock() {
-    delete ttask;
   }
 
   void ProcessControlBlock::configure(std::string name, bool tracing){

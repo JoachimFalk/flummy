@@ -53,7 +53,7 @@
 #include <systemcvpc/Attribute.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
-#include "tracing/TracerIf.hpp"
+#include "tracing/TraceableComponent.hpp"
 
 #include "Delayer.hpp"
 #include "FunctionTiming.hpp"
@@ -84,6 +84,7 @@ namespace SystemC_VPC {
    */
   class AbstractComponent:
     public sc_core::sc_module,
+    public Tracing::TraceableComponent,
     public Delayer,
     public ComponentModel,
     public ComponentInterface
@@ -120,8 +121,6 @@ namespace SystemC_VPC {
     virtual void reactivateExecution();
 
 
-    void addTracer(Tracing::TracerIf *tracer);
-            
     /**
      * \brief Simulate an execution on this "Virtual Component".
      *
@@ -208,8 +207,6 @@ namespace SystemC_VPC {
       Factories;
     static Factories factories;
     PowerTables powerTables;
-
-    Tracing::TracerIf *taskTracer_;
 
     AbstractComponent(Config::Component::Ptr component);
 

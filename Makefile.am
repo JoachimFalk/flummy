@@ -91,10 +91,12 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/PreemptiveScheduler/MostSecondaryScheduler.cpp \
 	src/systemcvpc/cpp/PreemptiveScheduler/StreamShaperScheduler.cpp \
 	\
-	src/systemcvpc/cpp/tracing/NullTracer.cpp \
 	src/systemcvpc/cpp/tracing/DataBaseTracer.cpp \
-	src/systemcvpc/cpp/tracing/VcdTracer.cpp \
+	src/systemcvpc/cpp/tracing/NullTracer.cpp \
 	src/systemcvpc/cpp/tracing/PajeTracer.cpp \
+	src/systemcvpc/cpp/tracing/TraceableComponent.cpp \
+	src/systemcvpc/cpp/tracing/TracerIf.cpp \
+	src/systemcvpc/cpp/tracing/VcdTracer.cpp \
 	\
 	src/systemcvpc/cpp/AbstractComponent.cpp \
 	src/systemcvpc/cpp/Attribute.cpp \
