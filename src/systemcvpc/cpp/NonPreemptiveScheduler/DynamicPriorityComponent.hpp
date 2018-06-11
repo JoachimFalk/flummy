@@ -38,13 +38,13 @@
 #define _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_DYNAMICPRIORITYCOMPONENT_HPP
 
 #include "NonPreemptiveComponent.hpp"
-#include <systemcvpc/ScheduledTask.hpp>
-#include "../Task.hpp"
 
+#include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
 #include "../diagnostics/DebugOutput.hpp"
+#include "../TaskInstance.hpp"
 
 #include <list>
 
@@ -67,18 +67,18 @@ public:
   ~DynamicPriorityComponent();
 protected:
   // Implement interface for NonPreemptiveComponent
-  void newReadyTask(Task *newTask);
+  void newReadyTask(TaskInstance *newTask);
 
   // Implement interface for NonPreemptiveComponent
-  Task *selectReadyTask();
+  TaskInstance *selectReadyTask();
 
 private:
   PriorityList   priorities_;
 
-  std::list<Task *> readyTasks;
+  std::list<TaskInstance *> readyTasks;
 
   TaskInterface *yieldTask;
-  Task          *selectedTask;
+  TaskInstance          *selectedTask;
   std::ostream  *debugOut;
 
   void debugDump(const TaskInterface * toBeExecuted) const;

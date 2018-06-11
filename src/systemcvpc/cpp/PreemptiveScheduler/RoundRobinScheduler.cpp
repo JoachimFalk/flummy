@@ -56,10 +56,10 @@ namespace SystemC_VPC{
     time = timeSliceExpires_ - sc_core::sc_time_stamp();
     return time > sc_core::SC_ZERO_TIME;
   }
-  void RoundRobinScheduler::addedNewTask(Task *task){
+  void RoundRobinScheduler::addedNewTask(TaskInstance *task){
     rr_fifo.push_back(task->getInstanceId());
   }
-  void RoundRobinScheduler::removedTask(Task *task){
+  void RoundRobinScheduler::removedTask(TaskInstance *task){
     std::deque<int>::iterator iter;
     for(iter=rr_fifo.begin();iter!=rr_fifo.end();iter++){
       if( *iter == task->getInstanceId()){
@@ -95,7 +95,7 @@ int RoundRobinScheduler::assignFromFront()
         if(!running_tasks.empty()){  // a running task is preempted
           TaskMap::const_iterator iter;
           iter=running_tasks.begin();
-          Task *task=iter->second;
+          TaskInstance *task=iter->second;
           task_to_resign=task->getInstanceId();
           rr_fifo.push_back(task->getInstanceId());
           ret_decision= PREEMPT;  

@@ -50,12 +50,12 @@ public:
   virtual ~PriorityComponent();
 protected:
   // Implement interface for NonPreemptiveComponent
-  void newReadyTask(Task *newTask);
+  void newReadyTask(TaskInstance *newTask);
 
   // Implement interface for NonPreemptiveComponent
-  Task *selectReadyTask();
+  TaskInstance *selectReadyTask();
 private:
-  typedef PriorityFcfsElement<Task *> QueueElem;
+  typedef PriorityFcfsElement<TaskInstance *> QueueElem;
 
   size_t                              fcfsOrder;
   std::priority_queue<QueueElem>      priorityQueue;

@@ -226,7 +226,7 @@ namespace SystemC_VPC{
   }
   
   
-  void TimeTriggeredCCScheduler::addedNewTask(Task *task){    
+  void TimeTriggeredCCScheduler::addedNewTask(TaskInstance *task){    
     int index = PIDmap[task->getProcessId()];
     //       std::cout<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<std::endl;
     if(index<StartslotDynamic){
@@ -244,7 +244,7 @@ namespace SystemC_VPC{
     processcount++;
   }
   
-  void TimeTriggeredCCScheduler::removedTask(Task *task){ 
+  void TimeTriggeredCCScheduler::removedTask(TaskInstance *task){ 
     int index = PIDmap[task->getProcessId()];
     
     // std::cout<<"Task entfernt! @ "<< sc_core::sc_time_stamp() << "  " << index << std::endl;
@@ -325,7 +325,7 @@ namespace SystemC_VPC{
             if(running_tasks.size()!=0){  // alten Task entfernen, wenn noetig
               TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              Task *task=iter->second;
+              TaskInstance *task=iter->second;
 
               task_to_resign=task->getInstanceId();
               ret_decision=RESIGNED;
@@ -338,7 +338,7 @@ namespace SystemC_VPC{
             if(running_tasks.size()!=0){  // alten Task entfernen
               TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              Task *task=iter->second;
+              TaskInstance *task=iter->second;
               task_to_resign=task->getInstanceId();
               ret_decision= PREEMPT;  
             }
@@ -351,7 +351,7 @@ namespace SystemC_VPC{
           if(running_tasks.size()!=0){  // alten Task entfernen
             TaskMap::const_iterator iter;
             iter=running_tasks.begin();
-            Task *task=iter->second;
+            TaskInstance *task=iter->second;
             task_to_resign=task->getInstanceId();
             ret_decision=RESIGNED;
           }else{

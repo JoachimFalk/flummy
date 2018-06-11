@@ -56,7 +56,7 @@
 namespace SystemC_VPC {
 
 class AbstractComponent;
-class Task;
+class TaskInstance;
 
 class ComponentInterface
 {

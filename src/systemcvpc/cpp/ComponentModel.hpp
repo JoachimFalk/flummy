@@ -40,8 +40,8 @@
 #include "ComponentInfo.hpp"
 
 namespace SystemC_VPC{
-  class Task;
-  typedef std::map<int, Task*>  TaskMap;
+  class TaskInstance;
+  typedef std::map<int, TaskInstance*>  TaskMap;
 
   class ComponentModel : public ComponentInfo {
   public:

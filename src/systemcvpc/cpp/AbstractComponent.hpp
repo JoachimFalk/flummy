@@ -57,7 +57,7 @@
 
 #include "Delayer.hpp"
 #include "FunctionTiming.hpp"
-#include "Task.hpp"
+#include "TaskInstance.hpp"
 #include "PowerSumming.hpp"
 #include "PowerMode.hpp"
 #include "PluggablePowerGovernor.hpp"
@@ -126,22 +126,22 @@ namespace SystemC_VPC {
      *
      * While this simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute(Task* task)=0;
+    virtual void compute(TaskInstance* task)=0;
 
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker)=0;
+    virtual void requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker)=0;
+    virtual void execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker)=0;
+    virtual void abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker)=0;
 
     /**
      * 
@@ -193,8 +193,8 @@ namespace SystemC_VPC {
     struct MultiCastGroupInstance{
       MultiCastGroup mcg;
       sc_core::sc_time timestamp;
-      Task* task;
-      std::list<Task*>* additional_tasks;
+      TaskInstance* task;
+      std::list<TaskInstance*>* additional_tasks;
     };
 
     std::list<MultiCastGroupInstance*> multiCastGroupInstances;
@@ -210,7 +210,7 @@ namespace SystemC_VPC {
 
     AbstractComponent(Config::Component::Ptr component);
 
-    MultiCastGroupInstance* getMultiCastGroupInstance(Task* actualTask);
+    MultiCastGroupInstance* getMultiCastGroupInstance(TaskInstance* actualTask);
 
     /**
      *

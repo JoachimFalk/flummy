@@ -58,14 +58,14 @@ namespace SystemC_VPC {
   using CoSupport::SystemC::Event;
 
   // Class representing a task instance, i.e., one execution of the task represented by the PCB.
-  class Task
+  class TaskInstance
     : public Tracing::TTaskInstanceHolder {
     friend class NonPreemptiveComponent;
     friend class RoundRobinComponent;
-    friend class AssociativePrototypedPool<ProcessId, Task>;
-    friend class PrototypedPool<Task>;
+    friend class AssociativePrototypedPool<ProcessId, TaskInstance>;
+    friend class PrototypedPool<TaskInstance>;
   public:
-    Task(TaskPool *pool);
+    TaskInstance(TaskPool *pool);
 
     // getter, setter
     std::string getName() const                          {return name;}
@@ -156,7 +156,7 @@ namespace SystemC_VPC {
       pool->free(this->getProcessId(), this);
     }
 
-    ~Task();
+    ~TaskInstance();
   private:
     void traceReleaseTask();
     void traceFinishTaskLatency();
@@ -196,10 +196,10 @@ namespace SystemC_VPC {
   };
 
   static inline
-  Task *getTaskOfTaskInterface(TaskInterface const *task)
-    { return reinterpret_cast<Task *>(task->getSchedulerInfo()); }
+  TaskInstance *getTaskOfTaskInterface(TaskInterface const *task)
+    { return reinterpret_cast<TaskInstance *>(task->getSchedulerInfo()); }
 
-  typedef std::map<int, Task*>  TaskMap;
+  typedef std::map<int, TaskInstance*>  TaskMap;
 
   template<typename PAYLOAD>
   struct PriorityFcfsElement {
@@ -228,8 +228,8 @@ namespace SystemC_VPC {
 
   struct p_queue_entry{
     int fifo_order;  // secondary scheduling policy
-    Task *task;
-    p_queue_entry(int fifo_order, Task *task) :
+    TaskInstance *task;
+    p_queue_entry(int fifo_order, TaskInstance *task) :
       fifo_order(fifo_order), task(task)
     {
     }
@@ -251,7 +251,7 @@ namespace SystemC_VPC {
 
   struct timePcbPair{
     sc_core::sc_time time;
-    Task *task;
+    TaskInstance *task;
 
     bool operator<(const timePcbPair& right) const
     {

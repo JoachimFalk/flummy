@@ -49,12 +49,12 @@ namespace SystemC_VPC{
     virtual ~FcfsComponent();
   protected:
     // Implement interface for NonPreemptiveComponent
-    void newReadyTask(Task *newTask);
+    void newReadyTask(TaskInstance *newTask);
 
     // Implement interface for NonPreemptiveComponent
-    Task *selectReadyTask();
+    TaskInstance *selectReadyTask();
   private:
-    std::list<Task *> fcfsQueue;
+    std::list<TaskInstance *> fcfsQueue;
   };
 
 } // namespace SystemC_VPC

@@ -136,7 +136,7 @@ namespace SystemC_VPC {
   /**
    *
    */
-  void NonPreemptiveComponent::compute(Task *actualTask) {
+  void NonPreemptiveComponent::compute(TaskInstance *actualTask) {
     if (multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()) {
       //MCG vorhanden und Task auch als MultiCast zu behandeln
       MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
@@ -177,7 +177,7 @@ namespace SystemC_VPC {
     this->addTask(actualTask);
   }
 
-  void NonPreemptiveComponent::addTask(Task *newReadyTask) {
+  void NonPreemptiveComponent::addTask(TaskInstance *newReadyTask) {
     releaseTask(newReadyTask);
     this->newReadyTask(newReadyTask);
     ++readyTasks;
@@ -253,7 +253,7 @@ namespace SystemC_VPC {
       {
         MultiCastGroupInstance* mcgi = *list_iter;
         if (mcgi->task == runningTask) {
-          for (std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
+          for (std::list<TaskInstance*>::iterator tasks_iter = mcgi->additional_tasks->begin();
                tasks_iter != mcgi->additional_tasks->end();
                tasks_iter++)
           {
@@ -290,7 +290,7 @@ namespace SystemC_VPC {
    *
    */
   void NonPreemptiveComponent::moveToRemainingPipelineStages(
-      Task* task)
+      TaskInstance* task)
   {
     sc_core::sc_time now = sc_core::sc_time_stamp();
     sc_core::sc_time restOfLatency = task->getLatency() - task->getDelay();
@@ -369,7 +369,7 @@ void NonPreemptiveComponent::fireStateChanged(const ComponentState &state) {
  *
  */
 void NonPreemptiveComponent::requestBlockingCompute(
-    Task* task, Coupling::VPCEvent::Ptr blocker)
+    TaskInstance* task, Coupling::VPCEvent::Ptr blocker)
 {
   task->setExec(false);
   task->setBlockingCompute(blocker);
@@ -380,7 +380,7 @@ void NonPreemptiveComponent::requestBlockingCompute(
  *
  */
 void NonPreemptiveComponent::execBlockingCompute(
-    Task* task, Coupling::VPCEvent::Ptr blocker)
+    TaskInstance* task, Coupling::VPCEvent::Ptr blocker)
 {
   task->setExec(true);
   blockCompute.notify();
@@ -390,7 +390,7 @@ void NonPreemptiveComponent::execBlockingCompute(
  *
  */
 void NonPreemptiveComponent::abortBlockingCompute(
-    Task* task, Coupling::VPCEvent::Ptr blocker)
+    TaskInstance* task, Coupling::VPCEvent::Ptr blocker)
 {
   task->resetBlockingCompute();
   blockCompute.notify();

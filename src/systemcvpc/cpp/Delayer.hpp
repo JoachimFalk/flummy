@@ -45,7 +45,7 @@
 
 #include "ComponentInfo.hpp"
 #include "ComponentObserver.hpp"
-#include "Task.hpp"
+#include "TaskInstance.hpp"
 
 #include <vector>
 
@@ -63,14 +63,14 @@ namespace SystemC_VPC {
      *
      * While the simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute(Task* task) = 0;
+    virtual void compute(TaskInstance* task) = 0;
 
     /**
      * \brief Simulate the delay caused by the transition guard check on this Delayer.
      *
      * While the simulation is running SystemC simulation time is consumed.
      */
-    virtual void check(Task* task) {}
+    virtual void check(TaskInstance* task) {}
 
     const std::string &getName() const
       { return name_; }

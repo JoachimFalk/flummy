@@ -45,15 +45,15 @@ namespace SystemC_VPC{
 
   FcfsComponent::~FcfsComponent() {}
 
-  void FcfsComponent::newReadyTask(Task *newTask) {
+  void FcfsComponent::newReadyTask(TaskInstance *newTask) {
     DBG_OUT(this->getName() << " newReadyTask: " << newTask->getName()
             << " @ " << sc_core::sc_time_stamp() << std::endl);
     fcfsQueue.push_back(newTask);
   }
 
-  Task *FcfsComponent::selectReadyTask() {
+  TaskInstance *FcfsComponent::selectReadyTask() {
     assert(!fcfsQueue.empty());
-    Task *selectedTask = fcfsQueue.front();
+    TaskInstance *selectedTask = fcfsQueue.front();
     fcfsQueue.pop_front();
     return selectedTask;
   }

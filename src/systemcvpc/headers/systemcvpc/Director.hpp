@@ -70,8 +70,8 @@ namespace SystemC_VPC{
   template<typename KEY, class OBJECT>
   class AssociativePrototypedPool;
 
-  class Task;
-  typedef AssociativePrototypedPool<ProcessId, Task> TaskPool;
+  class TaskInstance;
+  typedef AssociativePrototypedPool<ProcessId, TaskInstance> TaskPool;
 
   /**
    * \brief Director knows all (Abstract-)Components, all mappings (task -> component).
@@ -182,7 +182,7 @@ namespace SystemC_VPC{
      */
     const Delayer *getComponent(FastLink const *vpcLink) const ;
     
-    void signalLatencyEvent(Task* task);
+    void signalLatencyEvent(TaskInstance* task);
 
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;
@@ -221,7 +221,7 @@ namespace SystemC_VPC{
     static FunctionId getFunctionId(const std::string& function);
     static FunctionId createFunctionId(const std::string& function);
 
-    Task *allocateTask(ProcessId pid);
+    TaskInstance *allocateTask(ProcessId pid);
 
     // FIXME !!!
     PluggableGlobalPowerGovernor   *topPowerGov;
@@ -240,9 +240,9 @@ namespace SystemC_VPC{
     bool hasValidConfig() const;
   private:
 
-    Task *preCompute(FastLink const *fLink);
+    TaskInstance *preCompute(FastLink const *fLink);
 
-    void  postCompute(Task *task, EventPair endPair);
+    void  postCompute(TaskInstance *task, EventPair endPair);
 
     void debugUnknownNames( ) const;
 

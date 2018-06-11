@@ -41,11 +41,11 @@
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include "../PluggablePowerGovernor.hpp"
-#include "../HysteresisLocalGovernor.hpp"
-#include "../Task.hpp"
 #include <systemcvpc/config/Component.hpp>
 
+#include "../PluggablePowerGovernor.hpp"
+#include "../HysteresisLocalGovernor.hpp"
+#include "../TaskInstance.hpp"
 #include "../DebugOStream.hpp"
 
 #include <CoSupport/sassert.h>
@@ -184,7 +184,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void PreemptiveComponent::compute(Task* actualTask){
+  void PreemptiveComponent::compute(TaskInstance* actualTask){
     if (multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()) {
       //MCG vorhanden und Task auch als MultiCast zu behandeln
       MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
@@ -226,7 +226,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void PreemptiveComponent::addTask(Task *newReadyTask) {
+  void PreemptiveComponent::addTask(TaskInstance *newReadyTask) {
     // A task can call compute only one time!
     assert(readyTasks.find(newReadyTask->getInstanceId())   == readyTasks.end());
     assert(runningTasks.find(newReadyTask->getInstanceId()) == runningTasks.end());
@@ -534,7 +534,7 @@ namespace SystemC_VPC{
  */
   }
 
-  void PreemptiveComponent::removeTask(Task *task) {
+  void PreemptiveComponent::removeTask(TaskInstance *task) {
     // all execution time simulated -> BLOCK running task.
 
     DBG_OUT(this->getName() << " IID: " << task->getInstanceId() << " > ");
@@ -554,7 +554,7 @@ namespace SystemC_VPC{
        {
          MultiCastGroupInstance* mcgi = *list_iter;
          if(mcgi->task == task){
-             for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
+             for(std::list<TaskInstance*>::iterator tasks_iter = mcgi->additional_tasks->begin();
                  tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
                  (*tasks_iter)->getBlockEvent().dii->notify();
                  finishDiiTaskInstance(*tasks_iter);
@@ -575,7 +575,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void PreemptiveComponent::requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker){
     task->setExec(false);
     task->setBlockingCompute( blocker );
     this->compute( task );
@@ -584,7 +584,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void PreemptiveComponent::execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker){
     task->setExec(true);
     blockCompute.notify();
   }
@@ -593,7 +593,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void PreemptiveComponent::abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker){
     task->resetBlockingCompute();
     blockCompute.notify();
   }
@@ -670,7 +670,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void PreemptiveComponent::moveToRemainingPipelineStages(Task* task){
+  void PreemptiveComponent::moveToRemainingPipelineStages(TaskInstance* task){
     sc_core::sc_time now                 = sc_core::sc_time_stamp();
     sc_core::sc_time restOfLatency       = task->getLatency()  - task->getDelay();
     sc_core::sc_time end                 = now + restOfLatency;

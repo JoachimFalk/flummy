@@ -73,9 +73,9 @@ namespace SystemC_VPC{
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
     
-    void addedNewTask(Task *task);
+    void addedNewTask(TaskInstance *task);
     
-    void removedTask(Task *task);
+    void removedTask(TaskInstance *task);
     
     sc_core::sc_event& getNotifyEvent();
     

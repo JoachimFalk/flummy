@@ -46,7 +46,7 @@
 namespace SystemC_VPC {
 
   //
-  void StaticRoute::compute( Task* _task ) {
+  void StaticRoute::compute( TaskInstance* _task ) {
     // reset hop list
     nextHop = components.begin();
 
@@ -69,7 +69,7 @@ namespace SystemC_VPC {
   void StaticRoute::route( EventPair np ){
     if(nextHop != components.end()){
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
-      Task *newTask =
+      TaskInstance *newTask =
         Director::getInstance().allocateTask(task->getProcessId());
       newTask->setTimingScale(task->getTimingScale());
       newTask->setBlockEvent(np);

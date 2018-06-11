@@ -72,7 +72,7 @@
 #include "RoutePool.hpp"
 #include "SelectFastestPowerModeGlobalGovernor.hpp"
 #include "StaticRoute.hpp"
-#include "Task.hpp"
+#include "TaskInstance.hpp"
 #include "tracing/DataBaseTracer.hpp"
 #include "tracing/NullTracer.hpp"
 #include "tracing/PajeTracer.hpp"
@@ -293,9 +293,9 @@ namespace SystemC_VPC {
     delete taskPool;
   }
 
-  Task *Director::preCompute(FastLink const *fLink) {
+  TaskInstance *Director::preCompute(FastLink const *fLink) {
     try {
-      Task *task = this->allocateTask( fLink->process );
+      TaskInstance *task = this->allocateTask( fLink->process );
       task->setFunctionIds( fLink->actionIds );
       task->setGuardIds(fLink->guardIds);
       task->setFactorOverhead(fLink->complexity);
@@ -314,7 +314,7 @@ namespace SystemC_VPC {
   }
 
   //
-  void Director::postCompute( Task * task,
+  void Director::postCompute( TaskInstance * task,
                               EventPair endPair ){
 
     if( endPair.dii == NULL){
@@ -331,7 +331,7 @@ namespace SystemC_VPC {
   void Director::check(FastLink const *fLink) {
     if (FALLBACKMODE)
       return;
-    Task *task = preCompute(fLink);
+    TaskInstance *task = preCompute(fLink);
     task->setName(task->getName().append("_check"));
     task->setTimingScale(1);
 
@@ -352,7 +352,7 @@ namespace SystemC_VPC {
       return;
     }
 
-    Task * task = preCompute(fLink);
+    TaskInstance * task = preCompute(fLink);
     task->setBlockEvent( endPair );
     task->setTimingScale(1);
 
@@ -376,7 +376,7 @@ namespace SystemC_VPC {
     }
 
     // FIXME: treat quantum
-    Task * task = preCompute(fLink);
+    TaskInstance * task = preCompute(fLink);
     task->setBlockEvent( endPair );
     task->setWrite(false);
     task->setTimingScale(quantum);
@@ -402,7 +402,7 @@ namespace SystemC_VPC {
     }
 
     // FIXME: treat quantum
-    Task * task = preCompute(fLink);
+    TaskInstance * task = preCompute(fLink);
     task->setBlockEvent(endPair);
     task->setWrite(true);
     task->setTimingScale(quantum);
@@ -443,7 +443,7 @@ namespace SystemC_VPC {
     ProcessControlBlock *pcb = comp->getPCB(pid);
 
     if (!taskPool->contains( pid )) {
-      Task &task = taskPool->createObject(pid);
+      TaskInstance &task = taskPool->createObject(pid);
       task.setPCB(pcb);
       task.setProcessId( pid );
       task.setScheduledTask(actor);
@@ -526,7 +526,7 @@ namespace SystemC_VPC {
     DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< std::endl);
 
     if( !taskPool->contains( pid ) ){
-      Task &task = taskPool->createObject( pid );
+      TaskInstance &task = taskPool->createObject( pid );
       task.setProcessId( pid );
       task.setName( taskName );
     }
@@ -545,7 +545,7 @@ namespace SystemC_VPC {
 //  }
   }
 
-  Task* Director::allocateTask(ProcessId pid){
+  TaskInstance* Director::allocateTask(ProcessId pid){
     return this->taskPool->allocate(pid);
   }
 
@@ -556,7 +556,7 @@ namespace SystemC_VPC {
   }
 
   //
-  void Director::signalLatencyEvent(Task* task){
+  void Director::signalLatencyEvent(TaskInstance* task){
     assert(!FALLBACKMODE);
 
 #ifdef DBG_DIRECTOR

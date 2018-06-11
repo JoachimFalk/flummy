@@ -45,7 +45,7 @@ namespace SystemC_VPC{
   AVBScheduler::AVBScheduler(){
     AVBListEntry* newEntry;
     //default-IP-traffic (Priority 0) - is allowed to use LineSpeed
-    newEntry = new AVBListEntry( new std::queue<Task*>, INT_MAX, 1.0);
+    newEntry = new AVBListEntry( new std::queue<TaskInstance*>, INT_MAX, 1.0);
     p_list.insert(p_list.begin(), newEntry);
     last_active = -1;
     firstrun=true;
@@ -71,7 +71,7 @@ namespace SystemC_VPC{
     float value;
     is2 >> value;
     
-    newEntry = new AVBListEntry( new std::queue<Task*>, priority, value);
+    newEntry = new AVBListEntry( new std::queue<TaskInstance*>, priority, value);
 
     std::list<AVBListEntry*>::iterator it;
     for (it=p_list.begin(); it!=p_list.end(); it++){
@@ -113,7 +113,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void AVBScheduler::addedNewTask(Task *task){
+  void AVBScheduler::addedNewTask(TaskInstance *task){
     int priority = task->getPriority();
     std::list<AVBListEntry*>::iterator it;
     bool added = false;
@@ -138,7 +138,7 @@ namespace SystemC_VPC{
   /**
    *
    */
-  void AVBScheduler::removedTask(Task *task){
+  void AVBScheduler::removedTask(TaskInstance *task){
   }
 
   /**
