@@ -34,10 +34,10 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "../Task.hpp"
 #include <systemcvpc/config/Component.hpp>
 
 #include "VcdTracer.hpp"
+#include "../TaskInstance.hpp"
 
 #include <systemcvpc/vpc_config.h>
 

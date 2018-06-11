@@ -43,7 +43,7 @@
 namespace SystemC_VPC {
 
   //
-  void BlockingTransport::compute( Task* _task ) {
+  void BlockingTransport::compute( TaskInstance* _task ) {
     task = _task;
     this->isWrite = task->isWrite();
     //this->reset();
@@ -63,7 +63,7 @@ namespace SystemC_VPC {
       for(ComponentList::iterator iter = this->components.begin();
         iter != this->components.end();
         ++iter){
-        Task* copy =
+        TaskInstance* copy =
           Director::getInstance().allocateTask(task->getProcessId());
         copy->setFunctionIds(task->getFunctionIds());
         copy->setTimingScale(task->getTimingScale());
@@ -103,7 +103,7 @@ namespace SystemC_VPC {
     if( phase == LOCK_ROUTE && nextHop != lockList.end() ){
       //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
       AbstractComponent* comp       = nextHop->first;
-      Task*              actualTask = nextHop->second;
+      TaskInstance*              actualTask = nextHop->second;
       actualTask->setBlockEvent(np);
       DBG_OUT("lock " << this->getName()
               << "on: " << comp->getName()
@@ -121,7 +121,7 @@ namespace SystemC_VPC {
       comp->requestBlockingCompute(actualTask, routeLat);
     } else if( phase == COMPUTE_ROUTE && nextHop != hopList.end() ){
       AbstractComponent * comp = nextHop->first;
-      Task* actualTask = nextHop->second;
+      TaskInstance* actualTask = nextHop->second;
       DBG_OUT("compute " << this->getName()
               << "on: " << comp->getName()
               << std::endl);
@@ -157,7 +157,7 @@ namespace SystemC_VPC {
       if( phase == LOCK_ROUTE && nextHop != lockList.end() ){
         assert(!hopList.empty());
         //AbstractComponent * comp = blockedComponents.back().first;
-        Task* actualTask = nextHop->second;
+        TaskInstance* actualTask = nextHop->second;
         // we need to test if a hop is locked already
         if( actualTask->isAckedBlocking()){
           // count iter for next hop if blocking compute is akk`ed only
@@ -250,7 +250,7 @@ namespace SystemC_VPC {
     for(Components::iterator iter = lockList.begin();
         iter != lockList.end();
         ++iter){
-      Task* task = iter->second;
+      TaskInstance* task = iter->second;
       AbstractComponent * c = iter->first;
       task->resetBlockingCompute();
       c->abortBlockingCompute(task, routeLat);

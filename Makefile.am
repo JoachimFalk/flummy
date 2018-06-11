@@ -116,7 +116,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/SelectFastestPowerModeGlobalGovernor.cpp \
 	src/systemcvpc/cpp/StaticRoute.cpp \
 	src/systemcvpc/cpp/SystemCVPCSimulator.cpp \
-	src/systemcvpc/cpp/Task.cpp \
+	src/systemcvpc/cpp/TaskInstance.cpp \
 	src/systemcvpc/cpp/VPCBuilder.cpp
 
 libsystemcvpc_la_DEPENDENCIES = \

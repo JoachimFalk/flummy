@@ -85,7 +85,7 @@ void RoundRobinComponent::end_of_elaboration() {
   PCBPool const &pcbPool = getPCBPool();
   for (PCBPool::const_iterator it=pcbPool.begin(); it!=pcbPool.end(); ++it) {
 //  std::cout << "\t " << it->second->getName() << std::endl;
-    Task &task = Director::getInstance().taskPool->getPrototype(it->first);
+    TaskInstance &task = Director::getInstance().taskPool->getPrototype(it->first);
     task.setPCB(it->second.get());
     if (task.hasScheduledTask()) {
       TaskInterface *scheduledTask = task.getScheduledTask();
@@ -102,7 +102,7 @@ void RoundRobinComponent::notifyActivation(TaskInterface * scheduledTask, bool a
   }
 }
 
-void RoundRobinComponent::compute(Task *actualTask) {
+void RoundRobinComponent::compute(TaskInstance *actualTask) {
   std::cout << "\t " << sc_core::sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
   ProcessId pid = actualTask->getProcessId();
   /// Note that actualTask is not the task prototype, i.e.,
@@ -129,7 +129,7 @@ void RoundRobinComponent::compute(Task *actualTask) {
   readyEvent.notify();
 }
 
-void RoundRobinComponent::check(Task *actualTask) {
+void RoundRobinComponent::check(TaskInstance *actualTask) {
   if (!useActivationCallback) {
     ProcessId pid = actualTask->getProcessId();
     actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
@@ -147,7 +147,7 @@ void RoundRobinComponent::check(Task *actualTask) {
 /**
  *
  */
-void RoundRobinComponent::requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker) {
+void RoundRobinComponent::requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker) {
 
 
 }
@@ -155,7 +155,7 @@ void RoundRobinComponent::requestBlockingCompute(Task* task, Coupling::VPCEvent:
 /**
  *
  */
-void RoundRobinComponent::execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker) {
+void RoundRobinComponent::execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker) {
 
 
 }
@@ -163,7 +163,7 @@ void RoundRobinComponent::execBlockingCompute(Task* task, Coupling::VPCEvent::Pt
 /**
  *
  */
-void RoundRobinComponent::abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker) {
+void RoundRobinComponent::abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker) {
 
 
 }
@@ -187,7 +187,7 @@ bool RoundRobinComponent::hasWaitingOrRunningTasks()
 bool RoundRobinComponent::scheduleMessageTasks() {
   bool progress = !readyMsgTasks.empty();
   while (!readyMsgTasks.empty()) {
-    Task *messageTask = readyMsgTasks.front();
+    TaskInstance *messageTask = readyMsgTasks.front();
     readyMsgTasks.pop_front();
     assert(!messageTask->hasScheduledTask());
     releaseTask(messageTask);

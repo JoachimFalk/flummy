@@ -75,7 +75,7 @@ namespace SystemC_VPC {
     /**
      * implementation of AbstractComponent::compute(Task *)
      */
-    virtual void compute(Task* task);
+    virtual void compute(TaskInstance* task);
 
     /**
      *
@@ -85,17 +85,17 @@ namespace SystemC_VPC {
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
@@ -141,15 +141,15 @@ namespace SystemC_VPC {
     void ttReleaseQueuePSMMethod();
     sc_core::sc_event ttReleaseQueuePSMEvent;
 
-    void addTask(Task *newTask);
+    void addTask(TaskInstance *newTask);
 
     void scheduleThread();
     sc_core::sc_event scheduleEvent;
 
-    void removeTask(Task *removedTask);
+    void removeTask(TaskInstance *removedTask);
 
     void remainingPipelineStages();
-    void moveToRemainingPipelineStages(Task *task);
+    void moveToRemainingPipelineStages(TaskInstance *task);
 
     sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;

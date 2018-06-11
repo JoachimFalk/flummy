@@ -48,15 +48,15 @@ PriorityComponent::PriorityComponent(
 
 PriorityComponent::~PriorityComponent() {}
 
-void PriorityComponent::newReadyTask(Task *newTask) {
+void PriorityComponent::newReadyTask(TaskInstance *newTask) {
   DBG_OUT(this->getName() << " newReadyTask: " << newTask->getName()
           << " @ " << sc_core::sc_time_stamp() << std::endl);
   priorityQueue.push(QueueElem(newTask->getPriority(), fcfsOrder++, newTask));
 }
 
-Task *PriorityComponent::selectReadyTask() {
+TaskInstance *PriorityComponent::selectReadyTask() {
   assert(!priorityQueue.empty());
-  Task *selectedTask = priorityQueue.top().payload;
+  TaskInstance *selectedTask = priorityQueue.top().payload;
   priorityQueue.pop();
   return selectedTask;
 }

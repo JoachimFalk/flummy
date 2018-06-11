@@ -371,7 +371,7 @@ namespace SystemC_VPC{
   }
   
   
-  void FlexRayScheduler::addedNewTask(Task *task){    
+  void FlexRayScheduler::addedNewTask(TaskInstance *task){    
     int index = PIDmap[task->getProcessId()];
          // std::cerr<<"addedNewTask- index: "<<index<<" PID: "<<task->getProcessId()<<" instanceID: "<<task->getInstanceId()<<" name:"<<task->getName()<<std::endl;
     if(index<StartslotDynamic){
@@ -397,7 +397,7 @@ namespace SystemC_VPC{
      processcount++;
   }
   
-  void FlexRayScheduler::removedTask(Task *task){ 
+  void FlexRayScheduler::removedTask(TaskInstance *task){ 
     int index = PIDmap[task->getProcessId()];
     
     // std::cout<<"Task entfernt! @ "<< sc_core::sc_time_stamp() << "  " << index << std::endl;
@@ -509,7 +509,7 @@ namespace SystemC_VPC{
             if(running_tasks.size()!=0){  // alten Task entfernen, wenn noetig
               TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              Task *task=iter->second;
+              TaskInstance *task=iter->second;
 
               task_to_resign=task->getInstanceId();
               ret_decision=RESIGNED;
@@ -522,7 +522,7 @@ namespace SystemC_VPC{
             if(running_tasks.size()!=0){  // alten Task entfernen
               TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              Task *task=iter->second;
+              TaskInstance *task=iter->second;
               task_to_resign=task->getInstanceId();
               ret_decision= PREEMPT;  
             }
@@ -535,7 +535,7 @@ namespace SystemC_VPC{
           if(running_tasks.size()!=0){  // alten Task entfernen
             TaskMap::const_iterator iter;
             iter=running_tasks.begin();
-            Task *task=iter->second;
+            TaskInstance *task=iter->second;
             task_to_resign=task->getInstanceId();
             ret_decision=RESIGNED;
           }else{
@@ -609,7 +609,7 @@ namespace SystemC_VPC{
           if(running_tasks.size()!=0){  // alten Task entfernen
             TaskMap::const_iterator iter;
             iter=running_tasks.begin();
-            Task *task=iter->second;
+            TaskInstance *task=iter->second;
             task_to_resign=task->getInstanceId();
             ret_decision=RESIGNED;
           }else{
@@ -623,7 +623,7 @@ namespace SystemC_VPC{
             if(running_tasks.size()!=0){  // alten Task entfernen
               TaskMap::const_iterator iter;
               iter=running_tasks.begin();
-              Task *task=iter->second;
+              TaskInstance *task=iter->second;
               task_to_resign=task->getInstanceId();
               ret_decision=RESIGNED;
             }else{
@@ -697,7 +697,7 @@ namespace SystemC_VPC{
                         taskAssignedToA=task_to_assign;
                         TaskMap::const_iterator iter;
                         iter=running_tasks.begin();
-                        Task *task=iter->second;
+                        TaskInstance *task=iter->second;
                         task_to_resign=task->getInstanceId();
                         ret_decision= PREEMPT;  
                       }else{
@@ -705,7 +705,7 @@ namespace SystemC_VPC{
                         // alten Task entfernen
                         TaskMap::const_iterator iter;
                         iter=running_tasks.begin();
-                        Task *task=iter->second;
+                        TaskInstance *task=iter->second;
                         task_to_resign=task->getInstanceId();
                         ret_decision=RESIGNED;
                         taskAssignedToA=0;
@@ -713,7 +713,7 @@ namespace SystemC_VPC{
                     }else{
                       TaskMap::const_iterator iter;
                       iter=running_tasks.begin();
-                      Task *task=iter->second;
+                      TaskInstance *task=iter->second;
                       task_to_resign=task->getInstanceId();
                       ret_decision=RESIGNED;
                       taskAssignedToA=0;          
@@ -772,7 +772,7 @@ namespace SystemC_VPC{
                           taskAssignedToB=task_to_assign;
                           TaskMap::const_iterator iter;
                           iter=running_tasks.begin();
-                          Task *task=iter->second;
+                          TaskInstance *task=iter->second;
                           task_to_resign=task->getInstanceId();
                           ret_decision= PREEMPT;  
                         }else{
@@ -780,7 +780,7 @@ namespace SystemC_VPC{
                           // alten Task entfernen
                           TaskMap::const_iterator iter;
                           iter=running_tasks.begin();
-                          Task *task=iter->second;
+                          TaskInstance *task=iter->second;
                           task_to_resign=task->getInstanceId();
                           ret_decision=RESIGNED;
                           taskAssignedToB=0;

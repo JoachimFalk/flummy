@@ -64,7 +64,7 @@ namespace SystemC_VPC{
       wasEmpty_flag=true;
     }
 
-    AVBListEntry(std::queue<Task*>* t_queue, int p_level, float b_alloc){
+    AVBListEntry(std::queue<TaskInstance*>* t_queue, int p_level, float b_alloc){
       bw_alloc = b_alloc;
       priority_level = p_level;
       task_queue = t_queue;
@@ -78,7 +78,7 @@ namespace SystemC_VPC{
     bool has_credit_flag;
     bool wasEmpty_flag;
     int priority_level;
-    std::queue<Task*>* task_queue;
+    std::queue<TaskInstance*>* task_queue;
 
     int get_priority_level(void){
       return priority_level;
@@ -153,8 +153,8 @@ namespace SystemC_VPC{
     bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
-    void addedNewTask(Task *task);
-    void removedTask(Task *task);
+    void addedNewTask(TaskInstance *task);
+    void removedTask(TaskInstance *task);
     sc_core::sc_event& getNotifyEvent();
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,

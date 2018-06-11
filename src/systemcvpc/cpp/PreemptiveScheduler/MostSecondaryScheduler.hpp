@@ -68,9 +68,9 @@ public:
 
   sc_core::sc_time cycle(int sysFreq);
 
-  void addedNewTask(Task *task);
+  void addedNewTask(TaskInstance *task);
 
-  void removedTask(Task *task);
+  void removedTask(TaskInstance *task);
 
   bool getSchedulerTimeSlice(sc_core::sc_time& time,
                               const TaskMap &ready_tasks,

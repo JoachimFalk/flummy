@@ -56,7 +56,7 @@ namespace SystemC_VPC
   }
 
   void
-  MostSecondaryScheduler::addedNewTask(Task *task)
+  MostSecondaryScheduler::addedNewTask(TaskInstance *task)
   {/*creates a new slot and puts it into Asynch_slots
      the corresponding task is commited by the MostScheduler*/
     unsigned int slotIdasynch = Asynch_slots.size();
@@ -70,7 +70,7 @@ namespace SystemC_VPC
   }
 
   void
-  MostSecondaryScheduler::removedTask(Task *task)
+  MostSecondaryScheduler::removedTask(TaskInstance *task)
   { //removes a task by erasing the according element of Asynch_slots
     std::deque<AsynchSlot>::iterator iter;
     bool notFound = true;

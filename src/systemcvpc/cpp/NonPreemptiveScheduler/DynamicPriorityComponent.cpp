@@ -90,16 +90,16 @@ DynamicPriorityComponent::~DynamicPriorityComponent() {
   debugOut = nullptr;
 }
 
-void DynamicPriorityComponent::newReadyTask(Task *newTask) {
+void DynamicPriorityComponent::newReadyTask(TaskInstance *newTask) {
   readyTasks.push_back(newTask);
 }
 
-Task *DynamicPriorityComponent::selectReadyTask() {
+TaskInstance *DynamicPriorityComponent::selectReadyTask() {
   assert(!readyTasks.empty());
   for (TaskInterface *priorityTask : priorities_) {
     if (yieldTask == priorityTask)
       continue;
-    for (std::list<Task *>::iterator readyTaskIter = readyTasks.begin();
+    for (std::list<TaskInstance *>::iterator readyTaskIter = readyTasks.begin();
          readyTaskIter != readyTasks.end();
          ++readyTaskIter) {
       if ((*readyTaskIter)->getScheduledTask() == priorityTask) {

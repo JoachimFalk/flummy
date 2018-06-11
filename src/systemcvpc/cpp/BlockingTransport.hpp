@@ -60,7 +60,7 @@ namespace SystemC_VPC{
     protected CoSupport::SystemC::EventListener {
   public:
 
-    void compute( Task* task );
+    void compute( TaskInstance* task );
 
     FunctionId getFunctionId(ProcessId pid, std::string function);
 
@@ -90,7 +90,7 @@ namespace SystemC_VPC{
       LOCK_ROUTE,
       COMPUTE_ROUTE
     };
-    typedef std::list<std::pair<AbstractComponent *, Task *> > Components;
+    typedef std::list<std::pair<AbstractComponent *, TaskInstance *> > Components;
 
     Components                             hopList;
     Components                             lockList;
@@ -100,7 +100,7 @@ namespace SystemC_VPC{
     // a rout is either input (read) or output (write)
     bool                                   isWrite;
 
-    Task*                                  task;
+    TaskInstance*                                  task;
     EventPair                              taskEvents;
     Coupling::VPCEvent::Ptr                dummyDii;
     Coupling::VPCEvent::Ptr                routeLat;

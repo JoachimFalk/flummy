@@ -34,14 +34,14 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "Task.hpp"
+#include "TaskInstance.hpp"
 #include "ProcessControlBlock.hpp"
 
 namespace SystemC_VPC {
 
-  int Task::globalInstanceId = 0;
+  int TaskInstance::globalInstanceId = 0;
 
-  Task::Task(TaskPool *pool)
+  TaskInstance::TaskInstance(TaskPool *pool)
     : instanceId(globalInstanceId++)
     , pid(-1)
     , fid()
@@ -61,10 +61,10 @@ namespace SystemC_VPC {
     , scheduledTask(NULL)
     {}
 
-  Task::~Task() {
+  TaskInstance::~TaskInstance() {
   }
 
-  void Task::initDelays() {
+  void TaskInstance::initDelays() {
     assert(pcb != NULL);
     FunctionIds fids = this->getFunctionIds();
     FunctionIds gids = this->getGuardIds();
@@ -84,19 +84,19 @@ namespace SystemC_VPC {
   }
 
   // Adaptor setter / getter for ProcessControlBlock
-  int Task::getPriority() const
+  int TaskInstance::getPriority() const
     { assert(pcb != NULL); return pcb->getPriority();}
-  sc_core::sc_time Task::getPeriod() const
+  sc_core::sc_time TaskInstance::getPeriod() const
     { assert(pcb != NULL); return pcb->getPeriod();}
 
-  bool Task::isPSM() const
+  bool TaskInstance::isPSM() const
     { return pcb->getTaskIsPSM(); }
 
-  void Task::traceReleaseTask(){
+  void TaskInstance::traceReleaseTask(){
     taskTracerTicket = pcb->getTaskTracer()->releaseTask();
   }
 
-  void Task::traceFinishTaskLatency(){
+  void TaskInstance::traceFinishTaskLatency(){
     pcb->getTaskTracer()->finishTaskLatency(taskTracerTicket);
   }
 

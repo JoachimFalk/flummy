@@ -23,7 +23,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TRACING_TRACEABLECOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_TRACING_TRACEABLECOMPONENT_HPP
 
-#include "../Task.hpp"
+#include "../TaskInstance.hpp"
 #include "../ProcessControlBlock.hpp"
 
 #include "TracerIf.hpp"
@@ -45,22 +45,22 @@ public:
   void registerTask(ProcessControlBlock *task);
 
   /// Called once per actor firing to create a trace task instance in the task instance.
-  void releaseTask(Task *taskInstance);
+  void releaseTask(TaskInstance *taskInstance);
 
   /// Called possibly multiple times to assign the task instance to the resource.
-  void assignTaskInstance(Task *taskInstance);
+  void assignTaskInstance(TaskInstance *taskInstance);
 
   /// Called possibly multiple times to resign the task instance from the resource.
-  void resignTaskInstance(Task *taskInstance);
+  void resignTaskInstance(TaskInstance *taskInstance);
 
   /// Called possibly multiple times to indicate that the task is blocked waiting for something.
-  void blockTaskInstance(Task *taskInstance);
+  void blockTaskInstance(TaskInstance *taskInstance);
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
-  void finishDiiTaskInstance(Task *taskInstance);
+  void finishDiiTaskInstance(TaskInstance *taskInstance);
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
-  void finishLatencyTaskInstance(Task *taskInstance);
+  void finishLatencyTaskInstance(TaskInstance *taskInstance);
 
   ~TraceableComponent();
 private:

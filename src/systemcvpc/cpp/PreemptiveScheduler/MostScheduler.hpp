@@ -91,9 +91,9 @@ namespace SystemC_VPC{
 
     bool area(int sysFreq,int framesize);
  
-    void addedNewTask(Task *task);
+    void addedNewTask(TaskInstance *task);
     
-    void removedTask(Task *task);
+    void removedTask(TaskInstance *task);
     
     sc_core::sc_event& getNotifyEvent();
     

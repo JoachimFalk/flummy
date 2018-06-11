@@ -50,7 +50,7 @@
 #include "../HysteresisLocalGovernor.hpp"
 #include "../PowerSumming.hpp"
 #include "../PowerMode.hpp"
-#include "../Task.hpp"
+#include "../TaskInstance.hpp"
 #include "../tracing/TracerIf.hpp"
 #include "../timetriggered/tt_support.hpp"
 
@@ -74,22 +74,22 @@ namespace SystemC_VPC{
     /**
      * implementation of AbstractComponent::compute(Task *)
      */
-    virtual void compute(Task* task);
+    virtual void compute(TaskInstance* task);
 
     /**
      *
      */
-    virtual void requestBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(Task* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
     
     /**
      *
@@ -108,9 +108,9 @@ namespace SystemC_VPC{
      */
     NonPreemptiveComponent(Config::Component::Ptr component, Director *director);
 
-    virtual void newReadyTask(Task *newTask) = 0;
+    virtual void newReadyTask(TaskInstance *newTask) = 0;
 
-    virtual Task *selectReadyTask() = 0;
+    virtual TaskInstance *selectReadyTask() = 0;
 
     virtual ~NonPreemptiveComponent();
 
@@ -127,10 +127,10 @@ namespace SystemC_VPC{
     void ttReleaseQueueMethod();
     sc_core::sc_event ttReleaseQueueEvent;
 
-    void addTask(Task *newTask);
+    void addTask(TaskInstance *newTask);
 
     unsigned int  readyTasks;
-    Task         *runningTask;
+    TaskInstance         *runningTask;
 
     void scheduleThread();
     sc_core::sc_event scheduleEvent;
@@ -153,7 +153,7 @@ namespace SystemC_VPC{
 
     bool processPower(Attribute att);
 
-    void moveToRemainingPipelineStages(Task *task);
+    void moveToRemainingPipelineStages(TaskInstance *task);
     
     void notifyActivation(TaskInterface *scheduledTask,
         bool active);

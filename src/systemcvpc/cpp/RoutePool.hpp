@@ -65,7 +65,7 @@ namespace SystemC_VPC{
     }
 
 
-    void compute( Task* task )
+    void compute( TaskInstance* task )
     {
       ROUTE* route = this->allocate();
       route->setPool(this);
