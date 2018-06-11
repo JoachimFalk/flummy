@@ -58,7 +58,7 @@ namespace SystemC_VPC {
 
     NotAllocatedException(std::string msg) : msg(msg +" not allocated") {}
     
-    ~NotAllocatedException() throw(){}
+    ~NotAllocatedException() {}
 
     const std::string& what(){
 
@@ -214,8 +214,7 @@ namespace SystemC_VPC {
       }
     }
 
-    OBJECT* allocate( KEY key )
-      throw (NotAllocatedException){
+    OBJECT* allocate( KEY key ) {
 
       typename PrototypedPools::iterator iter = pools.find(key);
       if( iter != pools.end() ){

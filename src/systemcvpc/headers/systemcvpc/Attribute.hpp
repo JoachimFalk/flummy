@@ -61,14 +61,12 @@ namespace SystemC_VPC{
      */
     Attribute( std::string type, std::string value);
 
-    std::pair<std::string, std::string> getNextParameter(size_t pos)
-      throw (InvalidArgumentException);
+    std::pair<std::string, std::string> getNextParameter(size_t pos);
 
     /**
      *
      */
-    std::string getParameter(const std::string type)
-      throw (InvalidArgumentException);
+    std::string getParameter(const std::string type);
 
     /**
      *
@@ -77,14 +75,12 @@ namespace SystemC_VPC{
 
     void addParameter(std::string type, std::string value);
 
-    std::pair<std::string, AttributePtr > getNextAttribute(size_t pos)
-      throw (InvalidArgumentException);
+    std::pair<std::string, AttributePtr > getNextAttribute(size_t pos);
 
     /**
      *
      */
-    AttributePtr getAttribute(const std::string name)
-      throw (InvalidArgumentException);
+    AttributePtr getAttribute(const std::string name);
 
     /**
      *

@@ -210,12 +210,12 @@ namespace SystemC_VPC{
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
      */
-    static sc_core::sc_time createSC_Time(const char* timeString) throw(InvalidArgumentException);
+    static sc_core::sc_time createSC_Time(const char* timeString);
 
     /**
      * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
      */
-    static sc_core::sc_time createSC_Time(std::string timeString) throw(InvalidArgumentException);
+    static sc_core::sc_time createSC_Time(std::string timeString);
     
     static bool hasFunctionId(const std::string& function);
     static FunctionId getFunctionId(const std::string& function);

@@ -54,7 +54,7 @@ namespace SystemC_VPC{
       
     }
     
-    ~InvalidArgumentException() throw(){}
+    ~InvalidArgumentException() {}
     
     const std::string& what(){
       

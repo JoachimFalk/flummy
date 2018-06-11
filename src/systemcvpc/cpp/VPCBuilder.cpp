@@ -333,9 +333,7 @@ namespace SystemC_VPC {
    * \throws InvalidArgumentException if requested component within
    * configuration file is unknown
    */
-  VC::Component::Ptr VPCBuilder::initComponent()
-    throw(InvalidArgumentException)
-  {
+  VC::Component::Ptr VPCBuilder::initComponent() {
  
     DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     const CX::XStr xmlName = node->getNodeName(); 
@@ -652,7 +650,7 @@ namespace SystemC_VPC {
   }
 
   //
-  VC::Timing VPCBuilder::parseTiming(DOMNode* node) throw(InvalidArgumentException){
+  VC::Timing VPCBuilder::parseTiming(DOMNode* node) {
     VC::Timing t;
     t.setPowerMode("SLOW");
 
@@ -709,7 +707,7 @@ namespace SystemC_VPC {
    * \return pointer to the build timing modifier
    * \throws InvalidArgumentException if parameter are missing or invalid
    */
-  boost::shared_ptr<DistributionTimingModifier> VPCBuilder::parseTimingModifier(DOMNode* node) throw(InvalidArgumentException){
+  boost::shared_ptr<DistributionTimingModifier> VPCBuilder::parseTimingModifier(DOMNode* node) {
     //parse attributes
     DOMNamedNodeMap* atts = node->getAttributes();
     DOMNode* min = atts->getNamedItem(minAttrStr);

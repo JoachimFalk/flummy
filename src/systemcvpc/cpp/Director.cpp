@@ -814,19 +814,15 @@ namespace SystemC_VPC {
     return FastLink(route, pid, fids, FunctionIds(),0);
   }
 
-  sc_core::sc_time Director::createSC_Time(const char* timeString)
-    throw(InvalidArgumentException)
-  {
+  sc_core::sc_time Director::createSC_Time(const char* timeString) {
     try{
       return CoSupport::SystemC::createSCTime(timeString);
-    } catch(std::string &msg){
-      throw InvalidArgumentException(msg);
+    } catch(std::runtime_error &e){
+      throw InvalidArgumentException(e.what());
     }
   }
 
-  sc_core::sc_time Director::createSC_Time(std::string timeString)
-    throw(InvalidArgumentException)
-  {
+  sc_core::sc_time Director::createSC_Time(std::string timeString) {
     return Director::createSC_Time( timeString.c_str());
   }
 
