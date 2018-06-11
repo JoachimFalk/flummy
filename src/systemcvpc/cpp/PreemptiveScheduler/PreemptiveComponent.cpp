@@ -197,7 +197,7 @@ namespace SystemC_VPC{
         } else {
           ProcessId pid = actualTask->getProcessId();
           actualTask->setPCB(getPCB(pid));
-          actualTask->setTraceTaskInstance(taskTracer_->release(actualTask->getTraceTask()));
+          releaseTask(actualTask);
         }
         return;
       }
@@ -230,7 +230,7 @@ namespace SystemC_VPC{
     // A task can call compute only one time!
     assert(readyTasks.find(newReadyTask->getInstanceId())   == readyTasks.end());
     assert(runningTasks.find(newReadyTask->getInstanceId()) == runningTasks.end());
-    newReadyTask->setTraceTaskInstance(taskTracer_->release(newReadyTask->getTraceTask()));
+    releaseTask(newReadyTask);
     //insert new task in ready list
     readyTasks[newReadyTask->getInstanceId()]=newReadyTask;
     scheduler->addedNewTask(newReadyTask);
@@ -293,7 +293,7 @@ namespace SystemC_VPC{
         assert(iter != runningTasks.end());
         DBG_OUT(this->getName() << " IID: " << iter->first << "> Resigning task " << iter->second->getName()
             << "; Remaining delay " << iter->second->getRemainingDelay() << std::endl);
-        this->taskTracer_->resign(iter->second->getTraceTaskInstance());
+        resignTaskInstance(iter->second);
         sassert(readyTasks.insert(*iter).second);
         runningTasks.erase(iter);
       }
@@ -320,7 +320,7 @@ namespace SystemC_VPC{
         assert(iter != readyTasks.end());
         DBG_OUT(this->getName() << " IID: " << iter->first << "> Assigning task " << iter->second->getName()
             << "; Remaining delay " << iter->second->getRemainingDelay() << std::endl);
-        this->taskTracer_->assign(iter->second->getTraceTaskInstance());
+        assignTaskInstance(iter->second);
         sassert(runningTasks.insert(*iter).second);
         readyTasks.erase(iter);
       }
@@ -544,7 +544,7 @@ namespace SystemC_VPC{
 
     //notify(*(task->blockEvent));
     scheduler->removedTask(task);
-    this->taskTracer_->finishDii(task->getTraceTaskInstance());
+    finishDiiTaskInstance(task);
 
     task->getBlockEvent().dii->notify();
 
@@ -557,8 +557,8 @@ namespace SystemC_VPC{
              for(std::list<Task*>::iterator tasks_iter = mcgi->additional_tasks->begin();
                  tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
                  (*tasks_iter)->getBlockEvent().dii->notify();
-                 this->taskTracer_->finishDii((*tasks_iter)->getTraceTaskInstance());
-                 this->taskTracer_->finishLatency((*tasks_iter)->getTraceTaskInstance());
+                 finishDiiTaskInstance(*tasks_iter);
+                 finishLatencyTaskInstance(*tasks_iter);
                  Director::getInstance().signalLatencyEvent((*tasks_iter));
              }
              multiCastGroupInstances.remove(mcgi);
@@ -677,7 +677,7 @@ namespace SystemC_VPC{
     if(end <= now){
       //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
-      this->taskTracer_->finishLatency(task->getTraceTaskInstance());
+      finishLatencyTaskInstance(task);
       Director::getInstance().signalLatencyEvent(task);
       return;
     }
@@ -718,7 +718,7 @@ namespace SystemC_VPC{
           //std::cerr << "Ready! releasing task (" <<  front.time <<") at: "
           //<< sc_core::sc_time_stamp() << std::endl;
 
-          this->taskTracer_->finishLatency(front.task->getTraceTaskInstance());
+          finishLatencyTaskInstance(front.task);
 
           // Latency over -> remove Task
           Director::getInstance().signalLatencyEvent(front.task);

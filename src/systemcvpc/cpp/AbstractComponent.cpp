@@ -54,14 +54,6 @@ namespace SystemC_VPC {
 
   AbstractComponent::~AbstractComponent() {
     this->timingPools.clear();
-    if (this->taskTracer_)
-      delete this->taskTracer_;
-  }
-
-  void AbstractComponent::addTracer(Tracing::TracerIf *tracer) {
-    assert(pcbPool.empty());
-    assert(taskTracer_ == nullptr);
-    taskTracer_ = tracer;
   }
 
   bool AbstractComponent::processPower(AttributePtr attPtr)
@@ -195,16 +187,10 @@ namespace SystemC_VPC {
    * \brief Create the process control block.
    */
   ProcessControlBlock *AbstractComponent::createPCB(std::string const &taskName) {
-    ProcessId pid = Director::getProcessId(taskName);
-    std::pair<PCBPool::iterator, bool> status
-      (pcbPool.insert(PCBPool::value_type(
-          pid,
-          ProcessControlBlockPtr(new ProcessControlBlock(this)))));
-    assert(status.second);
-    status.first->second->setPid(pid);
-    if (taskTracer_)
-      status.first->second->setTraceTask(taskTracer_->registerTask(taskName));
-    return status.first->second.get();
+    ProcessControlBlock *pcb = new ProcessControlBlock(this, taskName);
+    sassert(pcbPool.insert(std::make_pair(pcb->getPid(), pcb)).second);
+    registerTask(pcb);
+    return pcb;
   }
 
   ProcessControlBlock *AbstractComponent::getPCB(ProcessId const pid) const {
@@ -316,7 +302,6 @@ namespace SystemC_VPC {
     , localGovernorFactory(nullptr)
     , midPowerGov(nullptr)
     , powerAttribute(new Attribute("",""))
-    , taskTracer_(nullptr)
     , powerMode(nullptr)
     , canExecuteTasks(true)
   {

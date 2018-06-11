@@ -39,7 +39,6 @@
 
 #include <systemc>
 
-#include <map>
 #include <vector>
 #include <string>
 
@@ -66,31 +65,25 @@ namespace SystemC_VPC {
   * This class represents all necessary data of a simulated process within VPC
   * and provides necessary access methods for its data.
   */
-  class ProcessControlBlock {
+  class ProcessControlBlock
+    : public Tracing::TTaskHolder {
   public:
     /**
      * \brief Default constructor of an PCB instance
      * Initialize a newly created instance of ProcessControlBlock
      */
-    ProcessControlBlock( AbstractComponent * component );
+    ProcessControlBlock(AbstractComponent *component, std::string const &taskName);
 
     /**
      * \brief Sets name of instance
      */
     void configure(std::string name, bool tracing);
 
-    void            setTraceTask(Tracing::TTask *ttask)
-      { assert(!this->ttask); this->ttask = ttask; }
-    Tracing::TTask *getTraceTask() const
-      { return this->ttask; }
-
     CoSupport::Tracing::TaskTracer *getTaskTracer() const
       { return taskTracer.get(); }
 
     void setTiming(const Config::Timing &timing);
 
-    void      setPid(ProcessId pid)
-      { this->pid = pid; }
     ProcessId getPid() const
       { return pid; }
 
@@ -106,17 +99,17 @@ namespace SystemC_VPC {
     bool getTaskIsPSM() const
       { return psm; }
 
+    std::string const &getName() const
+      { return name; }
+
     ~ProcessControlBlock();
   private:
+    AbstractComponent                   *component;
+    std::string                          name;
     ProcessId                            pid;
     int                                  priority;
-
-    // Custom data for a tracer in the PCB.
-    Tracing::TTask                      *ttask;
-
-    AbstractComponent                   *component;
-    CoSupport::Tracing::TaskTracer::Ptr  taskTracer;
     bool                                 psm;
+    CoSupport::Tracing::TaskTracer::Ptr  taskTracer;
   };
 
 } // namespace SystemC_VPC

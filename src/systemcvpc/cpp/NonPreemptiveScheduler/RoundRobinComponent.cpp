@@ -114,12 +114,12 @@ void RoundRobinComponent::compute(Task *actualTask) {
     assert(!useActivationCallback);
     scheduleMessageTasks();
     this->actualTask = actualTask;
-    actualTask->setTraceTaskInstance(this->taskTracer_->release(actualTask->getTraceTask()));
-    this->taskTracer_->assign(actualTask->getTraceTaskInstance());
+    releaseTask(actualTask);
+    assignTaskInstance(actualTask);
     std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
     wait(actualTask->getDelay());
-    this->taskTracer_->finishDii(actualTask->getTraceTaskInstance());
-    this->taskTracer_->finishLatency(actualTask->getTraceTaskInstance());
+    finishDiiTaskInstance(actualTask);
+    finishLatencyTaskInstance(actualTask);
     /// This is need to trigger consumption of tokens by the actor.
     actualTask->getBlockEvent().dii->notify();
     /// FIXME: What about DII != latency
@@ -134,11 +134,11 @@ void RoundRobinComponent::check(Task *actualTask) {
     ProcessId pid = actualTask->getProcessId();
     actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
     actualTask->initDelays();
-    actualTask->setTraceTaskInstance(this->taskTracer_->release(actualTask->getTraceTask()));
-    this->taskTracer_->assign(actualTask->getTraceTaskInstance());
+    releaseTask(actualTask);
+    assignTaskInstance(actualTask);
     wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
-    this->taskTracer_->finishDii(actualTask->getTraceTaskInstance());
-    this->taskTracer_->finishLatency(actualTask->getTraceTaskInstance());
+    finishDiiTaskInstance(actualTask);
+    finishLatencyTaskInstance(actualTask);
 
     std::cout << "check: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
   }
@@ -190,15 +190,14 @@ bool RoundRobinComponent::scheduleMessageTasks() {
     Task *messageTask = readyMsgTasks.front();
     readyMsgTasks.pop_front();
     assert(!messageTask->hasScheduledTask());
-    messageTask->setTraceTaskInstance(this->taskTracer_->release(messageTask->getTraceTask()));
-    this->taskTracer_->assign(messageTask->getTraceTaskInstance());
+    releaseTask(messageTask);
+    assignTaskInstance(messageTask);
     /// This will setup the trigger for schedule_method to be called
     /// again when the task execution time is over.
     wait(messageTask->getDelay());
-//        wait(0.9 * messageTask->getDelay());
+    finishDiiTaskInstance(messageTask);
+    finishLatencyTaskInstance(messageTask);
     Director::getInstance().signalLatencyEvent(messageTask);
-    this->taskTracer_->finishDii(messageTask->getTraceTaskInstance());
-    this->taskTracer_->finishLatency(messageTask->getTraceTaskInstance());
     /// The scheduledTask, i.e., the SysteMoC actor, should now be in the comm state.
     /// Enable transition out of comm state by notifying the dii event.
     messageTask->getBlockEvent().dii->notify();
