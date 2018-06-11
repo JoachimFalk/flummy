@@ -46,15 +46,13 @@ namespace SystemC_VPC{
   Attribute::Attribute( std::string type, std::string value)
     : type(type), value(value){}
 
-  std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos)
-    throw(InvalidArgumentException){
+  std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos) {
     if(pos<=parameters.size()) return parameters[pos];
     throw InvalidArgumentException("getNextParameter");
   }
 
   //
-  std::string Attribute::getParameter(const std::string type)
-    throw (InvalidArgumentException){
+  std::string Attribute::getParameter(const std::string type) {
     for(unsigned int i=0;
         i<this->getParameterSize();
         ++i){
@@ -82,16 +80,14 @@ namespace SystemC_VPC{
     this->parameters.push_back( std::make_pair(type, value) );
   }
 
-  std::pair<std::string, AttributePtr > Attribute::getNextAttribute(size_t pos)
-    throw(InvalidArgumentException){
+  std::pair<std::string, AttributePtr > Attribute::getNextAttribute(size_t pos) {
     if(pos<=attributes.size()) return attributes[pos];
     throw InvalidArgumentException("getNextAttribute");
         
   }
 
   //
-  AttributePtr Attribute::getAttribute(const std::string name)
-    throw(InvalidArgumentException){
+  AttributePtr Attribute::getAttribute(const std::string name) {
     for(unsigned int i=0;
         i<this->getAttributeSize();
         ++i)

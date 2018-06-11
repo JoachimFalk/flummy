@@ -185,7 +185,7 @@ namespace SystemC_VPC{
      * \brief Initialize a component from the configuration file
      * \return pointer to the initialized component
      */
-    Config::Component::Ptr initComponent() throw(InvalidArgumentException);
+    Config::Component::Ptr initComponent();
     
     /**
      * \brief Performs initialization of attribute values for a component
@@ -212,13 +212,13 @@ namespace SystemC_VPC{
     /**
     * \brief Parsing helper for <timing>
     */
-    Config::Timing parseTiming(CX::XN::DOMNode* node) throw(InvalidArgumentException);
+    Config::Timing parseTiming(CX::XN::DOMNode* node);
 
     //variables for the generation of random times
     boost::uniform_real<> distribution;
     boost::shared_ptr<base_generator_type> generator;
     boost::shared_ptr<boost::mt19937> gen;
-    boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(CX::XN::DOMNode* node) throw(InvalidArgumentException);
+    boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(CX::XN::DOMNode* node);
   };
     
 }
