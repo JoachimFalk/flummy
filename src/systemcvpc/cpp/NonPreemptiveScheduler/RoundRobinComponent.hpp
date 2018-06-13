@@ -101,7 +101,7 @@ private:
 
   /// This list contains the message tasks that will appear
   /// via compute calls.
-  std::deque<TaskInstance *>            readyMsgTasks;
+  std::deque<TaskInstance *>    readyMsgTasks;
   /// This list represent all the SysteMoC actors that
   /// are mapped to this component. The list will be
   /// filled by the the end_of_elaboration method.
@@ -110,7 +110,7 @@ private:
   /// be assigned by the compute method if
   /// on of the SysteMoC actors of the component
   /// is currently running.
-  TaskInstance                         *actualTask;
+  TaskInstance                 *actualTask;
   sc_core::sc_event             readyEvent;
 };
 
