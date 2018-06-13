@@ -68,6 +68,8 @@
 
 #include <list>
 
+#include <boost/shared_ptr.hpp>
+
 namespace SystemC_VPC {
 
   class ComponentObserver;

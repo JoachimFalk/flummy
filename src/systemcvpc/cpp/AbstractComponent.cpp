@@ -188,7 +188,9 @@ namespace SystemC_VPC {
    */
   ProcessControlBlock *AbstractComponent::createPCB(std::string const &taskName) {
     ProcessControlBlock *pcb = new ProcessControlBlock(this, taskName);
-    sassert(pcbPool.insert(std::make_pair(pcb->getPid(), pcb)).second);
+    sassert(pcbPool.insert(std::make_pair(
+        pcb->getPid(),
+        ProcessControlBlockPtr(pcb))).second);
     registerTask(pcb);
     return pcb;
   }
