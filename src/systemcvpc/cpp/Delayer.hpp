@@ -37,10 +37,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DELAYER_HPP
 #define _INCLUDED_SYSTEMCVPC_DELAYER_HPP
 
-#include <smoc/SimulatorAPI/SchedulerInterface.hpp>
-#include <smoc/SimulatorAPI/TaskInterface.hpp>
-#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
-
 #include <systemcvpc/datatypes.hpp>
 
 #include "ComponentInfo.hpp"
@@ -56,7 +52,7 @@ namespace SystemC_VPC {
   /**
    * \brief Interface for classes implementing delay simulation.
    */
-  class Delayer: public smoc::SimulatorAPI::SchedulerInterface {
+  class Delayer {
   public:
     /**
      * \brief Simulate the delay caused by the transition execution on this Delayer.
@@ -84,9 +80,6 @@ namespace SystemC_VPC {
     void fireNotification(ComponentInfo *compInf);
 
     virtual void initialize(const Director* d) {};
-
-    virtual void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr)
-        {}
 
     virtual ~Delayer() {}
 

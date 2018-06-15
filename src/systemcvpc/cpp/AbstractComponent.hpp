@@ -37,12 +37,9 @@
 #ifndef _INCLUDED_SYSTEMCVPC_ABSTRACTCOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_ABSTRACTCOMPONENT_HPP
 
-#include <vector>
-#include <map>
-
-#include <systemc>
-
-#include <string.h>
+#include <smoc/SimulatorAPI/SchedulerInterface.hpp>
+#include <smoc/SimulatorAPI/TaskInterface.hpp>
+#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
@@ -66,9 +63,15 @@
 #include "timetriggered/tt_support.hpp"
 #include "ProcessControlBlock.hpp"
 
-#include <list>
+#include <systemc>
 
 #include <boost/shared_ptr.hpp>
+
+#include <list>
+#include <vector>
+#include <map>
+#include <string>
+
 
 namespace SystemC_VPC {
 
@@ -88,6 +91,7 @@ namespace SystemC_VPC {
     public sc_core::sc_module,
     public Tracing::TraceableComponent,
     public Delayer,
+    public smoc::SimulatorAPI::SchedulerInterface,
     public ComponentModel,
     public ComponentInterface
   {
@@ -183,6 +187,15 @@ namespace SystemC_VPC {
      *
      */
     FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid);
+
+    virtual void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr)
+        {}
+
+    virtual void checkFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr)
+      {}
+
+    virtual void executeFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr)
+      {}
 
   protected:
     typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
