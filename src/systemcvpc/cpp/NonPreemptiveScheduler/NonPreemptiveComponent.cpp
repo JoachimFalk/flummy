@@ -101,9 +101,8 @@ namespace SystemC_VPC {
             TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
         ttReleaseQueueEvent.notify(delta);
       } else {
-        // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+        // This will trigger compute in due time.
         scheduledTask->schedule();
-//      addTask(getTaskOfTaskInterface(scheduledTask));
       }
     } else {
       if (activeTasks.find(scheduledTask) == activeTasks.end())
@@ -119,9 +118,8 @@ namespace SystemC_VPC {
       assert(ttReleaseQueue.top().time == sc_core::sc_time_stamp());
       TaskInterface *scheduledTask = ttReleaseQueue.top().node;
       ttReleaseQueue.pop();
-      // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+      // This will trigger compute in due time.
       scheduledTask->schedule();
-//    addTask(getTaskOfTaskInterface(scheduledTask));
       if (ttReleaseQueue.empty())
         break;
       sc_core::sc_time delta = ttReleaseQueue.top().time -
@@ -228,7 +226,7 @@ namespace SystemC_VPC {
           sassert(activeTasks.erase(scheduledTask) == 1);
           if (scheduledTask->canFire()) {
             sassert(activeTasks.insert(scheduledTask).second);
-            // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+            // This will trigger compute in due time.
             scheduledTask->schedule();
           }
         }
@@ -257,10 +255,8 @@ namespace SystemC_VPC {
                tasks_iter != mcgi->additional_tasks->end();
                tasks_iter++)
           {
-            (*tasks_iter)->getBlockEvent().dii->notify();
             finishDiiTaskInstance(*tasks_iter);
             finishLatencyTaskInstance(*tasks_iter);
-            Director::getInstance().signalLatencyEvent(*tasks_iter);
           }
           multiCastGroupInstances.remove(mcgi);
           delete (mcgi->additional_tasks);
@@ -274,8 +270,6 @@ namespace SystemC_VPC {
 
     DBG_OUT(
         this->getName() << " resign Task: " << runningTask->getName() << " @ " << sc_core::sc_time_stamp().to_default_time_units() << std::endl);
-
-    runningTask->getBlockEvent().dii->notify();
 
 //  ProcessId pid = runningTask->getProcessId();
 //  Task &task = Director::getInstance().taskPool->getPrototype(pid);
@@ -299,8 +293,6 @@ namespace SystemC_VPC {
       //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
       finishLatencyTaskInstance(task);
-      // signalLatencyEvent will release runningTask (back to TaskPool)
-      Director::getInstance().signalLatencyEvent(task);
       return;
     }
     timePcbPair pair;
@@ -341,10 +333,6 @@ namespace SystemC_VPC {
 
           // Latency over -> remove Task
           finishLatencyTaskInstance(front.task);
-          // signalLatencyEvent will release runningTask (back to TaskPool)
-          Director::getInstance().signalLatencyEvent(front.task);
-
-          //wait(sc_core::SC_ZERO_TIME);
           pqueue.pop();
         }
       }

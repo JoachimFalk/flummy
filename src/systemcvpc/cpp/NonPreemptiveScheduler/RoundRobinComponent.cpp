@@ -119,11 +119,8 @@ void RoundRobinComponent::compute(TaskInstance *actualTask) {
     std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
     wait(actualTask->getDelay());
     finishDiiTaskInstance(actualTask);
-    finishLatencyTaskInstance(actualTask);
-    /// This is need to trigger consumption of tokens by the actor.
-    actualTask->getBlockEvent().dii->notify();
     /// FIXME: What about DII != latency
-    Director::getInstance().signalLatencyEvent(actualTask);
+    finishLatencyTaskInstance(actualTask);
   } else
     readyMsgTasks.push_back(actualTask);
   readyEvent.notify();
@@ -196,12 +193,8 @@ bool RoundRobinComponent::scheduleMessageTasks() {
     /// again when the task execution time is over.
     wait(messageTask->getDelay());
     finishDiiTaskInstance(messageTask);
-    finishLatencyTaskInstance(messageTask);
-    Director::getInstance().signalLatencyEvent(messageTask);
-    /// The scheduledTask, i.e., the SysteMoC actor, should now be in the comm state.
-    /// Enable transition out of comm state by notifying the dii event.
-    messageTask->getBlockEvent().dii->notify();
     /// FIXME: What about dii != latency
+    finishLatencyTaskInstance(messageTask);
   }
   return progress;
 }

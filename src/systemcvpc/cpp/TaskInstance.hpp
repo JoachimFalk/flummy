@@ -195,10 +195,6 @@ namespace SystemC_VPC {
     TaskInterface * scheduledTask;
   };
 
-  static inline
-  TaskInstance *getTaskOfTaskInterface(TaskInterface const *task)
-    { return reinterpret_cast<TaskInstance *>(task->getSchedulerInfo()); }
-
   typedef std::map<int, TaskInstance*>  TaskMap;
 
   template<typename PAYLOAD>
