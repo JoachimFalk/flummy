@@ -191,7 +191,7 @@ namespace SystemC_VPC {
     sassert(pcbPool.insert(std::make_pair(
         pcb->getPid(),
         ProcessControlBlockPtr(pcb))).second);
-    registerTask(pcb);
+    registerTask(pcb, taskName);
     return pcb;
   }
 

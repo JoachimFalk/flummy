@@ -197,7 +197,7 @@ namespace SystemC_VPC{
         } else {
           ProcessId pid = actualTask->getProcessId();
           actualTask->setPCB(getPCB(pid));
-          releaseTask(actualTask);
+          releaseTask(actualTask->getPCB(), actualTask);
         }
         return;
       }
@@ -230,7 +230,7 @@ namespace SystemC_VPC{
     // A task can call compute only one time!
     assert(readyTasks.find(newReadyTask->getInstanceId())   == readyTasks.end());
     assert(runningTasks.find(newReadyTask->getInstanceId()) == runningTasks.end());
-    releaseTask(newReadyTask);
+    releaseTask(newReadyTask->getPCB(), newReadyTask);
     //insert new task in ready list
     readyTasks[newReadyTask->getInstanceId()]=newReadyTask;
     scheduler->addedNewTask(newReadyTask);

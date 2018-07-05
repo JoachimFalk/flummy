@@ -114,7 +114,7 @@ void RoundRobinComponent::compute(TaskInstance *actualTask) {
     assert(!useActivationCallback);
     scheduleMessageTasks();
     this->actualTask = actualTask;
-    releaseTask(actualTask);
+    releaseTask(actualTask->getPCB(), actualTask);
     assignTaskInstance(actualTask);
     std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
     wait(actualTask->getDelay());
@@ -134,7 +134,7 @@ void RoundRobinComponent::check(TaskInstance *actualTask) {
     ProcessId pid = actualTask->getProcessId();
     actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
     actualTask->initDelays();
-    releaseTask(actualTask);
+    releaseTask(actualTask->getPCB(), actualTask);
     assignTaskInstance(actualTask);
     wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
     finishDiiTaskInstance(actualTask);
@@ -190,7 +190,7 @@ bool RoundRobinComponent::scheduleMessageTasks() {
     TaskInstance *messageTask = readyMsgTasks.front();
     readyMsgTasks.pop_front();
     assert(!messageTask->hasScheduledTask());
-    releaseTask(messageTask);
+    releaseTask(messageTask->getPCB(), messageTask);
     assignTaskInstance(messageTask);
     /// This will setup the trigger for schedule_method to be called
     /// again when the task execution time is over.
