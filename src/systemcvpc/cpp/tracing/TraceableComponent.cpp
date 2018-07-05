@@ -27,26 +27,43 @@
 namespace SystemC_VPC { namespace Tracing {
 
 TraceableComponent::TraceableComponent()
-  : noTasks(true) {}
+  : tracingStarted(false) {}
 
+/// Add a tracer. This must no longer be called after the first task
+/// has been registered via registerTask.
 void TraceableComponent::addTracer(TracerIf *tracer) {
-  assert(noTasks);
+  assert(registerdTasks.empty());
   assert(tracer);
   tracers.push_back(tracer);
 }
 
-/// Called once per actor
+/// Called once per actor. Must not be called after startTracing was called.
 void TraceableComponent::registerTask(TTaskHolder *ttaskHolder, std::string const &name) {
-  noTasks = false;
   for (TTask *ttask : ttaskHolder->ttasks)
     delete ttask;
   ttaskHolder->ttasks.clear();
-  for (TracerIf *tracer : tracers)
-    ttaskHolder->ttasks.push_back(tracer->registerTask(name));
+  // We use this map to sort the tasks by name. This is required for a
+  // deterministic generation of tracing logs. Otherwise, the tracing log
+  // might depend on the order the tasks are registered.
+  registerdTasks[name].push_back(ttaskHolder);
+}
+
+/// Called once to initialize tracing
+void TraceableComponent::startTracing() {
+  for (RegisterdTasks::value_type const &entry : registerdTasks) {
+    std::string const &name = entry.first;
+    for (TTaskHolder *ttaskHolder : entry.second) {
+      for (TracerIf *tracer : tracers)
+        ttaskHolder->ttasks.push_back(tracer->registerTask(name));
+    }
+  }
+  tracingStarted = true;
 }
 
 /// Called once per actor firing to create a trace task instance in the task instance.
+/// The startTracing method has to be called first.
 void TraceableComponent::releaseTask(TTaskHolder *ttaskHolder, TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(tracingStarted);
   for (TTaskInstance *ttaskInstance : ttaskInstanceHolder->ttaskInstances)
     delete ttaskInstance;
   ttaskInstanceHolder->ttaskInstances.clear();
@@ -57,35 +74,45 @@ void TraceableComponent::releaseTask(TTaskHolder *ttaskHolder, TTaskInstanceHold
 }
 
 /// Called possibly multiple times to assign the task instance to the resource.
+/// The startTracing method has to be called first.
 void TraceableComponent::assignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(tracingStarted);
   assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
   for (unsigned int i = 0; i < tracers.size(); ++i)
     tracers[i]->assign(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called possibly multiple times to resign the task instance from the resource.
+/// The startTracing method has to be called first.
 void TraceableComponent::resignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(tracingStarted);
   assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
   for (unsigned int i = 0; i < tracers.size(); ++i)
     tracers[i]->resign(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called possibly multiple times to indicate that the task is blocked waiting for something.
+/// The startTracing method has to be called first.
 void TraceableComponent::blockTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(tracingStarted);
   assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
   for (unsigned int i = 0; i < tracers.size(); ++i)
     tracers[i]->block(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called once per actor firing to indicate that the DII of the task instance is over.
+/// The startTracing method has to be called first.
 void TraceableComponent::finishDiiTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(tracingStarted);
   assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
   for (unsigned int i = 0; i < tracers.size(); ++i)
     tracers[i]->finishDii(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called once per actor firing to indicate that the latency of the task instance is over.
+/// The startTracing method has to be called first.
 void TraceableComponent::finishLatencyTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(tracingStarted);
   assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
   for (unsigned int i = 0; i < tracers.size(); ++i)
     tracers[i]->finishLatency(ttaskInstanceHolder->ttaskInstances[i]);

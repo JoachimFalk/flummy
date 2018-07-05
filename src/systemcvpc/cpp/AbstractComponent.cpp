@@ -343,6 +343,11 @@ namespace SystemC_VPC {
     componentIdle = event;
   }
 
+  void AbstractComponent::end_of_elaboration() {
+    sc_core::sc_module::end_of_elaboration();
+    startTracing();
+  }
+
   /**
    * \brief Create the process control block.
    */

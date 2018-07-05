@@ -26,6 +26,7 @@
 #include "TracerIf.hpp"
 
 #include <vector>
+#include <map>
 
 namespace SystemC_VPC { namespace Tracing {
 
@@ -38,31 +39,45 @@ public:
 protected:
   TraceableComponent();
 
-  /// Called once per actor
+  /// Called once per actor. Must not be called after startTracing was called.
   void registerTask(TTaskHolder *ttaskHolder, std::string const &name);
 
+  /// Called once to initialize tracing
+  void startTracing();
+
   /// Called once per actor firing to create a trace task instance in the task instance.
+  /// The startTracing method has to be called first.
   void releaseTask(TTaskHolder *ttaskHolder, TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called possibly multiple times to assign the task instance to the resource.
+  /// The startTracing method has to be called first.
   void assignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called possibly multiple times to resign the task instance from the resource.
+  /// The startTracing method has to be called first.
   void resignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called possibly multiple times to indicate that the task is blocked waiting for something.
+  /// The startTracing method has to be called first.
   void blockTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
+  /// The startTracing method has to be called first.
   void finishDiiTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
+  /// The startTracing method has to be called first.
   void finishLatencyTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   ~TraceableComponent();
 private:
-  /// This flag is true as long as not tasks have been registered by registerTask.
-  bool noTasks;
+  /// This flag is true once startTracing has been called.
+  bool tracingStarted;
+
+  typedef std::map<std::string, std::vector<TTaskHolder *> > RegisterdTasks;
+
+  /// This map holds all registered tasks sorted by their name.
+  RegisterdTasks registerdTasks;
 
   /// List of all traces.
   std::vector<TracerIf *> tracers;
