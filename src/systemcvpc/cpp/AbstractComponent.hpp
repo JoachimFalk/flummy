@@ -186,11 +186,11 @@ namespace SystemC_VPC {
      */
     FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid);
 
-    virtual void checkFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr);
+    virtual void checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
 
     virtual void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
 
-    virtual void executeFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr);
+    virtual void executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
 
   protected:
     void end_of_elaboration();
