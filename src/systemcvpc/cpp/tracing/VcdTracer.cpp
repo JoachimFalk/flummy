@@ -59,15 +59,16 @@ public:
   static const trace_value S_READY;
   static const trace_value S_RUNNING;
 
-  VcdTask(std::string resource, std::string task)
-    : traceSignal(new sc_core::sc_signal<trace_value>())
-    , resource(resource)
-    , task(task)
+   VcdTask(
+       sc_core::sc_trace_file *traceFile,
+       std::string      const &resource,
+       std::string      const &task)
+    : resource(resource), task(task)
     , lastChange(sc_core::SC_ZERO_TIME)
-    , lastValue(0) {}
-
-  /** signal for VCD tracing */
-  sc_core::sc_signal<trace_value>* traceSignal;
+    , lastValue(0), currentValue(0)
+  {
+    sc_core::sc_trace(traceFile, currentValue, task);
+  }
 
   void traceRunning(){
     this->tracePlain("RUN");
@@ -105,20 +106,21 @@ private:
   /**
    * remember last value and time stamp of change
    */
-  void rememberLastValue(){
-    if(lastChange != sc_core::sc_time_stamp()){
+  trace_value getLastValue() {
+    if (sc_core::sc_time_stamp() > lastChange) {
       // remember value from last real changing (ignore delta cycle changing)
-      lastValue    = *traceSignal;
-      lastChange   = sc_core::sc_time_stamp();
+      lastValue  = currentValue;
     }
+    return lastValue;
   }
 
   /**
    * write value to signal
    */
-  void writeValue(trace_value value){
-    rememberLastValue();
-    *traceSignal  = value;
+  void writeValue(trace_value value) {
+    getLastValue(); // To update lastValue
+    lastChange   = sc_core::sc_time_stamp();
+    currentValue = value;
   }
 
   /**
@@ -127,9 +129,7 @@ private:
    * lower case is toggled
    */
   void setValueWithCaseCorrection(trace_value value){
-    rememberLastValue();
-
-    if(lastValue == value){
+    if(getLastValue() == value){
       // if value does not change toggle between upper and lower case
       if(value & LOWER_CASE){
         writeValue(value & UPPER_CASE);
@@ -156,6 +156,9 @@ private:
 
   /** rember last signal value */
   trace_value      lastValue;
+
+  /** rember current signal value */
+  trace_value      currentValue;
 
 }; // struct Tracing
 
@@ -205,9 +208,7 @@ TTask         *VcdTracer::registerTask(std::string const &name) {
     this->traceFile_ = sc_core::sc_create_vcd_trace_file(tracefilename.c_str());
     this->traceFile_->set_time_unit(1, sc_core::SC_NS);
   }
-  VcdTask *newsignal = new VcdTask(name, this->getName());
-
-  sc_trace(this->traceFile_, *newsignal->traceSignal, name);
+  VcdTask *newsignal = new VcdTask(this->traceFile_, getName(), name);
   newsignal->traceSleeping();
   return newsignal;
 }
