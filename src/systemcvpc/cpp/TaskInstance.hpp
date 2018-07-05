@@ -34,8 +34,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_TASK_HPP
-#define _INCLUDED_SYSTEMCVPC_TASK_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_TASKINSTANCE_HPP
+#define _INCLUDED_SYSTEMCVPC_TASKINSTANCE_HPP
 
 #include <sstream>
 
@@ -62,8 +62,6 @@ namespace SystemC_VPC {
     : public Tracing::TTaskInstanceHolder {
     friend class NonPreemptiveComponent;
     friend class RoundRobinComponent;
-    friend class AssociativePrototypedPool<ProcessId, TaskInstance>;
-    friend class PrototypedPool<TaskInstance>;
   public:
     TaskInstance(TaskPool *pool);
 
@@ -131,11 +129,16 @@ namespace SystemC_VPC {
     double getTimingScale()                     {return this->timingScale;}
 
     void setScheduledTask(TaskInterface * st)
-      {this->scheduledTask = st;}
+      { this->scheduledTask = st; }
     TaskInterface * getScheduledTask()
-      {return this->scheduledTask;}
+      { return this->scheduledTask; }
     bool hasScheduledTask() const
-      {return this->scheduledTask != NULL;}
+      { return this->scheduledTask != NULL; }
+
+    void setFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr)
+      { this->firingRuleInterface = fr; }
+    smoc::SimulatorAPI::FiringRuleInterface *getFiringRule()
+      { return this->firingRuleInterface; }
 
     /**
      * 
@@ -150,10 +153,12 @@ namespace SystemC_VPC {
     bool             isPSM() const;
 
     void release() {
-      //this->setBlockEvent(EventPair(NULL, NULL));
-      this->getBlockEvent().dii     = NULL;
-      this->getBlockEvent().latency = NULL;
-      pool->free(this->getProcessId(), this);
+      blockEvent.dii     = NULL;
+      blockEvent.latency = NULL;
+      if (pool)
+        pool->free(this->getProcessId(), this);
+      else
+        delete this;
     }
 
     ~TaskInstance();
@@ -192,7 +197,8 @@ namespace SystemC_VPC {
     std::string name;
     double timingScale;
     CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
-    TaskInterface * scheduledTask;
+    smoc::SimulatorAPI::TaskInterface       *scheduledTask;
+    smoc::SimulatorAPI::FiringRuleInterface *firingRuleInterface;
   };
 
   typedef std::map<int, TaskInstance*>  TaskMap;
@@ -260,4 +266,4 @@ namespace SystemC_VPC {
   };
 
 }
-#endif /* _INCLUDED_SYSTEMCVPC_TASK_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_TASKINSTANCE_HPP */

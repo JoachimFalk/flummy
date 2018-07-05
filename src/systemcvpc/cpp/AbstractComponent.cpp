@@ -367,12 +367,206 @@ namespace SystemC_VPC {
   }
 
   void AbstractComponent::registerFiringRule(TaskInterface *actor, smoc::SimulatorAPI::FiringRuleInterface *fr) {
+    const char                        *actorName       = actor->name();
+    smoc::SimulatorAPI::FunctionNames  actionNames     = fr->getActionNames();
+    smoc::SimulatorAPI::FunctionNames  guardNames      = fr->getGuardNames();
+    size_t                             guardComplexity = fr->getGuardComplexity();
+
+    ProcessControlBlock       *pcb = static_cast<ProcessControlBlock *>(actor->getSchedulerInfo());
+    ProcessId           const  pid = pcb->getPid();
+
+    assert(Director::getInstance().getProcessId(actorName) == pid);
+    assert(actor->getScheduler() == this);
+
+    try {
+//    if (!Director::getInstance().taskPool->contains( pid )) {
+//      TaskInstance &task = Director::getInstance().taskPool->createObject(pid);
+//      task.setPCB(pcb);
+//      task.setProcessId( pid );
+//      task.setScheduledTask(actor);
+//      task.setName(actor->name());
+//    }
+      Config::VpcTask::Ptr vpcTask = Config::getCachedTask(static_cast<ScheduledTask &>(*actor));
+
+      //TODO: Config::Timing -> Timing
+      const Config::Components & components = Config::getComponents();
+
+      for (Config::Components::value_type const &component_pair : components) {
+        std::string            componentName = component_pair.first;
+        Config::Component::Ptr component     = component_pair.second;
+
+        if (Config::Mappings::isMapped(vpcTask, component)) {
+          Config::TimingsProvider::Ptr provider = component->getTimingsProvider();
+          pcb->setPriority(vpcTask->getPriority());  // GFR BUGFIX
+          pcb->setTaskIsPSM(vpcTask->isPSM());
+          if (provider->hasDefaultActorTiming(actorName)) {
+
+            Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
+
+            for (Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
+              std::string powermode = (*it).first;
+              pcb->setTiming(provider->getActionTiming(actorName,powermode));
+            }
+
+          }
+          for (std::string const &guard : guardNames) {
+            if (provider->hasGuardTimings(guard)) {
+
+              Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
+              for (Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+              {
+                std::string powermode = (*it).first;
+                pcb->setTiming(provider->getGuardTiming(guard,powermode));
+
+                ConfigCheck::configureTiming(pid, guard);
+              }
+            }
+          }
+          for (std::string const &action : actionNames) {
+            if (provider->hasActionTimings(action)) {
+
+              Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
+              for (Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+              {
+                std::string powermode = (*it).first;
+                pcb->setTiming(provider->getActionTiming(action,powermode));
+                ConfigCheck::configureTiming(pid, action);
+              }
+            }
+          }
+        }
+      }
+    } catch (std::exception &e) {
+      std::cerr << "Actor registration failed for \"" << actorName <<
+          "\". Got exception:\n" << e.what() << std::endl;
+      exit(-1);
+    }
+
+    FunctionIds     actionIds;
+    FunctionIds     guardIds;
+
+    for (FunctionNames::const_iterator iter = actionNames.begin();
+         iter != actionNames .end();
+         ++iter){
+      Director::getInstance().debugFunctionNames[pid].insert(*iter);
+      //check if we have timing data for this function in the XML configuration
+      if (Director::getInstance().hasFunctionId(*iter)) {
+        actionIds.push_back(Director::getInstance().getFunctionId(*iter) );
+      }
+      ConfigCheck::modelTiming(pid, *iter);
+    }
+    for (FunctionNames::const_iterator iter = guardNames.begin();
+         iter != guardNames.end();
+         ++iter){
+      Director::getInstance().debugFunctionNames[pid].insert(*iter);
+      if(Director::getInstance().hasFunctionId(*iter)){
+        guardIds.push_back(Director::getInstance().getFunctionId(*iter) );
+      }
+      ConfigCheck::modelTiming(pid, *iter);
+    }
+
+    fr->setSchedulerInfo(new FastLink(this, pid, actionIds, guardIds, guardComplexity));
   }
 
   void AbstractComponent::checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
+    FastLink *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
+
+    ProcessControlBlock *pcb = this->getPCB(fLink->process);
+    TaskInstance taskInstance(nullptr);
+    taskInstance.setPCB(pcb);
+    taskInstance.setProcessId(fLink->process);
+    taskInstance.setScheduledTask(task);
+    taskInstance.setFiringRule(fr);
+    taskInstance.setName(task->name()+std::string("_check"));
+    taskInstance.setFunctionIds(fLink->actionIds );
+    taskInstance.setGuardIds(fLink->guardIds);
+    taskInstance.setFactorOverhead(fLink->complexity);
+    this->check(&taskInstance);
   }
 
+  class InputsAvailableListener
+    : public CoSupport::SystemC::EventListener
+  {
+    typedef CoSupport::SystemC::EventWaiter
+        EventWaiter;
+  public:
+    InputsAvailableListener(
+        TaskInterface                           *task,
+        smoc::SimulatorAPI::FiringRuleInterface *fr)
+      : task(task), fr(fr)
+      // We start with one to ensure that signaled does not call compute before wait is called!
+      , missing(1)
+      {}
+
+    Coupling::VPCEvent::Ptr acquireEvent() {
+      Coupling::VPCEvent::Ptr retval(new Coupling::VPCEvent());
+      retval->addListener(this);
+      ++missing;
+      return retval;
+    }
+
+    void wait() {
+      if (!--missing)
+        compute();
+    }
+  private:
+    ~InputsAvailableListener() {}
+
+    void signaled(EventWaiter *e) {
+      assert(*e);
+      e->delListener(this);
+      if (!--missing)
+        compute();
+    }
+
+    // The lifetime of the given EventWaiter is over
+    void eventDestroyed(EventWaiter *e)
+      { assert(!"WTF"); }
+
+    // May be called when Event is active
+    void renotified(EventWaiter *e)
+      { assert(!"WTF"); }
+
+    TaskInterface                           *task;
+    smoc::SimulatorAPI::FiringRuleInterface *fr;
+    size_t                                   missing;
+
+    void compute() {
+      FastLink            *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
+      AbstractComponent   *comp  = static_cast<AbstractComponent *>(task->getScheduler());
+      ProcessControlBlock *pcb   = comp->getPCB(fLink->process);
+      TaskInstance *taskInstance = new TaskInstance(nullptr);
+      taskInstance->setPCB(pcb);
+      taskInstance->setProcessId(fLink->process);
+      taskInstance->setScheduledTask(task);
+      taskInstance->setFiringRule(fr);
+      taskInstance->setName(task->name());
+      taskInstance->setFunctionIds(fLink->actionIds );
+      taskInstance->setGuardIds(fLink->guardIds);
+      taskInstance->setFactorOverhead(fLink->complexity);
+      comp->compute(taskInstance);
+      delete this;
+    }
+  };
+
   void AbstractComponent::executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
+
+    typedef smoc::SimulatorAPI::FiringRuleInterface     FiringRuleInterface;
+    typedef FiringRuleInterface::PortInInfo             PortInInfo;
+    typedef FiringRuleInterface::PortOutInfo            PortOutInfo;
+
+    InputsAvailableListener *ial = new InputsAvailableListener(task, fr);
+
+    for (PortInInfo const &portInfo : fr->getPortInInfos()) {
+      portInfo.port.commStart(portInfo.consumed);
+      FastLink  *fLink = static_cast<FastLink *>(portInfo.port.getSchedulerInfo());
+      fLink->read(portInfo.required, EventPair(nullptr, ial->acquireEvent()));
+    }
+    for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
+      portInfo.port.commStart(portInfo.produced);
+    }
+    // Wait for arrival of all inputs, i.e., the routing delay.
+    ial->wait();
   }
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
@@ -380,13 +574,98 @@ namespace SystemC_VPC {
     this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
     if (taskInstance->getBlockEvent().dii.get())
       taskInstance->getBlockEvent().dii->notify();
+
+    typedef smoc::SimulatorAPI::FiringRuleInterface FiringRuleInterface;
+    typedef FiringRuleInterface::PortInInfo         PortInInfo;
+
+    if (FiringRuleInterface *fr = taskInstance->getFiringRule()) {
+      for (PortInInfo const &portInfo : fr->getPortInInfos()) {
+        portInfo.port.getSource()->commFinish(portInfo.consumed);
+      }
+    }
   }
+
+  class OutputWrittenListener
+    : public CoSupport::SystemC::EventListener
+  {
+    typedef CoSupport::SystemC::EventWaiter
+        EventWaiter;
+  public:
+    OutputWrittenListener(
+        smoc::SimulatorAPI::ChannelSinkInterface *sink,
+        size_t                                    produced)
+      : sink(sink), produced(produced)
+      // We start with one to ensure that signaled does not call write before wait is called!
+      , missing(1)
+      , dropped(false)
+      {}
+
+    Coupling::VPCEvent::Ptr acquireEvent() {
+      Coupling::VPCEvent::Ptr retval(new Coupling::VPCEvent());
+      retval->addListener(this);
+      ++missing;
+      return retval;
+    }
+
+    void wait() {
+      if (!--missing)
+        write();
+    }
+  private:
+    ~OutputWrittenListener() {}
+
+    void signaled(EventWaiter *e) {
+      assert(*e);
+      e->delListener(this);
+      dropped = static_cast<Coupling::VPCEvent *>(e)->getDropped();
+      if (!--missing)
+        write();
+    }
+
+    // The lifetime of the given EventWaiter is over
+    void eventDestroyed(EventWaiter *e)
+      { assert(!"WTF"); }
+
+    // May be called when Event is active
+    void renotified(EventWaiter *e)
+      { assert(!"WTF"); }
+
+    smoc::SimulatorAPI::ChannelSinkInterface *sink;
+    size_t                                    produced;
+    size_t                                    missing;
+    bool                                      dropped;
+
+    void write() {
+      sink->commFinish(produced, dropped);
+      delete this;
+    }
+  };
+
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
   void AbstractComponent::finishLatencyTaskInstance(TaskInstance *taskInstance) {
     this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);
     if (taskInstance->getBlockEvent().latency.get())
       taskInstance->getBlockEvent().latency->notify();
+
+    typedef smoc::SimulatorAPI::FiringRuleInterface  FiringRuleInterface;
+//  typedef smoc::SimulatorAPI::ChannelSinkInterface ChannelSinkInterface;
+    typedef FiringRuleInterface::PortOutInfo         PortOutInfo;
+
+    if (FiringRuleInterface *fr = taskInstance->getFiringRule()) {
+      for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
+        // FIXME: Multicast
+        assert(portInfo.port.getSinks().size() == 1);
+        OutputWrittenListener *owl = new OutputWrittenListener(
+            portInfo.port.getSinks().front(), portInfo.produced);
+        FastLink  *fLink = static_cast<FastLink *>(portInfo.port.getSchedulerInfo());
+        fLink->write(portInfo.produced, EventPair(nullptr, owl->acquireEvent()));
+        owl->wait();
+//      for (ChannelSinkInterface *sink : portInfo.port.getSinks()) {
+//        sink->commFinish(portInfo.produced);
+//      }
+      }
+    }
     // Remember last acknowledged task time
     Director::getInstance().end = sc_core::sc_time_stamp();
     taskInstance->release();

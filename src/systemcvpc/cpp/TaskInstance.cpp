@@ -47,7 +47,7 @@ namespace SystemC_VPC {
     , fid()
     , gid()
     , blockEvent()
-    , blockingCompute(NULL)
+    , blockingCompute(nullptr)
     , blockAck(false)
     , exec(false)
     , write(false)
@@ -58,7 +58,8 @@ namespace SystemC_VPC {
     , name("NN")
     , timingScale(1)
     , taskTracerTicket()
-    , scheduledTask(NULL)
+    , scheduledTask(nullptr)
+    , firingRuleInterface(nullptr)
     {}
 
   TaskInstance::~TaskInstance() {
