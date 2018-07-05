@@ -53,7 +53,8 @@ namespace SystemC_VPC {
     task = _task;
     taskEvents = task->getBlockEvent();
     if(components.empty()){
-      taskEvents.dii->notify();
+      if (taskEvents.dii.get())
+        taskEvents.dii->notify();
       //taskEvents.latency->notify();
       Director::getInstance().signalLatencyEvent(task);
       this->pool->free(this);

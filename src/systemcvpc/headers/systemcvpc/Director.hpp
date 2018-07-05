@@ -199,13 +199,13 @@ namespace SystemC_VPC{
 
     ComponentId getComponentId(std::string component);
 
-    FastLink registerActor(TaskInterface * actor,
-                             std::string actorName,
-                             const FunctionNames& actionNames,
-                             const FunctionNames& guardNames,
-                             const int complexity);
+//  FastLink registerActor(TaskInterface * actor,
+//                           std::string actorName,
+//                           const FunctionNames& actionNames,
+//                           const FunctionNames& guardNames,
+//                           const int complexity);
 
-    FastLink registerRoute(std::string source, std::string destination,
+    FastLink *registerRoute(std::string source, std::string destination,
         sc_core::sc_port_base * leafPort);
 
     /**
@@ -249,11 +249,11 @@ namespace SystemC_VPC{
 
 //  void assertMapping(ProcessId const pid);
 
-    void finalizeMapping(
-         TaskInterface       *actor,
-         std::string   const &actorName,
-         FunctionNames const &actionNames,
-         FunctionNames const &guardNames);
+//  void finalizeMapping(
+//       TaskInterface       *actor,
+//       std::string   const &actorName,
+//       FunctionNames const &actionNames,
+//       FunctionNames const &guardNames);
 
     /**
      * Singleton design pattern

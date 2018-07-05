@@ -322,9 +322,8 @@ namespace SystemC_VPC {
       
       EventPair blockEvent =  task->getBlockEvent();
 
-      CoSupport::SystemC::wait(*blockEvent.dii);
-//    blockEvent.dii = NULL;
-//    blockEvent.latency = NULL;
+      if (blockEvent.dii.get())
+        CoSupport::SystemC::wait(*blockEvent.dii);
     }
   }
 
@@ -430,84 +429,84 @@ namespace SystemC_VPC {
             << std::endl);
   }
 
-  void Director::finalizeMapping(
-      TaskInterface       *actor,
-      std::string   const &actorName,
-      FunctionNames const &actionNames,
-      FunctionNames const &guardNames)
-  {
-    AbstractComponent * comp = static_cast<AbstractComponent *>(actor->getScheduler());
-
-    const ProcessId pid = Director::getInstance().getProcessId(actorName);
-    // Get existing ProcessControlBlock
-    ProcessControlBlock *pcb = comp->getPCB(pid);
-
-    if (!taskPool->contains( pid )) {
-      TaskInstance &task = taskPool->createObject(pid);
-      task.setPCB(pcb);
-      task.setProcessId( pid );
-      task.setScheduledTask(actor);
-      task.setName(actor->name());
-    }
-
-    VC::VpcTask::Ptr task = VC::getCachedTask(static_cast<ScheduledTask &>(*actor));
-
-    //TODO: VC::Timing -> Timing
-    const VC::Components & components = VC::getComponents();
-    BOOST_FOREACH(VC::Components::value_type component_pair, components)
-    {
-      std::string componentName = component_pair.first;
-      VC::Component::Ptr component = component_pair.second;
-
-      if (VC::Mappings::isMapped(task, component)) {
-        VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
-        pcb->setPriority(task->getPriority());  // GFR BUGFIX
-        pcb->setTaskIsPSM(task->isPSM());
-        if (provider->hasDefaultActorTiming(actorName)) {
-
-                SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
-
-                for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-                {
-                        std::string powermode = (*it).first;
-                        pcb->setTiming(provider->getActionTiming(actorName,powermode));
-                }
-
-        }
-        BOOST_FOREACH(std::string guard, guardNames)
-        {
-          if (provider->hasGuardTimings(guard)) {
-
-                  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
-                for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-                {
-                        std::string powermode = (*it).first;
-                        pcb->setTiming(provider->getGuardTiming(guard,powermode));
-
-                        ConfigCheck::configureTiming(pid, guard);
-                }
-          }
-        }
-        BOOST_FOREACH(std::string action, actionNames)
-        {
-          if (provider->hasActionTimings(action)) {
-
-                  SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
-                  for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-                  {
-                          std::string powermode = (*it).first;
-                          pcb->setTiming(provider->getActionTiming(action,powermode));
-                          ConfigCheck::configureTiming(pid, action);
-                  }
-          }
-        }
-      }
-    }
-//TODO:
-//    p.setPeriod(1);
-//    p.setBaseDelay();
-//    p.setBaseLatency();
-  }
+//void Director::finalizeMapping(
+//    TaskInterface       *actor,
+//    std::string   const &actorName,
+//    FunctionNames const &actionNames,
+//    FunctionNames const &guardNames)
+//{
+//  AbstractComponent * comp = static_cast<AbstractComponent *>(actor->getScheduler());
+//
+//  const ProcessId pid = Director::getInstance().getProcessId(actorName);
+//  // Get existing ProcessControlBlock
+//  ProcessControlBlock *pcb = comp->getPCB(pid);
+//
+//  if (!taskPool->contains( pid )) {
+//    TaskInstance &task = taskPool->createObject(pid);
+//    task.setPCB(pcb);
+//    task.setProcessId( pid );
+//    task.setScheduledTask(actor);
+//    task.setName(actor->name());
+//  }
+//
+//  VC::VpcTask::Ptr task = VC::getCachedTask(static_cast<ScheduledTask &>(*actor));
+//
+//  //TODO: VC::Timing -> Timing
+//  const VC::Components & components = VC::getComponents();
+//  BOOST_FOREACH(VC::Components::value_type component_pair, components)
+//  {
+//    std::string componentName = component_pair.first;
+//    VC::Component::Ptr component = component_pair.second;
+//
+//    if (VC::Mappings::isMapped(task, component)) {
+//      VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
+//      pcb->setPriority(task->getPriority());  // GFR BUGFIX
+//      pcb->setTaskIsPSM(task->isPSM());
+//      if (provider->hasDefaultActorTiming(actorName)) {
+//
+//              SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
+//
+//              for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+//              {
+//                      std::string powermode = (*it).first;
+//                      pcb->setTiming(provider->getActionTiming(actorName,powermode));
+//              }
+//
+//      }
+//      BOOST_FOREACH(std::string guard, guardNames)
+//      {
+//        if (provider->hasGuardTimings(guard)) {
+//
+//                SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
+//              for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+//              {
+//                      std::string powermode = (*it).first;
+//                      pcb->setTiming(provider->getGuardTiming(guard,powermode));
+//
+//                      ConfigCheck::configureTiming(pid, guard);
+//              }
+//        }
+//      }
+//      BOOST_FOREACH(std::string action, actionNames)
+//      {
+//        if (provider->hasActionTimings(action)) {
+//
+//                SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
+//                for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+//                {
+//                        std::string powermode = (*it).first;
+//                        pcb->setTiming(provider->getActionTiming(action,powermode));
+//                        ConfigCheck::configureTiming(pid, action);
+//                }
+//        }
+//      }
+//    }
+//  }
+////TODO:
+////  p.setPeriod(1);
+////  p.setBaseDelay();
+////  p.setBaseLatency();
+//}
 
   /**
    *
@@ -516,7 +515,7 @@ namespace SystemC_VPC {
     assert(!FALLBACKMODE);
     this->registerComponent(route);
     const std::string & taskName = route->getName();
-    const std::string & compName = route->getName();
+//  const std::string & compName = route->getName();
 
     ProcessId       pid = getProcessId( taskName );
 //  if( pid >= mappings.size() ){
@@ -726,63 +725,63 @@ namespace SystemC_VPC {
     return !FALLBACKMODE;
   }
 
-  FastLink Director::registerActor(TaskInterface * actor,
-      std::string actorName,
-      const FunctionNames &actionNames,
-      const FunctionNames &guardNames,
-      const int complexity)
-  {
-    //TODO: registerActor is called multiple times (for each transition)
+//FastLink Director::registerActor(TaskInterface * actor,
+//    std::string actorName,
+//    const FunctionNames &actionNames,
+//    const FunctionNames &guardNames,
+//    const int complexity)
+//{
+//  //TODO: registerActor is called multiple times (for each transition)
+//
+//  //TODO: check if this is really required.
+//  if(FALLBACKMODE) return FastLink();
+//
+//  ProcessId pid = getProcessId(  actorName  );
+//
+//  try {
+//    //injectTaskName(actor, actorName);
+//    finalizeMapping(actor, actorName, actionNames, guardNames);
+//  }catch(std::exception & e){
+//    std::cerr << "Actor registration failed for \"" << actorName <<
+//        "\". Got exception:\n" << e.what() << std::endl;
+//    exit(-1);
+//  }
+//
+//  FunctionIds     actionIds;
+//  FunctionIds     guardIds;
+//
+//  for(FunctionNames::const_iterator iter = actionNames.begin();
+//      iter != actionNames .end();
+//      ++iter){
+//    debugFunctionNames[pid].insert(*iter);
+//    //check if we have timing data for this function in the XML configuration
+//    if (hasFunctionId(*iter)) {
+//      actionIds.push_back( getFunctionId(*iter) );
+//    }
+//    ConfigCheck::modelTiming(pid, *iter);
+//  }
+//  for(FunctionNames::const_iterator iter = guardNames.begin();
+//      iter != guardNames.end();
+//      ++iter){
+//    debugFunctionNames[pid].insert(*iter);
+//    if(hasFunctionId(*iter)){
+//      guardIds.push_back( getFunctionId(*iter) );
+//    }
+//    ConfigCheck::modelTiming(pid, *iter);
+//  }
+//
+//  AbstractComponent *comp =
+//      static_cast<AbstractComponent *>(actor->getScheduler());
+//  assert(comp);
+//  return FastLink(comp, pid, actionIds, guardIds, complexity);
+//}
 
-    //TODO: check if this is really required.
-    if(FALLBACKMODE) return FastLink();
-
-    ProcessId pid = getProcessId(  actorName  );
-
-    try {
-      //injectTaskName(actor, actorName);
-      finalizeMapping(actor, actorName, actionNames, guardNames);
-    }catch(std::exception & e){
-      std::cerr << "Actor registration failed for \"" << actorName <<
-          "\". Got exception:\n" << e.what() << std::endl;
-      exit(-1);
-    }
-
-    FunctionIds     actionIds;
-    FunctionIds     guardIds;
-
-    for(FunctionNames::const_iterator iter = actionNames.begin();
-        iter != actionNames .end();
-        ++iter){
-      debugFunctionNames[pid].insert(*iter);
-      //check if we have timing data for this function in the XML configuration
-      if (hasFunctionId(*iter)) {
-        actionIds.push_back( getFunctionId(*iter) );
-      }
-      ConfigCheck::modelTiming(pid, *iter);
-    }
-    for(FunctionNames::const_iterator iter = guardNames.begin();
-        iter != guardNames.end();
-        ++iter){
-      debugFunctionNames[pid].insert(*iter);
-      if(hasFunctionId(*iter)){
-        guardIds.push_back( getFunctionId(*iter) );
-      }
-      ConfigCheck::modelTiming(pid, *iter);
-    }
-
-    AbstractComponent *comp =
-        static_cast<AbstractComponent *>(actor->getScheduler());
-    assert(comp);
-    return FastLink(comp, pid, actionIds, guardIds, complexity);
-  }
-
-  FastLink Director::registerRoute(std::string source,
+  FastLink *Director::registerRoute(std::string source,
     std::string destination,
     sc_core::sc_port_base * leafPort)
   {
     //TODO: check if this is really required.
-    if(FALLBACKMODE) return FastLink();
+    if(FALLBACKMODE) return nullptr;
 
     ProcessId       pid = getProcessId( source, destination );
     FunctionIds     fids; // empty functionIds
@@ -810,7 +809,7 @@ namespace SystemC_VPC {
 
     Director::registerRoute(route);
 
-    return FastLink(route, pid, fids, FunctionIds(),0);
+    return new FastLink(route, pid, fids, FunctionIds(),0);
   }
 
   sc_core::sc_time Director::createSC_Time(const char* timeString) {
