@@ -149,7 +149,7 @@ namespace SystemC_VPC {
         } else {
           ProcessId pid = actualTask->getProcessId();
           actualTask->setPCB(getPCB(pid));
-          releaseTask(actualTask);
+          releaseTask(actualTask->getPCB(), actualTask);
         }
         return;
       }
@@ -178,7 +178,7 @@ namespace SystemC_VPC {
   }
 
   void NonPreemptiveComponent::addTask(TaskInstance *newReadyTask) {
-    releaseTask(newReadyTask);
+    releaseTask(newReadyTask->getPCB(), newReadyTask);
     this->newReadyTask(newReadyTask);
     ++readyTasks;
     //awake scheduler thread

@@ -22,6 +22,8 @@
 
 #include "TraceableComponent.hpp"
 
+#include <assert.h>
+
 namespace SystemC_VPC { namespace Tracing {
 
 TraceableComponent::TraceableComponent()
@@ -34,59 +36,59 @@ void TraceableComponent::addTracer(TracerIf *tracer) {
 }
 
 /// Called once per actor
-void TraceableComponent::registerTask(ProcessControlBlock *task) {
+void TraceableComponent::registerTask(TTaskHolder *ttaskHolder, std::string const &name) {
   noTasks = false;
-  for (TTask *ttask : task->ttasks)
+  for (TTask *ttask : ttaskHolder->ttasks)
     delete ttask;
-  task->ttasks.clear();
+  ttaskHolder->ttasks.clear();
   for (TracerIf *tracer : tracers)
-    task->ttasks.push_back(tracer->registerTask(task->getName()));
+    ttaskHolder->ttasks.push_back(tracer->registerTask(name));
 }
 
 /// Called once per actor firing to create a trace task instance in the task instance.
-void TraceableComponent::releaseTask(TaskInstance *taskInstance) {
-  for (TTaskInstance *ttaskInstance : taskInstance->ttaskInstances)
+void TraceableComponent::releaseTask(TTaskHolder *ttaskHolder, TTaskInstanceHolder *ttaskInstanceHolder) {
+  for (TTaskInstance *ttaskInstance : ttaskInstanceHolder->ttaskInstances)
     delete ttaskInstance;
-  taskInstance->ttaskInstances.clear();
-  assert(taskInstance->getPCB()->ttasks.size() == tracers.size());
-  for (int i = 0; i < tracers.size(); ++i)
-    taskInstance->ttaskInstances.push_back(
-        tracers[i]->release(taskInstance->getPCB()->ttasks[i]));
+  ttaskInstanceHolder->ttaskInstances.clear();
+  assert(ttaskHolder->ttasks.size() == tracers.size());
+  for (unsigned int i = 0; i < tracers.size(); ++i)
+    ttaskInstanceHolder->ttaskInstances.push_back(
+        tracers[i]->release(ttaskHolder->ttasks[i]));
 }
 
 /// Called possibly multiple times to assign the task instance to the resource.
-void TraceableComponent::assignTaskInstance(TaskInstance *taskInstance) {
-  assert(taskInstance->ttaskInstances.size() == tracers.size());
-  for (int i = 0; i < tracers.size(); ++i)
-    tracers[i]->assign(taskInstance->ttaskInstances[i]);
+void TraceableComponent::assignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
+  for (unsigned int i = 0; i < tracers.size(); ++i)
+    tracers[i]->assign(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called possibly multiple times to resign the task instance from the resource.
-void TraceableComponent::resignTaskInstance(TaskInstance *taskInstance) {
-  assert(taskInstance->ttaskInstances.size() == tracers.size());
-  for (int i = 0; i < tracers.size(); ++i)
-    tracers[i]->resign(taskInstance->ttaskInstances[i]);
+void TraceableComponent::resignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
+  for (unsigned int i = 0; i < tracers.size(); ++i)
+    tracers[i]->resign(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called possibly multiple times to indicate that the task is blocked waiting for something.
-void TraceableComponent::blockTaskInstance(TaskInstance *taskInstance) {
-  assert(taskInstance->ttaskInstances.size() == tracers.size());
-  for (int i = 0; i < tracers.size(); ++i)
-    tracers[i]->block(taskInstance->ttaskInstances[i]);
+void TraceableComponent::blockTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
+  for (unsigned int i = 0; i < tracers.size(); ++i)
+    tracers[i]->block(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called once per actor firing to indicate that the DII of the task instance is over.
-void TraceableComponent::finishDiiTaskInstance(TaskInstance *taskInstance) {
-  assert(taskInstance->ttaskInstances.size() == tracers.size());
-  for (int i = 0; i < tracers.size(); ++i)
-    tracers[i]->finishDii(taskInstance->ttaskInstances[i]);
+void TraceableComponent::finishDiiTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
+  for (unsigned int i = 0; i < tracers.size(); ++i)
+    tracers[i]->finishDii(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 /// Called once per actor firing to indicate that the latency of the task instance is over.
-void TraceableComponent::finishLatencyTaskInstance(TaskInstance *taskInstance) {
-  assert(taskInstance->ttaskInstances.size() == tracers.size());
-  for (int i = 0; i < tracers.size(); ++i)
-    tracers[i]->finishLatency(taskInstance->ttaskInstances[i]);
+void TraceableComponent::finishLatencyTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder) {
+  assert(ttaskInstanceHolder->ttaskInstances.size() == tracers.size());
+  for (unsigned int i = 0; i < tracers.size(); ++i)
+    tracers[i]->finishLatency(ttaskInstanceHolder->ttaskInstances[i]);
 }
 
 TraceableComponent::~TraceableComponent() {

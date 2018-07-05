@@ -23,9 +23,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TRACING_TRACEABLECOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_TRACING_TRACEABLECOMPONENT_HPP
 
-#include "../TaskInstance.hpp"
-#include "../ProcessControlBlock.hpp"
-
 #include "TracerIf.hpp"
 
 #include <vector>
@@ -35,32 +32,32 @@ namespace SystemC_VPC { namespace Tracing {
 /// Base class for all components that can have tracers.
 class TraceableComponent {
 public:
-  TraceableComponent();
-
   /// Add a tracer. This must no longer be called after the first task
   /// has been registered via registerTask.
   void addTracer(TracerIf *tracer);
+protected:
+  TraceableComponent();
 
   /// Called once per actor
-  void registerTask(ProcessControlBlock *task);
+  void registerTask(TTaskHolder *ttaskHolder, std::string const &name);
 
   /// Called once per actor firing to create a trace task instance in the task instance.
-  void releaseTask(TaskInstance *taskInstance);
+  void releaseTask(TTaskHolder *ttaskHolder, TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called possibly multiple times to assign the task instance to the resource.
-  void assignTaskInstance(TaskInstance *taskInstance);
+  void assignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called possibly multiple times to resign the task instance from the resource.
-  void resignTaskInstance(TaskInstance *taskInstance);
+  void resignTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called possibly multiple times to indicate that the task is blocked waiting for something.
-  void blockTaskInstance(TaskInstance *taskInstance);
+  void blockTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
-  void finishDiiTaskInstance(TaskInstance *taskInstance);
+  void finishDiiTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
-  void finishLatencyTaskInstance(TaskInstance *taskInstance);
+  void finishLatencyTaskInstance(TTaskInstanceHolder *ttaskInstanceHolder);
 
   ~TraceableComponent();
 private:
