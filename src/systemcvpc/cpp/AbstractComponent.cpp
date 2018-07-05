@@ -34,6 +34,14 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#include "config.h"
+
+#include <systemcvpc/Director.hpp>
+#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/config/VpcTask.hpp>
+#include "config/Mappings.hpp"
+
 #include "AbstractComponent.hpp"
 #include "ProcessControlBlock.hpp"
 #include "ComponentObserver.hpp"
@@ -45,7 +53,9 @@
 
 #include "tracing/TracerIf.hpp"
 
-#include <systemcvpc/Director.hpp>
+#include "ConfigCheck.hpp"
+
+#include <cassert>
 
 namespace SystemC_VPC {
 
@@ -182,24 +192,6 @@ namespace SystemC_VPC {
         }
         return (*pool)[pid];
       }
-
-  /**
-   * \brief Create the process control block.
-   */
-  ProcessControlBlock *AbstractComponent::createPCB(std::string const &taskName) {
-    ProcessControlBlock *pcb = new ProcessControlBlock(this, taskName);
-    sassert(pcbPool.insert(std::make_pair(
-        pcb->getPid(),
-        ProcessControlBlockPtr(pcb))).second);
-    registerTask(pcb, taskName);
-    return pcb;
-  }
-
-  ProcessControlBlock *AbstractComponent::getPCB(ProcessId const pid) const {
-    PCBPool::const_iterator iter = pcbPool.find(pid);
-    assert(iter != pcbPool.end());
-    return iter->second.get();
-  }
 
   void AbstractComponent::setDynamicPriority(std::list<ScheduledTask *> priorityList) {
     throw Config::ConfigException(std::string("Component ") + this->name() +
@@ -341,7 +333,7 @@ namespace SystemC_VPC {
    */
   void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
     componentWakeup = event;
-   }
+  }
 
   /*
    * from ComponentInterface
@@ -349,6 +341,50 @@ namespace SystemC_VPC {
   void AbstractComponent::registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
     //std::cout<<"registerComponentIdle" << std::endl;
     componentIdle = event;
-   }
+  }
+
+  /**
+   * \brief Create the process control block.
+   */
+  ProcessControlBlock *AbstractComponent::createPCB(std::string const &taskName) {
+    ProcessControlBlock *pcb = new ProcessControlBlock(this, taskName);
+    sassert(pcbPool.insert(std::make_pair(
+        pcb->getPid(),
+        ProcessControlBlockPtr(pcb))).second);
+    registerTask(pcb, taskName);
+    return pcb;
+  }
+
+  ProcessControlBlock *AbstractComponent::getPCB(ProcessId const pid) const {
+    PCBPool::const_iterator iter = pcbPool.find(pid);
+    assert(iter != pcbPool.end());
+    return iter->second.get();
+  }
+
+  void AbstractComponent::registerFiringRule(TaskInterface *actor, smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  }
+
+  void AbstractComponent::checkFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  }
+
+  void AbstractComponent::executeFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  }
+
+  /// Called once per actor firing to indicate that the DII of the task instance is over.
+  void AbstractComponent::finishDiiTaskInstance(TaskInstance *taskInstance) {
+    this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
+    if (taskInstance->getBlockEvent().dii.get())
+      taskInstance->getBlockEvent().dii->notify();
+  }
+
+  /// Called once per actor firing to indicate that the latency of the task instance is over.
+  void AbstractComponent::finishLatencyTaskInstance(TaskInstance *taskInstance) {
+    this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);
+    if (taskInstance->getBlockEvent().latency.get())
+      taskInstance->getBlockEvent().latency->notify();
+    // Remember last acknowledged task time
+    Director::getInstance().end = sc_core::sc_time_stamp();
+    taskInstance->release();
+  }
 
 } //namespace SystemC_VPC

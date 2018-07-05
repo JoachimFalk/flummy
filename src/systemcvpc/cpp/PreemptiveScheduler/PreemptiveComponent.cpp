@@ -96,7 +96,7 @@ namespace SystemC_VPC{
         return;
       activeTasks.insert(scheduledTask);
       sc_core::sc_time delta = scheduledTask->getNextReleaseTime() - sc_core::sc_time_stamp();
-      if (getTaskOfTaskInterface(scheduledTask)->isPSM()) {
+      if (getPCBOfTaskInterface(scheduledTask)->getTaskIsPSM()) {
         // PSM tasks are always executed even if the component is in power down mode, i.e.,
         // !this->getCanExecuteTasks().
         if (delta > sc_core::SC_ZERO_TIME) {
@@ -104,7 +104,7 @@ namespace SystemC_VPC{
               TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
           ttReleaseQueuePSMEvent.notify(delta);
         } else {
-          // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+          // This will trigger compute in due time.
           scheduledTask->schedule();
         }
       } else {
@@ -113,7 +113,7 @@ namespace SystemC_VPC{
               TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
           ttReleaseQueueEvent.notify(delta);
         } else {
-          // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+          // This will trigger compute in due time.
           scheduledTask->schedule();
         }
       }
@@ -135,7 +135,7 @@ namespace SystemC_VPC{
       assert(ttReleaseQueue.top().time <= now); // Less than or equal to now due to component power down mode.
       TaskInterface *scheduledTask = ttReleaseQueue.top().node;
       ttReleaseQueue.pop();
-      // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+      // This will trigger compute in due time.
       scheduledTask->schedule();
       if (ttReleaseQueue.empty())
         break;
@@ -273,7 +273,7 @@ namespace SystemC_VPC{
             sassert(activeTasks.erase(scheduledTask) == 1);
             if (scheduledTask->canFire()) {
               sassert(activeTasks.insert(scheduledTask).second);
-              // This will trigger compute(getTaskOfTaskInterface(scheduledTask)) in due time.
+              // This will trigger compute in due time.
               scheduledTask->schedule();
             }
           }
@@ -542,11 +542,8 @@ namespace SystemC_VPC{
           << " at: " << sc_core::sc_time_stamp().to_default_time_units()
           << std::endl);
 
-    //notify(*(task->blockEvent));
     scheduler->removedTask(task);
     finishDiiTaskInstance(task);
-
-    task->getBlockEvent().dii->notify();
 
     if(multiCastGroups.size() != 0 && multiCastGroups.find(task->getProcessId()) != multiCastGroups.end()){
      for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
@@ -556,10 +553,8 @@ namespace SystemC_VPC{
          if(mcgi->task == task){
              for(std::list<TaskInstance*>::iterator tasks_iter = mcgi->additional_tasks->begin();
                  tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
-                 (*tasks_iter)->getBlockEvent().dii->notify();
                  finishDiiTaskInstance(*tasks_iter);
                  finishLatencyTaskInstance(*tasks_iter);
-                 Director::getInstance().signalLatencyEvent((*tasks_iter));
              }
              multiCastGroupInstances.remove(mcgi);
              delete(mcgi->additional_tasks);
@@ -678,7 +673,6 @@ namespace SystemC_VPC{
       //early exit if (Latency-DII) <= 0
       //std::cerr << "Early exit: " << task->getName() << std::endl;
       finishLatencyTaskInstance(task);
-      Director::getInstance().signalLatencyEvent(task);
       return;
     }
     timePcbPair pair;
@@ -719,9 +713,6 @@ namespace SystemC_VPC{
           //<< sc_core::sc_time_stamp() << std::endl;
 
           finishLatencyTaskInstance(front.task);
-
-          // Latency over -> remove Task
-          Director::getInstance().signalLatencyEvent(front.task);
 
           //wait(sc_core::SC_ZERO_TIME);
           pqueue.pop();

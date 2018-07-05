@@ -81,6 +81,7 @@ namespace SystemC_VPC{
   class Director {
     friend class RoundRobinComponent;
     friend class NonPreemptiveComponent;
+    friend class AbstractComponent;
   public:
     bool FALLBACKMODE;
     bool defaultRoute;

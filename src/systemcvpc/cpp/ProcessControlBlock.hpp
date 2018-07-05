@@ -37,13 +37,9 @@
 #ifndef _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP
 #define _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP
 
-#include <systemc>
-
-#include <vector>
-#include <string>
-
-#include <CoSupport/SystemC/systemc_support.hpp>
-#include <CoSupport/Tracing/TaskTracer.hpp>
+#include "PowerMode.hpp"
+#include "FunctionTiming.hpp"
+#include "tracing/TracerIf.hpp"
 
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/datatypes.hpp>
@@ -51,11 +47,13 @@
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
-#include "PowerMode.hpp"
-#include "FunctionTiming.hpp"
-#include "tracing/TracerIf.hpp"
+#include <CoSupport/SystemC/systemc_support.hpp>
+#include <CoSupport/Tracing/TaskTracer.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <systemc>
+
+#include <vector>
+#include <string>
 
 namespace SystemC_VPC {
 
@@ -111,6 +109,10 @@ namespace SystemC_VPC {
     bool                                 psm;
     CoSupport::Tracing::TaskTracer::Ptr  taskTracer;
   };
+
+  static inline
+  ProcessControlBlock *getPCBOfTaskInterface(TaskInterface const *task)
+    { return reinterpret_cast<ProcessControlBlock *>(task->getSchedulerInfo()); }
 
 } // namespace SystemC_VPC
 

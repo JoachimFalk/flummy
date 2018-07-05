@@ -39,12 +39,15 @@
 
 #include "NonPreemptiveComponent.hpp"
 
-#include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
 #include "../diagnostics/DebugOutput.hpp"
 #include "../TaskInstance.hpp"
+
+#include "config.h"
+#include <systemcvpc/ScheduledTask.hpp>
+
 
 #include <list>
 

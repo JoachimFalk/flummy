@@ -448,7 +448,6 @@ namespace SystemC_VPC {
       task.setProcessId( pid );
       task.setScheduledTask(actor);
       task.setName(actor->name());
-      actor->setSchedulerInfo(allocateTask(pid));
     }
 
     VC::VpcTask::Ptr task = VC::getCachedTask(static_cast<ScheduledTask &>(*actor));

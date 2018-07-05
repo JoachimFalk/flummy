@@ -199,6 +199,7 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   ProcessControlBlock *pcb = comp->createPCB(actor->name());
   pcb->configure(actor->name(), true);
   actor->setScheduler(comp);
+  actor->setSchedulerInfo(pcb);
 }
 
 SystemCVPCSimulator systemCVPCSimulator;
