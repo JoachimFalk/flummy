@@ -369,10 +369,10 @@ namespace SystemC_VPC {
   void AbstractComponent::registerFiringRule(TaskInterface *actor, smoc::SimulatorAPI::FiringRuleInterface *fr) {
   }
 
-  void AbstractComponent::checkFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  void AbstractComponent::checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
   }
 
-  void AbstractComponent::executeFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  void AbstractComponent::executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
   }
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
