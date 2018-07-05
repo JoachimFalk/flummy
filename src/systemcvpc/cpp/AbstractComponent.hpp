@@ -193,6 +193,8 @@ namespace SystemC_VPC {
     virtual void executeFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr);
 
   protected:
+    void end_of_elaboration();
+
     /// Called once per actor firing to indicate that the DII of the task instance is over.
     void finishDiiTaskInstance(TaskInstance *taskInstance);
 
