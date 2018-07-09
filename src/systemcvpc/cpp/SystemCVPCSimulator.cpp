@@ -38,6 +38,7 @@
 
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
 #include <smoc/SimulatorAPI/TaskInterface.hpp>
+#include <smoc/SimulatorAPI/PortInterfaces.hpp>
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/Director.hpp>
@@ -69,9 +70,12 @@ public:
   EnablementStatus evaluateOptionsMap(
       boost::program_options::variables_map &vm);
 
-  void simulationEnded();
-
   void registerTask(TaskInterface *task);
+
+  void registerPort(TaskInterface *task, PortInInterface *port);
+  void registerPort(TaskInterface *task, PortOutInterface *port);
+
+  void simulationEnded();
 };
 
 SystemCVPCSimulator::SystemCVPCSimulator() {
@@ -202,6 +206,25 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   pcb->configure(actor->name(), true);
   actor->setScheduler(comp);
   actor->setSchedulerInfo(pcb);
+}
+
+void SystemCVPCSimulator::registerPort(TaskInterface *task, PortInInterface *port) {
+  std::string actorName = task->name();
+  std::string channelName = port->getSource()->name();
+  // FIXME: Should be port not nullptr!
+  port->setSchedulerInfo(SystemC_VPC::Director::getInstance().registerRoute(channelName,
+      actorName, nullptr));
+
+}
+void SystemCVPCSimulator::registerPort(TaskInterface *task, PortOutInterface *port) {
+  std::string actorName = task->name();
+  // FIXME: Routes have to be changed to support multicast themselves.
+  for (ChannelSinkInterface *channelSinkInterface : port->getSinks()) {
+    std::string channelName = channelSinkInterface->name();
+    // FIXME: Should be port not nullptr!
+    port->setSchedulerInfo(SystemC_VPC::Director::getInstance().registerRoute(actorName,
+        channelName, nullptr));
+  }
 }
 
 void SystemCVPCSimulator::simulationEnded() {
