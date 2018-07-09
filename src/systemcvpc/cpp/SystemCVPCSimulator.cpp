@@ -69,6 +69,8 @@ public:
   EnablementStatus evaluateOptionsMap(
       boost::program_options::variables_map &vm);
 
+  void simulationEnded();
+
   void registerTask(TaskInterface *task);
 };
 
@@ -200,6 +202,10 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   pcb->configure(actor->name(), true);
   actor->setScheduler(comp);
   actor->setSchedulerInfo(pcb);
+}
+
+void SystemCVPCSimulator::simulationEnded() {
+  SystemC_VPC::Director::endOfSystemcSimulation();
 }
 
 SystemCVPCSimulator systemCVPCSimulator;
