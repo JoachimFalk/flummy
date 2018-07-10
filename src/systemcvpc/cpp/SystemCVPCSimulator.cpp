@@ -149,6 +149,7 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 #else
     setenv("VPCCONFIGURATION", vpcConfigFile.c_str(), 1);
 #endif // _MSC_VER
+    SystemC_VPC::Director::getInstance().beforeVpcFinalize();
     if (Director::getInstance().FALLBACKMODE) {
       if (getDbgOut().isVisible(Debug::High))
         getDbgOut() << "SystemC_VPC has invalid configuration " << getenv("VPCCONFIGURATION") << " => VPC still off" << std::endl;
@@ -231,6 +232,8 @@ void SystemCVPCSimulator::simulationEnded() {
   SystemC_VPC::Director::endOfSystemcSimulation();
 }
 
-SystemCVPCSimulator systemCVPCSimulator;
-
 } // namespace SystemC_VPC
+
+SystemC_VPC::SystemCVPCSimulator systemCVPCSimulator;
+
+

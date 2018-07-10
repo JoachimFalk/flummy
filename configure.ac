@@ -31,7 +31,7 @@ AC_PROG_CPP
 #AC_PROG_LN_S
 #AC_PROG_MAKE_SET
 
-AC_DISABLE_SHARED
+AC_ENABLE_SHARED
 AC_PROG_LIBTOOL
 
 ACJF_ARG_DEBUG([yes], [], [-DNDEBUG])
@@ -75,6 +75,7 @@ ACJF_CHECK_LIB_COSUPPORT_SMARTPTR
 ACJF_CHECK_LIB_COSUPPORT_SYSTEMC
 ACJF_CHECK_LIB_COSUPPORT_TRACING
 ACJF_CHECK_LIB_COSUPPORT_STREAMS
+ACJF_CHECK_LIB_SYSTEMOC
 
 ### VPC power tracing  ###
 # --enable-power-tracing option
@@ -94,26 +95,6 @@ AM_CONDITIONAL([NO_POWER_SUM], [test x"$enable_power_tracing" = x"no"])
 # consistency for Examples and Testcases
 if test x"$enable_power_tracing" = x"no"; then
   AC_DEFINE([NO_POWER_SUM], [yes], [Define to suppress power tracing for VPC])
-fi
-
-### VPC vcd tracing ###
-# --enable-vcd-tracing option
-AC_ARG_ENABLE(
- [vcd-tracing],
- [[  --enable-vcd-tracing    enable vcd tracing for VPC [default=yes]]],
- [case "$enableval" in
-    yes)  enable_vcd_tracing=yes  ;;
-    no)   enable_vcd_tracing=no   ;;
-    *)    AC_MSG_ERROR(bad value ${enableval} for --enable-vcd-tracing) ;;
-  esac],
- [enable_vcd_tracing=yes #default]
-)
-
-AM_CONDITIONAL([NO_VCD_TRACES], [test x"$enable_vcd_tracing" = x"no"])
-# This is a define for pkginclude/systemcvpc/vpc_config.h to guarantee
-# consistency for Examples and Testcases
-if test x"$enable_vcd_tracing" = x"no"; then
-  AC_DEFINE([NO_VCD_TRACES], [yes], [Define to suppress vcd tracing for VPC])
 fi
 
 AC_CONFIG_FILES(

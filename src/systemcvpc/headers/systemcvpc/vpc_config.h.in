@@ -3,9 +3,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_VPC_CONFIG_H_IN
 #define _INCLUDED_SYSTEMCVPC_VPC_CONFIG_H_IN
 
-/* Define if you want to suppress VCD tracing */
-#undef NO_VCD_TRACES
-
 /* Define if you want to suppress power tracing */
 #undef NO_POWER_SUM
 

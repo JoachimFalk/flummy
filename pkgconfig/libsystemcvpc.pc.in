@@ -22,7 +22,7 @@ Description: Virtual Processing Components for SystemC and SysteMoC
 Version: ${PACKAGE_VERSION}
 URL: http://www12.informatik.uni-erlangen.de/research/systemoc
 #Conflicts: foobar <= 4.5
-Requires: libcosupport-smartptr >= 1.0
+Requires: libcosupport-smartptr >= 1.0 libsystemoc >= 1.0
 Requires.private: libcosupport-systemc >= 1.0 libcosupport-tracing >= 1.0 libcosupport-streams >= 1.0 libcosupport-xerces >= 1.0
 Libs: -L${srctreemode_libdir} ${srctreemode_libdir}/libsystemcvpc.la
 Libs.private: @SYSTEMC_LDFLAGS@ @BOOST_LDFLAGS@ -lsystemc -lboost_filesystem@BOOST_LIBMTPOSTFIX@ -lboost_system@BOOST_LIBMTPOSTFIX@ -ldl
