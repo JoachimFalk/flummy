@@ -328,8 +328,7 @@ namespace SystemC_VPC {
   }
 
   void Director::check(FastLink const *fLink) {
-    if (FALLBACKMODE)
-      return;
+    assert(!FALLBACKMODE);
     TaskInstance *task = preCompute(fLink);
     task->setName(task->getName().append("_check"));
     task->setTimingScale(1);
@@ -341,16 +340,7 @@ namespace SystemC_VPC {
 
   //
   void Director::compute(FastLink const *fLink, EventPair endPair) {
-    if (FALLBACKMODE) {
-      // create Fallback behavior for active and passive mode!
-      if( endPair.dii != NULL )
-        endPair.dii->notify();      // passive mode: notify end
-      if( endPair.latency != NULL )
-        endPair.latency->notify();  // passive mode: notify end
-      // do nothing, just return
-      return;
-    }
-
+    assert(!FALLBACKMODE);
     TaskInstance * task = preCompute(fLink);
     task->setBlockEvent( endPair );
     task->setTimingScale(1);
@@ -364,22 +354,12 @@ namespace SystemC_VPC {
   void Director::read(FastLink const *fLink,
                       size_t quantum,
                       EventPair endPair ) {
-    if (FALLBACKMODE) {
-      // create Fallback behavior for active and passive mode!
-      if( endPair.dii != NULL )
-        endPair.dii->notify();      // passive mode: notify end
-      if( endPair.latency != NULL )
-        endPair.latency->notify();  // passive mode: notify end
-      // do nothing, just return
-      return;
-    }
-
+    assert(!FALLBACKMODE);
     // FIXME: treat quantum
     TaskInstance * task = preCompute(fLink);
     task->setBlockEvent( endPair );
     task->setWrite(false);
     task->setTimingScale(quantum);
-    assert(!FALLBACKMODE);
 
     Delayer* comp = fLink->component;
     comp->compute(task);
@@ -390,22 +370,12 @@ namespace SystemC_VPC {
   void Director::write(FastLink const *fLink,
                        size_t quantum,
                        EventPair endPair ) {
-    if (FALLBACKMODE) {
-      // create Fallback behavior for active and passive mode!
-      if( endPair.dii != NULL )
-        endPair.dii->notify();      // passive mode: notify end
-      if( endPair.latency != NULL )
-        endPair.latency->notify();  // passive mode: notify end
-      // do nothing, just return
-      return;
-    }
-
+    assert(!FALLBACKMODE);
     // FIXME: treat quantum
     TaskInstance * task = preCompute(fLink);
     task->setBlockEvent(endPair);
     task->setWrite(true);
     task->setTimingScale(quantum);
-    assert(!FALLBACKMODE);
 
     Delayer* comp = fLink->component;
     comp->compute(task);
@@ -427,120 +397,6 @@ namespace SystemC_VPC {
     DBG_OUT(" Director::registerComponent(" << comp->getName()
             << ") [" << comp->getComponentId() << "] # " << components.size()
             << std::endl);
-  }
-
-//void Director::finalizeMapping(
-//    TaskInterface       *actor,
-//    std::string   const &actorName,
-//    FunctionNames const &actionNames,
-//    FunctionNames const &guardNames)
-//{
-//  AbstractComponent * comp = static_cast<AbstractComponent *>(actor->getScheduler());
-//
-//  const ProcessId pid = Director::getInstance().getProcessId(actorName);
-//  // Get existing ProcessControlBlock
-//  ProcessControlBlock *pcb = comp->getPCB(pid);
-//
-//  if (!taskPool->contains( pid )) {
-//    TaskInstance &task = taskPool->createObject(pid);
-//    task.setPCB(pcb);
-//    task.setProcessId( pid );
-//    task.setScheduledTask(actor);
-//    task.setName(actor->name());
-//  }
-//
-//  VC::VpcTask::Ptr task = VC::getCachedTask(static_cast<ScheduledTask &>(*actor));
-//
-//  //TODO: VC::Timing -> Timing
-//  const VC::Components & components = VC::getComponents();
-//  BOOST_FOREACH(VC::Components::value_type component_pair, components)
-//  {
-//    std::string componentName = component_pair.first;
-//    VC::Component::Ptr component = component_pair.second;
-//
-//    if (VC::Mappings::isMapped(task, component)) {
-//      VC::TimingsProvider::Ptr provider = component->getTimingsProvider();
-//      pcb->setPriority(task->getPriority());  // GFR BUGFIX
-//      pcb->setTaskIsPSM(task->isPSM());
-//      if (provider->hasDefaultActorTiming(actorName)) {
-//
-//              SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
-//
-//              for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-//              {
-//                      std::string powermode = (*it).first;
-//                      pcb->setTiming(provider->getActionTiming(actorName,powermode));
-//              }
-//
-//      }
-//      BOOST_FOREACH(std::string guard, guardNames)
-//      {
-//        if (provider->hasGuardTimings(guard)) {
-//
-//                SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
-//              for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-//              {
-//                      std::string powermode = (*it).first;
-//                      pcb->setTiming(provider->getGuardTiming(guard,powermode));
-//
-//                      ConfigCheck::configureTiming(pid, guard);
-//              }
-//        }
-//      }
-//      BOOST_FOREACH(std::string action, actionNames)
-//      {
-//        if (provider->hasActionTimings(action)) {
-//
-//                SystemC_VPC::Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
-//                for (SystemC_VPC::Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-//                {
-//                        std::string powermode = (*it).first;
-//                        pcb->setTiming(provider->getActionTiming(action,powermode));
-//                        ConfigCheck::configureTiming(pid, action);
-//                }
-//        }
-//      }
-//    }
-//  }
-////TODO:
-////  p.setPeriod(1);
-////  p.setBaseDelay();
-////  p.setBaseLatency();
-//}
-
-  /**
-   *
-   */ 
-  void Director::registerRoute(Route* route){
-    assert(!FALLBACKMODE);
-    this->registerComponent(route);
-    const std::string & taskName = route->getName();
-//  const std::string & compName = route->getName();
-
-    ProcessId       pid = getProcessId( taskName );
-//  if( pid >= mappings.size() ){
-//    mappings.resize( pid + 100, NULL );
-//  }
-    DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< std::endl);
-
-    if( !taskPool->contains( pid ) ){
-      TaskInstance &task = taskPool->createObject( pid );
-      task.setProcessId( pid );
-      task.setName( taskName );
-    }
-
-//  assert(pid <= mappings.size());
-//  ComponentId cid = this->getComponentId(compName);
-//  Delayer * comp = components[cid];
-
-//  assert( comp != NULL );
-//  mappings[pid] = comp;
-//  const ComponentList& hops = route->getHops();
-//  for(ComponentList::const_iterator iter = hops.begin();
-//      iter != hops.end();
-//      ++iter){
-//    ComponentId hid = this->getComponentId((*iter)->getName());
-//  }
   }
 
   TaskInstance* Director::allocateTask(ProcessId pid){
@@ -725,64 +581,11 @@ namespace SystemC_VPC {
     return !FALLBACKMODE;
   }
 
-//FastLink Director::registerActor(TaskInterface * actor,
-//    std::string actorName,
-//    const FunctionNames &actionNames,
-//    const FunctionNames &guardNames,
-//    const int complexity)
-//{
-//  //TODO: registerActor is called multiple times (for each transition)
-//
-//  //TODO: check if this is really required.
-//  if(FALLBACKMODE) return FastLink();
-//
-//  ProcessId pid = getProcessId(  actorName  );
-//
-//  try {
-//    //injectTaskName(actor, actorName);
-//    finalizeMapping(actor, actorName, actionNames, guardNames);
-//  }catch(std::exception & e){
-//    std::cerr << "Actor registration failed for \"" << actorName <<
-//        "\". Got exception:\n" << e.what() << std::endl;
-//    exit(-1);
-//  }
-//
-//  FunctionIds     actionIds;
-//  FunctionIds     guardIds;
-//
-//  for(FunctionNames::const_iterator iter = actionNames.begin();
-//      iter != actionNames .end();
-//      ++iter){
-//    debugFunctionNames[pid].insert(*iter);
-//    //check if we have timing data for this function in the XML configuration
-//    if (hasFunctionId(*iter)) {
-//      actionIds.push_back( getFunctionId(*iter) );
-//    }
-//    ConfigCheck::modelTiming(pid, *iter);
-//  }
-//  for(FunctionNames::const_iterator iter = guardNames.begin();
-//      iter != guardNames.end();
-//      ++iter){
-//    debugFunctionNames[pid].insert(*iter);
-//    if(hasFunctionId(*iter)){
-//      guardIds.push_back( getFunctionId(*iter) );
-//    }
-//    ConfigCheck::modelTiming(pid, *iter);
-//  }
-//
-//  AbstractComponent *comp =
-//      static_cast<AbstractComponent *>(actor->getScheduler());
-//  assert(comp);
-//  return FastLink(comp, pid, actionIds, guardIds, complexity);
-//}
-
   FastLink *Director::registerRoute(std::string source,
     std::string destination,
     sc_core::sc_port_base * leafPort)
   {
-    //TODO: check if this is really required.
-    if(FALLBACKMODE) return nullptr;
-
+    assert(!FALLBACKMODE);
     ProcessId       pid = getProcessId( source, destination );
     FunctionIds     fids; // empty functionIds
     fids.push_back( getFunctionId("1") );
@@ -802,12 +605,20 @@ namespace SystemC_VPC {
       exit(-1);
     }
 
-    assert( !taskPool->contains(pid) );
-
     VC::Route::Ptr configuredRoute = VC::Routing::get(pid);
-    Route * route = VC::Routing::create(configuredRoute);
+    Route *route = VC::Routing::create(configuredRoute);
 
-    Director::registerRoute(route);
+    this->registerComponent(route);
+    const std::string & taskName = route->getName();
+
+    assert(pid == getProcessId( taskName ));
+    DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< std::endl);
+
+    assert(!taskPool->contains(pid));
+
+    TaskInstance &task = taskPool->createObject( pid );
+    task.setProcessId( pid );
+    task.setName( taskName );
 
     return new FastLink(route, pid, fids, FunctionIds(),0);
   }
