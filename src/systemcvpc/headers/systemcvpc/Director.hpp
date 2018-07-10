@@ -173,12 +173,6 @@ namespace SystemC_VPC{
     void registerComponent(Delayer *comp);
     
     /**
-     * \brief Register a communication route.
-     * \param route the route
-     */
-    void registerRoute(Route *route);
-
-    /**
      * \brief resolve mapping
      */
     const Delayer *getComponent(FastLink const *vpcLink) const ;
