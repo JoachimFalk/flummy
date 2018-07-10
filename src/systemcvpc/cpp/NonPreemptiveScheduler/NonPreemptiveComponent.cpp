@@ -160,7 +160,7 @@ namespace SystemC_VPC {
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
         << " ) at time: " << sc_core::sc_time_stamp()
         << " mode: " << this->getPowerMode()->getName()
-        << " schedTask: " << actualTask->getScheduledTask()
+        << " schedTask: " << actualTask->getPCB()->getScheduledTask()
         << std::endl);
 
     // reset the execution delay
@@ -216,7 +216,7 @@ namespace SystemC_VPC {
           fireStateChanged(ComponentState::IDLE);
         wait(runningTask->getDelay());
         removeTask();
-        TaskInterface *scheduledTask = runningTask->getScheduledTask();
+        TaskInterface *scheduledTask = runningTask->getPCB()->getScheduledTask();
         if (scheduledTask) {
           // The scheduledTask->canFire() method call might call notifyActivation in
           // case that scheduledTask is a periodic actor. For this case, the

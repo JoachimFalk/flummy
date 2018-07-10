@@ -100,8 +100,16 @@ namespace SystemC_VPC {
     std::string const &getName() const
       { return name; }
 
+    void setScheduledTask(TaskInterface * st)
+      { this->scheduledTask = st; }
+    TaskInterface * getScheduledTask()
+      { return this->scheduledTask; }
+    bool hasScheduledTask() const
+      { return this->scheduledTask != NULL; }
+
     ~ProcessControlBlock();
   private:
+    smoc::SimulatorAPI::TaskInterface   *scheduledTask;
     AbstractComponent                   *component;
     std::string                          name;
     ProcessId                            pid;

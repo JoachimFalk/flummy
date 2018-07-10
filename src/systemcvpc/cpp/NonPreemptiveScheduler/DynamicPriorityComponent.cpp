@@ -80,7 +80,7 @@ std::list<ScheduledTask *> DynamicPriorityComponent::getDynamicPriority()
 
 // Implement ComponentInterface
 void DynamicPriorityComponent::scheduleAfterTransition() {
-  yieldTask = selectedTask->getScheduledTask();
+  yieldTask = selectedTask->getPCB()->getScheduledTask();
   assert(yieldTask);
 }
 
@@ -102,7 +102,7 @@ TaskInstance *DynamicPriorityComponent::selectReadyTask() {
     for (std::list<TaskInstance *>::iterator readyTaskIter = readyTasks.begin();
          readyTaskIter != readyTasks.end();
          ++readyTaskIter) {
-      if ((*readyTaskIter)->getScheduledTask() == priorityTask) {
+      if ((*readyTaskIter)->getPCB()->getScheduledTask() == priorityTask) {
         yieldTask    = nullptr;
         selectedTask = *readyTaskIter;
         readyTasks.erase(readyTaskIter);

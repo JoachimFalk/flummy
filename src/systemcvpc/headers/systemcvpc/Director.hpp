@@ -79,9 +79,6 @@ namespace SystemC_VPC{
    * Director reads allocation and binding from file.
    */
   class Director {
-    friend class RoundRobinComponent;
-    friend class NonPreemptiveComponent;
-    friend class AbstractComponent;
   public:
     bool FALLBACKMODE;
     bool defaultRoute;
@@ -193,12 +190,6 @@ namespace SystemC_VPC{
 
     ComponentId getComponentId(std::string component);
 
-//  FastLink registerActor(TaskInterface * actor,
-//                           std::string actorName,
-//                           const FunctionNames& actionNames,
-//                           const FunctionNames& guardNames,
-//                           const int complexity);
-
     FastLink *registerRoute(std::string source, std::string destination,
         sc_core::sc_port_base * leafPort);
 
@@ -233,6 +224,11 @@ namespace SystemC_VPC{
     void beforeVpcFinalize();
     void endOfVpcFinalize();
     bool hasValidConfig() const;
+
+    // time of latest acknowledge simulated task
+    static sc_core::sc_time end;
+
+    std::map<ProcessId, std::set<std::string> > debugFunctionNames;
   private:
 
     TaskInstance *preCompute(FastLink const *fLink);
@@ -240,14 +236,6 @@ namespace SystemC_VPC{
     void  postCompute(TaskInstance *task, EventPair endPair);
 
     void debugUnknownNames( ) const;
-
-//  void assertMapping(ProcessId const pid);
-
-//  void finalizeMapping(
-//       TaskInterface       *actor,
-//       std::string   const &actorName,
-//       FunctionNames const &actionNames,
-//       FunctionNames const &guardNames);
 
     /**
      * Singleton design pattern
@@ -262,20 +250,12 @@ namespace SystemC_VPC{
     typedef std::vector<Delayer* >  Components;
     Components                      components;
     
-//  typedef std::vector<Delayer* >  Mappings;
-//  Mappings                        mappings;
-
     // output file to write result to
     std::string vpc_result_file;
     
-    // time of latest acknowledge simulated task
-    static sc_core::sc_time end;
-
 
     typedef std::map<std::string, ComponentId> ComponentIdMap;
     ComponentIdMap                             componentIdMap;
-
-    std::map<ProcessId, std::set<std::string> > debugFunctionNames;
 
 #ifndef NO_POWER_SUM
     std::ofstream  powerConsStream;
