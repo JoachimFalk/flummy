@@ -36,17 +36,19 @@
 
 #ifndef _INCLUDED_SYSTEMCVPC_STATICROUTE_HPP
 #define _INCLUDED_SYSTEMCVPC_STATICROUTE_HPP
-#include <list>
 
-#include <systemc>
+#include <systemcvpc/config/Route.hpp>
+#include <systemcvpc/EventPair.hpp>
+
+#include "RouteImpl.hpp"
+#include "Director.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
-#include <systemcvpc/config/Route.hpp>
-#include <systemcvpc/EventPair.hpp>
-#include "RouteImpl.hpp"
-#include <systemcvpc/Director.hpp>
+#include <systemc>
+
+#include <list>
 
 namespace SystemC_VPC{
   template<class ROUTE>

@@ -37,15 +37,14 @@
 #ifndef _INCLUDED_SYSTEMCVPC_HYSTERESISLOCALGOVERNOR_HPP
 #define _INCLUDED_SYSTEMCVPC_HYSTERESISLOCALGOVERNOR_HPP
 
-#include <map>
-#include <deque>
-#include <systemc>
+#include "PowerMode.hpp"
+#include "PluggablePowerGovernor.hpp"
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
-#include "PowerMode.hpp"
-#include <systemcvpc/Director.hpp>
-#include "PluggablePowerGovernor.hpp"
+#include <map>
+#include <deque>
+#include <systemc>
 
 namespace SystemC_VPC{
 

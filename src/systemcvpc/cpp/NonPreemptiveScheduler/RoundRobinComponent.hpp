@@ -37,14 +37,13 @@
 #ifndef _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_ROUNDROBINCOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_ROUNDROBINCOMPONENT_HPP
 
-#include "memory.h"
+#include "../AbstractComponent.hpp"
+#include "../Director.hpp"
+
+//#include "memory.h"
 
 #include <vector>
 #include <deque>
-
-#include "../AbstractComponent.hpp"
-
-#include <systemcvpc/Director.hpp>
 
 namespace SystemC_VPC{
 

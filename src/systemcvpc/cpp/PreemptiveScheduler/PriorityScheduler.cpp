@@ -34,11 +34,10 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "PriorityScheduler.hpp"
-#include "PreemptiveComponent.hpp"
-#include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 
+#include "PriorityScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 
 namespace SystemC_VPC{
   void PriorityScheduler::setProperty(const char* key, const char* value){

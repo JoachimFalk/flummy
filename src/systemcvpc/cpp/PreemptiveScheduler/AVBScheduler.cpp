@@ -36,7 +36,7 @@
 
 #include "AVBScheduler.hpp"
 #include "PreemptiveComponent.hpp"
-#include <systemcvpc/Director.hpp>
+
 #include <systemcvpc/datatypes.hpp>
 
 

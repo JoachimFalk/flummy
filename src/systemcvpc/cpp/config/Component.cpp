@@ -38,9 +38,10 @@
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/Director.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/TimingModifier.hpp>
+
+#include "Director.hpp"
 
 #include <boost/shared_ptr.hpp>
 

@@ -39,7 +39,6 @@
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/config/Component.hpp>
 
@@ -47,6 +46,7 @@
 #include "../HysteresisLocalGovernor.hpp"
 #include "../TaskInstance.hpp"
 #include "../DebugOStream.hpp"
+#include "../Director.hpp"
 
 #include <CoSupport/sassert.h>
 

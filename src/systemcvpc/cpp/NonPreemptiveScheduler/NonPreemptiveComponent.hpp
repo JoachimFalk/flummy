@@ -42,7 +42,6 @@
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/Director.hpp>
 #include <systemcvpc/config/Component.hpp>
 
 #include "../AbstractComponent.hpp"
@@ -51,6 +50,7 @@
 #include "../PowerSumming.hpp"
 #include "../PowerMode.hpp"
 #include "../TaskInstance.hpp"
+#include "../Director.hpp"
 #include "../tracing/TracerIf.hpp"
 #include "../timetriggered/tt_support.hpp"
 

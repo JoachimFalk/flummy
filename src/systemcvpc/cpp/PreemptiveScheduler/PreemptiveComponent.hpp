@@ -40,13 +40,13 @@
 #include <systemcvpc/vpc_config.h>
 #include <systemcvpc/config/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/Director.hpp>
 
 #include "Scheduler.hpp"
 #include "../AbstractComponent.hpp"
 #include "../ComponentInfo.hpp"
 #include "../PowerMode.hpp"
 #include "../PowerSumming.hpp"
+#include "../Director.hpp"
 #include "../timetriggered/tt_support.hpp"
 #include "../tracing/TracerIf.hpp"
 

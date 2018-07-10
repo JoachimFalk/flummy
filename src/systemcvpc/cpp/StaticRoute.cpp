@@ -39,7 +39,7 @@
 
 #include "StaticRoute.hpp"
 #include "RoutePool.hpp"
-#include <systemcvpc/Director.hpp>
+#include "Director.hpp"
 
 #include "DebugOStream.hpp"
 
