@@ -918,11 +918,4 @@ namespace SystemC_VPC {
     }
   }
 
-  /// This stuff is here to pull SystemCVPCSimulator.cpp into the link.
-  class SystemCVPCSimulator;
-  extern SystemCVPCSimulator systemCVPCSimulator;
-  static __attribute__ ((unused))
-  SystemCVPCSimulator *pSimulator = &systemCVPCSimulator;
-
 }
-

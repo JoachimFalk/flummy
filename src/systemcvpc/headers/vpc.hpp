@@ -37,8 +37,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_VPC_HPP
 #define _INCLUDED_SYSTEMCVPC_VPC_HPP
 
-#include <systemcvpc/vpc_config.h>
-#include "systemcvpc/Director.hpp"
-//#include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/config/VpcApi.hpp>
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPC_HPP */
