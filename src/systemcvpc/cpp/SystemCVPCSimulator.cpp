@@ -204,6 +204,7 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
 
   // This should be the first time the actor appeared here.
   ProcessControlBlock *pcb = comp->createPCB(actor->name());
+  pcb->setScheduledTask(actor);
   pcb->configure(actor->name(), true);
   actor->setScheduler(comp);
   actor->setSchedulerInfo(pcb);

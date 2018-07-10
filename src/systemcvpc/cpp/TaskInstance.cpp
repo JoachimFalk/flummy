@@ -58,7 +58,6 @@ namespace SystemC_VPC {
     , name("NN")
     , timingScale(1)
     , taskTracerTicket()
-    , scheduledTask(nullptr)
     , firingRuleInterface(nullptr)
     {}
 

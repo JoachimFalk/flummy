@@ -128,13 +128,6 @@ namespace SystemC_VPC {
     void setTimingScale( double scale )         {this->timingScale = scale;}
     double getTimingScale()                     {return this->timingScale;}
 
-    void setScheduledTask(TaskInterface * st)
-      { this->scheduledTask = st; }
-    TaskInterface * getScheduledTask()
-      { return this->scheduledTask; }
-    bool hasScheduledTask() const
-      { return this->scheduledTask != NULL; }
-
     void setFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr)
       { this->firingRuleInterface = fr; }
     smoc::SimulatorAPI::FiringRuleInterface *getFiringRule()
@@ -197,7 +190,7 @@ namespace SystemC_VPC {
     std::string name;
     double timingScale;
     CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
-    smoc::SimulatorAPI::TaskInterface       *scheduledTask;
+
     smoc::SimulatorAPI::FiringRuleInterface *firingRuleInterface;
   };
 

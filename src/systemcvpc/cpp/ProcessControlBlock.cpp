@@ -50,7 +50,8 @@
 namespace SystemC_VPC{
 
   ProcessControlBlock::ProcessControlBlock(AbstractComponent *component, std::string const &taskName)
-    : component(component)
+    : scheduledTask(nullptr)
+    , component(component)
     , name(taskName)
     , pid(Director::getProcessId(taskName))
     , priority(0)

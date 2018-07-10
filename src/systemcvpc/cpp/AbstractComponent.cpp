@@ -379,13 +379,6 @@ namespace SystemC_VPC {
     assert(actor->getScheduler() == this);
 
     try {
-//    if (!Director::getInstance().taskPool->contains( pid )) {
-//      TaskInstance &task = Director::getInstance().taskPool->createObject(pid);
-//      task.setPCB(pcb);
-//      task.setProcessId( pid );
-//      task.setScheduledTask(actor);
-//      task.setName(actor->name());
-//    }
       Config::VpcTask::Ptr vpcTask = Config::getCachedTask(static_cast<ScheduledTask &>(*actor));
 
       //TODO: Config::Timing -> Timing
@@ -475,7 +468,6 @@ namespace SystemC_VPC {
     TaskInstance taskInstance(nullptr);
     taskInstance.setPCB(pcb);
     taskInstance.setProcessId(fLink->process);
-    taskInstance.setScheduledTask(task);
     taskInstance.setFiringRule(fr);
     taskInstance.setName(task->name()+std::string("_check"));
     taskInstance.setFunctionIds(fLink->actionIds );
@@ -538,7 +530,6 @@ namespace SystemC_VPC {
       TaskInstance *taskInstance = new TaskInstance(nullptr);
       taskInstance->setPCB(pcb);
       taskInstance->setProcessId(fLink->process);
-      taskInstance->setScheduledTask(task);
       taskInstance->setFiringRule(fr);
       taskInstance->setName(task->name());
       taskInstance->setFunctionIds(fLink->actionIds );
