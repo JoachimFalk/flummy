@@ -35,9 +35,6 @@
  */
 
 #include "Mappings.hpp"
-
-#include <systemcvpc/Director.hpp>
-
 #include "../BlockingTransport.hpp"
 #include "../RoutePool.hpp"
 #include "../StaticRoute.hpp"

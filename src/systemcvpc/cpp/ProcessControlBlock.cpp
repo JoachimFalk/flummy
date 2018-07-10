@@ -39,7 +39,8 @@
 
 #include "AbstractComponent.hpp"
 #include "ProcessControlBlock.hpp"
-#include <systemcvpc/Director.hpp>
+#include "Director.hpp"
+
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
 #include <ctime>

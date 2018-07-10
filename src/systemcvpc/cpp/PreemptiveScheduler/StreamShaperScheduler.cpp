@@ -50,10 +50,12 @@
    </component>
 
 */
-#include <systemcvpc/Director.hpp>
-#include <CoSupport/SystemC/algorithm.hpp>
 #include "StreamShaperScheduler.hpp"
 #include "PreemptiveComponent.hpp"
+#include "../Director.hpp"
+
+#include <CoSupport/SystemC/algorithm.hpp>
+
 #include <utility>
 
 namespace SystemC_VPC{

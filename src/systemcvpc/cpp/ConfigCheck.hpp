@@ -37,12 +37,12 @@
 #ifndef _INCLUDED_SYSTEMCVPC_CONFIGCHECK_HPP
 #define _INCLUDED_SYSTEMCVPC_CONFIGCHECK_HPP
 
-#include <systemcvpc/Director.hpp>
+#include <systemcvpc/datatypes.hpp>
 
 #include <systemc>
 
 #include <set>
-#include <iterator>
+#include <map>
 
 namespace SystemC_VPC
 {

@@ -36,8 +36,7 @@
 
 #include "BlockingTransport.hpp"
 #include "RoutePool.hpp"
-#include <systemcvpc/Director.hpp>
-
+#include "Director.hpp"
 #include "DebugOStream.hpp"
 
 namespace SystemC_VPC {

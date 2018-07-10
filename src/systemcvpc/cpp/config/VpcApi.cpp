@@ -39,9 +39,9 @@
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/ConfigException.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
-#include <systemcvpc/Director.hpp>
 
 #include "Mappings.hpp"
+#include "../Director.hpp"
 
 #include <string>
 #include <iostream>

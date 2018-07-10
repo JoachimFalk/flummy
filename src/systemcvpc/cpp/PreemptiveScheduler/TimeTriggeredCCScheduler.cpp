@@ -65,7 +65,7 @@ Sebastian Graf - Mai 2008
 
 #include "TimeTriggeredCCScheduler.hpp"
 #include "PreemptiveComponent.hpp"
-#include <systemcvpc/Director.hpp>
+#include "../Director.hpp"
 
 
 namespace SystemC_VPC{

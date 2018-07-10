@@ -34,31 +34,23 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <iostream>
-#include <limits.h> 
-#include <algorithm>
-#include <cctype>
-#include <string>
-#include <stdlib.h>
-
-#include <systemcvpc/config/common.hpp>
-#include <CoSupport/Tracing/TracingFactory.hpp>
-
-#include "VPCBuilder.hpp"
-#include "VpcDomErrorHandler.hpp"
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/Director.hpp>
+#include <systemcvpc/TimingModifier.hpp>
+#include <systemcvpc/config/common.hpp>
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/Route.hpp>
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
+#include "VPCBuilder.hpp"
+#include "VpcDomErrorHandler.hpp"
+#include "Director.hpp"
 #include "ConfigCheck.hpp"
+#include "DebugOStream.hpp"
 #include "config/Mappings.hpp"
 
 #include <CoSupport/DataTypes/MaybeValue.hpp>
-
-#include <systemcvpc/TimingModifier.hpp>
+#include <CoSupport/Tracing/TracingFactory.hpp>
 
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -78,13 +70,18 @@
 
 #include <boost/filesystem.hpp>
 
+#include <iostream>
+#include <limits.h> 
+#include <algorithm>
+#include <cctype>
+#include <string>
+#include <stdlib.h>
+
 #include <time.h>
 
 #define MAX(x,y) ((x > y) ? x : y)
 
 #include "vpc-dtd.c" // get DTD
-
-#include "DebugOStream.hpp"
 
 namespace SystemC_VPC {
 

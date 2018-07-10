@@ -34,11 +34,10 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "RateMonotonicScheduler.hpp"
-#include "PreemptiveComponent.hpp"
-#include <systemcvpc/Director.hpp>
 #include <systemcvpc/datatypes.hpp>
 
+#include "RateMonotonicScheduler.hpp"
+#include "PreemptiveComponent.hpp"
 
 namespace SystemC_VPC{
   void RateMonotonicScheduler::setProperty(const char* key, const char* value){

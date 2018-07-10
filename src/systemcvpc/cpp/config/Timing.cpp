@@ -35,9 +35,10 @@
  */
 
 #include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/Director.hpp>
-#include <systemcvpc/TimingModifier.hpp>
 #include <systemcvpc/config/ConfigException.hpp>
+#include <systemcvpc/TimingModifier.hpp>
+
+#include "../Director.hpp"
 
 namespace SystemC_VPC
 {

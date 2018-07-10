@@ -38,11 +38,11 @@
 #define _INCLUDED_SYSTEMCVPC_DIRECTOR_HPP
 
 #include <systemcvpc/vpc_config.h>
-#include "FastLink.hpp"
-#include "EventPair.hpp"
-#include "ScheduledTask.hpp"
-#include "InvalidArgumentException.hpp"
-#include "Attribute.hpp"
+#include <systemcvpc/FastLink.hpp>
+#include <systemcvpc/EventPair.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/InvalidArgumentException.hpp>
+#include <systemcvpc/Attribute.hpp>
 
 #include <string>
 #include <map>

@@ -39,11 +39,11 @@
 
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
-#include <systemcvpc/Director.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
 #include "AbstractComponent.hpp"
+#include "Director.hpp"
 #include "ConfigCheck.hpp"
 #include "config/Mappings.hpp"
 #include "DebugOStream.hpp"

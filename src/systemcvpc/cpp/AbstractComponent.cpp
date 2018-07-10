@@ -36,12 +36,12 @@
 
 #include "config.h"
 
-#include <systemcvpc/Director.hpp>
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 #include <systemcvpc/config/VpcTask.hpp>
-#include "config/Mappings.hpp"
 
+#include "config/Mappings.hpp"
+#include "Director.hpp"
 #include "AbstractComponent.hpp"
 #include "ProcessControlBlock.hpp"
 #include "ComponentObserver.hpp"
