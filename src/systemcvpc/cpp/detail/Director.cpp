@@ -94,7 +94,7 @@
 namespace SystemC_VPC { namespace Detail {
 
   namespace {
-    namespace VC = Config;
+    namespace VC = SystemC_VPC;
 
     static
     void injectRoute(std::string src, std::string dest, sc_core::sc_port_base * leafPort)
@@ -123,7 +123,7 @@ namespace SystemC_VPC { namespace Detail {
     }
 
     static
-    AbstractComponent * createComponent(Config::Component::Ptr component) {
+    AbstractComponent * createComponent(SystemC_VPC::Component::Ptr component) {
       AbstractComponent *comp = NULL;
       switch (component->getScheduler()) {
         case VC::Scheduler::FCFS:
@@ -138,31 +138,31 @@ namespace SystemC_VPC { namespace Detail {
         case VC::Scheduler::DynamicPriorityUserYield:
           comp = new DynamicPriorityComponent(component);
           break;
-        case Config::Scheduler::RoundRobin:
+        case SystemC_VPC::Scheduler::RoundRobin:
           comp = new PreemptiveComponent(component, new RoundRobinScheduler());
           break;
-        case Config::Scheduler::StaticPriority:
+        case SystemC_VPC::Scheduler::StaticPriority:
           comp = new PreemptiveComponent(component, new PriorityScheduler());
           break;
-        case Config::Scheduler::RateMonotonic:
+        case SystemC_VPC::Scheduler::RateMonotonic:
           comp = new PreemptiveComponent(component, new RateMonotonicScheduler());
           break;
-        case Config::Scheduler::TDMA:
+        case SystemC_VPC::Scheduler::TDMA:
           comp = new PreemptiveComponent(component, new TDMAScheduler());
           break;
-        case Config::Scheduler::FlexRay:
+        case SystemC_VPC::Scheduler::FlexRay:
           comp = new PreemptiveComponent(component, new FlexRayScheduler());
           break;
-        case Config::Scheduler::AVB:
+        case SystemC_VPC::Scheduler::AVB:
           comp = new PreemptiveComponent(component, new AVBScheduler());
           break;
-        case Config::Scheduler::TTCC:
+        case SystemC_VPC::Scheduler::TTCC:
           comp = new PreemptiveComponent(component, new TimeTriggeredCCScheduler());
           break;
-        case Config::Scheduler::MOST:
+        case SystemC_VPC::Scheduler::MOST:
           comp = new PreemptiveComponent(component, new MostScheduler());
           break;
-        case Config::Scheduler::StreamShaper:
+        case SystemC_VPC::Scheduler::StreamShaper:
           comp = new PreemptiveComponent(component, new StreamShaperScheduler());
           break;
         default:
@@ -170,16 +170,16 @@ namespace SystemC_VPC { namespace Detail {
       }
 
       switch(component->getTracing()){
-        case Config::Traceable::NONE:
+        case SystemC_VPC::Traceable::NONE:
           comp->addTracer(new Tracing::NullTracer(component));
           break;
-        case Config::Traceable::PAJE:
+        case SystemC_VPC::Traceable::PAJE:
           comp->addTracer(new Tracing::PajeTracer(component));
           break;
-        case Config::Traceable::VCD:
+        case SystemC_VPC::Traceable::VCD:
           comp->addTracer(new Tracing::VcdTracer(component));
           break;
-        case Config::Traceable::DB:
+        case SystemC_VPC::Traceable::DB:
           comp->addTracer(new Tracing::DataBaseTracer(component));
           break;
         default:

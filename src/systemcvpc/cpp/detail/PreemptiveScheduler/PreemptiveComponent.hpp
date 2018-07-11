@@ -70,7 +70,7 @@ namespace SystemC_VPC { namespace Detail {
     /**
      * \brief An implementation of AbstractComponent.
      */
-    PreemptiveComponent(Config::Component::Ptr component, Scheduler *scheduler);
+    PreemptiveComponent(SystemC_VPC::Component::Ptr component, Scheduler *scheduler);
 
     /**
      * implementation of AbstractComponent::compute(Task *)
@@ -85,17 +85,17 @@ namespace SystemC_VPC { namespace Detail {
     /**
      *
      */
-    virtual void requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *

@@ -62,7 +62,7 @@ class TaskInstance;
 
 } } // namespace SystemC_VPC::Detail
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 class ComponentInterface {
 public:
@@ -73,8 +73,8 @@ public:
   }
   virtual void changePowerMode(std::string powerMode) = 0;
   virtual bool hasWaitingOrRunningTasks() = 0;
-  virtual void registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event) = 0;
-  virtual void registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event) = 0;
+  virtual void registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event) = 0;
+  virtual void registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event) = 0;
   virtual void setCanExec(bool canExec) = 0;
   virtual void setDynamicPriority(std::list<ScheduledTask *>) = 0;
   virtual std::list<ScheduledTask *> getDynamicPriority() = 0;
@@ -138,6 +138,6 @@ private:
   ComponentInterface::Ptr componentInterface_;
 };
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_COMPONENT_HPP */

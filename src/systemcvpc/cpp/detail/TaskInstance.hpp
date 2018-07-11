@@ -81,7 +81,7 @@ namespace SystemC_VPC { namespace Detail {
     }
 
     void       resetBlockingCompute(){this->setBlockingCompute(NULL);}
-    void       setBlockingCompute(Coupling::VPCEvent::Ptr blocker)
+    void       setBlockingCompute(VPCEvent::Ptr blocker)
       { blockingCompute = blocker; }
     bool       isBlocking()
       { return blockingCompute != NULL; }
@@ -137,7 +137,7 @@ namespace SystemC_VPC { namespace Detail {
     FunctionIds      fid;
     EventPair        blockEvent;
 
-    Coupling::VPCEvent::Ptr blockingCompute;
+    VPCEvent::Ptr blockingCompute;
     bool       blockAck;
     bool       exec;
     bool       write;

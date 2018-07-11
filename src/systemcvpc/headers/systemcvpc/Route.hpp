@@ -53,7 +53,7 @@ namespace SystemC_VPC { namespace Detail {
 
 } } // namespace SystemC_VPC::Detail
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 class RouteInterface
 {
@@ -118,6 +118,6 @@ private:
   RouteInterface::Ptr routeInterface_;
 };
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_ROUTE_HPP */

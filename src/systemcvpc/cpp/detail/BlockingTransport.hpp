@@ -77,7 +77,7 @@ namespace SystemC_VPC { namespace Detail {
 
     const ComponentList& getHops() const;
 
-    BlockingTransport( Config::Route::Ptr configuredRoute );
+    BlockingTransport( SystemC_VPC::Route::Ptr configuredRoute );
 
     BlockingTransport( const BlockingTransport & route );
 
@@ -103,8 +103,8 @@ namespace SystemC_VPC { namespace Detail {
 
     TaskInstance*                                  task;
     EventPair                              taskEvents;
-    Coupling::VPCEvent::Ptr                dummyDii;
-    Coupling::VPCEvent::Ptr                routeLat;
+    VPCEvent::Ptr                dummyDii;
+    VPCEvent::Ptr                routeLat;
     RoutePool<BlockingTransport>          *pool;
 
     // blocking transport has two phases:

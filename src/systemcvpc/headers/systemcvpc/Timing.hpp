@@ -47,7 +47,7 @@
 #include <string>
 #include <map>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 /*
  *
@@ -145,6 +145,6 @@ private:
 
 };
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_TIMING_HPP */

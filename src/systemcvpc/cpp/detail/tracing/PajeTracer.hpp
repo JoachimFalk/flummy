@@ -50,7 +50,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class PajeTracer: public TracerIf {
 public:
-  PajeTracer(Config::Component::Ptr component);
+  PajeTracer(SystemC_VPC::Component::Ptr component);
 
   TTask         *registerTask(std::string const &name);
 

@@ -169,7 +169,7 @@ namespace SystemC_VPC { namespace Detail {
    return rePlaySummarizeFunctionTimes(functions, funcLatencies,funcTimingModifiers);
   }
 
-  void FunctionTiming::setTiming(const Config::Timing& timing){
+  void FunctionTiming::setTiming(const SystemC_VPC::Timing& timing){
     this->addDelay(timing.getFunctionId(),   timing.getDii());
     this->addLatency(timing.getFunctionId(), timing.getLatency());
     this->addTimingModifier(timing.getFunctionId(), timing.getTimingModifier());

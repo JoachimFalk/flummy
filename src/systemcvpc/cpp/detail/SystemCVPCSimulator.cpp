@@ -54,7 +54,7 @@ namespace SystemC_VPC { namespace Detail {
 using namespace smoc::SimulatorAPI;
 
 namespace po = boost::program_options;
-namespace VC = Config;
+namespace VC = SystemC_VPC;
 
 class SystemCVPCSimulator
   : public SimulatorInterface

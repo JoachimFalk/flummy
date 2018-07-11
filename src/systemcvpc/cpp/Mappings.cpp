@@ -41,7 +41,7 @@
 #include "detail/StaticRoute.hpp"
 #include "detail/ProcessControlBlock.hpp"
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 //
 std::map<VpcTask::Ptr, Component::Ptr>& Mappings::getConfiguredMappings()
@@ -175,26 +175,26 @@ void set(const sc_core::sc_port_base *leafPort, Route::Ptr route)
 }
 
 //
-Detail::Route * create(Config::Route::Ptr configuredRoute)
+Detail::Route * create(SystemC_VPC::Route::Ptr configuredRoute)
 {
   Detail::Route * route;
   switch (configuredRoute->getType()) {
     default:
-    case Config::Route::StaticRoute:
+    case SystemC_VPC::Route::StaticRoute:
       {
         Detail::RoutePool<Detail::StaticRoute> * staticRoute = new Detail::RoutePool<Detail::StaticRoute> (configuredRoute);
         route = staticRoute;
         staticRoute->setRouteInterface(&(staticRoute->getPrototype()));
       }
       break;
-    case Config::Route::BlockingTransport:
+    case SystemC_VPC::Route::BlockingTransport:
       route = new Detail::RoutePool<Detail::BlockingTransport> (configuredRoute);
       break;
   }
   std::list<Hop> hops = configuredRoute->getHops();
   for (std::list<Hop>::const_iterator iter = hops.begin(); iter != hops.end(); ++iter) {
-    Config::Component::Ptr component = iter->getComponent();
-    Detail::AbstractComponent * c = Config::Mappings::getComponents()[component];
+    SystemC_VPC::Component::Ptr component = iter->getComponent();
+    Detail::AbstractComponent * c = SystemC_VPC::Mappings::getComponents()[component];
     route->addHop(component->getName(), c);
 
     Detail::ProcessControlBlock *pcb = c->createPCB(route->getName());
@@ -207,4 +207,4 @@ Detail::Route * create(Config::Route::Ptr configuredRoute)
 
 } // namespace Routing
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC

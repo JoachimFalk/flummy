@@ -49,7 +49,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class VcdTracer: public TracerIf {
 public:
-  VcdTracer(Config::Component::Ptr component);
+  VcdTracer(SystemC_VPC::Component::Ptr component);
 
   ~VcdTracer();
 

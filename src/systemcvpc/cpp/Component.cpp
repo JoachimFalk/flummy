@@ -48,7 +48,7 @@
 #include <string>
 #include <set>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 //
 Component::Component(std::string name, Scheduler scheduler) :
@@ -141,10 +141,10 @@ void Component::addAttribute(AttributePtr attribute)
 {
   if (attribute->isType("transaction_delay")) {
     sc_core::sc_time transferDelay = Detail::Director::createSC_Time(attribute->getValue());
-    this->setTransferTiming(Config::Timing(transferDelay));
+    this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
   } else if (attribute->isType("transfer_delay")) {
     sc_core::sc_time transferDelay = Detail::Director::createSC_Time(attribute->getValue());
-    this->setTransferTiming(Config::Timing(transferDelay));
+    this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
   } else if (attribute->isType("transaction")) {
 //  unsigned int transactionSize = 1;
     sc_core::sc_time transferDelay = sc_core::SC_ZERO_TIME;
@@ -156,7 +156,7 @@ void Component::addAttribute(AttributePtr attribute)
 //    transactionSize = atoi(attribute->getParameter("size").c_str());
 //  }
 
-    this->setTransferTiming(Config::Timing(transferDelay));
+    this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
     // FIXME: add transactionSize
 
   } else if (attribute->isType("tracing")) {
@@ -204,4 +204,4 @@ void Component::setDebugFileName(std::string debugFileName)
   this->debugFileName_ = debugFileName;
 }
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC

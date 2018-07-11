@@ -88,7 +88,7 @@ namespace SystemC_VPC { namespace Detail {
   typedef boost::minstd_rand base_generator_type;
 
   //using namespace CoSupport::XML::Xerces;
-  namespace VC = Config;
+  namespace VC = SystemC_VPC;
   namespace fs = boost::filesystem;
 
   using CoSupport::DataTypes::MaybeValue;

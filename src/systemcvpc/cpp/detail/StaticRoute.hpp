@@ -80,7 +80,7 @@ namespace SystemC_VPC { namespace Detail {
 
     const ComponentList& getHops() const;
 
-    StaticRoute( Config::Route::Ptr configuredRoute );
+    StaticRoute( SystemC_VPC::Route::Ptr configuredRoute );
 
     StaticRoute( const StaticRoute & route );
 
@@ -110,8 +110,8 @@ namespace SystemC_VPC { namespace Detail {
     Components                             components;
     TaskInstance                          *task;
     EventPair                              taskEvents;
-    Coupling::VPCEvent::Ptr                dummyDii;
-    Coupling::VPCEvent::Ptr                routeLat;
+    VPCEvent::Ptr                dummyDii;
+    VPCEvent::Ptr                routeLat;
     Components::iterator                   nextHop;
     RoutePool<StaticRoute>                *pool;
   };

@@ -42,7 +42,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 class VpcTask {
 public:
@@ -77,6 +77,6 @@ private:
   bool psm_;
 };
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPCTASK_HPP */

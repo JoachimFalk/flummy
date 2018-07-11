@@ -39,7 +39,7 @@
 
 #include <iostream>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 //
 Hop::Hop(Component::Ptr component) :
@@ -88,7 +88,7 @@ Route::Type Route::parseRouteType(std::string name)
     return BlockingTransport;
   }
 
-  throw Config::ConfigException("Unknown scheduler \"" + name
+  throw SystemC_VPC::ConfigException("Unknown scheduler \"" + name
       + "\" for component: " + name);
   return StaticRoute;
 }
@@ -160,4 +160,4 @@ Hop & Route::addHop(Component::Ptr component)
   return hops_.back();
 }
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC

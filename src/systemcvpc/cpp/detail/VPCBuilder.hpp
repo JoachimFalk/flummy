@@ -186,13 +186,13 @@ namespace SystemC_VPC { namespace Detail {
      * \brief Initialize a component from the configuration file
      * \return pointer to the initialized component
      */
-    Config::Component::Ptr initComponent();
+    SystemC_VPC::Component::Ptr initComponent();
     
     /**
      * \brief Performs initialization of attribute values for a component
      * \param comp specifies the component to set attributes for
      */
-    void initCompAttributes(Config::Component::Ptr comp);
+    void initCompAttributes(SystemC_VPC::Component::Ptr comp);
     
     /**
      * \brief Initializes mapping between tasks and components
@@ -213,7 +213,7 @@ namespace SystemC_VPC { namespace Detail {
     /**
     * \brief Parsing helper for <timing>
     */
-    Config::Timing parseTiming(CX::XN::DOMNode* node);
+    SystemC_VPC::Timing parseTiming(CX::XN::DOMNode* node);
 
     //variables for the generation of random times
     boost::uniform_real<> distribution;

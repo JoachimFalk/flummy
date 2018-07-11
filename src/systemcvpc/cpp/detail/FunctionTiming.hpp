@@ -118,7 +118,7 @@ namespace SystemC_VPC { namespace Detail {
      * \brief set the timing of the instace
 		 * \param timing is the timing to set
      */
-    void setTiming(const Config::Timing& timing);
+    void setTiming(const SystemC_VPC::Timing& timing);
 
     /**
 		 * \brief adds TimingModifiers to the instance

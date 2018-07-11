@@ -40,7 +40,7 @@
 namespace SystemC_VPC { namespace Detail {
 
 DynamicPriorityComponent::DynamicPriorityComponent(
-    Config::Component::Ptr  component, Director *director)
+    SystemC_VPC::Component::Ptr  component, Director *director)
   : NonPreemptiveComponent(component, director)
   , yieldTask(nullptr)
   , selectedTask(nullptr)
@@ -53,11 +53,11 @@ DynamicPriorityComponent::DynamicPriorityComponent(
   size_t fcfsOrder = 0;
 
   // put every task in a priority queue
-  Config::Component::MappedTasks mp = component->getMappedTasks();
-  for (Config::Component::MappedTasks::iterator iter = mp.begin(); iter
+  SystemC_VPC::Component::MappedTasks mp = component->getMappedTasks();
+  for (SystemC_VPC::Component::MappedTasks::iterator iter = mp.begin(); iter
       != mp.end(); ++iter) {
     TaskInterface *actor = *iter;
-    size_t priority = Config::getCachedTask(*actor)->getPriority();
+    size_t priority = SystemC_VPC::getCachedTask(*actor)->getPriority();
     pQueue.push(
         PriorityFcfsElement<TaskInterface*> (priority, fcfsOrder++, actor));
   }

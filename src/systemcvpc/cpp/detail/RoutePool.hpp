@@ -81,13 +81,13 @@ namespace SystemC_VPC { namespace Detail {
       configuredRoute_->routeInterface_=route;
     }
 
-    RoutePool( const Config::Route::Ptr configuredRoute )
+    RoutePool( const SystemC_VPC::Route::Ptr configuredRoute )
       : PrototypedPool<ROUTE>(configuredRoute), Route(configuredRoute)
     {
       configuredRoute_=configuredRoute;
     }
 
-    Config::Route::Ptr configuredRoute_;
+    SystemC_VPC::Route::Ptr configuredRoute_;
   };
 
 } } // namespace SystemC_VPC::Detail

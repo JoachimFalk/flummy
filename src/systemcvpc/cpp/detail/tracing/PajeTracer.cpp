@@ -77,7 +77,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   };
 
 
-  PajeTracer::PajeTracer(Config::Component::Ptr component)
+  PajeTracer::PajeTracer(SystemC_VPC::Component::Ptr component)
       : name_(component->getName()) {
     if (!myPajeTracer){
       myPajeTracer.reset(new CoSupport::Tracing::PajeTracer("paje.trace"));

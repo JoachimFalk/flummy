@@ -39,7 +39,7 @@
 
 #include <string>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 Scheduler parseScheduler(std::string name) {
   if (name == "TDMA") {
@@ -67,8 +67,8 @@ Scheduler parseScheduler(std::string name) {
   } else if (name == "StreamShaper"){
     return Scheduler::StreamShaper;
   } else {
-    throw Config::ConfigException("Unknown scheduler \"" + name + "\"!");
+    throw SystemC_VPC::ConfigException("Unknown scheduler \"" + name + "\"!");
   }
 }
 
-} }  // namespace SystemC_VPC::Config
+}  // namespace SystemC_VPC

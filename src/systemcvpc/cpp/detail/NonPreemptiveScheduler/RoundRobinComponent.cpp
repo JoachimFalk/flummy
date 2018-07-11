@@ -40,7 +40,7 @@
 namespace SystemC_VPC { namespace Detail {
 
 RoundRobinComponent::RoundRobinComponent(
-    Config::Component::Ptr component, Director *director)
+    SystemC_VPC::Component::Ptr component, Director *director)
   : AbstractComponent(component)
   , useActivationCallback(false)
   , actualTask(NULL)
@@ -132,7 +132,7 @@ void RoundRobinComponent::check(TaskInstance *actualTask) {
 /**
  *
  */
-void RoundRobinComponent::requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker) {
+void RoundRobinComponent::requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker) {
 
 
 }
@@ -140,7 +140,7 @@ void RoundRobinComponent::requestBlockingCompute(TaskInstance* task, Coupling::V
 /**
  *
  */
-void RoundRobinComponent::execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker) {
+void RoundRobinComponent::execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker) {
 
 
 }
@@ -148,7 +148,7 @@ void RoundRobinComponent::execBlockingCompute(TaskInstance* task, Coupling::VPCE
 /**
  *
  */
-void RoundRobinComponent::abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker) {
+void RoundRobinComponent::abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker) {
 
 
 }
