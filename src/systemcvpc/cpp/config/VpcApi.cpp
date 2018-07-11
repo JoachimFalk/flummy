@@ -46,10 +46,7 @@
 #include <string>
 #include <iostream>
 
-namespace SystemC_VPC
-{
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 Modifiers & getDistributions()
 {
@@ -235,7 +232,7 @@ void changePowerMode(ScheduledTask & actor,std::string powermode)
 	Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
 	if(component != NULL)
 	{
-		SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+		ComponentInterface* ci = component->getComponentInterface();
 		if(ci != NULL)
 			ci->changePowerMode(powermode);
 	}
@@ -253,7 +250,7 @@ bool hasWaitingOrRunningTasks(ScheduledTask & actor){
    Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
    if(component != NULL)
    {
-           SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+           ComponentInterface* ci = component->getComponentInterface();
            if(ci != NULL)
                  return ci->hasWaitingOrRunningTasks();
    }
@@ -269,7 +266,7 @@ void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr  event){
   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
   if(component != NULL)
   {
-          SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+          ComponentInterface* ci = component->getComponentInterface();
           if(ci != NULL)
                   ci->registerComponentWakeup(getCachedTask(actor)->getActor(), event);
   }
@@ -284,7 +281,7 @@ void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr  event){
   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
   if(component != NULL)
   {
-          SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+          ComponentInterface* ci = component->getComponentInterface();
           if(ci != NULL)
                   ci->registerComponentIdle(getCachedTask(actor)->getActor(), event);
   }
@@ -297,7 +294,7 @@ void setCanExec(ScheduledTask & actor, bool canExec){
     Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
     if(component != NULL)
     {
-            SystemC_VPC::ComponentInterface* ci = component->getComponentInterface();
+            ComponentInterface* ci = component->getComponentInterface();
             if(ci != NULL)
                     ci->setCanExec(canExec);
     }
@@ -308,5 +305,4 @@ void setActorAsPSM(const char* name, bool psm)
 	  getCachedTask(name)->setActorAsPSM(psm);
 }
 
-} // namespace Config
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config

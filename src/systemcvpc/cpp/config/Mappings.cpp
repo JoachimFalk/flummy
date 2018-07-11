@@ -40,11 +40,7 @@
 #include "../StaticRoute.hpp"
 #include "../ProcessControlBlock.hpp"
 
-namespace SystemC_VPC
-{
-
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 //
 std::map<VpcTask::Ptr, Component::Ptr>& Mappings::getConfiguredMappings()
@@ -209,6 +205,5 @@ SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute)
 }
 
 } // namespace Routing
-} // namespace Config
-} // namespace SystemC_VPC
 
+} } // namespace SystemC_VPC::Config

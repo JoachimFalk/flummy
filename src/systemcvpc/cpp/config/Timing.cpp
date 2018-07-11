@@ -40,11 +40,7 @@
 
 #include "../Director.hpp"
 
-namespace SystemC_VPC
-{
-
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 Timing::Timing(std::string function, sc_core::sc_time dii,
     sc_core::sc_time latency) :
@@ -228,5 +224,4 @@ void DefaultTimingsProvider::addDefaultActorTiming(std::string actorName,Timing 
   functionTimings_[actorName][timing.getPowerMode()] = timing;
 }
 
-} // namespace Config
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config

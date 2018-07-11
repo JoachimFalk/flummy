@@ -43,25 +43,25 @@
 
 #include <string>
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC {
   class Route;
   class StaticRoute;
   template<class ROUTE>
   class RoutePool;
 
-  class RouteInterface
-  {
-  public:
-    typedef RouteInterface* Ptr;
+} // namespace SystemC_VPC
 
-    virtual ~RouteInterface(){}
-    virtual bool addStream(){return false;}
-    virtual bool closeStream(){return false;}
-  };
+namespace SystemC_VPC { namespace Config {
 
-namespace Config
+class RouteInterface
 {
+public:
+  typedef RouteInterface* Ptr;
+
+  virtual ~RouteInterface(){}
+  virtual bool addStream(){return false;}
+  virtual bool closeStream(){return false;}
+};
 
 class Hop
 {
@@ -115,8 +115,7 @@ private:
   Type type_;
   RouteInterface::Ptr routeInterface_;
 };
-} // namespace Config
-}
 
-// namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config
+
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIG_ROUTE_HPP */

@@ -39,11 +39,7 @@
 #include <systemcvpc/config/ConfigException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
-namespace SystemC_VPC
-{
-
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 //
 VpcTask::VpcTask(ScheduledTask & actor) :
@@ -101,5 +97,4 @@ bool VpcTask::isPSM()
 	return this->psm_;
 }
 
-} // namespace Config
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config

@@ -39,10 +39,7 @@
 #include <string>
 #include <iostream>
 
-namespace SystemC_VPC
-{
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 //
 Traceable::Type Traceable::parseTracing(std::string name)
@@ -79,5 +76,4 @@ Traceable::Traceable() :
 {
 }
 
-} // namespace Config
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config
