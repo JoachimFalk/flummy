@@ -37,13 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_FASTLINK_HPP
 #define _INCLUDED_SYSTEMCVPC_FASTLINK_HPP
 
-#include "EventPair.hpp"
-
-#include "datatypes.hpp"
-
-#include <systemc>
-
-#include <vector>
+#include <systemcvpc/EventPair.hpp>
+#include <systemcvpc/datatypes.hpp>
 
 namespace SystemC_VPC{
 
@@ -88,8 +83,6 @@ namespace SystemC_VPC{
     FunctionIds          guardIds;
     int                  complexity;
   };
-
-  static const FunctionId defaultFunctionId = 0;
 }
 
 #endif /* _INCLUDED_SYSTEMCVPC_FASTLINK_HPP */

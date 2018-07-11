@@ -47,6 +47,7 @@
 #include "ComponentObserver.hpp"
 #include "ComponentInfo.hpp"
 #include "HysteresisLocalGovernor.hpp"
+#include "FastLink.hpp"
 
 #include "dynload/dll.hpp"
 #include "PluggablePowerGovernor.hpp"
@@ -478,20 +479,19 @@ namespace SystemC_VPC {
     taskInstance.setFiringRule(fr);
     taskInstance.setName(task->name()+std::string("_check"));
     taskInstance.setFunctionIds(fLink->actionIds );
-    taskInstance.setGuardIds(fLink->guardIds);
-    taskInstance.setFactorOverhead(fLink->complexity);
 
     FunctionTimingPtr timing =
         this->getTiming(this->getPowerMode(), fLink->process);
 
     if(!fLink->guardIds.empty())
-      taskInstance.setOverhead(
+      taskInstance.setDelay(
           timing->getDelay(fLink->guardIds) +
           fLink->complexity * sc_core::sc_time(0.1, sc_core::SC_NS));
     else
-      taskInstance.setOverhead(
+      taskInstance.setDelay(
           fLink->complexity * sc_core::sc_time(0.1, sc_core::SC_NS));
-
+    taskInstance.setRemainingDelay(taskInstance.getDelay());
+    taskInstance.setLatency(taskInstance.getDelay());
     this->check(&taskInstance);
   }
 
@@ -567,8 +567,6 @@ namespace SystemC_VPC {
       taskInstance->setFiringRule(fr);
       taskInstance->setName(task->name());
       taskInstance->setFunctionIds(fLink->actionIds );
-      taskInstance->setGuardIds(fLink->guardIds);
-      taskInstance->setFactorOverhead(fLink->complexity);
       comp->compute(taskInstance);
       delete this;
     }

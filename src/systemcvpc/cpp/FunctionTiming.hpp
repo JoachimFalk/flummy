@@ -37,14 +37,12 @@
 #ifndef _INCLUDED_SYSTEMCVPC_FUNCTIONTIMINGPOOL_HPP
 #define _INCLUDED_SYSTEMCVPC_FUNCTIONTIMINGPOOL_HPP
 
-#include <map>
-#include <boost/shared_ptr.hpp>
-
-#include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/TimingModifier.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 
+#include <boost/shared_ptr.hpp>
+
+#include <map>
 
 namespace SystemC_VPC {
 

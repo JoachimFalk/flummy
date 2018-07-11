@@ -38,11 +38,14 @@
 #define _INCLUDED_SYSTEMCVPC_DIRECTOR_HPP
 
 #include <systemcvpc/vpc_config.h>
-#include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/Attribute.hpp>
+
+#include "FastLink.hpp"
+
+#include <boost/function.hpp>
 
 #include <string>
 #include <map>
@@ -51,8 +54,6 @@
 #include <memory>
 
 #include <stdio.h>
-
-#include <boost/function.hpp>
 
 template <class T> class DLLFactory;
 

@@ -48,6 +48,7 @@
 #include "config/Mappings.hpp"
 #include "DebugOStream.hpp"
 #include "HysteresisLocalGovernor.hpp"
+#include "FastLink.hpp"
 
 #include "NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
 #include "NonPreemptiveScheduler/FcfsComponent.hpp"
@@ -297,8 +298,6 @@ namespace SystemC_VPC {
     try {
       TaskInstance *task = this->allocateTask( fLink->process );
       task->setFunctionIds( fLink->actionIds );
-      task->setGuardIds(fLink->guardIds);
-      task->setFactorOverhead(fLink->complexity);
     
       //HINT: also treat mode!!
       //if( endPair.latency != NULL ) endPair.latency->notify();

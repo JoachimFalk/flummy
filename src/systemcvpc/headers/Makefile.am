@@ -37,7 +37,6 @@ nobase_include_HEADERS = \
 	systemcvpc/coupling/VPCEvent.hpp \
 	systemcvpc/datatypes.hpp \
 	systemcvpc/EventPair.hpp \
-	systemcvpc/FastLink.hpp \
 	systemcvpc/InvalidArgumentException.hpp \
 	systemcvpc/ScheduledTask.hpp \
 	systemcvpc/TimingModifier.hpp \

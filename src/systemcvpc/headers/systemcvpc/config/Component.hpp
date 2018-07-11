@@ -43,9 +43,11 @@
 #include "Timing.hpp"
 #include "../Attribute.hpp"
 #include "../datatypes.hpp"
-#include <CoSupport/SystemC/systemc_support.hpp>
 #include "../TimingModifier.hpp"
 #include "../ScheduledTask.hpp"
+#include "../coupling/VPCEvent.hpp"
+
+#include <CoSupport/SystemC/systemc_support.hpp>
 
 #include <boost/shared_ptr.hpp>
 

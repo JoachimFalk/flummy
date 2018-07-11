@@ -49,6 +49,8 @@ typedef size_t ProcessId;
 typedef size_t                  FunctionId;
 typedef std::vector<FunctionId> FunctionIds;
 
+static const FunctionId defaultFunctionId = 0;
+
 /******************************************************************************
  *
  */
