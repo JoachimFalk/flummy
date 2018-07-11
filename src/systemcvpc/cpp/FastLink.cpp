@@ -38,19 +38,20 @@
 #include "Director.hpp"
 #include "Delayer.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   void FastLink::write( size_t quantum, EventPair p ) const{
-    SystemC_VPC::Director::getInstance()
+    Director::getInstance()
       .write(this, quantum, p );
   }
 
   void FastLink::read( size_t quantum, EventPair p ) const{
-    SystemC_VPC::Director::getInstance()
+    Director::getInstance()
       .read(this, quantum, p );
   }
 
   ComponentId FastLink::getComponentId() const{
     return component->getComponentId();
   }
-}
+
+} } // namespace SystemC_VPC::Detail

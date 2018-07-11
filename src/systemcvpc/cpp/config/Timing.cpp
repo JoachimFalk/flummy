@@ -45,27 +45,27 @@ namespace SystemC_VPC { namespace Config {
 Timing::Timing(std::string function, sc_core::sc_time dii,
     sc_core::sc_time latency) :
   function_(function), dii_(dii), latency_(latency), fid_(
-      Director::createFunctionId(function)), powerMode_("SLOW"),
+      Detail::Director::createFunctionId(function)), powerMode_("SLOW"),
       timingModifier_(new TimingModifier)
 {
 }
 
 Timing::Timing(std::string function, sc_core::sc_time dii) :
   function_(function), dii_(dii), latency_(dii), fid_(
-      Director::createFunctionId(function)), powerMode_("SLOW"),
+      Detail::Director::createFunctionId(function)), powerMode_("SLOW"),
       timingModifier_(new TimingModifier)
 {
 }
 
 Timing::Timing(sc_core::sc_time dii, sc_core::sc_time latency) :
-  function_(""), dii_(dii), latency_(latency), fid_(Director::createFunctionId(
+  function_(""), dii_(dii), latency_(latency), fid_(Detail::Director::createFunctionId(
       "")), powerMode_("SLOW"),timingModifier_(new TimingModifier)
 {
 }
 
 Timing::Timing(sc_core::sc_time dii) :
   function_(""), dii_(dii), latency_(dii),
-      fid_(Director::createFunctionId("")), powerMode_("SLOW"),
+      fid_(Detail::Director::createFunctionId("")), powerMode_("SLOW"),
       timingModifier_(new TimingModifier)
 {
 }
@@ -124,7 +124,7 @@ boost::shared_ptr<TimingModifier> Timing::getTimingModifier() const
 
 void Timing::setFunction(std::string function_)
 {
-  this->fid_ = Director::createFunctionId(function_);
+  this->fid_ = Detail::Director::createFunctionId(function_);
   this->function_ = function_;
 }
 

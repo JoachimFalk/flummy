@@ -46,7 +46,8 @@
 #include <map>
 #include <deque>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class PreemptiveComponent;
 
   class RoundRobinScheduler : public Scheduler{
@@ -79,5 +80,7 @@ namespace SystemC_VPC{
 
     int assignFromFront();
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_ROUNDROBINSCHEDULER_HPP */

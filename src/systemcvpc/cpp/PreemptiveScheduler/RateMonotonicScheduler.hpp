@@ -47,7 +47,8 @@
 #include <queue>
 #include <vector>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class PreemptiveComponent;
 
   struct rm_queue_compare{
@@ -93,5 +94,7 @@ namespace SystemC_VPC{
 
 
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_RATEMONOTONICSCHEDULER_HPP */

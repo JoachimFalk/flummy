@@ -41,11 +41,11 @@
 #include <systemcvpc/config/VpcApi.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/config/Mappings.hpp>
 
 #include "AbstractComponent.hpp"
 #include "Director.hpp"
 #include "ConfigCheck.hpp"
-#include "config/Mappings.hpp"
 #include "DebugOStream.hpp"
 #include "HysteresisLocalGovernor.hpp"
 #include "FastLink.hpp"
@@ -91,7 +91,7 @@
 #include <sstream>
 #include <vector>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   namespace {
     namespace VC = Config;
@@ -705,4 +705,4 @@ namespace SystemC_VPC {
     }
   }
 
-}
+} } // namespace SystemC_VPC::Detail

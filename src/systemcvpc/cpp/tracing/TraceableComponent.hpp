@@ -28,7 +28,7 @@
 #include <vector>
 #include <map>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 /// Base class for all components that can have tracers.
 class TraceableComponent {
@@ -83,6 +83,6 @@ private:
   std::vector<TracerIf *> tracers;
 };
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_TRACEABLECOMPONENT_HPP */

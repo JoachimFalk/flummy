@@ -45,7 +45,7 @@
 #include <map>
 #include <string>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   class ComponentModel;
 
@@ -127,5 +127,7 @@ namespace SystemC_VPC{
       PowerModes     powerModes;
       ComponentModel *model;
   };
-} //namespace SystemC_VPC
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_COMPONENTINFO_HPP */

@@ -43,7 +43,7 @@
 
 #include "DebugOStream.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   //
   void StaticRoute::compute( TaskInstance* _task ) {
@@ -159,4 +159,5 @@ namespace SystemC_VPC {
     components.clear();
     DBG_OUT("StaticRoute::~StaticRoute( )" << std::endl);
   }
-}
+
+} } // namespace SystemC_VPC::Detail

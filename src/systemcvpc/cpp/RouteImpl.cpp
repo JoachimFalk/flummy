@@ -36,7 +36,7 @@
 
 #include "RouteImpl.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   size_t Route::createRouteId(){
     static size_t instanceCounter = 0;
@@ -48,4 +48,4 @@ namespace SystemC_VPC {
     assert(!"Why is this ever called!");
   }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

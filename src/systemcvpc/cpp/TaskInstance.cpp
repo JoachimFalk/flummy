@@ -37,7 +37,7 @@
 #include "TaskInstance.hpp"
 #include "ProcessControlBlock.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   int TaskInstance::globalInstanceId = 0;
 
@@ -78,4 +78,4 @@ namespace SystemC_VPC {
     pcb->getTaskTracer()->finishTaskLatency(taskTracerTicket);
   }
 
-}
+} } // namespace SystemC_VPC::Detail

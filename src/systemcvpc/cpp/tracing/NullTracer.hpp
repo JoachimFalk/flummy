@@ -41,7 +41,7 @@
 
 #include <systemcvpc/config/Component.hpp>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class NullTracer: public TracerIf {
 public:
@@ -63,6 +63,6 @@ public:
   void           finishLatency(TTaskInstance *ttaskInstance);
 };
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_NULLTRACER_HPP */

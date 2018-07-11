@@ -44,7 +44,7 @@
 #include "PowerMode.hpp"
 #include "PluggablePowerGovernor.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   class InternalSelectFastestPowerModeGovernor :
     public PluggableGlobalPowerGovernor
@@ -58,6 +58,7 @@ namespace SystemC_VPC{
     const PowerMode                           *m_lastMode;
     std::map<ComponentInfo*, const PowerMode*> m_components;
   };
-}
+
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_SELECTFASTESTPOWERMODEGLOBALGOVERNOR_HPP */

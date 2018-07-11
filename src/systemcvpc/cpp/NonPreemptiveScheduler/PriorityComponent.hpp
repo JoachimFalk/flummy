@@ -39,8 +39,7 @@
 
 #include "NonPreemptiveComponent.hpp"
 
-namespace SystemC_VPC {
-
+namespace SystemC_VPC { namespace Detail {
 
 class PriorityComponent : public NonPreemptiveComponent {
 public:
@@ -61,6 +60,6 @@ private:
   std::priority_queue<QueueElem>      priorityQueue;
 };
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_PRIORITYCOMPONENT_HPP */

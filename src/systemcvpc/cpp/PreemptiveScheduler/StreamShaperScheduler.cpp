@@ -58,7 +58,7 @@
 
 #include <utility>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   StreamShaperScheduler::StreamShaperScheduler()
     : _properties() {
@@ -156,4 +156,5 @@ namespace SystemC_VPC{
   sc_core::sc_time* StreamShaperScheduler::schedulingOverhead(){
     return NULL; //new sc_core::sc_time(1,sc_core::SC_NS);
   }
-}
+
+} } // namespace SystemC_VPC::Detail

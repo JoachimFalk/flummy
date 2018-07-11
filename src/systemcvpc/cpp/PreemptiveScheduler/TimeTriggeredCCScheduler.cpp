@@ -68,7 +68,7 @@ Sebastian Graf - Mai 2008
 #include "../Director.hpp"
 
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   TimeTriggeredCCScheduler::TimeTriggeredCCScheduler()
     : _properties() {
@@ -437,4 +437,5 @@ namespace SystemC_VPC{
     
     //     return new sc_core::sc_time(1,sc_core::SC_NS);
   }
-}
+
+} } // namespace SystemC_VPC::Detail

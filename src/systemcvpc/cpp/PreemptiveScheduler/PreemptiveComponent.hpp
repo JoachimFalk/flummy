@@ -58,7 +58,7 @@
 #include <deque>
 #include <queue>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -171,6 +171,6 @@ namespace SystemC_VPC {
 
   };
 
-} 
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_PREEMPTIVECOMPONENT_HPP */

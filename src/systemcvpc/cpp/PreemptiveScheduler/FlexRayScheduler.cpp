@@ -78,7 +78,7 @@
 #include "PreemptiveComponent.hpp"
 #include "../Director.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   FlexRayScheduler::FlexRayScheduler()
     : _properties() {
@@ -917,4 +917,5 @@ namespace SystemC_VPC{
     
     //     return new sc_core::sc_time(1,sc_core::SC_NS);
   }
-}
+
+} } // namespace SystemC_VPC::Detail

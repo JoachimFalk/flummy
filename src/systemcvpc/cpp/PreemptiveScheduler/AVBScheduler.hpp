@@ -48,11 +48,10 @@
 #include <queue>
 #include <vector>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class PreemptiveComponent;
   
-
-
   class AVBListEntry{
   public:
     AVBListEntry(){
@@ -173,5 +172,7 @@ namespace SystemC_VPC{
     bool firstrun;
 
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_AVBSCHEDULER_HPP */

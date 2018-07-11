@@ -37,7 +37,7 @@
 #include "config.h"
 #include "DynamicPriorityComponent.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 DynamicPriorityComponent::DynamicPriorityComponent(
     Config::Component::Ptr  component, Director *director)
@@ -138,4 +138,4 @@ void DynamicPriorityComponent::debugDump(const TaskInterface * toBeExecuted) con
   }
 }
 
-} //namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

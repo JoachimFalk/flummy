@@ -40,6 +40,7 @@
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/Route.hpp>
 #include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/config/Mappings.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 
 #include "VPCBuilder.hpp"
@@ -47,7 +48,6 @@
 #include "Director.hpp"
 #include "ConfigCheck.hpp"
 #include "DebugOStream.hpp"
-#include "config/Mappings.hpp"
 
 #include <CoSupport/DataTypes/MaybeValue.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
@@ -83,7 +83,7 @@
 
 #include "vpc-dtd.c" // get DTD
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   typedef boost::minstd_rand base_generator_type;
 
@@ -192,7 +192,7 @@ namespace SystemC_VPC {
       vpcConfigTreeWalker =
         handler.getDocument()->createTreeWalker(
           handler.getDocument()->getDocumentElement(),
-          DOMNodeFilter::SHOW_ELEMENT, 0,
+          CX::XN::DOMNodeFilter::SHOW_ELEMENT, 0,
           true);
 
       vpcConfigTreeWalker->setCurrentNode(
@@ -206,7 +206,7 @@ namespace SystemC_VPC {
           seed.isDefined() ? seed.get() : time(NULL)));
       
       // moves the Treewalker to the first Child 
-      DOMNode* node = vpcConfigTreeWalker->firstChild(); 
+      CX::XN::DOMNode* node = vpcConfigTreeWalker->firstChild();
       // name of xmlTag
       while (node!=0) {
         const CX::XStr xmlName = node->getNodeName();
@@ -248,7 +248,7 @@ namespace SystemC_VPC {
                     const CX::XStr sType =
                       node->getAttributes()->getNamedItem(typeAttrStr)->getNodeValue();
                     CX::XStr sValue = "";
-                    DOMNode * value = node->getAttributes()->getNamedItem(valueAttrStr);
+                    CX::XN::DOMNode * value = node->getAttributes()->getNamedItem(valueAttrStr);
                     if( value  != NULL){
                       sValue=
                         node->getAttributes()->getNamedItem(valueAttrStr)->getNodeValue();
@@ -290,7 +290,7 @@ namespace SystemC_VPC {
 
         }else if( xmlName == resultfileStr ){
            
-           DOMNamedNodeMap * atts=node->getAttributes();
+           CX::XN::DOMNamedNodeMap * atts=node->getAttributes();
            CX::XStr vpc_result_file =
              atts->getNamedItem(nameAttrStr)->getNodeValue();
            this->director->setResultFile(vpc_result_file);
@@ -313,12 +313,12 @@ namespace SystemC_VPC {
 	 **/
   void VPCBuilder::initDistribution(){
 
-    DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
+    CX::XN::DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     
     CX::XStr xmlName=node->getNodeName();
 
     if( xmlName == distributionStr ){
-      DOMNamedNodeMap* atts=node->getAttributes();
+      CX::XN::DOMNamedNodeMap* atts=node->getAttributes();
       CX::NStr sName = atts->getNamedItem(nameAttrStr)->getNodeValue();
       VC::createDistribution(sName,this->parseTimingModifier(node));
     }
@@ -332,13 +332,13 @@ namespace SystemC_VPC {
    */
   VC::Component::Ptr VPCBuilder::initComponent() {
  
-    DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
+    CX::XN::DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     const CX::XStr xmlName = node->getNodeName(); 
 
     // check for component tag
     if( xmlName == VPCBuilder::componentStr ){
       
-      DOMNamedNodeMap* atts = node->getAttributes();
+      CX::XN::DOMNamedNodeMap* atts = node->getAttributes();
   
       CX::XStr sScheduler =
         atts->getNamedItem(VPCBuilder::schedulerAttrStr)->getNodeValue();
@@ -366,14 +366,14 @@ namespace SystemC_VPC {
    * \param node specifies current position within dom tree
    */
   void VPCBuilder::initCompAttributes(VC::Component::Ptr comp){
-    DOMNode* node = this->vpcConfigTreeWalker->firstChild(); 
+    CX::XN::DOMNode* node = this->vpcConfigTreeWalker->firstChild();
     DBG_OUT("VPC> InitAttribute for Component name=" << comp->getName()
          << std::endl);
     if(node != NULL){
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
         const CX::XStr xmlName = node->getNodeName();
-        DOMNamedNodeMap * atts = node->getAttributes();
+        CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
 
         // check if its an attribute to add
         if( xmlName == attributeStr ){
@@ -382,7 +382,7 @@ namespace SystemC_VPC {
           CX::NStr sValue = "";
           CX::NStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
 
-          DOMNode * value = atts->getNamedItem(valueAttrStr);
+          CX::XN::DOMNode * value = atts->getNamedItem(valueAttrStr);
           if( value  != NULL){
             sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
           }
@@ -408,7 +408,7 @@ namespace SystemC_VPC {
   //void VPCBuilder::initMappingAPStruct(DOMNode* node){
   void VPCBuilder::initMappingAPStruct(){
 
-    DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
+    CX::XN::DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
     
     CX::XStr xmlName=node->getNodeName();
 
@@ -416,7 +416,7 @@ namespace SystemC_VPC {
    
     // find mapping tag (not mappings)
     if( xmlName == mappingStr ){
-      DOMNamedNodeMap* atts=node->getAttributes();
+      CX::XN::DOMNamedNodeMap* atts=node->getAttributes();
       CX::NStr sTarget = atts->getNamedItem(targetAttrStr)->getNodeValue();
 
       CX::NStr sSource = atts->getNamedItem(sourceAttrStr)->getNodeValue();
@@ -438,13 +438,13 @@ namespace SystemC_VPC {
           VC::DefaultTimingsProvider::Ptr provider = comp->getDefaultTimingsProvider();
 
           //walk down hierarchy to attributes
-          DOMNode* attnode = node->getFirstChild();
+          CX::XN::DOMNode* attnode = node->getFirstChild();
           
           // find all attributes
           for(; attnode!=NULL; attnode = attnode->getNextSibling()){
 
             xmlName=attnode->getNodeName();
-            DOMNamedNodeMap * atts=attnode->getAttributes();
+            CX::XN::DOMNamedNodeMap * atts=attnode->getAttributes();
 
             if( xmlName == timingStr ){
               try {
@@ -500,11 +500,11 @@ namespace SystemC_VPC {
   }
 
   void VPCBuilder::nextAttribute(SystemC_VPC::AttributePtr attribute,
-                                 DOMNode* node){
+                                 CX::XN::DOMNode* node){
         //walk down hierarchy to attributes             
         for(; node != NULL; node = node->getNextSibling()){
         const CX::XStr xmlName = node->getNodeName();
-        DOMNamedNodeMap * atts = node->getAttributes();
+        CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
                 
         // check if its an attribute to add
         if( xmlName == attributeStr ){
@@ -529,12 +529,12 @@ namespace SystemC_VPC {
      }
   }
 
-  void VPCBuilder::parseTopology( DOMNode* top ){
+  void VPCBuilder::parseTopology(CX::XN::DOMNode* top ){
     // iterate children of <topology>
     try{
       // scan <topology>
-      DOMNamedNodeMap * atts = top->getAttributes();
-      DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
+      CX::XN::DOMNamedNodeMap * atts = top->getAttributes();
+      CX::XN::DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
       bool topologyTracing = (tracingAtt != NULL) &&
           (std::string("true") == CX::NStr(tracingAtt->getNodeValue()) );
 
@@ -542,11 +542,11 @@ namespace SystemC_VPC {
       bool tracingEnabled = false;
 
       // define the empty default route behavior
-      DOMNode    *defaultRouteAttr = atts->getNamedItem(defaultRouteAttrStr);
+      CX::XN::DOMNode    *defaultRouteAttr = atts->getNamedItem(defaultRouteAttrStr);
       director->defaultRoute = (defaultRouteAttr != NULL) &&
           (std::string("ignore") == CX::NStr(defaultRouteAttr->getNodeValue()) );
 
-      for(DOMNode * routeNode = top->getFirstChild();
+      for(CX::XN::DOMNode * routeNode = top->getFirstChild();
           routeNode != NULL;
           routeNode = routeNode->getNextSibling()){
         
@@ -555,7 +555,7 @@ namespace SystemC_VPC {
         if( xmlName == routeStr ){
           
           // scan <route>
-          DOMNamedNodeMap * atts = routeNode->getAttributes();
+          CX::XN::DOMNamedNodeMap * atts = routeNode->getAttributes();
           std::string src = CX::NStr(
             atts->getNamedItem(sourceAttrStr)->getNodeValue() );
           std::string dest = CX::NStr(
@@ -572,7 +572,7 @@ namespace SystemC_VPC {
 
           //copy default value from <route>
           bool tracing = topologyTracing;
-          DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
+          CX::XN::DOMNode    *tracingAtt = atts->getNamedItem(tracingAttrStr);
           if (tracingAtt != NULL){
             tracing = std::string("true") == CX::NStr(tracingAtt->getNodeValue());
           }
@@ -582,7 +582,7 @@ namespace SystemC_VPC {
           route->setTracing(tracing);
 
           // add <hop>s
-          for(DOMNode * hopNode = routeNode->getFirstChild();
+          for(CX::XN::DOMNode * hopNode = routeNode->getFirstChild();
               hopNode != NULL;
               hopNode = hopNode->getNextSibling()){
             const CX::XStr xmlName = hopNode->getNodeName();
@@ -597,11 +597,11 @@ namespace SystemC_VPC {
               VC::Hop &hop = route->addHop( comp );
 
               // parse <timing>s
-              for(DOMNode * timingNode = hopNode->getFirstChild();
+              for(CX::XN::DOMNode * timingNode = hopNode->getFirstChild();
                   timingNode != NULL;
                   timingNode = timingNode->getNextSibling()){
                 const CX::XStr xmlName = timingNode->getNodeName();
-                DOMNamedNodeMap* atts=timingNode->getAttributes();
+                CX::XN::DOMNamedNodeMap* atts=timingNode->getAttributes();
                 if( xmlName == timingStr ){
                   try {
                     VC::Timing t = this->parseTiming( timingNode );
@@ -647,11 +647,11 @@ namespace SystemC_VPC {
   }
 
   //
-  VC::Timing VPCBuilder::parseTiming(DOMNode* node) {
+  VC::Timing VPCBuilder::parseTiming(CX::XN::DOMNode* node) {
     VC::Timing t;
     t.setPowerMode("SLOW");
 
-    DOMNamedNodeMap* atts = node->getAttributes();
+    CX::XN::DOMNamedNodeMap* atts = node->getAttributes();
     if( NULL != atts->getNamedItem(powerModeStr) ) {
       t.setPowerMode(CX::NStr(atts->getNamedItem(powerModeStr)->getNodeValue()));
     }
@@ -660,9 +660,9 @@ namespace SystemC_VPC {
       t.setFunction(attribute);
     }
 
-    DOMNode* dii     = atts->getNamedItem(diiAttrStr);
-    DOMNode* delay   = atts->getNamedItem(delayAttrStr);
-    DOMNode* latency = atts->getNamedItem(latencyAttrStr);
+    CX::XN::DOMNode* dii     = atts->getNamedItem(diiAttrStr);
+    CX::XN::DOMNode* delay   = atts->getNamedItem(delayAttrStr);
+    CX::XN::DOMNode* latency = atts->getNamedItem(latencyAttrStr);
     bool hasDii     = (dii != NULL);
     bool hasDelay   = (delay != NULL);
     bool hasLatency = (latency != NULL);
@@ -676,7 +676,7 @@ namespace SystemC_VPC {
     } else {
       std::string msg("Invalid timing annotation.\n");
       for(unsigned int i=0; i<atts->getLength(); i++){
-        DOMNode* a=atts->item(i);
+        CX::XN::DOMNode* a=atts->item(i);
         CX::XStr val  = a->getNodeValue();
         CX::XStr name = a->getNodeName();
         msg += "timing: " + CX::NStr(name) + " = " + CX::NStr(val) + "\n";
@@ -687,7 +687,7 @@ namespace SystemC_VPC {
     }
 
     //add the distribution to the timing if existant
-    DOMNode* distribution = atts->getNamedItem(distributionAttrStr);
+    CX::XN::DOMNode* distribution = atts->getNamedItem(distributionAttrStr);
     bool hasDistribution = (distribution != NULL);
     if (hasDistribution){
       std::string distr = CX::NStr(distribution->getNodeValue());
@@ -704,20 +704,20 @@ namespace SystemC_VPC {
    * \return pointer to the build timing modifier
    * \throws InvalidArgumentException if parameter are missing or invalid
    */
-  boost::shared_ptr<DistributionTimingModifier> VPCBuilder::parseTimingModifier(DOMNode* node) {
+  boost::shared_ptr<DistributionTimingModifier> VPCBuilder::parseTimingModifier(CX::XN::DOMNode* node) {
     //parse attributes
-    DOMNamedNodeMap* atts = node->getAttributes();
-    DOMNode* min = atts->getNamedItem(minAttrStr);
-    DOMNode* max = atts->getNamedItem(maxAttrStr);
-    DOMNode* parameter1 = atts->getNamedItem(parameter1AttrStr);
-    DOMNode* parameter2 = atts->getNamedItem(parameter2AttrStr);
-    DOMNode* parameter3 = atts->getNamedItem(parameter3AttrStr);
-    DOMNode* seed = atts->getNamedItem(seedAttrStr);
-    DOMNode* data = atts->getNamedItem(dataAttrStr);
-    DOMNode* scale = atts->getNamedItem(scaleAttrStr);
-    DOMNode* fixed = atts->getNamedItem(fixedAttrStr);
-    DOMNode* base = atts->getNamedItem(baseAttrStr);
-    DOMNode* distribution = atts->getNamedItem(typeAttrStr);
+    CX::XN::DOMNamedNodeMap* atts = node->getAttributes();
+    CX::XN::DOMNode* min = atts->getNamedItem(minAttrStr);
+    CX::XN::DOMNode* max = atts->getNamedItem(maxAttrStr);
+    CX::XN::DOMNode* parameter1 = atts->getNamedItem(parameter1AttrStr);
+    CX::XN::DOMNode* parameter2 = atts->getNamedItem(parameter2AttrStr);
+    CX::XN::DOMNode* parameter3 = atts->getNamedItem(parameter3AttrStr);
+    CX::XN::DOMNode* seed = atts->getNamedItem(seedAttrStr);
+    CX::XN::DOMNode* data = atts->getNamedItem(dataAttrStr);
+    CX::XN::DOMNode* scale = atts->getNamedItem(scaleAttrStr);
+    CX::XN::DOMNode* fixed = atts->getNamedItem(fixedAttrStr);
+    CX::XN::DOMNode* base = atts->getNamedItem(baseAttrStr);
+    CX::XN::DOMNode* distribution = atts->getNamedItem(typeAttrStr);
     bool hasMin = (min != NULL);
     bool hasMax = (max != NULL);
     bool hasParameter1 = (parameter1 != NULL);
@@ -1045,4 +1045,4 @@ namespace SystemC_VPC {
     throw InvalidArgumentException("unknown distribution");
   }
 
-}// namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

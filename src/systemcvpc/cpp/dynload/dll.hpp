@@ -48,6 +48,8 @@
 #define DLL_EXPORT extern "C"
 #endif
 
+namespace SystemC_VPC { namespace Detail {
+
 //
 // class DLLManager is the simple ELF C++ Library manager.
 //
@@ -57,7 +59,6 @@
 // You should call LastError() before doing anything.  If it 
 // returns NULL there is no error.
 //
-
 
 class DLLManager
 {
@@ -161,7 +162,6 @@ class DLLFactory : public DLLFactoryBase
 
 
 
-
-
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_DYNLOAD_DLL_HPP */

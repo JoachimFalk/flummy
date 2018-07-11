@@ -41,7 +41,7 @@
 
 #include <systemcvpc/vpc_config.h>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 typedef char trace_value;
 
@@ -242,4 +242,4 @@ void           VcdTracer::finishLatency(TTaskInstance *ttaskInstance) {
 //const_cast<Task *>(task)->traceFinishTaskLatency();
 }
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing

@@ -46,7 +46,7 @@
 #include <deque>
 #include <systemc>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   class InternalLoadHysteresisGovernor : public PluggableLocalPowerGovernor,
                                  public sc_core::sc_module {
@@ -114,6 +114,7 @@ namespace SystemC_VPC{
     sc_core::sc_time fastTime;
     sc_core::sc_time slowTime;
   };
-}
+
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_HYSTERESISLOCALGOVERNOR_HPP */

@@ -40,7 +40,7 @@
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/datatypes.hpp>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   class Delayer;
 
@@ -83,6 +83,7 @@ namespace SystemC_VPC{
     FunctionIds          guardIds;
     int                  complexity;
   };
-}
+
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_FASTLINK_HPP */

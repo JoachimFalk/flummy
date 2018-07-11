@@ -55,12 +55,12 @@
 #include <set>
 #include <string>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 class AbstractComponent;
 class TaskInstance;
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 namespace SystemC_VPC { namespace Config {
 
@@ -125,7 +125,7 @@ public:
   std::string getDebugFileName() const;
   void setDebugFileName(std::string debugFileName);
 private:
-  friend class SystemC_VPC::AbstractComponent;
+  friend class Detail::AbstractComponent;
 
   std::string name_;
   std::string debugFileName_;

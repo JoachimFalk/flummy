@@ -46,7 +46,7 @@
 #include <map>
 #include <string>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class PajeTracer: public TracerIf {
 public:
@@ -77,6 +77,6 @@ private:
   sc_core::sc_time startTime;
 };
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_PAJETRACER_HPP */

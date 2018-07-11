@@ -45,7 +45,7 @@
 #include <vector>
 #include <deque>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
 class RoundRobinComponent : public AbstractComponent {
   SC_HAS_PROCESS(RoundRobinComponent);
@@ -113,6 +113,6 @@ private:
   sc_core::sc_event             readyEvent;
 };
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_ROUNDROBINCOMPONENT_HPP */

@@ -44,7 +44,7 @@
 #include <systemcvpc/config/Route.hpp>
 #include "AbstractComponent.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   typedef std::list<AbstractComponent *> ComponentList;
 
@@ -98,6 +98,6 @@ namespace SystemC_VPC{
     CoSupport::Tracing::PtpTracer::Ticket  ticket;
   };
 
-}
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_ROUTEIMPL_HPP */

@@ -39,10 +39,7 @@
 
 #include <queue>
 
-namespace SystemC_VPC
-{
-namespace TT
-{
+namespace SystemC_VPC { namespace Detail { namespace TT {
 
 /* struct used to store an event with a certain release-time */
 struct TimeNodePair{
@@ -71,6 +68,6 @@ typedef std::priority_queue <TimeNodePair,
                              std::vector<TimeNodePair>,
                              nodeCompare>  TimedQueue;
 
-} // namespace TT
-} // namespace SystemC_VPC
+} } } // namespace SystemC_VPC::Detail::TT
+
 #endif /* _INCLUDED_SYSTEMCVPC_TIMETRIGGERED_TT_SUPPORT_HPP */

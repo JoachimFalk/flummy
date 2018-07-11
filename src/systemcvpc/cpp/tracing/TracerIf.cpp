@@ -22,7 +22,7 @@
 
 #include "TracerIf.hpp"
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 TTask::~TTask() {}
 
@@ -42,4 +42,4 @@ TTaskInstanceHolder::~TTaskInstanceHolder() {
 
 TracerIf::~TracerIf() {}
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing

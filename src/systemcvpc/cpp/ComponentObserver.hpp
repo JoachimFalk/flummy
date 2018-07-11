@@ -39,7 +39,7 @@
 
 #include "ComponentInfo.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   class ComponentObserver
   {
@@ -49,5 +49,7 @@ namespace SystemC_VPC{
     // this callback function shall be called on component state changes
     virtual void notify(ComponentInfo *ci) = 0;
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP */

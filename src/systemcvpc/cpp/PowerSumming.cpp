@@ -39,7 +39,7 @@
 #include "PowerSumming.hpp"
 #include "Director.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
 PowerSumming::PowerSumming(std::ostream &os) :
   m_output(os),
@@ -163,4 +163,4 @@ void PowerSumming::printPowerChange(std::string mode)
 	m_output << timeStamp << '\t' << m_previousPowerSum << '\t' << m_previousEnergySum << '\t'<< mode << std::endl;
 }
 
-} //namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

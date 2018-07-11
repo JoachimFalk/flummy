@@ -47,7 +47,8 @@
 #include <queue>
 #include <vector>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class PreemptiveComponent;
 
   class PriorityScheduler : public Scheduler{
@@ -72,5 +73,7 @@ namespace SystemC_VPC{
     std::priority_queue<p_queue_entry> pqueue;
 
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_PRIORITYSCHEDULER_HPP */

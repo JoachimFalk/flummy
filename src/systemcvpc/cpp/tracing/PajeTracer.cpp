@@ -49,7 +49,7 @@ namespace {
 
 }
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
   class PajeTracer::PajeTask: public TTask {
   public:
@@ -129,4 +129,4 @@ namespace SystemC_VPC { namespace Tracing {
         sc_core::sc_time_stamp());
   }
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing

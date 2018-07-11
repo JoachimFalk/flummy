@@ -39,8 +39,8 @@
 #include <systemcvpc/config/Timing.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
 #include <systemcvpc/config/VpcTask.hpp>
+#include <systemcvpc/config/Mappings.hpp>
 
-#include "config/Mappings.hpp"
 #include "Director.hpp"
 #include "AbstractComponent.hpp"
 #include "ProcessControlBlock.hpp"
@@ -58,7 +58,7 @@
 
 #include <cassert>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   AbstractComponent::Factories AbstractComponent::factories;
 
@@ -723,4 +723,4 @@ namespace SystemC_VPC {
     taskInstance->release();
   }
 
-} //namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

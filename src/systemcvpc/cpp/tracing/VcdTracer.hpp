@@ -45,7 +45,7 @@
 
 #include <string>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class VcdTracer: public TracerIf {
 public:
@@ -77,6 +77,6 @@ private:
 //std::map<std::string, Trace::Tracing*> trace_map_by_name_;
 };
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_VCDTRACER_HPP */

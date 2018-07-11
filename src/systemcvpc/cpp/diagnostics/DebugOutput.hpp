@@ -39,10 +39,8 @@
 
 #include <CoSupport/Streams/AlternateStream.hpp>
 
-namespace SystemC_VPC
-{
-namespace Diagnostics
-{
+//FIXME: There is also DebugOStream.hpp
+namespace SystemC_VPC { namespace Detail { namespace Diagnostics {
 
 class PrintDebug: public CoSupport::Streams::AOStream
 {
@@ -86,6 +84,6 @@ public:
   }
 };
 
-} // SystemC_VPC
-} // Diagnostics
+} } } // namespace SystemC_VPC::Detail::Diagnostics
+
 #endif /* _INCLUDED_SYSTEMCVPC_DIAGNOSTICS_DEBUGOUTPUT_HPP */

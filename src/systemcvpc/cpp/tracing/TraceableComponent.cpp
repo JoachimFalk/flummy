@@ -24,7 +24,7 @@
 
 #include <assert.h>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 TraceableComponent::TraceableComponent()
   : tracingStarted(false) {}
@@ -124,4 +124,4 @@ TraceableComponent::~TraceableComponent() {
   tracers.clear();
 }
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing

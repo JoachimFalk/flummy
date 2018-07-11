@@ -43,8 +43,7 @@
 
 #include "ComponentObserver.hpp"
 
-
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   class PowerSumming : public ComponentObserver
   {
@@ -82,5 +81,7 @@ namespace SystemC_VPC{
     void printPowerChange(std::string mode);
     void calculateNewEnergySum();
   };
-} //namespace SystemC_VPC
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_POWERSUMMING_HPP */

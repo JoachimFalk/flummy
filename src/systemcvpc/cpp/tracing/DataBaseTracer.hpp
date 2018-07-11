@@ -42,7 +42,7 @@
 
 #include <systemcvpc/config/Component.hpp>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class DataBaseTracer: public TracerIf {
 public:
@@ -71,6 +71,6 @@ private:
   std::string    resourceName_;
 };
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_DATABASETRACER_HPP */

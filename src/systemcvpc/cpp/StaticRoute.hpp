@@ -50,7 +50,8 @@
 
 #include <list>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   template<class ROUTE>
   class RoutePool;
 
@@ -114,6 +115,7 @@ namespace SystemC_VPC{
     Components::iterator                   nextHop;
     RoutePool<StaticRoute>                *pool;
   };
-}
+
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_STATICROUTE_HPP */

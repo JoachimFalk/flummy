@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 // Custom data for a tracer in the PCB.
 class TTask {
@@ -100,6 +100,6 @@ public:
   virtual ~TracerIf();
 };
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing
 
 #endif /* _INCLUDED_SYSTEMCVPC_TRACING_TRACERIF_HPP */

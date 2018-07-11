@@ -44,7 +44,7 @@
 
 #include <map>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   typedef std::vector<sc_core::sc_time> FunctionTimes;
   typedef std::vector<boost::shared_ptr<TimingModifier> > FunctionTimingModifiers;
@@ -155,5 +155,6 @@ namespace SystemC_VPC {
   typedef std::map<ProcessId, FunctionTimingPtr>  FunctionTimingPool;
   typedef boost::shared_ptr<FunctionTimingPool> FunctionTimingPoolPtr;
 
-}
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_FUNCTIONTIMINGPOOL_HPP */

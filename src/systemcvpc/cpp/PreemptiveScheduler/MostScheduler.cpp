@@ -51,8 +51,8 @@
  Zeit/Byte		54 ns
  Zeit/Zyklus            20088 ns
  */
-namespace SystemC_VPC
-{
+
+namespace SystemC_VPC { namespace Detail {
 
   MostScheduler::MostScheduler(const char *schedulername) :
     secondaryScheduler()
@@ -386,4 +386,5 @@ namespace SystemC_VPC
             task_to_assign, ready_tasks, running_tasks));
       }
   }
-}
+
+} } // namespace SystemC_VPC::Detail

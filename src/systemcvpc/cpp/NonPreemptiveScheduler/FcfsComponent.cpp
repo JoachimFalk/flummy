@@ -38,7 +38,7 @@
 
 #include "../DebugOStream.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   FcfsComponent::FcfsComponent(Config::Component::Ptr component, Director *director)
     : NonPreemptiveComponent(component, director) {}
@@ -58,4 +58,4 @@ namespace SystemC_VPC{
     return selectedTask;
   }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
