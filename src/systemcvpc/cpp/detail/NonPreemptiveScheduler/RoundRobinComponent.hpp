@@ -50,7 +50,7 @@ namespace SystemC_VPC { namespace Detail {
 class RoundRobinComponent : public AbstractComponent {
   SC_HAS_PROCESS(RoundRobinComponent);
 public:
-  RoundRobinComponent(Config::Component::Ptr component,
+  RoundRobinComponent(SystemC_VPC::Component::Ptr component,
       Director *director = &Director::getInstance());
 
 protected:
@@ -69,17 +69,17 @@ protected:
   /**
    *
    */
-  virtual void requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+  virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
 
   /**
    *
    */
-  virtual void execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+  virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
 
   /**
    *
    */
-  virtual void abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+  virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
 
   /**
    *

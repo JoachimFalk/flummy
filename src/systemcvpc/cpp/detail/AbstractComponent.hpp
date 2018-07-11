@@ -91,7 +91,7 @@ namespace SystemC_VPC { namespace Detail {
     public Delayer,
     private smoc::SimulatorAPI::SchedulerInterface,
     public ComponentModel,
-    public Config::ComponentInterface
+    public SystemC_VPC::ComponentInterface
   {
   public:
     /**
@@ -137,17 +137,17 @@ namespace SystemC_VPC { namespace Detail {
     /**
      *
      */
-    virtual void requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker)=0;
+    virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker)=0;
+    virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker)=0;
+    virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker)=0;
 
     /**
      * 
@@ -176,12 +176,12 @@ namespace SystemC_VPC { namespace Detail {
     /*
      * from ComponentInterface
      */
-    void registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event);
+    void registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event);
 
     /*
      * from ComponentInterface
      */
-    void registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event);
+    void registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event);
 
     /**
      *
@@ -223,7 +223,7 @@ namespace SystemC_VPC { namespace Detail {
     static Factories factories;
     PowerTables powerTables;
 
-    AbstractComponent(Config::Component::Ptr component);
+    AbstractComponent(SystemC_VPC::Component::Ptr component);
 
     MultiCastGroupInstance* getMultiCastGroupInstance(TaskInstance* actualTask);
 
@@ -265,8 +265,8 @@ namespace SystemC_VPC { namespace Detail {
     const PowerMode *powerMode;
     bool canExecuteTasks;
     sc_core::sc_time shutdownRequestAtTime;
-    Coupling::VPCEvent::Ptr componentWakeup;
-    Coupling::VPCEvent::Ptr componentIdle;
+    VPCEvent::Ptr componentWakeup;
+    VPCEvent::Ptr componentIdle;
   };
 
 } } // namespace SystemC_VPC::Detail

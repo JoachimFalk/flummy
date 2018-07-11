@@ -46,7 +46,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 class NullTracer: public TracerIf {
 public:
   //
-  NullTracer(Config::Component::Ptr component);
+  NullTracer(SystemC_VPC::Component::Ptr component);
 
   TTask         *registerTask(std::string const &name);
 

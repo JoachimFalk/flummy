@@ -57,7 +57,7 @@ typedef std::list<TaskInterface *> PriorityList;
 
 class DynamicPriorityComponent: public NonPreemptiveComponent {
 public:
-  DynamicPriorityComponent(Config::Component::Ptr component,
+  DynamicPriorityComponent(SystemC_VPC::Component::Ptr component,
       Director *director = &Director::getInstance());
 
   // Implement ComponentInterface

@@ -55,7 +55,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief An implementation of AbstractComponent.
    */
-  PreemptiveComponent::PreemptiveComponent(Config::Component::Ptr component, Scheduler *scheduler)
+  PreemptiveComponent::PreemptiveComponent(SystemC_VPC::Component::Ptr component, Scheduler *scheduler)
     : AbstractComponent(component)
     , scheduler(scheduler)
     , blockMutex(0)
@@ -563,7 +563,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker){
     task->setExec(false);
     task->setBlockingCompute( blocker );
     this->compute( task );
@@ -572,7 +572,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker){
     task->setExec(true);
     blockCompute.notify();
   }
@@ -581,7 +581,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker){
+  void PreemptiveComponent::abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker){
     task->resetBlockingCompute();
     blockCompute.notify();
   }

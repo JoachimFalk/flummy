@@ -40,7 +40,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
   class ConfigException: public std::runtime_error {
     public:
@@ -48,6 +48,6 @@ namespace SystemC_VPC { namespace Config {
         : std::runtime_error("[VPC] Got Error:\n" + msg) {}
   };
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIGEXCEPTION_HPP */

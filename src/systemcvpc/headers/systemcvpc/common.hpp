@@ -39,7 +39,7 @@
 
 #include <string>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 class Traceable
 {
@@ -60,6 +60,6 @@ private:
   Type tracing_;
 };
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_COMMON_HPP */

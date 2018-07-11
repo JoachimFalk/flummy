@@ -143,7 +143,7 @@ public:
 
 size_t DataBaseTracer::DBTaskInstance::instanceIdCounter = 0;
 
-DataBaseTracer::DataBaseTracer(Config::Component::Ptr component)
+DataBaseTracer::DataBaseTracer(SystemC_VPC::Component::Ptr component)
   : dbProxy_(DataBaseProxy::getDataBaseProxy())
   , resourceName_(component->getName()) {}
 

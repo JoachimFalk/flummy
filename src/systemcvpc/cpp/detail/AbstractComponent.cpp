@@ -193,17 +193,17 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void AbstractComponent::setDynamicPriority(std::list<ScheduledTask *> priorityList) {
-    throw Config::ConfigException(std::string("Component ") + this->name() +
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
         " doesn't support dynamic priorities!");
   }
 
   std::list<ScheduledTask *> AbstractComponent::getDynamicPriority() {
-    throw Config::ConfigException(std::string("Component ") + this->name() +
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
         " doesn't support dynamic priorities!");
   }
 
   void AbstractComponent::scheduleAfterTransition() {
-    throw Config::ConfigException(std::string("Component ") + this->name() +
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
         " doesn't support scheduleAfterTransition()!");
   }
 
@@ -288,7 +288,7 @@ namespace SystemC_VPC { namespace Detail {
     return newInstance;
   }
 
-  AbstractComponent::AbstractComponent(Config::Component::Ptr component)
+  AbstractComponent::AbstractComponent(SystemC_VPC::Component::Ptr component)
     : sc_core::sc_module(sc_core::sc_module_name(component->getName().c_str()))
     , Delayer(component->getComponentId(), component->getName())
     , requestExecuteTasks(false)
@@ -330,14 +330,14 @@ namespace SystemC_VPC { namespace Detail {
   /*
    * from ComponentInterface
    */
-  void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
+  void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event){
     componentWakeup = event;
   }
 
   /*
    * from ComponentInterface
    */
-  void AbstractComponent::registerComponentIdle(const ScheduledTask * actor, Coupling::VPCEvent::Ptr event){
+  void AbstractComponent::registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event){
     //std::cout<<"registerComponentIdle" << std::endl;
     componentIdle = event;
   }
@@ -387,24 +387,24 @@ namespace SystemC_VPC { namespace Detail {
     assert(actor->getScheduler() == this);
 
     try {
-      Config::VpcTask::Ptr vpcTask = Config::getCachedTask(static_cast<ScheduledTask &>(*actor));
+      SystemC_VPC::VpcTask::Ptr vpcTask = SystemC_VPC::getCachedTask(static_cast<ScheduledTask &>(*actor));
 
-      //TODO: Config::Timing -> Timing
-      const Config::Components & components = Config::getComponents();
+      //TODO: SystemC_VPC::Timing -> Timing
+      const SystemC_VPC::Components & components = SystemC_VPC::getComponents();
 
-      for (Config::Components::value_type const &component_pair : components) {
+      for (SystemC_VPC::Components::value_type const &component_pair : components) {
         std::string            componentName = component_pair.first;
-        Config::Component::Ptr component     = component_pair.second;
+        SystemC_VPC::Component::Ptr component     = component_pair.second;
 
-        if (Config::Mappings::isMapped(vpcTask, component)) {
-          Config::TimingsProvider::Ptr provider = component->getTimingsProvider();
+        if (SystemC_VPC::Mappings::isMapped(vpcTask, component)) {
+          SystemC_VPC::TimingsProvider::Ptr provider = component->getTimingsProvider();
           pcb->setPriority(vpcTask->getPriority());  // GFR BUGFIX
           pcb->setTaskIsPSM(vpcTask->isPSM());
           if (provider->hasDefaultActorTiming(actorName)) {
 
-            Config::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
+            SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
 
-            for (Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
+            for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
               std::string powermode = (*it).first;
               pcb->setTiming(provider->getActionTiming(actorName,powermode));
             }
@@ -413,8 +413,8 @@ namespace SystemC_VPC { namespace Detail {
           for (std::string const &guard : guardNames) {
             if (provider->hasGuardTimings(guard)) {
 
-              Config::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
-              for (Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+              SystemC_VPC::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
+              for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
               {
                 std::string powermode = (*it).first;
                 pcb->setTiming(provider->getGuardTiming(guard,powermode));
@@ -426,8 +426,8 @@ namespace SystemC_VPC { namespace Detail {
           for (std::string const &action : actionNames) {
             if (provider->hasActionTimings(action)) {
 
-              Config::functionTimingsPM timingsPM = provider->getActionTimings(action);
-              for (Config::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+              SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(action);
+              for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
               {
                 std::string powermode = (*it).first;
                 pcb->setTiming(provider->getActionTiming(action,powermode));
@@ -509,8 +509,8 @@ namespace SystemC_VPC { namespace Detail {
       , missing(1)
       {}
 
-    Coupling::VPCEvent::Ptr acquireEvent() {
-      Coupling::VPCEvent::Ptr retval(new Coupling::VPCEvent());
+    VPCEvent::Ptr acquireEvent() {
+      VPCEvent::Ptr retval(new VPCEvent());
       retval->addListener(this);
       ++missing;
       return retval;
@@ -652,8 +652,8 @@ namespace SystemC_VPC { namespace Detail {
       , dropped(false)
       {}
 
-    Coupling::VPCEvent::Ptr acquireEvent() {
-      Coupling::VPCEvent::Ptr retval(new Coupling::VPCEvent());
+    VPCEvent::Ptr acquireEvent() {
+      VPCEvent::Ptr retval(new VPCEvent());
       retval->addListener(this);
       ++missing;
       return retval;
@@ -669,7 +669,7 @@ namespace SystemC_VPC { namespace Detail {
     void signaled(EventWaiter *e) {
       assert(*e);
       e->delListener(this);
-      dropped = static_cast<Coupling::VPCEvent *>(e)->getDropped();
+      dropped = static_cast<VPCEvent *>(e)->getDropped();
       if (!--missing)
         write();
     }

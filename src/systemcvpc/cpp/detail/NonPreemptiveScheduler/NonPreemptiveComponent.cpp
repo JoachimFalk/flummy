@@ -44,7 +44,7 @@ namespace SystemC_VPC { namespace Detail {
    *
    */
   NonPreemptiveComponent::NonPreemptiveComponent(
-      Config::Component::Ptr component, Director *director)
+      SystemC_VPC::Component::Ptr component, Director *director)
     : AbstractComponent(component)
     , readyTasks(0)
     , runningTask(NULL)
@@ -350,7 +350,7 @@ void NonPreemptiveComponent::fireStateChanged(const ComponentState &state) {
  *
  */
 void NonPreemptiveComponent::requestBlockingCompute(
-    TaskInstance* task, Coupling::VPCEvent::Ptr blocker)
+    TaskInstance* task, VPCEvent::Ptr blocker)
 {
   task->setExec(false);
   task->setBlockingCompute(blocker);
@@ -361,7 +361,7 @@ void NonPreemptiveComponent::requestBlockingCompute(
  *
  */
 void NonPreemptiveComponent::execBlockingCompute(
-    TaskInstance* task, Coupling::VPCEvent::Ptr blocker)
+    TaskInstance* task, VPCEvent::Ptr blocker)
 {
   task->setExec(true);
   blockCompute.notify();
@@ -371,7 +371,7 @@ void NonPreemptiveComponent::execBlockingCompute(
  *
  */
 void NonPreemptiveComponent::abortBlockingCompute(
-    TaskInstance* task, Coupling::VPCEvent::Ptr blocker)
+    TaskInstance* task, VPCEvent::Ptr blocker)
 {
   task->resetBlockingCompute();
   blockCompute.notify();

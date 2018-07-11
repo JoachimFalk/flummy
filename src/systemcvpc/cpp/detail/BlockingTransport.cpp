@@ -206,11 +206,11 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   //
-  BlockingTransport::BlockingTransport( Config::Route::Ptr configuredRoute )
+  BlockingTransport::BlockingTransport( SystemC_VPC::Route::Ptr configuredRoute )
     : Route(configuredRoute),
       components(),
-      dummyDii(new Coupling::VPCEvent()),
-      routeLat(new Coupling::VPCEvent()),
+      dummyDii(new VPCEvent()),
+      routeLat(new VPCEvent()),
       phase(LOCK_ROUTE)
   {
     routeLat->addListener(this);
@@ -225,8 +225,8 @@ namespace SystemC_VPC { namespace Detail {
     components(),
     task(route.task),
     taskEvents(route.taskEvents),
-    dummyDii(new Coupling::VPCEvent()),
-    routeLat(new Coupling::VPCEvent())
+    dummyDii(new VPCEvent()),
+    routeLat(new VPCEvent())
   {
     DBG_OUT("copy a BlockingTransport orig=" << &route << std::endl);
     routeLat->addListener(this);

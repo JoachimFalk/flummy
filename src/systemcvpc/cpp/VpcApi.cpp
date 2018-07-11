@@ -46,7 +46,7 @@
 #include <string>
 #include <iostream>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 Modifiers & getDistributions()
 {
@@ -258,7 +258,7 @@ bool hasWaitingOrRunningTasks(ScheduledTask & actor){
    return false;
 }
 
-void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr  event){
+void registerComponentWakeup(const char* actor, VPCEvent::Ptr  event){
   if(Detail::Director::getInstance().FALLBACKMODE)
   {
           return;
@@ -272,7 +272,7 @@ void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr  event){
   }
 }
 
-void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr  event){
+void registerComponentIdle(const char* actor, VPCEvent::Ptr  event){
 
   if(Detail::Director::getInstance().FALLBACKMODE)
   {
@@ -305,4 +305,4 @@ void setActorAsPSM(const char* name, bool psm)
 	  getCachedTask(name)->setActorAsPSM(psm);
 }
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC

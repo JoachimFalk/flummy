@@ -39,7 +39,7 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
-namespace SystemC_VPC { namespace Coupling {
+namespace SystemC_VPC {
 
   /*
    * Event used for messages in order to invalidate them in the Component
@@ -76,6 +76,6 @@ namespace SystemC_VPC { namespace Coupling {
     }
   };
 
-} } // namespace SystemC_VPC::Coupling
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPCEVENT_HPP */

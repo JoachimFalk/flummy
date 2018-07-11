@@ -39,7 +39,7 @@
 
 #include <string>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 enum class Scheduler {
   FCFS,
@@ -59,6 +59,6 @@ enum class Scheduler {
 
 Scheduler parseScheduler(std::string name);
 
-} }  // namespace SystemC_VPC::Config
+}  // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_SCHEDULER_HPP */

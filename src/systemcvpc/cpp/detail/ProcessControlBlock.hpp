@@ -80,7 +80,7 @@ namespace SystemC_VPC { namespace Detail {
     CoSupport::Tracing::TaskTracer *getTaskTracer() const
       { return taskTracer.get(); }
 
-    void setTiming(const Config::Timing &timing);
+    void setTiming(const SystemC_VPC::Timing &timing);
 
     ProcessId getPid() const
       { return pid; }

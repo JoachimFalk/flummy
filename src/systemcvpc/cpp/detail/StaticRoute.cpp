@@ -127,10 +127,10 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   //
-  StaticRoute::StaticRoute( Config::Route::Ptr configuredRoute ) :
+  StaticRoute::StaticRoute( SystemC_VPC::Route::Ptr configuredRoute ) :
     Route(configuredRoute),
-    dummyDii(new Coupling::VPCEvent()),
-    routeLat(new Coupling::VPCEvent())
+    dummyDii(new VPCEvent()),
+    routeLat(new VPCEvent())
   {
     routeLat->addListener(this);
     configuredRoute->routeInterface_ = this;
@@ -142,8 +142,8 @@ namespace SystemC_VPC { namespace Detail {
     components(),
     task(route.task),
     taskEvents(route.taskEvents),
-    dummyDii(new Coupling::VPCEvent()),
-    routeLat(new Coupling::VPCEvent())
+    dummyDii(new VPCEvent()),
+    routeLat(new VPCEvent())
   {
     routeLat->addListener(this);
     for(Components::const_iterator iter = route.components.begin();

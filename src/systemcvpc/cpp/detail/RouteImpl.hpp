@@ -51,13 +51,13 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief Interface for classes implementing routing simulation.
    */
-  class Route : public Delayer, public Config::RouteInterface {
+  class Route : public Delayer, public SystemC_VPC::RouteInterface {
   public:
     virtual void addHop(std::string name, AbstractComponent * hop) = 0;
 
     virtual const ComponentList& getHops() const = 0;
 
-    Route(Config::Route::Ptr configuredRoute) : Delayer(
+    Route(SystemC_VPC::Route::Ptr configuredRoute) : Delayer(
         configuredRoute->getComponentId(), configuredRoute->getName()),
         instanceId(createRouteId()),
         ptpTracer()

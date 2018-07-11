@@ -79,17 +79,17 @@ namespace SystemC_VPC { namespace Detail {
     /**
      *
      */
-    virtual void requestBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(TaskInstance* task, Coupling::VPCEvent::Ptr blocker);
+    virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *
@@ -106,7 +106,7 @@ namespace SystemC_VPC { namespace Detail {
      * \brief An implementation of AbstractComponent used together with
      * passive actors and global SMoC v2 Schedulers.
      */
-    NonPreemptiveComponent(Config::Component::Ptr component, Director *director);
+    NonPreemptiveComponent(SystemC_VPC::Component::Ptr component, Director *director);
 
     virtual void newReadyTask(TaskInstance *newTask) = 0;
 

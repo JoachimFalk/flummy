@@ -46,7 +46,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class DataBaseTracer: public TracerIf {
 public:
-  DataBaseTracer(Config::Component::Ptr component);
+  DataBaseTracer(SystemC_VPC::Component::Ptr component);
 
   TTask         *registerTask(std::string const &name);
 

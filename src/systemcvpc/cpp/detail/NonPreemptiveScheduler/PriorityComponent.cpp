@@ -41,7 +41,7 @@
 namespace SystemC_VPC { namespace Detail {
 
 PriorityComponent::PriorityComponent(
-    Config::Component::Ptr component, Director *director)
+    SystemC_VPC::Component::Ptr component, Director *director)
   : NonPreemptiveComponent(component, director)
   , fcfsOrder(0)
 {}

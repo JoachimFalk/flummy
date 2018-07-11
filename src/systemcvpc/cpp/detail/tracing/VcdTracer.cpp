@@ -181,7 +181,7 @@ public:
 std::ostream * Tracing::plainTrace = new CoSupport::Streams::AOStream(std::cout, "vpc.trace", "-");
 #endif // VPC_ENABLE_PLAIN_TRACING
 
-VcdTracer::VcdTracer(Config::Component::Ptr component)
+VcdTracer::VcdTracer(SystemC_VPC::Component::Ptr component)
   : traceFile_(NULL)
   , name_(component->getName())
 {}

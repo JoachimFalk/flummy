@@ -46,7 +46,7 @@
 #include <string>
 #include <map>
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 typedef std::map<std::string, Component::Ptr> Components;
 typedef std::map<std::string, boost::shared_ptr<DistributionTimingModifier> > Modifiers;
@@ -98,9 +98,9 @@ void changePowerMode(ScheduledTask & actor,std::string powermode);
 
 bool hasWaitingOrRunningTasks(ScheduledTask & actor);
 
-void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr event);
+void registerComponentWakeup(const char* actor, VPCEvent::Ptr event);
 
-void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr event);
+void registerComponentIdle(const char* actor, VPCEvent::Ptr event);
 
 void setCanExec(ScheduledTask & actor, bool canExec);
 
@@ -110,6 +110,6 @@ void setCanExec(ScheduledTask & actor, bool canExec);
  */
 void setActorAsPSM(const char*  name, bool psm);
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPCAPI_HPP */

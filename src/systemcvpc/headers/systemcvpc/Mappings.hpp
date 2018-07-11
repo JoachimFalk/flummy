@@ -52,7 +52,7 @@ class Route;
 
 } } // namespace SystemC_VPC::Detail
 
-namespace SystemC_VPC { namespace Config {
+namespace SystemC_VPC {
 
 typedef std::map<const ProcessId, Route::Ptr> Routes;
 typedef std::map<const sc_core::sc_port_base *, Route::Ptr> RoutesByPort;
@@ -80,10 +80,10 @@ namespace Routing
 
   Route::Ptr get(const ProcessId pid);
   Route::Ptr get(const sc_core::sc_port_base * leafPort);
-  Detail::Route * create(Config::Route::Ptr configuredRoute);
+  Detail::Route * create(SystemC_VPC::Route::Ptr configuredRoute);
 
 } // namespace Routing
 
-} } // namespace SystemC_VPC::Config
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_MAPPINGS_HPP */
