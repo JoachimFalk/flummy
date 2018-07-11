@@ -34,8 +34,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/config/ConfigException.hpp>
-#include <systemcvpc/config/Route.hpp>
+#include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/Route.hpp>
 
 #include <iostream>
 

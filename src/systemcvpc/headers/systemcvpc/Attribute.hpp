@@ -37,12 +37,13 @@
 #ifndef _INCLUDED_SYSTEMCVPC_ATTRIBUTE_HPP
 #define _INCLUDED_SYSTEMCVPC_ATTRIBUTE_HPP
 
+#include "InvalidArgumentException.hpp"
+
 #include <boost/shared_ptr.hpp>
 
 #include <deque>
 #include <utility>
 #include <iostream>
-#include "InvalidArgumentException.hpp"
 
 namespace SystemC_VPC {
 

@@ -34,20 +34,90 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_CONFIGEXCEPTION_HPP
-#define _INCLUDED_SYSTEMCVPC_CONFIG_CONFIGEXCEPTION_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_ROUTE_HPP
+#define _INCLUDED_SYSTEMCVPC_ROUTE_HPP
 
-#include <stdexcept>
+#include "datatypes.hpp"
+#include "Component.hpp"
+
+#include <boost/shared_ptr.hpp>
+
 #include <string>
+
+namespace SystemC_VPC { namespace Detail {
+
+  class Route;
+  class StaticRoute;
+  template<class ROUTE>
+  class RoutePool;
+
+} } // namespace SystemC_VPC::Detail
 
 namespace SystemC_VPC { namespace Config {
 
-  class ConfigException: public std::runtime_error {
-    public:
-      ConfigException(std::string const &msg)
-        : std::runtime_error("[VPC] Got Error:\n" + msg) {}
+class RouteInterface
+{
+public:
+  typedef RouteInterface* Ptr;
+
+  virtual ~RouteInterface(){}
+  virtual bool addStream(){return false;}
+  virtual bool closeStream(){return false;}
+};
+
+class Hop
+{
+public:
+  Hop(Component::Ptr component);
+  Hop & setPriority(size_t priority_);
+  Hop & setTransferTiming(Timing transferTiming_);
+  Component::Ptr getComponent() const;
+  size_t getPriority() const;
+  Timing getTransferTiming() const;
+private:
+  Component::Ptr component_;
+  Timing transferTiming_;
+  size_t priority_;
+};
+
+class Route: public SystemC_VPC::SequentiallyIdedObject<ComponentId>
+{
+public:
+  enum Type
+  {
+    StaticRoute, BlockingTransport
   };
+  static Type parseRouteType(std::string name);
+
+  typedef boost::shared_ptr<Route> Ptr;
+
+  Route(Route::Type type, std::string source = "", std::string dest = "");
+  ComponentId getComponentId() const;
+  bool getTracing() const;
+  void setTracing(bool tracing_);
+  Hop & addHop(Component::Ptr component);
+  void addTiming(Component::Ptr hop, Timing);
+  std::string getDestination() const;
+  std::list<Hop> getHops() const;
+  std::string getSource() const;
+  std::string getName() const;
+  Type getType() const;
+  void inject(std::string source, std::string destination);
+  RouteInterface::Ptr getRouteInterface() const;
+private:
+  friend class Detail::Route;
+  friend class Detail::StaticRoute;
+  template<class>
+  friend class Detail::RoutePool;
+  bool tracing_;
+  std::list<Hop> hops_;
+  std::map<Component::Ptr, Timing> routeTimings_;
+  std::string source_;
+  std::string destination_;
+  Type type_;
+  RouteInterface::Ptr routeInterface_;
+};
 
 } } // namespace SystemC_VPC::Config
 
-#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_CONFIGEXCEPTION_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_ROUTE_HPP */

@@ -36,12 +36,12 @@
 
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/TimingModifier.hpp>
-#include <systemcvpc/config/common.hpp>
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/Route.hpp>
-#include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/config/Mappings.hpp>
-#include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/common.hpp>
+#include <systemcvpc/Component.hpp>
+#include <systemcvpc/Route.hpp>
+#include <systemcvpc/Timing.hpp>
+#include <systemcvpc/Mappings.hpp>
+#include <systemcvpc/VpcApi.hpp>
 
 #include "VPCBuilder.hpp"
 #include "VpcDomErrorHandler.hpp"

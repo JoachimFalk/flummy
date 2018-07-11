@@ -34,18 +34,18 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP
-#define _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_COMPONENT_HPP
+#define _INCLUDED_SYSTEMCVPC_COMPONENT_HPP
 
 #include "common.hpp"
 #include "ConfigException.hpp"
 #include "Scheduler.hpp"
 #include "Timing.hpp"
-#include "../Attribute.hpp"
-#include "../datatypes.hpp"
-#include "../TimingModifier.hpp"
-#include "../ScheduledTask.hpp"
-#include "../coupling/VPCEvent.hpp"
+#include "Attribute.hpp"
+#include "datatypes.hpp"
+#include "TimingModifier.hpp"
+#include "ScheduledTask.hpp"
+#include "VPCEvent.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
@@ -140,4 +140,4 @@ private:
 
 } } // namespace SystemC_VPC::Config
 
-#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_COMPONENT_HPP */

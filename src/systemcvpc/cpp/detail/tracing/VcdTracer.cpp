@@ -34,7 +34,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/Component.hpp>
 
 #include "VcdTracer.hpp"
 #include "../TaskInstance.hpp"

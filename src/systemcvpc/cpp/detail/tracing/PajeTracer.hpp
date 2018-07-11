@@ -39,7 +39,7 @@
 
 #include "TracerIf.hpp"
 
-#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/Component.hpp>
 
 #include <CoSupport/Tracing/PajeTracer.hpp>
 

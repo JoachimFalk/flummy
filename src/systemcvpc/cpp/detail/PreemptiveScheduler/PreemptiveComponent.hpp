@@ -38,7 +38,7 @@
 #define _INCLUDED_SYSTEMCVPC_DETAIL_PREEMPTIVESCHEDULER_PREEMPTIVECOMPONENT_HPP
 
 #include <systemcvpc/vpc_config.h>
-#include <systemcvpc/config/Scheduler.hpp>
+#include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/datatypes.hpp>
 
 #include "Scheduler.hpp"

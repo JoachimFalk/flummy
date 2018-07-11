@@ -34,8 +34,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/config/ConfigException.hpp>
+#include <systemcvpc/Timing.hpp>
+#include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/TimingModifier.hpp>
 
 #include "detail/Director.hpp"

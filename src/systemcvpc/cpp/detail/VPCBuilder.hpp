@@ -56,7 +56,7 @@
  */
 
 #include <CoSupport/XML/Xerces/Handler.hpp>
-#include <systemcvpc/config/common.hpp>
+#include <systemcvpc/common.hpp>
 
 #include <map>
 #include <string>
@@ -66,8 +66,8 @@
 
 #include <systemcvpc/InvalidArgumentException.hpp>
 
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/Component.hpp>
+#include <systemcvpc/Timing.hpp>
 #include <systemcvpc/Attribute.hpp>
 
 #include <systemcvpc/TimingModifier.hpp>

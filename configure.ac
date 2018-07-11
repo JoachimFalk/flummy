@@ -8,7 +8,7 @@ AC_INIT(
 AC_PREREQ(2.57)
 ACJF_INIT
 
-AC_CONFIG_SRCDIR([src/systemcvpc/cpp/Director.cpp])
+AC_CONFIG_SRCDIR([src/systemcvpc/cpp/VpcApi.cpp])
 AC_CONFIG_AUX_DIR([../BuildSystem])
 AC_CONFIG_MACRO_DIR([../BuildSystem/m4])
 

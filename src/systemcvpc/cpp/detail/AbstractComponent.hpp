@@ -37,7 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_ABSTRACTCOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_ABSTRACTCOMPONENT_HPP
 
-#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/Component.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Attribute.hpp>
 

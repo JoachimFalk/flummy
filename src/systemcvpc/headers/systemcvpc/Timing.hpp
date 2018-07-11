@@ -34,11 +34,11 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP
-#define _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_TIMING_HPP
+#define _INCLUDED_SYSTEMCVPC_TIMING_HPP
 
-#include "../TimingModifier.hpp"
-#include "../datatypes.hpp"
+#include "TimingModifier.hpp"
+#include "datatypes.hpp"
 
 #include <systemc>
 
@@ -147,4 +147,4 @@ private:
 
 } } // namespace SystemC_VPC::Config
 
-#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_TIMING_HPP */

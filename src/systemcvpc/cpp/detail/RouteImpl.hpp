@@ -41,7 +41,7 @@
 
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
-#include <systemcvpc/config/Route.hpp>
+#include <systemcvpc/Route.hpp>
 #include "AbstractComponent.hpp"
 
 namespace SystemC_VPC { namespace Detail {

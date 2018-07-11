@@ -34,48 +34,32 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_COUPLING_VPCEVENT_HPP
-#define _INCLUDED_SYSTEMCVPC_COUPLING_VPCEVENT_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_COMMON_HPP
+#define _INCLUDED_SYSTEMCVPC_COMMON_HPP
 
-#include <CoSupport/SystemC/systemc_support.hpp>
+#include <string>
 
-namespace SystemC_VPC { namespace Coupling {
+namespace SystemC_VPC { namespace Config {
 
-  /*
-   * Event used for messages in order to invalidate them in the Component
-   */
-  class VPCEvent
-  : public CoSupport::SystemC::RefCountEvent {
-  public:
-    typedef boost::intrusive_ptr<VPCEvent> Ptr;
-    typedef VPCEvent this_type;
-    //if packet is dropped (e.g. packetloss) dropped is set true
-    bool dropped;
-  public:
-    VPCEvent(bool startNotified = false)
-      : CoSupport::SystemC::RefCountEvent(startNotified), dropped(false) {}
-
-    VPCEvent(const Event& e)
-        : CoSupport::SystemC::RefCountEvent(e), dropped(false) {}
-
-    CoSupport::SystemC::EventWaiter *reset(CoSupport::SystemC::EventListener *el = NULL) {
-      dropped = false;
-      return CoSupport::SystemC::RefCountEvent::reset(el);
-    }
-
-    void setDropped(bool drop){
-      dropped = drop;
-    }
-
-    bool getDropped(void){
-      return dropped;
-    }
-
-    bool isDropped(void){
-      return getDropped();
-    }
+class Traceable
+{
+public:
+  enum Type
+  {
+    DB,  // write trace to a database
+    PAJE,// trace to paje file
+    VCD, // trace to vcd file
+    NONE // disable tracing
   };
 
-} } // namespace SystemC_VPC::Coupling
+  static Type parseTracing(std::string name);
+  Traceable();
+  void setTracing(Type tracing);
+  Type getTracing() const;
+private:
+  Type tracing_;
+};
 
-#endif /* _INCLUDED_SYSTEMCVPC_COUPLING_VPCEVENT_HPP */
+} } // namespace SystemC_VPC::Config
+
+#endif /* _INCLUDED_SYSTEMCVPC_COMMON_HPP */
