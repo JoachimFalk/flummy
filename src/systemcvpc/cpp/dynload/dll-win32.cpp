@@ -39,6 +39,8 @@
 #include <iostream>
 #include "dll.hpp"
 
+namespace SystemC_VPC { namespace Detail {
+
 DLLManager::DLLManager( const char *fname )
 {
     // Try to open the library now and get any error message.
@@ -137,5 +139,6 @@ DLLFactoryBase::~DLLFactoryBase()
 {
 }
 
+} } // namespace SystemC_VPC::Detail
 
 #endif /* WIN32 */

@@ -40,7 +40,7 @@
 #include <exception>
 #include <string>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
 
   class InvalidArgumentException: public std::exception{
   
@@ -64,6 +64,6 @@ namespace SystemC_VPC{
     
   };
   
-}
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_INVALIDARGUMENTEXCEPTION_HPP */

@@ -39,7 +39,7 @@
 #include "Director.hpp"
 #include "DebugOStream.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   //
   void BlockingTransport::compute( TaskInstance* _task ) {
@@ -265,4 +265,5 @@ namespace SystemC_VPC {
     phase   = LOCK_ROUTE;
     nextHop = lockList.begin();
   }
-}
+
+} } // namespace SystemC_VPC::Detail

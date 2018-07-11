@@ -39,7 +39,7 @@
 
 #include "NonPreemptiveComponent.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   class FcfsComponent : public NonPreemptiveComponent {
   public:
@@ -57,6 +57,6 @@ namespace SystemC_VPC{
     std::list<TaskInstance *> fcfsQueue;
   };
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_FCFSCOMPONENT_HPP */

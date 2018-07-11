@@ -43,13 +43,14 @@
 
 #include <string>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
+
   class Route;
   class StaticRoute;
   template<class ROUTE>
   class RoutePool;
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 namespace SystemC_VPC { namespace Config {
 
@@ -103,10 +104,10 @@ public:
   void inject(std::string source, std::string destination);
   RouteInterface::Ptr getRouteInterface() const;
 private:
-  friend class SystemC_VPC::Route;
-  friend class SystemC_VPC::StaticRoute;
-  template<class ROUTE>
-  friend class SystemC_VPC::RoutePool;
+  friend class Detail::Route;
+  friend class Detail::StaticRoute;
+  template<class>
+  friend class Detail::RoutePool;
   bool tracing_;
   std::list<Hop> hops_;
   std::map<Component::Ptr, Timing> routeTimings_;

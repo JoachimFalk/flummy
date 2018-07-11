@@ -48,7 +48,8 @@
 #include <map>
 #include <deque>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class PreemptiveComponent;
   
   /*Dient zur Speicherung der TDMA-Zeitschlitz - Daten
@@ -122,6 +123,7 @@ namespace SystemC_VPC{
     sc_core::sc_time TimeDynamicSegment;   
     
   };
-}
-#endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_TIMETRIGGEREDCCSCHEDULER_HPP */
 
+} } // namespace SystemC_VPC::Detail
+
+#endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_TIMETRIGGEREDCCSCHEDULER_HPP */

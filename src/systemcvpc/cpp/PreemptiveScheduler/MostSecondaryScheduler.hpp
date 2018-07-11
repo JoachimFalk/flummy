@@ -46,9 +46,8 @@
 #include <map>
 #include <deque>
 
+namespace SystemC_VPC { namespace Detail {
 
-
-namespace SystemC_VPC{
   class PreemptiveComponent;
 
   struct AsynchSlot{
@@ -94,6 +93,6 @@ int sysFreq;
 
 };
 
-}
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSECONDARYSCHEDULER_HPP */

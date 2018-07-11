@@ -41,7 +41,7 @@
 
 #include "Pool.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   template<typename KEY, class OBJECT>
   class AssociativePrototypedPool;
@@ -49,5 +49,6 @@ namespace SystemC_VPC {
   class TaskInstance;
   typedef AssociativePrototypedPool<ProcessId, TaskInstance> TaskPool;
 
-}
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_TASKPOOL_HPP */

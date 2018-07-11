@@ -48,7 +48,8 @@
 #include <deque>
 #include <string.h>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class PreemptiveComponent;
 
   typedef size_t ProcessId;
@@ -133,5 +134,7 @@ namespace SystemC_VPC{
     bool flag;
     sc_core::sc_time currSlotStartTime;
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_MOSTSCHEDULER_HPP */

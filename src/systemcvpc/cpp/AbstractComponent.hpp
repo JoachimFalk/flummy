@@ -71,7 +71,7 @@
 #include <map>
 #include <string>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   class ComponentObserver;
 
@@ -269,6 +269,6 @@ namespace SystemC_VPC {
     Coupling::VPCEvent::Ptr componentIdle;
   };
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_ABSTRACTCOMPONENT_HPP */

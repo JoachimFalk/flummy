@@ -39,8 +39,8 @@
 #include <systemcvpc/config/Component.hpp>
 #include <systemcvpc/config/ConfigException.hpp>
 #include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/config/Mappings.hpp>
 
-#include "Mappings.hpp"
 #include "../Director.hpp"
 
 #include <string>
@@ -106,7 +106,7 @@ Component::Ptr getComponent(std::string name)
 //
 Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
 {
-  ProcessId routePid = Director::getProcessId(source, dest);
+  ProcessId routePid = Detail::Director::getProcessId(source, dest);
   Route::Ptr route(new Route(type, source, dest));
   Routing::add(routePid, route);
   return route;
@@ -125,7 +125,7 @@ Route::Ptr createRoute(const sc_core::sc_port_base * leafPort, Route::Type type)
 //
 Route::Ptr getRoute(std::string source, std::string dest)
 {
-  ProcessId routePid = Director::getProcessId(source, dest);
+  ProcessId routePid = Detail::Director::getProcessId(source, dest);
   if (Routing::has(routePid)){
     return Routing::get(routePid);
   }
@@ -153,7 +153,7 @@ bool hasComponent(std::string name)
 VpcTask::Ptr getCachedTask(ScheduledTask & actor)
 {
   // TODO: find the right place
-  SystemC_VPC::Director::getInstance().FALLBACKMODE = false;
+  Detail::Director::getInstance().FALLBACKMODE = false;
   //std::cerr << " unset FALLBACKMODE" << std::endl;
 
 
@@ -209,7 +209,7 @@ void setPriority(ScheduledTask & actor, size_t priority)
 //
 void ignoreMissingRoutes(bool ignore)
 {
-  Director::getInstance().defaultRoute = ignore;
+  Detail::Director::getInstance().defaultRoute = ignore;
 }
 
 ComponentInterface* getTaskComponentInterface(ScheduledTask & actor)
@@ -225,7 +225,7 @@ ComponentInterface* getTaskComponentInterface(ScheduledTask & actor)
 
 void changePowerMode(ScheduledTask & actor,std::string powermode)
 {
-	if(Director::getInstance().FALLBACKMODE)
+	if(Detail::Director::getInstance().FALLBACKMODE)
 	{
 		return;
 	}
@@ -242,7 +242,7 @@ void changePowerMode(ScheduledTask & actor,std::string powermode)
 }
 
 bool hasWaitingOrRunningTasks(ScheduledTask & actor){
-  if(Director::getInstance().FALLBACKMODE)
+  if(Detail::Director::getInstance().FALLBACKMODE)
    {
     //FIXME: how to handle Fallbackmode?
            return true;
@@ -259,7 +259,7 @@ bool hasWaitingOrRunningTasks(ScheduledTask & actor){
 }
 
 void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr  event){
-  if(Director::getInstance().FALLBACKMODE)
+  if(Detail::Director::getInstance().FALLBACKMODE)
   {
           return;
   }
@@ -274,7 +274,7 @@ void registerComponentWakeup(const char* actor, Coupling::VPCEvent::Ptr  event){
 
 void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr  event){
 
-  if(Director::getInstance().FALLBACKMODE)
+  if(Detail::Director::getInstance().FALLBACKMODE)
   {
           return;
   }
@@ -288,7 +288,7 @@ void registerComponentIdle(const char* actor, Coupling::VPCEvent::Ptr  event){
 }
 
 void setCanExec(ScheduledTask & actor, bool canExec){
-  if(Director::getInstance().FALLBACKMODE){
+  if(Detail::Director::getInstance().FALLBACKMODE){
             return;
     }
     Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];

@@ -38,7 +38,7 @@
 
 #include <iostream>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 // Global CTOR initialization order is undefined between translation units.
 // Hence, using a global variable CoSupport::Streams::DebugOStream dbgout does
@@ -53,4 +53,4 @@ DebugOStream &getDbgOut() {
   return *dbgout;
 }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

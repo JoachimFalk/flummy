@@ -41,13 +41,12 @@
 #include <xercesc/util/XMLString.hpp>
 #include <iostream>
 
-//XERCES_CPP_NAMESPACE_USE
-using namespace xercesc;
+namespace SystemC_VPC { namespace Detail {
 
 /**
  * Simple error handler deriviative to install on parser
  */
-class VpcDomErrorHandler : public DOMErrorHandler {
+class VpcDomErrorHandler : public xercesc::DOMErrorHandler {
 public:
   VpcDomErrorHandler() : failed(false){}
   ~VpcDomErrorHandler(){}
@@ -55,11 +54,11 @@ public:
   /**
    * Implementation of the DOM ErrorHandler interface
    */
-  bool handleError(const DOMError& domError){
+  bool handleError(const xercesc::DOMError& domError){
     std::cerr<< "DOMError";
-    if (domError.getSeverity() == DOMError::DOM_SEVERITY_WARNING){
+    if (domError.getSeverity() == xercesc::DOMError::DOM_SEVERITY_WARNING){
         std::cerr << "\nWarning at file ";
-    }else if (domError.getSeverity() == DOMError::DOM_SEVERITY_ERROR){
+    }else if (domError.getSeverity() == xercesc::DOMError::DOM_SEVERITY_ERROR){
         this->failed = true;
         std::cerr << "\nError at file ";
     }else{
@@ -67,10 +66,10 @@ public:
         std::cerr << "\nFatal Error at file ";
     }
     
-    std::cerr << XMLString::transcode( domError.getLocation()->getURI())
+    std::cerr << xercesc::XMLString::transcode( domError.getLocation()->getURI())
          << ", line " << domError.getLocation()->getLineNumber()
          << ", char " << domError.getLocation()->getColumnNumber()
-         << "\n  Message: " << XMLString::transcode( domError.getMessage())
+         << "\n  Message: " << xercesc::XMLString::transcode( domError.getMessage())
          << std::endl;
     
     return !failed;
@@ -84,5 +83,7 @@ public:
 private :
   bool failed;
 };
+
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPCDOMERRORHANDLER_HPP */

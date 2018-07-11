@@ -29,6 +29,7 @@ nobase_include_HEADERS = \
 	systemcvpc/config/common.hpp \
 	systemcvpc/config/Component.hpp \
 	systemcvpc/config/ConfigException.hpp \
+	systemcvpc/config/Mappings.hpp \
 	systemcvpc/config/Route.hpp \
 	systemcvpc/config/Scheduler.hpp \
 	systemcvpc/config/Timing.hpp \

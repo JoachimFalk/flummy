@@ -55,7 +55,7 @@
 #include <vector>
 #include <string>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   class AbstractComponent;
 
@@ -122,6 +122,6 @@ namespace SystemC_VPC {
   ProcessControlBlock *getPCBOfTaskInterface(TaskInterface const *task)
     { return reinterpret_cast<ProcessControlBlock *>(task->getSchedulerInfo()); }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP */

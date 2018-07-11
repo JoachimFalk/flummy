@@ -50,7 +50,7 @@
 
 #include <CoSupport/sassert.h>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -715,4 +715,4 @@ namespace SystemC_VPC{
     }
   }
 
-} //namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

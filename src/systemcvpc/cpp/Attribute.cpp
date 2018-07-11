@@ -37,7 +37,7 @@
 #include <systemcvpc/Attribute.hpp>
 #include <iostream>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
 
   //
   Attribute::Attribute() : type(), value() {}
@@ -143,4 +143,5 @@ namespace SystemC_VPC{
   void Attribute::setType(std::string newType){
     type=newType;
   }
-}
+
+} // namespace SystemC_VPC::Detail

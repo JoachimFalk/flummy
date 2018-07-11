@@ -40,7 +40,7 @@
 #include <cstddef>
 #include <string>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   /**
    * 
@@ -92,5 +92,6 @@ namespace SystemC_VPC{
     std::string name;
   };
 
-}
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_POWERMODE_HPP */

@@ -36,8 +36,7 @@
 
 #include "HysteresisLocalGovernor.hpp"
 
-namespace SystemC_VPC{
-
+namespace SystemC_VPC { namespace Detail {
 
   InternalLoadHysteresisGovernor::InternalLoadHysteresisGovernor(const sc_core::sc_time& windowTime,
                                                  const sc_core::sc_time& fastTime,
@@ -139,4 +138,4 @@ namespace SystemC_VPC{
     }
   }
 
-}
+} } // namespace SystemC_VPC::Detail

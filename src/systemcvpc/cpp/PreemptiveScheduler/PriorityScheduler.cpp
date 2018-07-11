@@ -39,7 +39,8 @@
 #include "PriorityScheduler.hpp"
 #include "PreemptiveComponent.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   void PriorityScheduler::setProperty(const char* key, const char* value){
   }
 
@@ -105,4 +106,5 @@ namespace SystemC_VPC{
 
      return ret_decision;
    }
-}
+
+} } // namespace SystemC_VPC::Detail

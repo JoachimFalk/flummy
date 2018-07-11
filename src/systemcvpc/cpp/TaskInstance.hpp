@@ -47,7 +47,7 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   class ProcessControlBlock;
 
@@ -224,5 +224,6 @@ namespace SystemC_VPC {
 
   };
 
-}
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_TASKINSTANCE_HPP */

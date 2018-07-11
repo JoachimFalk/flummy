@@ -44,7 +44,7 @@
 #include <iostream>
 #include "InvalidArgumentException.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC {
 
   class Attribute;
 
@@ -115,7 +115,8 @@ namespace SystemC_VPC{
     Parameters  parameters;
     Attributes  attributes;
   };
-}
+
+} // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_ATTRIBUTE_HPP */
 

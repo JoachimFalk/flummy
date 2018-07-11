@@ -42,14 +42,14 @@
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/config/Mappings.hpp>
 
 #include "Director.hpp"
 #include "AbstractComponent.hpp"
-#include "config/Mappings.hpp"
 
 #include "DebugOStream.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 using namespace smoc::SimulatorAPI;
 
@@ -149,7 +149,7 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 #else
     setenv("VPCCONFIGURATION", vpcConfigFile.c_str(), 1);
 #endif // _MSC_VER
-    SystemC_VPC::Director::getInstance().beforeVpcFinalize();
+    Director::getInstance().beforeVpcFinalize();
     if (Director::getInstance().FALLBACKMODE) {
       if (getDbgOut().isVisible(Debug::High))
         getDbgOut() << "SystemC_VPC has invalid configuration " << getenv("VPCCONFIGURATION") << " => VPC still off" << std::endl;
@@ -208,7 +208,7 @@ void SystemCVPCSimulator::registerPort(TaskInterface *task, PortInInterface *por
   std::string actorName = task->name();
   std::string channelName = port->getSource()->name();
   // FIXME: Should be port not nullptr!
-  port->setSchedulerInfo(SystemC_VPC::Director::getInstance().registerRoute(channelName,
+  port->setSchedulerInfo(Director::getInstance().registerRoute(channelName,
       actorName, nullptr));
 
 }
@@ -218,17 +218,16 @@ void SystemCVPCSimulator::registerPort(TaskInterface *task, PortOutInterface *po
   for (ChannelSinkInterface *channelSinkInterface : port->getSinks()) {
     std::string channelName = channelSinkInterface->name();
     // FIXME: Should be port not nullptr!
-    port->setSchedulerInfo(SystemC_VPC::Director::getInstance().registerRoute(actorName,
+    port->setSchedulerInfo(Director::getInstance().registerRoute(actorName,
         channelName, nullptr));
   }
 }
 
 void SystemCVPCSimulator::simulationEnded() {
-  SystemC_VPC::Director::endOfSystemcSimulation();
+  Director::endOfSystemcSimulation();
 }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
-SystemC_VPC::SystemCVPCSimulator systemCVPCSimulator;
-
-
+// This must be outside of the namespace for SysteMoC plugin load pickup!
+SystemC_VPC::Detail::SystemCVPCSimulator systemCVPCSimulator;

@@ -45,12 +45,12 @@
 
 #include <systemc>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 class AbstractComponent;
 class Route;
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 namespace SystemC_VPC { namespace Config {
 
@@ -62,7 +62,7 @@ namespace Mappings
   // TODO: replace other mapping maps
   // TODO: provide getter, setter, etc.
   std::map<VpcTask::Ptr, Component::Ptr > & getConfiguredMappings();
-  std::map<Component::Ptr, AbstractComponent * > & getComponents();
+  std::map<Component::Ptr, Detail::AbstractComponent * > & getComponents();
   bool isMapped(VpcTask::Ptr task, Component::Ptr component);
 
 } // namespace Mappings
@@ -80,7 +80,7 @@ namespace Routing
 
   Route::Ptr get(const ProcessId pid);
   Route::Ptr get(const sc_core::sc_port_base * leafPort);
-  SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute);
+  Detail::Route * create(Config::Route::Ptr configuredRoute);
 
 } // namespace Routing
 

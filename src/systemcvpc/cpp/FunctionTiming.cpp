@@ -31,7 +31,7 @@ typedef boost::minstd_rand base_generator_type;
 #include "FunctionTiming.hpp"
 #include "DebugOStream.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   FunctionTiming::FunctionTiming( )
     : funcDelays(1, sc_core::SC_ZERO_TIME),
@@ -175,4 +175,4 @@ namespace SystemC_VPC {
     this->addTimingModifier(timing.getFunctionId(), timing.getTimingModifier());
   }
 
-}
+} } // namespace SystemC_VPC::Detail

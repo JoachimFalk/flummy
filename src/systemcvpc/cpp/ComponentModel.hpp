@@ -39,7 +39,8 @@
 
 #include "ComponentInfo.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class TaskInstance;
   typedef std::map<int, TaskInstance*>  TaskMap;
 
@@ -60,5 +61,7 @@ namespace SystemC_VPC{
       powerConsumption = pc;
     }
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_COMPONENTMODEL_HPP */

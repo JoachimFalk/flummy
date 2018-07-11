@@ -40,7 +40,7 @@
 #include "ComponentObserver.hpp"
 #include <systemcvpc/Attribute.hpp>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
 template <typename T>
 class GlobalPowerGovernor
@@ -78,7 +78,6 @@ class LocalPowerGovernor : public ComponentObserver
     GlobalPowerGovernor<T> *m_tpg;
 };
 
-
-}
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_POWERGOVERNOR_HPP */

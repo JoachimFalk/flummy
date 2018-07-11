@@ -37,7 +37,7 @@
 #include "RoundRobinComponent.hpp"
 #include "../tracing/TracerIf.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
 RoundRobinComponent::RoundRobinComponent(
     Config::Component::Ptr component, Director *director)
@@ -224,4 +224,4 @@ void RoundRobinComponent::scheduleThread() {
 
 RoundRobinComponent::~RoundRobinComponent() {}
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

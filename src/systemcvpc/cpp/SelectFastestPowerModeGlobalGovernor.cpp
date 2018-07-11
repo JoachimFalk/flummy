@@ -37,7 +37,7 @@
 #include "SelectFastestPowerModeGlobalGovernor.hpp"
 #include "ComponentModel.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   InternalSelectFastestPowerModeGovernor::InternalSelectFastestPowerModeGovernor() :
     m_lastMode(NULL)
@@ -87,4 +87,4 @@ namespace SystemC_VPC{
     }
   }
 
-}
+} } // namespace SystemC_VPC::Detail

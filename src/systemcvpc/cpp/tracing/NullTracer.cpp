@@ -36,7 +36,7 @@
 
 #include "NullTracer.hpp"
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 NullTracer::NullTracer(Config::Component::Ptr component)
   {}
@@ -62,4 +62,4 @@ void           NullTracer::finishDii(TTaskInstance *ttaskInstance)
 void           NullTracer::finishLatency(TTaskInstance *ttaskInstance)
   {}
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing

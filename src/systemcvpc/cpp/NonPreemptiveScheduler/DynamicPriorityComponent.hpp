@@ -51,7 +51,7 @@
 
 #include <list>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 typedef std::list<TaskInterface *> PriorityList;
 
@@ -87,6 +87,6 @@ private:
   void debugDump(const TaskInterface * toBeExecuted) const;
 };
 
-} //namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_DYNAMICPRIORITYCOMPONENT_HPP */

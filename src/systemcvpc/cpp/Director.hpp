@@ -57,7 +57,7 @@
 
 template <class T> class DLLFactory;
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   typedef std::vector<std::string> FunctionNames;
 
@@ -243,5 +243,6 @@ namespace SystemC_VPC{
     TaskPool        *taskPool;
   };
 
-}
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_DIRECTOR_HPP */

@@ -36,8 +36,8 @@
 
 #include "ConfigCheck.hpp"
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC { namespace Detail {
+
 void dumpSet(FunctionSet s, std::ostream & stream = std::cerr)
 {
   std::copy(s.begin(), s.end(),
@@ -137,5 +137,4 @@ std::pair<std::string, std::string> ConfigCheck::getRouteName(ProcessId pid)
   return ConfigCheck::routeNames()[pid];
 }
 
-
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

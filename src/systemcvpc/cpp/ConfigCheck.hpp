@@ -44,8 +44,8 @@
 #include <set>
 #include <map>
 
-namespace SystemC_VPC
-{
+namespace SystemC_VPC { namespace Detail {
+
 typedef std::set<std::string> FunctionSet;
 
 class TaskConfig
@@ -147,6 +147,7 @@ public:
 private:
   TaskConfigs taskConfigs;
 };
-}
+
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIGCHECK_HPP */

@@ -60,7 +60,7 @@
 #include <queue>
 #include <list>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   /**
    * \brief An implementation of AbstractComponent.
@@ -161,6 +161,6 @@ namespace SystemC_VPC{
     void remainingPipelineStages();
   };
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_NONPREEMPTIVESCHEDULER_NONPREEMPTIVECOMPONENT_HPP */

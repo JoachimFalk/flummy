@@ -38,7 +38,7 @@
 
 #include "../DebugOStream.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 PriorityComponent::PriorityComponent(
     Config::Component::Ptr component, Director *director)
@@ -61,4 +61,4 @@ TaskInstance *PriorityComponent::selectReadyTask() {
   return selectedTask;
 }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

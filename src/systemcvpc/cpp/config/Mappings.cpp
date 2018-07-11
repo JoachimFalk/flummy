@@ -34,7 +34,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "Mappings.hpp"
+#include <systemcvpc/config/Mappings.hpp>
 #include "../BlockingTransport.hpp"
 #include "../RoutePool.hpp"
 #include "../StaticRoute.hpp"
@@ -50,9 +50,9 @@ std::map<VpcTask::Ptr, Component::Ptr>& Mappings::getConfiguredMappings()
 }
 
 //
-std::map<Component::Ptr, AbstractComponent *> & Mappings::getComponents()
+std::map<Component::Ptr, Detail::AbstractComponent *> & Mappings::getComponents()
 {
-  static std::map<Component::Ptr, AbstractComponent *> components;
+  static std::map<Component::Ptr, Detail::AbstractComponent *> components;
   return components;
 }
 
@@ -174,29 +174,29 @@ void set(const sc_core::sc_port_base *leafPort, Route::Ptr route)
 }
 
 //
-SystemC_VPC::Route * create(Config::Route::Ptr configuredRoute)
+Detail::Route * create(Config::Route::Ptr configuredRoute)
 {
-  SystemC_VPC::Route * route;
+  Detail::Route * route;
   switch (configuredRoute->getType()) {
     default:
     case Config::Route::StaticRoute:
       {
-        RoutePool<StaticRoute> * staticRoute = new RoutePool<StaticRoute> (configuredRoute);
+        Detail::RoutePool<Detail::StaticRoute> * staticRoute = new Detail::RoutePool<Detail::StaticRoute> (configuredRoute);
         route = staticRoute;
         staticRoute->setRouteInterface(&(staticRoute->getPrototype()));
       }
       break;
     case Config::Route::BlockingTransport:
-      route = new RoutePool<BlockingTransport> (configuredRoute);
+      route = new Detail::RoutePool<Detail::BlockingTransport> (configuredRoute);
       break;
   }
   std::list<Hop> hops = configuredRoute->getHops();
   for (std::list<Hop>::const_iterator iter = hops.begin(); iter != hops.end(); ++iter) {
     Config::Component::Ptr component = iter->getComponent();
-    AbstractComponent * c = Config::Mappings::getComponents()[component];
+    Detail::AbstractComponent * c = Config::Mappings::getComponents()[component];
     route->addHop(component->getName(), c);
 
-    ProcessControlBlock *pcb = c->createPCB(route->getName());
+    Detail::ProcessControlBlock *pcb = c->createPCB(route->getName());
     pcb->configure(route->getName(), false);
     pcb->setTiming(iter->getTransferTiming());
     pcb->setPriority(iter->getPriority());

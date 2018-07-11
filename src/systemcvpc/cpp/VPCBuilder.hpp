@@ -79,7 +79,8 @@ typedef boost::minstd_rand base_generator_type;
 
 //XERCES_CPP_NAMESPACE_USE
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   namespace CX = CoSupport::XML::Xerces;
 
   class Director;
@@ -221,6 +222,6 @@ namespace SystemC_VPC{
     boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(CX::XN::DOMNode* node);
   };
     
-}
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPCBUILDER_HPP */

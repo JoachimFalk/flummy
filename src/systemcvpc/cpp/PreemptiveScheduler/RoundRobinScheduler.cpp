@@ -38,8 +38,7 @@
 #include "PreemptiveComponent.hpp"
 #include "../Director.hpp"
 
-
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   void RoundRobinScheduler::setProperty(const char* key, const char* value){
     if (std::string("timeslice") == key) {
@@ -125,4 +124,5 @@ int RoundRobinScheduler::assignFromFront()
   sc_core::sc_time* RoundRobinScheduler::schedulingOverhead(){
     return NULL; //new sc_core::sc_time(1,sc_core::SC_NS);
   }
-}
+
+} } // namespace SystemC_VPC::Detail

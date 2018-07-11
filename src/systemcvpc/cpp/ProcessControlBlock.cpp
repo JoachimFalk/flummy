@@ -48,7 +48,7 @@
 
 #include "DebugOStream.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   ProcessControlBlock::ProcessControlBlock(AbstractComponent *component, std::string const &taskName)
     : scheduledTask(nullptr)
@@ -77,4 +77,4 @@ namespace SystemC_VPC{
     ft->setTiming(timing);
   }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

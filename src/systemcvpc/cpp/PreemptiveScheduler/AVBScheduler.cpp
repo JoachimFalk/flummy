@@ -39,8 +39,7 @@
 
 #include <systemcvpc/datatypes.hpp>
 
-
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
   
   AVBScheduler::AVBScheduler(){
     AVBListEntry* newEntry;
@@ -233,4 +232,5 @@ namespace SystemC_VPC{
 
      return ret_decision;
    }
-}
+
+} } // namespace SystemC_VPC::Detail

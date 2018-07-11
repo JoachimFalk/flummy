@@ -46,7 +46,8 @@
 #include <map>
 #include <deque>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   class PreemptiveComponent;
 
   typedef size_t ProcessId;
@@ -92,5 +93,7 @@ namespace SystemC_VPC{
     std::deque<std::pair<std::string, std::string> > _properties;
     std::deque<int> stream_fifo;
   };
-}
+
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_STREAMSHAPERSCHEDULER_HPP */

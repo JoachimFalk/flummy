@@ -44,7 +44,7 @@
 
 #include <systemc>
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
   
   enum scheduling_decision {ONLY_ASSIGN // no old task, assign new task only
           ,PREEMPT    // preempt running task
@@ -126,5 +126,6 @@ namespace SystemC_VPC{
     }
   };
 
-}
+} } // namespace SystemC_VPC::Detail
+
 #endif /* _INCLUDED_SYSTEMCVPC_PREEMPTIVESCHEDULER_SCHEDULER_HPP */

@@ -38,7 +38,7 @@
 
 #include "../DebugOStream.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   /**
    *
@@ -387,4 +387,4 @@ NonPreemptiveComponent::~NonPreemptiveComponent() {
 #endif // NO_POWER_SUM
 }
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

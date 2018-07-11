@@ -22,7 +22,7 @@
 
 #include "Delayer.hpp"
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
   const ComponentId Delayer::getComponentId() const {
     return this->componentId_;
@@ -53,4 +53,4 @@ namespace SystemC_VPC {
     }
   }
 
-} //namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

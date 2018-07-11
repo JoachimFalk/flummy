@@ -44,7 +44,7 @@
 #include <CoSupport/Streams/IndentStreambuf.hpp>
 #include <CoSupport/Streams/HeaderFooterStreambuf.hpp>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
 using CoSupport::Streams::Debug;
 using CoSupport::Streams::ScopedDebug;
@@ -71,7 +71,7 @@ typedef
 // helper function to guarantee this property.
 extern DebugOStream &getDbgOut();
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
 // set for debugging output
 //#define VPC_DEBUG true;

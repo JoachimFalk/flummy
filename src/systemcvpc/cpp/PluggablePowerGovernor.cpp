@@ -36,9 +36,11 @@
 
 #include "PluggablePowerGovernor.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
+
   GenericParameter::~GenericParameter() {}
 
   PowerModeParameter::PowerModeParameter(PowerMode *mode) : powerMode(mode){}
   PowerModeParameter::~PowerModeParameter() {}
-}
+
+} } // namespace SystemC_VPC::Detail

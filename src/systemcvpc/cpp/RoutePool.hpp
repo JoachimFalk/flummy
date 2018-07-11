@@ -42,7 +42,7 @@
 #include <systemcvpc/config/Route.hpp>
 #include "RouteImpl.hpp"
 
-namespace SystemC_VPC{
+namespace SystemC_VPC { namespace Detail {
 
   /**
    * \brief a memory pool for routes
@@ -90,6 +90,6 @@ namespace SystemC_VPC{
     Config::Route::Ptr configuredRoute_;
   };
 
-}
+} } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_ROUTEPOOL_HPP */

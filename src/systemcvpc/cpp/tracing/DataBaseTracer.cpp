@@ -39,7 +39,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-namespace SystemC_VPC { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 class DataBaseTracer::DataBaseProxy {
 public:
@@ -182,4 +182,4 @@ void DataBaseTracer::addEvent(TTaskInstance const *ttaskInstance_, char const *s
       ttaskInstance->instanceId);
 }
 
-} } // namespace SystemC_VPC::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracing
