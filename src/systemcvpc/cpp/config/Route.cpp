@@ -39,11 +39,7 @@
 
 #include <iostream>
 
-namespace SystemC_VPC
-{
-
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 //
 Hop::Hop(Component::Ptr component) :
@@ -164,5 +160,4 @@ Hop & Route::addHop(Component::Ptr component)
   return hops_.back();
 }
 
-} // namespace Config
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config

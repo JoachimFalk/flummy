@@ -51,7 +51,7 @@ namespace SystemC_VPC{
   /**
    * \brief Interface for classes implementing routing simulation.
    */
-  class Route : public Delayer, public RouteInterface {
+  class Route : public Delayer, public Config::RouteInterface {
   public:
     virtual void addHop(std::string name, AbstractComponent * hop) = 0;
 

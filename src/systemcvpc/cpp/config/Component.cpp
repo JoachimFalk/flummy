@@ -48,11 +48,7 @@
 #include <string>
 #include <set>
 
-namespace SystemC_VPC
-{
-
-namespace Config
-{
+namespace SystemC_VPC { namespace Config {
 
 //
 Component::Component(std::string name, Scheduler scheduler) :
@@ -208,6 +204,4 @@ void Component::setDebugFileName(std::string debugFileName)
   this->debugFileName_ = debugFileName;
 }
 
-} // namespace Config
-} // namespace SystemC_VPC
-
+} } // namespace SystemC_VPC::Config

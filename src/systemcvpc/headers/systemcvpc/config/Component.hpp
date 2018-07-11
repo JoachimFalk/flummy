@@ -60,8 +60,11 @@ namespace SystemC_VPC {
 class AbstractComponent;
 class TaskInstance;
 
-class ComponentInterface
-{
+} // namespace SystemC_VPC
+
+namespace SystemC_VPC { namespace Config {
+
+class ComponentInterface {
 public:
   typedef ComponentInterface* Ptr;
 
@@ -79,9 +82,6 @@ public:
   virtual bool addStream(ProcessId pid){return false;};
   virtual bool closeStream(ProcessId pid){return false;};
 };
-
-namespace Config
-{
 
 class Component:
     protected SequentiallyIdedObject<ComponentId> ,
@@ -138,7 +138,6 @@ private:
   ComponentInterface::Ptr componentInterface_;
 };
 
-} // namespace Config
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Config
 
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIG_COMPONENT_HPP */

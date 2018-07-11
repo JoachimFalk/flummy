@@ -91,7 +91,7 @@ namespace SystemC_VPC {
     public Delayer,
     private smoc::SimulatorAPI::SchedulerInterface,
     public ComponentModel,
-    public ComponentInterface
+    public Config::ComponentInterface
   {
   public:
     /**
