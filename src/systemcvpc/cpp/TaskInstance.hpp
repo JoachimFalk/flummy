@@ -37,19 +37,15 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TASKINSTANCE_HPP
 #define _INCLUDED_SYSTEMCVPC_TASKINSTANCE_HPP
 
-#include <sstream>
-
-#include <CoSupport/SystemC/systemc_support.hpp>
-#include <CoSupport/Tracing/TaskTracer.hpp>
-
 #include <systemcvpc/vpc_config.h>
-
 #include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
 #include "TaskPool.hpp"
-#include "FunctionTiming.hpp"
 #include "tracing/TracerIf.hpp"
+
+#include <CoSupport/SystemC/systemc_support.hpp>
+#include <CoSupport/Tracing/TaskTracer.hpp>
 
 namespace SystemC_VPC {
 
@@ -60,8 +56,6 @@ namespace SystemC_VPC {
   // Class representing a task instance, i.e., one execution of the task represented by the PCB.
   class TaskInstance
     : public Tracing::TTaskInstanceHolder {
-    friend class NonPreemptiveComponent;
-    friend class RoundRobinComponent;
   public:
     TaskInstance(TaskPool *pool);
 
@@ -78,7 +72,6 @@ namespace SystemC_VPC {
     void        setBlockEvent(EventPair p)               {this->blockEvent = p;}
     ProcessControlBlock *getPCB()                        {return this->pcb;}
     void        setPCB(ProcessControlBlock *pcb)         {this->pcb = pcb;}
-    void        setTiming(FunctionTimingPtr timing)      {this->timing = timing;}
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -133,11 +126,6 @@ namespace SystemC_VPC {
     smoc::SimulatorAPI::FiringRuleInterface *getFiringRule()
       { return this->firingRuleInterface; }
 
-    /**
-     * 
-     */
-    void initDelays();
-
     // Adaptor setter / getter for ProcessControlBlock
     int              getPriority() const;
 
@@ -183,7 +171,6 @@ namespace SystemC_VPC {
     
     int factorOverhead;
 
-    FunctionTimingPtr    timing;
     ProcessControlBlock *pcb;
     TaskPool            *pool;
 

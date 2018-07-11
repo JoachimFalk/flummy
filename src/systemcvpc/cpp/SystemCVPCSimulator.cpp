@@ -201,13 +201,7 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   }
 #endif //NDEBUG
   AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
-
-  // This should be the first time the actor appeared here.
-  ProcessControlBlock *pcb = comp->createPCB(actor->name());
-  pcb->setScheduledTask(actor);
-  pcb->configure(actor->name(), true);
-  actor->setScheduler(comp);
-  actor->setSchedulerInfo(pcb);
+  comp->registerTask(actor);
 }
 
 void SystemCVPCSimulator::registerPort(TaskInterface *task, PortInInterface *port) {

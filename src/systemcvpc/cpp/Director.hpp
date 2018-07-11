@@ -104,29 +104,6 @@ namespace SystemC_VPC{
     ~Director();
 
     /**
-     * \brief Simulates timing simulations of guard checks.
-     *
-     * Determines the component from FastLink.
-     * \param fLink FastLink for transition to evaluate its guard.
-     */
-    void check(FastLink const *fLink);
-
-    /**
-     * \brief Simulates computation of a given task
-     * 
-     * Determines the component from FastLink.
-     * Supports pipelining!
-     * \param fLink FastLink for task and function to execute.
-     * \param endPair EventPair to signal finishing of data introduction 
-     * interval (dii) and latency.
-     * If dii == latency no pipelining is assumed and both events are notified
-     * at same time!
-     * \sa EventPair
-     */
-    void compute(FastLink const *fLink,
-                 EventPair endPair = EventPair(NULL, NULL));
-
-    /**
      * \brief Simulates communication delay of a given task
      * 
      * Determines the component from FastLink.

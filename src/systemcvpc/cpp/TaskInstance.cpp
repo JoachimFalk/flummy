@@ -52,7 +52,6 @@ namespace SystemC_VPC {
     , exec(false)
     , write(false)
     , factorOverhead(0)
-    , timing()
     , pcb()
     , pool(pool)
     , name("NN")
@@ -62,25 +61,6 @@ namespace SystemC_VPC {
     {}
 
   TaskInstance::~TaskInstance() {
-  }
-
-  void TaskInstance::initDelays() {
-    assert(pcb != NULL);
-    FunctionIds fids = this->getFunctionIds();
-    FunctionIds gids = this->getGuardIds();
-
-    if(!gids.empty())
-      this->setOverhead(this->timingScale * timing->getDelay(gids) + (double)this->factorOverhead * sc_core::sc_time(10, sc_core::SC_NS));
-    else
-      this->setOverhead((double)this->factorOverhead * sc_core::sc_time(0.1, sc_core::SC_NS));
-
-    //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
-    // Initialize with DII
-    this->setDelay(this->timingScale * timing->getDelay(fids));
-    // Initialize with DII
-    this->setRemainingDelay(this->getDelay());
-    // Initialize with Latency
-    this->setLatency(this->timingScale * timing->getLatency(fids));
   }
 
   // Adaptor setter / getter for ProcessControlBlock

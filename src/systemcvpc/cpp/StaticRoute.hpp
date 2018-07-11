@@ -107,7 +107,7 @@ namespace SystemC_VPC{
     typedef std::list<AbstractComponent *> Components;
 
     Components                             components;
-    TaskInstance*                                  task;
+    TaskInstance                          *task;
     EventPair                              taskEvents;
     Coupling::VPCEvent::Ptr                dummyDii;
     Coupling::VPCEvent::Ptr                routeLat;

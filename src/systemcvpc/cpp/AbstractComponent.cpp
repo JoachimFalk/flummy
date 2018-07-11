@@ -177,21 +177,19 @@ namespace SystemC_VPC {
     this->timingPool = timingPools[powerMode];
   }
 
-
-  FunctionTimingPtr AbstractComponent::getTiming(const PowerMode *mode, ProcessId pid){
-
-	  if(timingPools.find(mode) == timingPools.end()){
-          timingPools[mode].reset(new FunctionTimingPool());
-        }
-        FunctionTimingPoolPtr pool = this->timingPools[mode];
-        if(pool->find(pid) == pool->end()){
-          (*pool)[pid].reset(new FunctionTiming());
-          (*pool)[pid]->setBaseDelay(this->transactionDelays[mode]);
-          //sc_core::sc_time a = this->transactionDelays[mode];
-          //std::cout << a;
-        }
-        return (*pool)[pid];
-      }
+  FunctionTimingPtr AbstractComponent::getTiming(const PowerMode *mode, ProcessId pid) {
+    if (timingPools.find(mode) == timingPools.end()) {
+      timingPools[mode].reset(new FunctionTimingPool());
+    }
+    FunctionTimingPoolPtr pool = this->timingPools[mode];
+    if (pool->find(pid) == pool->end()) {
+      (*pool)[pid].reset(new FunctionTiming());
+      (*pool)[pid]->setBaseDelay(this->transactionDelays[mode]);
+      //sc_core::sc_time a = this->transactionDelays[mode];
+      //std::cout << a;
+    }
+    return (*pool)[pid];
+  }
 
   void AbstractComponent::setDynamicPriority(std::list<ScheduledTask *> priorityList) {
     throw Config::ConfigException(std::string("Component ") + this->name() +
@@ -356,7 +354,7 @@ namespace SystemC_VPC {
     sassert(pcbPool.insert(std::make_pair(
         pcb->getPid(),
         ProcessControlBlockPtr(pcb))).second);
-    registerTask(pcb, taskName);
+    this->TraceableComponent::registerTask(pcb, taskName);
     return pcb;
   }
 
@@ -364,6 +362,15 @@ namespace SystemC_VPC {
     PCBPool::const_iterator iter = pcbPool.find(pid);
     assert(iter != pcbPool.end());
     return iter->second.get();
+  }
+
+  void AbstractComponent::registerTask(TaskInterface *task) {
+    // This should be the first time the actor appeared here.
+    ProcessControlBlock *pcb = this->createPCB(task->name());
+    pcb->setScheduledTask(task);
+    pcb->configure(task->name(), true);
+    task->setScheduler(this);
+    task->setSchedulerInfo(pcb);
   }
 
   void AbstractComponent::registerFiringRule(TaskInterface *actor, smoc::SimulatorAPI::FiringRuleInterface *fr) {
@@ -464,7 +471,7 @@ namespace SystemC_VPC {
   void AbstractComponent::checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
     FastLink *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
 
-    ProcessControlBlock *pcb = this->getPCB(fLink->process);
+    ProcessControlBlock *pcb = getPCBOfTaskInterface(task);
     TaskInstance taskInstance(nullptr);
     taskInstance.setPCB(pcb);
     taskInstance.setProcessId(fLink->process);
@@ -473,10 +480,22 @@ namespace SystemC_VPC {
     taskInstance.setFunctionIds(fLink->actionIds );
     taskInstance.setGuardIds(fLink->guardIds);
     taskInstance.setFactorOverhead(fLink->complexity);
+
+    FunctionTimingPtr timing =
+        this->getTiming(this->getPowerMode(), fLink->process);
+
+    if(!fLink->guardIds.empty())
+      taskInstance.setOverhead(
+          timing->getDelay(fLink->guardIds) +
+          fLink->complexity * sc_core::sc_time(0.1, sc_core::SC_NS));
+    else
+      taskInstance.setOverhead(
+          fLink->complexity * sc_core::sc_time(0.1, sc_core::SC_NS));
+
     this->check(&taskInstance);
   }
 
-  class InputsAvailableListener
+  class AbstractComponent::InputsAvailableListener
     : public CoSupport::SystemC::EventListener
   {
     typedef CoSupport::SystemC::EventWaiter
@@ -526,8 +545,23 @@ namespace SystemC_VPC {
     void compute() {
       FastLink            *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
       AbstractComponent   *comp  = static_cast<AbstractComponent *>(task->getScheduler());
-      ProcessControlBlock *pcb   = comp->getPCB(fLink->process);
+      ProcessControlBlock *pcb   = getPCBOfTaskInterface(task);
+
       TaskInstance *taskInstance = new TaskInstance(nullptr);
+
+      assert(pcb != NULL);
+
+      FunctionTimingPtr timing =
+          comp->getTiming(comp->getPowerMode(), fLink->process);
+
+      //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
+      // Initialize with DII
+      taskInstance->setDelay(timing->getDelay(fLink->actionIds));
+      // Initialize with DII
+      taskInstance->setRemainingDelay(taskInstance->getDelay());
+      // Initialize with Latency
+      taskInstance->setLatency(timing->getLatency(fLink->actionIds));
+
       taskInstance->setPCB(pcb);
       taskInstance->setProcessId(fLink->process);
       taskInstance->setFiringRule(fr);
@@ -560,6 +594,35 @@ namespace SystemC_VPC {
     ial->wait();
   }
 
+  TaskInstance *AbstractComponent::executeHop(ProcessControlBlock *pcb, size_t quantum, EventPair const &np) {
+    TaskInstance *taskInstance = new TaskInstance(nullptr);
+
+    assert(pcb != NULL);
+
+    FunctionTimingPtr timing =
+        this->getTiming(this->getPowerMode(), pcb->getPid());
+
+    FunctionIds fids; // empty functionIds
+    fids.push_back(Director::getInstance().getFunctionId("1"));
+
+    //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
+    // Initialize with DII
+    taskInstance->setDelay(quantum * timing->getDelay(fids));
+    // Initialize with DII
+    taskInstance->setRemainingDelay(taskInstance->getDelay());
+    // Initialize with Latency
+    taskInstance->setLatency(quantum * timing->getLatency(fids));
+
+    taskInstance->setPCB(pcb);
+    taskInstance->setProcessId(pcb->getPid());
+    taskInstance->setName(pcb->getName());
+    taskInstance->setFunctionIds(fids);
+    taskInstance->setTimingScale(quantum);
+    taskInstance->setBlockEvent(np);
+    this->compute(taskInstance);
+    return taskInstance;
+  }
+
   /// Called once per actor firing to indicate that the DII of the task instance is over.
   void AbstractComponent::finishDiiTaskInstance(TaskInstance *taskInstance) {
     this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
@@ -576,7 +639,7 @@ namespace SystemC_VPC {
     }
   }
 
-  class OutputWrittenListener
+  class AbstractComponent::OutputWrittenListener
     : public CoSupport::SystemC::EventListener
   {
     typedef CoSupport::SystemC::EventWaiter

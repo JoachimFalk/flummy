@@ -89,7 +89,7 @@ namespace SystemC_VPC {
     public sc_core::sc_module,
     public Tracing::TraceableComponent,
     public Delayer,
-    public smoc::SimulatorAPI::SchedulerInterface,
+    private smoc::SimulatorAPI::SchedulerInterface,
     public ComponentModel,
     public ComponentInterface
   {
@@ -104,6 +104,8 @@ namespace SystemC_VPC {
      * The PCB must not previously exist.
      */
     ProcessControlBlock *createPCB(std::string const &taskName);
+
+    void registerTask(TaskInterface *task);
 
     /**
      * \brief Get the Process Control Block (PCB) for pid.
@@ -186,12 +188,7 @@ namespace SystemC_VPC {
      */
     FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid);
 
-    virtual void checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
-
-    virtual void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
-
-    virtual void executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
-
+    TaskInstance *executeHop(ProcessControlBlock *pcb, size_t quantum, EventPair const &np);
   protected:
     void end_of_elaboration();
 
@@ -241,6 +238,17 @@ namespace SystemC_VPC {
 
     virtual ~AbstractComponent();
   private:
+    class InputsAvailableListener;
+    class OutputWrittenListener;
+
+    /// Implement interface to SysteMoC
+    void checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
+
+    /// Implement interface to SysteMoC
+    void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
+
+    /// Implement interface to SysteMoC
+    void executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
 
     bool processPower(AttributePtr att);
 
