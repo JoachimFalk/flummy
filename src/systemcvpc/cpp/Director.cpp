@@ -327,29 +327,6 @@ namespace SystemC_VPC {
     }
   }
 
-  void Director::check(FastLink const *fLink) {
-    assert(!FALLBACKMODE);
-    TaskInstance *task = preCompute(fLink);
-    task->setName(task->getName().append("_check"));
-    task->setTimingScale(1);
-
-    Delayer *comp = fLink->component;
-    assert(comp);
-    comp->check(task);
-  }
-
-  //
-  void Director::compute(FastLink const *fLink, EventPair endPair) {
-    assert(!FALLBACKMODE);
-    TaskInstance * task = preCompute(fLink);
-    task->setBlockEvent( endPair );
-    task->setTimingScale(1);
-
-    Delayer* comp = fLink->component;
-    comp->compute(task);
-    postCompute(task, endPair);
-  }
-
   //
   void Director::read(FastLink const *fLink,
                       size_t quantum,

@@ -56,16 +56,6 @@ namespace SystemC_VPC{
   public:
 
     /**
-     * This is called if a transition is executed.
-     */
-    void compute( EventPair p ) const;
-
-    /**
-     * This is called if a transition is checked if it is enabled.
-     */
-    void check() const;
-
-    /**
      *
      */
     void write( size_t quantum, EventPair p ) const;

@@ -66,6 +66,7 @@ namespace SystemC_VPC {
           Director::getInstance().allocateTask(task->getProcessId());
         copy->setFunctionIds(task->getFunctionIds());
         copy->setTimingScale(task->getTimingScale());
+        copy->setPCB((*iter)->getPCB(task->getProcessId()));
         hopList.push_back( std::make_pair(*iter, copy) );
         // we need to lock the route in write or in read direction
         if(this->isWrite){

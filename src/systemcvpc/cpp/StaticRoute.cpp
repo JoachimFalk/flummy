@@ -69,14 +69,11 @@ namespace SystemC_VPC {
   //
   void StaticRoute::route( EventPair np ){
     if(nextHop != components.end()){
-      //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
-      TaskInstance *newTask =
-        Director::getInstance().allocateTask(task->getProcessId());
-      newTask->setTimingScale(task->getTimingScale());
-      newTask->setBlockEvent(np);
-      newTask->setFunctionIds(task->getFunctionIds());
-      DBG_OUT("route on: " << components.front()->getName() << std::endl);
-      (*nextHop)->compute(newTask);
+      DBG_OUT("route on: " << (*nextHop)->getName() << std::endl);
+      TaskInstance *newTask = (*nextHop)->executeHop(
+          (*nextHop)->getPCB(task->getProcessId()),
+          task->getTimingScale(),
+          np);
       ++nextHop;
       if(newTask->getBlockEvent().latency->isDropped()){
         taskEvents.latency->setDropped(newTask->getBlockEvent().latency->isDropped());

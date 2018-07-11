@@ -41,31 +41,16 @@
 
 namespace SystemC_VPC{
 
-  //
-  void FastLink::compute( EventPair p ) const{
-    SystemC_VPC::Director::getInstance()
-      .compute(this, p);
-  }
-
-  void FastLink::check() const {
-    //std::cerr << "FastLink " << this->process << ", " << this->func << std::endl;
-    SystemC_VPC::Director::getInstance()
-      .check(this);
-  }
-
-  //
   void FastLink::write( size_t quantum, EventPair p ) const{
     SystemC_VPC::Director::getInstance()
       .write(this, quantum, p );
   }
 
-  //
   void FastLink::read( size_t quantum, EventPair p ) const{
     SystemC_VPC::Director::getInstance()
       .read(this, quantum, p );
   }
 
-  //
   ComponentId FastLink::getComponentId() const{
     return component->getComponentId();
   }

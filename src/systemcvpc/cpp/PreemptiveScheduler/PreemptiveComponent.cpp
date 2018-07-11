@@ -203,18 +203,11 @@ namespace SystemC_VPC{
       }
     }
 
-    ProcessId pid = actualTask->getProcessId();
-    actualTask->setPCB(getPCB(pid));
-    actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
-
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
         << " ) at time: " << sc_core::sc_time_stamp()
         << " mode: " << this->getPowerMode()->getName()
         << " schedTask: " << actualTask->getPCB()->getScheduledTask()
         << std::endl);
-
-    // reset the execution delay
-    actualTask->initDelays();
     DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
     DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
 

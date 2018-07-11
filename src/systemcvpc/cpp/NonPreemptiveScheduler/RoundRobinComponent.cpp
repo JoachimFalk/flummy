@@ -101,12 +101,6 @@ void RoundRobinComponent::notifyActivation(TaskInterface * scheduledTask, bool a
 
 void RoundRobinComponent::compute(TaskInstance *actualTask) {
   std::cout << "\t " << sc_core::sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
-  ProcessId pid = actualTask->getProcessId();
-  /// Note that actualTask is not the task prototype, i.e.,
-  /// Director::getInstance().taskPool.getPrototype(pid),
-  /// but an instance allocated with PrototypedPool<Task>::allocate().
-  actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
-  actualTask->initDelays();
   if (actualTask->getPCB()->hasScheduledTask()) {
     assert(!useActivationCallback);
     scheduleMessageTasks();
@@ -125,9 +119,6 @@ void RoundRobinComponent::compute(TaskInstance *actualTask) {
 
 void RoundRobinComponent::check(TaskInstance *actualTask) {
   if (!useActivationCallback) {
-    ProcessId pid = actualTask->getProcessId();
-    actualTask->setTiming(this->getTiming(this->getPowerMode(), pid));
-    actualTask->initDelays();
     releaseTask(actualTask->getPCB(), actualTask);
     assignTaskInstance(actualTask);
     wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
