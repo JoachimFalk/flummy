@@ -61,63 +61,63 @@ CLEANFILES=$(nodist_pkgconfig_DATA)
 lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_la_SOURCES = \
-	src/systemcvpc/cpp/config/common.cpp \
-	src/systemcvpc/cpp/config/Component.cpp \
-	src/systemcvpc/cpp/config/Mappings.cpp \
-	src/systemcvpc/cpp/config/Route.cpp \
-	src/systemcvpc/cpp/config/Scheduler.cpp \
-	src/systemcvpc/cpp/config/Timing.cpp \
-	src/systemcvpc/cpp/config/VpcTask.cpp \
-	src/systemcvpc/cpp/config/VpcApi.cpp \
-	\
-	src/systemcvpc/cpp/dynload/dll-elf.cpp \
-	src/systemcvpc/cpp/dynload/dll-win32.cpp \
-	\
-	src/systemcvpc/cpp/NonPreemptiveScheduler/DynamicPriorityComponent.cpp \
-	src/systemcvpc/cpp/NonPreemptiveScheduler/FcfsComponent.cpp \
-	src/systemcvpc/cpp/NonPreemptiveScheduler/NonPreemptiveComponent.cpp \
-	src/systemcvpc/cpp/NonPreemptiveScheduler/PriorityComponent.cpp \
-	src/systemcvpc/cpp/NonPreemptiveScheduler/RoundRobinComponent.cpp \
-	\
-	src/systemcvpc/cpp/PreemptiveScheduler/PreemptiveComponent.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/AVBScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/FlexRayScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/PriorityScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/RateMonotonicScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/RoundRobinScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/TimeTriggeredCCScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/TDMAScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/MostScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/MostSecondaryScheduler.cpp \
-	src/systemcvpc/cpp/PreemptiveScheduler/StreamShaperScheduler.cpp \
-	\
-	src/systemcvpc/cpp/tracing/DataBaseTracer.cpp \
-	src/systemcvpc/cpp/tracing/NullTracer.cpp \
-	src/systemcvpc/cpp/tracing/PajeTracer.cpp \
-	src/systemcvpc/cpp/tracing/TraceableComponent.cpp \
-	src/systemcvpc/cpp/tracing/TracerIf.cpp \
-	src/systemcvpc/cpp/tracing/VcdTracer.cpp \
-	\
-	src/systemcvpc/cpp/AbstractComponent.cpp \
 	src/systemcvpc/cpp/Attribute.cpp \
-	src/systemcvpc/cpp/BlockingTransport.cpp \
-	src/systemcvpc/cpp/ComponentInfo.cpp \
-	src/systemcvpc/cpp/ConfigCheck.cpp \
-	src/systemcvpc/cpp/DebugOStream.cpp \
-	src/systemcvpc/cpp/Delayer.cpp \
-	src/systemcvpc/cpp/Director.cpp \
-	src/systemcvpc/cpp/FastLink.cpp \
-	src/systemcvpc/cpp/FunctionTiming.cpp \
-	src/systemcvpc/cpp/HysteresisLocalGovernor.cpp \
-	src/systemcvpc/cpp/PluggablePowerGovernor.cpp \
-	src/systemcvpc/cpp/PowerSumming.cpp \
-	src/systemcvpc/cpp/ProcessControlBlock.cpp \
-	src/systemcvpc/cpp/RouteImpl.cpp \
-	src/systemcvpc/cpp/SelectFastestPowerModeGlobalGovernor.cpp \
-	src/systemcvpc/cpp/StaticRoute.cpp \
-	src/systemcvpc/cpp/SystemCVPCSimulator.cpp \
-	src/systemcvpc/cpp/TaskInstance.cpp \
-	src/systemcvpc/cpp/VPCBuilder.cpp
+	src/systemcvpc/cpp/common.cpp \
+	src/systemcvpc/cpp/Component.cpp \
+	src/systemcvpc/cpp/Mappings.cpp \
+	src/systemcvpc/cpp/Route.cpp \
+	src/systemcvpc/cpp/Scheduler.cpp \
+	src/systemcvpc/cpp/Timing.cpp \
+	src/systemcvpc/cpp/VpcApi.cpp \
+	src/systemcvpc/cpp/VpcTask.cpp \
+	\
+	src/systemcvpc/cpp/detail/dynload/dll-elf.cpp \
+	src/systemcvpc/cpp/detail/dynload/dll-win32.cpp \
+	\
+	src/systemcvpc/cpp/detail/NonPreemptiveScheduler/DynamicPriorityComponent.cpp \
+	src/systemcvpc/cpp/detail/NonPreemptiveScheduler/FcfsComponent.cpp \
+	src/systemcvpc/cpp/detail/NonPreemptiveScheduler/NonPreemptiveComponent.cpp \
+	src/systemcvpc/cpp/detail/NonPreemptiveScheduler/PriorityComponent.cpp \
+	src/systemcvpc/cpp/detail/NonPreemptiveScheduler/RoundRobinComponent.cpp \
+	\
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/PreemptiveComponent.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/AVBScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/FlexRayScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/PriorityScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/RateMonotonicScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/RoundRobinScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/TimeTriggeredCCScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/TDMAScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/MostScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/MostSecondaryScheduler.cpp \
+	src/systemcvpc/cpp/detail/PreemptiveScheduler/StreamShaperScheduler.cpp \
+	\
+	src/systemcvpc/cpp/detail/tracing/DataBaseTracer.cpp \
+	src/systemcvpc/cpp/detail/tracing/NullTracer.cpp \
+	src/systemcvpc/cpp/detail/tracing/PajeTracer.cpp \
+	src/systemcvpc/cpp/detail/tracing/TraceableComponent.cpp \
+	src/systemcvpc/cpp/detail/tracing/TracerIf.cpp \
+	src/systemcvpc/cpp/detail/tracing/VcdTracer.cpp \
+	\
+	src/systemcvpc/cpp/detail/AbstractComponent.cpp \
+	src/systemcvpc/cpp/detail/BlockingTransport.cpp \
+	src/systemcvpc/cpp/detail/ComponentInfo.cpp \
+	src/systemcvpc/cpp/detail/ConfigCheck.cpp \
+	src/systemcvpc/cpp/detail/DebugOStream.cpp \
+	src/systemcvpc/cpp/detail/Delayer.cpp \
+	src/systemcvpc/cpp/detail/Director.cpp \
+	src/systemcvpc/cpp/detail/FastLink.cpp \
+	src/systemcvpc/cpp/detail/FunctionTiming.cpp \
+	src/systemcvpc/cpp/detail/HysteresisLocalGovernor.cpp \
+	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \
+	src/systemcvpc/cpp/detail/PowerSumming.cpp \
+	src/systemcvpc/cpp/detail/ProcessControlBlock.cpp \
+	src/systemcvpc/cpp/detail/RouteImpl.cpp \
+	src/systemcvpc/cpp/detail/SelectFastestPowerModeGlobalGovernor.cpp \
+	src/systemcvpc/cpp/detail/StaticRoute.cpp \
+	src/systemcvpc/cpp/detail/SystemCVPCSimulator.cpp \
+	src/systemcvpc/cpp/detail/TaskInstance.cpp \
+	src/systemcvpc/cpp/detail/VPCBuilder.cpp
 
 libsystemcvpc_la_DEPENDENCIES = \
 	$(COSUPPORT_STRING_DEPENDENCIES) \
