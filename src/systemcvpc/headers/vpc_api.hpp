@@ -37,6 +37,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_VPC_API_HPP
 #define _INCLUDED_SYSTEMCVPC_VPC_API_HPP
 
-#include "systemcvpc/config/VpcApi.hpp"
+#include "systemcvpc/VpcApi.hpp"
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPC_API_HPP */

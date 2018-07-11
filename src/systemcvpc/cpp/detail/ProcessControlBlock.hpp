@@ -39,7 +39,7 @@
 
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
 #include "FastLink.hpp"

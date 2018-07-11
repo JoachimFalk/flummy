@@ -42,7 +42,7 @@
 #include <systemcvpc/vpc_config.h>
 
 #include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/Component.hpp>
 
 #include "../AbstractComponent.hpp"
 #include "../ComponentInfo.hpp"

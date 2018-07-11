@@ -34,7 +34,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/config/common.hpp>
+#include <systemcvpc/common.hpp>
 
 #include <string>
 #include <iostream>

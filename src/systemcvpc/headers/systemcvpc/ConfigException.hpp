@@ -34,49 +34,20 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP
-#define _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_CONFIGEXCEPTION_HPP
+#define _INCLUDED_SYSTEMCVPC_CONFIGEXCEPTION_HPP
 
-#include "Component.hpp"
-#include "../ScheduledTask.hpp"
-
-#include <boost/shared_ptr.hpp>
+#include <stdexcept>
+#include <string>
 
 namespace SystemC_VPC { namespace Config {
 
-class VpcTask {
-public:
-  typedef boost::shared_ptr<VpcTask> Ptr;
-
-  VpcTask();
-
-  VpcTask(ScheduledTask & actor);
-
-  void mapTo(Component::Ptr component);
-
-  void setPriority(size_t priority);
-
-  size_t getPriority() const;
-
-  const ScheduledTask * getActor() const;
-
-  const Component::Ptr  getComponent() const;
-
-  //private:
-  void inject(ScheduledTask * actor);
-
-  void setActorAsPSM(bool psm);
-
-  bool isPSM();
-
-private:
-  // configured data
-  ScheduledTask * actor_;
-  Component::Ptr component_;
-  size_t priority_;
-  bool psm_;
-};
+  class ConfigException: public std::runtime_error {
+    public:
+      ConfigException(std::string const &msg)
+        : std::runtime_error("[VPC] Got Error:\n" + msg) {}
+  };
 
 } } // namespace SystemC_VPC::Config
 
-#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_VPCTASK_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_CONFIGEXCEPTION_HPP */

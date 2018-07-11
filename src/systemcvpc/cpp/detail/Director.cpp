@@ -37,11 +37,11 @@
 #include "config.h"
 //#include <systemcvpc/vpc_config.h>
 
-#include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/Timing.hpp>
+#include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
-#include <systemcvpc/config/Mappings.hpp>
+#include <systemcvpc/Mappings.hpp>
 
 #include "AbstractComponent.hpp"
 #include "Director.hpp"

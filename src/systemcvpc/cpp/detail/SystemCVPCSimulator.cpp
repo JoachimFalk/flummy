@@ -41,8 +41,8 @@
 #include <smoc/SimulatorAPI/PortInterfaces.hpp>
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
-#include <systemcvpc/config/VpcApi.hpp>
-#include <systemcvpc/config/Mappings.hpp>
+#include <systemcvpc/VpcApi.hpp>
+#include <systemcvpc/Mappings.hpp>
 
 #include "Director.hpp"
 #include "AbstractComponent.hpp"

@@ -26,21 +26,21 @@ SUBDIRS=
 
 nobase_include_HEADERS = \
 	systemcvpc/Attribute.hpp \
-	systemcvpc/config/common.hpp \
-	systemcvpc/config/Component.hpp \
-	systemcvpc/config/ConfigException.hpp \
-	systemcvpc/config/Mappings.hpp \
-	systemcvpc/config/Route.hpp \
-	systemcvpc/config/Scheduler.hpp \
-	systemcvpc/config/Timing.hpp \
-	systemcvpc/config/VpcApi.hpp \
-	systemcvpc/config/VpcTask.hpp \
-	systemcvpc/coupling/VPCEvent.hpp \
+	systemcvpc/common.hpp \
+	systemcvpc/Component.hpp \
+	systemcvpc/ConfigException.hpp \
 	systemcvpc/datatypes.hpp \
 	systemcvpc/EventPair.hpp \
 	systemcvpc/InvalidArgumentException.hpp \
+	systemcvpc/Mappings.hpp \
+	systemcvpc/Route.hpp \
 	systemcvpc/ScheduledTask.hpp \
+	systemcvpc/Scheduler.hpp \
+	systemcvpc/Timing.hpp \
 	systemcvpc/TimingModifier.hpp \
+	systemcvpc/VpcApi.hpp \
 	systemcvpc/vpc_config.h \
+	systemcvpc/VPCEvent.hpp \
+	systemcvpc/VpcTask.hpp \
 	vpc_api.hpp \
 	vpc.hpp

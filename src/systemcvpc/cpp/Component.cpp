@@ -34,10 +34,10 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/config/common.hpp>
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/Scheduler.hpp>
-#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/common.hpp>
+#include <systemcvpc/Component.hpp>
+#include <systemcvpc/Scheduler.hpp>
+#include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/TimingModifier.hpp>
 

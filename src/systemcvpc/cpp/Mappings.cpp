@@ -34,7 +34,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/config/Mappings.hpp>
+#include <systemcvpc/Mappings.hpp>
 
 #include "detail/BlockingTransport.hpp"
 #include "detail/RoutePool.hpp"

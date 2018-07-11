@@ -40,7 +40,7 @@
 //#define VPC_ENABLE_PLAIN_TRACING
 #include "TracerIf.hpp"
 
-#include <systemcvpc/config/Component.hpp>
+#include <systemcvpc/Component.hpp>
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 

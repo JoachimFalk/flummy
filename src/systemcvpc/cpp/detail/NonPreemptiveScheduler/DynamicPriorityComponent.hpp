@@ -39,8 +39,8 @@
 
 #include "NonPreemptiveComponent.hpp"
 
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/VpcApi.hpp>
+#include <systemcvpc/Component.hpp>
+#include <systemcvpc/VpcApi.hpp>
 
 #include "../diagnostics/DebugOutput.hpp"
 #include "../TaskInstance.hpp"

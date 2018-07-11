@@ -39,7 +39,7 @@
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
-#include <systemcvpc/config/Route.hpp>
+#include <systemcvpc/Route.hpp>
 #include "RouteImpl.hpp"
 
 namespace SystemC_VPC { namespace Detail {

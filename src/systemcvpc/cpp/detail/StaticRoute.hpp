@@ -37,7 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_STATICROUTE_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_STATICROUTE_HPP
 
-#include <systemcvpc/config/Route.hpp>
+#include <systemcvpc/Route.hpp>
 #include <systemcvpc/EventPair.hpp>
 
 #include "RouteImpl.hpp"

@@ -34,9 +34,9 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/config/VpcTask.hpp>
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/ConfigException.hpp>
+#include <systemcvpc/VpcTask.hpp>
+#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
 namespace SystemC_VPC { namespace Config {

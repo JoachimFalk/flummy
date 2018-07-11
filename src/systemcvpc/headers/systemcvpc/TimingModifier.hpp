@@ -37,13 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_TIMINGMODIFIER_HPP
 #define _INCLUDED_SYSTEMCVPC_TIMINGMODIFIER_HPP
 
-#include <systemc>
-#include <fstream>
-#include <systemc>
-#include <vector>
-#include <algorithm>
+
 #include <boost/random.hpp>
-#include <stdio.h>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/bernoulli_distribution.hpp>
@@ -58,6 +53,16 @@
 #include <boost/random/triangle_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+
+#include <systemc>
+
+#include <fstream>
+#include <systemc>
+#include <vector>
+#include <algorithm>
+
+#include <stdio.h>
+
 typedef boost::minstd_rand base_generator_type;
 
 namespace SystemC_VPC{

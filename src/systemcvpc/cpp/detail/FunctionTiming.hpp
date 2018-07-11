@@ -37,7 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_FUNCTIONTIMING_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_FUNCTIONTIMING_HPP
 
-#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/Timing.hpp>
 #include <systemcvpc/TimingModifier.hpp>
 
 #include <boost/shared_ptr.hpp>

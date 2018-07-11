@@ -36,10 +36,10 @@
 
 #include "config.h"
 
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/ConfigException.hpp>
-#include <systemcvpc/config/VpcApi.hpp>
-#include <systemcvpc/config/Mappings.hpp>
+#include <systemcvpc/Component.hpp>
+#include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/VpcApi.hpp>
+#include <systemcvpc/Mappings.hpp>
 
 #include "detail/Director.hpp"
 

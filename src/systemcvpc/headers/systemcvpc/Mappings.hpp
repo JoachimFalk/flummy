@@ -34,12 +34,12 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_MAPPINGS_HPP
-#define _INCLUDED_SYSTEMCVPC_CONFIG_MAPPINGS_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_MAPPINGS_HPP
+#define _INCLUDED_SYSTEMCVPC_MAPPINGS_HPP
 
-#include <systemcvpc/config/Component.hpp>
-#include <systemcvpc/config/Route.hpp>
-#include <systemcvpc/config/VpcTask.hpp>
+#include "Component.hpp"
+#include "Route.hpp"
+#include "VpcTask.hpp"
 
 #include <map>
 
@@ -86,4 +86,4 @@ namespace Routing
 
 } } // namespace SystemC_VPC::Config
 
-#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_MAPPINGS_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_MAPPINGS_HPP */

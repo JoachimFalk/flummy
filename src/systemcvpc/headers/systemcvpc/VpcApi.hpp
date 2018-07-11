@@ -34,14 +34,14 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_CONFIG_VPCAPI_HPP
-#define _INCLUDED_SYSTEMCVPC_CONFIG_VPCAPI_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_VPCAPI_HPP
+#define _INCLUDED_SYSTEMCVPC_VPCAPI_HPP
 
 #include "Component.hpp"
 #include "Route.hpp"
 #include "Timing.hpp"
 #include "VpcTask.hpp"
-#include "../ScheduledTask.hpp"
+#include "ScheduledTask.hpp"
 
 #include <string>
 #include <map>
@@ -112,4 +112,4 @@ void setActorAsPSM(const char*  name, bool psm);
 
 } } // namespace SystemC_VPC::Config
 
-#endif /* _INCLUDED_SYSTEMCVPC_CONFIG_VPCAPI_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_VPCAPI_HPP */
