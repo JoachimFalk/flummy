@@ -37,15 +37,15 @@
 #ifndef _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP
 #define _INCLUDED_SYSTEMCVPC_PROCESSCONTROLBLOCK_HPP
 
+#include <systemcvpc/EventPair.hpp>
+#include <systemcvpc/datatypes.hpp>
+#include <systemcvpc/config/Timing.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+
+#include "FastLink.hpp"
 #include "PowerMode.hpp"
 #include "FunctionTiming.hpp"
 #include "tracing/TracerIf.hpp"
-
-#include <systemcvpc/EventPair.hpp>
-#include <systemcvpc/datatypes.hpp>
-#include <systemcvpc/FastLink.hpp>
-#include <systemcvpc/config/Timing.hpp>
-#include <systemcvpc/ScheduledTask.hpp>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>

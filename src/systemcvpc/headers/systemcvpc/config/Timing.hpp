@@ -37,25 +37,17 @@
 #ifndef _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP
 #define _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP
 
-#include "../FastLink.hpp"
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include "../TimingModifier.hpp"
+#include "../datatypes.hpp"
+
+#include <systemc>
 
 #include <boost/shared_ptr.hpp>
 
 #include <string>
 #include <map>
 
-#include <systemc>
-
-namespace SystemC_VPC
-{
-
-namespace Config
-{
-
-
-
+namespace SystemC_VPC { namespace Config {
 
 /*
  *
@@ -153,8 +145,6 @@ private:
 
 };
 
+} } // namespace SystemC_VPC::Config
 
-
-} // namespace Config
-} // namespace SystemC_VPC
 #endif /* _INCLUDED_SYSTEMCVPC_CONFIG_TIMING_HPP */

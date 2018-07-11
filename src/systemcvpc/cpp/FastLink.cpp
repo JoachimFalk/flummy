@@ -34,8 +34,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/FastLink.hpp>
-
+#include "FastLink.hpp"
 #include "Director.hpp"
 #include "Delayer.hpp"
 

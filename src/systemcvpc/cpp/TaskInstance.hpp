@@ -38,8 +38,8 @@
 #define _INCLUDED_SYSTEMCVPC_TASKINSTANCE_HPP
 
 #include <systemcvpc/vpc_config.h>
-#include <systemcvpc/FastLink.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/EventPair.hpp>
 
 #include "TaskPool.hpp"
 #include "tracing/TracerIf.hpp"
@@ -66,8 +66,6 @@ namespace SystemC_VPC {
     void        setProcessId(ProcessId pid)              {this->pid = pid;}
     FunctionIds getFunctionIds()                         {return fid;}
     void        setFunctionIds(FunctionIds fid)          {this->fid = fid;}
-    FunctionIds getGuardIds()                            {return gid;}
-    void        setGuardIds(FunctionIds gid)             {this->gid = gid;}
     EventPair   getBlockEvent()                          {return blockEvent;}
     void        setBlockEvent(EventPair p)               {this->blockEvent = p;}
     ProcessControlBlock *getPCB()                        {return this->pcb;}
@@ -94,32 +92,16 @@ namespace SystemC_VPC {
     void       setWrite( bool write ) {this->write=write;}
     bool       isWrite(  ) { return this->write;}
 
-    //////////////////////////////
-    // Begin from Simone Mueller //
-    //////////////////////////////
-
-    void setFactorOverhead(int complexity)
-      { this->factorOverhead = complexity; }
-    int getFactorOverhead() const
-      { return this->factorOverhead; }
-
-    void setOverhead(const sc_core::sc_time &overhead)
-      { this->overhead = overhead; }
-    sc_core::sc_time getOverhead() const
-      { return this->overhead; }
-    //////////////////////////////
-    // End from Simone Mueller //
-    //////////////////////////////
-
     void setDelay(const sc_core::sc_time& delay)         {this->delay = delay;}
     sc_core::sc_time getDelay() const                    {return this->delay;}
     void setLatency(const sc_core::sc_time& latency)     {this->latency = latency;}
     sc_core::sc_time getLatency() const                  {return this->latency;}
     void setRemainingDelay(const sc_core::sc_time& delay){this->remainingDelay = delay;}
     sc_core::sc_time getRemainingDelay() const           {return this->remainingDelay;}
-    int getInstanceId() const                   {return this->instanceId;}
-    void setTimingScale( double scale )         {this->timingScale = scale;}
-    double getTimingScale()                     {return this->timingScale;}
+    void setTimingScale( double scale )                  {this->timingScale = scale;}
+    double getTimingScale()                              {return this->timingScale;}
+
+    int getInstanceId() const                            {return this->instanceId;}
 
     void setFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr)
       { this->firingRuleInterface = fr; }
@@ -153,7 +135,6 @@ namespace SystemC_VPC {
 
     ProcessId        pid;
     FunctionIds      fid;
-    FunctionIds      gid;
     EventPair        blockEvent;
 
     Coupling::VPCEvent::Ptr blockingCompute;
@@ -164,13 +145,11 @@ namespace SystemC_VPC {
     sc_core::sc_time startTime;
     sc_core::sc_time endTime;
     sc_core::sc_time blockingTime;
+
     sc_core::sc_time delay;
     sc_core::sc_time latency;
     sc_core::sc_time remainingDelay;
-    sc_core::sc_time overhead;
     
-    int factorOverhead;
-
     ProcessControlBlock *pcb;
     TaskPool            *pool;
 

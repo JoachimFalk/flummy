@@ -121,7 +121,7 @@ void RoundRobinComponent::check(TaskInstance *actualTask) {
   if (!useActivationCallback) {
     releaseTask(actualTask->getPCB(), actualTask);
     assignTaskInstance(actualTask);
-    wait(actualTask->getOverhead());//Director::getInstance().getOverhead() +
+    wait(actualTask->getDelay());//Director::getInstance().getOverhead() +
     finishDiiTaskInstance(actualTask);
     finishLatencyTaskInstance(actualTask);
 
