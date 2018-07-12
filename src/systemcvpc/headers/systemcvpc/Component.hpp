@@ -37,7 +37,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_COMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_COMPONENT_HPP
 
-#include "common.hpp"
 #include "ConfigException.hpp"
 #include "Scheduler.hpp"
 #include "Timing.hpp"
@@ -47,12 +46,10 @@
 #include "ScheduledTask.hpp"
 #include "VPCEvent.hpp"
 
-#include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/SmartPtr/RefCountObject.hpp>
 
 #include <boost/noncopyable.hpp>
 
-#include <systemc>
 #include <set>
 #include <string>
 
@@ -90,8 +87,6 @@ public:
 };
 
 class Component
-//: protected SequentiallyIdedObject<ComponentId> ,
-//  public Traceable
   : private boost::noncopyable
   , public CoSupport::SmartPtr::RefCountObject
 {
@@ -116,6 +111,9 @@ public:
   void addTask(ScheduledTask & actor);
 
   bool hasTask(ScheduledTask * actor) const;
+
+  // Add a tracer. Use constants as defined in Tracer, e.g., Tracer::PAJE.
+  void addTracer(const char *tracer);
 
   void setTimingsProvider(TimingsProvider::Ptr provider);
 

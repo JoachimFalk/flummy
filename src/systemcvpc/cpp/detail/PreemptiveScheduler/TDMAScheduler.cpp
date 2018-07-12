@@ -53,7 +53,7 @@
 
 #include "TDMAScheduler.hpp"
 #include "PreemptiveComponent.hpp"
-#include "../Director.hpp"
+#include "../common.hpp"
 
 #include <CoSupport/SystemC/algorithm.hpp>
 
@@ -104,7 +104,7 @@ namespace SystemC_VPC { namespace Detail {
 
           //Erstellen der TDMA-Struktur
           TDMASlot newSlot;
-          newSlot.length = Director::createSC_Time(value);      
+          newSlot.length = createSC_Time(value);
           newSlot.name = key;
           TDMA_slots.insert(TDMA_slots.end(), newSlot);
           slicecount++;

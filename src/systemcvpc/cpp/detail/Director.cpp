@@ -416,18 +416,6 @@ namespace SystemC_VPC { namespace Detail {
     return new FastLink(route, pid, fids, FunctionIds(),0);
   }
 
-  sc_core::sc_time Director::createSC_Time(const char* timeString) {
-    try{
-      return CoSupport::SystemC::createSCTime(timeString);
-    } catch(std::runtime_error &e){
-      throw InvalidArgumentException(e.what());
-    }
-  }
-
-  sc_core::sc_time Director::createSC_Time(std::string timeString) {
-    return Director::createSC_Time( timeString.c_str());
-  }
-
   void Director::loadGlobalGovernorPlugin(std::string plugin,
                                           AttributePtr attPtr){
     //std::cerr << "Director::loadGlobalGovernorPlugin" << std::endl;

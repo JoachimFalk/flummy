@@ -34,46 +34,24 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/common.hpp>
+#include "common.hpp"
 
-#include <string>
-#include <iostream>
+#include <systemcvpc/InvalidArgumentException.hpp>
 
-namespace SystemC_VPC {
+#include <CoSupport/SystemC/systemc_time.hpp>
 
-//
-Traceable::Type Traceable::parseTracing(std::string name)
-{
-  if (name == "NONE") {
-    return NONE;
-  } else if (name == "VCD") {
-    return VCD;
-  } else if (name == "PAJE") {
-    return PAJE;
-  } else if (name == "DB") {
-    return DB;
-  } else {
-    std::cerr << "[VPC warning] unknown tracing option: " << name << std::endl;
+
+namespace SystemC_VPC { namespace Detail {
+
+  /**
+   * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
+   */
+  sc_core::sc_time createSC_Time(const char *timeString) {
+    try {
+      return CoSupport::SystemC::createSCTime(timeString);
+    } catch(std::runtime_error &e) {
+      throw InvalidArgumentException(e.what());
+    }
   }
-  return VCD;
-}
 
-//
-void Traceable::setTracing(Traceable::Type tracing)
-{
-  tracing_ = tracing;
-}
-
-//
-Traceable::Type Traceable::getTracing() const
-{
-  return tracing_;
-}
-
-//
-Traceable::Traceable() :
-  tracing_(Traceable::VCD)
-{
-}
-
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail

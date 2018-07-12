@@ -26,7 +26,6 @@ SUBDIRS=
 
 nobase_include_HEADERS = \
 	systemcvpc/Attribute.hpp \
-	systemcvpc/common.hpp \
 	systemcvpc/Component.hpp \
 	systemcvpc/ConfigException.hpp \
 	systemcvpc/datatypes.hpp \

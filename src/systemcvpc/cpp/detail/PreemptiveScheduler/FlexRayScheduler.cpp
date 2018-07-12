@@ -76,7 +76,7 @@
 
 #include "FlexRayScheduler.hpp"
 #include "PreemptiveComponent.hpp"
-#include "../Director.hpp"
+#include "../common.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -215,7 +215,7 @@ namespace SystemC_VPC { namespace Detail {
         //std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
         TDMASlot newSlot;
         //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
-        newSlot.length = Director::createSC_Time(param.second.c_str() );  
+        newSlot.length = createSC_Time(param.second.c_str() );
         cycle_length += newSlot.length;      
         newSlot.name = param.first;
         TDMA_slots.insert(TDMA_slots.end(), newSlot);
@@ -284,7 +284,7 @@ namespace SystemC_VPC { namespace Detail {
     }   
     if( attributePtr->hasAttribute("dynamic") ){
       AttributePtr fr_dynamic = attributePtr->getAttribute("dynamic");
-      this->TimeDynamicSegment = Director::createSC_Time(fr_dynamic->getValue());
+      this->TimeDynamicSegment = createSC_Time(fr_dynamic->getValue().c_str());
       cycle_length += this->TimeDynamicSegment; 
                 
       for(size_t k=0;k<fr_dynamic->getAttributeSize();k++){
@@ -302,7 +302,7 @@ namespace SystemC_VPC { namespace Detail {
           //Default-Value fuer eine Dynamic-Slot-Laenge
           param.second="30us";
         }
-        newSlot.length = Director::createSC_Time(param.second.c_str() );        
+        newSlot.length = createSC_Time(param.second.c_str() );
         newSlot.name = param.first;
         Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
         //                      std::cout<<"new Dynamic One! " << newSlot.length <<std::endl;

@@ -103,11 +103,6 @@ private:
   static void registerTracer(
       const char                                   *tracerName,
       std::function<TracerIf *(Component const *)>  tracerFactory);
-
-  /// Add a tracer.
-  /// This must no longer be called after the first task has been
-  /// registered via registerTask.
-  void addTracer(TracerIf *tracer);
 };
 
 } } } // namespace SystemC_VPC::Detail::Tracing

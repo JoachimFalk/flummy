@@ -65,7 +65,7 @@ Sebastian Graf - Mai 2008
 
 #include "TimeTriggeredCCScheduler.hpp"
 #include "PreemptiveComponent.hpp"
-#include "../Director.hpp"
+#include "../common.hpp"
 
 
 namespace SystemC_VPC { namespace Detail {
@@ -163,7 +163,7 @@ namespace SystemC_VPC { namespace Detail {
           //                         std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
           TDMASlot newSlot;
           //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
-          newSlot.length = Director::createSC_Time(param.second.c_str() );      
+          newSlot.length = createSC_Time(param.second.c_str() );
           newSlot.name = param.first;
           TDMA_slots.insert(TDMA_slots.end(), newSlot);
 

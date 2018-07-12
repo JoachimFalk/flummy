@@ -36,13 +36,13 @@
 
 #include "RoundRobinScheduler.hpp"
 #include "PreemptiveComponent.hpp"
-#include "../Director.hpp"
+#include "../common.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
   void RoundRobinScheduler::setProperty(const char* key, const char* value){
     if (std::string("timeslice") == key) {
-      timeSlice_ = Director::createSC_Time(value);
+      timeSlice_ = createSC_Time(value);
     }
   }
 
