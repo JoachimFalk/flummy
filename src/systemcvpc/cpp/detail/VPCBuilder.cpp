@@ -434,7 +434,7 @@ namespace SystemC_VPC { namespace Detail {
           assert(VC::hasComponent(sTarget));
           VC::Component::Ptr comp = VC::getComponent(sTarget);
           VC::VpcTask::Ptr task = VC::getCachedTask(sSource);
-          VC::Mappings::getConfiguredMappings()[task] = comp;
+          task->mapTo(comp);
           VC::DefaultTimingsProvider::Ptr provider = comp->getDefaultTimingsProvider();
 
           //walk down hierarchy to attributes

@@ -57,13 +57,20 @@ typedef std::list<TaskInterface *> PriorityList;
 
 class DynamicPriorityComponent: public NonPreemptiveComponent {
 public:
-  DynamicPriorityComponent(SystemC_VPC::Component::Ptr component,
-      Director *director = &Director::getInstance());
+  DynamicPriorityComponent(std::string const &name);
+
+  /// Realize debug file interface from SystemC_VPC::Component.
+  bool        hasDebugFile() const;
+  /// Realize debug file interface from SystemC_VPC::Component.
+  void        setDebugFileName(std::string const &fileName);
+  /// Realize debug file interface from SystemC_VPC::Component.
+  std::string getDebugFileName() const;
 
   // Implement ComponentInterface
-  void setDynamicPriority(std::list<ScheduledTask *> priorityList);
+  void                       setDynamicPriority(std::list<ScheduledTask *> priorityList);
   // Implement ComponentInterface
   std::list<ScheduledTask *> getDynamicPriority();
+
   // Implement ComponentInterface
   void scheduleAfterTransition();
 
@@ -75,14 +82,17 @@ protected:
   // Implement interface for NonPreemptiveComponent
   TaskInstance *selectReadyTask();
 
+  void start_of_simulation();
+
 private:
   PriorityList   priorities_;
 
   std::list<TaskInstance *> readyTasks;
 
   TaskInterface *yieldTask;
-  TaskInstance          *selectedTask;
+  TaskInstance  *selectedTask;
   std::ostream  *debugOut;
+  std::string    debugFileName;
 
   void debugDump(const TaskInterface * toBeExecuted) const;
 };

@@ -106,7 +106,7 @@ namespace SystemC_VPC { namespace Detail {
      * \brief An implementation of AbstractComponent used together with
      * passive actors and global SMoC v2 Schedulers.
      */
-    NonPreemptiveComponent(SystemC_VPC::Component::Ptr component, Director *director);
+    NonPreemptiveComponent(std::string const &name);
 
     virtual void newReadyTask(TaskInstance *newTask) = 0;
 

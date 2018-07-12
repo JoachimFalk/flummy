@@ -43,42 +43,20 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/Mappings.hpp>
 
-#include "AbstractComponent.hpp"
 #include "Director.hpp"
 #include "ConfigCheck.hpp"
 #include "DebugOStream.hpp"
 #include "HysteresisLocalGovernor.hpp"
 #include "FastLink.hpp"
 
-#include "NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
-#include "NonPreemptiveScheduler/FcfsComponent.hpp"
-#include "NonPreemptiveScheduler/NonPreemptiveComponent.hpp"
-#include "NonPreemptiveScheduler/PriorityComponent.hpp"
-#include "NonPreemptiveScheduler/RoundRobinComponent.hpp"
-#include "PreemptiveScheduler/AVBScheduler.hpp"
-#include "PreemptiveScheduler/FlexRayScheduler.hpp"
-#include "PreemptiveScheduler/MostScheduler.hpp"
-#include "PreemptiveScheduler/MostSecondaryScheduler.hpp"
-#include "PreemptiveScheduler/PriorityScheduler.hpp"
-#include "PreemptiveScheduler/RateMonotonicScheduler.hpp"
-#include "PreemptiveScheduler/RoundRobinScheduler.hpp"
-#include "PreemptiveScheduler/StreamShaperScheduler.hpp"
-#include "PreemptiveScheduler/TDMAScheduler.hpp"
-#include "PreemptiveScheduler/TimeTriggeredCCScheduler.hpp"
-
 #include "PluggablePowerGovernor.hpp"
 #include "PowerSumming.hpp"
-#include "PreemptiveScheduler/PreemptiveComponent.hpp"
 #include "ProcessControlBlock.hpp"
 #include "RoutePool.hpp"
 #include "SelectFastestPowerModeGlobalGovernor.hpp"
 #include "StaticRoute.hpp"
 #include "TaskInstance.hpp"
-#include "tracing/DataBaseTracer.hpp"
-#include "tracing/NullTracer.hpp"
-#include "tracing/PajeTracer.hpp"
-#include "tracing/VcdTracer.hpp"
-#include "VPCBuilder.hpp"
+#include "dynload/dll.hpp"
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
@@ -122,80 +100,6 @@ namespace SystemC_VPC { namespace Detail {
       //assert(VC::Routing::get(pid) == VC::Routing::get(leafPort));
     }
 
-    static
-    AbstractComponent * createComponent(SystemC_VPC::Component::Ptr component) {
-      AbstractComponent *comp = NULL;
-      switch (component->getScheduler()) {
-        case VC::Scheduler::FCFS:
-          comp = new FcfsComponent(component);
-          break;
-        case VC::Scheduler::StaticPriorityNoPreempt:
-          comp = new PriorityComponent(component);
-          break;
-        case VC::Scheduler::RoundRobinNoPreempt:
-          comp = new RoundRobinComponent(component);
-          break;
-        case VC::Scheduler::DynamicPriorityUserYield:
-          comp = new DynamicPriorityComponent(component);
-          break;
-        case SystemC_VPC::Scheduler::RoundRobin:
-          comp = new PreemptiveComponent(component, new RoundRobinScheduler());
-          break;
-        case SystemC_VPC::Scheduler::StaticPriority:
-          comp = new PreemptiveComponent(component, new PriorityScheduler());
-          break;
-        case SystemC_VPC::Scheduler::RateMonotonic:
-          comp = new PreemptiveComponent(component, new RateMonotonicScheduler());
-          break;
-        case SystemC_VPC::Scheduler::TDMA:
-          comp = new PreemptiveComponent(component, new TDMAScheduler());
-          break;
-        case SystemC_VPC::Scheduler::FlexRay:
-          comp = new PreemptiveComponent(component, new FlexRayScheduler());
-          break;
-        case SystemC_VPC::Scheduler::AVB:
-          comp = new PreemptiveComponent(component, new AVBScheduler());
-          break;
-        case SystemC_VPC::Scheduler::TTCC:
-          comp = new PreemptiveComponent(component, new TimeTriggeredCCScheduler());
-          break;
-        case SystemC_VPC::Scheduler::MOST:
-          comp = new PreemptiveComponent(component, new MostScheduler());
-          break;
-        case SystemC_VPC::Scheduler::StreamShaper:
-          comp = new PreemptiveComponent(component, new StreamShaperScheduler());
-          break;
-        default:
-          assert(!"Oops, I don't know this scheduler!");
-      }
-
-      switch(component->getTracing()){
-        case SystemC_VPC::Traceable::NONE:
-          comp->addTracer(new Tracing::NullTracer(component));
-          break;
-        case SystemC_VPC::Traceable::PAJE:
-          comp->addTracer(new Tracing::PajeTracer(component));
-          break;
-        case SystemC_VPC::Traceable::VCD:
-          comp->addTracer(new Tracing::VcdTracer(component));
-          break;
-        case SystemC_VPC::Traceable::DB:
-          comp->addTracer(new Tracing::DataBaseTracer(component));
-          break;
-        default:
-          assert(!"Oops, I don't know this tracer!");
-      }
-
-      VC::Mappings::getComponents()[component] = comp;
-      Director::getInstance().registerComponent(comp);
-      std::vector<AttributePtr> atts = component->getAttributes();
-      for(std::vector<AttributePtr>::const_iterator iter = atts.begin();
-          iter != atts.end(); ++iter){
-        comp->setAttribute(*iter);
-      }
-      return comp;
-    }
-
   } // namespace anonymous
 
   std::unique_ptr<Director> Director::singleton;
@@ -225,19 +129,6 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_report_handler::set_actions(
         sc_core::SC_WARNING,
         sc_core::SC_DO_NOTHING);
-
-    try{
-      VPCBuilder builder((Director*)this);
-      builder.buildVPC();
-    }catch(InvalidArgumentException& e){
-      std::cerr << "Director> Got exception while setting up VPC:\n"
-                << e.what() << std::endl;
-      exit(-1);
-    }catch(const std::exception& e){
-      std::cerr << "Director> Got exception while setting up VPC:\n"
-                << e.what() << std::endl;
-      exit(-1);
-    }
   }
 
   /**
@@ -268,29 +159,11 @@ namespace SystemC_VPC { namespace Detail {
     }
 
 #ifndef NO_POWER_SUM
-    for( Components::iterator it = components.begin();
-         it != components.end();
-         ++it )
-    {
-      if(*it != NULL) {
-        (*it)->removeObserver(powerSumming);
-      }
+    for (SystemC_VPC::Components::value_type const &v : getComponents()) {
+      static_cast<AbstractComponent *>(v.second.get())->removeObserver(powerSumming);
     }
-
     delete powerSumming;
 #endif // NO_POWER_SUM
-
-    // clear components
-    for( Components::iterator it = components.begin();
-         it != components.end();
-         ++it ){
-      if(*it != NULL) {
-        delete *it;
-      }
-    }
-
-    componentIdMap.clear();
-
     delete taskPool;
   }
 
@@ -356,23 +229,6 @@ namespace SystemC_VPC { namespace Detail {
     Delayer* comp = fLink->component;
     comp->compute(task);
     postCompute(task, endPair);
-  }
-
-  /**
-   * \brief Implementation of Director::registerComponent
-   */
-  void Director::registerComponent(Delayer* comp){
-    ComponentId cid = comp->getComponentId();
-    if(cid >= components.size())
-      components.resize(cid+100, NULL);
-
-    this->componentIdMap[comp->getName()] = cid;
-
-    this->components[cid] = comp;
-
-    DBG_OUT(" Director::registerComponent(" << comp->getName()
-            << ") [" << comp->getComponentId() << "] # " << components.size()
-            << std::endl);
   }
 
   TaskInstance* Director::allocateTask(ProcessId pid){
@@ -441,19 +297,6 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  ComponentId Director::getComponentId(std::string component) {
-#ifdef DBG_DIRECTOR
-    std::cerr << " Director::getComponentId(" << component
-         << ") # " << componentIdMap.size()
-         << std::endl;
-#endif //DBG_DIRECTOR
-
-    ComponentIdMap::const_iterator iter = componentIdMap.find(component);
-    assert( iter != componentIdMap.end() );
-    return iter->second;
-      
-  }
-
   typedef std::map<std::string, FunctionId>  FunctionIdMap;
 
   FunctionId uniqueFunctionId() {
@@ -506,39 +349,14 @@ namespace SystemC_VPC { namespace Detail {
 
   void Director::beforeVpcFinalize()
   {
-    // create AbstractComponents and configure mappings given from config API
-    const VC::Components & components = VC::getComponents();
-
-    BOOST_FOREACH(VC::Components::value_type component_pair, components) {
-      std::string componentName = component_pair.first;
-      VC::Component::Ptr component = component_pair.second;
-      assert(componentName == component->getName());
-
-      VC::Component::MappedTasks tasks = component->getMappedTasks();
-
-      AbstractComponent *comp = createComponent(component);
-      assert(comp != NULL);
-
-      BOOST_FOREACH(TaskInterface* task, tasks) {
-        VC::Mappings::getConfiguredMappings()[VC::getCachedTask(*task)] = component;
-      }
-    }
-
-
 #ifndef NO_POWER_SUM
     powerSumming = new PowerSumming(powerConsStream);
 #endif // NO_POWER_SUM
-    for( Components::iterator it = this->components.begin();
-         it != this->components.end();
-         ++it )
-    {
-      if(*it != NULL) {
+    for (SystemC_VPC::Components::value_type const &v : getComponents()) {
 #ifndef NO_POWER_SUM
-        (*it)->addObserver(powerSumming);
+      static_cast<AbstractComponent *>(v.second.get())->addObserver(powerSumming);
 #endif // NO_POWER_SUM
-        (*it)->initialize(this);
-
-      }
+      static_cast<AbstractComponent *>(v.second.get())->initialize(this);
     }
   }
   /// end section: VpcApi.hpp related stuff
@@ -584,7 +402,6 @@ namespace SystemC_VPC { namespace Detail {
     VC::Route::Ptr configuredRoute = VC::Routing::get(pid);
     Route *route = VC::Routing::create(configuredRoute);
 
-    this->registerComponent(route);
     const std::string & taskName = route->getName();
 
     assert(pid == getProcessId( taskName ));

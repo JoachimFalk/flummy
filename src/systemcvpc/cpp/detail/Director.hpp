@@ -55,9 +55,9 @@
 
 #include <stdio.h>
 
-template <class T> class DLLFactory;
-
 namespace SystemC_VPC { namespace Detail {
+
+  template <class T> class DLLFactory;
 
   typedef std::vector<std::string> FunctionNames;
 
@@ -137,15 +137,6 @@ namespace SystemC_VPC { namespace Detail {
     void write(FastLink const *fLink,
                size_t quantum,
                EventPair endPair = EventPair(NULL, NULL) );
-
-    /**
-     * \brief Register component to Director
-     * Used to register a component to the Director for
-     * later computation of task on it. The components name
-     * is used as identifier for it.
-     * \param comp points to component instance to be registered
-     */
-    void registerComponent(Delayer *comp);
     
     /**
      * \brief resolve mapping
@@ -165,8 +156,6 @@ namespace SystemC_VPC { namespace Detail {
 
     static ProcessId getProcessId(std::string process_or_source,
         std::string destination = "");
-
-    ComponentId getComponentId(std::string component);
 
     FastLink *registerRoute(std::string source, std::string destination,
         sc_core::sc_port_base * leafPort);
@@ -225,15 +214,9 @@ namespace SystemC_VPC { namespace Detail {
      */
     Director();
 
-    typedef std::vector<Delayer* >  Components;
-    Components                      components;
-    
     // output file to write result to
     std::string vpc_result_file;
     
-
-    typedef std::map<std::string, ComponentId> ComponentIdMap;
-    ComponentIdMap                             componentIdMap;
 
 #ifndef NO_POWER_SUM
     std::ofstream  powerConsStream;

@@ -43,8 +43,7 @@ namespace SystemC_VPC { namespace Detail {
 
 class PriorityComponent : public NonPreemptiveComponent {
 public:
-  PriorityComponent(SystemC_VPC::Component::Ptr component,
-      Director *director  = &Director::getInstance());
+  PriorityComponent(std::string const &name);
 
   virtual ~PriorityComponent();
 protected:

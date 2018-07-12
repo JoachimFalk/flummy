@@ -55,19 +55,15 @@ static const FunctionId defaultFunctionId = 0;
  *
  */
 template<typename ID_TYPE>
-class SequentiallyIdedObject
-{
+class SequentiallyIdedObject {
 public:
   typedef ID_TYPE IdType;
-
+protected:
   SequentiallyIdedObject() :
     id_(getNextId())
-  {
-  }
+  {}
 
-protected:
-  IdType getSequentialId() const
-  {
+  IdType getSequentialId() const {
     return id_;
   }
 

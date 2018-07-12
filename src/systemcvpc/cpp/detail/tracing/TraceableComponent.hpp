@@ -1,8 +1,22 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2018-2018 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
+ * 
+ *   This library is free software; you can redistribute it and/or modify it under
+ *   the terms of the GNU Lesser General Public License as published by the Free
+ *   Software Foundation; either version 2 of the License, or (at your option) any
+ *   later version.
+ * 
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ *   details.
+ * 
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation, Inc.,
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  * 
  * --- This software and any associated documentation is provided "as is"
  * 
@@ -27,15 +41,17 @@
 
 #include <vector>
 #include <map>
+#include <functional>
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 /// Base class for all components that can have tracers.
 class TraceableComponent {
 public:
-  /// Add a tracer. This must no longer be called after the first task
-  /// has been registered via registerTask.
-  void addTracer(TracerIf *tracer);
+  /// Add a tracer by its name.
+  /// This must no longer be called after the first task has been
+  /// registered via registerTask.
+  void addTracer(const char *tracerName, Component const *componentConfig);
 protected:
   TraceableComponent();
 
@@ -81,6 +97,17 @@ private:
 
   /// List of all traces.
   std::vector<TracerIf *> tracers;
+
+  friend class TracerIf;
+
+  static void registerTracer(
+      const char                                   *tracerName,
+      std::function<TracerIf *(Component const *)>  tracerFactory);
+
+  /// Add a tracer.
+  /// This must no longer be called after the first task has been
+  /// registered via registerTask.
+  void addTracer(TracerIf *tracer);
 };
 
 } } } // namespace SystemC_VPC::Detail::Tracing

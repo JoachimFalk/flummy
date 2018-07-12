@@ -37,8 +37,11 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_TRACING_TRACERIF_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_TRACING_TRACERIF_HPP
 
+#include <systemcvpc/Component.hpp>
+
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
@@ -98,6 +101,10 @@ public:
   virtual void           finishLatency(TTaskInstance *ttaskInstance) = 0;
 
   virtual ~TracerIf();
+protected:
+  static void registerTracer(
+      const char                                   *tracerName,
+      std::function<TracerIf *(Component const *)>  tracerFactory);
 };
 
 } } } // namespace SystemC_VPC::Detail::Tracing

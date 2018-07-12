@@ -51,7 +51,9 @@ namespace SystemC_VPC {
 typedef std::map<std::string, Component::Ptr> Components;
 typedef std::map<std::string, boost::shared_ptr<DistributionTimingModifier> > Modifiers;
 
-void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier);
+Components &getComponents();
+
+bool hasComponent(std::string name);
 
 Component::Ptr createComponent(std::string name, Scheduler scheduler =
     Scheduler::FCFS);
@@ -68,13 +70,14 @@ Route::Ptr getRoute(std::string source, std::string dest);
 
 Route::Ptr getRoute(const sc_core::sc_port_base * leafPort);
 
-bool hasDistribution(std::string name);
-
-bool hasComponent(std::string name);
-
 Modifiers & getDistributions();
 
-Components & getComponents();
+bool hasDistribution(std::string name);
+
+void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier);
+
+
+
 
 VpcTask::Ptr getCachedTask(ScheduledTask & actor); //smoc_actor is a ScheduledTask
 

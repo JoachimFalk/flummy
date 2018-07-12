@@ -34,10 +34,13 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "PajeTracer.hpp"
+#include <systemcvpc/Component.hpp>
+
+#include "TracerIf.hpp"
 
 #include <CoSupport/String/color.hpp>
 #include <CoSupport/String/DoubleQuotedString.hpp>
+#include <CoSupport/Tracing/PajeTracer.hpp>
 
 #include <iomanip>
 #include <memory>
@@ -49,7 +52,45 @@ namespace {
 
 }
 
+namespace SystemC_VPC {
+
+  const char *Component::Tracer::PAJE = "PAJE";
+
+} // namespace SystemC_VPC
+
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
+
+  class PajeTracer: public TracerIf {
+  public:
+    PajeTracer(Component const *component);
+
+    TTask         *registerTask(std::string const &name);
+
+    TTaskInstance *release(TTask *ttask);
+
+    void           assign(TTaskInstance *ttaskInstance);
+
+    void           resign(TTaskInstance *ttaskInstance);
+
+    void           block(TTaskInstance *ttaskInstance);
+
+    void           finishDii(TTaskInstance *ttaskInstance);
+
+    void           finishLatency(TTaskInstance *ttaskInstance);
+
+    ~PajeTracer();
+  private:
+    class PajeTask;
+    class PajeTaskInstance;
+    class RegisterMe;
+
+    static RegisterMe registerMe;
+
+    std::string  name_;
+
+    CoSupport::Tracing::PajeTracer::Resource const *res_;
+    sc_core::sc_time startTime;
+  };
 
   class PajeTracer::PajeTask: public TTask {
   public:
@@ -76,8 +117,15 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~PajeTaskInstance() {}
   };
 
+  class PajeTracer::RegisterMe {
+  public:
+    RegisterMe() {
+      PajeTracer::registerTracer("PAJE",
+        [](Component const *comp) { return new PajeTracer(comp); });
+    }
+  } PajeTracer::registerMe;
 
-  PajeTracer::PajeTracer(SystemC_VPC::Component::Ptr component)
+  PajeTracer::PajeTracer(Component const *component)
       : name_(component->getName()) {
     if (!myPajeTracer){
       myPajeTracer.reset(new CoSupport::Tracing::PajeTracer("paje.trace"));

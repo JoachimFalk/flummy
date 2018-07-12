@@ -60,6 +60,93 @@
 
 namespace SystemC_VPC { namespace Detail {
 
+  ///
+  /// Handle interfaces for SystemC_VPC::Component
+  ///
+
+  // Realize debug file interface from SystemC_VPC::Component with
+  // a default unsupported implementation.
+  bool        AbstractComponent::hasDebugFile() const {
+    return false;
+  }
+  // Realize debug file interface from SystemC_VPC::Component with
+  // a default unsupported implementation.
+  void        AbstractComponent::setDebugFileName(std::string const &fileName) {
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support specification of a debug file!");
+  }
+  // Realize debug file interface from SystemC_VPC::Component with
+  // a default unsupported implementation.
+  std::string AbstractComponent::getDebugFileName() const {
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support specification of a debug file!");
+  }
+
+  ///
+  /// Handle interfaces for SystemC_VPC::ComponentInterface
+  ///
+
+  void AbstractComponent::changePowerMode(std::string powerMode) {
+    setPowerMode(translatePowerMode(powerMode));
+  }
+
+  void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event){
+    componentWakeup = event;
+  }
+
+  void AbstractComponent::registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event){
+    componentIdle = event;
+  }
+
+  void AbstractComponent::setCanExec(bool canExec){
+    this->setCanExecuteTasks(canExec);
+  }
+
+  void AbstractComponent::setDynamicPriority(std::list<ScheduledTask *> priorityList) {
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support dynamic priorities!");
+  }
+
+  std::list<ScheduledTask *> AbstractComponent::getDynamicPriority() {
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support dynamic priorities!");
+  }
+
+  void AbstractComponent::scheduleAfterTransition() {
+    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
+        " doesn't support scheduleAfterTransition()!");
+  }
+
+  bool AbstractComponent::addStream(ProcessId pid) {
+    return false;
+  }
+
+  bool AbstractComponent::closeStream(ProcessId pid) {
+    return false;
+  }
+
+  ///
+  /// Handle interfaces for SystemC_VPC::ComponentModel
+  ///
+
+  void AbstractComponent::setPowerMode(const PowerMode* mode){
+    this->powerMode = translatePowerMode(mode->getName());
+    this->updatePowerConsumption();
+
+    if(timingPools.find(powerMode) == timingPools.end()){
+      timingPools[powerMode].reset(new FunctionTimingPool());
+    }
+    this->timingPool = timingPools[powerMode];
+  }
+
+  const PowerMode* AbstractComponent::getPowerMode() const {
+    return this->powerMode;
+  }
+
+  ///
+  /// Other stuff
+  ///
+
   AbstractComponent::Factories AbstractComponent::factories;
 
 
@@ -144,10 +231,10 @@ namespace SystemC_VPC { namespace Detail {
    *
    */
   bool AbstractComponent::setAttribute(AttributePtr attribute){
-    if(processPower(attribute)){
+    if (processPower(attribute)) {
       return true;
-    }else if(processMCG(attribute)){
-        return true;
+    } else if (processMCG(attribute)) {
+      return true;
     }
 
     return false;
@@ -168,16 +255,6 @@ namespace SystemC_VPC { namespace Detail {
     localGovernorFactory = AbstractComponent::factories[plugin]->factory;
   }
 
-  void AbstractComponent::setPowerMode(const PowerMode* mode){
-    this->powerMode = translatePowerMode(mode->getName());
-    this->updatePowerConsumption();
-
-    if(timingPools.find(powerMode) == timingPools.end()){
-      timingPools[powerMode].reset(new FunctionTimingPool());
-    }
-    this->timingPool = timingPools[powerMode];
-  }
-
   FunctionTimingPtr AbstractComponent::getTiming(const PowerMode *mode, ProcessId pid) {
     if (timingPools.find(mode) == timingPools.end()) {
       timingPools[mode].reset(new FunctionTimingPool());
@@ -190,21 +267,6 @@ namespace SystemC_VPC { namespace Detail {
       //std::cout << a;
     }
     return (*pool)[pid];
-  }
-
-  void AbstractComponent::setDynamicPriority(std::list<ScheduledTask *> priorityList) {
-    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
-        " doesn't support dynamic priorities!");
-  }
-
-  std::list<ScheduledTask *> AbstractComponent::getDynamicPriority() {
-    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
-        " doesn't support dynamic priorities!");
-  }
-
-  void AbstractComponent::scheduleAfterTransition() {
-    throw SystemC_VPC::ConfigException(std::string("Component ") + this->name() +
-        " doesn't support scheduleAfterTransition()!");
   }
 
   void AbstractComponent::requestCanExecute(){
@@ -288,9 +350,9 @@ namespace SystemC_VPC { namespace Detail {
     return newInstance;
   }
 
-  AbstractComponent::AbstractComponent(SystemC_VPC::Component::Ptr component)
-    : sc_core::sc_module(sc_core::sc_module_name(component->getName().c_str()))
-    , Delayer(component->getComponentId(), component->getName())
+  AbstractComponent::AbstractComponent(std::string const &name)
+    : sc_core::sc_module(sc_core::sc_module_name(name.c_str()))
+    , Delayer(name)
     , requestExecuteTasks(false)
     , localGovernorFactory(nullptr)
     , midPowerGov(nullptr)
@@ -298,7 +360,6 @@ namespace SystemC_VPC { namespace Detail {
     , powerMode(nullptr)
     , canExecuteTasks(true)
   {
-    component->componentInterface_ = this;
     if(powerTables.find(getPowerMode()) == powerTables.end()){
       powerTables[getPowerMode()] = PowerTable();
     }
@@ -308,39 +369,6 @@ namespace SystemC_VPC { namespace Detail {
     powerTable[ComponentState::RUNNING] = 1.0;
   }
 
-
-  const PowerMode* AbstractComponent::getPowerMode() const {
-    return this->powerMode;
-  }
-
-  /*
-   * from ComponentInterface
-   */
-  void AbstractComponent::changePowerMode(std::string powerMode) {
-    setPowerMode(translatePowerMode(powerMode));
-  }
-
-  /*
-   * from ComponentInterface
-   */
-  void AbstractComponent::setCanExec(bool canExec){
-    this->setCanExecuteTasks(canExec);
-  }
-
-  /*
-   * from ComponentInterface
-   */
-  void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event){
-    componentWakeup = event;
-  }
-
-  /*
-   * from ComponentInterface
-   */
-  void AbstractComponent::registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event){
-    //std::cout<<"registerComponentIdle" << std::endl;
-    componentIdle = event;
-  }
 
   void AbstractComponent::end_of_elaboration() {
     sc_core::sc_module::end_of_elaboration();

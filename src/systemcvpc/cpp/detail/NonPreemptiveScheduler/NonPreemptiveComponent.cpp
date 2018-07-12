@@ -44,8 +44,8 @@ namespace SystemC_VPC { namespace Detail {
    *
    */
   NonPreemptiveComponent::NonPreemptiveComponent(
-      SystemC_VPC::Component::Ptr component, Director *director)
-    : AbstractComponent(component)
+      std::string const &name)
+    : AbstractComponent(name)
     , readyTasks(0)
     , runningTask(NULL)
   {
@@ -61,7 +61,7 @@ namespace SystemC_VPC { namespace Detail {
 
     this->midPowerGov = new InternalLoadHysteresisGovernor(sc_core::sc_time(12.5, sc_core::SC_MS),
         sc_core::sc_time(12.1, sc_core::SC_MS), sc_core::sc_time(4.0, sc_core::SC_MS));
-    this->midPowerGov->setGlobalGovernor(director->topPowerGov);
+    this->midPowerGov->setGlobalGovernor(Director::getInstance().topPowerGov);
 
 
 

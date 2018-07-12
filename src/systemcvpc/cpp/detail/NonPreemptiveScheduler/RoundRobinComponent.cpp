@@ -39,9 +39,8 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-RoundRobinComponent::RoundRobinComponent(
-    SystemC_VPC::Component::Ptr component, Director *director)
-  : AbstractComponent(component)
+RoundRobinComponent::RoundRobinComponent(std::string const &name)
+  : AbstractComponent(name)
   , useActivationCallback(false)
   , actualTask(NULL)
 {

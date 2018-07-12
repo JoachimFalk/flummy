@@ -47,7 +47,6 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-class AbstractComponent;
 class Route;
 
 } } // namespace SystemC_VPC::Detail
@@ -62,7 +61,6 @@ namespace Mappings
   // TODO: replace other mapping maps
   // TODO: provide getter, setter, etc.
   std::map<VpcTask::Ptr, Component::Ptr > & getConfiguredMappings();
-  std::map<Component::Ptr, Detail::AbstractComponent * > & getComponents();
   bool isMapped(VpcTask::Ptr task, Component::Ptr component);
 
 } // namespace Mappings

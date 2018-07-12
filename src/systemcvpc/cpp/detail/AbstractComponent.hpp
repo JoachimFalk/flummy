@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -85,19 +85,74 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief The interface of a Virtual-Processing-Component (VPC).
    */
-  class AbstractComponent:
-    public sc_core::sc_module,
-    public Tracing::TraceableComponent,
-    public Delayer,
-    private smoc::SimulatorAPI::SchedulerInterface,
-    public ComponentModel,
-    public SystemC_VPC::ComponentInterface
+  class AbstractComponent
+    : public sc_core::sc_module
+    , public SystemC_VPC::Component
+    , public SystemC_VPC::ComponentInterface
+    , public ComponentModel
+    , public Tracing::TraceableComponent
+    , public Delayer
+    , private smoc::SimulatorAPI::SchedulerInterface
   {
   public:
+    ///
+    /// Handle interfaces for SystemC_VPC::Component
+    ///
+
+    // For resolving ambiguity
+    using Delayer::getName;
+    using Delayer::getComponentId;
+
+    /// Realize debug file interface from SystemC_VPC::Component with
+    /// a default unsupported implementation.
+    virtual bool        hasDebugFile() const;
+    /// Realize debug file interface from SystemC_VPC::Component with
+    /// a default unsupported implementation.
+    virtual void        setDebugFileName(std::string const &fileName);
+    /// Realize debug file interface from SystemC_VPC::Component with
+    /// a default unsupported implementation.
+    virtual std::string getDebugFileName() const;
+
+    ///
+    /// Handle interfaces for SystemC_VPC::ComponentInterface
+    ///
+
+    void changePowerMode(std::string powerMode);
+    /// virtual bool hasWaitingOrRunningTasks() = 0; still open
+
+    void registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event);
+    void registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event);
+
+    void setCanExec(bool canExec);
+
+    /// Realize dynamic priority interface from SystemC_VPC::ComponentInterface with
+    /// a default unsupported implementation.
+    virtual void                       setDynamicPriority(std::list<ScheduledTask *> priorityList);
+    /// Realize dynamic priority interface from SystemC_VPC::ComponentInterface with
+    /// a default unsupported implementation.
+    virtual std::list<ScheduledTask *> getDynamicPriority();
+
+    virtual void scheduleAfterTransition();
+
+    virtual bool addStream(ProcessId pid);
+    virtual bool closeStream(ProcessId pid);
+
+    ///
+    /// Handle interfaces for SystemC_VPC::ComponentModel
+    ///
+
+    void             setPowerMode(const PowerMode *mode);
+    const PowerMode *getPowerMode() const;
+
+    ///
+    /// Other stuff
+    ///
+
     /**
      * \brief Set parameter for Component and Scheduler.
      */
     virtual bool setAttribute(AttributePtr attributePtr);
+
 
     /**
      * \brief Create the Process Control Block (PCB).
@@ -113,10 +168,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     ProcessControlBlock *getPCB(ProcessId const pid) const;
 
-    virtual void setDynamicPriority(std::list<ScheduledTask *> priorityList);
-    virtual std::list<ScheduledTask *> getDynamicPriority();
-
-    virtual void scheduleAfterTransition();
 
     void requestCanExecute();
 
@@ -154,34 +205,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void updatePowerConsumption() = 0;
 
-    /**
-     * from ComponentInterface
-     */
-    void             setPowerMode(const PowerMode *mode);
-    /**
-     * from ComponentInterface
-     */
-    const PowerMode *getPowerMode() const;
-
-    /*
-     * from ComponentInterface
-     */
-    void changePowerMode(std::string powerMode);
-
-    /*
-     * from ComponentInterface
-     */
-    void setCanExec(bool canExec);
-
-    /*
-     * from ComponentInterface
-     */
-    void registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event);
-
-    /*
-     * from ComponentInterface
-     */
-    void registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event);
 
     /**
      *
@@ -223,7 +246,7 @@ namespace SystemC_VPC { namespace Detail {
     static Factories factories;
     PowerTables powerTables;
 
-    AbstractComponent(SystemC_VPC::Component::Ptr component);
+    AbstractComponent(std::string const &name);
 
     MultiCastGroupInstance* getMultiCastGroupInstance(TaskInstance* actualTask);
 

@@ -40,17 +40,23 @@
 #include "Component.hpp"
 #include "ScheduledTask.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include <CoSupport/SmartPtr/RefCountObject.hpp>
+
+#include <boost/noncopyable.hpp>
 
 namespace SystemC_VPC {
 
-class VpcTask {
+class VpcTask
+  : private boost::noncopyable
+  , public CoSupport::SmartPtr::RefCountObject
+{
+  typedef VpcTask this_type;
 public:
-  typedef boost::shared_ptr<VpcTask> Ptr;
+  typedef boost::intrusive_ptr<this_type> Ptr;
 
   VpcTask();
 
-  VpcTask(ScheduledTask & actor);
+  VpcTask(ScheduledTask &actor);
 
   void mapTo(Component::Ptr component);
 
@@ -59,8 +65,6 @@ public:
   size_t getPriority() const;
 
   const ScheduledTask * getActor() const;
-
-  const Component::Ptr  getComponent() const;
 
   //private:
   void inject(ScheduledTask * actor);
@@ -72,7 +76,6 @@ public:
 private:
   // configured data
   ScheduledTask * actor_;
-  Component::Ptr component_;
   size_t priority_;
   bool psm_;
 };
