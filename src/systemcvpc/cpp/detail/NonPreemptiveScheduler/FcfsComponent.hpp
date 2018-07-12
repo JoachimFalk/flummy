@@ -43,8 +43,7 @@ namespace SystemC_VPC { namespace Detail {
 
   class FcfsComponent : public NonPreemptiveComponent {
   public:
-    FcfsComponent(SystemC_VPC::Component::Ptr component,
-        Director *director = &Director::getInstance());
+    FcfsComponent(std::string const &name);
 
     virtual ~FcfsComponent();
   protected:

@@ -34,152 +34,198 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "DataBaseTracer.hpp"
+#include <systemcvpc/Component.hpp>
+
+#include "TracerIf.hpp"
 
 #include <sys/socket.h>
 #include <netdb.h>
 
+namespace SystemC_VPC {
+
+  const char *Component::Tracer::DB = "DB";
+
+} // namespace SystemC_VPC
+
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-class DataBaseTracer::DataBaseProxy {
-public:
-  static DataBaseProxy &getDataBaseProxy() {
-    static DataBaseProxy dbProxy("VPC");
-    return dbProxy;
+  class DataBaseTracer: public TracerIf {
+  public:
+    DataBaseTracer(Component const *component);
+
+    TTask         *registerTask(std::string const &name);
+
+    TTaskInstance *release(TTask *ttask);
+
+    void           assign(TTaskInstance *ttaskInstance);
+
+    void           resign(TTaskInstance *ttaskInstance);
+
+    void           block(TTaskInstance *ttaskInstance);
+
+    void           finishDii(TTaskInstance *ttaskInstance);
+
+    void           finishLatency(TTaskInstance *ttaskInstance);
+  private:
+    class DataBaseProxy;
+    class DBTask;
+    class DBTaskInstance;
+    class RegisterMe;
+
+    static RegisterMe registerMe;
+
+    void addEvent(TTaskInstance const *ttaskInstance_, char const *state);
+    DataBaseProxy &dbProxy_;
+    std::string    resourceName_;
+  };
+
+  class DataBaseTracer::DataBaseProxy {
+  public:
+    static DataBaseProxy &getDataBaseProxy() {
+      static DataBaseProxy dbProxy("VPC");
+      return dbProxy;
+    }
+
+    ~DataBaseProxy();
+
+    // addEvent
+    void addEvent(const char* resourceName, const char* taskName,
+        const char* status, unsigned long long timeStamp, unsigned int taskId);
+
+  private:
+    const char* databaseName_;
+    uint16_t portNumber_;
+    FILE* socket_;
+
+    // create database with given name
+    DataBaseProxy(const char* database_name, uint16_t port = 5555);
+
+    void open();
+
+    void close();
+  };
+
+  DataBaseTracer::DataBaseProxy::DataBaseProxy(const char* database_name, uint16_t port)
+    : databaseName_(database_name)
+    , portNumber_(port)
+    { open(); }
+
+  DataBaseTracer::DataBaseProxy::~DataBaseProxy()
+    { close(); }
+
+  void DataBaseTracer::DataBaseProxy::addEvent(
+      const char *resourceName,
+      const char *taskName,
+      const char *status,
+      const unsigned long long timeStamp,
+      const unsigned int taskId)
+  {
+    fprintf(socket_, "%s %s %s %llu %u\r\n", resourceName, taskName, status,
+        timeStamp, taskId);
   }
 
-  ~DataBaseProxy();
+  void DataBaseTracer::DataBaseProxy::open() {
 
-  // addEvent
-  void addEvent(const char* resourceName, const char* taskName,
-      const char* status, unsigned long long timeStamp, unsigned int taskId);
+    struct sockaddr_in6 socketAddr;
+    int socketFD;
 
-private:
-  const char* databaseName_;
-  uint16_t portNumber_;
-  FILE* socket_;
+    socketAddr.sin6_family = AF_INET6;
+    socketAddr.sin6_addr = in6addr_any;
+    socketAddr.sin6_port = htons(portNumber_);
 
-  // create database with given name
-  DataBaseProxy(const char* database_name, uint16_t port = 5555);
+    if ((socketFD = socket(PF_INET6, SOCK_STREAM, 0)) == -1) {
+      perror("server socket");
+      exit(EXIT_FAILURE);
+    }
 
-  void open();
+    if (connect(socketFD, (const struct sockaddr *) &socketAddr,
+        sizeof(socketAddr)) == -1) {
+      perror("connection error");
+      exit(EXIT_FAILURE);
+    }
 
-  void close();
-};
+    if ((socket_ = fdopen(socketFD, "a+")) == nullptr) {
+      perror("fdopen");
+      exit(EXIT_FAILURE);
+    }
 
-DataBaseTracer::DataBaseProxy::DataBaseProxy(const char* database_name, uint16_t port)
-  : databaseName_(database_name)
-  , portNumber_(port)
-  { open(); }
-
-DataBaseTracer::DataBaseProxy::~DataBaseProxy()
-  { close(); }
-
-void DataBaseTracer::DataBaseProxy::addEvent(
-    const char *resourceName,
-    const char *taskName,
-    const char *status,
-    const unsigned long long timeStamp,
-    const unsigned int taskId)
-{
-  fprintf(socket_, "%s %s %s %llu %u\r\n", resourceName, taskName, status,
-      timeStamp, taskId);
-}
-
-void DataBaseTracer::DataBaseProxy::open() {
-
-  struct sockaddr_in6 socketAddr;
-  int socketFD;
-
-  socketAddr.sin6_family = AF_INET6;
-  socketAddr.sin6_addr = in6addr_any;
-  socketAddr.sin6_port = htons(portNumber_);
-
-  if ((socketFD = socket(PF_INET6, SOCK_STREAM, 0)) == -1) {
-    perror("server socket");
-    exit(EXIT_FAILURE);
+    fprintf(socket_, "%s\r\n", databaseName_);
   }
 
-  if (connect(socketFD, (const struct sockaddr *) &socketAddr,
-      sizeof(socketAddr)) == -1) {
-    perror("connection error");
-    exit(EXIT_FAILURE);
+  void DataBaseTracer::DataBaseProxy::close() {
+    fprintf(socket_, "CLOSE\r\n");
   }
 
-  if ((socket_ = fdopen(socketFD, "a+")) == nullptr) {
-    perror("fdopen");
-    exit(EXIT_FAILURE);
+  class DataBaseTracer::DBTask: public TTask {
+  public:
+    DBTask(std::string const &name)
+      : name(name) {}
+
+    std::string name;
+
+    ~DBTask() {}
+  };
+
+  class DataBaseTracer::DBTaskInstance: public TTaskInstance {
+  public:
+    DBTaskInstance(DBTask *dbTask)
+      : dbTask(dbTask), instanceId(instanceIdCounter++) {}
+
+    static size_t instanceIdCounter;
+
+    DBTask *dbTask;
+    size_t  instanceId;
+
+    ~DBTaskInstance() {}
+  };
+
+  class DataBaseTracer::RegisterMe {
+  public:
+    RegisterMe() {
+      DataBaseTracer::registerTracer("DB",
+        [](Component const *comp) { return new DataBaseTracer(comp); });
+    }
+  } DataBaseTracer::registerMe;
+
+  size_t DataBaseTracer::DBTaskInstance::instanceIdCounter = 0;
+
+  DataBaseTracer::DataBaseTracer(Component const *component)
+    : dbProxy_(DataBaseProxy::getDataBaseProxy())
+    , resourceName_(component->getName()) {}
+
+  TTask         *DataBaseTracer::registerTask(std::string const &name)
+    { return new DBTask(name); }
+
+  TTaskInstance *DataBaseTracer::release(TTask *ttask) {
+    TTaskInstance *ttaskInstance =
+        new DBTaskInstance(static_cast<DBTask *>(ttask));
+    this->addEvent(ttaskInstance, "s");
+    return ttaskInstance;
   }
 
-  fprintf(socket_, "%s\r\n", databaseName_);
-}
+  void DataBaseTracer::finishDii(TTaskInstance *ttaskInstance)
+    { this->addEvent(ttaskInstance, "d"); }
 
-void DataBaseTracer::DataBaseProxy::close() {
-  fprintf(socket_, "CLOSE\r\n");
-}
+  void DataBaseTracer::finishLatency(TTaskInstance *ttaskInstance)
+    { this->addEvent(ttaskInstance, "l"); }
 
-class DataBaseTracer::DBTask: public TTask {
-public:
-  DBTask(std::string const &name)
-    : name(name) {}
+  void DataBaseTracer::assign(TTaskInstance *ttaskInstance)
+    { this->addEvent(ttaskInstance, "a"); }
 
-  std::string name;
+  void DataBaseTracer::resign(TTaskInstance *ttaskInstance)
+    { this->addEvent(ttaskInstance, "r"); }
 
-  ~DBTask() {}
-};
+  void DataBaseTracer::block(TTaskInstance *ttaskInstance)
+    { this->addEvent(ttaskInstance, "b"); }
 
-class DataBaseTracer::DBTaskInstance: public TTaskInstance {
-public:
-  DBTaskInstance(DBTask *dbTask)
-    : dbTask(dbTask), instanceId(instanceIdCounter++) {}
+  void DataBaseTracer::addEvent(TTaskInstance const *ttaskInstance_, char const *state) {
+    DBTaskInstance const *ttaskInstance = static_cast<DBTaskInstance const *>(ttaskInstance_);
 
-  static size_t instanceIdCounter;
-
-  DBTask *dbTask;
-  size_t  instanceId;
-
-  ~DBTaskInstance() {}
-};
-
-size_t DataBaseTracer::DBTaskInstance::instanceIdCounter = 0;
-
-DataBaseTracer::DataBaseTracer(SystemC_VPC::Component::Ptr component)
-  : dbProxy_(DataBaseProxy::getDataBaseProxy())
-  , resourceName_(component->getName()) {}
-
-TTask         *DataBaseTracer::registerTask(std::string const &name)
-  { return new DBTask(name); }
-
-TTaskInstance *DataBaseTracer::release(TTask *ttask) {
-  TTaskInstance *ttaskInstance =
-      new DBTaskInstance(static_cast<DBTask *>(ttask));
-  this->addEvent(ttaskInstance, "s");
-  return ttaskInstance;
-}
-
-void DataBaseTracer::finishDii(TTaskInstance *ttaskInstance)
-  { this->addEvent(ttaskInstance, "d"); }
-
-void DataBaseTracer::finishLatency(TTaskInstance *ttaskInstance)
-  { this->addEvent(ttaskInstance, "l"); }
-
-void DataBaseTracer::assign(TTaskInstance *ttaskInstance)
-  { this->addEvent(ttaskInstance, "a"); }
-
-void DataBaseTracer::resign(TTaskInstance *ttaskInstance)
-  { this->addEvent(ttaskInstance, "r"); }
-
-void DataBaseTracer::block(TTaskInstance *ttaskInstance)
-  { this->addEvent(ttaskInstance, "b"); }
-
-void DataBaseTracer::addEvent(TTaskInstance const *ttaskInstance_, char const *state) {
-  DBTaskInstance const *ttaskInstance = static_cast<DBTaskInstance const *>(ttaskInstance_);
-
-  dbProxy_.addEvent(resourceName_.c_str(),
-      ttaskInstance->dbTask->name.c_str(),
-      state,
-      sc_core::sc_time_stamp().value(),
-      ttaskInstance->instanceId);
-}
+    dbProxy_.addEvent(resourceName_.c_str(),
+        ttaskInstance->dbTask->name.c_str(),
+        state,
+        sc_core::sc_time_stamp().value(),
+        ttaskInstance->instanceId);
+  }
 
 } } } // namespace SystemC_VPC::Detail::Tracing

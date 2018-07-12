@@ -50,8 +50,7 @@ namespace SystemC_VPC { namespace Detail {
 class RoundRobinComponent : public AbstractComponent {
   SC_HAS_PROCESS(RoundRobinComponent);
 public:
-  RoundRobinComponent(SystemC_VPC::Component::Ptr component,
-      Director *director = &Director::getInstance());
+  RoundRobinComponent(std::string const &name);
 
 protected:
   bool useActivationCallback;

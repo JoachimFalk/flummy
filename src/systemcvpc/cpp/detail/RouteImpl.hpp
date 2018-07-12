@@ -57,18 +57,7 @@ namespace SystemC_VPC { namespace Detail {
 
     virtual const ComponentList& getHops() const = 0;
 
-    Route(SystemC_VPC::Route::Ptr configuredRoute) : Delayer(
-        configuredRoute->getComponentId(), configuredRoute->getName()),
-        instanceId(createRouteId()),
-        ptpTracer()
-    {
-      if (configuredRoute->getTracing()) {
-        this->ptpTracer
-          = CoSupport::Tracing::TracingFactory::getInstance() .createPtpTracer(
-              this->getName());
-      }
-      configuredRoute->routeInterface_ = this;
-    }
+    Route(SystemC_VPC::Route::Ptr configuredRoute);
 
     Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
         ptpTracer(orig.ptpTracer) {}

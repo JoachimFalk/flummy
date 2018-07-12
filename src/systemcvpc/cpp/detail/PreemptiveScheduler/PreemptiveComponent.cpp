@@ -55,8 +55,8 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief An implementation of AbstractComponent.
    */
-  PreemptiveComponent::PreemptiveComponent(SystemC_VPC::Component::Ptr component, Scheduler *scheduler)
-    : AbstractComponent(component)
+  PreemptiveComponent::PreemptiveComponent(std::string const &name, Scheduler *scheduler)
+    : AbstractComponent(name)
     , scheduler(scheduler)
     , blockMutex(0)
   {

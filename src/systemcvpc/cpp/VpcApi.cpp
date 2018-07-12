@@ -40,7 +40,24 @@
 #include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/Mappings.hpp>
+#include <systemcvpc/Scheduler.hpp>
 
+#include "detail/NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
+#include "detail/NonPreemptiveScheduler/FcfsComponent.hpp"
+#include "detail/NonPreemptiveScheduler/NonPreemptiveComponent.hpp"
+#include "detail/NonPreemptiveScheduler/PriorityComponent.hpp"
+#include "detail/NonPreemptiveScheduler/RoundRobinComponent.hpp"
+#include "detail/PreemptiveScheduler/PreemptiveComponent.hpp"
+#include "detail/PreemptiveScheduler/AVBScheduler.hpp"
+#include "detail/PreemptiveScheduler/FlexRayScheduler.hpp"
+#include "detail/PreemptiveScheduler/MostScheduler.hpp"
+#include "detail/PreemptiveScheduler/MostSecondaryScheduler.hpp"
+#include "detail/PreemptiveScheduler/PriorityScheduler.hpp"
+#include "detail/PreemptiveScheduler/RateMonotonicScheduler.hpp"
+#include "detail/PreemptiveScheduler/RoundRobinScheduler.hpp"
+#include "detail/PreemptiveScheduler/StreamShaperScheduler.hpp"
+#include "detail/PreemptiveScheduler/TDMAScheduler.hpp"
+#include "detail/PreemptiveScheduler/TimeTriggeredCCScheduler.hpp"
 #include "detail/Director.hpp"
 
 #include <string>
@@ -84,10 +101,53 @@ void createDistribution(std::string name, boost::shared_ptr<DistributionTimingMo
 Component::Ptr createComponent(std::string name, Scheduler scheduler)
 {
   if (!hasComponent(name)) {
-    Component::Ptr ptr(new Component(name, scheduler));
+    Detail::AbstractComponent *comp;
 
-    getComponents()[name] = ptr;
-    return ptr;
+    switch (scheduler) {
+      case Scheduler::FCFS:
+        comp = new Detail::FcfsComponent(name);
+        break;
+      case Scheduler::StaticPriorityNoPreempt:
+        comp = new Detail::PriorityComponent(name);
+        break;
+      case Scheduler::RoundRobinNoPreempt:
+        comp = new Detail::RoundRobinComponent(name);
+        break;
+      case Scheduler::DynamicPriorityUserYield:
+        comp = new Detail::DynamicPriorityComponent(name);
+        break;
+      case Scheduler::RoundRobin:
+        comp = new Detail::PreemptiveComponent(name, new Detail::RoundRobinScheduler());
+        break;
+      case Scheduler::StaticPriority:
+        comp = new Detail::PreemptiveComponent(name, new Detail::PriorityScheduler());
+        break;
+      case Scheduler::RateMonotonic:
+        comp = new Detail::PreemptiveComponent(name, new Detail::RateMonotonicScheduler());
+        break;
+      case Scheduler::TDMA:
+        comp = new Detail::PreemptiveComponent(name, new Detail::TDMAScheduler());
+        break;
+      case Scheduler::FlexRay:
+        comp = new Detail::PreemptiveComponent(name, new Detail::FlexRayScheduler());
+        break;
+      case Scheduler::AVB:
+        comp = new Detail::PreemptiveComponent(name, new Detail::AVBScheduler());
+        break;
+      case Scheduler::TTCC:
+        comp = new Detail::PreemptiveComponent(name, new Detail::TimeTriggeredCCScheduler());
+        break;
+      case Scheduler::MOST:
+        comp = new Detail::PreemptiveComponent(name, new Detail::MostScheduler());
+        break;
+      case Scheduler::StreamShaper:
+        comp = new Detail::PreemptiveComponent(name, new Detail::StreamShaperScheduler());
+        break;
+      default:
+        assert(!"Oops, I don't know this scheduler!");
+    }
+    getComponents()[name] = comp;
+    return comp;
   }
   throw ConfigException(std::string("Multiple creation of component \"") + name
       + "\" is not supported. Use getComponent() instead. ");

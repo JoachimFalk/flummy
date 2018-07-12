@@ -52,7 +52,8 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief Interface for classes implementing delay simulation.
    */
-  class Delayer {
+  class Delayer
+    : private SequentiallyIdedObject<ComponentId> {
   public:
     /**
      * \brief Simulate the delay caused by the transition execution on this Delayer.
@@ -84,19 +85,13 @@ namespace SystemC_VPC { namespace Detail {
     virtual ~Delayer() {}
 
   protected:
-
-    Delayer(ComponentId id, std::string name) : componentId_(id), name_(name) {}
+    Delayer(std::string const &name);
 
     typedef std::vector<ComponentObserver *> Observers;
     
     Observers observers;
     
   private:
-
-    //
-    ComponentId componentId_;
-
-    //
     std::string name_;
   };
 

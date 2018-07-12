@@ -38,6 +38,19 @@
 
 namespace SystemC_VPC { namespace Detail {
 
+  Route::Route(SystemC_VPC::Route::Ptr configuredRoute)
+    : Delayer(configuredRoute->getName()),
+      instanceId(createRouteId()),
+      ptpTracer()
+  {
+    if (configuredRoute->getTracing()) {
+      this->ptpTracer
+        = CoSupport::Tracing::TracingFactory::getInstance() .createPtpTracer(
+            this->getName());
+    }
+    configuredRoute->routeInterface_ = this;
+  }
+
   size_t Route::createRouteId(){
     static size_t instanceCounter = 0;
     return ++instanceCounter; // start from 1

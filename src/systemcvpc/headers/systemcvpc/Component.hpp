@@ -48,8 +48,9 @@
 #include "VPCEvent.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
+#include <CoSupport/SmartPtr/RefCountObject.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <systemc>
 #include <set>
@@ -66,36 +67,45 @@ namespace SystemC_VPC {
 
 class ComponentInterface {
 public:
-  typedef ComponentInterface* Ptr;
+  typedef ComponentInterface *Ptr;
 
-  virtual ~ComponentInterface()
-  {
-  }
   virtual void changePowerMode(std::string powerMode) = 0;
+
   virtual bool hasWaitingOrRunningTasks() = 0;
+
   virtual void registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event) = 0;
   virtual void registerComponentIdle(const ScheduledTask * actor, VPCEvent::Ptr event) = 0;
+
   virtual void setCanExec(bool canExec) = 0;
-  virtual void setDynamicPriority(std::list<ScheduledTask *>) = 0;
+
+  virtual void                       setDynamicPriority(std::list<ScheduledTask *>) = 0;
   virtual std::list<ScheduledTask *> getDynamicPriority() = 0;
+
   virtual void scheduleAfterTransition() = 0;
-  virtual bool addStream(ProcessId pid){return false;};
-  virtual bool closeStream(ProcessId pid){return false;};
+
+  virtual bool addStream(ProcessId pid) = 0;
+  virtual bool closeStream(ProcessId pid) = 0;
+
+  virtual ~ComponentInterface() {}
 };
 
-class Component:
-    protected SequentiallyIdedObject<ComponentId> ,
-    public Traceable
+class Component
+//: protected SequentiallyIdedObject<ComponentId> ,
+//  public Traceable
+  : private boost::noncopyable
+  , public CoSupport::SmartPtr::RefCountObject
 {
+  typedef Component this_type;
 public:
-  typedef boost::shared_ptr<Component> Ptr;
+  typedef boost::intrusive_ptr<this_type> Ptr;
   typedef std::set<ScheduledTask *> MappedTasks;
 
-  Component(std::string name, Scheduler scheduler);
-
-  void setScheduler(Scheduler scheduler);
-
-  Scheduler getScheduler() const;
+  /// This is the set of built in tracers.
+  struct Tracer {
+    static const char *DB;   // write trace to a database
+    static const char *PAJE; // trace to paje file
+    static const char *VCD;  // trace to vcd file
+  };
 
   void setTransferTiming(Timing transferTiming);
 
@@ -116,26 +126,22 @@ public:
   MappedTasks getMappedTasks();
 
   std::string getName() const;
-  std::vector<AttributePtr> getAttributes() const;
+
   void addAttribute(AttributePtr attribute);
+
   ComponentId getComponentId() const;
 
-  ComponentInterface::Ptr getComponentInterface() const;
-  bool hasDebugFile() const;
-  std::string getDebugFileName() const;
-  void setDebugFileName(std::string debugFileName);
-private:
-  friend class Detail::AbstractComponent;
+  ComponentInterface *getComponentInterface();
 
-  std::string name_;
-  std::string debugFileName_;
-  Timing      transferTiming_;
-  Scheduler   scheduler_;
-  MappedTasks mappedTasks_;
-  TimingsProvider::Ptr timingsProvider_;
+  virtual bool        hasDebugFile() const = 0;
+  virtual void        setDebugFileName(std::string const &fileName) = 0;
+  virtual std::string getDebugFileName() const = 0;
+protected:
+  Component();
+private:
+  Timing                      transferTiming_;
+  TimingsProvider::Ptr        timingsProvider_;
   DefaultTimingsProvider::Ptr defaultTimingsProvider_;
-  std::vector<AttributePtr> attributes_;
-  ComponentInterface::Ptr componentInterface_;
 };
 
 } // namespace SystemC_VPC

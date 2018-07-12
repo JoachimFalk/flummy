@@ -39,35 +39,29 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-DynamicPriorityComponent::DynamicPriorityComponent(
-    SystemC_VPC::Component::Ptr  component, Director *director)
-  : NonPreemptiveComponent(component, director)
+DynamicPriorityComponent::DynamicPriorityComponent(std::string const &name)
+  : NonPreemptiveComponent(name)
   , yieldTask(nullptr)
   , selectedTask(nullptr)
-  , debugOut(component->hasDebugFile()
-      ? new Diagnostics::PrintDebug(component->getDebugFileName())
-      : nullptr)
-{
-  // build initial priority list
-  std::priority_queue<PriorityFcfsElement<TaskInterface*> > pQueue;
-  size_t fcfsOrder = 0;
+  , debugOut(nullptr)
+{}
 
-  // put every task in a priority queue
-  SystemC_VPC::Component::MappedTasks mp = component->getMappedTasks();
-  for (SystemC_VPC::Component::MappedTasks::iterator iter = mp.begin(); iter
-      != mp.end(); ++iter) {
-    TaskInterface *actor = *iter;
-    size_t priority = SystemC_VPC::getCachedTask(*actor)->getPriority();
-    pQueue.push(
-        PriorityFcfsElement<TaskInterface*> (priority, fcfsOrder++, actor));
-  }
+//
+bool DynamicPriorityComponent::hasDebugFile() const {
+  return debugOut != nullptr;
+}
 
-  // pop tasks (in order of priority) from queue and build priority list
-  while (!pQueue.empty()) {
-    TaskInterface *actor = pQueue.top().payload;
-    priorities_.push_back(actor);
-    pQueue.pop();
-  }
+//
+std::string DynamicPriorityComponent::getDebugFileName() const {
+  return debugFileName;
+}
+
+//
+void DynamicPriorityComponent::setDebugFileName(std::string const &fileName) {
+  delete debugOut;
+  debugOut = nullptr;
+  debugOut = new Diagnostics::PrintDebug(fileName);
+  debugFileName = fileName;
 }
 
 // Implement ComponentInterface
@@ -116,6 +110,32 @@ TaskInstance *DynamicPriorityComponent::selectReadyTask() {
   selectedTask = readyTasks.front();
   readyTasks.pop_front();
   return selectedTask;
+}
+
+void DynamicPriorityComponent::start_of_simulation() {
+  if (!priorities_.empty())
+    return;
+
+  // build initial priority list
+  std::priority_queue<PriorityFcfsElement<TaskInterface*> > pQueue;
+  size_t fcfsOrder = 0;
+
+  // put every task in a priority queue
+  SystemC_VPC::Component::MappedTasks mp = this->getMappedTasks();
+  for (SystemC_VPC::Component::MappedTasks::iterator iter = mp.begin(); iter
+      != mp.end(); ++iter) {
+    TaskInterface *actor = *iter;
+    size_t priority = SystemC_VPC::getCachedTask(*actor)->getPriority();
+    pQueue.push(
+        PriorityFcfsElement<TaskInterface*> (priority, fcfsOrder++, actor));
+  }
+
+  // pop tasks (in order of priority) from queue and build priority list
+  while (!pQueue.empty()) {
+    TaskInterface *actor = pQueue.top().payload;
+    priorities_.push_back(actor);
+    pQueue.pop();
+  }
 }
 
 void DynamicPriorityComponent::debugDump(const TaskInterface * toBeExecuted) const

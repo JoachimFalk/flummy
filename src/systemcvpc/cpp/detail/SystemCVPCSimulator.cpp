@@ -45,6 +45,7 @@
 #include <systemcvpc/Mappings.hpp>
 
 #include "Director.hpp"
+#include "VPCBuilder.hpp"
 #include "AbstractComponent.hpp"
 
 #include "DebugOStream.hpp"
@@ -149,6 +150,20 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 #else
     setenv("VPCCONFIGURATION", vpcConfigFile.c_str(), 1);
 #endif // _MSC_VER
+
+    try {
+      VPCBuilder builder(&Director::getInstance());
+      builder.buildVPC();
+    } catch (InvalidArgumentException &e) {
+      std::cerr << "VPCBuilder> Got exception while setting up VPC:\n"
+                << e.what() << std::endl;
+      exit(-1);
+    } catch (const std::exception &e) {
+      std::cerr << "VPCBuilder> Got exception while setting up VPC:\n"
+                << e.what() << std::endl;
+      exit(-1);
+    }
+
     Director::getInstance().beforeVpcFinalize();
     if (Director::getInstance().FALLBACKMODE) {
       if (getDbgOut().isVisible(Debug::High))
@@ -189,18 +204,7 @@ void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   VC::VpcTask::Ptr &task = vpcTask1;
   assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
   VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
-#ifndef NDEBUG
-  if (VC::Mappings::getComponents().find(configComponent) == VC::Mappings::getComponents().end()) {
-    for (std::map<VC::Component::Ptr, AbstractComponent *>::iterator iter = VC::Mappings::getComponents().begin();
-         iter != VC::Mappings::getComponents().end();
-         ++iter) {
-      std::cerr << "SystemC-VPC: Have component " << iter->first->getName() << std::endl;
-    }
-    std::cerr << "SystemC-VPC: Can't find component " << configComponent->getName() << " for a mapping" << std::endl;
-    assert(VC::Mappings::getComponents().find(configComponent) != VC::Mappings::getComponents().end());
-  }
-#endif //NDEBUG
-  AbstractComponent * comp = VC::Mappings::getComponents()[configComponent];
+  AbstractComponent * comp = static_cast<AbstractComponent *>(configComponent.get());
   comp->registerTask(actor);
 }
 

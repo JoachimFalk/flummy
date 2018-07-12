@@ -1,8 +1,22 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2018-2018 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
+ * 
+ *   This library is free software; you can redistribute it and/or modify it under
+ *   the terms of the GNU Lesser General Public License as published by the Free
+ *   Software Foundation; either version 2 of the License, or (at your option) any
+ *   later version.
+ * 
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ *   details.
+ * 
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation, Inc.,
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  * 
  * --- This software and any associated documentation is provided "as is"
  * 
@@ -22,12 +36,46 @@
 
 #include "TraceableComponent.hpp"
 
+#include <stdexcept>
+#include <map>
+#include <sstream>
+
 #include <assert.h>
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
 TraceableComponent::TraceableComponent()
   : tracingStarted(false) {}
+
+typedef std::map<std::string, std::function<TracerIf *(Component const *)> > TracerByName;
+
+/// We need this to be independent from the global variable initialization order.
+TracerByName &getTracerByName() {
+  static TracerByName tracerByName;
+  return tracerByName;
+}
+
+void TraceableComponent::registerTracer(
+    const char                                   *tracerName,
+    std::function<TracerIf *(Component const *)>  tracerFactory)
+{
+  sassert(getTracerByName().insert(std::make_pair(tracerName, tracerFactory)).second);
+}
+
+/// Add a tracer by its name.
+/// This must no longer be called after the first task has been
+/// registered via registerTask.
+void TraceableComponent::addTracer(
+    const char      *tracerName,
+    Component const *componentConfig) {
+  TracerByName::const_iterator iter = getTracerByName().find(tracerName);
+  if (iter == getTracerByName().end()) {
+    std::stringstream msg;
+    msg << "Unknown component tracer " << tracerName << "!";
+    throw std::runtime_error(msg.str().c_str());
+  }
+  addTracer(iter->second(componentConfig));
+}
 
 /// Add a tracer. This must no longer be called after the first task
 /// has been registered via registerTask.

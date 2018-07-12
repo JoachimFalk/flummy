@@ -40,8 +40,8 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  FcfsComponent::FcfsComponent(SystemC_VPC::Component::Ptr component, Director *director)
-    : NonPreemptiveComponent(component, director) {}
+  FcfsComponent::FcfsComponent(std::string const &name)
+    : NonPreemptiveComponent(name) {}
 
   FcfsComponent::~FcfsComponent() {}
 

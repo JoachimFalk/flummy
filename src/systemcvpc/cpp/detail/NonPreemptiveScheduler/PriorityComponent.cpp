@@ -40,9 +40,8 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-PriorityComponent::PriorityComponent(
-    SystemC_VPC::Component::Ptr component, Director *director)
-  : NonPreemptiveComponent(component, director)
+PriorityComponent::PriorityComponent(std::string const &name)
+  : NonPreemptiveComponent(name)
   , fcfsOrder(0)
 {}
 

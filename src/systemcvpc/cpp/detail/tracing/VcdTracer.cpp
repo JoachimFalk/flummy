@@ -36,210 +36,260 @@
 
 #include <systemcvpc/Component.hpp>
 
-#include "VcdTracer.hpp"
-#include "../TaskInstance.hpp"
+#include "TracerIf.hpp"
+
+#include <systemc>
+
+#include <string>
 
 #include <systemcvpc/vpc_config.h>
 
+namespace SystemC_VPC {
+
+  const char *Component::Tracer::VCD = "VCD";
+
+} // namespace SystemC_VPC
+
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-typedef char trace_value;
+  class VcdTracer: public TracerIf {
+  public:
+    VcdTracer(Component const *component);
 
-/** ASCII lower case bit is  2^5 */
-const unsigned int LOWER_CASE = 32;
-const unsigned int UPPER_CASE = ~LOWER_CASE;
+    ~VcdTracer();
 
-/**
- * tiny little helper: toggle ASCII characters used for VCD tracing
- */
-class VcdTracer::VcdTask: public TTask {
-public:
-  static const trace_value S_SLEEP;
-  static const trace_value S_BLOCKED;
-  static const trace_value S_READY;
-  static const trace_value S_RUNNING;
+    TTask         *registerTask(std::string const &name);
 
-   VcdTask(
-       sc_core::sc_trace_file *traceFile,
-       std::string      const &resource,
-       std::string      const &task)
-    : resource(resource), task(task)
-    , lastChange(sc_core::SC_ZERO_TIME)
-    , lastValue(0), currentValue(0)
-  {
-    sc_core::sc_trace(traceFile, currentValue, task);
-  }
+    TTaskInstance *release(TTask *ttask);
 
-  void traceRunning(){
-    this->tracePlain("RUN");
-    this->setValueWithCaseCorrection(S_RUNNING);
-  }
+    void           assign(TTaskInstance *ttaskInstance);
 
-  void traceBlocking(){
-    this->tracePlain("BLOCK");
-    this->setValueWithCaseCorrection(S_BLOCKED);
-  }
+    void           resign(TTaskInstance *ttaskInstance);
 
-  void traceSleeping(){
-    this->tracePlain("SLEEP");
-    this->writeValue(S_SLEEP);
-  }
+    void           block(TTaskInstance *ttaskInstance);
 
-  void traceReady(){
-    this->tracePlain("WAIT");
-    this->setValueWithCaseCorrection(S_READY);
-  }
+    void           finishDii(TTaskInstance *ttaskInstance);
 
-  void tracePlain(std::string traceValue) {
-#ifdef VPC_ENABLE_PLAIN_TRACING
-    if(plainTrace != NULL){
-      *plainTrace << sc_core::sc_time_stamp().value()
-                  << "\t" << resource
-                  << "\t" << task
-                  << "\t" << traceValue
-                  <<  std::endl;
+    void           finishLatency(TTaskInstance *ttaskInstance);
+  private:
+    class VcdTask;
+    class VcdTaskInstance;
+    class RegisterMe;
+
+    static RegisterMe registerMe;
+
+    std::string getName() const;
+
+    sc_core::sc_trace_file *traceFile_;
+    std::string name_;
+  //std::map<std::string, Trace::Tracing*> trace_map_by_name_;
+  };
+
+  typedef char trace_value;
+
+  /** ASCII lower case bit is  2^5 */
+  const unsigned int LOWER_CASE = 32;
+  const unsigned int UPPER_CASE = ~LOWER_CASE;
+
+  /**
+   * tiny little helper: toggle ASCII characters used for VCD tracing
+   */
+  class VcdTracer::VcdTask: public TTask {
+  public:
+    static const trace_value S_SLEEP;
+    static const trace_value S_BLOCKED;
+    static const trace_value S_READY;
+    static const trace_value S_RUNNING;
+
+     VcdTask(
+         sc_core::sc_trace_file *traceFile,
+         std::string      const &resource,
+         std::string      const &task)
+      : resource(resource), task(task)
+      , lastChange(sc_core::SC_ZERO_TIME)
+      , lastValue(0), currentValue(0)
+    {
+      sc_core::sc_trace(traceFile, currentValue, task);
     }
-#endif // VPC_ENABLE_PLAIN_TRACING
-  }
-private:
 
-  /**
-   * remember last value and time stamp of change
-   */
-  trace_value getLastValue() {
-    if (sc_core::sc_time_stamp() > lastChange) {
-      // remember value from last real changing (ignore delta cycle changing)
-      lastValue  = currentValue;
+    void traceRunning(){
+      this->tracePlain("RUN");
+      this->setValueWithCaseCorrection(S_RUNNING);
     }
-    return lastValue;
-  }
 
-  /**
-   * write value to signal
-   */
-  void writeValue(trace_value value) {
-    getLastValue(); // To update lastValue
-    lastChange   = sc_core::sc_time_stamp();
-    currentValue = value;
-  }
+    void traceBlocking(){
+      this->tracePlain("BLOCK");
+      this->setValueWithCaseCorrection(S_BLOCKED);
+    }
 
-  /**
-   * Set trace value.
-   * If the signal is identical to lastValue then the ASCII bit for
-   * lower case is toggled
-   */
-  void setValueWithCaseCorrection(trace_value value){
-    if(getLastValue() == value){
-      // if value does not change toggle between upper and lower case
-      if(value & LOWER_CASE){
-        writeValue(value & UPPER_CASE);
-      } else {
-        writeValue(value | LOWER_CASE);
+    void traceSleeping(){
+      this->tracePlain("SLEEP");
+      this->writeValue(S_SLEEP);
+    }
+
+    void traceReady(){
+      this->tracePlain("WAIT");
+      this->setValueWithCaseCorrection(S_READY);
+    }
+
+    void tracePlain(std::string traceValue) {
+  #ifdef VPC_ENABLE_PLAIN_TRACING
+      if(plainTrace != NULL){
+        *plainTrace << sc_core::sc_time_stamp().value()
+                    << "\t" << resource
+                    << "\t" << task
+                    << "\t" << traceValue
+                    <<  std::endl;
       }
-    }else{
-      writeValue(value);
+  #endif // VPC_ENABLE_PLAIN_TRACING
+    }
+  private:
+
+    /**
+     * remember last value and time stamp of change
+     */
+    trace_value getLastValue() {
+      if (sc_core::sc_time_stamp() > lastChange) {
+        // remember value from last real changing (ignore delta cycle changing)
+        lastValue  = currentValue;
+      }
+      return lastValue;
+    }
+
+    /**
+     * write value to signal
+     */
+    void writeValue(trace_value value) {
+      getLastValue(); // To update lastValue
+      lastChange   = sc_core::sc_time_stamp();
+      currentValue = value;
+    }
+
+    /**
+     * Set trace value.
+     * If the signal is identical to lastValue then the ASCII bit for
+     * lower case is toggled
+     */
+    void setValueWithCaseCorrection(trace_value value){
+      if(getLastValue() == value){
+        // if value does not change toggle between upper and lower case
+        if(value & LOWER_CASE){
+          writeValue(value & UPPER_CASE);
+        } else {
+          writeValue(value | LOWER_CASE);
+        }
+      }else{
+        writeValue(value);
+      }
+    }
+
+  #ifdef VPC_ENABLE_PLAIN_TRACING
+    static std::ostream * plainTrace;
+  #endif // VPC_ENABLE_PLAIN_TRACING
+
+    /// name of traced resource
+    std::string      resource;
+
+    /// name of traced task
+    std::string      task;
+
+    /** remeber last time of signal changing */
+    sc_core::sc_time lastChange;
+
+    /** rember last signal value */
+    trace_value      lastValue;
+
+    /** rember current signal value */
+    trace_value      currentValue;
+
+  }; // struct Tracing
+
+  const trace_value VcdTracer::VcdTask::S_SLEEP   = ' ';
+  const trace_value VcdTracer::VcdTask::S_BLOCKED = 'b';
+  const trace_value VcdTracer::VcdTask::S_READY   = 'w';
+  const trace_value VcdTracer::VcdTask::S_RUNNING = 'R';
+
+  class VcdTracer::VcdTaskInstance: public TTaskInstance {
+  public:
+    VcdTaskInstance(VcdTask *vcdTask)
+      : vcdTask(vcdTask) {}
+
+    VcdTask *vcdTask;
+
+    ~VcdTaskInstance() {}
+  };
+
+  class VcdTracer::RegisterMe {
+  public:
+    RegisterMe() {
+      VcdTracer::registerTracer("VCD",
+        [](Component const *comp) { return new VcdTracer(comp); });
+    }
+  } VcdTracer::registerMe;
+
+  #ifdef VPC_ENABLE_PLAIN_TRACING
+  std::ostream * Tracing::plainTrace = new CoSupport::Streams::AOStream(std::cout, "vpc.trace", "-");
+  #endif // VPC_ENABLE_PLAIN_TRACING
+
+  VcdTracer::VcdTracer(Component const *component)
+    : traceFile_(NULL)
+    , name_(component->getName())
+  {}
+
+  VcdTracer::~VcdTracer() {
+    if (traceFile_) {
+      sc_core::sc_close_vcd_trace_file(traceFile_);
     }
   }
 
-#ifdef VPC_ENABLE_PLAIN_TRACING
-  static std::ostream * plainTrace;
-#endif // VPC_ENABLE_PLAIN_TRACING
-
-  /// name of traced resource
-  std::string      resource;
-
-  /// name of traced task
-  std::string      task;
-
-  /** remeber last time of signal changing */
-  sc_core::sc_time lastChange;
-
-  /** rember last signal value */
-  trace_value      lastValue;
-
-  /** rember current signal value */
-  trace_value      currentValue;
-
-}; // struct Tracing
-
-const trace_value VcdTracer::VcdTask::S_SLEEP   = ' ';
-const trace_value VcdTracer::VcdTask::S_BLOCKED = 'b';
-const trace_value VcdTracer::VcdTask::S_READY   = 'w';
-const trace_value VcdTracer::VcdTask::S_RUNNING = 'R';
-
-class VcdTracer::VcdTaskInstance: public TTaskInstance {
-public:
-  VcdTaskInstance(VcdTask *vcdTask)
-    : vcdTask(vcdTask) {}
-
-  VcdTask *vcdTask;
-
-  ~VcdTaskInstance() {}
-};
-
-#ifdef VPC_ENABLE_PLAIN_TRACING
-std::ostream * Tracing::plainTrace = new CoSupport::Streams::AOStream(std::cout, "vpc.trace", "-");
-#endif // VPC_ENABLE_PLAIN_TRACING
-
-VcdTracer::VcdTracer(SystemC_VPC::Component::Ptr component)
-  : traceFile_(NULL)
-  , name_(component->getName())
-{}
-
-VcdTracer::~VcdTracer() {
-  if (traceFile_) {
-    sc_core::sc_close_vcd_trace_file(traceFile_);
+  std::string VcdTracer::getName() const {
+    return name_;
   }
-}
 
-std::string VcdTracer::getName() const {
-  return name_;
-}
+  TTask         *VcdTracer::registerTask(std::string const &name) {
+    if (this->traceFile_ == NULL) {
+      std::string tracefilename = this->getName(); //componentName;
 
-TTask         *VcdTracer::registerTask(std::string const &name) {
-  if (this->traceFile_ == NULL) {
-    std::string tracefilename = this->getName(); //componentName;
+      char* traceprefix = getenv("VPCTRACEFILEPREFIX");
+      if (0 != traceprefix) {
+        tracefilename.insert(0, traceprefix);
+      }
 
-    char* traceprefix = getenv("VPCTRACEFILEPREFIX");
-    if (0 != traceprefix) {
-      tracefilename.insert(0, traceprefix);
+      this->traceFile_ = sc_core::sc_create_vcd_trace_file(tracefilename.c_str());
+      this->traceFile_->set_time_unit(1, sc_core::SC_NS);
     }
-
-    this->traceFile_ = sc_core::sc_create_vcd_trace_file(tracefilename.c_str());
-    this->traceFile_->set_time_unit(1, sc_core::SC_NS);
+    VcdTask *newsignal = new VcdTask(this->traceFile_, getName(), name);
+    newsignal->traceSleeping();
+    return newsignal;
   }
-  VcdTask *newsignal = new VcdTask(this->traceFile_, getName(), name);
-  newsignal->traceSleeping();
-  return newsignal;
-}
 
-TTaskInstance *VcdTracer::release(TTask *ttask) {
-  VcdTaskInstance *ttaskInstance = new VcdTaskInstance(static_cast<VcdTask *>(ttask));
-  ttaskInstance->vcdTask->traceReady();
-//// FIXME: This should become its own tracer!
-//const_cast<Task *>(task)->traceReleaseTask();
-  return ttaskInstance;
-}
+  TTaskInstance *VcdTracer::release(TTask *ttask) {
+    VcdTaskInstance *ttaskInstance = new VcdTaskInstance(static_cast<VcdTask *>(ttask));
+    ttaskInstance->vcdTask->traceReady();
+  //// FIXME: This should become its own tracer!
+  //const_cast<Task *>(task)->traceReleaseTask();
+    return ttaskInstance;
+  }
 
-void           VcdTracer::assign(TTaskInstance *ttaskInstance) {
-  static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceRunning();
-}
+  void           VcdTracer::assign(TTaskInstance *ttaskInstance) {
+    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceRunning();
+  }
 
-void           VcdTracer::resign(TTaskInstance *ttaskInstance) {
-  static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceReady();
-}
+  void           VcdTracer::resign(TTaskInstance *ttaskInstance) {
+    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceReady();
+  }
 
-void           VcdTracer::block(TTaskInstance *ttaskInstance) {
-  static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceBlocking();
-}
+  void           VcdTracer::block(TTaskInstance *ttaskInstance) {
+    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceBlocking();
+  }
 
-void           VcdTracer::finishDii(TTaskInstance *ttaskInstance) {
-  static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceSleeping();
-}
+  void           VcdTracer::finishDii(TTaskInstance *ttaskInstance) {
+    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceSleeping();
+  }
 
-void           VcdTracer::finishLatency(TTaskInstance *ttaskInstance) {
-//// FIXME: This should become its own tracer!
-//const_cast<Task *>(task)->traceFinishTaskLatency();
-}
+  void           VcdTracer::finishLatency(TTaskInstance *ttaskInstance) {
+  //// FIXME: This should become its own tracer!
+  //const_cast<Task *>(task)->traceFinishTaskLatency();
+  }
 
 } } } // namespace SystemC_VPC::Detail::Tracing

@@ -35,6 +35,7 @@
  */
 
 #include <systemcvpc/VpcTask.hpp>
+#include <systemcvpc/Mappings.hpp>
 #include <systemcvpc/Component.hpp>
 #include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
@@ -56,7 +57,7 @@ VpcTask::VpcTask() :
 //
 void VpcTask::mapTo(Component::Ptr component)
 {
-  component->addTask(*actor_);
+  Mappings::getConfiguredMappings()[Ptr(this)] = component;
 }
 
 //
@@ -74,11 +75,6 @@ size_t VpcTask::getPriority() const
 const ScheduledTask * VpcTask::getActor() const
 {
   return actor_;
-}
-
-const Component::Ptr  VpcTask::getComponent() const
-{
-  return component_;
 }
 
 //

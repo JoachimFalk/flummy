@@ -51,13 +51,6 @@ std::map<VpcTask::Ptr, Component::Ptr>& Mappings::getConfiguredMappings()
 }
 
 //
-std::map<Component::Ptr, Detail::AbstractComponent *> & Mappings::getComponents()
-{
-  static std::map<Component::Ptr, Detail::AbstractComponent *> components;
-  return components;
-}
-
-//
 bool Mappings::isMapped(VpcTask::Ptr task, Component::Ptr component)
 {
   std::map<VpcTask::Ptr, Component::Ptr>& mappings =
@@ -194,7 +187,7 @@ Detail::Route * create(SystemC_VPC::Route::Ptr configuredRoute)
   std::list<Hop> hops = configuredRoute->getHops();
   for (std::list<Hop>::const_iterator iter = hops.begin(); iter != hops.end(); ++iter) {
     SystemC_VPC::Component::Ptr component = iter->getComponent();
-    Detail::AbstractComponent * c = SystemC_VPC::Mappings::getComponents()[component];
+    Detail::AbstractComponent * c = static_cast<Detail::AbstractComponent *>(component.get());
     route->addHop(component->getName(), c);
 
     Detail::ProcessControlBlock *pcb = c->createPCB(route->getName());

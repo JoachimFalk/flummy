@@ -40,8 +40,11 @@
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/TimingModifier.hpp>
+#include <systemcvpc/Mappings.hpp>
+#include <systemcvpc/VpcApi.hpp>
 
 #include "detail/Director.hpp"
+#include "detail/AbstractComponent.hpp"
 
 #include <boost/shared_ptr.hpp>
 
@@ -51,94 +54,65 @@
 namespace SystemC_VPC {
 
 //
-Component::Component(std::string name, Scheduler scheduler) :
-  name_(name), debugFileName_(""), scheduler_(scheduler), componentInterface_(NULL)
-{
+Component::Component() {
 }
 
 //
-void Component::setTransferTiming(Timing transferTiming)
-{
+void Component::setTransferTiming(Timing transferTiming) {
   transferTiming_ = transferTiming;
 }
 
-void Component::setTransferTimingModifier(boost::shared_ptr<TimingModifier> timingModifier)
-{
+void Component::setTransferTimingModifier(boost::shared_ptr<TimingModifier> timingModifier) {
   transferTiming_.setTimingModifier(timingModifier);
 }
 
 //
-Timing Component::getTransferTiming() const
-{
+Timing Component::getTransferTiming() const {
   return transferTiming_;
 }
 
 //
-void Component::setScheduler(Scheduler scheduler)
-{
-  scheduler_ = scheduler;
+void Component::addTask(ScheduledTask & actor) {
+  Mappings::getConfiguredMappings()[getCachedTask(actor)] = this;
 }
 
 //
-Scheduler Component::getScheduler() const
-{
-  return scheduler_;
+std::string Component::getName() const {
+  return static_cast<Detail::AbstractComponent const *>(this)->getName();
 }
 
 //
-void Component::addTask(ScheduledTask & actor)
-{
-  mappedTasks_.insert(&actor);
+bool Component::hasTask(ScheduledTask * actor) const {
+  return Mappings::isMapped(getCachedTask(*actor), Ptr(const_cast<this_type *>(this)));
 }
 
 //
-std::string Component::getName() const
-{
-  return name_;
-}
-
-//
-bool Component::hasTask(ScheduledTask * actor) const
-{
-  return mappedTasks_.find(actor) != mappedTasks_.end();
-}
-
-//
-void Component::setTimingsProvider(TimingsProvider::Ptr provider)
-{
+void Component::setTimingsProvider(TimingsProvider::Ptr provider) {
   timingsProvider_ = provider;
 }
 
 //
-TimingsProvider::Ptr Component::getTimingsProvider()
-{
+TimingsProvider::Ptr Component::getTimingsProvider() {
   if (timingsProvider_) {
     return timingsProvider_;
   } else if (defaultTimingsProvider_) {
     return defaultTimingsProvider_;
   }
-  throw ConfigException("\tComponent \"" + this->name_
+  throw ConfigException("\tComponent \"" + this->getName()
       + "\" has NO timing provider"
         "\n\tEither set one: Component::setTimingsProvider(TimingsProvider::Ptr )"
         "\n\tOr use default one: Component::getDefaultTimingsProvider()");
 }
 
 //
-DefaultTimingsProvider::Ptr Component::getDefaultTimingsProvider()
-{
+DefaultTimingsProvider::Ptr Component::getDefaultTimingsProvider() {
   if (!defaultTimingsProvider_) {
     defaultTimingsProvider_.reset(new DefaultTimingsProvider());
   }
   return defaultTimingsProvider_;
 }
 
-std::vector<AttributePtr> Component::getAttributes() const
-{
-  return attributes_;
-}
-
-void Component::addAttribute(AttributePtr attribute)
-{
+void Component::addAttribute(AttributePtr attribute) {
   if (attribute->isType("transaction_delay")) {
     sc_core::sc_time transferDelay = Detail::Director::createSC_Time(attribute->getValue());
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
@@ -158,50 +132,30 @@ void Component::addAttribute(AttributePtr attribute)
 
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
     // FIXME: add transactionSize
-
   } else if (attribute->isType("tracing")) {
-    this->setTracing(Traceable::parseTracing(attribute->getValue()));
-  } else {
-    this->attributes_.push_back(attribute);
+    static_cast<Detail::AbstractComponent *>(this)->addTracer(attribute->getValue().c_str(), this);
+  } else if (!static_cast<Detail::AbstractComponent *>(this)->setAttribute(attribute)) {
+    throw std::runtime_error("Unhandled attribute");
   }
 }
 
-//
-Component::MappedTasks Component::getMappedTasks()
-{
-  return mappedTasks_;
+Component::MappedTasks Component::getMappedTasks() {
+  Component::MappedTasks retval;
+  for (std::pair<VpcTask::Ptr, Component::Ptr> const &v :
+          Mappings::getConfiguredMappings())
+    if (v.second == this) {
+      assert(v.first->getActor() != nullptr);
+      retval.insert(const_cast<ScheduledTask *>(v.first->getActor()));
+    }
+  return retval;
 }
 
-//
-ComponentId Component::getComponentId() const
-{
-  return this->getSequentialId();
+ComponentId Component::getComponentId() const {
+  return static_cast<Detail::AbstractComponent const *>(this)->getComponentId();
 }
 
-//
-ComponentInterface::Ptr Component::getComponentInterface() const
-{
-  //TODO: assert simulation phase
-  assert(componentInterface_ != NULL);
-  return componentInterface_;
-}
-
-//
-bool Component::hasDebugFile() const
-{
-  return (this->debugFileName_ != "");
-}
-
-//
-std::string Component::getDebugFileName() const
-{
-  return this->debugFileName_;
-}
-
-//
-void Component::setDebugFileName(std::string debugFileName)
-{
-  this->debugFileName_ = debugFileName;
+ComponentInterface *Component::getComponentInterface() {
+  return static_cast<Detail::AbstractComponent *>(this);
 }
 
 } // namespace SystemC_VPC
