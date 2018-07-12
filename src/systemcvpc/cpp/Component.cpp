@@ -34,7 +34,6 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/common.hpp>
 #include <systemcvpc/Component.hpp>
 #include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/Timing.hpp>
@@ -43,7 +42,7 @@
 #include <systemcvpc/Mappings.hpp>
 #include <systemcvpc/VpcApi.hpp>
 
-#include "detail/Director.hpp"
+#include "detail/common.hpp"
 #include "detail/AbstractComponent.hpp"
 
 #include <boost/shared_ptr.hpp>
@@ -81,6 +80,10 @@ std::string Component::getName() const {
   return static_cast<Detail::AbstractComponent const *>(this)->getName();
 }
 
+void Component::addTracer(const char *tracer) {
+  static_cast<Detail::AbstractComponent *>(this)->addTracer(tracer, this);
+}
+
 //
 bool Component::hasTask(ScheduledTask * actor) const {
   return Mappings::isMapped(getCachedTask(*actor), Ptr(const_cast<this_type *>(this)));
@@ -114,16 +117,16 @@ DefaultTimingsProvider::Ptr Component::getDefaultTimingsProvider() {
 
 void Component::addAttribute(AttributePtr attribute) {
   if (attribute->isType("transaction_delay")) {
-    sc_core::sc_time transferDelay = Detail::Director::createSC_Time(attribute->getValue());
+    sc_core::sc_time transferDelay = Detail::createSC_Time(attribute->getValue().c_str());
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
   } else if (attribute->isType("transfer_delay")) {
-    sc_core::sc_time transferDelay = Detail::Director::createSC_Time(attribute->getValue());
+    sc_core::sc_time transferDelay = Detail::createSC_Time(attribute->getValue().c_str());
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
   } else if (attribute->isType("transaction")) {
 //  unsigned int transactionSize = 1;
     sc_core::sc_time transferDelay = sc_core::SC_ZERO_TIME;
     if (attribute->hasParameter("delay")) {
-      transferDelay = Detail::Director::createSC_Time(attribute->getParameter("delay"));
+      transferDelay = Detail::createSC_Time(attribute->getParameter("delay").c_str());
     }
 
 //  if (attribute->hasParameter("size")) {

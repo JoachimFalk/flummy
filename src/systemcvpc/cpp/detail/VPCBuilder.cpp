@@ -36,7 +36,6 @@
 
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/TimingModifier.hpp>
-#include <systemcvpc/common.hpp>
 #include <systemcvpc/Component.hpp>
 #include <systemcvpc/Route.hpp>
 #include <systemcvpc/Timing.hpp>
@@ -44,6 +43,7 @@
 #include <systemcvpc/VpcApi.hpp>
 
 #include "VPCBuilder.hpp"
+#include "common.hpp"
 #include "VpcDomErrorHandler.hpp"
 #include "Director.hpp"
 #include "ConfigCheck.hpp"
@@ -667,12 +667,12 @@ namespace SystemC_VPC { namespace Detail {
     bool hasDelay   = (delay != NULL);
     bool hasLatency = (latency != NULL);
     if (hasDelay && !hasDii && !hasLatency) {
-      sc_core::sc_time d = Director::createSC_Time(CX::NStr(delay->getNodeValue()));
+      sc_core::sc_time d = createSC_Time(CX::NStr(delay->getNodeValue()).c_str());
       t.setDii(d);
       t.setLatency(d);
     } else if (!hasDelay && hasDii && hasLatency) {
-      t.setDii(Director::createSC_Time(CX::NStr(dii->getNodeValue())));
-      t.setLatency(Director::createSC_Time(CX::NStr(latency->getNodeValue())));
+      t.setDii(createSC_Time(CX::NStr(dii->getNodeValue()).c_str()));
+      t.setLatency(createSC_Time(CX::NStr(latency->getNodeValue()).c_str()));
     } else {
       std::string msg("Invalid timing annotation.\n");
       for(unsigned int i=0; i<atts->getLength(); i++){
@@ -1001,7 +1001,7 @@ namespace SystemC_VPC { namespace Detail {
       if (hasData && hasScale){
 
         //create the timingModifier
-        result = boost::shared_ptr<DistributionTimingModifier>(new EmpiricTimingModifier(generator,Director::createSC_Time(CX::NStr(scale->getNodeValue())),CX::NStr(data->getNodeValue()),minValue,maxValue,hasfixed));
+        result = boost::shared_ptr<DistributionTimingModifier>(new EmpiricTimingModifier(generator, createSC_Time(CX::NStr(scale->getNodeValue()).c_str()),CX::NStr(data->getNodeValue()),minValue,maxValue,hasfixed));
         foundDistribution = true;
       } else {
         throw InvalidArgumentException("invalid parameter for distribution");

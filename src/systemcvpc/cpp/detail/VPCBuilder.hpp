@@ -56,7 +56,6 @@
  */
 
 #include <CoSupport/XML/Xerces/Handler.hpp>
-#include <systemcvpc/common.hpp>
 
 #include <map>
 #include <string>

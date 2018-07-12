@@ -74,13 +74,8 @@ void TraceableComponent::addTracer(
     msg << "Unknown component tracer " << tracerName << "!";
     throw std::runtime_error(msg.str().c_str());
   }
-  addTracer(iter->second(componentConfig));
-}
-
-/// Add a tracer. This must no longer be called after the first task
-/// has been registered via registerTask.
-void TraceableComponent::addTracer(TracerIf *tracer) {
   assert(registerdTasks.empty());
+  TracerIf *tracer = iter->second(componentConfig);
   assert(tracer);
   tracers.push_back(tracer);
 }

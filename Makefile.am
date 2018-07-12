@@ -62,7 +62,6 @@ lib_LTLIBRARIES = libsystemcvpc.la
 
 libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/Attribute.cpp \
-	src/systemcvpc/cpp/common.cpp \
 	src/systemcvpc/cpp/Component.cpp \
 	src/systemcvpc/cpp/Mappings.cpp \
 	src/systemcvpc/cpp/Route.cpp \
@@ -100,6 +99,7 @@ libsystemcvpc_la_SOURCES = \
 	\
 	src/systemcvpc/cpp/detail/AbstractComponent.cpp \
 	src/systemcvpc/cpp/detail/BlockingTransport.cpp \
+	src/systemcvpc/cpp/detail/common.cpp \
 	src/systemcvpc/cpp/detail/ComponentInfo.cpp \
 	src/systemcvpc/cpp/detail/ConfigCheck.cpp \
 	src/systemcvpc/cpp/detail/DebugOStream.cpp \

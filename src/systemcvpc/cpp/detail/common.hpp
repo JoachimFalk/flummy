@@ -34,32 +34,19 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_COMMON_HPP
-#define _INCLUDED_SYSTEMCVPC_COMMON_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_COMMON_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_COMMON_HPP
 
-#include <string>
+#include <systemc>
 
-namespace SystemC_VPC {
+namespace SystemC_VPC { namespace Detail {
 
-class Traceable
-{
-public:
-  enum Type
-  {
-    DB,  // write trace to a database
-    PAJE,// trace to paje file
-    VCD, // trace to vcd file
-    NONE // disable tracing
-  };
+  /**
+   * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
+   */
+  sc_core::sc_time createSC_Time(const char *timeString);
 
-  static Type parseTracing(std::string name);
-  Traceable();
-  void setTracing(Type tracing);
-  Type getTracing() const;
-private:
-  Type tracing_;
-};
 
-} // namespace SystemC_VPC
+} } // namespace SystemC_VPC::Detail
 
-#endif /* _INCLUDED_SYSTEMCVPC_COMMON_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_COMMON_HPP */

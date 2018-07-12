@@ -52,7 +52,7 @@
 */
 #include "StreamShaperScheduler.hpp"
 #include "PreemptiveComponent.hpp"
-#include "../Director.hpp"
+#include "../common.hpp"
 
 #include <CoSupport/SystemC/algorithm.hpp>
 
@@ -91,7 +91,7 @@ namespace SystemC_VPC { namespace Detail {
   void StreamShaperScheduler::setAttribute(AttributePtr attributePtr){
     std::string value = attributePtr->getType();
     if(value=="shapePeriod"){
-        shapeCycle = Director::createSC_Time(attributePtr->getValue());
+        shapeCycle = createSC_Time(attributePtr->getValue().c_str());
     }
   }
 

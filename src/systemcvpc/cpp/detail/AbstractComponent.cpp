@@ -41,6 +41,7 @@
 #include <systemcvpc/VpcTask.hpp>
 #include <systemcvpc/Mappings.hpp>
 
+#include "common.hpp"
 #include "Director.hpp"
 #include "AbstractComponent.hpp"
 #include "ProcessControlBlock.hpp"
@@ -195,11 +196,11 @@ namespace SystemC_VPC { namespace Detail {
       }
       if(powerAtt->hasParameter("transaction_delay")) {
         this->transactionDelays[power] =
-          Director::createSC_Time(powerAtt->getParameter("transaction_delay"));
+          createSC_Time(powerAtt->getParameter("transaction_delay").c_str());
       }
       if(powerAtt->hasParameter("transfer_delay")) {
         this->transactionDelays[power] =
-          Director::createSC_Time(powerAtt->getParameter("transfer_delay"));
+          createSC_Time(powerAtt->getParameter("transfer_delay").c_str());
       }
 
     }

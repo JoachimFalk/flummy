@@ -160,16 +160,6 @@ namespace SystemC_VPC { namespace Detail {
     FastLink *registerRoute(std::string source, std::string destination,
         sc_core::sc_port_base * leafPort);
 
-    /**
-     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
-     */
-    static sc_core::sc_time createSC_Time(const char* timeString);
-
-    /**
-     * \brief Takes a string representation of a time (e.g. a delay) and constructs a sc_core::sc_time object.
-     */
-    static sc_core::sc_time createSC_Time(std::string timeString);
-    
     static bool hasFunctionId(const std::string& function);
     static FunctionId getFunctionId(const std::string& function);
     static FunctionId createFunctionId(const std::string& function);

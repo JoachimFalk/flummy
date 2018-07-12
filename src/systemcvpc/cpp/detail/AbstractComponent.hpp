@@ -102,6 +102,7 @@ namespace SystemC_VPC { namespace Detail {
     // For resolving ambiguity
     using Delayer::getName;
     using Delayer::getComponentId;
+    using Tracing::TraceableComponent::addTracer;
 
     /// Realize debug file interface from SystemC_VPC::Component with
     /// a default unsupported implementation.
