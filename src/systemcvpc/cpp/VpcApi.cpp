@@ -50,8 +50,8 @@ namespace SystemC_VPC {
 
 Modifiers & getDistributions()
 {
-	static Modifiers modifiers;
-	return modifiers;
+  static Modifiers modifiers;
+  return modifiers;
 }
 
 //
@@ -72,10 +72,10 @@ static std::map<const TaskInterface *, VpcTask::Ptr> vpcTasks;
 
 void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier)
 {
-	if(!hasDistribution(name)) {
-		getDistributions()[name] = modifier;
-		return;
-	}
+  if(!hasDistribution(name)) {
+    getDistributions()[name] = modifier;
+    return;
+  }
   throw ConfigException(std::string("Multiple creation of distribution \"") + name
       + "\" is not supported. Use getDistribution() instead. ");
 }
@@ -140,7 +140,7 @@ Route::Ptr getRoute(const sc_core::sc_port_base * leafPort){
 
 bool hasDistribution(std::string name)
 {
-	return getDistributions().find(name) != getDistributions().end();
+  return getDistributions().find(name) != getDistributions().end();
 }
 
 //
@@ -214,45 +214,43 @@ void ignoreMissingRoutes(bool ignore)
 
 ComponentInterface* getTaskComponentInterface(ScheduledTask & actor)
 {
-	Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
-	if(component != NULL)
-		return component->getComponentInterface();
-	else
-		return NULL;
+  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  if(component != NULL)
+    return component->getComponentInterface();
+  else
+    return NULL;
 
-	//return NULL;
+  //return NULL;
 }
 
 void changePowerMode(ScheduledTask & actor,std::string powermode)
 {
-	if(Detail::Director::getInstance().FALLBACKMODE)
-	{
-		return;
-	}
-	Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
-	if(component != NULL)
-	{
-		ComponentInterface* ci = component->getComponentInterface();
-		if(ci != NULL)
-			ci->changePowerMode(powermode);
-	}
-
-
-	//return NULL;
+  if(Detail::Director::getInstance().FALLBACKMODE)
+  {
+    return;
+  }
+  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  if(component != NULL)
+  {
+    ComponentInterface* ci = component->getComponentInterface();
+    if(ci != NULL)
+      ci->changePowerMode(powermode);
+  }
+  //return NULL;
 }
 
 bool hasWaitingOrRunningTasks(ScheduledTask & actor){
   if(Detail::Director::getInstance().FALLBACKMODE)
    {
     //FIXME: how to handle Fallbackmode?
-           return true;
+     return true;
    }
    Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
    if(component != NULL)
    {
-           ComponentInterface* ci = component->getComponentInterface();
-           if(ci != NULL)
-                 return ci->hasWaitingOrRunningTasks();
+     ComponentInterface* ci = component->getComponentInterface();
+     if(ci != NULL)
+       return ci->hasWaitingOrRunningTasks();
    }
    //should never reach here
    return false;
@@ -261,14 +259,14 @@ bool hasWaitingOrRunningTasks(ScheduledTask & actor){
 void registerComponentWakeup(const char* actor, VPCEvent::Ptr  event){
   if(Detail::Director::getInstance().FALLBACKMODE)
   {
-          return;
+    return;
   }
   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
   if(component != NULL)
   {
-          ComponentInterface* ci = component->getComponentInterface();
-          if(ci != NULL)
-                  ci->registerComponentWakeup(getCachedTask(actor)->getActor(), event);
+    ComponentInterface* ci = component->getComponentInterface();
+    if(ci != NULL)
+      ci->registerComponentWakeup(getCachedTask(actor)->getActor(), event);
   }
 }
 
@@ -276,33 +274,33 @@ void registerComponentIdle(const char* actor, VPCEvent::Ptr  event){
 
   if(Detail::Director::getInstance().FALLBACKMODE)
   {
-          return;
+    return;
   }
   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
   if(component != NULL)
   {
-          ComponentInterface* ci = component->getComponentInterface();
-          if(ci != NULL)
-                  ci->registerComponentIdle(getCachedTask(actor)->getActor(), event);
+    ComponentInterface* ci = component->getComponentInterface();
+    if(ci != NULL)
+      ci->registerComponentIdle(getCachedTask(actor)->getActor(), event);
   }
 }
 
 void setCanExec(ScheduledTask & actor, bool canExec){
   if(Detail::Director::getInstance().FALLBACKMODE){
-            return;
-    }
-    Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
-    if(component != NULL)
-    {
-            ComponentInterface* ci = component->getComponentInterface();
-            if(ci != NULL)
-                    ci->setCanExec(canExec);
-    }
+    return;
+  }
+  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  if(component != NULL)
+  {
+    ComponentInterface* ci = component->getComponentInterface();
+    if(ci != NULL)
+      ci->setCanExec(canExec);
+  }
 }
 
 void setActorAsPSM(const char* name, bool psm)
 {
-	  getCachedTask(name)->setActorAsPSM(psm);
+  getCachedTask(name)->setActorAsPSM(psm);
 }
 
 } // namespace SystemC_VPC

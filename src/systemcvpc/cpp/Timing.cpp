@@ -155,9 +155,9 @@ Timing TimingsProvider::getDefaultActorTiming(const std::string& actorName,const
 bool DefaultTimingsProvider::hasActionTiming(const std::string &functionName,const std::string &powermode) const
 {
   if (functionTimings_.find(functionName) != functionTimings_.end())
-	  return functionTimings_.find(functionName)->second.find(powermode) != functionTimings_.find(functionName)->second.end();
+    return functionTimings_.find(functionName)->second.find(powermode) != functionTimings_.find(functionName)->second.end();
   else
-	  return false;
+    return false;
 }
 
 bool DefaultTimingsProvider::hasActionTimings(const std::string &functionName) const
@@ -197,7 +197,7 @@ Timing DefaultTimingsProvider::getGuardTiming(const std::string &functionName,co
 
 functionTimingsPM DefaultTimingsProvider::getGuardTimings(const std::string &functionName) const
 {
-	return functionTimings_.find(functionName)->second;
+  return functionTimings_.find(functionName)->second;
   //return functionTimings_.find(functionName);
 }
 

@@ -64,7 +64,7 @@ void Component::setTransferTiming(Timing transferTiming)
 
 void Component::setTransferTimingModifier(boost::shared_ptr<TimingModifier> timingModifier)
 {
-	transferTiming_.setTimingModifier(timingModifier);
+  transferTiming_.setTimingModifier(timingModifier);
 }
 
 //
@@ -161,7 +161,7 @@ void Component::addAttribute(AttributePtr attribute)
 
   } else if (attribute->isType("tracing")) {
     this->setTracing(Traceable::parseTracing(attribute->getValue()));
-	} else {
+  } else {
     this->attributes_.push_back(attribute);
   }
 }

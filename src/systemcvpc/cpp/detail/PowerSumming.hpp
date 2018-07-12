@@ -56,7 +56,7 @@ namespace SystemC_VPC { namespace Detail {
   private:
     std::ostream    &m_output;
     sc_core::sc_time m_changedTime;
-	sc_core::sc_time m_lastVirtualTime;
+    sc_core::sc_time m_lastVirtualTime;
     double           m_powerSum;
     double           m_previousPowerSum;
     std::map<const ComponentInfo *, double> m_powerConsumption;

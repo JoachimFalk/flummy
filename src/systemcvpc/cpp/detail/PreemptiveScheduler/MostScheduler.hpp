@@ -104,7 +104,7 @@ namespace SystemC_VPC { namespace Detail {
                                            const  TaskMap &running_tasks);
     
     sc_core::sc_time* schedulingOverhead(){
-	return NULL;
+      return NULL;
     }
     
     void initialize(){}
@@ -118,7 +118,7 @@ namespace SystemC_VPC { namespace Detail {
     std::map<sc_core::sc_time, unsigned int> slotOffsets;
 
     std::map<ProcessId, bool> areaMap;
-	
+
     MostSecondaryScheduler secondaryScheduler;
 
     sc_core::sc_time lastassign;

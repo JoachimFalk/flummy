@@ -116,26 +116,27 @@ namespace SystemC_VPC { namespace Detail {
 
     /**
      * \brief set the timing of the instace
-		 * \param timing is the timing to set
+     * \param timing is the timing to set
      */
     void setTiming(const SystemC_VPC::Timing& timing);
 
     /**
-		 * \brief adds TimingModifiers to the instance
-		 * \param fids is the id of the function the timingModifiers should be added to
-		 * \param timingModifier is the timingModifier to set
-		 */
+     * \brief adds TimingModifiers to the instance
+     * \param fids is the id of the function the timingModifiers should be added to
+     * \param timingModifier is the timingModifier to set
+     */
     void addTimingModifier(FunctionId fid, boost::shared_ptr<TimingModifier> timingModifier);
 
-		/**
-		 * \brief set the base timingModifier
-		 * \param timingModifier is the timingModifier to set
-		 */
+    /**
+     * \brief set the base timingModifier
+     * \param timingModifier is the timingModifier to set
+     */
     void setBaseTimingModifier( boost::shared_ptr<TimingModifier> timingModifier);
-		/**
-		 * \brief drop the history of the modifications
-		 * \param functions is a list of functionids affected
-		 */
+
+    /**
+     * \brief drop the history of the modifications
+     * \param functions is a list of functionids affected
+     */
     void reset(FunctionIds functions);
 
   private:
