@@ -309,8 +309,8 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   /**
-	 * \brief Initialize a distribution from the configuration file
-	 **/
+   * \brief Initialize a distribution from the configuration file
+   **/
   void VPCBuilder::initDistribution(){
 
     CX::XN::DOMNode* node = this->vpcConfigTreeWalker->getCurrentNode();
@@ -501,32 +501,32 @@ namespace SystemC_VPC { namespace Detail {
 
   void VPCBuilder::nextAttribute(SystemC_VPC::AttributePtr attribute,
                                  CX::XN::DOMNode* node){
-        //walk down hierarchy to attributes             
-        for(; node != NULL; node = node->getNextSibling()){
-        const CX::XStr xmlName = node->getNodeName();
-        CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
-                
-        // check if its an attribute to add
-        if( xmlName == attributeStr ){
-          CX::XStr sValue="";
-          CX::XStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
-          if(atts->getNamedItem(valueAttrStr)!=NULL){
-                sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
-          }
-          
-          AttributePtr fr_Attribute2(new Attribute(sType, sValue));
+    //walk down hierarchy to attributes
+    for(; node != NULL; node = node->getNextSibling()){
+      const CX::XStr xmlName = node->getNodeName();
+      CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
 
-          //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
-          nextAttribute(fr_Attribute2,node->getFirstChild());
-          attribute->addAttribute(sType, fr_Attribute2);
+      // check if its an attribute to add
+      if( xmlName == attributeStr ){
+        CX::XStr sValue="";
+        CX::XStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
+        if(atts->getNamedItem(valueAttrStr)!=NULL){
+          sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
         }
-        // check if its an Parameter to add
-        if( xmlName == parameterStr ){
-          CX::XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
-          CX::XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
-          attribute->addParameter( sType, sValue);
-        }
-     }
+
+        AttributePtr fr_Attribute2(new Attribute(sType, sValue));
+
+        //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
+        nextAttribute(fr_Attribute2,node->getFirstChild());
+        attribute->addAttribute(sType, fr_Attribute2);
+      }
+      // check if its an Parameter to add
+      if( xmlName == parameterStr ){
+        CX::XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
+        CX::XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
+        attribute->addParameter( sType, sValue);
+      }
+    }
   }
 
   void VPCBuilder::parseTopology(CX::XN::DOMNode* top ){
