@@ -388,9 +388,9 @@ namespace SystemC_VPC { namespace Detail {
     }
     
     if(processcount==0 /*&& firstrun == false */){
-	    cyclecount = (int) (sc_core::sc_time_stamp() / cycle_length);
-	    to_init=true;
-	   // std::cout<<"new cyclecount: "<<cyclecount<<std::endl;
+      cyclecount = (int) (sc_core::sc_time_stamp() / cycle_length);
+      to_init=true;
+      // std::cout<<"new cyclecount: "<<cyclecount<<std::endl;
      }
      //firstrun=false;
      processcount++;
@@ -452,29 +452,28 @@ namespace SystemC_VPC { namespace Detail {
         
         //Korrekturfaktor falls mitten im Slot
         if(to_init == true && running_tasks.size()==0) {
-        //	std::cout<<"FIXME - curr_slicecount: "<< curr_slicecount<<" curr_remaining_slice="<< this->remainingSlice<< " @" <<sc_core::sc_time_stamp()<<std::endl;
-        	to_init=false;
-	//	std::cout<<"remainingSlice: " << this->remainingSlice <<"  "<<sc_core::sc_time_stamp()<<" - "<< cycle_length <<" * "<< cyclecount<<std::endl;
-		
-		if(sc_core::sc_time_stamp() < cycle_length * cyclecount){
-			//Quick-FIX: Bug if last Slot is completely empty
-			this->remainingSlice = sc_core::sc_time_stamp() - cycle_length * (cyclecount-1);
-		}else{
-        		this->remainingSlice = sc_core::sc_time_stamp() - cycle_length * cyclecount;
-		}
-        //	std::cout<<"new temp value: "<<this->remainingSlice<<std::endl;
-        	for(int i_fix = 0; i_fix < StartslotDynamic; i_fix++){
-        		if( this->remainingSlice > TDMA_slots[i_fix].length){
-        			this->remainingSlice = this->remainingSlice  - TDMA_slots[i_fix].length;
-        //			std::cout<<"new value: " << i_fix << "with: "<< TDMA_slots[i_fix].length <<" = "<<this->remainingSlice<<std::endl;
-        		}else{
-       				this->remainingSlice = TDMA_slots[i_fix].length - this->remainingSlice;
-       				curr_slicecount = i_fix;
-       				break;
-        		}
-        	}
+          // std::cout<<"FIXME - curr_slicecount: "<< curr_slicecount<<" curr_remaining_slice="<< this->remainingSlice<< " @" <<sc_core::sc_time_stamp()<<std::endl;
+          to_init=false;
+          // std::cout<<"remainingSlice: " << this->remainingSlice <<"  "<<sc_core::sc_time_stamp()<<" - "<< cycle_length <<" * "<< cyclecount<<std::endl;
 
-         	//std::cout<<"new value: "<<this->remainingSlice<<std::endl; 
+          if(sc_core::sc_time_stamp() < cycle_length * cyclecount){
+            //Quick-FIX: Bug if last Slot is completely empty
+            this->remainingSlice = sc_core::sc_time_stamp() - cycle_length * (cyclecount-1);
+          }else{
+            this->remainingSlice = sc_core::sc_time_stamp() - cycle_length * cyclecount;
+          }
+          // std::cout<<"new temp value: "<<this->remainingSlice<<std::endl;
+          for(int i_fix = 0; i_fix < StartslotDynamic; i_fix++){
+            if( this->remainingSlice > TDMA_slots[i_fix].length){
+              this->remainingSlice = this->remainingSlice  - TDMA_slots[i_fix].length;
+              // std::cout<<"new value: " << i_fix << "with: "<< TDMA_slots[i_fix].length <<" = "<<this->remainingSlice<<std::endl;
+            }else{
+              this->remainingSlice = TDMA_slots[i_fix].length - this->remainingSlice;
+              curr_slicecount = i_fix;
+              break;
+            }
+          }
+          //std::cout<<"new value: "<<this->remainingSlice<<std::endl; 
         }
         if(TDMA_slots[curr_slicecount].pid_fifo.size()>0){    // neuer Task da?
           unsigned int tempcount=0;
@@ -565,7 +564,7 @@ namespace SystemC_VPC { namespace Detail {
                     /*std::cout<<"Abfrage: mux= "<< ProcessParams[task_to_assign].multiplex << std::endl;
                       std::cout<<" count= "<<cyclecount <<" 2^ = "<< mux_value<<std::endl;
                       std::cout<< " MOD= " << cyclecount % mux_value <<" @ "<< sc_core::sc_time_stamp()<<std::endl;
-					*/                  
+                     */                  
                   found=true;
                 }
               }

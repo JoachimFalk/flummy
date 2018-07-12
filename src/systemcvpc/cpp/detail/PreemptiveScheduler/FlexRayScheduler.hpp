@@ -55,10 +55,10 @@ namespace SystemC_VPC { namespace Detail {
     pid_fifo enthaelt die laufbereiten Prozesse  
   */
   struct SlotParameters{
-	SlotParameters(int offset, int multiplex)
-		: offset(offset), multiplex(multiplex){}
-	SlotParameters()
-		: offset(0), multiplex(0){}
+    SlotParameters(int offset, int multiplex)
+            : offset(offset), multiplex(multiplex){}
+    SlotParameters()
+            : offset(0), multiplex(0){}
     int offset; //in cycles
     int multiplex; //in 2^multiplex - cycles
   };

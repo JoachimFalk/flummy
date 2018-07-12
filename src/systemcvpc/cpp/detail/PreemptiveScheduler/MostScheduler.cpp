@@ -47,8 +47,8 @@
 /*
  Zyklusgröße(Brutto)    384 Byte
  Zyklusgröße(Netto)     372 Byte
- Systemfreqeunz	        48000 Hz
- Zeit/Byte		54 ns
+ Systemfreqeunz         48000 Hz
+ Zeit/Byte              54 ns
  Zeit/Zyklus            20088 ns
  */
 

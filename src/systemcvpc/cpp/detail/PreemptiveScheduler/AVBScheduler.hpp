@@ -88,15 +88,15 @@ namespace SystemC_VPC { namespace Detail {
     }
 
     void increment_credit(sc_core::sc_time increment){
-    if(has_credit_flag){
-	queue_credit += increment;
+      if(has_credit_flag){
+        queue_credit += increment;
       }else{
-	if(increment < queue_credit){
-	  queue_credit -= increment;
-	}else{
-	  queue_credit = increment - queue_credit;
-	  has_credit_flag = true;
-	}
+        if(increment < queue_credit){
+          queue_credit -= increment;
+        }else{
+          queue_credit = increment - queue_credit;
+          has_credit_flag = true;
+        }
       }
     }
 
@@ -136,9 +136,9 @@ namespace SystemC_VPC { namespace Detail {
 
     sc_core::sc_time get_credit(void){
       if(has_credit_flag){
-	return queue_credit;
+        return queue_credit;
       }else{
-	return sc_core::SC_ZERO_TIME - queue_credit;
+        return sc_core::SC_ZERO_TIME - queue_credit;
       }
     }
 

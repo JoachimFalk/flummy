@@ -1037,7 +1037,7 @@ namespace SystemC_VPC { namespace Detail {
     //set the base and return the result if there is one
     if (foundDistribution == true) {
       if (hasBase) {
-	std::cout << "base:";
+        std::cout << "base:";
         result->setBase(boost::shared_ptr<TimingModifier>(VC::getDistributions()[CX::NStr(base->getNodeValue())]));
       }
       return result;

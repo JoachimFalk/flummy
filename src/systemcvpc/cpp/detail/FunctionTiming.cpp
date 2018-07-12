@@ -154,7 +154,7 @@ namespace SystemC_VPC { namespace Detail {
 
   sc_core::sc_time FunctionTiming::getBaseLatency( ) const {
     boost::shared_ptr<TimingModifier> modifier = this->funcTimingModifiers[defaultFunctionId];
-	  //replay the result from getBaseDelay() to get identical modifications
+    //replay the result from getBaseDelay() to get identical modifications
     return modifier->rePlay(this->funcLatencies[defaultFunctionId]);
   }
 
@@ -165,7 +165,7 @@ namespace SystemC_VPC { namespace Detail {
     if (functions.begin() == functions.end()){
       return getBaseLatency();
     }
-	 //replay the result from getDelay() to get identical modifications
+    //replay the result from getDelay() to get identical modifications
    return rePlaySummarizeFunctionTimes(functions, funcLatencies,funcTimingModifiers);
   }
 

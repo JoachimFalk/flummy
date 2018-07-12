@@ -78,7 +78,7 @@ const ScheduledTask * VpcTask::getActor() const
 
 const Component::Ptr  VpcTask::getComponent() const
 {
-	return component_;
+  return component_;
 }
 
 //
@@ -89,12 +89,12 @@ void VpcTask::inject(ScheduledTask * actor)
 
 void VpcTask::setActorAsPSM(bool psm)
 {
-	psm_ = psm;
+  psm_ = psm;
 }
 
 bool VpcTask::isPSM()
 {
-	return this->psm_;
+  return this->psm_;
 }
 
 } // namespace SystemC_VPC

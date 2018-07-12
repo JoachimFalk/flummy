@@ -75,9 +75,9 @@ namespace SystemC_VPC { namespace Detail {
     std::list<AVBListEntry*>::iterator it;
     for (it=p_list.begin(); it!=p_list.end(); it++){
       if((*it)->get_priority_level() > priority){
-	p_list.insert(it, newEntry);
-	it = p_list.end();
-	it--;
+        p_list.insert(it, newEntry);
+        it = p_list.end();
+        it--;
       }
     }
     
@@ -97,13 +97,13 @@ namespace SystemC_VPC { namespace Detail {
       sc_core::sc_time needed_time = sc_core::SC_ZERO_TIME;
       std::list<AVBListEntry*>::iterator it;
       for (it=p_list.begin(); it!=p_list.end(); it++){
-	if((*it)->task_queue->size() != 0){
-	  assert((*it)->has_credit() == false);
-	  sc_core::sc_time curr_needed_time = (sc_core::SC_ZERO_TIME -(*it)->get_credit()) / ((*it)->get_bw_alloc());
-	  if(needed_time == sc_core::SC_ZERO_TIME || needed_time > curr_needed_time){
-	    needed_time = curr_needed_time;
-	  }
-	}
+        if((*it)->task_queue->size() != 0){
+          assert((*it)->has_credit() == false);
+          sc_core::sc_time curr_needed_time = (sc_core::SC_ZERO_TIME -(*it)->get_credit()) / ((*it)->get_bw_alloc());
+          if(needed_time == sc_core::SC_ZERO_TIME || needed_time > curr_needed_time){
+            needed_time = curr_needed_time;
+          }
+        }
       }
     time = needed_time;
     return true;
@@ -117,13 +117,13 @@ namespace SystemC_VPC { namespace Detail {
     std::list<AVBListEntry*>::iterator it;
     bool added = false;
     for (it=p_list.begin(); it!=p_list.end(); it++){
-	if((*it)->get_priority_level() >= priority && !added){
-	  (*it)->task_queue->push(task);
-	  if((*it)->task_queue->size()==1){
-	    (*it)->setWasEmpty(true);
-	  }
-	  added = true;
-	}
+      if((*it)->get_priority_level() >= priority && !added){
+        (*it)->task_queue->push(task);
+        if((*it)->task_queue->size()==1){
+          (*it)->setWasEmpty(true);
+        }
+        added = true;
+      }
    }
 
     /*
@@ -185,45 +185,45 @@ namespace SystemC_VPC { namespace Detail {
     }else{ //Update of the Credits
       sc_core::sc_time time_budget = sc_core::sc_time_stamp() - time_last_assign;
       for (it=p_list.begin(); it!=p_list.end(); it++){
-	if((*it)->task_queue->size()!= 0 ){
-	  if((*it)->get_priority_level() != last_active){
-	    //task was blocked by another task (in another priority_level)
-	    //OR it was newly added!
-	    //so raise up the credits
-	    (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+        if((*it)->task_queue->size()!= 0 ){
+          if((*it)->get_priority_level() != last_active){
+            //task was blocked by another task (in another priority_level)
+            //OR it was newly added!
+            //so raise up the credits
+            (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
 
-	    if((*it)->has_credit() && (*it)->wasEmpty()){
-	      (*it)->setWasEmpty(false);
-	      (*it)->reset_credit();
-	    }
-	  }else{
-	    //decrement the credit of the currently used queue
-	    (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
-	  }
-	}else{
-	      if((*it)->get_priority_level() != last_active){
-	        (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
-	      }else{
-	        (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
-	      }
-	  if((*it)->has_credit()){
-	    (*it)->reset_credit();
-	  }
-	}
+            if((*it)->has_credit() && (*it)->wasEmpty()){
+              (*it)->setWasEmpty(false);
+              (*it)->reset_credit();
+            }
+          }else{
+            //decrement the credit of the currently used queue
+            (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
+          }
+        }else{
+              if((*it)->get_priority_level() != last_active){
+                (*it)->increment_credit(time_budget * (*it)->get_bw_alloc());
+              }else{
+                (*it)->decrement_credit(time_budget * (1-(*it)->get_bw_alloc()));
+              }
+          if((*it)->has_credit()){
+            (*it)->reset_credit();
+          }
+        }
       }
 
   //search the new task
       for (it=p_list.begin(); it!=p_list.end(); it++){
-	  if((*it)->task_queue->size() != 0 && (*it)->has_credit() ){
-	      task_to_assign = (*it)->task_queue->front()->getInstanceId();
-	      (*it)->task_queue->pop();
-	      ret_decision = ONLY_ASSIGN;
-	      last_active = (*it)->get_priority_level();
-	      time_last_assign = sc_core::sc_time_stamp();
-	      return ret_decision;
-	  }else{
-	    //nothing to do
-	  }
+        if((*it)->task_queue->size() != 0 && (*it)->has_credit() ){
+            task_to_assign = (*it)->task_queue->front()->getInstanceId();
+            (*it)->task_queue->pop();
+            ret_decision = ONLY_ASSIGN;
+            last_active = (*it)->get_priority_level();
+            time_last_assign = sc_core::sc_time_stamp();
+            return ret_decision;
+        }else{
+          //nothing to do
+        }
       }
     //no new task was found -> getting idle
     last_active = -1;
