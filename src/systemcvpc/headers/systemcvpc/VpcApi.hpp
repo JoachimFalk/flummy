@@ -70,26 +70,20 @@ Route::Ptr getRoute(std::string source, std::string dest);
 
 Route::Ptr getRoute(const sc_core::sc_port_base * leafPort);
 
+bool hasTask(ScheduledTask const &task);
+bool hasTask(std::string   const &taskName);
+
+VpcTask::Ptr createTask(ScheduledTask const &task);
+VpcTask::Ptr createTask(std::string   const &taskName);
+
+VpcTask::Ptr getTask(ScheduledTask const &task);
+VpcTask::Ptr getTask(std::string   const &taskName);
+
 Modifiers & getDistributions();
 
 bool hasDistribution(std::string name);
 
 void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier);
-
-
-
-
-VpcTask::Ptr getCachedTask(ScheduledTask & actor); //smoc_actor is a ScheduledTask
-
-VpcTask::Ptr getCachedTask(std::string name);
-
-void setCachedTask(const ScheduledTask * actor, VpcTask::Ptr task);
-
-void setCachedTask(std::string name, VpcTask::Ptr task);
-
-bool hasTask(const ScheduledTask & actor);
-
-bool hasTask(std::string name);
 
 void setPriority(ScheduledTask & actor, size_t priority);
 

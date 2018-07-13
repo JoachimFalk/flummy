@@ -125,7 +125,7 @@ void DynamicPriorityComponent::start_of_simulation() {
   for (SystemC_VPC::Component::MappedTasks::iterator iter = mp.begin(); iter
       != mp.end(); ++iter) {
     TaskInterface *actor = *iter;
-    size_t priority = SystemC_VPC::getCachedTask(*actor)->getPriority();
+    size_t priority = SystemC_VPC::getTask(static_cast<ScheduledTask &>(*actor))->getPriority();
     pQueue.push(
         PriorityFcfsElement<TaskInterface*> (priority, fcfsOrder++, actor));
   }

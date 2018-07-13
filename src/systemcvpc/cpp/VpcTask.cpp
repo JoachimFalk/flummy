@@ -34,6 +34,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#include "config.h"
+
 #include <systemcvpc/VpcTask.hpp>
 #include <systemcvpc/Mappings.hpp>
 #include <systemcvpc/Component.hpp>
@@ -42,55 +44,48 @@
 
 namespace SystemC_VPC {
 
-//
-VpcTask::VpcTask(ScheduledTask & actor) :
-  actor_(&actor), priority_(0), psm_(false)
-{
-}
+  VpcTask::VpcTask(ScheduledTask const *actor)
+    : task(actor)
+    , taskName(actor->name())
+    , priority(0)
+    , psm(false) {}
 
-//
-VpcTask::VpcTask() :
-  actor_(NULL), priority_(0), psm_(false)
-{
-}
+  VpcTask::VpcTask(std::string   const &actorName)
+    : task(nullptr) // Later, must be set by setActor
+    , taskName(actorName)
+    , priority(0)
+    , psm(false) {}
 
-//
-void VpcTask::mapTo(Component::Ptr component)
-{
-  Mappings::getConfiguredMappings()[Ptr(this)] = component;
-}
+  VpcTask::~VpcTask() {}
 
-//
-void VpcTask::setPriority(size_t priority)
-{
-  priority_ = priority;
-}
+  void VpcTask::mapTo(Component::Ptr component) {
+    Mappings::getConfiguredMappings()[Ptr(this)] = component;
+  }
 
-//
-size_t VpcTask::getPriority() const
-{
-  return priority_;
-}
-//
-const ScheduledTask * VpcTask::getActor() const
-{
-  return actor_;
-}
+  void VpcTask::setPriority(size_t priority) {
+    this->priority = priority;
+  }
 
-//
-void VpcTask::inject(ScheduledTask * actor)
-{
-  actor_ = actor;
-}
+  size_t VpcTask::getPriority() const {
+    return this->priority;
+  }
 
-void VpcTask::setActorAsPSM(bool psm)
-{
-  psm_ = psm;
-}
+  const ScheduledTask *VpcTask::getActor() const {
+    return this->task;
+  }
 
-bool VpcTask::isPSM()
-{
-  return this->psm_;
-}
+  void VpcTask::setActor(ScheduledTask const *actor) {
+    assert(actor && actor->name() == taskName && "Only a valid actor can be set!");
+    assert((!task || task == actor) && "Setting the actor can be done only once!");
+    task = actor;
+  }
+
+  void VpcTask::setActorAsPSM(bool psm) {
+    this->psm = psm;
+  }
+
+  bool VpcTask::isPSM() {
+    return this->psm;
+  }
 
 } // namespace SystemC_VPC

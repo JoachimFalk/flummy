@@ -71,8 +71,8 @@ Timing Component::getTransferTiming() const {
 }
 
 //
-void Component::addTask(ScheduledTask & actor) {
-  Mappings::getConfiguredMappings()[getCachedTask(actor)] = this;
+void Component::addTask(ScheduledTask &actor) {
+  Mappings::getConfiguredMappings()[getTask(actor)] = this;
 }
 
 //
@@ -85,8 +85,8 @@ void Component::addTracer(const char *tracer) {
 }
 
 //
-bool Component::hasTask(ScheduledTask * actor) const {
-  return Mappings::isMapped(getCachedTask(*actor), Ptr(const_cast<this_type *>(this)));
+bool Component::hasTask(ScheduledTask *actor) const {
+  return Mappings::isMapped(getTask(*actor), Ptr(const_cast<this_type *>(this)));
 }
 
 //

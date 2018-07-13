@@ -54,30 +54,36 @@ class VpcTask
 public:
   typedef boost::intrusive_ptr<this_type> Ptr;
 
-  VpcTask();
-
-  VpcTask(ScheduledTask &actor);
-
   void mapTo(Component::Ptr component);
 
-  void setPriority(size_t priority);
+  void   setPriority(size_t priority);
 
   size_t getPriority() const;
 
-  const ScheduledTask * getActor() const;
-
-  //private:
-  void inject(ScheduledTask * actor);
+  ScheduledTask const *getActor() const;
 
   void setActorAsPSM(bool psm);
 
   bool isPSM();
 
 private:
+  friend bool hasTask(ScheduledTask const &task);
+  friend Ptr  getTask(ScheduledTask const &task);
+  friend Ptr  createTask(ScheduledTask const &task);
+  friend Ptr  createTask(std::string   const &taskName);
+
+  VpcTask(ScheduledTask const *actor);
+  VpcTask(std::string   const &actorName);
+
+  void setActor(ScheduledTask const *actor);
+
+  ~VpcTask();
+
   // configured data
-  ScheduledTask * actor_;
-  size_t priority_;
-  bool psm_;
+  ScheduledTask const *task;
+  std::string const    taskName;
+  size_t               priority;
+  bool                 psm;
 };
 
 } // namespace SystemC_VPC
