@@ -37,8 +37,6 @@
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-
-typedef boost::minstd_rand base_generator_type;
 #include <systemcvpc/TimingModifier.hpp>
 #include <systemcvpc/vpc_config.h>
 

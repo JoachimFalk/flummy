@@ -37,46 +37,23 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_VPCBUILDER_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_VPCBUILDER_HPP
 
-/*
-#include <xercesc/dom/DOMTreeWalker.hpp>
-#include <xercesc/util/PlatformUtils.hpp>
-#include <xercesc/util/XMLString.hpp>
-#include <xercesc/parsers/AbstractDOMParser.hpp>
-#include <xercesc/dom/DOMImplementation.hpp>
-#include <xercesc/dom/DOMImplementationLS.hpp>
-#include <xercesc/dom/DOMImplementationRegistry.hpp>
-#include <xercesc/dom/DOMBuilder.hpp>
-#include <xercesc/dom/DOMException.hpp>
-#include <xercesc/dom/DOMDocument.hpp>
-#include <xercesc/dom/DOMNodeList.hpp>
-#include <xercesc/dom/DOMError.hpp>
-#include <xercesc/dom/DOMLocator.hpp>
-#include <xercesc/dom/DOMElement.hpp>
-#include <xercesc/dom/DOMNamedNodeMap.hpp>
- */
+#include <systemcvpc/InvalidArgumentException.hpp>
+#include <systemcvpc/Component.hpp>
+#include <systemcvpc/Timing.hpp>
+#include <systemcvpc/Attribute.hpp>
+#include <systemcvpc/TimingModifier.hpp>
+
+#include "AbstractComponent.hpp"
 
 #include <CoSupport/XML/Xerces/Handler.hpp>
+
+#include <boost/random/mersenne_twister.hpp>    // for boost::mt19937
+
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 #include <map>
 #include <string>
 #include <vector>
-
-#include "AbstractComponent.hpp"
-
-#include <systemcvpc/InvalidArgumentException.hpp>
-
-#include <systemcvpc/Component.hpp>
-#include <systemcvpc/Timing.hpp>
-#include <systemcvpc/Attribute.hpp>
-
-#include <systemcvpc/TimingModifier.hpp>
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
-typedef boost::minstd_rand base_generator_type;
-
-//XERCES_CPP_NAMESPACE_USE
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -215,8 +192,6 @@ namespace SystemC_VPC { namespace Detail {
     SystemC_VPC::Timing parseTiming(CX::XN::DOMNode* node);
 
     //variables for the generation of random times
-    boost::uniform_real<> distribution;
-    boost::shared_ptr<base_generator_type> generator;
     boost::shared_ptr<boost::mt19937> gen;
     boost::shared_ptr<DistributionTimingModifier> parseTimingModifier(CX::XN::DOMNode* node);
   };
