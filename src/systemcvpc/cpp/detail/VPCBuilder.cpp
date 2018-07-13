@@ -44,7 +44,6 @@
 
 #include "VPCBuilder.hpp"
 #include "common.hpp"
-#include "VpcDomErrorHandler.hpp"
 #include "Director.hpp"
 #include "ConfigCheck.hpp"
 #include "DebugOStream.hpp"
@@ -52,19 +51,7 @@
 #include <CoSupport/DataTypes/MaybeValue.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/bernoulli_distribution.hpp>
-#include <boost/random/binomial_distribution.hpp>
-#include <boost/random/cauchy_distribution.hpp>
-#include <boost/random/exponential_distribution.hpp>
-#include <boost/random/gamma_distribution.hpp>
-#include <boost/random/geometric_distribution.hpp>
-#include <boost/random/lognormal_distribution.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/poisson_distribution.hpp>
-#include <boost/random/triangle_distribution.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <boost/random/mersenne_twister.hpp> // for boost::mt19937
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 
@@ -85,8 +72,6 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  typedef boost::minstd_rand base_generator_type;
-
   //using namespace CoSupport::XML::Xerces;
   namespace VC = SystemC_VPC;
   namespace fs = boost::filesystem;
@@ -99,6 +84,47 @@ namespace SystemC_VPC { namespace Detail {
   const char *VPCBuilder::STR_VPC_PRIORITY =                 "priority";
   const char *VPCBuilder::STR_VPC_PERIOD =                   "period";
   const char *VPCBuilder::STR_VPC_DEADLINE =                 "deadline";
+
+  /**
+   * Simple error handler deriviative to install on parser
+   */
+  class VpcDomErrorHandler : public xercesc::DOMErrorHandler {
+  public:
+    VpcDomErrorHandler() : failed(false){}
+    ~VpcDomErrorHandler(){}
+
+    /**
+     * Implementation of the DOM ErrorHandler interface
+     */
+    bool handleError(const xercesc::DOMError& domError){
+      std::cerr<< "DOMError";
+      if (domError.getSeverity() == xercesc::DOMError::DOM_SEVERITY_WARNING){
+          std::cerr << "\nWarning at file ";
+      }else if (domError.getSeverity() == xercesc::DOMError::DOM_SEVERITY_ERROR){
+          this->failed = true;
+          std::cerr << "\nError at file ";
+      }else{
+          this->failed = true;
+          std::cerr << "\nFatal Error at file ";
+      }
+
+      std::cerr << xercesc::XMLString::transcode( domError.getLocation()->getURI())
+           << ", line " << domError.getLocation()->getLineNumber()
+           << ", char " << domError.getLocation()->getColumnNumber()
+           << "\n  Message: " << xercesc::XMLString::transcode( domError.getMessage())
+           << std::endl;
+
+      return !failed;
+
+    }
+
+    bool parseFailed(){
+      return this->failed;
+    }
+
+  private :
+    bool failed;
+  };
 
   void testAndRemoveFile(std::string fileName){
     std::ofstream file(fileName.c_str());

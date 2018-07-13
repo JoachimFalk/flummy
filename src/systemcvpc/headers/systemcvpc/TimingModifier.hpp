@@ -63,8 +63,6 @@
 
 #include <stdio.h>
 
-typedef boost::minstd_rand base_generator_type;
-
 namespace SystemC_VPC{
 
   //the base TimingModifier class is used as identity function
