@@ -457,9 +457,8 @@ namespace SystemC_VPC { namespace Detail {
           DBG_OUT( "VPCBuilder> Configure mapping: " << sSource << "<->"
                    << sTarget << std::endl); 
 
-          assert(VC::hasComponent(sTarget));
-          VC::Component::Ptr comp = VC::getComponent(sTarget);
-          VC::VpcTask::Ptr task = VC::getCachedTask(sSource);
+          VC::Component::Ptr comp = getComponent(sTarget);
+          VC::VpcTask::Ptr   task = createTask(sSource);
           task->mapTo(comp);
           VC::DefaultTimingsProvider::Ptr provider = comp->getDefaultTimingsProvider();
 

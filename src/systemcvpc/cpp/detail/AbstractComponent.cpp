@@ -396,9 +396,12 @@ namespace SystemC_VPC { namespace Detail {
 
   void AbstractComponent::registerTask(TaskInterface *task) {
     // This should be the first time the actor appeared here.
+    VpcTask::Ptr         vpcTask = getTask(static_cast<ScheduledTask &>(*task));
     ProcessControlBlock *pcb = this->createPCB(task->name());
     pcb->setScheduledTask(task);
     pcb->configure(task->name(), true);
+    pcb->setPriority(vpcTask->getPriority());
+    pcb->setTaskIsPSM(vpcTask->isPSM());
     task->setScheduler(this);
     task->setSchedulerInfo(pcb);
   }
@@ -416,53 +419,39 @@ namespace SystemC_VPC { namespace Detail {
     assert(actor->getScheduler() == this);
 
     try {
-      SystemC_VPC::VpcTask::Ptr vpcTask = SystemC_VPC::getCachedTask(static_cast<ScheduledTask &>(*actor));
+      TimingsProvider::Ptr provider = this->getTimingsProvider();
+      if (provider->hasDefaultActorTiming(actorName)) {
 
-      //TODO: SystemC_VPC::Timing -> Timing
-      const SystemC_VPC::Components & components = SystemC_VPC::getComponents();
+        SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
 
-      for (SystemC_VPC::Components::value_type const &component_pair : components) {
-        std::string            componentName = component_pair.first;
-        SystemC_VPC::Component::Ptr component     = component_pair.second;
+        for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
+          std::string powermode = (*it).first;
+          pcb->setTiming(provider->getActionTiming(actorName,powermode));
+        }
 
-        if (SystemC_VPC::Mappings::isMapped(vpcTask, component)) {
-          SystemC_VPC::TimingsProvider::Ptr provider = component->getTimingsProvider();
-          pcb->setPriority(vpcTask->getPriority());  // GFR BUGFIX
-          pcb->setTaskIsPSM(vpcTask->isPSM());
-          if (provider->hasDefaultActorTiming(actorName)) {
+      }
+      for (std::string const &guard : guardNames) {
+        if (provider->hasGuardTimings(guard)) {
 
-            SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
+          SystemC_VPC::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
+          for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+          {
+            std::string powermode = (*it).first;
+            pcb->setTiming(provider->getGuardTiming(guard,powermode));
 
-            for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
-              std::string powermode = (*it).first;
-              pcb->setTiming(provider->getActionTiming(actorName,powermode));
-            }
-
+            ConfigCheck::configureTiming(pid, guard);
           }
-          for (std::string const &guard : guardNames) {
-            if (provider->hasGuardTimings(guard)) {
+        }
+      }
+      for (std::string const &action : actionNames) {
+        if (provider->hasActionTimings(action)) {
 
-              SystemC_VPC::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
-              for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-              {
-                std::string powermode = (*it).first;
-                pcb->setTiming(provider->getGuardTiming(guard,powermode));
-
-                ConfigCheck::configureTiming(pid, guard);
-              }
-            }
-          }
-          for (std::string const &action : actionNames) {
-            if (provider->hasActionTimings(action)) {
-
-              SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(action);
-              for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-              {
-                std::string powermode = (*it).first;
-                pcb->setTiming(provider->getActionTiming(action,powermode));
-                ConfigCheck::configureTiming(pid, action);
-              }
-            }
+          SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(action);
+          for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
+          {
+            std::string powermode = (*it).first;
+            pcb->setTiming(provider->getActionTiming(action,powermode));
+            ConfigCheck::configureTiming(pid, action);
           }
         }
       }

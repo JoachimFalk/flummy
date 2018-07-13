@@ -180,31 +180,13 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 }
 
 void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
-  VC::VpcTask::Ptr vpcTask1 = VC::hasTask(static_cast<ScheduledTask &>(*actor))
-    ? VC::getCachedTask(static_cast<ScheduledTask &>(*actor))
-    : nullptr;
-  VC::VpcTask::Ptr vpcTask2 = VC::hasTask(actor->name())
-    ? VC::getCachedTask(actor->name())
-    : nullptr;
-  if (!vpcTask1 && !vpcTask2)
+  if (!hasTask(static_cast<ScheduledTask &>(*actor)))
     throw VC::ConfigException(std::string(actor->name()) +
-        " has NO configuration data at all.");
-  if (vpcTask1 && vpcTask2 && vpcTask1 != vpcTask2) {
-    // TODO: Check if a merging strategy is required.
-    throw VC::ConfigException(std::string(actor->name()) +
-        " has configuration data from XML and from configuration API.");
-  }
-  if (!vpcTask1)
-    VC::setCachedTask(&static_cast<ScheduledTask &>(*actor), (vpcTask1 = vpcTask2));
-  else if (!vpcTask2)
-    VC::setCachedTask(actor->name(), (vpcTask2 = vpcTask1));
-  assert(VC::hasTask(actor->name()) && VC::hasTask(static_cast<ScheduledTask &>(*actor)));
-  assert(VC::getCachedTask(actor->name()) == VC::getCachedTask(static_cast<ScheduledTask &>(*actor)));
-
-  VC::VpcTask::Ptr &task = vpcTask1;
+        " has NO configuration data.");
+  VpcTask::Ptr task = getTask(static_cast<ScheduledTask &>(*actor));
   assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
-  VC::Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
-  AbstractComponent * comp = static_cast<AbstractComponent *>(configComponent.get());
+  Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
+  AbstractComponent *comp = static_cast<AbstractComponent *>(configComponent.get());
   comp->registerTask(actor);
 }
 

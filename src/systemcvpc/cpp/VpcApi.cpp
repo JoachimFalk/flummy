@@ -65,27 +65,177 @@
 
 namespace SystemC_VPC {
 
+Components &getComponents() {
+  static Components components;
+  return components;
+}
+
+bool hasComponent(std::string name) {
+  return getComponents().find(name) != getComponents().end();
+}
+
+Component::Ptr createComponent(std::string name, Scheduler scheduler) {
+  std::pair<Components::iterator, bool> status =
+      getComponents().insert(Components::value_type(name, nullptr));
+  if (!status.second)
+    throw ConfigException(std::string("Multiple creation of component \"") + name
+        + "\" is not supported. Use getComponent() instead.");
+
+  Component::Ptr &comp = status.first->second;
+
+  switch (scheduler) {
+    case Scheduler::FCFS:
+      comp = new Detail::FcfsComponent(name);
+      break;
+    case Scheduler::StaticPriorityNoPreempt:
+      comp = new Detail::PriorityComponent(name);
+      break;
+    case Scheduler::RoundRobinNoPreempt:
+      comp = new Detail::RoundRobinComponent(name);
+      break;
+    case Scheduler::DynamicPriorityUserYield:
+      comp = new Detail::DynamicPriorityComponent(name);
+      break;
+    case Scheduler::RoundRobin:
+      comp = new Detail::PreemptiveComponent(name, new Detail::RoundRobinScheduler());
+      break;
+    case Scheduler::StaticPriority:
+      comp = new Detail::PreemptiveComponent(name, new Detail::PriorityScheduler());
+      break;
+    case Scheduler::RateMonotonic:
+      comp = new Detail::PreemptiveComponent(name, new Detail::RateMonotonicScheduler());
+      break;
+    case Scheduler::TDMA:
+      comp = new Detail::PreemptiveComponent(name, new Detail::TDMAScheduler());
+      break;
+    case Scheduler::FlexRay:
+      comp = new Detail::PreemptiveComponent(name, new Detail::FlexRayScheduler());
+      break;
+    case Scheduler::AVB:
+      comp = new Detail::PreemptiveComponent(name, new Detail::AVBScheduler());
+      break;
+    case Scheduler::TTCC:
+      comp = new Detail::PreemptiveComponent(name, new Detail::TimeTriggeredCCScheduler());
+      break;
+    case Scheduler::MOST:
+      comp = new Detail::PreemptiveComponent(name, new Detail::MostScheduler());
+      break;
+    case Scheduler::StreamShaper:
+      comp = new Detail::PreemptiveComponent(name, new Detail::StreamShaperScheduler());
+      break;
+    default:
+      assert(!"Oops, I don't know this scheduler!");
+  }
+  return comp;
+}
+
+Component::Ptr getComponent(std::string name) {
+  Components::iterator iter = getComponents().find(name);
+  if (iter == getComponents().end())
+    throw ConfigException(std::string("Cannot get component \"") + name
+        + "\" before creation. Use createComponent() first.");
+  return iter->second;
+}
+
+
+Route::Ptr createRoute(std::string source, std::string dest, Route::Type type) {
+  ProcessId routePid = Detail::Director::getProcessId(source, dest);
+  Route::Ptr route(new Route(type, source, dest));
+  Routing::add(routePid, route);
+  return route;
+}
+
+Route::Ptr createRoute(const sc_core::sc_port_base * leafPort, Route::Type type) {
+  // TODO: ProcessId routePid = Director::getProcessId(source, dest);
+  assert(leafPort != NULL);
+  Route::Ptr route(new Route(type));
+  Routing::add(leafPort, route);
+  return route;
+}
+
+Route::Ptr getRoute(std::string source, std::string dest) {
+  ProcessId routePid = Detail::Director::getProcessId(source, dest);
+  if (Routing::has(routePid)){
+    return Routing::get(routePid);
+  }
+
+  throw ConfigException(std::string("Cannot get route \"") + source
+      + " -> " + dest + "\" before creation. Use createRoute() first.");
+}
+
+Route::Ptr getRoute(const sc_core::sc_port_base * leafPort){
+  return  Routing::get(leafPort);
+}
+
+typedef std::map<std::string, VpcTask::Ptr> VpcTasks;
+
+static
+VpcTasks &getVpcTasks() {
+  static VpcTasks vpcTasksByName;
+  return vpcTasksByName;
+}
+
+bool hasTask(ScheduledTask const &task) {
+  VpcTasks::iterator iter = getVpcTasks().find(task.name());
+  if (iter == getVpcTasks().end())
+    return false;
+  iter->second->setActor(&task);
+  return true;
+}
+
+bool hasTask(std::string   const &taskName) {
+  return getVpcTasks().find(taskName) != getVpcTasks().end();
+}
+
+VpcTask::Ptr createTask(ScheduledTask const &task) {
+  // TODO: find the right place
+  Detail::Director::getInstance().FALLBACKMODE = false;
+
+  std::pair<VpcTasks::iterator, bool> status =
+      getVpcTasks().insert(VpcTasks::value_type(task.name(), nullptr));
+  if (!status.second)
+    throw ConfigException(std::string("Multiple creation of task \"") + task.name()
+        + "\" is not supported. Use getTask() instead.");
+  status.first->second = new VpcTask(&task);
+  return status.first->second;
+}
+
+VpcTask::Ptr createTask(std::string   const &taskName) {
+  // TODO: find the right place
+  Detail::Director::getInstance().FALLBACKMODE = false;
+
+  std::pair<VpcTasks::iterator, bool> status =
+      getVpcTasks().insert(VpcTasks::value_type(taskName, nullptr));
+  if (!status.second)
+    throw ConfigException(std::string("Multiple creation of task \"") + taskName
+        + "\" is not supported. Use getTask() instead.");
+  status.first->second = new VpcTask(taskName);
+  return status.first->second;
+}
+
+VpcTask::Ptr getTask(ScheduledTask const &task) {
+  VpcTasks::iterator iter = getVpcTasks().find(task.name());
+  if (iter == getVpcTasks().end())
+    throw ConfigException(std::string("Cannot get task \"") + task.name()
+        + "\" before creation. Use createTask() first.");
+  iter->second->setActor(&task);
+  return iter->second;
+}
+
+VpcTask::Ptr getTask(std::string   const &taskName) {
+  VpcTasks::iterator iter = getVpcTasks().find(taskName);
+  if (iter == getVpcTasks().end())
+    throw ConfigException(std::string("Cannot get task \"") + taskName
+        + "\" before creation. Use createTask() first.");
+  return iter->second;
+}
+
 Modifiers & getDistributions()
 {
   static Modifiers modifiers;
   return modifiers;
 }
 
-//
-Components & getComponents()
-{
-  static Components components;
-  return components;
-}
-
-//
-std::map<std::string, VpcTask::Ptr>& getVpcTasksByName()
-{
-  static std::map<std::string, VpcTask::Ptr> vpcTasksByName;
-  return vpcTasksByName;
-}
-
-static std::map<const TaskInterface *, VpcTask::Ptr> vpcTasks;
 
 void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier)
 {
@@ -97,173 +247,15 @@ void createDistribution(std::string name, boost::shared_ptr<DistributionTimingMo
       + "\" is not supported. Use getDistribution() instead. ");
 }
 
-//
-Component::Ptr createComponent(std::string name, Scheduler scheduler)
-{
-  if (!hasComponent(name)) {
-    Detail::AbstractComponent *comp;
-
-    switch (scheduler) {
-      case Scheduler::FCFS:
-        comp = new Detail::FcfsComponent(name);
-        break;
-      case Scheduler::StaticPriorityNoPreempt:
-        comp = new Detail::PriorityComponent(name);
-        break;
-      case Scheduler::RoundRobinNoPreempt:
-        comp = new Detail::RoundRobinComponent(name);
-        break;
-      case Scheduler::DynamicPriorityUserYield:
-        comp = new Detail::DynamicPriorityComponent(name);
-        break;
-      case Scheduler::RoundRobin:
-        comp = new Detail::PreemptiveComponent(name, new Detail::RoundRobinScheduler());
-        break;
-      case Scheduler::StaticPriority:
-        comp = new Detail::PreemptiveComponent(name, new Detail::PriorityScheduler());
-        break;
-      case Scheduler::RateMonotonic:
-        comp = new Detail::PreemptiveComponent(name, new Detail::RateMonotonicScheduler());
-        break;
-      case Scheduler::TDMA:
-        comp = new Detail::PreemptiveComponent(name, new Detail::TDMAScheduler());
-        break;
-      case Scheduler::FlexRay:
-        comp = new Detail::PreemptiveComponent(name, new Detail::FlexRayScheduler());
-        break;
-      case Scheduler::AVB:
-        comp = new Detail::PreemptiveComponent(name, new Detail::AVBScheduler());
-        break;
-      case Scheduler::TTCC:
-        comp = new Detail::PreemptiveComponent(name, new Detail::TimeTriggeredCCScheduler());
-        break;
-      case Scheduler::MOST:
-        comp = new Detail::PreemptiveComponent(name, new Detail::MostScheduler());
-        break;
-      case Scheduler::StreamShaper:
-        comp = new Detail::PreemptiveComponent(name, new Detail::StreamShaperScheduler());
-        break;
-      default:
-        assert(!"Oops, I don't know this scheduler!");
-    }
-    getComponents()[name] = comp;
-    return comp;
-  }
-  throw ConfigException(std::string("Multiple creation of component \"") + name
-      + "\" is not supported. Use getComponent() instead. ");
-}
-
-//
-Component::Ptr getComponent(std::string name)
-{
-  if (hasComponent(name)) {
-    return getComponents()[name];
-  }
-  throw ConfigException(std::string("Cannot get component \"") + name
-      + "\" before creation. Use createComponent() first. ");
-}
-
-//
-Route::Ptr createRoute(std::string source, std::string dest, Route::Type type)
-{
-  ProcessId routePid = Detail::Director::getProcessId(source, dest);
-  Route::Ptr route(new Route(type, source, dest));
-  Routing::add(routePid, route);
-  return route;
-}
-
-//
-Route::Ptr createRoute(const sc_core::sc_port_base * leafPort, Route::Type type)
-{
-  // TODO: ProcessId routePid = Director::getProcessId(source, dest);
-  assert(leafPort != NULL);
-  Route::Ptr route(new Route(type));
-  Routing::add(leafPort, route);
-  return route;
-}
-
-//
-Route::Ptr getRoute(std::string source, std::string dest)
-{
-  ProcessId routePid = Detail::Director::getProcessId(source, dest);
-  if (Routing::has(routePid)){
-    return Routing::get(routePid);
-  }
-
-  throw ConfigException(std::string("Cannot get route \"") + source
-      + " -> " + dest + "\" before creation. Use createRoute() first. ");
-}
-
-Route::Ptr getRoute(const sc_core::sc_port_base * leafPort){
-  return  Routing::get(leafPort);
-}
 
 bool hasDistribution(std::string name)
 {
   return getDistributions().find(name) != getDistributions().end();
 }
 
-//
-bool hasComponent(std::string name)
-{
-  return getComponents().find(name) != getComponents().end();
-}
-
-//
-VpcTask::Ptr getCachedTask(ScheduledTask & actor)
-{
-  // TODO: find the right place
-  Detail::Director::getInstance().FALLBACKMODE = false;
-  //std::cerr << " unset FALLBACKMODE" << std::endl;
-
-
-  // the pid is not yet injected
-  //std::cerr << "createTask: " << actor.getPid() << std::endl;
-  if (!hasTask(actor)) {
-    vpcTasks[&actor] = VpcTask::Ptr(new VpcTask(actor));
-  }
-  return vpcTasks[&actor];
-}
-
-//
-VpcTask::Ptr getCachedTask(std::string name)
-{
-  if (!hasTask(name)) {
-    getVpcTasksByName()[name] = VpcTask::Ptr(new VpcTask());
-  }
-  return getVpcTasksByName()[name];
-}
-
-//
-void setCachedTask(const ScheduledTask * actor, VpcTask::Ptr task)
-{
-  assert( !hasTask(*actor) );
-  vpcTasks[actor] = task;
-}
-
-//
-void setCachedTask(std::string name, VpcTask::Ptr task)
-{
-  assert( !hasTask(name) );
-  getVpcTasksByName()[name] = task;
-}
-
-//
-bool hasTask(const ScheduledTask & actor)
-{
-  return vpcTasks.find(&actor) != vpcTasks.end();
-}
-
-//
-bool hasTask(std::string name)
-{
-  return getVpcTasksByName().find(name) != getVpcTasksByName().end();
-}
-
-//
 void setPriority(ScheduledTask & actor, size_t priority)
 {
-  getCachedTask(actor)->setPriority(priority);
+  getTask(actor)->setPriority(priority);
 }
 
 //
@@ -274,7 +266,7 @@ void ignoreMissingRoutes(bool ignore)
 
 ComponentInterface* getTaskComponentInterface(ScheduledTask & actor)
 {
-  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  Component::Ptr component = Mappings::getConfiguredMappings()[getTask(actor)];
   if(component != NULL)
     return component->getComponentInterface();
   else
@@ -289,7 +281,7 @@ void changePowerMode(ScheduledTask & actor,std::string powermode)
   {
     return;
   }
-  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  Component::Ptr component = Mappings::getConfiguredMappings()[getTask(actor)];
   if(component != NULL)
   {
     ComponentInterface* ci = component->getComponentInterface();
@@ -305,7 +297,7 @@ bool hasWaitingOrRunningTasks(ScheduledTask & actor){
     //FIXME: how to handle Fallbackmode?
      return true;
    }
-   Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+   Component::Ptr component = Mappings::getConfiguredMappings()[getTask(actor)];
    if(component != NULL)
    {
      ComponentInterface* ci = component->getComponentInterface();
@@ -321,12 +313,12 @@ void registerComponentWakeup(const char* actor, VPCEvent::Ptr  event){
   {
     return;
   }
-  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  Component::Ptr component = Mappings::getConfiguredMappings()[getTask(actor)];
   if(component != NULL)
   {
     ComponentInterface* ci = component->getComponentInterface();
     if(ci != NULL)
-      ci->registerComponentWakeup(getCachedTask(actor)->getActor(), event);
+      ci->registerComponentWakeup(getTask(actor)->getActor(), event);
   }
 }
 
@@ -336,12 +328,12 @@ void registerComponentIdle(const char* actor, VPCEvent::Ptr  event){
   {
     return;
   }
-  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  Component::Ptr component = Mappings::getConfiguredMappings()[getTask(actor)];
   if(component != NULL)
   {
     ComponentInterface* ci = component->getComponentInterface();
     if(ci != NULL)
-      ci->registerComponentIdle(getCachedTask(actor)->getActor(), event);
+      ci->registerComponentIdle(getTask(actor)->getActor(), event);
   }
 }
 
@@ -349,7 +341,7 @@ void setCanExec(ScheduledTask & actor, bool canExec){
   if(Detail::Director::getInstance().FALLBACKMODE){
     return;
   }
-  Component::Ptr component = Mappings::getConfiguredMappings()[getCachedTask(actor)];
+  Component::Ptr component = Mappings::getConfiguredMappings()[getTask(actor)];
   if(component != NULL)
   {
     ComponentInterface* ci = component->getComponentInterface();
@@ -360,7 +352,7 @@ void setCanExec(ScheduledTask & actor, bool canExec){
 
 void setActorAsPSM(const char* name, bool psm)
 {
-  getCachedTask(name)->setActorAsPSM(psm);
+  getTask(name)->setActorAsPSM(psm);
 }
 
 } // namespace SystemC_VPC
