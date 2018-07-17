@@ -43,50 +43,29 @@
 
 #include <iostream>
 
+#include <stddef.h>
+
 namespace SystemC_VPC { namespace Routing {
 
 //
-Static::Hop::Hop(Component::Ptr component) :
-  component_(component), transferTiming_(component->getTransferTiming()),
-      priority_()
-{
-}
-
-//
-Static::Hop &Static::Hop::setPriority(size_t priority_)
-{
-  this->priority_ = priority_;
-  return *this;
-}
-
-Static::Hop & Static::Hop::setTransferTiming(Timing transferTiming_)
-{
-  this->transferTiming_ = transferTiming_;
-  return *this;
-}
-
-Component::Ptr Static::Hop::getComponent() const
-{
-  return component_;
-}
-
-size_t Static::Hop::getPriority() const
-{
-  return priority_;
-}
-
-Timing Static::Hop::getTransferTiming() const
-{
-  return transferTiming_;
-}
+Static::Hop::Hop(Component::Ptr const &component)
+  : component(component)
+  , transferTiming_(component->getTransferTiming())
+  , priority_(0) {}
 
 const char *Static::Type = "StaticRoute";
 
-Static::Hop &Static::addHop(Component::Ptr component) {
-  return getImpl()->addHop(component);
+Static::Hop *Static::addHop(Component::Ptr component, Hop *parent) {
+  return getImpl()->addHop(component, parent);
 }
-std::list<Static::Hop> const &Static::getHops() const {
-  return getImpl()->getHops();
+
+Static::Hop *Static::getFirstHop() {
+  return getImpl()->getFirstHop();
+}
+
+std::map<Component::Ptr, Static::Hop> const &Static::getHops() const {
+  return reinterpret_cast<std::map<Component::Ptr, Static::Hop> const &>
+    (getImpl()->getHops());
 }
 
 bool Static::addStream()
