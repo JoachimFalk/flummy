@@ -42,11 +42,14 @@
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/VpcApi.hpp>
-#include <systemcvpc/Mappings.hpp>
+#include <systemcvpc/Routing/Static.hpp>
 
 #include "Director.hpp"
+#include "Configuration.hpp"
 #include "VPCBuilder.hpp"
 #include "AbstractComponent.hpp"
+#include "AbstractRoute.hpp"
+#include "Routing/StaticImpl.hpp"
 
 #include "DebugOStream.hpp"
 
@@ -181,32 +184,49 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 
 void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
   if (!hasTask(static_cast<ScheduledTask &>(*actor)))
-    throw VC::ConfigException(std::string(actor->name()) +
-        " has NO configuration data.");
+    throw VC::ConfigException("Actor " + std::string(actor->name()) +
+        " has NO configuration data at all.");
   VpcTask::Ptr task = getTask(static_cast<ScheduledTask &>(*actor));
-  assert(VC::Mappings::getConfiguredMappings().find(task) != VC::Mappings::getConfiguredMappings().end());
-  Component::Ptr configComponent = VC::Mappings::getConfiguredMappings()[task];
+  Component::Ptr configComponent = task->getComponent();
+  assert(configComponent);
   AbstractComponent *comp = static_cast<AbstractComponent *>(configComponent.get());
   comp->registerTask(actor);
 }
 
-void SystemCVPCSimulator::registerPort(TaskInterface *task, PortInInterface *port) {
-  std::string actorName = task->name();
-  std::string channelName = port->getSource()->name();
-  // FIXME: Should be port not nullptr!
-  port->setSchedulerInfo(Director::getInstance().registerRoute(channelName,
-      actorName, nullptr));
+static
+AbstractRoute::Ptr registerPortHelper(std::string const &name) {
+  AbstractRoute::Ptr route = Configuration::getInstance().hasRoute(name);
 
+  if (!route) {
+    if (Director::getInstance().defaultRoute) {
+      // default behavior: add empty route
+      route = boost::static_pointer_cast<Routing::StaticImpl>(
+          createRoute(name, Routing::StaticImpl::Type));
+//    route->setTracing(false);
+    } else {
+      throw VC::ConfigException("Route " + name +
+          " has NO configuration data at all.");
+    }
+  }
+
+//try{
+//  route->inject(src, dest);
+//}catch(std::exception & e){
+//  std::cerr << "Route registration failed for route \"" << name
+//            << "\". Got exception:\n" << e.what() << std::endl;
+//  exit(-1);
+//}
+  return route;
+}
+
+
+void SystemCVPCSimulator::registerPort(TaskInterface *task, PortInInterface *port) {
+  AbstractRoute::Ptr route = registerPortHelper(port->name());
+  port->setSchedulerInfo(route.get());
 }
 void SystemCVPCSimulator::registerPort(TaskInterface *task, PortOutInterface *port) {
-  std::string actorName = task->name();
-  // FIXME: Routes have to be changed to support multicast themselves.
-  for (ChannelSinkInterface *channelSinkInterface : port->getSinks()) {
-    std::string channelName = channelSinkInterface->name();
-    // FIXME: Should be port not nullptr!
-    port->setSchedulerInfo(Director::getInstance().registerRoute(actorName,
-        channelName, nullptr));
-  }
+  AbstractRoute::Ptr route = registerPortHelper(port->name());
+  port->setSchedulerInfo(route.get());
 }
 
 void SystemCVPCSimulator::simulationEnded() {

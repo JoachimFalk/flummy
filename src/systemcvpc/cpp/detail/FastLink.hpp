@@ -53,16 +53,6 @@ namespace SystemC_VPC { namespace Detail {
     /**
      *
      */
-    void write( size_t quantum, EventPair p ) const;
-
-    /**
-     *
-     */
-    void read( size_t quantum, EventPair p ) const;
-
-    /**
-     *
-     */
     ComponentId getComponentId() const;
 
     FastLink(Delayer *component, ProcessId pid, FunctionIds actionIds, FunctionIds guardIds, int complexity)

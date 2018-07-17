@@ -72,14 +72,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     ProcessControlBlock(AbstractComponent *component, std::string const &taskName);
 
-    /**
-     * \brief Sets name of instance
-     */
-    void configure(std::string name, bool tracing);
-
-    CoSupport::Tracing::TaskTracer *getTaskTracer() const
-      { return taskTracer.get(); }
-
     void setTiming(const SystemC_VPC::Timing &timing);
 
     ProcessId getPid() const
@@ -115,7 +107,6 @@ namespace SystemC_VPC { namespace Detail {
     ProcessId                            pid;
     int                                  priority;
     bool                                 psm;
-    CoSupport::Tracing::TaskTracer::Ptr  taskTracer;
   };
 
   static inline

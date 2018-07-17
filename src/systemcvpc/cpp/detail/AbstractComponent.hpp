@@ -64,6 +64,7 @@
 
 #include <systemc>
 
+#include <boost/intrusive_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <list>
@@ -94,7 +95,11 @@ namespace SystemC_VPC { namespace Detail {
     , public Delayer
     , private smoc::SimulatorAPI::SchedulerInterface
   {
+    typedef AbstractComponent this_type;
   public:
+    typedef boost::intrusive_ptr<this_type>       Ptr;
+    typedef boost::intrusive_ptr<this_type> const ConstPtr;
+
     ///
     /// Handle interfaces for SystemC_VPC::Component
     ///
@@ -212,7 +217,7 @@ namespace SystemC_VPC { namespace Detail {
      */
     FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid);
 
-    TaskInstance *executeHop(ProcessControlBlock *pcb, size_t quantum, EventPair const &np);
+    TaskInstance *executeHop(ProcessControlBlock *pcb, size_t quantum, std::function<void (TaskInstance *)> const &cb);
   protected:
     void end_of_elaboration();
 

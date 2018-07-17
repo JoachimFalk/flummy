@@ -37,10 +37,11 @@
 #include "config.h"
 
 #include <systemcvpc/VpcTask.hpp>
-#include <systemcvpc/Mappings.hpp>
 #include <systemcvpc/Component.hpp>
 #include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
+
+#include "detail/Configuration.hpp"
 
 namespace SystemC_VPC {
 
@@ -59,7 +60,9 @@ namespace SystemC_VPC {
   VpcTask::~VpcTask() {}
 
   void VpcTask::mapTo(Component::Ptr component) {
-    Mappings::getConfiguredMappings()[Ptr(this)] = component;
+    assert(component && "Only a valid component can be mapped to!");
+    assert((!boundComponent || boundComponent == component) && "Binding the actor to a component can be done only once!");
+    boundComponent = component;
   }
 
   void VpcTask::setPriority(size_t priority) {
@@ -74,6 +77,10 @@ namespace SystemC_VPC {
     return this->task;
   }
 
+  Component::Ptr VpcTask::getComponent() const {
+    return this->boundComponent;
+  }
+
   void VpcTask::setActor(ScheduledTask const *actor) {
     assert(actor && actor->name() == taskName && "Only a valid actor can be set!");
     assert((!task || task == actor) && "Setting the actor can be done only once!");
@@ -86,6 +93,126 @@ namespace SystemC_VPC {
 
   bool VpcTask::isPSM() {
     return this->psm;
+  }
+
+  bool hasTask(ScheduledTask const &task) {
+    VpcTask::Ptr vpcTask = Detail::Configuration::getInstance().hasVpcTask(task.name());
+    if (!vpcTask.get())
+      return false;
+    vpcTask->setActor(&task);
+    return true;
+  }
+
+  bool hasTask(std::string   const &taskName) {
+    return Detail::Configuration::getInstance().hasVpcTask(taskName).get();
+  }
+
+  VpcTask::Ptr createTask(ScheduledTask const &task) {
+    return Detail::Configuration::getInstance().createVpcTask(task.name(),
+        [&task]() { return new VpcTask(&task); });
+  }
+
+  VpcTask::Ptr createTask(std::string   const &taskName) {
+    return Detail::Configuration::getInstance().createVpcTask(taskName,
+        [&taskName]() { return new VpcTask(taskName); });
+  }
+
+  VpcTask::Ptr getTask(ScheduledTask const &task) {
+    VpcTask::Ptr vpcTask = Detail::Configuration::getInstance().getVpcTask(task.name());
+    vpcTask->setActor(&task);
+    return vpcTask;
+  }
+
+  VpcTask::Ptr getTask(std::string   const &taskName) {
+    return Detail::Configuration::getInstance().getVpcTask(taskName);
+  }
+
+  void registerComponentWakeup(const char *actor, VPCEvent::Ptr  event) {
+//  if(Detail::Director::getInstance().FALLBACKMODE)
+//  {
+//    return;
+//  }
+    Component::Ptr component = getTask(actor)->getComponent();
+    if(component != NULL)
+    {
+      ComponentInterface* ci = component->getComponentInterface();
+      if(ci != NULL)
+        ci->registerComponentWakeup(getTask(actor)->getActor(), event);
+    }
+  }
+
+  void registerComponentIdle(const char *actor, VPCEvent::Ptr  event) {
+//  if(Detail::Director::getInstance().FALLBACKMODE)
+//  {
+//    return;
+//  }
+    Component::Ptr component = getTask(actor)->getComponent();
+    if(component != NULL)
+    {
+      ComponentInterface* ci = component->getComponentInterface();
+      if(ci != NULL)
+        ci->registerComponentIdle(getTask(actor)->getActor(), event);
+    }
+  }
+
+  void setActorAsPSM(const char *actor, bool psm) {
+    getTask(actor)->setActorAsPSM(psm);
+  }
+
+  void changePowerMode(ScheduledTask &actor, std::string powermode) {
+//  if(Detail::Director::getInstance().FALLBACKMODE)
+//  {
+//    return;
+//  }
+    Component::Ptr component = getTask(actor)->getComponent();
+    if(component != NULL)
+    {
+      ComponentInterface* ci = component->getComponentInterface();
+      if(ci != NULL)
+        ci->changePowerMode(powermode);
+    }
+    //return NULL;
+  }
+
+  bool hasWaitingOrRunningTasks(ScheduledTask & actor) {
+//  if(Detail::Director::getInstance().FALLBACKMODE) {
+//    //FIXME: how to handle Fallbackmode?
+//    return true;
+//  }
+    Component::Ptr component = getTask(actor)->getComponent();
+    if(component != NULL)
+    {
+      ComponentInterface* ci = component->getComponentInterface();
+      if(ci != NULL)
+        return ci->hasWaitingOrRunningTasks();
+    }
+    //should never reach here
+    return false;
+  }
+
+  void setCanExec(ScheduledTask & actor, bool canExec) {
+//  if(Detail::Director::getInstance().FALLBACKMODE){
+//    return;
+//  }
+    Component::Ptr component = getTask(actor)->getComponent();
+    if(component != NULL)
+    {
+      ComponentInterface* ci = component->getComponentInterface();
+      if(ci != NULL)
+        ci->setCanExec(canExec);
+    }
+  }
+
+  void setPriority(ScheduledTask &actor, size_t priority) {
+    getTask(actor)->setPriority(priority);
+  }
+
+  ComponentInterface *getTaskComponentInterface(ScheduledTask &actor) {
+    Component::Ptr component = getTask(actor)->getComponent();
+    if(component != NULL)
+      return component->getComponentInterface();
+    else
+      return NULL;
   }
 
 } // namespace SystemC_VPC

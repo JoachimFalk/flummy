@@ -34,88 +34,101 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_STATICROUTE_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_STATICROUTE_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_BLOCKINGTRANSPORT_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_BLOCKINGTRANSPORT_HPP
 
 #include <systemcvpc/Route.hpp>
 #include <systemcvpc/EventPair.hpp>
 
-#include "RouteImpl.hpp"
-#include "Director.hpp"
+#include "../AbstractRoute.hpp"
+#include "../AbstractComponent.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
-#include <CoSupport/Tracing/TracingFactory.hpp>
 
 #include <systemc>
 
 #include <list>
+#include <utility>
 
-namespace SystemC_VPC { namespace Detail {
-
-  template<class ROUTE>
-  class RoutePool;
+namespace SystemC_VPC { namespace Detail { namespace Routing {
 
   /**
    *
    */
-  class StaticRoute :
-    public Route,
-    public CoSupport::SystemC::Event,
-    protected CoSupport::SystemC::EventListener {
+  class BlockingTransport
+    : public AbstractRoute
+    , public Route
+//  , public CoSupport::SystemC::Event
+//  , protected CoSupport::SystemC::EventListener
+  {
   public:
+    BlockingTransport(std::string const &name);
 
-    void compute( TaskInstance* task );
+    ///
+    /// Handle interfaces for SystemC_VPC::Route
+    ///
 
-    FunctionId getFunctionId(ProcessId pid, std::string function);
+    // For resolving ambiguity
+    using AbstractRoute::getName;
+    using AbstractRoute::getRouteId;
 
-    void route( EventPair np );
+    ///
+    /// Handle interfaces for AbstractRoute
+    ///
 
-    void signaled(EventWaiter *e);
+    Route *getRoute();
 
-    void eventDestroyed(EventWaiter *e);
+    void   start(size_t quantitiy, VPCEvent::Ptr finishEvent);
+
+    ///
+    /// Other stuff
+    ///
+
+//  void compute( TaskInstance* task );
+//
+//  void route( EventPair np );
+//
+//  void signaled(EventWaiter *e);
+//
+//  void eventDestroyed(EventWaiter *e);
 
     void addHop(std::string name, AbstractComponent * hop);
 
-    void setPool(RoutePool<StaticRoute> * pool);
-
     const ComponentList& getHops() const;
 
-    StaticRoute( SystemC_VPC::Route::Ptr configuredRoute );
-
-    StaticRoute( const StaticRoute & route );
-
-    ~StaticRoute( );
-
-    virtual bool closeStream(){
-      std::list<AbstractComponent *>::iterator it;
-       for ( it=components.begin() ; it != components.end(); it++ ){
-         ProcessId pid= Director::getInstance().getProcessId(this->getName());
-         (*it)->closeStream(pid);
-       }
-       return true;
-    }
-
-    virtual bool addStream(){
-      std::list<AbstractComponent *>::iterator it;
-        for ( it=components.begin() ; it != components.end(); it++ ){
-          ProcessId pid= Director::getInstance().getProcessId(this->getName());
-          (*it)->addStream(pid);
-        }
-        return true;
-    }
+    ~BlockingTransport( );
+  private:
+    void resetHops();
+    void resetLists();
 
   private:
-    typedef std::list<AbstractComponent *> Components;
+    enum Phase {
+      LOCK_ROUTE,
+      COMPUTE_ROUTE
+    };
+    typedef std::list<std::pair<AbstractComponent *, TaskInstance *> > Components;
 
-    Components                             components;
-    TaskInstance                          *task;
-    EventPair                              taskEvents;
-    VPCEvent::Ptr                dummyDii;
-    VPCEvent::Ptr                routeLat;
+    Components                             hopList;
+    Components                             lockList;
     Components::iterator                   nextHop;
-    RoutePool<StaticRoute>                *pool;
+    ComponentList                          components;
+
+    // a rout is either input (read) or output (write)
+    bool                                   isWrite;
+
+    TaskInstance*                          task;
+    EventPair                              taskEvents;
+    VPCEvent::Ptr                          dummyDii;
+    VPCEvent::Ptr                          routeLat;
+
+    // blocking transport has two phases:
+    // - lock the route
+    // - apply the route
+    Phase                                  phase;
+
+    
   };
 
-} } // namespace SystemC_VPC::Detail
+} } } // namespace SystemC_VPC::Detail::Routing
 
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_STATICROUTE_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_BLOCKINGTRANSPORT_HPP */

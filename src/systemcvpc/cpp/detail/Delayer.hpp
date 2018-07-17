@@ -42,6 +42,7 @@
 #include "ComponentInfo.hpp"
 #include "ComponentObserver.hpp"
 #include "TaskInstance.hpp"
+#include "SequentiallyIdedObject.hpp"
 
 #include <vector>
 
@@ -53,7 +54,7 @@ namespace SystemC_VPC { namespace Detail {
    * \brief Interface for classes implementing delay simulation.
    */
   class Delayer
-    : private SequentiallyIdedObject<ComponentId> {
+    : private SequentiallyIdedObject {
   public:
     /**
      * \brief Simulate the delay caused by the transition execution on this Delayer.

@@ -63,12 +63,13 @@ lib_LTLIBRARIES = libsystemcvpc.la
 libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/Attribute.cpp \
 	src/systemcvpc/cpp/Component.cpp \
-	src/systemcvpc/cpp/Mappings.cpp \
 	src/systemcvpc/cpp/Route.cpp \
 	src/systemcvpc/cpp/Scheduler.cpp \
 	src/systemcvpc/cpp/Timing.cpp \
 	src/systemcvpc/cpp/VpcApi.cpp \
 	src/systemcvpc/cpp/VpcTask.cpp \
+	\
+	src/systemcvpc/cpp/Routing/Static.cpp \
 	\
 	src/systemcvpc/cpp/detail/dynload/dll-elf.cpp \
 	src/systemcvpc/cpp/detail/dynload/dll-win32.cpp \
@@ -91,6 +92,9 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/PreemptiveScheduler/MostSecondaryScheduler.cpp \
 	src/systemcvpc/cpp/detail/PreemptiveScheduler/StreamShaperScheduler.cpp \
 	\
+	src/systemcvpc/cpp/detail/Routing/BlockingTransport.cpp \
+	src/systemcvpc/cpp/detail/Routing/StaticImpl.cpp \
+	\
 	src/systemcvpc/cpp/detail/tracing/DataBaseTracer.cpp \
 	src/systemcvpc/cpp/detail/tracing/PajeTracer.cpp \
 	src/systemcvpc/cpp/detail/tracing/TraceableComponent.cpp \
@@ -98,10 +102,11 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/tracing/VcdTracer.cpp \
 	\
 	src/systemcvpc/cpp/detail/AbstractComponent.cpp \
-	src/systemcvpc/cpp/detail/BlockingTransport.cpp \
+	src/systemcvpc/cpp/detail/AbstractRoute.cpp \
 	src/systemcvpc/cpp/detail/common.cpp \
 	src/systemcvpc/cpp/detail/ComponentInfo.cpp \
 	src/systemcvpc/cpp/detail/ConfigCheck.cpp \
+	src/systemcvpc/cpp/detail/Configuration.cpp \
 	src/systemcvpc/cpp/detail/DebugOStream.cpp \
 	src/systemcvpc/cpp/detail/Delayer.cpp \
 	src/systemcvpc/cpp/detail/Director.cpp \
@@ -111,9 +116,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \
 	src/systemcvpc/cpp/detail/PowerSumming.cpp \
 	src/systemcvpc/cpp/detail/ProcessControlBlock.cpp \
-	src/systemcvpc/cpp/detail/RouteImpl.cpp \
 	src/systemcvpc/cpp/detail/SelectFastestPowerModeGlobalGovernor.cpp \
-	src/systemcvpc/cpp/detail/StaticRoute.cpp \
 	src/systemcvpc/cpp/detail/SystemCVPCSimulator.cpp \
 	src/systemcvpc/cpp/detail/TaskInstance.cpp \
 	src/systemcvpc/cpp/detail/VPCBuilder.cpp

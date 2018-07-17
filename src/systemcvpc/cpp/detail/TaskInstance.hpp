@@ -47,6 +47,8 @@
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
+#include <functional>
+
 namespace SystemC_VPC { namespace Detail {
 
   class ProcessControlBlock;
@@ -57,7 +59,9 @@ namespace SystemC_VPC { namespace Detail {
   class TaskInstance
     : public Tracing::TTaskInstanceHolder {
   public:
-    TaskInstance(TaskPool *pool);
+    TaskInstance(
+        std::function<void (TaskInstance *)> const &diiCallback,
+        std::function<void (TaskInstance *)> const &latCallback);
 
     // getter, setter
     std::string getName() const                          {return name;}
@@ -66,8 +70,6 @@ namespace SystemC_VPC { namespace Detail {
     void        setProcessId(ProcessId pid)              {this->pid = pid;}
     FunctionIds getFunctionIds()                         {return fid;}
     void        setFunctionIds(FunctionIds fid)          {this->fid = fid;}
-    EventPair   getBlockEvent()                          {return blockEvent;}
-    void        setBlockEvent(EventPair p)               {this->blockEvent = p;}
     ProcessControlBlock *getPCB()                        {return this->pcb;}
     void        setPCB(ProcessControlBlock *pcb)         {this->pcb = pcb;}
 
@@ -115,27 +117,21 @@ namespace SystemC_VPC { namespace Detail {
 
     bool             isPSM() const;
 
-    void release() {
-      blockEvent.dii     = NULL;
-      blockEvent.latency = NULL;
-      if (pool)
-        pool->free(this->getProcessId(), this);
-      else
-        delete this;
-    }
+    void diiExpired() { diiCallback(this); }
+    void latExpired() { latCallback(this); }
 
     ~TaskInstance();
   private:
-    void traceReleaseTask();
-    void traceFinishTaskLatency();
-
     static int globalInstanceId;
 
     int instanceId;
 
+    std::function<void (TaskInstance *)> const diiCallback;
+    std::function<void (TaskInstance *)> const latCallback;
+
+
     ProcessId        pid;
     FunctionIds      fid;
-    EventPair        blockEvent;
 
     VPCEvent::Ptr blockingCompute;
     bool       blockAck;
@@ -151,11 +147,9 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_time remainingDelay;
     
     ProcessControlBlock *pcb;
-    TaskPool            *pool;
 
     std::string name;
     double timingScale;
-    CoSupport::Tracing::TaskTracer::Ticket taskTracerTicket;
 
     smoc::SimulatorAPI::FiringRuleInterface *firingRuleInterface;
   };

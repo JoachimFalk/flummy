@@ -40,16 +40,6 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  void FastLink::write( size_t quantum, EventPair p ) const{
-    Director::getInstance()
-      .write(this, quantum, p );
-  }
-
-  void FastLink::read( size_t quantum, EventPair p ) const{
-    Director::getInstance()
-      .read(this, quantum, p );
-  }
-
   ComponentId FastLink::getComponentId() const{
     return component->getComponentId();
   }

@@ -45,37 +45,12 @@ namespace SystemC_VPC {
 
 typedef size_t ComponentId;
 typedef size_t ProcessId;
+typedef size_t RouteId;
 
 typedef size_t                  FunctionId;
 typedef std::vector<FunctionId> FunctionIds;
 
 static const FunctionId defaultFunctionId = 0;
-
-/******************************************************************************
- *
- */
-template<typename ID_TYPE>
-class SequentiallyIdedObject {
-public:
-  typedef ID_TYPE IdType;
-protected:
-  SequentiallyIdedObject() :
-    id_(getNextId())
-  {}
-
-  IdType getSequentialId() const {
-    return id_;
-  }
-
-private:
-  const IdType id_;
-
-  static IdType getNextId()
-  {
-    static IdType currentId = 0;
-    return currentId++;
-  }
-};
 
 } // namespace SystemC_VPC
 

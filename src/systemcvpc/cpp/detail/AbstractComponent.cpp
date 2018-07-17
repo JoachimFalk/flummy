@@ -39,11 +39,11 @@
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/VpcTask.hpp>
-#include <systemcvpc/Mappings.hpp>
 
 #include "common.hpp"
 #include "Director.hpp"
 #include "AbstractComponent.hpp"
+#include "AbstractRoute.hpp"
 #include "ProcessControlBlock.hpp"
 #include "ComponentObserver.hpp"
 #include "ComponentInfo.hpp"
@@ -399,7 +399,7 @@ namespace SystemC_VPC { namespace Detail {
     VpcTask::Ptr         vpcTask = getTask(static_cast<ScheduledTask &>(*task));
     ProcessControlBlock *pcb = this->createPCB(task->name());
     pcb->setScheduledTask(task);
-    pcb->configure(task->name(), true);
+//  pcb->configure(task->name(), true);
     pcb->setPriority(vpcTask->getPriority());
     pcb->setTaskIsPSM(vpcTask->isPSM());
     task->setScheduler(this);
@@ -491,7 +491,8 @@ namespace SystemC_VPC { namespace Detail {
     FastLink *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
 
     ProcessControlBlock *pcb = getPCBOfTaskInterface(task);
-    TaskInstance taskInstance(nullptr);
+    std::function<void (TaskInstance *)> none([](TaskInstance *) {});
+    TaskInstance taskInstance(none, none);
     taskInstance.setPCB(pcb);
     taskInstance.setProcessId(fLink->process);
     taskInstance.setFiringRule(fr);
@@ -565,7 +566,8 @@ namespace SystemC_VPC { namespace Detail {
       AbstractComponent   *comp  = static_cast<AbstractComponent *>(task->getScheduler());
       ProcessControlBlock *pcb   = getPCBOfTaskInterface(task);
 
-      TaskInstance *taskInstance = new TaskInstance(nullptr);
+      std::function<void (TaskInstance *)> none([](TaskInstance *) {});
+      TaskInstance *taskInstance = new TaskInstance(none, none);
 
       assert(pcb != NULL);
 
@@ -600,8 +602,8 @@ namespace SystemC_VPC { namespace Detail {
 
     for (PortInInfo const &portInfo : fr->getPortInInfos()) {
       portInfo.port.commStart(portInfo.consumed);
-      FastLink  *fLink = static_cast<FastLink *>(portInfo.port.getSchedulerInfo());
-      fLink->read(portInfo.required, EventPair(nullptr, ial->acquireEvent()));
+      AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
+      route->start(portInfo.required, ial->acquireEvent());
     }
     for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
       portInfo.port.commStart(portInfo.produced);
@@ -610,8 +612,9 @@ namespace SystemC_VPC { namespace Detail {
     ial->wait();
   }
 
-  TaskInstance *AbstractComponent::executeHop(ProcessControlBlock *pcb, size_t quantum, EventPair const &np) {
-    TaskInstance *taskInstance = new TaskInstance(nullptr);
+  TaskInstance *AbstractComponent::executeHop(ProcessControlBlock *pcb, size_t quantum, std::function<void (TaskInstance *)> const &cb) {
+    std::function<void (TaskInstance *)> none([](TaskInstance *) {});
+    TaskInstance *taskInstance = new TaskInstance(none, cb);
 
     assert(pcb != NULL);
 
@@ -634,7 +637,6 @@ namespace SystemC_VPC { namespace Detail {
     taskInstance->setName(pcb->getName());
     taskInstance->setFunctionIds(fids);
     taskInstance->setTimingScale(quantum);
-    taskInstance->setBlockEvent(np);
     this->compute(taskInstance);
     return taskInstance;
   }
@@ -642,8 +644,8 @@ namespace SystemC_VPC { namespace Detail {
   /// Called once per actor firing to indicate that the DII of the task instance is over.
   void AbstractComponent::finishDiiTaskInstance(TaskInstance *taskInstance) {
     this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
-    if (taskInstance->getBlockEvent().dii.get())
-      taskInstance->getBlockEvent().dii->notify();
+
+    taskInstance->diiExpired();
 
     typedef smoc::SimulatorAPI::FiringRuleInterface FiringRuleInterface;
     typedef FiringRuleInterface::PortInInfo         PortInInfo;
@@ -711,12 +713,12 @@ namespace SystemC_VPC { namespace Detail {
     }
   };
 
-
   /// Called once per actor firing to indicate that the latency of the task instance is over.
   void AbstractComponent::finishLatencyTaskInstance(TaskInstance *taskInstance) {
+    // Remember last acknowledged task time
+    Director::getInstance().end = sc_core::sc_time_stamp();
     this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);
-    if (taskInstance->getBlockEvent().latency.get())
-      taskInstance->getBlockEvent().latency->notify();
+    taskInstance->latExpired();
 
     typedef smoc::SimulatorAPI::FiringRuleInterface  FiringRuleInterface;
 //  typedef smoc::SimulatorAPI::ChannelSinkInterface ChannelSinkInterface;
@@ -728,17 +730,15 @@ namespace SystemC_VPC { namespace Detail {
         assert(portInfo.port.getSinks().size() == 1);
         OutputWrittenListener *owl = new OutputWrittenListener(
             portInfo.port.getSinks().front(), portInfo.produced);
-        FastLink  *fLink = static_cast<FastLink *>(portInfo.port.getSchedulerInfo());
-        fLink->write(portInfo.produced, EventPair(nullptr, owl->acquireEvent()));
+        AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
+        route->start(portInfo.produced, owl->acquireEvent());
         owl->wait();
 //      for (ChannelSinkInterface *sink : portInfo.port.getSinks()) {
 //        sink->commFinish(portInfo.produced);
 //      }
       }
     }
-    // Remember last acknowledged task time
-    Director::getInstance().end = sc_core::sc_time_stamp();
-    taskInstance->release();
+    delete taskInstance;
   }
 
 } } // namespace SystemC_VPC::Detail

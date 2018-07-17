@@ -36,47 +36,19 @@
 
 #include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/Route.hpp>
+#include <systemcvpc/Routing/Static.hpp>
+
+#include "detail/Configuration.hpp"
+#include "detail/Routing/BlockingTransport.hpp"
+#include "detail/Routing/StaticImpl.hpp"
 
 #include <iostream>
 
+#include <string.h>
+
 namespace SystemC_VPC {
 
-//
-Hop::Hop(Component::Ptr component) :
-  component_(component), transferTiming_(component->getTransferTiming()),
-      priority_()
-{
-}
 
-//
-Hop & Hop::setPriority(size_t priority_)
-{
-  this->priority_ = priority_;
-  return *this;
-}
-
-Hop & Hop::setTransferTiming(Timing transferTiming_)
-{
-  this->transferTiming_ = transferTiming_;
-  return *this;
-}
-
-Component::Ptr Hop::getComponent() const
-{
-  return component_;
-}
-
-size_t Hop::getPriority() const
-{
-  return priority_;
-}
-
-Timing Hop::getTransferTiming() const
-{
-  return transferTiming_;
-}
-
-//
 Route::Type Route::parseRouteType(std::string name)
 {
   static const std::string B_TRANSPORT = "blocking";
@@ -87,16 +59,26 @@ Route::Type Route::parseRouteType(std::string name)
   } else if (name == B_TRANSPORT) {
     return BlockingTransport;
   }
-
   throw SystemC_VPC::ConfigException("Unknown scheduler \"" + name
       + "\" for component: " + name);
   return StaticRoute;
 }
 
-Route::Route(Route::Type type, std::string source, std::string dest) :
-  tracing_(false), source_(source), destination_(dest), type_(type),
-  routeInterface_(NULL)
+Route::Route(Type type, int implAdj)
+  : implAdj(implAdj), tracing_(false)
+  , type_(type)
 {
+}
+
+Detail::AbstractRoute *Route::getImpl() {
+  // Pointer magic. Shift our this pointer
+  // so that it points to the Detail::AbstractRoute
+  // base class of our real implementation.
+  return reinterpret_cast<Detail::AbstractRoute *>(
+      reinterpret_cast<char *>(this) + implAdj);
+}
+
+Route::~Route() {
 }
 
 bool Route::getTracing() const
@@ -109,9 +91,9 @@ void Route::setTracing(bool tracing_)
   this->tracing_ = tracing_;
 }
 //
-ComponentId Route::getComponentId() const
+RouteId Route::getRouteId() const
 {
-  return this->getSequentialId();
+  return getImpl()->getRouteId();
 }
 
 std::string Route::getDestination() const
@@ -119,19 +101,14 @@ std::string Route::getDestination() const
   return destination_;
 }
 
-std::list<Hop> Route::getHops() const
-{
-  return hops_;
-}
-
 std::string Route::getSource() const
 {
   return source_;
 }
 
-//
 std::string Route::getName() const {
-  return "msg_" + getSource() + "_2_" + getDestination();
+  return getImpl()->getName();
+//return "msg_" + getSource() + "_2_" + getDestination();
 }
 
 Route::Type Route::getType() const
@@ -145,19 +122,49 @@ void Route::inject(std::string source, std::string destination)
   this->destination_ = destination;
 }
 
-RouteInterface::Ptr Route::getRouteInterface() const
-{
-  //TODO: assert simulation phase
-  assert(routeInterface_ != NULL);
-  return routeInterface_;
+bool hasRoute(std::string const &name) {
+  return Detail::Configuration::getInstance().hasRoute(name).get();
+}
+bool hasRoute(smoc::SimulatorAPI::PortInInterface  const &port) {
+  return Detail::Configuration::getInstance().hasRoute(port.name()).get();
+}
+bool hasRoute(smoc::SimulatorAPI::PortOutInterface const &port) {
+  return Detail::Configuration::getInstance().hasRoute(port.name()).get();
 }
 
-//
-Hop & Route::addHop(Component::Ptr component)
-{
-  Hop hop(component);
-  hops_.push_back(hop);
-  return hops_.back();
+Route::Ptr getRoute(std::string const &name) {
+  return Detail::Configuration::getInstance().getRoute(name)->getRoute();
+}
+Route::Ptr getRoute(smoc::SimulatorAPI::PortInInterface  const &port) {
+  return Detail::Configuration::getInstance().getRoute(port.name())->getRoute();
+}
+Route::Ptr getRoute(smoc::SimulatorAPI::PortOutInterface const &port) {
+  return Detail::Configuration::getInstance().getRoute(port.name())->getRoute();
+}
+
+Route::Ptr createRoute(std::string const &name,
+    const char *type) {
+  return Detail::Configuration::getInstance().createRoute(name,
+    [&name, type]() -> Detail::AbstractRoute::Ptr {
+      if (strcmp(type, Routing::Static::Type) == 0)
+        return new Detail::Routing::StaticImpl(name);
+      else if (strcmp(type, "BlockingTransport") == 0)
+        return new Detail::Routing::BlockingTransport(name);
+      else {
+        assert(!"WTF?!");
+        throw std::runtime_error("Unknown route type!");
+      }
+    })->getRoute();
+}
+Route::Ptr createRoute(smoc::SimulatorAPI::PortInInterface  const &port,
+    const char *type) {
+  Route::Ptr route = createRoute(port.name(), type);
+  return route;
+}
+Route::Ptr createRoute(smoc::SimulatorAPI::PortOutInterface const &port,
+    const char *type) {
+  Route::Ptr route = createRoute(port.name(), type);
+  return route;
 }
 
 } // namespace SystemC_VPC
