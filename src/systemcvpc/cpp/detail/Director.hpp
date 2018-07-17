@@ -71,9 +71,6 @@ namespace SystemC_VPC { namespace Detail {
   template<typename KEY, class OBJECT>
   class AssociativePrototypedPool;
 
-  class TaskInstance;
-  typedef AssociativePrototypedPool<ProcessId, TaskInstance> TaskPool;
-
   /**
    * \brief Director knows all (Abstract-)Components, all mappings (task -> component).
    *
@@ -125,8 +122,6 @@ namespace SystemC_VPC { namespace Detail {
     static FunctionId getFunctionId(const std::string& function);
     static FunctionId createFunctionId(const std::string& function);
 
-    TaskInstance *allocateTask(ProcessId pid);
-
     // FIXME !!!
     PluggableGlobalPowerGovernor   *topPowerGov;
     DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >
@@ -149,7 +144,7 @@ namespace SystemC_VPC { namespace Detail {
     std::map<ProcessId, std::set<std::string> > debugFunctionNames;
   private:
 
-    void debugUnknownNames( ) const;
+//  void debugUnknownNames( ) const;
 
     /**
      * Singleton design pattern
@@ -169,8 +164,6 @@ namespace SystemC_VPC { namespace Detail {
     std::ofstream  powerConsStream;
     PowerSumming  *powerSumming;
 #endif // NO_POWER_SUM
-
-    TaskPool        *taskPool;
   };
 
 } } // namespace SystemC_VPC::Detail

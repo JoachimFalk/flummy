@@ -86,7 +86,6 @@ namespace SystemC_VPC { namespace Detail {
     , powerConsStream("powerconsumption.dat")
     , powerSumming(NULL)
 #endif // NO_POWER_SUM
-    , taskPool(new TaskPool())
   {
     sc_core::sc_report_handler::set_actions(
         sc_core::SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
@@ -131,11 +130,6 @@ namespace SystemC_VPC { namespace Detail {
     }
     delete powerSumming;
 #endif // NO_POWER_SUM
-    delete taskPool;
-  }
-
-  TaskInstance* Director::allocateTask(ProcessId pid){
-    return this->taskPool->allocate(pid);
   }
 
   //
@@ -273,6 +267,7 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
+/*
   void Director::debugUnknownNames( ) const {
     bool route = false;
     bool mappings = false;
@@ -340,7 +335,7 @@ namespace SystemC_VPC { namespace Detail {
     }
     exit(-1);
   }
-
+*/
   //
   std::string Director::getTaskName(ProcessId id) {
     if(ConfigCheck::hasProcessName(id)){
