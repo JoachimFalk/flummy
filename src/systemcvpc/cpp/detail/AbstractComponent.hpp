@@ -300,4 +300,15 @@ namespace SystemC_VPC { namespace Detail {
 
 } } // namespace SystemC_VPC::Detail
 
+namespace SystemC_VPC {
+
+  static inline
+  Detail::AbstractComponent::Ptr  getImpl(Component::Ptr const &p)
+    { return boost::static_pointer_cast<Detail::AbstractComponent>(p); }
+  static inline
+  Detail::AbstractComponent      *getImpl(Component            *p)
+    { return static_cast<Detail::AbstractComponent *>(p); }
+
+} // namespace SystemC_VPC
+
 #endif /* _INCLUDED_SYSTEMCVPC_DETAIL_ABSTRACTCOMPONENT_HPP */

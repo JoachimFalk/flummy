@@ -39,6 +39,8 @@
 
 #include "../Route.hpp"
 
+#include <map>
+
 namespace SystemC_VPC { namespace Detail { namespace Routing {
 
   class StaticImpl;
@@ -57,9 +59,10 @@ public:
 
   static const char *Type;
 
-  Hop  &addHop(Component::Ptr component);
+  Hop  *addHop(Component::Ptr component, Hop *parent = nullptr);
 
-  std::list<Hop> const &getHops() const;
+  Hop                                 *getFirstHop();
+  std::map<Component::Ptr, Hop> const &getHops() const;
 
   bool addStream();
   bool closeStream();
@@ -75,19 +78,29 @@ protected:
 
 class Static::Hop {
 public:
-  Hop(Component::Ptr component);
+  size_t  getPriority() const
+    { return priority_; }
+  Hop    &setPriority(size_t priority_)
+    { this->priority_ = priority_; return *this; }
 
-  size_t  getPriority() const;
-  Hop    &setPriority(size_t priority_);
+  Timing const &getTransferTiming() const
+    { return transferTiming_; }
+  Hop    &setTransferTiming(Timing const &transferTiming_)
+    { this->transferTiming_ = transferTiming_; return *this; }
 
-  Timing  getTransferTiming() const;
-  Hop    &setTransferTiming(Timing transferTiming_);
+  std::list<Hop *> const &getChildHops() const
+    { return childHops; }
 
-  Component::Ptr getComponent() const;
+  Component::Ptr const &getComponent() const
+    { return component; }
+protected:
+  Hop(Component::Ptr const &component);
+
+  std::list<Hop *> childHops;
 private:
-  Component::Ptr component_;
-  Timing transferTiming_;
-  size_t priority_;
+  Component::Ptr const component;
+  Timing               transferTiming_;
+  size_t               priority_;
 };
 
 } } // namespace SystemC_VPC::Routing

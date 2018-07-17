@@ -48,24 +48,40 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     , Static(
          reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)) -
          reinterpret_cast<char *>(static_cast<Route         *>(this)))
+    , firstHopImpl(nullptr)
   {
   }
 
-  StaticImpl::Hop  &StaticImpl::addHop(Component::Ptr component) {
-    hops.push_back(Hop(component));
-    hopImpls.push_back(HopImpl(hops.back()));
-
-    HopImpl &hopImpl = hopImpls.back();
-    Detail::AbstractComponent *c = static_cast<Detail::AbstractComponent *>
-      (component.get());
-    hopImpl.pcb = c->createPCB(getName());
-    hopImpl.pcb->setTiming(hopImpl.hop.getTransferTiming());
-    hopImpl.pcb->setPriority(hopImpl.hop.getPriority());
-    return hopImpl.hop;
+  StaticImpl::Hop  *StaticImpl::addHop(Component::Ptr component, Hop *parent) {
+    AbstractComponent::Ptr comp(
+        static_cast<AbstractComponent *>(component.get()));
+    std::pair<HopImpls::iterator, bool> status =
+        hopImpls.insert(std::make_pair(comp, HopImpl(component)));
+    assert(status.second);
+    HopImpl &hopImpl = status.first->second;
+    if (!parent) {
+      assert(!firstHopImpl);
+      firstHopImpl = &hopImpl;
+    } else {
+#ifndef NDEBUG
+      HopImpls::iterator iter = hopImpls.find(SystemC_VPC::getImpl(parent->getComponent()));
+      assert(iter != hopImpls.end());
+      assert(&iter->second == parent);
+#endif //NDEBUG
+      static_cast<HopImpl *>(parent)->getChildHops().push_back(&hopImpl);
+    }
+    hopImpl.pcb = hopImpl.getComponent()->createPCB(getName());
+    hopImpl.pcb->setTiming(hopImpl.getTransferTiming());
+    hopImpl.pcb->setPriority(hopImpl.getPriority());
+    return &hopImpl;
   }
 
-  std::list<StaticImpl::Hop> const &StaticImpl::getHops() const {
-    return hops;
+  StaticImpl::Hop  *StaticImpl::getFirstHop() {
+    return firstHopImpl;
+  }
+
+  std::map<Component::Ptr, StaticImpl::Hop> const &StaticImpl::getHops() const {
+    return reinterpret_cast<std::map<Component::Ptr, Hop> const &>(hopImpls);
   }
 
   Route *StaticImpl::getRoute() {
@@ -84,25 +100,29 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     : staticImpl(staticImpl)
     , quantitiy(quantitiy)
     , finishEvent(finishEvent)
-    , currHop(staticImpl->hopImpls.begin())
+    , currHop(staticImpl->firstHopImpl)
   {
     startHop();
 
   }
   void StaticImpl::MessageInstance::startHop() {
-    if (currHop == staticImpl->hopImpls.end()) {
+    if (!currHop) {
       finishEvent->notify();
       delete this;
       return;
     }
-    static_cast<AbstractComponent *>(currHop->hop.getComponent().get())
+    currHop->getComponent()
         ->executeHop(currHop->pcb, quantitiy, [this](TaskInstance *) {
           this->finishHop();
       });
   }
 
   void StaticImpl::MessageInstance::finishHop() {
-    ++currHop;
+    if (currHop->getChildHops().empty()) {
+      currHop = nullptr;
+    } else {
+      currHop = currHop->getChildHops().front();
+    }
     startHop();
   }
 
@@ -172,17 +192,15 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 //}
 
   bool StaticImpl::closeStream(){
-    for (HopImpl const &hopImpl : hopImpls) {
-      static_cast<AbstractComponent *>(hopImpl.hop.getComponent().get())
-          ->closeStream(getRouteId());
+    for (HopImpls::value_type const &v : hopImpls) {
+      v.second.getComponent()->closeStream(getRouteId());
     }
     return true;
   }
 
   bool StaticImpl::addStream(){
-    for (HopImpl const &hopImpl : hopImpls) {
-      static_cast<AbstractComponent *>(hopImpl.hop.getComponent().get())
-          ->addStream(getRouteId());
+    for (HopImpls::value_type const &v : hopImpls) {
+      v.second.getComponent()->addStream(getRouteId());
     }
     return true;
   }

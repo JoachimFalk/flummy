@@ -607,6 +607,8 @@ namespace SystemC_VPC { namespace Detail {
           tracingEnabled |= tracing;
           route->setTracing(tracing);
 
+          SystemC_VPC::Routing::Static::Hop *parentHop = nullptr;
+
           // add <hop>s
           for(CX::XN::DOMNode * hopNode = routeNode->getFirstChild();
               hopNode != NULL;
@@ -620,7 +622,7 @@ namespace SystemC_VPC { namespace Detail {
               assert( VC::hasComponent(hopComponent) );
               VC::Component::Ptr comp = VC::getComponent(hopComponent);
 
-              SystemC_VPC::Routing::Static::Hop &hop = route->addHop( comp );
+              parentHop = route->addHop(comp, parentHop);
 
               // parse <timing>s
               for(CX::XN::DOMNode * timingNode = hopNode->getFirstChild();
@@ -631,7 +633,7 @@ namespace SystemC_VPC { namespace Detail {
                 if( xmlName == timingStr ){
                   try {
                     VC::Timing t = this->parseTiming( timingNode );
-                    hop.setTransferTiming(t);
+                    parentHop->setTransferTiming(t);
                   } catch(InvalidArgumentException &e) {
                     std::string msg("Error with route: ");
 //                  msg += src + " -> " + dest + " (" + hopComponent +")\n";
@@ -649,7 +651,7 @@ namespace SystemC_VPC { namespace Detail {
                     int priority = 0;
                     sscanf(CX::NStr(sValue).c_str(), "%d", &priority);
                     
-                    hop.setPriority(priority);
+                    parentHop->setPriority(priority);
                   }
                 }
               }

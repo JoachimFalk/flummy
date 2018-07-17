@@ -42,6 +42,7 @@
 
 #include "../Director.hpp"
 #include "../AbstractRoute.hpp"
+#include "../AbstractComponent.hpp"
 #include "../ProcessControlBlock.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
@@ -78,9 +79,10 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     /// Handle interfaces for SystemC_VPC::Routing::Static
     ///
 
-    Hop  &addHop(Component::Ptr component);
+    Hop  *addHop(Component::Ptr component, Hop *parent);
+    Hop  *getFirstHop();
 
-    std::list<Hop> const &getHops() const;
+    std::map<Component::Ptr, Hop> const &getHops() const;
 
     bool addStream();
     bool closeStream();
@@ -107,18 +109,26 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     ~StaticImpl();
   private:
-    struct HopImpl {
-      HopImpl(Hop &hop)
-        : hop(hop), pcb(nullptr) {}
+    struct HopImpl: public Hop {
+      HopImpl(Component::Ptr component)
+        : Hop(component)
+        , pcb(nullptr) {}
 
-      Hop                 &hop;
-      ProcessControlBlock *pcb;
+      AbstractComponent::Ptr getComponent() const
+        { return SystemC_VPC::getImpl(this->Hop::getComponent()); }
+
+      std::list<HopImpl *> &getChildHops() {
+        return reinterpret_cast<std::list<HopImpl *> &>(childHops);
+      }
+
+      ProcessControlBlock  *pcb;
     };
 
-    typedef std::list<Hop>      Hops;
-    Hops                        hops;
+    HopImpl                    *firstHopImpl;
 
-    typedef std::list<HopImpl>  HopImpls;
+    typedef std::map<
+        AbstractComponent::Ptr,
+        HopImpl>                HopImpls;
     HopImpls                    hopImpls;
 
     struct MessageInstance {
@@ -133,7 +143,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
       StaticImpl         *staticImpl;
       size_t              quantitiy;
       VPCEvent::Ptr       finishEvent;
-      HopImpls::iterator  currHop;
+      HopImpl            *currHop;
     };
   };
 
