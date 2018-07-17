@@ -144,6 +144,7 @@ libsystemcvpc_la_CPPFLAGS = $(AM_CPPFLAGS) \
 
 libsystemcvpc_la_LDFLAGS = $(AM_LDFLAGS) \
 	$(filter-out %/libsystemcvpc.la, $(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)"; export PKG_CONFIG_PATH; $(PKG_CONFIG) --static --libs libsystemcvpc)) \
+	-Wl,--no-undefined \
 	-version-info 0:0:0 \
-	-no-undefined \
+	-module \
 	-rdynamic
