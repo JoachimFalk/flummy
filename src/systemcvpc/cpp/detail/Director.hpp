@@ -63,7 +63,7 @@ namespace SystemC_VPC { namespace Detail {
 
   class PowerSumming;
   class Delayer;
-  class Route;
+  class AbstractRoute;
   class PluggableGlobalPowerGovernor;
 
   template <class T> class PlugInFactory;
@@ -105,46 +105,10 @@ namespace SystemC_VPC { namespace Detail {
     ~Director();
 
     /**
-     * \brief Simulates communication delay of a given task
-     * 
-     * Determines the component from FastLink.
-     * Supports pipelining!
-     * \param fLink FastLink for task and function to execute.
-     * \param quantum Number of read data tokens.
-     * \param endPair EventPair to signal finishing of data introduction 
-     * interval (dii) and latency.
-     * If dii == latency no pipelining is assumed and both events are notified
-     * at same time!
-     * \sa EventPair
-     */
-    void read(FastLink const *fLink,
-              size_t quantum,
-              EventPair endPair = EventPair(NULL, NULL) );
-
-    /**
-     * \brief Simulates communication delay of a given task
-     * 
-     * Determines the component from FastLink.
-     * Supports pipelining!
-     * \param fLink FastLink for task and function to execute.
-     * \param quantum Number of written data tokens.
-     * \param endPair EventPair to signal finishing of data introduction 
-     * interval (dii) and latency.
-     * If dii == latency no pipelining is assumed and both events are notified
-     * at same time!
-     * \sa EventPair
-     */
-    void write(FastLink const *fLink,
-               size_t quantum,
-               EventPair endPair = EventPair(NULL, NULL) );
-    
-    /**
      * \brief resolve mapping
      */
     const Delayer *getComponent(FastLink const *vpcLink) const ;
     
-    void signalLatencyEvent(TaskInstance* task);
-
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;
       remove(vpc_result_file.c_str());
@@ -156,9 +120,6 @@ namespace SystemC_VPC { namespace Detail {
 
     static ProcessId getProcessId(std::string process_or_source,
         std::string destination = "");
-
-    FastLink *registerRoute(std::string source, std::string destination,
-        sc_core::sc_port_base * leafPort);
 
     static bool hasFunctionId(const std::string& function);
     static FunctionId getFunctionId(const std::string& function);
@@ -187,10 +148,6 @@ namespace SystemC_VPC { namespace Detail {
 
     std::map<ProcessId, std::set<std::string> > debugFunctionNames;
   private:
-
-    TaskInstance *preCompute(FastLink const *fLink);
-
-    void  postCompute(TaskInstance *task, EventPair endPair);
 
     void debugUnknownNames( ) const;
 

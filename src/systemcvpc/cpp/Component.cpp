@@ -39,13 +39,27 @@
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/TimingModifier.hpp>
-#include <systemcvpc/Mappings.hpp>
 #include <systemcvpc/VpcApi.hpp>
 
 #include "detail/common.hpp"
+#include "detail/Configuration.hpp"
 #include "detail/AbstractComponent.hpp"
-
-#include <boost/shared_ptr.hpp>
+#include "detail/NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
+#include "detail/NonPreemptiveScheduler/FcfsComponent.hpp"
+#include "detail/NonPreemptiveScheduler/NonPreemptiveComponent.hpp"
+#include "detail/NonPreemptiveScheduler/PriorityComponent.hpp"
+#include "detail/NonPreemptiveScheduler/RoundRobinComponent.hpp"
+#include "detail/PreemptiveScheduler/PreemptiveComponent.hpp"
+#include "detail/PreemptiveScheduler/AVBScheduler.hpp"
+#include "detail/PreemptiveScheduler/FlexRayScheduler.hpp"
+#include "detail/PreemptiveScheduler/MostScheduler.hpp"
+#include "detail/PreemptiveScheduler/MostSecondaryScheduler.hpp"
+#include "detail/PreemptiveScheduler/PriorityScheduler.hpp"
+#include "detail/PreemptiveScheduler/RateMonotonicScheduler.hpp"
+#include "detail/PreemptiveScheduler/RoundRobinScheduler.hpp"
+#include "detail/PreemptiveScheduler/StreamShaperScheduler.hpp"
+#include "detail/PreemptiveScheduler/TDMAScheduler.hpp"
+#include "detail/PreemptiveScheduler/TimeTriggeredCCScheduler.hpp"
 
 #include <string>
 #include <set>
@@ -61,7 +75,7 @@ void Component::setTransferTiming(Timing transferTiming) {
   transferTiming_ = transferTiming;
 }
 
-void Component::setTransferTimingModifier(boost::shared_ptr<TimingModifier> timingModifier) {
+void Component::setTransferTimingModifier(TimingModifier::Ptr timingModifier) {
   transferTiming_.setTimingModifier(timingModifier);
 }
 
@@ -72,7 +86,7 @@ Timing Component::getTransferTiming() const {
 
 //
 void Component::addTask(ScheduledTask &actor) {
-  Mappings::getConfiguredMappings()[getTask(actor)] = this;
+  getTask(actor)->mapTo(this);
 }
 
 //
@@ -86,7 +100,7 @@ void Component::addTracer(const char *tracer) {
 
 //
 bool Component::hasTask(ScheduledTask *actor) const {
-  return Mappings::isMapped(getTask(*actor), Ptr(const_cast<this_type *>(this)));
+  return getTask(*actor)->getComponent() == this;
 }
 
 //
@@ -144,11 +158,11 @@ void Component::addAttribute(AttributePtr attribute) {
 
 Component::MappedTasks Component::getMappedTasks() {
   Component::MappedTasks retval;
-  for (std::pair<VpcTask::Ptr, Component::Ptr> const &v :
-          Mappings::getConfiguredMappings())
-    if (v.second == this) {
-      assert(v.first->getActor() != nullptr);
-      retval.insert(const_cast<ScheduledTask *>(v.first->getActor()));
+  for (Detail::VpcTasks::value_type const &v :
+      Detail::Configuration::getInstance().getVpcTasks())
+    if (v.second->getComponent() == this) {
+      assert(v.second->getActor() != nullptr);
+      retval.insert(const_cast<ScheduledTask *>(v.second->getActor()));
     }
   return retval;
 }
@@ -159,6 +173,51 @@ ComponentId Component::getComponentId() const {
 
 ComponentInterface *Component::getComponentInterface() {
   return static_cast<Detail::AbstractComponent *>(this);
+}
+
+bool hasComponent(std::string name) {
+  return Detail::Configuration::getInstance().hasComponent(name).get();
+}
+
+Component::Ptr getComponent(std::string name) {
+  return Detail::Configuration::getInstance().getComponent(name);
+}
+
+Component::Ptr createComponent(std::string name, Scheduler scheduler) {
+  return Detail::Configuration::getInstance().createComponent(name,
+      [&name, scheduler]() ->  Detail::AbstractComponent::Ptr {
+      switch (scheduler) {
+        case Scheduler::FCFS:
+          return new Detail::FcfsComponent(name);
+        case Scheduler::StaticPriorityNoPreempt:
+          return new Detail::PriorityComponent(name);
+        case Scheduler::RoundRobinNoPreempt:
+          return new Detail::RoundRobinComponent(name);
+        case Scheduler::DynamicPriorityUserYield:
+          return new Detail::DynamicPriorityComponent(name);
+        case Scheduler::RoundRobin:
+          return new Detail::PreemptiveComponent(name, new Detail::RoundRobinScheduler());
+        case Scheduler::StaticPriority:
+          return new Detail::PreemptiveComponent(name, new Detail::PriorityScheduler());
+        case Scheduler::RateMonotonic:
+          return new Detail::PreemptiveComponent(name, new Detail::RateMonotonicScheduler());
+        case Scheduler::TDMA:
+          return new Detail::PreemptiveComponent(name, new Detail::TDMAScheduler());
+        case Scheduler::FlexRay:
+          return new Detail::PreemptiveComponent(name, new Detail::FlexRayScheduler());
+        case Scheduler::AVB:
+          return new Detail::PreemptiveComponent(name, new Detail::AVBScheduler());
+        case Scheduler::TTCC:
+          return new Detail::PreemptiveComponent(name, new Detail::TimeTriggeredCCScheduler());
+        case Scheduler::MOST:
+          return new Detail::PreemptiveComponent(name, new Detail::MostScheduler());
+        case Scheduler::StreamShaper:
+          return new Detail::PreemptiveComponent(name, new Detail::StreamShaperScheduler());
+        default:
+          assert(!"Oops, I don't know this scheduler!");
+          throw std::runtime_error("Oops, I don't know this scheduler!");
+      }
+    });
 }
 
 } // namespace SystemC_VPC

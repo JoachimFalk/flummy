@@ -61,12 +61,6 @@ namespace SystemC_VPC { namespace Detail {
   ProcessControlBlock::~ProcessControlBlock() {
   }
 
-  void ProcessControlBlock::configure(std::string name, bool tracing){
-    taskTracer =
-        CoSupport::Tracing::TracingFactory::getInstance().createTaskTracer(name,
-            component->getName());
-  }
-
   sc_core::sc_time ProcessControlBlock::getPeriod() const{
     return sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
   }

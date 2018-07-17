@@ -31,8 +31,8 @@ nobase_include_HEADERS = \
 	systemcvpc/datatypes.hpp \
 	systemcvpc/EventPair.hpp \
 	systemcvpc/InvalidArgumentException.hpp \
-	systemcvpc/Mappings.hpp \
 	systemcvpc/Route.hpp \
+	systemcvpc/Routing/Static.hpp \
 	systemcvpc/ScheduledTask.hpp \
 	systemcvpc/Scheduler.hpp \
 	systemcvpc/Timing.hpp \

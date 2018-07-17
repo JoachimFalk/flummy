@@ -34,62 +34,62 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEPOOL_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEPOOL_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_ROUTING_STATIC_HPP
+#define _INCLUDED_SYSTEMCVPC_ROUTING_STATIC_HPP
 
-#include <CoSupport/SystemC/systemc_support.hpp>
+#include "../Route.hpp"
 
-#include <systemcvpc/Route.hpp>
-#include "RouteImpl.hpp"
+namespace SystemC_VPC { namespace Detail { namespace Routing {
 
-namespace SystemC_VPC { namespace Detail {
+  class StaticImpl;
 
-  /**
-   * \brief a memory pool for routes
-   */
-  template<class ROUTE>
-  class RoutePool
-    : public PrototypedPool<ROUTE>,
-      public Route
-  {
-  public:
+} } } // namespace SystemC_VPC::Detail::Routing
 
-    void addHop(std::string name, AbstractComponent * hop)
-    {
-      return this->getPrototype().addHop(name, hop);
-    }
+namespace SystemC_VPC { namespace Routing {
 
-    const ComponentList& getHops() const
-    {
-      return this->getPrototype().getHops();
-    }
+class Static: public Route {
+  typedef Static this_type;
+public:
+  typedef boost::intrusive_ptr<this_type>       Ptr;
+  typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
+  class Hop;
 
-    void compute( TaskInstance* task )
-    {
-      ROUTE* route = this->allocate();
-      route->setPool(this);
-      route->compute( task );
-    }
+  static const char *Type;
 
-    std::string getName() const
-    {
-      return this->getPrototype().getName();
-    }
+  Hop  &addHop(Component::Ptr component);
 
-    void setRouteInterface(Route* route){
-      configuredRoute_->routeInterface_=route;
-    }
+  std::list<Hop> const &getHops() const;
 
-    RoutePool( const SystemC_VPC::Route::Ptr configuredRoute )
-      : PrototypedPool<ROUTE>(configuredRoute), Route(configuredRoute)
-    {
-      configuredRoute_=configuredRoute;
-    }
+  bool addStream();
+  bool closeStream();
 
-    SystemC_VPC::Route::Ptr configuredRoute_;
-  };
+protected:
+  Static(int implAdj)
+    : Route(StaticRoute, implAdj) {}
 
-} } // namespace SystemC_VPC::Detail
+  Detail::Routing::StaticImpl       *getImpl();
+  Detail::Routing::StaticImpl const *getImpl() const
+    { return const_cast<this_type *>(this)->getImpl(); }
+};
 
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEPOOL_HPP */
+class Static::Hop {
+public:
+  Hop(Component::Ptr component);
+
+  size_t  getPriority() const;
+  Hop    &setPriority(size_t priority_);
+
+  Timing  getTransferTiming() const;
+  Hop    &setTransferTiming(Timing transferTiming_);
+
+  Component::Ptr getComponent() const;
+private:
+  Component::Ptr component_;
+  Timing transferTiming_;
+  size_t priority_;
+};
+
+} } // namespace SystemC_VPC::Routing
+
+#endif /* _INCLUDED_SYSTEMCVPC_ROUTING_STATIC_HPP */

@@ -34,59 +34,21 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEIMPL_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEIMPL_HPP
-
-#include <vector>
-
-#include <CoSupport/Tracing/TracingFactory.hpp>
-
-#include <systemcvpc/Route.hpp>
-#include "AbstractComponent.hpp"
+#include "AbstractRoute.hpp"
+#include "Director.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
-  typedef std::list<AbstractComponent *> ComponentList;
-
-  /**
-   * \brief Interface for classes implementing routing simulation.
-   */
-  class Route : public Delayer, public SystemC_VPC::RouteInterface {
-  public:
-    virtual void addHop(std::string name, AbstractComponent * hop) = 0;
-
-    virtual const ComponentList& getHops() const = 0;
-
-    Route(SystemC_VPC::Route::Ptr configuredRoute);
-
-    Route(const Route & orig) : Delayer(orig), instanceId(createRouteId()),
-        ptpTracer(orig.ptpTracer) {}
-
-    virtual ~Route(){}
-
-    int getInstanceId() const
-    {
-      return instanceId;
-    }
-
-    virtual void notifyActivation(smoc::SimulatorAPI::TaskInterface *scheduledTask,
-        bool active);
-  protected:
-    void traceStart() {
-      if (ptpTracer) ticket = ptpTracer->startOoo();
-    }
-
-    void traceStop() {
-      if (ptpTracer) ptpTracer->stopOoo(ticket);
-    }
-  private:
-    size_t createRouteId();
-
-    const int instanceId;
-    CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
-    CoSupport::Tracing::PtpTracer::Ticket  ticket;
-  };
+  AbstractRoute::AbstractRoute(std::string const &name)
+    : routeName(name)
+    , routeId(Director::getInstance().getProcessId(name))
+    , ticket(-1)
+  {
+//  if (configuredRoute->getTracing()) {
+//    this->ptpTracer
+//      = CoSupport::Tracing::TracingFactory::getInstance().createPtpTracer(
+//          this->getName());
+//  }
+  }
 
 } } // namespace SystemC_VPC::Detail
-
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEIMPL_HPP */

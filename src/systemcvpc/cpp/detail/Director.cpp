@@ -41,9 +41,9 @@
 #include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
-#include <systemcvpc/Mappings.hpp>
 
 #include "Director.hpp"
+#include "Configuration.hpp"
 #include "ConfigCheck.hpp"
 #include "DebugOStream.hpp"
 #include "HysteresisLocalGovernor.hpp"
@@ -52,9 +52,7 @@
 #include "PluggablePowerGovernor.hpp"
 #include "PowerSumming.hpp"
 #include "ProcessControlBlock.hpp"
-#include "RoutePool.hpp"
 #include "SelectFastestPowerModeGlobalGovernor.hpp"
-#include "StaticRoute.hpp"
 #include "TaskInstance.hpp"
 #include "dynload/dll.hpp"
 
@@ -62,7 +60,7 @@
 
 #include <systemc>
 
-#include <boost/foreach.hpp>
+#include "detail/AbstractRoute.hpp"
 
 #include <iostream>
 #include <map>
@@ -70,37 +68,6 @@
 #include <vector>
 
 namespace SystemC_VPC { namespace Detail {
-
-  namespace {
-    namespace VC = SystemC_VPC;
-
-    static
-    void injectRoute(std::string src, std::string dest, sc_core::sc_port_base * leafPort)
-    {
-      ProcessId pid = Director::getProcessId(src, dest);
-      if (VC::Routing::has(pid) && VC::Routing::has(leafPort)) {
-        if(VC::Routing::get(pid) != VC::Routing::get(leafPort)) {
-            std::cout<<"debug Multicast: " << VC::Routing::get(pid)->getDestination() << " and " << VC::Routing::get(leafPort)->getDestination() << std::endl;
-          /*throw VC::ConfigException("Route " + src + " -> " + dest +
-              " has configuration data from XML and from configuration API.");*/
-        }
-      } else if (!VC::Routing::has(pid) && !VC::Routing::has(leafPort)) {
-        throw VC::ConfigException("Route " + src + " -> " + dest +
-            " has NO configuration data at all.");
-      } else if (VC::Routing::has(pid)) {
-        VC::Route::Ptr route = VC::Routing::get(pid);
-        VC::Routing::set(leafPort, route);
-      } else if (VC::Routing::has(leafPort)) {
-        VC::Route::Ptr route = VC::Routing::get(leafPort);
-        VC::Routing::set(pid, route);
-        route->inject(src, dest);
-      }
-
-      assert(VC::Routing::has(pid) && VC::Routing::has(leafPort));
-      //assert(VC::Routing::get(pid) == VC::Routing::get(leafPort));
-    }
-
-  } // namespace anonymous
 
   std::unique_ptr<Director> Director::singleton;
 
@@ -160,75 +127,11 @@ namespace SystemC_VPC { namespace Detail {
 
 #ifndef NO_POWER_SUM
     for (SystemC_VPC::Components::value_type const &v : getComponents()) {
-      static_cast<AbstractComponent *>(v.second.get())->removeObserver(powerSumming);
+      v.second->removeObserver(powerSumming);
     }
     delete powerSumming;
 #endif // NO_POWER_SUM
     delete taskPool;
-  }
-
-  TaskInstance *Director::preCompute(FastLink const *fLink) {
-    try {
-      TaskInstance *task = this->allocateTask( fLink->process );
-      task->setFunctionIds( fLink->actionIds );
-    
-      //HINT: also treat mode!!
-      //if( endPair.latency != NULL ) endPair.latency->notify();
-      assert(fLink->component);
-      return task;
-    } catch (NotAllocatedException &e) {
-      std::cerr << "Unknown Task: ID = " << fLink->process
-           << " name = " << this->getTaskName(fLink->process)  << std::endl;
-
-      debugUnknownNames();
-    }
-    throw NotAllocatedException(this->getTaskName(fLink->process));
-  }
-
-  //
-  void Director::postCompute( TaskInstance * task,
-                              EventPair endPair ){
-
-    if( endPair.dii == NULL){
-      // active mode -> waits until simulated delay time has expired
-      
-      EventPair blockEvent =  task->getBlockEvent();
-
-      if (blockEvent.dii.get())
-        CoSupport::SystemC::wait(*blockEvent.dii);
-    }
-  }
-
-  //
-  void Director::read(FastLink const *fLink,
-                      size_t quantum,
-                      EventPair endPair ) {
-    assert(!FALLBACKMODE);
-    // FIXME: treat quantum
-    TaskInstance * task = preCompute(fLink);
-    task->setBlockEvent( endPair );
-    task->setWrite(false);
-    task->setTimingScale(quantum);
-
-    Delayer* comp = fLink->component;
-    comp->compute(task);
-    postCompute(task, endPair);
-  }
-
-  //
-  void Director::write(FastLink const *fLink,
-                       size_t quantum,
-                       EventPair endPair ) {
-    assert(!FALLBACKMODE);
-    // FIXME: treat quantum
-    TaskInstance * task = preCompute(fLink);
-    task->setBlockEvent(endPair);
-    task->setWrite(true);
-    task->setTimingScale(quantum);
-
-    Delayer* comp = fLink->component;
-    comp->compute(task);
-    postCompute(task, endPair);
   }
 
   TaskInstance* Director::allocateTask(ProcessId pid){
@@ -241,26 +144,7 @@ namespace SystemC_VPC { namespace Detail {
     return vpcLink->component;
   }
 
-  //
-  void Director::signalLatencyEvent(TaskInstance* task){
-    assert(!FALLBACKMODE);
-
-#ifdef DBG_DIRECTOR
-    std::cerr << "Director> got notified from: " << task->getName()
-              << std::endl;
-    std::cerr << "Director> task successful finished: " << task->getName()
-              << std::endl;
-#endif //DBG_DIRECTOR
-    if(NULL != task->getBlockEvent().latency)
-      task->getBlockEvent().latency->notify();
-    // remember last acknowledged task time
-    this->end = sc_core::sc_time_stamp();
-    
-    // free allocated task
-    task->release();
-  }
-
-
+  static
   ProcessId getNextProcessId() {
     static ProcessId       globalProcessId = 0;
     return globalProcessId++;
@@ -352,11 +236,11 @@ namespace SystemC_VPC { namespace Detail {
 #ifndef NO_POWER_SUM
     powerSumming = new PowerSumming(powerConsStream);
 #endif // NO_POWER_SUM
-    for (SystemC_VPC::Components::value_type const &v : getComponents()) {
+    for (Components::value_type const &v : Configuration::getInstance().getComponents()) {
 #ifndef NO_POWER_SUM
-      static_cast<AbstractComponent *>(v.second.get())->addObserver(powerSumming);
+      v.second->addObserver(powerSumming);
 #endif // NO_POWER_SUM
-      static_cast<AbstractComponent *>(v.second.get())->initialize(this);
+      v.second->initialize(this);
     }
   }
   /// end section: VpcApi.hpp related stuff
@@ -373,47 +257,6 @@ namespace SystemC_VPC { namespace Detail {
   bool Director::hasValidConfig() const
   {
     return !FALLBACKMODE;
-  }
-
-  FastLink *Director::registerRoute(std::string source,
-    std::string destination,
-    sc_core::sc_port_base * leafPort)
-  {
-    assert(!FALLBACKMODE);
-    ProcessId       pid = getProcessId( source, destination );
-    FunctionIds     fids; // empty functionIds
-    fids.push_back( getFunctionId("1") );
-
-    if (!VC::Routing::has(pid) && !VC::Routing::has(leafPort) && defaultRoute) {
-      // default behavior: add empty route
-      VC::Route::Ptr route = VC::createRoute(source, destination);
-      route->setTracing(false);
-    }
-
-    try{
-      injectRoute(source, destination, leafPort);
-    }catch(std::exception & e){
-      std::cerr << "Route registration failed for route\"" << source << " - " <<
-          destination <<
-          "\". Got exception:\n" << e.what() << std::endl;
-      exit(-1);
-    }
-
-    VC::Route::Ptr configuredRoute = VC::Routing::get(pid);
-    Route *route = VC::Routing::create(configuredRoute);
-
-    const std::string & taskName = route->getName();
-
-    assert(pid == getProcessId( taskName ));
-    DBG_OUT("registerRoute( " << taskName << " " << pid << " )"<< std::endl);
-
-    assert(!taskPool->contains(pid));
-
-    TaskInstance &task = taskPool->createObject( pid );
-    task.setProcessId( pid );
-    task.setName( taskName );
-
-    return new FastLink(route, pid, fids, FunctionIds(),0);
   }
 
   void Director::loadGlobalGovernorPlugin(std::string plugin,
@@ -453,11 +296,9 @@ namespace SystemC_VPC { namespace Detail {
                   << std::endl;
       }
     }
-    for(std::map<ProcessId, std::string>::const_iterator iter =
-          ConfigCheck::processNames().begin();
-        iter != ConfigCheck::processNames().end();
-        ++iter){
-      if( !taskPool->contains( iter->first ) ){
+    for (VpcTasks::value_type const &v :
+            Configuration::getInstance().getVpcTasks()) {
+      if (!v.second->getComponent()) {
         if(!mappings){
           std::cout << "\n" << std::endl;
           std::cout << "Unknown mapping for tasks.\n"
@@ -466,7 +307,7 @@ namespace SystemC_VPC { namespace Detail {
           mappings = true;
         }
         std::cout << "  <mapping source=\""
-                  << iter->second
+                  << v.first
                   << "\" target=\"?\">\n"
                   << "    <!-- we may use a default delay: "
                   << "    <timing dii=\"? us\""
@@ -474,8 +315,8 @@ namespace SystemC_VPC { namespace Detail {
                   << " --> "
                   << std::endl;
 
-        const std::set<std::string>& functionNames =
-          debugFunctionNames.find(iter->first)->second;
+        const std::set<std::string> &functionNames =
+          debugFunctionNames.find(getProcessId(v.first))->second;
 
         for(std::set<std::string>::const_iterator fiter =
             functionNames.begin();

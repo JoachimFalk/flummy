@@ -40,83 +40,97 @@
 #include "datatypes.hpp"
 #include "Component.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include <smoc/SimulatorAPI/PortInterfaces.hpp>
+
+#include <CoSupport/SmartPtr/RefCountObject.hpp>
+
+#include <boost/noncopyable.hpp>
 
 #include <string>
 
 namespace SystemC_VPC { namespace Detail {
 
-  class Route;
-  class StaticRoute;
-  template<class ROUTE>
-  class RoutePool;
+  class AbstractRoute;
 
 } } // namespace SystemC_VPC::Detail
 
 namespace SystemC_VPC {
 
-class RouteInterface
+class Route
+  : private boost::noncopyable
+  , public CoSupport::SmartPtr::RefCountObject
 {
+  typedef Route this_type;
 public:
-  typedef RouteInterface* Ptr;
+  typedef boost::intrusive_ptr<this_type>       Ptr;
+  typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-  virtual ~RouteInterface(){}
-  virtual bool addStream(){return false;}
-  virtual bool closeStream(){return false;}
-};
-
-class Hop
-{
-public:
-  Hop(Component::Ptr component);
-  Hop & setPriority(size_t priority_);
-  Hop & setTransferTiming(Timing transferTiming_);
-  Component::Ptr getComponent() const;
-  size_t getPriority() const;
-  Timing getTransferTiming() const;
-private:
-  Component::Ptr component_;
-  Timing transferTiming_;
-  size_t priority_;
-};
-
-class Route: public SystemC_VPC::SequentiallyIdedObject<ComponentId>
-{
-public:
-  enum Type
-  {
+  enum Type {
     StaticRoute, BlockingTransport
   };
   static Type parseRouteType(std::string name);
 
-  typedef boost::shared_ptr<Route> Ptr;
+  RouteId getRouteId() const;
 
-  Route(Route::Type type, std::string source = "", std::string dest = "");
-  ComponentId getComponentId() const;
   bool getTracing() const;
   void setTracing(bool tracing_);
-  Hop & addHop(Component::Ptr component);
-  void addTiming(Component::Ptr hop, Timing);
+
   std::string getDestination() const;
-  std::list<Hop> getHops() const;
   std::string getSource() const;
   std::string getName() const;
+
   Type getType() const;
+
   void inject(std::string source, std::string destination);
-  RouteInterface::Ptr getRouteInterface() const;
+protected:
+  Route(Type type, int implAdj);
+
+  Detail::AbstractRoute       *getImpl();
+  Detail::AbstractRoute const *getImpl() const
+    { return const_cast<this_type *>(this)->getImpl(); }
+
+  ~Route();
 private:
-  friend class Detail::Route;
-  friend class Detail::StaticRoute;
-  template<class>
-  friend class Detail::RoutePool;
+  int implAdj;
   bool tracing_;
-  std::list<Hop> hops_;
-  std::map<Component::Ptr, Timing> routeTimings_;
   std::string source_;
   std::string destination_;
   Type type_;
-  RouteInterface::Ptr routeInterface_;
 };
+
+bool hasRoute(std::string const &name);
+bool hasRoute(smoc::SimulatorAPI::PortInInterface  const &port);
+bool hasRoute(smoc::SimulatorAPI::PortOutInterface const &port);
+
+Route::Ptr getRoute(std::string const &name);
+Route::Ptr getRoute(smoc::SimulatorAPI::PortInInterface  const &port);
+Route::Ptr getRoute(smoc::SimulatorAPI::PortOutInterface const &port);
+
+Route::Ptr createRoute(std::string const &name,
+    const char *type);
+Route::Ptr createRoute(smoc::SimulatorAPI::PortInInterface  const &port,
+    const char *type);
+Route::Ptr createRoute(smoc::SimulatorAPI::PortOutInterface const &port,
+    const char *type);
+
+template <typename ROUTE>
+typename ROUTE::Ptr
+createRoute(std::string const &name) {
+  return boost::static_pointer_cast<ROUTE>(
+      createRoute(name, ROUTE::Type));
+}
+template <typename ROUTE>
+typename ROUTE::Ptr
+createRoute(smoc::SimulatorAPI::PortInInterface  const &port) {
+  return boost::static_pointer_cast<ROUTE>(
+      createRoute(port, ROUTE::Type));
+}
+template <typename ROUTE>
+typename ROUTE::Ptr
+createRoute(smoc::SimulatorAPI::PortOutInterface const &port) {
+  return boost::static_pointer_cast<ROUTE>(
+      createRoute(port, ROUTE::Type));
+}
 
 } // namespace SystemC_VPC
 

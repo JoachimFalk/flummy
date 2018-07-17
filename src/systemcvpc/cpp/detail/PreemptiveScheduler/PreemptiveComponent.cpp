@@ -185,23 +185,23 @@ namespace SystemC_VPC { namespace Detail {
    *
    */
   void PreemptiveComponent::compute(TaskInstance* actualTask){
-    if (multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()) {
-      //MCG vorhanden und Task auch als MultiCast zu behandeln
-      MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
-
-      if (instance->task != actualTask) {
-        //instance already running...
-        if (instance->task->getBlockEvent().latency->getDropped()) {
-          //handling of buffer overflow
-          actualTask->getBlockEvent().latency->setDropped(true);
-        } else {
-          ProcessId pid = actualTask->getProcessId();
-          actualTask->setPCB(getPCB(pid));
-          releaseTask(actualTask->getPCB(), actualTask);
-        }
-        return;
-      }
-    }
+//  if (multiCastGroups.size() != 0 && multiCastGroups.find(actualTask->getProcessId()) != multiCastGroups.end()) {
+//    //MCG vorhanden und Task auch als MultiCast zu behandeln
+//    MultiCastGroupInstance* instance = getMultiCastGroupInstance(actualTask);
+//
+//    if (instance->task != actualTask) {
+//      //instance already running...
+//      if (instance->task->getBlockEvent().latency->getDropped()) {
+//        //handling of buffer overflow
+//        actualTask->getBlockEvent().latency->setDropped(true);
+//      } else {
+//        ProcessId pid = actualTask->getProcessId();
+//        actualTask->setPCB(getPCB(pid));
+//        releaseTask(actualTask->getPCB(), actualTask);
+//      }
+//      return;
+//    }
+//  }
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
         << " ) at time: " << sc_core::sc_time_stamp()

@@ -38,14 +38,13 @@
 #include <systemcvpc/TimingModifier.hpp>
 #include <systemcvpc/Component.hpp>
 #include <systemcvpc/Route.hpp>
+#include <systemcvpc/Routing/Static.hpp>
 #include <systemcvpc/Timing.hpp>
-#include <systemcvpc/Mappings.hpp>
 #include <systemcvpc/VpcApi.hpp>
 
 #include "VPCBuilder.hpp"
 #include "common.hpp"
 #include "Director.hpp"
-#include "ConfigCheck.hpp"
 #include "DebugOStream.hpp"
 
 #include <CoSupport/DataTypes/MaybeValue.hpp>
@@ -419,7 +418,7 @@ namespace SystemC_VPC { namespace Detail {
 
           // add distribution to the timing
           if (sType == "distribution"){
-            comp->setTransferTimingModifier(VC::getDistributions()[sValue]);
+            comp->setTransferTimingModifier(getDistribution(sValue));
           }
           comp->addAttribute(attributes);
         }
@@ -581,10 +580,10 @@ namespace SystemC_VPC { namespace Detail {
           
           // scan <route>
           CX::XN::DOMNamedNodeMap * atts = routeNode->getAttributes();
-          std::string src = CX::NStr(
-            atts->getNamedItem(sourceAttrStr)->getNodeValue() );
-          std::string dest = CX::NStr(
-            atts->getNamedItem(destinationAttrStr)->getNodeValue() );
+          std::string name = CX::NStr(
+            atts->getNamedItem(nameAttrStr)->getNodeValue() );
+//        std::string dest = CX::NStr(
+//          atts->getNamedItem(destinationAttrStr)->getNodeValue() );
 
           VC::Route::Type t = VC::Route::StaticRoute;
           if(atts->getNamedItem(typeAttrStr)!=NULL){
@@ -593,7 +592,9 @@ namespace SystemC_VPC { namespace Detail {
             //type = CX::NStr( );
           }
 
-          VC::Route::Ptr route = VC::createRoute(src, dest, t);
+          // VC::Route::Ptr route = VC::createRoute(src, dest, t);
+          // FIXME: Specify destinations
+          SystemC_VPC::Routing::Static::Ptr route = createRoute<SystemC_VPC::Routing::Static>(name);
 
           //copy default value from <route>
           bool tracing = topologyTracing;
@@ -612,14 +613,14 @@ namespace SystemC_VPC { namespace Detail {
               hopNode = hopNode->getNextSibling()){
             const CX::XStr xmlName = hopNode->getNodeName();
             if( xmlName == hopStr ){
-              std::string name =
+              std::string hopComponent =
                 CX::NStr( hopNode->getAttributes()->getNamedItem(nameAttrStr)->
                       getNodeValue() );
 
-              assert( VC::hasComponent(name) );
-              VC::Component::Ptr comp = VC::getComponent(name);
+              assert( VC::hasComponent(hopComponent) );
+              VC::Component::Ptr comp = VC::getComponent(hopComponent);
 
-              VC::Hop &hop = route->addHop( comp );
+              SystemC_VPC::Routing::Static::Hop &hop = route->addHop( comp );
 
               // parse <timing>s
               for(CX::XN::DOMNode * timingNode = hopNode->getFirstChild();
@@ -633,7 +634,8 @@ namespace SystemC_VPC { namespace Detail {
                     hop.setTransferTiming(t);
                   } catch(InvalidArgumentException &e) {
                     std::string msg("Error with route: ");
-                    msg += src + " -> " + dest + " (" + name +")\n";
+//                  msg += src + " -> " + dest + " (" + hopComponent +")\n";
+                    msg += name + " at " + hopComponent +"\n";
                     msg += e.what();
                     throw InvalidArgumentException(msg);
                   }
@@ -716,7 +718,7 @@ namespace SystemC_VPC { namespace Detail {
     bool hasDistribution = (distribution != NULL);
     if (hasDistribution){
       std::string distr = CX::NStr(distribution->getNodeValue());
-      t.setTimingModifier(VC::getDistributions()[distr]);
+      t.setTimingModifier(getDistribution(distr));
     }
 
     return t;
@@ -1063,7 +1065,7 @@ namespace SystemC_VPC { namespace Detail {
     if (foundDistribution == true) {
       if (hasBase) {
         std::cout << "base:";
-        result->setBase(boost::shared_ptr<TimingModifier>(VC::getDistributions()[CX::NStr(base->getNodeValue())]));
+        result->setBase(getDistribution(CX::NStr(base->getNodeValue())));
       }
       return result;
     }

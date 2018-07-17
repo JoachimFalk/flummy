@@ -52,7 +52,8 @@ class VpcTask
 {
   typedef VpcTask this_type;
 public:
-  typedef boost::intrusive_ptr<this_type> Ptr;
+  typedef boost::intrusive_ptr<this_type>       Ptr;
+  typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
   void mapTo(Component::Ptr component);
 
@@ -61,6 +62,8 @@ public:
   size_t getPriority() const;
 
   ScheduledTask const *getActor() const;
+
+  Component::Ptr getComponent() const;
 
   void setActorAsPSM(bool psm);
 
@@ -82,9 +85,39 @@ private:
   // configured data
   ScheduledTask const *task;
   std::string const    taskName;
+  Component::Ptr       boundComponent;
   size_t               priority;
   bool                 psm;
 };
+
+bool hasTask(ScheduledTask const &task);
+bool hasTask(std::string   const &taskName);
+
+VpcTask::Ptr getTask(ScheduledTask const &task);
+VpcTask::Ptr getTask(std::string   const &taskName);
+
+VpcTask::Ptr createTask(ScheduledTask const &task);
+VpcTask::Ptr createTask(std::string   const &taskName);
+
+void registerComponentWakeup(const char *actor, VPCEvent::Ptr event);
+
+void registerComponentIdle(const char *actor, VPCEvent::Ptr event);
+
+/*
+ * Sets the actor as a PSM actor.
+ * The executing state of this actor will always set the component executing state to IDLE
+ */
+void setActorAsPSM(const char *actor, bool psm);
+
+void changePowerMode(ScheduledTask &actor,std::string powermode);
+
+bool hasWaitingOrRunningTasks(ScheduledTask &actor);
+
+void setCanExec(ScheduledTask &actor, bool canExec);
+
+void setPriority(ScheduledTask &actor, size_t priority);
+
+ComponentInterface *getTaskComponentInterface(ScheduledTask &actor);
 
 } // namespace SystemC_VPC
 

@@ -68,9 +68,10 @@ default     CDATA #IMPLIED
 >
 <!ELEMENT route (hop)*>
 <!ATTLIST route
-source      CDATA #REQUIRED
-destination CDATA #REQUIRED
-type        CDATA #IMPLIED
+name        CDATA #REQUIRED
+type        CDATA #REQUIRED
+source      CDATA #IMPLIED
+destination CDATA #IMPLIED
 tracing     CDATA #IMPLIED
 >
 

@@ -34,87 +34,83 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_BLOCKINGTRANSPORT_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_BLOCKINGTRANSPORT_HPP
-#include <list>
-#include <utility>
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEIMPL_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEIMPL_HPP
 
-#include <systemc>
-
-#include <CoSupport/SystemC/systemc_support.hpp>
+#include <systemcvpc/Route.hpp>
 
 #include "AbstractComponent.hpp"
-#include <systemcvpc/EventPair.hpp>
-#include "RouteImpl.hpp"
+
+#include <smoc/SimulatorAPI/PortInterfaces.hpp>
+
+#include <CoSupport/Tracing/TracingFactory.hpp>
+
+#include <vector>
 
 namespace SystemC_VPC { namespace Detail {
 
-  template<class ROUTE>
-  class RoutePool;
+  typedef std::list<AbstractComponent *> ComponentList;
 
   /**
-   *
+   * \brief Interface for classes implementing routing simulation.
    */
-  class BlockingTransport :
-    public Route,
-    public CoSupport::SystemC::Event,
-    protected CoSupport::SystemC::EventListener {
+  class AbstractRoute {
+    typedef AbstractRoute this_type;
   public:
+    typedef boost::intrusive_ptr<this_type>       Ptr;
+    typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-    void compute( TaskInstance* task );
+    AbstractRoute(std::string const &name);
 
-    FunctionId getFunctionId(ProcessId pid, std::string function);
+    virtual void start(size_t quantitiy, VPCEvent::Ptr finishEvent) = 0;
 
-    void route( EventPair np );
+    std::string const &getName() const
+      { return routeName; }
 
-    void signaled(EventWaiter *e);
+    int getRouteId() const
+      { return routeId; }
 
-    void eventDestroyed(EventWaiter *e);
+    virtual
+    Route       *getRoute() = 0;
+    Route const *getRoute() const
+      { return const_cast<this_type *>(this)->getRoute(); }
 
-    void addHop(std::string name, AbstractComponent * hop);
+    virtual ~AbstractRoute(){}
+  protected:
+    void traceStart() {
+      if (ptpTracer) ticket = ptpTracer->startOoo();
+    }
 
-    void setPool(RoutePool<BlockingTransport> * pool);
-
-    const ComponentList& getHops() const;
-
-    BlockingTransport( SystemC_VPC::Route::Ptr configuredRoute );
-
-    BlockingTransport( const BlockingTransport & route );
-
-    ~BlockingTransport( );
+    void traceStop() {
+      if (ptpTracer) ptpTracer->stopOoo(ticket);
+    }
   private:
-    void resetHops();
-    void resetLists();
+    std::string const   routeName;
+    RouteId             routeId;
 
-  private:
-    enum Phase {
-      LOCK_ROUTE,
-      COMPUTE_ROUTE
-    };
-    typedef std::list<std::pair<AbstractComponent *, TaskInstance *> > Components;
-
-    Components                             hopList;
-    Components                             lockList;
-    Components::iterator                   nextHop;
-    ComponentList                          components;
-
-    // a rout is either input (read) or output (write)
-    bool                                   isWrite;
-
-    TaskInstance*                                  task;
-    EventPair                              taskEvents;
-    VPCEvent::Ptr                dummyDii;
-    VPCEvent::Ptr                routeLat;
-    RoutePool<BlockingTransport>          *pool;
-
-    // blocking transport has two phases:
-    // - lock the route
-    // - apply the route
-    Phase                                  phase;
-
-    
+    CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
+    CoSupport::Tracing::PtpTracer::Ticket  ticket;
   };
+
+  inline
+  void intrusive_ptr_add_ref(AbstractRoute *p) {
+    p->getRoute()->add_ref();
+  }
+
+  inline
+  void intrusive_ptr_release(AbstractRoute *p) {
+    if (p->getRoute()->del_ref())
+      // AbstractRoute has virtual destructor
+      delete p;
+  }
+
+  static inline
+  AbstractRoute *getAbstractRouteOfPort(smoc::SimulatorAPI::PortInInterface const &port)
+    { return static_cast<AbstractRoute *>(port.getSchedulerInfo()); }
+  static inline
+  AbstractRoute *getAbstractRouteOfPort(smoc::SimulatorAPI::PortOutInterface const &port)
+    { return static_cast<AbstractRoute *>(port.getSchedulerInfo()); }
 
 } } // namespace SystemC_VPC::Detail
 
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_BLOCKINGTRANSPORT_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_ROUTEIMPL_HPP */

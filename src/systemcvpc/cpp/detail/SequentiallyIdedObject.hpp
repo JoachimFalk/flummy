@@ -34,31 +34,33 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "RouteImpl.hpp"
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_SEQUENTIALLYIDEDOBJECT_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_SEQUENTIALLYIDEDOBJECT_HPP
+
+#include <stddef.h>
 
 namespace SystemC_VPC { namespace Detail {
 
-  Route::Route(SystemC_VPC::Route::Ptr configuredRoute)
-    : Delayer(configuredRoute->getName()),
-      instanceId(createRouteId()),
-      ptpTracer()
-  {
-    if (configuredRoute->getTracing()) {
-      this->ptpTracer
-        = CoSupport::Tracing::TracingFactory::getInstance() .createPtpTracer(
-            this->getName());
+  /// Class for auto assigning monotonically increasing ids.
+  class SequentiallyIdedObject {
+  public:
+    typedef size_t IdType;
+  protected:
+    SequentiallyIdedObject()
+      : id_(getNextId()) {}
+
+    IdType getSequentialId() const
+      { return id_; }
+
+  private:
+    const IdType id_;
+
+    static IdType getNextId() {
+      static IdType currentId = 0;
+      return currentId++;
     }
-    configuredRoute->routeInterface_ = this;
-  }
-
-  size_t Route::createRouteId(){
-    static size_t instanceCounter = 0;
-    return ++instanceCounter; // start from 1
-  }
-
-  void Route::notifyActivation(smoc::SimulatorAPI::TaskInterface *scheduledTask,
-      bool active) {
-    assert(!"Why is this ever called!");
-  }
+  };
 
 } } // namespace SystemC_VPC::Detail
+
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_SEQUENTIALLYIDEDOBJECT_HPP */

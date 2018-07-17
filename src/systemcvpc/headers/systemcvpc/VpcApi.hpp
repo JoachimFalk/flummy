@@ -37,75 +37,20 @@
 #ifndef _INCLUDED_SYSTEMCVPC_VPCAPI_HPP
 #define _INCLUDED_SYSTEMCVPC_VPCAPI_HPP
 
+#include "VpcTask.hpp"
 #include "Component.hpp"
 #include "Route.hpp"
 #include "Timing.hpp"
-#include "VpcTask.hpp"
-#include "ScheduledTask.hpp"
-
-#include <string>
-#include <map>
 
 namespace SystemC_VPC {
 
-typedef std::map<std::string, Component::Ptr> Components;
-typedef std::map<std::string, boost::shared_ptr<DistributionTimingModifier> > Modifiers;
+bool hasDistribution(std::string const &name);
 
-Components &getComponents();
+TimingModifier::Ptr getDistribution(std::string const &name);
 
-bool hasComponent(std::string name);
-
-Component::Ptr createComponent(std::string name, Scheduler scheduler =
-    Scheduler::FCFS);
-
-Component::Ptr getComponent(std::string name);
-
-Route::Ptr createRoute(std::string source, std::string dest, Route::Type type =
-    Route::StaticRoute);
-
-Route::Ptr createRoute(const sc_core::sc_port_base * leafPtr, Route::Type type =
-    Route::StaticRoute);
-
-Route::Ptr getRoute(std::string source, std::string dest);
-
-Route::Ptr getRoute(const sc_core::sc_port_base * leafPort);
-
-bool hasTask(ScheduledTask const &task);
-bool hasTask(std::string   const &taskName);
-
-VpcTask::Ptr createTask(ScheduledTask const &task);
-VpcTask::Ptr createTask(std::string   const &taskName);
-
-VpcTask::Ptr getTask(ScheduledTask const &task);
-VpcTask::Ptr getTask(std::string   const &taskName);
-
-Modifiers & getDistributions();
-
-bool hasDistribution(std::string name);
-
-void createDistribution(std::string name, boost::shared_ptr<DistributionTimingModifier> modifier);
-
-void setPriority(ScheduledTask & actor, size_t priority);
+void createDistribution(std::string const &name, boost::shared_ptr<DistributionTimingModifier> modifier);
 
 void ignoreMissingRoutes(bool ignore);
-
-ComponentInterface* getTaskComponentInterface(ScheduledTask & actor);
-
-void changePowerMode(ScheduledTask & actor,std::string powermode);
-
-bool hasWaitingOrRunningTasks(ScheduledTask & actor);
-
-void registerComponentWakeup(const char* actor, VPCEvent::Ptr event);
-
-void registerComponentIdle(const char* actor, VPCEvent::Ptr event);
-
-void setCanExec(ScheduledTask & actor, bool canExec);
-
-/*
- * Sets the actor as a PSM actor.
- * The executing state of this actor will always set the component executing state to IDLE
- */
-void setActorAsPSM(const char*  name, bool psm);
 
 } // namespace SystemC_VPC
 

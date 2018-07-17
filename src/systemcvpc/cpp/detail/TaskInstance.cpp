@@ -41,20 +41,21 @@ namespace SystemC_VPC { namespace Detail {
 
   int TaskInstance::globalInstanceId = 0;
 
-  TaskInstance::TaskInstance(TaskPool *pool)
+  TaskInstance::TaskInstance(
+      std::function<void (TaskInstance *)> const &diiCallback,
+      std::function<void (TaskInstance *)> const &latCallback)
     : instanceId(globalInstanceId++)
+    , diiCallback(diiCallback)
+    , latCallback(latCallback)
     , pid(-1)
     , fid()
-    , blockEvent()
     , blockingCompute(nullptr)
     , blockAck(false)
     , exec(false)
     , write(false)
     , pcb()
-    , pool(pool)
     , name("NN")
     , timingScale(1)
-    , taskTracerTicket()
     , firingRuleInterface(nullptr)
     {}
 
@@ -69,13 +70,5 @@ namespace SystemC_VPC { namespace Detail {
 
   bool TaskInstance::isPSM() const
     { return pcb->getTaskIsPSM(); }
-
-  void TaskInstance::traceReleaseTask(){
-    taskTracerTicket = pcb->getTaskTracer()->releaseTask();
-  }
-
-  void TaskInstance::traceFinishTaskLatency(){
-    pcb->getTaskTracer()->finishTaskLatency(taskTracerTicket);
-  }
 
 } } // namespace SystemC_VPC::Detail

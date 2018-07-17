@@ -34,54 +34,67 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_MAPPINGS_HPP
-#define _INCLUDED_SYSTEMCVPC_MAPPINGS_HPP
+#include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/Routing/Static.hpp>
 
-#include "Component.hpp"
-#include "Route.hpp"
-#include "VpcTask.hpp"
+#include "detail/Configuration.hpp"
+#include "detail/Routing/BlockingTransport.hpp"
+#include "detail/Routing/StaticImpl.hpp"
 
-#include <map>
+#include <iostream>
 
-#include <systemc>
+namespace SystemC_VPC { namespace Routing {
 
-namespace SystemC_VPC { namespace Detail {
-
-class Route;
-
-} } // namespace SystemC_VPC::Detail
-
-namespace SystemC_VPC {
-
-typedef std::map<const ProcessId, Route::Ptr> Routes;
-typedef std::map<const sc_core::sc_port_base *, Route::Ptr> RoutesByPort;
-
-namespace Mappings
+//
+Static::Hop::Hop(Component::Ptr component) :
+  component_(component), transferTiming_(component->getTransferTiming()),
+      priority_()
 {
-  // TODO: replace other mapping maps
-  // TODO: provide getter, setter, etc.
-  std::map<VpcTask::Ptr, Component::Ptr > & getConfiguredMappings();
-  bool isMapped(VpcTask::Ptr task, Component::Ptr component);
+}
 
-} // namespace Mappings
-
-namespace Routing
+//
+Static::Hop &Static::Hop::setPriority(size_t priority_)
 {
-  void add(const ProcessId pid, Route::Ptr route);
-  void add(const sc_core::sc_port_base * leafPort, Route::Ptr route);
+  this->priority_ = priority_;
+  return *this;
+}
 
-  void set(const ProcessId pid, Route::Ptr route);
-  void set(const sc_core::sc_port_base * leafPort, Route::Ptr route);
+Static::Hop & Static::Hop::setTransferTiming(Timing transferTiming_)
+{
+  this->transferTiming_ = transferTiming_;
+  return *this;
+}
 
-  bool has(const ProcessId pid);
-  bool has(const sc_core::sc_port_base * leafPort);
+Component::Ptr Static::Hop::getComponent() const
+{
+  return component_;
+}
 
-  Route::Ptr get(const ProcessId pid);
-  Route::Ptr get(const sc_core::sc_port_base * leafPort);
-  Detail::Route * create(SystemC_VPC::Route::Ptr configuredRoute);
+size_t Static::Hop::getPriority() const
+{
+  return priority_;
+}
 
-} // namespace Routing
+Timing Static::Hop::getTransferTiming() const
+{
+  return transferTiming_;
+}
 
-} // namespace SystemC_VPC
+const char *Static::Type = "StaticRoute";
 
-#endif /* _INCLUDED_SYSTEMCVPC_MAPPINGS_HPP */
+Static::Hop &Static::addHop(Component::Ptr component) {
+  return getImpl()->addHop(component);
+}
+std::list<Static::Hop> const &Static::getHops() const {
+  return getImpl()->getHops();
+}
+
+bool Static::addStream()
+  { return getImpl()->addStream(); }
+bool Static::closeStream()
+  { return getImpl()->closeStream(); }
+
+Detail::Routing::StaticImpl *Static::getImpl()
+  { return static_cast<Detail::Routing::StaticImpl *>(this); }
+
+} } // namespace SystemC_VPC::Routing

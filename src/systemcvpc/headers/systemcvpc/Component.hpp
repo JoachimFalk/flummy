@@ -53,13 +53,6 @@
 #include <set>
 #include <string>
 
-namespace SystemC_VPC { namespace Detail {
-
-class AbstractComponent;
-class TaskInstance;
-
-} } // namespace SystemC_VPC::Detail
-
 namespace SystemC_VPC {
 
 class ComponentInterface {
@@ -92,7 +85,9 @@ class Component
 {
   typedef Component this_type;
 public:
-  typedef boost::intrusive_ptr<this_type> Ptr;
+  typedef boost::intrusive_ptr<this_type>       Ptr;
+  typedef boost::intrusive_ptr<this_type> const ConstPtr;
+
   typedef std::set<ScheduledTask *> MappedTasks;
 
   /// This is the set of built in tracers.
@@ -141,6 +136,13 @@ private:
   TimingsProvider::Ptr        timingsProvider_;
   DefaultTimingsProvider::Ptr defaultTimingsProvider_;
 };
+
+bool hasComponent(std::string name);
+
+Component::Ptr createComponent(std::string name,
+    Scheduler scheduler = Scheduler::FCFS);
+
+Component::Ptr getComponent(std::string name);
 
 } // namespace SystemC_VPC
 
