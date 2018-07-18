@@ -41,12 +41,6 @@
 
 #include <map>
 
-namespace SystemC_VPC { namespace Detail { namespace Routing {
-
-  class StaticImpl;
-
-} } } // namespace SystemC_VPC::Detail::Routing
-
 namespace SystemC_VPC { namespace Routing {
 
 class Static: public Route {
@@ -66,14 +60,8 @@ public:
 
   bool addStream();
   bool closeStream();
-
 protected:
-  Static(int implAdj)
-    : Route(StaticRoute, implAdj) {}
-
-  Detail::Routing::StaticImpl       *getImpl();
-  Detail::Routing::StaticImpl const *getImpl() const
-    { return const_cast<this_type *>(this)->getImpl(); }
+  Static(int implAdj);
 };
 
 class Static::Hop {

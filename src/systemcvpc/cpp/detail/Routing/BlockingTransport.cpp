@@ -40,12 +40,18 @@
 
 namespace SystemC_VPC { namespace Detail { namespace Routing {
 
+  const char *BlockingTransport::Type = "BlockingTransport";
+
   //
   BlockingTransport::BlockingTransport(std::string const &name)
-    : AbstractRoute(name)
-    , Route(Type::BlockingTransport,
+    : AbstractRoute(name,
+        reinterpret_cast<char *>(static_cast<Route         *>(this)) -
+        reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)))
+    , Route(Type,
         reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)) -
         reinterpret_cast<char *>(static_cast<Route         *>(this)))
+    , isWrite(false)
+    , task(nullptr)
     , dummyDii(new VPCEvent())
     , routeLat(new VPCEvent())
     , phase(LOCK_ROUTE)
@@ -55,8 +61,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     //components.push_back(bus);
   }
 
-  void BlockingTransport::start(size_t quantitiy, VPCEvent::Ptr finishEvent) {
-    finishEvent->notify();
+  void BlockingTransport::start(size_t quantitiy, std::function<void ()> completed) {
+    completed();
   }
 
 //void BlockingTransport::compute( TaskInstance* _task ) {
@@ -212,7 +218,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
   }
 
   //
-  const ComponentList& BlockingTransport::getHops() const {
+  const BlockingTransport::ComponentList& BlockingTransport::getHops() const {
     return components;
   }
 
@@ -238,10 +244,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
             << " @ " << sc_core::sc_time_stamp() << std::endl);
     phase   = LOCK_ROUTE;
     nextHop = lockList.begin();
-  }
-
-  Route *BlockingTransport::getRoute() {
-    return this;
   }
 
   BlockingTransport::~BlockingTransport( ){

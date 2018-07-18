@@ -69,6 +69,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/VpcApi.cpp \
 	src/systemcvpc/cpp/VpcTask.cpp \
 	\
+	src/systemcvpc/cpp/Routing/Ignore.cpp \
 	src/systemcvpc/cpp/Routing/Static.cpp \
 	\
 	src/systemcvpc/cpp/detail/dynload/dll-elf.cpp \
@@ -93,6 +94,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/PreemptiveScheduler/StreamShaperScheduler.cpp \
 	\
 	src/systemcvpc/cpp/detail/Routing/BlockingTransport.cpp \
+	src/systemcvpc/cpp/detail/Routing/IgnoreImpl.cpp \
 	src/systemcvpc/cpp/detail/Routing/StaticImpl.cpp \
 	\
 	src/systemcvpc/cpp/detail/tracing/DataBaseTracer.cpp \

@@ -585,12 +585,12 @@ namespace SystemC_VPC { namespace Detail {
 //        std::string dest = CX::NStr(
 //          atts->getNamedItem(destinationAttrStr)->getNodeValue() );
 
-          VC::Route::Type t = VC::Route::StaticRoute;
-          if(atts->getNamedItem(typeAttrStr)!=NULL){
-            t = VC::Route::parseRouteType(
-                CX::NStr(atts->getNamedItem(typeAttrStr)->getNodeValue()));
-            //type = CX::NStr( );
-          }
+//        VC::Route::Type t = VC::Route::StaticRoute;
+//        if(atts->getNamedItem(typeAttrStr)!=NULL){
+//          t = VC::Route::parseRouteType(
+//              CX::NStr(atts->getNamedItem(typeAttrStr)->getNodeValue()));
+//          //type = CX::NStr( );
+//        }
 
           // VC::Route::Ptr route = VC::createRoute(src, dest, t);
           // FIXME: Specify destinations

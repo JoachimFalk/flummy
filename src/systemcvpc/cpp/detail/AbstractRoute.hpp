@@ -45,11 +45,12 @@
 
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
+#include <boost/variant.hpp>
+
 #include <vector>
+#include <functional>
 
 namespace SystemC_VPC { namespace Detail {
-
-  typedef std::list<AbstractComponent *> ComponentList;
 
   /**
    * \brief Interface for classes implementing routing simulation.
@@ -60,9 +61,12 @@ namespace SystemC_VPC { namespace Detail {
     typedef boost::intrusive_ptr<this_type>       Ptr;
     typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-    AbstractRoute(std::string const &name);
+    typedef smoc::SimulatorAPI::PortInInterface   PortInInterface;
+    typedef smoc::SimulatorAPI::PortOutInterface  PortOutInterface;
 
-    virtual void start(size_t quantitiy, VPCEvent::Ptr finishEvent) = 0;
+    AbstractRoute(std::string const &name, int facadeAdj);
+
+    virtual void start(size_t quantitiy, std::function<void ()> completed) = 0;
 
     std::string const &getName() const
       { return routeName; }
@@ -70,8 +74,16 @@ namespace SystemC_VPC { namespace Detail {
     int getRouteId() const
       { return routeId; }
 
-    virtual
-    Route       *getRoute() = 0;
+    void setPortInterface(PortInInterface  *port);
+    void setPortInterface(PortOutInterface *port);
+
+    Route       *getRoute() {
+      // Pointer magic. Shift our this pointer
+      // so that it points to the Route
+      // base class of our real implementation.
+      return reinterpret_cast<Route *>(
+          reinterpret_cast<char *>(this) + facadeAdj);
+    }
     Route const *getRoute() const
       { return const_cast<this_type *>(this)->getRoute(); }
 
@@ -84,9 +96,14 @@ namespace SystemC_VPC { namespace Detail {
     void traceStop() {
       if (ptpTracer) ptpTracer->stopOoo(ticket);
     }
+
+    boost::variant<boost::blank,
+      PortInInterface *,
+      PortOutInterface *>       portInterface;
   private:
-    std::string const   routeName;
-    RouteId             routeId;
+    std::string const           routeName;
+    RouteId                     routeId;
+    int                         facadeAdj;
 
     CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
     CoSupport::Tracing::PtpTracer::Ticket  ticket;

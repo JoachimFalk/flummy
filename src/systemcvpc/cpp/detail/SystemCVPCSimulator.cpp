@@ -42,14 +42,14 @@
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/VpcApi.hpp>
-#include <systemcvpc/Routing/Static.hpp>
+#include <systemcvpc/Routing/Ignore.hpp>
 
 #include "Director.hpp"
 #include "Configuration.hpp"
 #include "VPCBuilder.hpp"
 #include "AbstractComponent.hpp"
 #include "AbstractRoute.hpp"
-#include "Routing/StaticImpl.hpp"
+#include "Routing/IgnoreImpl.hpp"
 
 #include "DebugOStream.hpp"
 
@@ -200,33 +200,26 @@ AbstractRoute::Ptr registerPortHelper(std::string const &name) {
   if (!route) {
     if (Director::getInstance().defaultRoute) {
       // default behavior: add empty route
-      route = boost::static_pointer_cast<Routing::StaticImpl>(
-          createRoute(name, Routing::StaticImpl::Type));
+      route = boost::static_pointer_cast<Routing::IgnoreImpl>(
+          createRoute<SystemC_VPC::Routing::Ignore>(name));
 //    route->setTracing(false);
     } else {
       throw VC::ConfigException("Route " + name +
           " has NO configuration data at all.");
     }
   }
-
-//try{
-//  route->inject(src, dest);
-//}catch(std::exception & e){
-//  std::cerr << "Route registration failed for route \"" << name
-//            << "\". Got exception:\n" << e.what() << std::endl;
-//  exit(-1);
-//}
   return route;
 }
-
 
 void SystemCVPCSimulator::registerPort(TaskInterface *task, PortInInterface *port) {
   AbstractRoute::Ptr route = registerPortHelper(port->name());
   port->setSchedulerInfo(route.get());
+  route->setPortInterface(port);
 }
 void SystemCVPCSimulator::registerPort(TaskInterface *task, PortOutInterface *port) {
   AbstractRoute::Ptr route = registerPortHelper(port->name());
   port->setSchedulerInfo(route.get());
+  route->setPortInterface(port);
 }
 
 void SystemCVPCSimulator::simulationEnded() {

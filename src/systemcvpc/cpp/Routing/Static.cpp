@@ -55,25 +55,25 @@ Static::Hop::Hop(Component::Ptr const &component)
 
 const char *Static::Type = "StaticRoute";
 
+Static::Static(int implAdj)
+  : Route(Type, implAdj) {}
+
 Static::Hop *Static::addHop(Component::Ptr component, Hop *parent) {
-  return getImpl()->addHop(component, parent);
+  return Routing::getImpl(this)->addHop(component, parent);
 }
 
 Static::Hop *Static::getFirstHop() {
-  return getImpl()->getFirstHop();
+  return Routing::getImpl(this)->getFirstHop();
 }
 
 std::map<Component::Ptr, Static::Hop> const &Static::getHops() const {
   return reinterpret_cast<std::map<Component::Ptr, Static::Hop> const &>
-    (getImpl()->getHops());
+    (Routing::getImpl(this)->getHops());
 }
 
 bool Static::addStream()
-  { return getImpl()->addStream(); }
+  { return Routing::getImpl(this)->addStream(); }
 bool Static::closeStream()
-  { return getImpl()->closeStream(); }
-
-Detail::Routing::StaticImpl *Static::getImpl()
-  { return static_cast<Detail::Routing::StaticImpl *>(this); }
+  { return Routing::getImpl(this)->closeStream(); }
 
 } } // namespace SystemC_VPC::Routing

@@ -36,11 +36,11 @@
 
 #include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/Route.hpp>
-#include <systemcvpc/Routing/Static.hpp>
 
 #include "detail/Configuration.hpp"
 #include "detail/Routing/BlockingTransport.hpp"
 #include "detail/Routing/StaticImpl.hpp"
+#include "detail/Routing/IgnoreImpl.hpp"
 
 #include <iostream>
 
@@ -49,26 +49,24 @@
 namespace SystemC_VPC {
 
 
-Route::Type Route::parseRouteType(std::string name)
-{
-  static const std::string B_TRANSPORT = "blocking";
-  static const std::string STATIC_ROUTE = "static_route";
+//Route::Type Route::parseRouteType(std::string name)
+//{
+//  static const std::string B_TRANSPORT = "blocking";
+//  static const std::string STATIC_ROUTE = "static_route";
+//
+//  if (name == STATIC_ROUTE) {
+//    return StaticRoute;
+//  } else if (name == B_TRANSPORT) {
+//    return BlockingTransport;
+//  }
+//  throw SystemC_VPC::ConfigException("Unknown scheduler \"" + name
+//      + "\" for component: " + name);
+//  return StaticRoute;
+//}
 
-  if (name == STATIC_ROUTE) {
-    return StaticRoute;
-  } else if (name == B_TRANSPORT) {
-    return BlockingTransport;
-  }
-  throw SystemC_VPC::ConfigException("Unknown scheduler \"" + name
-      + "\" for component: " + name);
-  return StaticRoute;
-}
-
-Route::Route(Type type, int implAdj)
-  : implAdj(implAdj), tracing_(false)
-  , type_(type)
-{
-}
+Route::Route(const char *type, int implAdj)
+  : type(type), implAdj(implAdj)
+  , tracing_(false) {}
 
 Detail::AbstractRoute *Route::getImpl() {
   // Pointer magic. Shift our this pointer
@@ -111,17 +109,6 @@ std::string Route::getName() const {
 //return "msg_" + getSource() + "_2_" + getDestination();
 }
 
-Route::Type Route::getType() const
-{
-  return type_;
-}
-
-void Route::inject(std::string source, std::string destination)
-{
-  this->source_ = source;
-  this->destination_ = destination;
-}
-
 bool hasRoute(std::string const &name) {
   return Detail::Configuration::getInstance().hasRoute(name).get();
 }
@@ -146,9 +133,11 @@ Route::Ptr createRoute(std::string const &name,
     const char *type) {
   return Detail::Configuration::getInstance().createRoute(name,
     [&name, type]() -> Detail::AbstractRoute::Ptr {
-      if (strcmp(type, Routing::Static::Type) == 0)
+      if (strcmp(type, Detail::Routing::StaticImpl::Type) == 0)
         return new Detail::Routing::StaticImpl(name);
-      else if (strcmp(type, "BlockingTransport") == 0)
+      if (strcmp(type, Detail::Routing::IgnoreImpl::Type) == 0)
+        return new Detail::Routing::IgnoreImpl(name);
+      else if (strcmp(type, Detail::Routing::BlockingTransport::Type) == 0)
         return new Detail::Routing::BlockingTransport(name);
       else {
         assert(!"WTF?!");
