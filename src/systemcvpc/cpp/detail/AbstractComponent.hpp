@@ -268,7 +268,6 @@ namespace SystemC_VPC { namespace Detail {
     virtual ~AbstractComponent();
   private:
     class InputsAvailableListener;
-    class OutputWrittenListener;
 
     /// Implement interface to SysteMoC
     void checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);

@@ -44,10 +44,12 @@
 namespace SystemC_VPC { namespace Detail { namespace Routing {
 
   StaticImpl::StaticImpl(std::string const &name)
-    : AbstractRoute(name)
+    : AbstractRoute(name,
+        reinterpret_cast<char *>(static_cast<Route         *>(this)) -
+        reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)))
     , Static(
-         reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)) -
-         reinterpret_cast<char *>(static_cast<Route         *>(this)))
+        reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)) -
+        reinterpret_cast<char *>(static_cast<Route         *>(this)))
     , firstHopImpl(nullptr)
   {
   }
@@ -84,30 +86,49 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     return reinterpret_cast<std::map<Component::Ptr, Hop> const &>(hopImpls);
   }
 
-  Route *StaticImpl::getRoute() {
-    return this;
-  }
-
-  void StaticImpl::start(size_t quantitiy, VPCEvent::Ptr finishEvent) {
-    // This will autodelete.
-    new MessageInstance(this, quantitiy, finishEvent);
+  void StaticImpl::start(size_t quantitiy, std::function<void ()> completed) {
+    // This will auto delete.
+    new MessageInstance(this, quantitiy, completed);
   }
 
   StaticImpl::MessageInstance::MessageInstance(
-      StaticImpl    *staticImpl,
-      size_t         quantitiy,
-      VPCEvent::Ptr  finishEvent)
+      StaticImpl             *staticImpl,
+      size_t                  quantitiy,
+      std::function<void ()>  completed)
     : staticImpl(staticImpl)
     , quantitiy(quantitiy)
-    , finishEvent(finishEvent)
+    , completed(completed)
     , currHop(staticImpl->firstHopImpl)
   {
     startHop();
-
   }
+
+  class Visitor: public boost::static_visitor<void> {
+  public:
+    Visitor(int n) : n(n) {}
+
+    result_type operator()(smoc::SimulatorAPI::PortInInterface *in) const {
+//    in->getSource()->commFinish(n);
+    }
+
+    result_type operator()(smoc::SimulatorAPI::PortOutInterface *out) const {
+      for (smoc::SimulatorAPI::ChannelSinkInterface *sink : out->getSinks())
+        sink->commFinish(n);
+    }
+
+    result_type operator()(boost::blank &) const {
+      assert(!"WTF?!");
+    }
+
+
+  private:
+    int n;
+  };
+
   void StaticImpl::MessageInstance::startHop() {
     if (!currHop) {
-      finishEvent->notify();
+      boost::apply_visitor(Visitor(quantitiy), staticImpl->portInterface);
+      completed();
       delete this;
       return;
     }

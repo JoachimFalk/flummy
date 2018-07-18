@@ -514,49 +514,26 @@ namespace SystemC_VPC { namespace Detail {
     this->check(&taskInstance);
   }
 
-  class AbstractComponent::InputsAvailableListener
-    : public CoSupport::SystemC::EventListener
-  {
-    typedef CoSupport::SystemC::EventWaiter
-        EventWaiter;
+  class AbstractComponent::InputsAvailableListener {
   public:
     InputsAvailableListener(
         TaskInterface                           *task,
         smoc::SimulatorAPI::FiringRuleInterface *fr)
       : task(task), fr(fr)
-      // We start with one to ensure that signaled does not call compute before wait is called!
-      , missing(1)
-      {}
-
-    VPCEvent::Ptr acquireEvent() {
-      VPCEvent::Ptr retval(new VPCEvent());
-      retval->addListener(this);
-      ++missing;
-      return retval;
-    }
+      // We start with one more, i.e., +1, to ensure that
+      // arrived does not call compute before wait is called!
+      , missing(fr->getPortInInfos().size()+1) {}
 
     void wait() {
       if (!--missing)
         compute();
     }
-  private:
-    ~InputsAvailableListener() {}
 
-    void signaled(EventWaiter *e) {
-      assert(*e);
-      e->delListener(this);
+    void arrived() {
       if (!--missing)
         compute();
     }
-
-    // The lifetime of the given EventWaiter is over
-    void eventDestroyed(EventWaiter *e)
-      { assert(!"WTF"); }
-
-    // May be called when Event is active
-    void renotified(EventWaiter *e)
-      { assert(!"WTF"); }
-
+  private:
     TaskInterface                           *task;
     smoc::SimulatorAPI::FiringRuleInterface *fr;
     size_t                                   missing;
@@ -603,12 +580,11 @@ namespace SystemC_VPC { namespace Detail {
     for (PortInInfo const &portInfo : fr->getPortInInfos()) {
       portInfo.port.commStart(portInfo.consumed);
       AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
-      route->start(portInfo.required, ial->acquireEvent());
+      route->start(portInfo.required, [ial]() { ial->arrived(); });
     }
     for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
       portInfo.port.commStart(portInfo.produced);
     }
-    // Wait for arrival of all inputs, i.e., the routing delay.
     ial->wait();
   }
 
@@ -657,62 +633,6 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  class AbstractComponent::OutputWrittenListener
-    : public CoSupport::SystemC::EventListener
-  {
-    typedef CoSupport::SystemC::EventWaiter
-        EventWaiter;
-  public:
-    OutputWrittenListener(
-        smoc::SimulatorAPI::ChannelSinkInterface *sink,
-        size_t                                    produced)
-      : sink(sink), produced(produced)
-      // We start with one to ensure that signaled does not call write before wait is called!
-      , missing(1)
-      , dropped(false)
-      {}
-
-    VPCEvent::Ptr acquireEvent() {
-      VPCEvent::Ptr retval(new VPCEvent());
-      retval->addListener(this);
-      ++missing;
-      return retval;
-    }
-
-    void wait() {
-      if (!--missing)
-        write();
-    }
-  private:
-    ~OutputWrittenListener() {}
-
-    void signaled(EventWaiter *e) {
-      assert(*e);
-      e->delListener(this);
-      dropped = static_cast<VPCEvent *>(e)->getDropped();
-      if (!--missing)
-        write();
-    }
-
-    // The lifetime of the given EventWaiter is over
-    void eventDestroyed(EventWaiter *e)
-      { assert(!"WTF"); }
-
-    // May be called when Event is active
-    void renotified(EventWaiter *e)
-      { assert(!"WTF"); }
-
-    smoc::SimulatorAPI::ChannelSinkInterface *sink;
-    size_t                                    produced;
-    size_t                                    missing;
-    bool                                      dropped;
-
-    void write() {
-      sink->commFinish(produced, dropped);
-      delete this;
-    }
-  };
-
   /// Called once per actor firing to indicate that the latency of the task instance is over.
   void AbstractComponent::finishLatencyTaskInstance(TaskInstance *taskInstance) {
     // Remember last acknowledged task time
@@ -726,16 +646,8 @@ namespace SystemC_VPC { namespace Detail {
 
     if (FiringRuleInterface *fr = taskInstance->getFiringRule()) {
       for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
-        // FIXME: Multicast
-        assert(portInfo.port.getSinks().size() == 1);
-        OutputWrittenListener *owl = new OutputWrittenListener(
-            portInfo.port.getSinks().front(), portInfo.produced);
         AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
-        route->start(portInfo.produced, owl->acquireEvent());
-        owl->wait();
-//      for (ChannelSinkInterface *sink : portInfo.port.getSinks()) {
-//        sink->commFinish(portInfo.produced);
-//      }
+        route->start(portInfo.produced, []() {});
       }
     }
     delete taskInstance;

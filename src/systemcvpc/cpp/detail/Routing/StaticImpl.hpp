@@ -45,8 +45,6 @@
 #include "../AbstractComponent.hpp"
 #include "../ProcessControlBlock.hpp"
 
-#include <CoSupport/SystemC/systemc_support.hpp>
-
 #include <systemc>
 
 #include <list>
@@ -91,9 +89,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     /// Handle interfaces for AbstractRoute
     ///
 
-    Route *getRoute();
-
-    void   start(size_t quantitiy, VPCEvent::Ptr finishEvent);
+    void start(size_t quantitiy, std::function<void ()> completed);
 
     ///
     /// Other stuff
@@ -133,17 +129,17 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     struct MessageInstance {
       MessageInstance(
-          StaticImpl    *staticImpl,
-          size_t         quantitiy,
-          VPCEvent::Ptr  finishEvent);
+          StaticImpl             *staticImpl,
+          size_t                  quantitiy,
+          std::function<void ()>  completed);
     private:
       void startHop();
       void finishHop();
     private:
-      StaticImpl         *staticImpl;
-      size_t              quantitiy;
-      VPCEvent::Ptr       finishEvent;
-      HopImpl            *currHop;
+      StaticImpl             *staticImpl;
+      size_t                  quantitiy;
+      std::function<void ()>  completed;
+      HopImpl                *currHop;
     };
   };
 
@@ -158,5 +154,16 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
   }
 
 } } } // namespace SystemC_VPC::Detail::Routing
+
+namespace SystemC_VPC { namespace Routing {
+
+  static inline
+  Detail::Routing::StaticImpl       *getImpl(Static       *route)
+    { return static_cast<Detail::Routing::StaticImpl       *>(route); }
+  static inline
+  Detail::Routing::StaticImpl const *getImpl(Static const *route)
+    { return static_cast<Detail::Routing::StaticImpl const *>(route); }
+
+} } // namespace SystemC_VPC::Detail::Routing
 
 #endif /* _INCLUDED_SYSTEMCVPC_DETAIL_ROUTING_STATICIMPL_HPP */

@@ -43,8 +43,6 @@
 #include "../AbstractRoute.hpp"
 #include "../AbstractComponent.hpp"
 
-#include <CoSupport/SystemC/systemc_support.hpp>
-
 #include <systemc>
 
 #include <list>
@@ -62,6 +60,10 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 //  , protected CoSupport::SystemC::EventListener
   {
   public:
+    typedef std::list<AbstractComponent *> ComponentList;
+
+    static const char *Type;
+
     BlockingTransport(std::string const &name);
 
     ///
@@ -76,9 +78,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     /// Handle interfaces for AbstractRoute
     ///
 
-    Route *getRoute();
-
-    void   start(size_t quantitiy, VPCEvent::Ptr finishEvent);
+    void start(size_t quantitiy, std::function<void ()> completed);
 
     ///
     /// Other stuff

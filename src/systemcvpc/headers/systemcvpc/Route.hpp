@@ -65,10 +65,10 @@ public:
   typedef boost::intrusive_ptr<this_type>       Ptr;
   typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-  enum Type {
-    StaticRoute, BlockingTransport
-  };
-  static Type parseRouteType(std::string name);
+//enum Type {
+//  StaticRoute, BlockingTransport
+//};
+//static Type parseRouteType(std::string name);
 
   RouteId getRouteId() const;
 
@@ -79,23 +79,22 @@ public:
   std::string getSource() const;
   std::string getName() const;
 
-  Type getType() const;
-
-  void inject(std::string source, std::string destination);
+  const char *getType() const
+    { return type; }
 protected:
-  Route(Type type, int implAdj);
-
-  Detail::AbstractRoute       *getImpl();
-  Detail::AbstractRoute const *getImpl() const
-    { return const_cast<this_type *>(this)->getImpl(); }
+  Route(const char *type, int implAdj);
 
   ~Route();
 private:
-  int implAdj;
+  Detail::AbstractRoute       *getImpl();
+  Detail::AbstractRoute const *getImpl() const
+    { return const_cast<this_type *>(this)->getImpl(); }
+private:
+  const char *type;
+  int         implAdj;
   bool tracing_;
   std::string source_;
   std::string destination_;
-  Type type_;
 };
 
 bool hasRoute(std::string const &name);

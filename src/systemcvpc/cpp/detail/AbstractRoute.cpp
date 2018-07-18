@@ -39,9 +39,10 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  AbstractRoute::AbstractRoute(std::string const &name)
+  AbstractRoute::AbstractRoute(std::string const &name, int facadeAdj)
     : routeName(name)
     , routeId(Director::getInstance().getProcessId(name))
+    , facadeAdj(facadeAdj)
     , ticket(-1)
   {
 //  if (configuredRoute->getTracing()) {
@@ -49,6 +50,24 @@ namespace SystemC_VPC { namespace Detail {
 //      = CoSupport::Tracing::TracingFactory::getInstance().createPtpTracer(
 //          this->getName());
 //  }
+  }
+
+  void AbstractRoute::setPortInterface(PortInInterface  *port) {
+    if (portInterface.which() == 0) {
+      portInterface = port;
+    } else {
+      assert(portInterface.which() == 1);
+      assert(boost::get<PortInInterface *>(portInterface) == port);
+    }
+  }
+
+  void AbstractRoute::setPortInterface(PortOutInterface *port) {
+    if (portInterface.which() == 0) {
+      portInterface = port;
+    } else {
+      assert(portInterface.which() == 2);
+      assert(boost::get<PortOutInterface *>(portInterface) == port);
+    }
   }
 
 } } // namespace SystemC_VPC::Detail

@@ -1,0 +1,75 @@
+// -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
+// vim: set sw=2 ts=8 et:
+/*
+ * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Erlangen-Nuremberg. All rights reserved.
+ * 
+ * --- This software and any associated documentation is provided "as is"
+ * 
+ * IN NO EVENT SHALL HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG
+ * BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
+ * CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
+ * DOCUMENTATION, EVEN IF HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN
+ * NUREMBERG HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG, SPECIFICALLY
+ * DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED
+ * HEREUNDER IS ON AN "AS IS" BASIS, AND HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF
+ * ERLANGEN NUREMBERG HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ * ENHANCEMENTS, OR MODIFICATIONS.
+ */
+
+#include "IgnoreImpl.hpp"
+#include "../Director.hpp"
+#include "../DebugOStream.hpp"
+
+#include <CoSupport/Tracing/TracingFactory.hpp>
+#include <CoSupport/Tracing/PtpTracer.hpp>
+
+namespace SystemC_VPC { namespace Detail { namespace Routing {
+
+  IgnoreImpl::IgnoreImpl(std::string const &name)
+    : AbstractRoute(name,
+        reinterpret_cast<char *>(static_cast<Route         *>(this)) -
+        reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)))
+    , Ignore(
+         reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)) -
+         reinterpret_cast<char *>(static_cast<Route         *>(this)))
+  {
+  }
+
+  class Visitor: public boost::static_visitor<void> {
+  public:
+    Visitor(int n) : n(n) {}
+
+    result_type operator()(smoc::SimulatorAPI::PortInInterface *in) const {
+//    in->getSource()->commFinish(n);
+    }
+
+    result_type operator()(smoc::SimulatorAPI::PortOutInterface *out) const {
+      for (smoc::SimulatorAPI::ChannelSinkInterface *sink : out->getSinks())
+        sink->commFinish(n);
+    }
+
+    result_type operator()(boost::blank &) const {
+      assert(!"WTF?!");
+    }
+
+
+  private:
+    int n;
+  };
+
+
+  void IgnoreImpl::start(size_t quantitiy, std::function<void ()> completed) {
+    boost::apply_visitor(Visitor(quantitiy), portInterface);
+    completed();
+  }
+
+  IgnoreImpl::~IgnoreImpl( ){
+    DBG_OUT("Ignore::~Ignore( )" << std::endl);
+  }
+
+
+} } } // namespace SystemC_VPC::Detail::Routing
