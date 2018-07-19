@@ -63,6 +63,8 @@
 
 #include "vpc-dtd.c" // get DTD
 
+#define X(x) reinterpret_cast<XMLCh const *>(u##x)
+
 namespace SystemC_VPC { namespace Detail {
 
   //using namespace CoSupport::XML::Xerces;
@@ -551,11 +553,11 @@ namespace SystemC_VPC { namespace Detail {
     try {
       // scan <topology>
       MaybeValue<bool> topologyTracing =
-          CX::getMaybeAttrValueAs<bool>(top, u"tracing");
+          CX::getMaybeAttrValueAs<bool>(top, X("tracing"));
       if (!topologyTracing.isDefined())
         topologyTracing = false;
       MaybeValue<std::string> defaultRoute =
-          CX::getMaybeAttrValueAs<std::string>(top, u"default");
+          CX::getMaybeAttrValueAs<std::string>(top, X("default"));
       director->defaultRoute = defaultRoute.isDefined() &&
           defaultRoute == "ignore";
 
@@ -569,15 +571,15 @@ namespace SystemC_VPC { namespace Detail {
         
         CX::XStr const xmlName = routeNode->getNodeName();
 
-        if (xmlName == u"route") {
+        if (xmlName == X("route")) {
           // scan <route>
           MaybeValue<bool> tracing =
-              CX::getMaybeAttrValueAs<bool>(routeNode, u"tracing");
+              CX::getMaybeAttrValueAs<bool>(routeNode, X("tracing"));
           if (!tracing.isDefined())
             tracing = topologyTracing;
 
           Route::Ptr  route;
-          std::string type = CX::getAttrValueAs<std::string>(routeNode, u"type");
+          std::string type = CX::getAttrValueAs<std::string>(routeNode, X("type"));
 
           if (type ==  Routing::Static::Type) {
             route = parseStaticRoute(routeNode);
@@ -609,7 +611,7 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   Routing::Static::Ptr VPCBuilder::parseStaticRoute(CX::XN::DOMNode *routeNode) {
-    std::string name = CX::getAttrValueAs<std::string>(routeNode, u"name");
+    std::string name = CX::getAttrValueAs<std::string>(routeNode, X("name"));
     Routing::Static::Ptr route = createRoute<Routing::Static>(name);
 
     // Add <hop>s
@@ -619,7 +621,7 @@ namespace SystemC_VPC { namespace Detail {
 
       CX::XStr const xmlName = hopNode->getNodeName();
 
-      if (xmlName == u"hop") {
+      if (xmlName == X("hop")) {
         parseStaticHop(route.get(), nullptr, hopNode);
       } else {
         assert(!"WTF?! Unknown tag in <route>!");
@@ -633,7 +635,7 @@ namespace SystemC_VPC { namespace Detail {
       Routing::Static::Hop *parentHop,
       CX::XN::DOMNode      *hopNode)
   {
-    std::string hopComponent = CX::getAttrValueAs<std::string>(hopNode, u"component");
+    std::string hopComponent = CX::getAttrValueAs<std::string>(hopNode, X("component"));
     Component::Ptr comp = getComponent(hopComponent);
 
     Routing::Static::Hop *hop = route->addHop(comp, parentHop);
@@ -643,12 +645,12 @@ namespace SystemC_VPC { namespace Detail {
         node != NULL;
         node = node->getNextSibling()){
       CX::XStr const nodeName = node->getNodeName();
-      if (nodeName == u"hop") {
+      if (nodeName == X("hop")) {
         parseStaticHop(route, hop, node);
-      } else if (nodeName == u"desthop") {
-        MaybeValue<std::string> channel = CX::getMaybeAttrValueAs<std::string>(node, u"channel");
+      } else if (nodeName == X("desthop")) {
+        MaybeValue<std::string> channel = CX::getMaybeAttrValueAs<std::string>(node, X("channel"));
 
-      } else if (nodeName == u"timing") {
+      } else if (nodeName == X("timing")) {
         try {
           VC::Timing t = this->parseTiming(node);
           hop->setTransferTiming(t);
@@ -657,10 +659,10 @@ namespace SystemC_VPC { namespace Detail {
           msg << "Error with route " << route->getName() << " at " << hopComponent << ": " << e.what();
           throw InvalidArgumentException(msg.str().c_str());
         }
-      } else if (nodeName == u"attribute") {
-        std::string type = CX::getAttrValueAs<std::string>(node, u"type");
+      } else if (nodeName == X("attribute")) {
+        std::string type = CX::getAttrValueAs<std::string>(node, X("type"));
         if (type == STR_VPC_PRIORITY) {
-          hop->setPriority(CX::getAttrValueAs<int>(node, u"value"));
+          hop->setPriority(CX::getAttrValueAs<int>(node, X("value")));
         } else {
           assert(!"WTF?! Unknown attribute in <hop>!");
         }
