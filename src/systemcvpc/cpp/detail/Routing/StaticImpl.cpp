@@ -65,17 +65,27 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
       assert(!firstHopImpl);
       firstHopImpl = &hopImpl;
     } else {
+      HopImpl &parentImpl = *static_cast<HopImpl *>(parent);
 #ifndef NDEBUG
       HopImpls::iterator iter = hopImpls.find(SystemC_VPC::getImpl(parent->getComponent()));
       assert(iter != hopImpls.end());
-      assert(&iter->second == parent);
+      assert(&iter->second == &parentImpl);
 #endif //NDEBUG
-      static_cast<HopImpl *>(parent)->getChildHops().push_back(&hopImpl);
+      parentImpl.getChildHops().push_back(&hopImpl);
     }
     hopImpl.pcb = hopImpl.getComponent()->createPCB(getName());
     hopImpl.pcb->setTiming(hopImpl.getTransferTiming());
     hopImpl.pcb->setPriority(hopImpl.getPriority());
     return &hopImpl;
+  }
+
+  void              StaticImpl::addDest(std::string const &chan, Hop *parent) {
+    HopImpl &parentImpl = *static_cast<HopImpl *>(parent);
+#ifndef NDEBUG
+    HopImpls::iterator iter = hopImpls.find(SystemC_VPC::getImpl(parent->getComponent()));
+    assert(iter != hopImpls.end());
+    assert(&iter->second == &parentImpl);
+#endif //NDEBUG
   }
 
   StaticImpl::Hop  *StaticImpl::getFirstHop() {

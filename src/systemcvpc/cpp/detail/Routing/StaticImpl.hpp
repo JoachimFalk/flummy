@@ -78,6 +78,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     ///
 
     Hop  *addHop(Component::Ptr component, Hop *parent);
+    void  addDest(std::string const &chan, Hop *parent);
     Hop  *getFirstHop();
 
     std::map<Component::Ptr, Hop> const &getHops() const;

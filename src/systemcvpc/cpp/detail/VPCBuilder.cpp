@@ -636,39 +636,42 @@ namespace SystemC_VPC { namespace Detail {
       CX::XN::DOMNode      *hopNode)
   {
     std::string hopComponent = CX::getAttrValueAs<std::string>(hopNode, X("component"));
-    Component::Ptr comp = getComponent(hopComponent);
+    try {
+      Component::Ptr comp = getComponent(hopComponent);
 
-    Routing::Static::Hop *hop = route->addHop(comp, parentHop);
+      Routing::Static::Hop *hop = route->addHop(comp, parentHop);
 
-    // parse <timing>s
-    for(CX::XN::DOMNode *node = hopNode->getFirstChild();
-        node != NULL;
-        node = node->getNextSibling()){
-      CX::XStr const nodeName = node->getNodeName();
-      if (nodeName == X("hop")) {
-        parseStaticHop(route, hop, node);
-      } else if (nodeName == X("desthop")) {
-        MaybeValue<std::string> channel = CX::getMaybeAttrValueAs<std::string>(node, X("channel"));
-
-      } else if (nodeName == X("timing")) {
-        try {
+      // parse <timing>s
+      for(CX::XN::DOMNode *node = hopNode->getFirstChild();
+          node != NULL;
+          node = node->getNextSibling()){
+        CX::XStr const nodeName = node->getNodeName();
+        if (nodeName == X("hop")) {
+          parseStaticHop(route, hop, node);
+        } else if (nodeName == X("desthop")) {
+          MaybeValue<std::string> channel = CX::getMaybeAttrValueAs<std::string>(node, X("channel"));
+          if (channel.isDefined())
+            route->addDest(channel, parentHop);
+          else
+            route->addDest("DEFAULT", parentHop);
+        } else if (nodeName == X("timing")) {
           VC::Timing t = this->parseTiming(node);
           hop->setTransferTiming(t);
-        } catch (InvalidArgumentException &e) {
-          std::stringstream msg;
-          msg << "Error with route " << route->getName() << " at " << hopComponent << ": " << e.what();
-          throw InvalidArgumentException(msg.str().c_str());
-        }
-      } else if (nodeName == X("attribute")) {
-        std::string type = CX::getAttrValueAs<std::string>(node, X("type"));
-        if (type == STR_VPC_PRIORITY) {
-          hop->setPriority(CX::getAttrValueAs<int>(node, X("value")));
+        } else if (nodeName == X("attribute")) {
+          std::string type = CX::getAttrValueAs<std::string>(node, X("type"));
+          if (type == STR_VPC_PRIORITY) {
+            hop->setPriority(CX::getAttrValueAs<int>(node, X("value")));
+          } else {
+            assert(!"WTF?! Unknown attribute in <hop>!");
+          }
         } else {
-          assert(!"WTF?! Unknown attribute in <hop>!");
+          assert(!"WTF?! Unknown tag in <hop>!");
         }
-      } else {
-        assert(!"WTF?! Unknown tag in <hop>!");
       }
+    } catch (std::exception const &e) {
+      std::stringstream msg;
+      msg << "Error with route " << route->getName() << " at " << hopComponent << ": " << e.what();
+      throw ConfigException(msg.str().c_str());
     }
   }
 

@@ -89,6 +89,17 @@ namespace SystemC_VPC { namespace Detail {
 
     virtual ~AbstractRoute(){}
   protected:
+    // This class will never be defined. It is
+    // a stand in for ChannelSinkInterface or ChannelSourceInterface.
+    class ChannelInterface;
+
+    /// This will update link with the channel interface for the channel
+    /// denoted via channelName. However, update of link might be delayed
+    /// if setPortInterface has not been called before acquireChannelInterface.
+    /// @param[in]  channelName The name of the channel for which link should be performed.
+    /// @param[out] link        Where to store the channel interface. Initially must be a nullptr.
+    void acquireChannelInterface(const char *channelName, ChannelInterface *&link);
+
     void traceStart() {
       if (ptpTracer) ticket = ptpTracer->startOoo();
     }
@@ -101,9 +112,23 @@ namespace SystemC_VPC { namespace Detail {
       PortInInterface *,
       PortOutInterface *>       portInterface;
   private:
+    struct ChannelLink {
+      ChannelLink(ChannelInterface *ci)
+        : ci(ci), cil(nullptr) {}
+      ChannelLink(ChannelInterface **cil)
+        : ci(nullptr), cil(cil) {}
+
+      ChannelInterface  *ci;
+      ChannelInterface **cil;
+    };
+
+    typedef std::map<std::string, ChannelLink> ChannelLinks;
+
+
     std::string const           routeName;
     RouteId                     routeId;
     int                         facadeAdj;
+    ChannelLinks                channelLinks;
 
     CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
     CoSupport::Tracing::PtpTracer::Ticket  ticket;

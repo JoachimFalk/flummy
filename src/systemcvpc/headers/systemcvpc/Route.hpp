@@ -65,11 +65,6 @@ public:
   typedef boost::intrusive_ptr<this_type>       Ptr;
   typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-//enum Type {
-//  StaticRoute, BlockingTransport
-//};
-//static Type parseRouteType(std::string name);
-
   RouteId getRouteId() const;
 
   bool getTracing() const;

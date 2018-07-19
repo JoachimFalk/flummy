@@ -62,6 +62,10 @@ Static::Hop *Static::addHop(Component::Ptr component, Hop *parent) {
   return Routing::getImpl(this)->addHop(component, parent);
 }
 
+void         Static::addDest(std::string const &chan, Hop *parent) {
+  return Routing::getImpl(this)->addDest(chan, parent);
+}
+
 Static::Hop *Static::getFirstHop() {
   return Routing::getImpl(this)->getFirstHop();
 }
