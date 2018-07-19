@@ -66,15 +66,17 @@ fname   CDATA #IMPLIED>
 tracing     CDATA #IMPLIED
 default     CDATA #IMPLIED
 >
-<!ELEMENT route (hop)*>
+<!ELEMENT route (attribute*,hop?)>
 <!ATTLIST route
 name        CDATA #REQUIRED
 type        CDATA #REQUIRED
-source      CDATA #IMPLIED
-destination CDATA #IMPLIED
 tracing     CDATA #IMPLIED
 >
 
-<!ELEMENT hop (attribute|timing)*>
+<!ELEMENT hop (attribute*,timing*,((desthop+,hop*)|hop+))>
 <!ATTLIST hop
-name    CDATA #IMPLIED>
+component   CDATA #REQUIRED>
+
+<!ELEMENT desthop EMPTY>
+<!ATTLIST desthop
+channel     CDATA #IMPLIED>
