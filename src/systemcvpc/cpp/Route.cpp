@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -47,22 +47,6 @@
 #include <string.h>
 
 namespace SystemC_VPC {
-
-
-//Route::Type Route::parseRouteType(std::string name)
-//{
-//  static const std::string B_TRANSPORT = "blocking";
-//  static const std::string STATIC_ROUTE = "static_route";
-//
-//  if (name == STATIC_ROUTE) {
-//    return StaticRoute;
-//  } else if (name == B_TRANSPORT) {
-//    return BlockingTransport;
-//  }
-//  throw SystemC_VPC::ConfigException("Unknown scheduler \"" + name
-//      + "\" for component: " + name);
-//  return StaticRoute;
-//}
 
 Route::Route(const char *type, int implAdj)
   : type(type), implAdj(implAdj)

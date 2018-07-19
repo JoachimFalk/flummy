@@ -37,6 +37,8 @@
 #include "AbstractRoute.hpp"
 #include "Director.hpp"
 
+#include <CoSupport/sassert.h>
+
 namespace SystemC_VPC { namespace Detail {
 
   AbstractRoute::AbstractRoute(std::string const &name, int facadeAdj)
@@ -55,6 +57,21 @@ namespace SystemC_VPC { namespace Detail {
   void AbstractRoute::setPortInterface(PortInInterface  *port) {
     if (portInterface.which() == 0) {
       portInterface = port;
+      smoc::SimulatorAPI::ChannelSourceInterface *csi = port->getSource();
+      assert(csi != nullptr);
+      if (channelLinks.empty()) {
+        /// setPortInterface has been called before acquireChannelInterface
+        sassert(channelLinks.insert(std::make_pair(csi->name(),
+            reinterpret_cast<ChannelInterface *>(csi))).second);
+      } else {
+        assert(channelLinks.size() == 1);
+        ChannelLinks::iterator iter = channelLinks.begin();
+        assert(iter->first == csi->name());
+        assert(iter->second.cil);
+        assert(*iter->second.cil == nullptr);
+        iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
+        *iter->second.cil = reinterpret_cast<ChannelInterface *>(csi);
+      }
     } else {
       assert(portInterface.which() == 1);
       assert(boost::get<PortInInterface *>(portInterface) == port);
@@ -64,6 +81,28 @@ namespace SystemC_VPC { namespace Detail {
   void AbstractRoute::setPortInterface(PortOutInterface *port) {
     if (portInterface.which() == 0) {
       portInterface = port;
+      if (channelLinks.empty()) {
+        /// setPortInterface has been called before acquireChannelInterface
+        for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
+          assert(csi != nullptr);
+          sassert(channelLinks.insert(std::make_pair(csi->name(),
+              reinterpret_cast<ChannelInterface *>(csi))).second);
+        }
+        assert(!channelLinks.empty());
+      } else {
+        size_t missing = channelLinks.size();
+        for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
+          assert(csi != nullptr);
+          ChannelLinks::iterator iter = channelLinks.find(csi->name());
+          assert(iter != channelLinks.end());
+          assert(iter->second.cil);
+          assert(*iter->second.cil == nullptr);
+          iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
+          *iter->second.cil = reinterpret_cast<ChannelInterface *>(csi);
+          --missing;
+        }
+        assert(missing == 0);
+      }
     } else {
       assert(portInterface.which() == 2);
       assert(boost::get<PortOutInterface *>(portInterface) == port);

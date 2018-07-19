@@ -54,6 +54,7 @@ public:
   static const char *Type;
 
   Hop  *addHop(Component::Ptr component, Hop *parent = nullptr);
+  void  addDest(std::string const &chan, Hop *parent);
 
   Hop                                 *getFirstHop();
   std::map<Component::Ptr, Hop> const &getHops() const;
