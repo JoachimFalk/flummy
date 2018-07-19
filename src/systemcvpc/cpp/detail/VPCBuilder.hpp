@@ -42,6 +42,8 @@
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/Attribute.hpp>
 #include <systemcvpc/TimingModifier.hpp>
+#include <systemcvpc/Route.hpp>
+#include <systemcvpc/Routing/Static.hpp>
 
 #include "AbstractComponent.hpp"
 
@@ -182,9 +184,22 @@ namespace SystemC_VPC { namespace Detail {
     void nextAttribute(AttributePtr attributePtr, CX::XN::DOMNode *node);
      
     /**
-    * \brief Topology parsing related code
-    */
-    void parseTopology(CX::XN::DOMNode* node);
+     * \brief Topology parsing related code
+     */
+    void parseTopology(CX::XN::DOMNode *node);
+
+    /**
+     * \brief Parse a static route in the topology.
+     */
+    Routing::Static::Ptr parseStaticRoute(CX::XN::DOMNode *routeNode);
+
+    /**
+     * \brief Parse a hop in a static route.
+     */
+    void parseStaticHop(
+        Routing::Static      *route,
+        Routing::Static::Hop *parentHop,
+        CX::XN::DOMNode      *hopNode);
 
     /**
     * \brief Parsing helper for <timing>
