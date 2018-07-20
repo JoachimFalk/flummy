@@ -55,64 +55,49 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void AbstractRoute::setPortInterface(PortInInterface  *port) {
-    if (portInterface.which() == 0) {
-      portInterface = port;
-      smoc::SimulatorAPI::ChannelSourceInterface *csi = port->getSource();
-      assert(csi != nullptr);
-      if (channelLinks.empty()) {
-        /// setPortInterface has been called before acquireChannelInterface
-        sassert(channelLinks.insert(std::make_pair(csi->name(),
-            reinterpret_cast<ChannelInterface *>(csi))).second);
-      } else {
-        assert(channelLinks.size() == 1);
-        ChannelLinks::iterator iter = channelLinks.begin();
-        assert(iter->first == csi->name() || iter->first == "DEFAULT");
-        assert(iter->second.link);
-        iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
-        iter->second.link->push_back(iter->second.ci);
-      }
-    } else {
-      assert(portInterface.which() == 1);
-      assert(boost::get<PortInInterface *>(portInterface) == port);
-    }
+    assert(portInterface.which() == 0);
+    portInterface = port;
+    smoc::SimulatorAPI::ChannelSourceInterface *csi = port->getSource();
+    assert(csi != nullptr);
+    /// FIXME: This is the case for IgnoreImpl routes where
+    /// acquireChannelInterface is not used.
+    if (channelLinks.empty())
+      return;
+    assert(channelLinks.size() == 1);
+    ChannelLinks::iterator iter = channelLinks.begin();
+    assert(iter->first == csi->name() || iter->first == "DEFAULT");
+    assert(iter->second.link);
+    iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
+    iter->second.link->push_back(iter->second.ci);
   }
 
   void AbstractRoute::setPortInterface(PortOutInterface *port) {
-    if (portInterface.which() == 0) {
-      portInterface = port;
-      if (channelLinks.empty()) {
-        /// setPortInterface has been called before acquireChannelInterface
-        for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
-          assert(csi != nullptr);
-          sassert(channelLinks.insert(std::make_pair(csi->name(),
-              reinterpret_cast<ChannelInterface *>(csi))).second);
-        }
-        assert(!channelLinks.empty());
-      } else {
-        size_t requested = channelLinks.size();
-        size_t provided  = port->getSinks().size();
-        assert(requested == provided);
-        if (requested == 1) {
-          smoc::SimulatorAPI::ChannelSinkInterface *csi = *port->getSinks().begin();
-          ChannelLinks::iterator iter = channelLinks.begin();
-          assert(iter->first == csi->name() || iter->first == "DEFAULT");
-          assert(iter->second.link);
-          iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
-          iter->second.link->push_back(iter->second.ci);
-        } else {
-          for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
-            assert(csi != nullptr);
-            ChannelLinks::iterator iter = channelLinks.find(csi->name());
-            assert(iter != channelLinks.end());
-            assert(iter->second.link);
-            iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
-            iter->second.link->push_back(iter->second.ci);
-          }
-        }
-      }
+    assert(portInterface.which() == 0);
+    portInterface = port;
+    size_t provided  = port->getSinks().size();
+    assert(provided != 0);
+    /// FIXME: This is the case for IgnoreImpl routes where
+    /// acquireChannelInterface is not used.
+    if (channelLinks.empty())
+      return;
+    size_t requested = channelLinks.size();
+    assert(requested == provided);
+    if (requested == 1) {
+      smoc::SimulatorAPI::ChannelSinkInterface *csi = *port->getSinks().begin();
+      ChannelLinks::iterator iter = channelLinks.begin();
+      assert(iter->first == csi->name() || iter->first == "DEFAULT");
+      assert(iter->second.link);
+      iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
+      iter->second.link->push_back(iter->second.ci);
     } else {
-      assert(portInterface.which() == 2);
-      assert(boost::get<PortOutInterface *>(portInterface) == port);
+      for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
+        assert(csi != nullptr);
+        ChannelLinks::iterator iter = channelLinks.find(csi->name());
+        assert(iter != channelLinks.end());
+        assert(iter->second.link);
+        iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
+        iter->second.link->push_back(iter->second.ci);
+      }
     }
   }
 
@@ -120,16 +105,10 @@ namespace SystemC_VPC { namespace Detail {
       std::string               const &chan,
       std::vector<ChannelInterface *> &link)
   {
-    if (portInterface.which() == 0) {
-      // acquireChannelInterface called before setPortInterface.
-      sassert(channelLinks.insert(
-          ChannelLinks::value_type(chan, link)).second);
-    } else {
-      ChannelLinks::iterator iter = channelLinks.find(chan);
-      assert(iter != channelLinks.end());
-      iter->second.link = &link;
-      link.push_back(iter->second.ci);
-    }
+    // acquireChannelInterface must be called before setPortInterface.
+    assert(portInterface.which() == 0);
+    sassert(channelLinks.insert(
+        ChannelLinks::value_type(chan, link)).second);
   }
 
 } } // namespace SystemC_VPC::Detail

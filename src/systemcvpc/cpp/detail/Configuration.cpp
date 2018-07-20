@@ -37,8 +37,7 @@
 #include "Configuration.hpp"
 
 #include "Director.hpp"
-#include "Routing/BlockingTransport.hpp"
-#include "Routing/StaticImpl.hpp"
+#include "Routing/IgnoreImpl.hpp"
 
 #include <CoSupport/String/QuotedString.hpp>
 
@@ -48,8 +47,8 @@ namespace SystemC_VPC { namespace Detail {
 
   using CoSupport::String::QuotedString;
 
-  Configuration::Configuration() {
-  }
+  Configuration::Configuration()
+    : finalized(false) {}
 
   Configuration &Configuration::getInstance() {
     static Configuration conf;
@@ -81,6 +80,7 @@ namespace SystemC_VPC { namespace Detail {
   /// name already exists, a ConfigException will be thrown.
   AbstractComponent::Ptr Configuration::createComponent(std::string const &name,
       std::function<AbstractComponent::Ptr ()> constr) {
+    assert(!finalized);
     std::pair<Components::iterator, bool> status =
         components.insert(Components::value_type(name, nullptr));
     if (status.second) {
@@ -122,6 +122,7 @@ namespace SystemC_VPC { namespace Detail {
   /// name already exists, a ConfigException will be thrown.
   VpcTask::Ptr Configuration::createVpcTask(std::string const &name,
       std::function<VpcTask::Ptr ()> constr) {
+    assert(!finalized);
     std::pair<VpcTasks::iterator, bool> status =
         vpcTasks.insert(VpcTasks::value_type(name, nullptr));
     if (status.second) {
@@ -136,6 +137,20 @@ namespace SystemC_VPC { namespace Detail {
     std::stringstream msg;
     msg << "Multiple creation of task " << QuotedString(name) << " is not supported. Use getVpcTask instead.";
     throw ConfigException(msg.str().c_str());
+  }
+
+  /// This is triggered from SysteMoC via SystemCVPCSimulator to
+  /// register a task, i.e., a SysteMoC actor. For each registered
+  /// SysteMoC actor there must be a corresponding createVpcTask
+  /// triggered by building the VPC configuration, e.g., by VPCBuilder.
+  void Configuration::registerTask(
+      TaskInterface                          *task,
+      std::list<FiringRuleInterface *> const &firingRules)
+  {
+    assert(!finalized);
+    sassert(registeredTasks.insert(
+        RegisteredTasks::value_type(task->name(),
+            RegisteredTask(task, firingRules))).second);
   }
 
   /// This will return the map of all routes.
@@ -164,6 +179,7 @@ namespace SystemC_VPC { namespace Detail {
   /// name already exists, a ConfigException will be thrown.
   AbstractRoute::Ptr Configuration::createRoute(std::string const &name,
       std::function<AbstractRoute::Ptr ()> constr) {
+    assert(!finalized);
     std::pair<Routes::iterator, bool> status =
         routes.insert(Routes::value_type(name, nullptr));
     if (status.second) {
@@ -180,7 +196,26 @@ namespace SystemC_VPC { namespace Detail {
     throw ConfigException(msg.str().c_str());
   }
 
-  /// This will return the map of all routes.
+  /// This is triggered from SysteMoC via SystemCVPCSimulator to
+  /// register a route, i.e., a SysteMoC port. For each registered
+  /// SysteMoC port there must be a corresponding createRoute
+  /// triggered by building the VPC configuration, e.g., by VPCBuilder.
+  void Configuration::registerRoute(PortInInterface *port) {
+    assert(!finalized);
+    sassert(registeredRoutes.insert(
+        RegisteredRoutes::value_type(port->name(), port)).second);
+  }
+  /// This is triggered from SysteMoC via SystemCVPCSimulator to
+  /// register a route, i.e., a SysteMoC port. For each registered
+  /// SysteMoC port there must be a corresponding createRoute
+  /// triggered by building the VPC configuration, e.g., by VPCBuilder.
+  void Configuration::registerRoute(PortOutInterface *port) {
+    assert(!finalized);
+    sassert(registeredRoutes.insert(
+        RegisteredRoutes::value_type(port->name(), port)).second);
+  }
+
+  /// This will return the map of all timing modifiers.
   TimingModifiers const &Configuration::getTimingModifiers() const
     { return timingModifiers; }
   /// This might return a nullptr.
@@ -190,7 +225,7 @@ namespace SystemC_VPC { namespace Detail {
         ? iter->second
         : nullptr;
   }
-  /// This will not return a nullptr. If the route does not
+  /// This will not return a nullptr. If the timing modifier does not
   /// exists, then a ConfigException will be thrown.
   TimingModifier::Ptr Configuration::getTimingModifier(std::string const &name) const {
     TimingModifiers::const_iterator iter = timingModifiers.find(name);
@@ -200,11 +235,12 @@ namespace SystemC_VPC { namespace Detail {
     msg << "Cannot get timing modifier " << QuotedString(name) << " before creation. Use createTimingModifier first.";
     throw ConfigException(msg.str().c_str());
   }
-  /// This will create a route of the given name. A factory
-  /// function has to be supplied. If a route with an identical
+  /// This will create a timing modifier of the given name. A factory
+  /// function has to be supplied. If a timing modifier with an identical
   /// name already exists, a ConfigException will be thrown.
   TimingModifier::Ptr Configuration::createTimingModifier(std::string const &name,
       std::function<TimingModifier::Ptr ()> constr) {
+    assert(!finalized);
     std::pair<TimingModifiers::iterator, bool> status =
         timingModifiers.insert(TimingModifiers::value_type(name, nullptr));
     if (status.second) {
@@ -219,6 +255,72 @@ namespace SystemC_VPC { namespace Detail {
     std::stringstream msg;
     msg << "Multiple creation of timing modifier " << QuotedString(name) << " is not supported. Use getTimingModifier instead.";
     throw ConfigException(msg.str().c_str());
+  }
+
+  void Configuration::finalize() {
+    std::stringstream msg;
+
+    finalized = true;
+    for (RegisteredTasks::value_type const &v : registeredTasks) {
+      RegisteredTask const &registeredTask = v.second;
+      VpcTasks::iterator iter = vpcTasks.find(v.first);
+
+      if (iter == vpcTasks.end()) {
+        msg << "Actor " << v.first << " has NO configuration data at all." << std::endl;
+        continue;
+      }
+
+      VpcTask::Ptr &task = iter->second;
+      Component::Ptr configComponent = task->getComponent();
+
+      if (!configComponent) {
+        msg << "Actor " << v.first << " is not mapped." << std::endl;
+        continue;
+      }
+
+      AbstractComponent *comp = static_cast<AbstractComponent *>(configComponent.get());
+      comp->registerTask(registeredTask.task);
+
+      for (FiringRuleInterface *fr : registeredTask.firingRules) {
+        comp->registerFiringRule(registeredTask.task, fr);
+      }
+    }
+    for (RegisteredRoutes::value_type const &v : registeredRoutes) {
+      RegisteredRoute const &registeredRoute = v.second;
+      Routes::iterator iter = routes.find(v.first);
+
+      if (iter == routes.end() &&
+          Director::getInstance().defaultRoute) {
+        bool status;
+        std::tie(iter, status) =
+                routes.insert(Routes::value_type(v.first,
+                    new Routing::IgnoreImpl(v.first)));
+        assert(status && "Insert must succeed!");
+      }
+      if (iter == routes.end()) {
+        msg << "Route " << v.first << " has NO configuration data at all." << std::endl;
+        continue;
+      }
+
+      struct Visitor: public boost::static_visitor<void> {
+        Visitor(AbstractRoute::Ptr &route)
+          : route(route) {}
+
+        result_type operator()(PortInInterface *port) {
+          port->setSchedulerInfo(route.get());
+          route->setPortInterface(port);
+        }
+        result_type operator()(PortOutInterface *port) {
+          port->setSchedulerInfo(route.get());
+          route->setPortInterface(port);
+        }
+
+        AbstractRoute::Ptr &route;
+      } visitor(iter->second);
+      boost::apply_visitor(visitor, registeredRoute);
+    }
+    if (!msg.str().empty())
+      throw ConfigException(msg.str().c_str());
   }
 
 } } // namespace SystemC_VPC::Detail

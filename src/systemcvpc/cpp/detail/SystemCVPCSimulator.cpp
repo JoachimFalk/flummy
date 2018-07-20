@@ -53,6 +53,8 @@
 
 #include "DebugOStream.hpp"
 
+#include <systemc>
+
 namespace SystemC_VPC { namespace Detail {
 
 using namespace smoc::SimulatorAPI;
@@ -62,9 +64,14 @@ namespace VC = SystemC_VPC;
 
 class SystemCVPCSimulator
   : public SimulatorInterface
+  , public sc_core::sc_module
 {
 public:
-  SystemCVPCSimulator();
+  SystemCVPCSimulator(sc_core::sc_module_name name);
+
+  ///
+  /// Handle SimulatorInterface
+  ///
 
   void populateOptionsDescription(
       int &argc, char ** &argv,
@@ -74,16 +81,25 @@ public:
   EnablementStatus evaluateOptionsMap(
       boost::program_options::variables_map &vm);
 
-  void registerTask(TaskInterface *task);
+  void registerTask(
+      TaskInterface                          *actor,
+      std::list<FiringRuleInterface *> const &firingRules);
 
-  void registerPort(TaskInterface *task, PortInInterface *port);
-  void registerPort(TaskInterface *task, PortOutInterface *port);
+  void registerPort(PortInInterface *port);
+  void registerPort(PortOutInterface *port);
 
-  void simulationEnded();
+  ///
+  /// Use sc_core::sc_module to trigger consistency checks
+  ///
+  void end_of_elaboration();
+
+  void start_of_simulation();
+
+  void end_of_simulation();
 };
 
-SystemCVPCSimulator::SystemCVPCSimulator() {
-}
+SystemCVPCSimulator::SystemCVPCSimulator(sc_core::sc_module_name name)
+  : sc_core::sc_module(name) {}
 
 void SystemCVPCSimulator::populateOptionsDescription(
     int &argc, char ** &argv,
@@ -182,51 +198,33 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
   return retval;
 }
 
-void SystemCVPCSimulator::registerTask(TaskInterface *actor) {
-  if (!hasTask(static_cast<ScheduledTask &>(*actor)))
-    throw VC::ConfigException("Actor " + std::string(actor->name()) +
-        " has NO configuration data at all.");
-  VpcTask::Ptr task = getTask(static_cast<ScheduledTask &>(*actor));
-  Component::Ptr configComponent = task->getComponent();
-  assert(configComponent);
-  AbstractComponent *comp = static_cast<AbstractComponent *>(configComponent.get());
-  comp->registerTask(actor);
+void SystemCVPCSimulator::registerTask(
+    TaskInterface                          *actor,
+    std::list<FiringRuleInterface *> const &firingRules) {
+  Configuration::getInstance().registerTask(actor, firingRules);
 }
 
-static
-AbstractRoute::Ptr registerPortHelper(std::string const &name) {
-  AbstractRoute::Ptr route = Configuration::getInstance().hasRoute(name);
-
-  if (!route) {
-    if (Director::getInstance().defaultRoute) {
-      // default behavior: add empty route
-      route = boost::static_pointer_cast<Routing::IgnoreImpl>(
-          createRoute<SystemC_VPC::Routing::Ignore>(name));
-//    route->setTracing(false);
-    } else {
-      throw VC::ConfigException("Route " + name +
-          " has NO configuration data at all.");
-    }
-  }
-  return route;
+void SystemCVPCSimulator::registerPort(PortInInterface *port) {
+  Configuration::getInstance().registerRoute(port);
+}
+void SystemCVPCSimulator::registerPort(PortOutInterface *port) {
+  Configuration::getInstance().registerRoute(port);
 }
 
-void SystemCVPCSimulator::registerPort(TaskInterface *task, PortInInterface *port) {
-  AbstractRoute::Ptr route = registerPortHelper(port->name());
-  port->setSchedulerInfo(route.get());
-  route->setPortInterface(port);
-}
-void SystemCVPCSimulator::registerPort(TaskInterface *task, PortOutInterface *port) {
-  AbstractRoute::Ptr route = registerPortHelper(port->name());
-  port->setSchedulerInfo(route.get());
-  route->setPortInterface(port);
+void SystemCVPCSimulator::end_of_elaboration() {
+  Configuration::getInstance().finalize();
 }
 
-void SystemCVPCSimulator::simulationEnded() {
+void SystemCVPCSimulator::start_of_simulation() {
+
+}
+
+void SystemCVPCSimulator::end_of_simulation() {
   Director::endOfSystemcSimulation();
 }
 
 } } // namespace SystemC_VPC::Detail
 
 // This must be outside of the namespace for SysteMoC plugin load pickup!
-SystemC_VPC::Detail::SystemCVPCSimulator systemCVPCSimulator;
+// Prefix all SysteMoC internal modules with __smoc_ to enable filtering out the module on smx dump!
+SystemC_VPC::Detail::SystemCVPCSimulator systemCVPCSimulator("__smoc_systemcvpcsimulator");

@@ -168,6 +168,10 @@ namespace SystemC_VPC { namespace Detail {
 
     void registerTask(TaskInterface *task);
 
+    void registerFiringRule(
+        TaskInterface                           *task,
+        smoc::SimulatorAPI::FiringRuleInterface *fr);
+
     /**
      * \brief Get the Process Control Block (PCB) for pid.
      * The PCB must previously have been created via createPCB.
@@ -271,9 +275,6 @@ namespace SystemC_VPC { namespace Detail {
 
     /// Implement interface to SysteMoC
     void checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
-
-    /// Implement interface to SysteMoC
-    void registerFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
 
     /// Implement interface to SysteMoC
     void executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
