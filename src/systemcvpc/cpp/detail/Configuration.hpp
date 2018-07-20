@@ -43,6 +43,10 @@
 #include "AbstractComponent.hpp"
 #include "AbstractRoute.hpp"
 
+#include <smoc/SimulatorAPI/TaskInterface.hpp>
+#include <smoc/SimulatorAPI/PortInterfaces.hpp>
+#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
+
 #include <map>
 #include <functional>
 
@@ -55,6 +59,11 @@ typedef std::map<std::string, TimingModifier::Ptr>      TimingModifiers;
 
 class Configuration {
   typedef Configuration this_type;
+
+  typedef smoc::SimulatorAPI::TaskInterface         TaskInterface;
+  typedef smoc::SimulatorAPI::FiringRuleInterface   FiringRuleInterface;
+  typedef smoc::SimulatorAPI::PortInInterface       PortInInterface;
+  typedef smoc::SimulatorAPI::PortOutInterface      PortOutInterface;
 public:
   /**
    * \brief Access to singleton Configuration.
@@ -86,6 +95,13 @@ public:
   /// name already exists, a ConfigException will be thrown.
   VpcTask::Ptr createVpcTask(std::string const &name,
       std::function<VpcTask::Ptr ()> constr);
+  /// This is triggered from SysteMoC via SystemCVPCSimulator to
+  /// register a task, i.e., a SysteMoC actor. For each registered
+  /// SysteMoC actor there must be a corresponding createVpcTask
+  /// triggered by building the VPC configuration, e.g., by VPCBuilder.
+  void registerTask(
+      TaskInterface                          *task,
+      std::list<FiringRuleInterface *> const &firingRules);
 
   /// This will return the map of all routes.
   Routes const &getRoutes() const;
@@ -99,27 +115,67 @@ public:
   /// name already exists, a ConfigException will be thrown.
   AbstractRoute::Ptr createRoute(std::string const &name,
       std::function<AbstractRoute::Ptr ()> constr);
+  /// This is triggered from SysteMoC via SystemCVPCSimulator to
+  /// register a route, i.e., a SysteMoC port. For each registered
+  /// SysteMoC port there must be a corresponding createRoute
+  /// triggered by building the VPC configuration, e.g., by VPCBuilder.
+  void registerRoute(PortInInterface *port);
+  /// This is triggered from SysteMoC via SystemCVPCSimulator to
+  /// register a route, i.e., a SysteMoC port. For each registered
+  /// SysteMoC port there must be a corresponding createRoute
+  /// triggered by building the VPC configuration, e.g., by VPCBuilder.
+  void registerRoute(PortOutInterface *port);
 
-  /// This will return the map of all routes.
+  /// This will return the map of all timing modifiers.
   TimingModifiers const &getTimingModifiers() const;
   /// This might return a nullptr.
   TimingModifier::Ptr hasTimingModifier(std::string const &name) const;
-  /// This will not return a nullptr. If the route does not
+  /// This will not return a nullptr. If the timing modifier does not
   /// exists, then a ConfigException will be thrown.
   TimingModifier::Ptr getTimingModifier(std::string const &name) const;
-  /// This will create a route of the given name. A factory
-  /// function has to be supplied. If a route with an identical
+  /// This will create a timing modifier of the given name. A factory
+  /// function has to be supplied. If a timing modifier with an identical
   /// name already exists, a ConfigException will be thrown.
   TimingModifier::Ptr createTimingModifier(std::string const &name,
       std::function<TimingModifier::Ptr ()> constr);
+
+  /// Do a consistency check and finalize stuff for start of simulation.
+  void finalize();
 private:
   Configuration();
 
+  struct RegisteredTask {
+    RegisteredTask(
+        TaskInterface                          *task,
+        std::list<FiringRuleInterface *> const &firingRules)
+      : task(task), firingRules(firingRules) {}
+
+    // The registered task
+    TaskInterface *task;
+    // Its firing rules.
+    std::list<FiringRuleInterface *> const &firingRules;
+  };
+
+  typedef std::map<std::string, RegisteredTask> RegisteredTasks;
+
+  typedef boost::variant<
+      PortInInterface *, PortOutInterface *>     RegisteredRoute;
+  typedef std::map<std::string, RegisteredRoute> RegisteredRoutes;
+
+  /// Marker if finalize has run and registerXXX and createXXX calls
+  /// are no longer allowed.
+  bool                  finalized;
+
   Components            components;
+  /// These are the created tasks
   VpcTasks              vpcTasks;
+  /// These are the registered tasks
+  RegisteredTasks       registeredTasks;
+  /// These are the created routes
   Routes                routes;
+  /// These are the registered routes
+  RegisteredRoutes      registeredRoutes;
   TimingModifiers       timingModifiers;
-//Mappings              mappings;
 };
 
 } } // namespace SystemC_VPC::Detail
