@@ -94,11 +94,11 @@ namespace SystemC_VPC { namespace Detail {
     class ChannelInterface;
 
     /// This will update link with the channel interface for the channel
-    /// denoted via channelName. However, update of link might be delayed
+    /// denoted via chan. However, update of link might be delayed
     /// if setPortInterface has not been called before acquireChannelInterface.
-    /// @param[in]  channelName The name of the channel for which link should be performed.
-    /// @param[out] link        Where to store the channel interface. Initially must be a nullptr.
-    void acquireChannelInterface(const char *channelName, ChannelInterface *&link);
+    /// @param[in]  chan  The name of the channel for which link should be performed.
+    /// @param[out] link  Where to store the channel interface.
+    void acquireChannelInterface(std::string const &chan, std::vector<ChannelInterface *> &link);
 
     void traceStart() {
       if (ptpTracer) ticket = ptpTracer->startOoo();
@@ -114,12 +114,12 @@ namespace SystemC_VPC { namespace Detail {
   private:
     struct ChannelLink {
       ChannelLink(ChannelInterface *ci)
-        : ci(ci), cil(nullptr) {}
-      ChannelLink(ChannelInterface **cil)
-        : ci(nullptr), cil(cil) {}
+        : ci(ci), link(nullptr) {}
+      ChannelLink(std::vector<ChannelInterface *> &link)
+        : ci(nullptr), link(&link) {}
 
-      ChannelInterface  *ci;
-      ChannelInterface **cil;
+      ChannelInterface                *ci;
+      std::vector<ChannelInterface *> *link;
     };
 
     typedef std::map<std::string, ChannelLink> ChannelLinks;

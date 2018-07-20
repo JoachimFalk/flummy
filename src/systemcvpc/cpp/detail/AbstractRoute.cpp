@@ -66,11 +66,10 @@ namespace SystemC_VPC { namespace Detail {
       } else {
         assert(channelLinks.size() == 1);
         ChannelLinks::iterator iter = channelLinks.begin();
-        assert(iter->first == csi->name());
-        assert(iter->second.cil);
-        assert(*iter->second.cil == nullptr);
-        iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
-        *iter->second.cil = reinterpret_cast<ChannelInterface *>(csi);
+        assert(iter->first == csi->name() || iter->first == "DEFAULT");
+        assert(iter->second.link);
+        iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
+        iter->second.link->push_back(iter->second.ci);
       }
     } else {
       assert(portInterface.which() == 1);
@@ -90,22 +89,46 @@ namespace SystemC_VPC { namespace Detail {
         }
         assert(!channelLinks.empty());
       } else {
-        size_t missing = channelLinks.size();
-        for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
-          assert(csi != nullptr);
-          ChannelLinks::iterator iter = channelLinks.find(csi->name());
-          assert(iter != channelLinks.end());
-          assert(iter->second.cil);
-          assert(*iter->second.cil == nullptr);
-          iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
-          *iter->second.cil = reinterpret_cast<ChannelInterface *>(csi);
-          --missing;
+        size_t requested = channelLinks.size();
+        size_t provided  = port->getSinks().size();
+        assert(requested == provided);
+        if (requested == 1) {
+          smoc::SimulatorAPI::ChannelSinkInterface *csi = *port->getSinks().begin();
+          ChannelLinks::iterator iter = channelLinks.begin();
+          assert(iter->first == csi->name() || iter->first == "DEFAULT");
+          assert(iter->second.link);
+          iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
+          iter->second.link->push_back(iter->second.ci);
+        } else {
+          for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
+            assert(csi != nullptr);
+            ChannelLinks::iterator iter = channelLinks.find(csi->name());
+            assert(iter != channelLinks.end());
+            assert(iter->second.link);
+            iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
+            iter->second.link->push_back(iter->second.ci);
+          }
         }
-        assert(missing == 0);
       }
     } else {
       assert(portInterface.which() == 2);
       assert(boost::get<PortOutInterface *>(portInterface) == port);
+    }
+  }
+
+  void AbstractRoute::acquireChannelInterface(
+      std::string               const &chan,
+      std::vector<ChannelInterface *> &link)
+  {
+    if (portInterface.which() == 0) {
+      // acquireChannelInterface called before setPortInterface.
+      sassert(channelLinks.insert(
+          ChannelLinks::value_type(chan, link)).second);
+    } else {
+      ChannelLinks::iterator iter = channelLinks.find(chan);
+      assert(iter != channelLinks.end());
+      iter->second.link = &link;
+      link.push_back(iter->second.ci);
     }
   }
 
