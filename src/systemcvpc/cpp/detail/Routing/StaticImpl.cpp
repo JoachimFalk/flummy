@@ -86,6 +86,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     assert(iter != hopImpls.end());
     assert(&iter->second == &parentImpl);
 #endif //NDEBUG
+    acquireChannelInterface(chan, parentImpl.destinations);
   }
 
   StaticImpl::Hop  *StaticImpl::getFirstHop() {
@@ -156,71 +157,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     }
     startHop();
   }
-
-////
-//void StaticImpl::compute( TaskInstance* _task ) {
-//  // reset hop list
-//  nextHop = components.begin();
-//
-//  task = _task;
-//  taskEvents = task->getBlockEvent();
-//  if(components.empty()){
-//    if (taskEvents.dii.get())
-//      taskEvents.dii->notify();
-//    //taskEvents.latency->notify();
-//    Director::getInstance().signalLatencyEvent(task);
-////    this->pool->free(this);
-//    return;
-//  }
-//
-//  this->traceStart();
-//
-//  this->route( EventPair(taskEvents.dii, routeLat) );
-//}
-//
-////
-//void StaticImpl::route( EventPair np ){
-//  if(nextHop != components.end()){
-//    DBG_OUT("route on: " << (*nextHop)->getName() << std::endl);
-//    TaskInstance *newTask = (*nextHop)->executeHop(
-//        (*nextHop)->getPCB(task->getProcessId()),
-//        task->getTimingScale(),
-//        np);
-//    ++nextHop;
-//    if(newTask->getBlockEvent().latency->isDropped()){
-//      taskEvents.latency->setDropped(newTask->getBlockEvent().latency->isDropped());
-//      task->setBlockEvent(taskEvents);
-//      nextHop = components.end();
-//      routeLat->reset();
-//      this->traceStop();
-//      Director::getInstance().signalLatencyEvent(task);
-////      this->pool->free(this);
-//    }
-//  } else {
-//    this->traceStop();
-//
-//    assert(dummyDii == np.dii);
-//    Director::getInstance().signalLatencyEvent(task);
-////    this->pool->free(this);
-//  }
-//}
-//
-////
-//void StaticImpl::signaled(EventWaiter *e) {
-//  if(e->isActive()){
-//    DBG_OUT("signaled @ " << sc_core::sc_time_stamp() << std::endl);
-//    if(task->getBlockEvent().latency->isDropped()){
-//      nextHop = components.end();
-//    }
-//    routeLat->reset();
-//    route( EventPair(dummyDii, routeLat) );
-//  }
-//}
-//
-////
-//void StaticImpl::eventDestroyed(EventWaiter *e){
-//  DBG_OUT("eventDestroyed" << std::endl);
-//}
 
   bool StaticImpl::closeStream(){
     for (HopImpls::value_type const &v : hopImpls) {

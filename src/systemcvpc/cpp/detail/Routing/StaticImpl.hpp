@@ -96,14 +96,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     /// Other stuff
     ///
 
-//  void compute( TaskInstance* task );
-//
-//  void route( EventPair np );
-//
-//  void signaled(EventWaiter *e);
-//
-//  void eventDestroyed(EventWaiter *e);
-
     ~StaticImpl();
   private:
     struct HopImpl: public Hop {
@@ -118,7 +110,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
         return reinterpret_cast<std::list<HopImpl *> &>(childHops);
       }
 
-      ProcessControlBlock  *pcb;
+      ProcessControlBlock             *pcb;
+      std::vector<ChannelInterface *>  destinations;
     };
 
     HopImpl                    *firstHopImpl;
