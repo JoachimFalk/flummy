@@ -51,6 +51,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     IgnoreImpl(std::string const &name);
 
+    ~IgnoreImpl();
+
     ///
     /// Handle interfaces for SystemC_VPC::Route
     ///
@@ -62,19 +64,18 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     ///
     /// Handle interfaces for SystemC_VPC::Routing::Ignore
     ///
-
+  private:
     ///
     /// Handle interfaces for AbstractRoute
     ///
 
-    void start(size_t quantitiy, std::function<void ()> completed);
+    void start(size_t quantitiy, void *userData, CallBack completed);
 
     ///
     /// Other stuff
     ///
 
-    ~IgnoreImpl();
-  private:
+    class Visitor;
   };
 
   inline

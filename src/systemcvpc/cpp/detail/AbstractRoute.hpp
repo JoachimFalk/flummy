@@ -46,9 +46,11 @@
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
 #include <boost/variant.hpp>
+#include <boost/pool/pool.hpp>
 
 #include <vector>
 #include <functional>
+#include <memory>
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -61,12 +63,25 @@ namespace SystemC_VPC { namespace Detail {
     typedef boost::intrusive_ptr<this_type>       Ptr;
     typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-    typedef smoc::SimulatorAPI::PortInInterface   PortInInterface;
-    typedef smoc::SimulatorAPI::PortOutInterface  PortOutInterface;
+    typedef smoc::SimulatorAPI::PortInInterface         PortInInterface;
+    typedef smoc::SimulatorAPI::PortOutInterface        PortOutInterface;
+    typedef smoc::SimulatorAPI::ChannelSourceInterface  ChannelSourceInterface;
+    typedef smoc::SimulatorAPI::ChannelSinkInterface    ChannelSinkInterface;
 
     AbstractRoute(std::string const &name, int facadeAdj);
 
-    virtual void start(size_t quantitiy, std::function<void ()> completed) = 0;
+    template <class T>
+    void start(size_t quantitiy, T *userData, void (*completed)(T *, size_t n, ChannelSourceInterface *)) {
+      assert(portInterface.which() == 1); // port must be a PortInInterface
+      start(quantitiy, userData,
+          reinterpret_cast<void (*)(void *, size_t n, ChannelInterface *)>(completed));
+    }
+    template <class T>
+    void start(size_t quantitiy, T *userData, void (*completed)(T *, size_t n, ChannelSinkInterface *)) {
+      assert(portInterface.which() == 2); // port must be a PortOutInterface
+      start(quantitiy, userData,
+          reinterpret_cast<void (*)(void *, size_t n, ChannelInterface *)>(completed));
+    }
 
     std::string const &getName() const
       { return routeName; }
@@ -93,12 +108,46 @@ namespace SystemC_VPC { namespace Detail {
     // a stand in for ChannelSinkInterface or ChannelSourceInterface.
     class ChannelInterface;
 
+    typedef void (*CallBack)(void *, size_t n, ChannelInterface *);
+
     /// This will update link with the channel interface for the channel
     /// denoted via chan. However, update of link might be delayed
     /// if setPortInterface has not been called before acquireChannelInterface.
     /// @param[in]  chan  The name of the channel for which link should be performed.
     /// @param[out] link  Where to store the channel interface.
     void acquireChannelInterface(std::string const &chan, std::vector<ChannelInterface *> &link);
+
+    struct MessageInstance {
+      MessageInstance(
+          AbstractRoute  *route,
+          size_t          quantitiy,
+          void           *userData,
+          CallBack        completed)
+        : route(route), quantitiy(quantitiy)
+        , userData(userData), completed(completed) {}
+
+      AbstractRoute *route;
+      size_t         quantitiy;
+      void          *userData;
+      CallBack       completed;
+    };
+
+    template <class MSG>
+    void *allocate() {
+      if (!messagePool) {
+        messagePool.reset(new boost::pool<>(sizeof(MSG)));
+      } else {
+        assert(messagePool->get_requested_size() == sizeof(MSG));
+      }
+      return messagePool->malloc();
+    }
+    template <class MSG>
+    void  release(MSG *msg) {
+      msg->~MSG();
+      messagePool->free(msg);
+    }
+
+    virtual void start(size_t quantitiy, void *userData, CallBack completed) = 0;
 
     void traceStart() {
       if (ptpTracer) ticket = ptpTracer->startOoo();
@@ -129,6 +178,8 @@ namespace SystemC_VPC { namespace Detail {
     RouteId                     routeId;
     int                         facadeAdj;
     ChannelLinks                channelLinks;
+
+    std::unique_ptr<boost::pool<>> messagePool;
 
     CoSupport::Tracing::PtpTracer::Ptr     ptpTracer;
     CoSupport::Tracing::PtpTracer::Ticket  ticket;

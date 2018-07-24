@@ -65,6 +65,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     StaticImpl(std::string const &name);
 
+    ~StaticImpl();
+
     ///
     /// Handle interfaces for SystemC_VPC::Route
     ///
@@ -86,18 +88,19 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     bool addStream();
     bool closeStream();
 
+  private:
     ///
     /// Handle interfaces for AbstractRoute
     ///
 
-    void start(size_t quantitiy, std::function<void ()> completed);
+    void start(size_t quantitiy, void *userData, CallBack completed);
 
     ///
     /// Other stuff
     ///
 
-    ~StaticImpl();
-  private:
+    class Visitor;
+
     struct HopImpl: public Hop {
       HopImpl(Component::Ptr component)
         : Hop(component)
@@ -121,18 +124,18 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
         HopImpl>                HopImpls;
     HopImpls                    hopImpls;
 
-    struct MessageInstance {
+    struct MessageInstance: public AbstractRoute::MessageInstance {
       MessageInstance(
-          StaticImpl             *staticImpl,
-          size_t                  quantitiy,
-          std::function<void ()>  completed);
+          StaticImpl     *route,
+          size_t          quantitiy,
+          void           *userData,
+          CallBack        completed)
+        : AbstractRoute::MessageInstance(route, quantitiy, userData, completed)
+        , currHop(route->firstHopImpl) { startHop(); }
     private:
       void startHop();
       void finishHop();
     private:
-      StaticImpl             *staticImpl;
-      size_t                  quantitiy;
-      std::function<void ()>  completed;
       HopImpl                *currHop;
     };
   };

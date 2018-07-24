@@ -580,7 +580,11 @@ namespace SystemC_VPC { namespace Detail {
     for (PortInInfo const &portInfo : fr->getPortInInfos()) {
       portInfo.port.commStart(portInfo.consumed);
       AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
-      route->start(portInfo.required, [ial]() { ial->arrived(); });
+      route->start<InputsAvailableListener>(portInfo.required, ial,
+          [](InputsAvailableListener *ial, size_t n, smoc::SimulatorAPI::ChannelSourceInterface *csi) {
+            csi->commFinish(n);
+            ial->arrived();
+          });
     }
     for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
       portInfo.port.commStart(portInfo.produced);
@@ -647,7 +651,9 @@ namespace SystemC_VPC { namespace Detail {
     if (FiringRuleInterface *fr = taskInstance->getFiringRule()) {
       for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
         AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
-        route->start(portInfo.produced, []() {});
+        route->start<void>(portInfo.produced, nullptr, [](void *, size_t n, smoc::SimulatorAPI::ChannelSinkInterface *out) {
+            out->commFinish(n);
+          });
       }
     }
     delete taskInstance;
