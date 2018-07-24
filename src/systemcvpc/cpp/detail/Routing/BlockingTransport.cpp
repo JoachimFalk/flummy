@@ -61,8 +61,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     //components.push_back(bus);
   }
 
-  void BlockingTransport::start(size_t quantitiy, std::function<void ()> completed) {
-    completed();
+  void BlockingTransport::start(size_t quantitiy, void *userData, CallBack completed) {
+    (*completed)(userData, quantitiy, nullptr);
   }
 
 //void BlockingTransport::compute( TaskInstance* _task ) {

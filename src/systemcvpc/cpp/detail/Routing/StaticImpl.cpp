@@ -97,50 +97,40 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     return reinterpret_cast<std::map<Component::Ptr, Hop> const &>(hopImpls);
   }
 
-  void StaticImpl::start(size_t quantitiy, std::function<void ()> completed) {
+  void StaticImpl::start(size_t quantitiy, void *userData, CallBack completed) {
     // This will auto delete.
-    new MessageInstance(this, quantitiy, completed);
+    new(allocate<MessageInstance>()) MessageInstance(this, quantitiy, userData, completed);
   }
 
-  StaticImpl::MessageInstance::MessageInstance(
-      StaticImpl             *staticImpl,
-      size_t                  quantitiy,
-      std::function<void ()>  completed)
-    : staticImpl(staticImpl)
-    , quantitiy(quantitiy)
-    , completed(completed)
-    , currHop(staticImpl->firstHopImpl)
-  {
-    startHop();
-  }
-
-  class Visitor: public boost::static_visitor<void> {
+  class StaticImpl::Visitor: public boost::static_visitor<void> {
   public:
-    Visitor(int n) : n(n) {}
+    Visitor(int quantity, void *userData, StaticImpl::CallBack callBack)
+      : quantity(quantity), userData(userData), callBack(callBack) {}
 
     result_type operator()(smoc::SimulatorAPI::PortInInterface *in) const {
-//    in->getSource()->commFinish(n);
+      (*callBack)(userData, quantity, reinterpret_cast<StaticImpl::ChannelInterface *>(in->getSource()));
     }
 
     result_type operator()(smoc::SimulatorAPI::PortOutInterface *out) const {
-      for (smoc::SimulatorAPI::ChannelSinkInterface *sink : out->getSinks())
-        sink->commFinish(n);
+      for (smoc::SimulatorAPI::ChannelSinkInterface *sink : out->getSinks()) {
+        (*callBack)(userData, quantity, reinterpret_cast<StaticImpl::ChannelInterface *>(sink));
+      }
     }
 
     result_type operator()(boost::blank &) const {
       assert(!"WTF?!");
     }
-
-
   private:
-    int n;
+    int                   quantity;
+    void                 *userData;
+    StaticImpl::CallBack  callBack;
   };
 
   void StaticImpl::MessageInstance::startHop() {
     if (!currHop) {
-      boost::apply_visitor(Visitor(quantitiy), staticImpl->portInterface);
-      completed();
-      delete this;
+      boost::apply_visitor(Visitor(quantitiy, userData, completed),
+          static_cast<StaticImpl *>(route)->portInterface);
+      static_cast<StaticImpl *>(route)->release(this);
       return;
     }
     currHop->getComponent()

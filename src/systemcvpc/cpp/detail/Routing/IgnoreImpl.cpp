@@ -39,32 +39,32 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
   {
   }
 
-  class Visitor: public boost::static_visitor<void> {
+  class IgnoreImpl::Visitor: public boost::static_visitor<void> {
   public:
-    Visitor(int n) : n(n) {}
+    Visitor(int quantity, void *userData, IgnoreImpl::CallBack callBack)
+      : quantity(quantity), userData(userData), callBack(callBack) {}
 
     result_type operator()(smoc::SimulatorAPI::PortInInterface *in) const {
-//    in->getSource()->commFinish(n);
+      (*callBack)(userData, quantity, reinterpret_cast<IgnoreImpl::ChannelInterface *>(in->getSource()));
     }
 
     result_type operator()(smoc::SimulatorAPI::PortOutInterface *out) const {
-      for (smoc::SimulatorAPI::ChannelSinkInterface *sink : out->getSinks())
-        sink->commFinish(n);
+      for (smoc::SimulatorAPI::ChannelSinkInterface *sink : out->getSinks()) {
+        (*callBack)(userData, quantity, reinterpret_cast<IgnoreImpl::ChannelInterface *>(sink));
+      }
     }
 
     result_type operator()(boost::blank &) const {
       assert(!"WTF?!");
     }
-
-
   private:
-    int n;
+    int                   quantity;
+    void                 *userData;
+    IgnoreImpl::CallBack  callBack;
   };
 
-
-  void IgnoreImpl::start(size_t quantitiy, std::function<void ()> completed) {
-    boost::apply_visitor(Visitor(quantitiy), portInterface);
-    completed();
+  void IgnoreImpl::start(size_t quantitiy, void *userData, CallBack completed) {
+    boost::apply_visitor(Visitor(quantitiy, userData, completed), portInterface);
   }
 
   IgnoreImpl::~IgnoreImpl( ){

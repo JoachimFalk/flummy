@@ -66,6 +66,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     BlockingTransport(std::string const &name);
 
+    ~BlockingTransport();
+
     ///
     /// Handle interfaces for SystemC_VPC::Route
     ///
@@ -74,11 +76,12 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     using AbstractRoute::getName;
     using AbstractRoute::getRouteId;
 
+  private:
     ///
     /// Handle interfaces for AbstractRoute
     ///
 
-    void start(size_t quantitiy, std::function<void ()> completed);
+    void start(size_t quantitiy, void *userData, CallBack completed);
 
     ///
     /// Other stuff
@@ -96,8 +99,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     const ComponentList& getHops() const;
 
-    ~BlockingTransport( );
-  private:
     void resetHops();
     void resetLists();
 
