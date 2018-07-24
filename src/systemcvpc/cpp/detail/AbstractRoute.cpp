@@ -67,8 +67,8 @@ namespace SystemC_VPC { namespace Detail {
     ChannelLinks::iterator iter = channelLinks.begin();
     assert(iter->first == csi->name() || iter->first == "DEFAULT");
     assert(iter->second.link);
-    iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
-    iter->second.link->push_back(iter->second.ci);
+    iter->second.link->push_back(reinterpret_cast<ChannelInterface *>(csi));
+    destinations.push_back(Destination(csi->name(), reinterpret_cast<ChannelInterface *>(csi)));
   }
 
   void AbstractRoute::setPortInterface(PortOutInterface *port) {
@@ -87,16 +87,16 @@ namespace SystemC_VPC { namespace Detail {
       ChannelLinks::iterator iter = channelLinks.begin();
       assert(iter->first == csi->name() || iter->first == "DEFAULT");
       assert(iter->second.link);
-      iter->second.ci = reinterpret_cast<ChannelInterface *>(csi);
-      iter->second.link->push_back(iter->second.ci);
+      iter->second.link->push_back(reinterpret_cast<ChannelInterface *>(csi));
+      destinations.push_back(Destination(csi->name(), reinterpret_cast<ChannelInterface *>(csi)));
     } else {
       for (smoc::SimulatorAPI::ChannelSinkInterface *csi : port->getSinks()) {
         assert(csi != nullptr);
         ChannelLinks::iterator iter = channelLinks.find(csi->name());
         assert(iter != channelLinks.end());
         assert(iter->second.link);
-        iter->second.ci   = reinterpret_cast<ChannelInterface *>(csi);
-        iter->second.link->push_back(iter->second.ci);
+        iter->second.link->push_back(reinterpret_cast<ChannelInterface *>(csi));
+        destinations.push_back(Destination(csi->name(), reinterpret_cast<ChannelInterface *>(csi)));
       }
     }
   }

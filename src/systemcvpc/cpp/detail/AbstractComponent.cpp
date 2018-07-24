@@ -582,7 +582,6 @@ namespace SystemC_VPC { namespace Detail {
       AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
       route->start<InputsAvailableListener>(portInfo.required, ial,
           [](InputsAvailableListener *ial, size_t n, smoc::SimulatorAPI::ChannelSourceInterface *csi) {
-            csi->commFinish(n);
             ial->arrived();
           });
     }

@@ -49,7 +49,6 @@
 #include <boost/pool/pool.hpp>
 
 #include <vector>
-#include <functional>
 #include <memory>
 
 namespace SystemC_VPC { namespace Detail {
@@ -68,6 +67,19 @@ namespace SystemC_VPC { namespace Detail {
     typedef smoc::SimulatorAPI::ChannelSourceInterface  ChannelSourceInterface;
     typedef smoc::SimulatorAPI::ChannelSinkInterface    ChannelSinkInterface;
 
+    // This class will never be defined. It is
+    // a stand in for ChannelSinkInterface or ChannelSourceInterface.
+    class ChannelInterface;
+
+    struct Destination {
+      Destination(const char *name, ChannelInterface *ci)
+        : name(name), ci(ci) {}
+
+      const char       *name;
+      ChannelInterface *ci;
+    };
+    typedef std::vector<Destination> Destinations;
+
     AbstractRoute(std::string const &name, int facadeAdj);
 
     template <class T>
@@ -82,6 +94,9 @@ namespace SystemC_VPC { namespace Detail {
       start(quantitiy, userData,
           reinterpret_cast<void (*)(void *, size_t n, ChannelInterface *)>(completed));
     }
+
+    Destinations const &getDestinations()
+      { return destinations; }
 
     std::string const &getName() const
       { return routeName; }
@@ -104,15 +119,11 @@ namespace SystemC_VPC { namespace Detail {
 
     virtual ~AbstractRoute(){}
   protected:
-    // This class will never be defined. It is
-    // a stand in for ChannelSinkInterface or ChannelSourceInterface.
-    class ChannelInterface;
-
     typedef void (*CallBack)(void *, size_t n, ChannelInterface *);
 
     /// This will update link with the channel interface for the channel
-    /// denoted via chan. However, update of link might be delayed
-    /// if setPortInterface has not been called before acquireChannelInterface.
+    /// denoted via chan. However, update of link will be delayed until
+    /// setPortInterface has been called.
     /// @param[in]  chan  The name of the channel for which link should be performed.
     /// @param[out] link  Where to store the channel interface.
     void acquireChannelInterface(std::string const &chan, std::vector<ChannelInterface *> &link);
@@ -132,12 +143,11 @@ namespace SystemC_VPC { namespace Detail {
       CallBack       completed;
     };
 
-    template <class MSG>
-    void *allocate() {
+    void *allocate(size_t size) {
       if (!messagePool) {
-        messagePool.reset(new boost::pool<>(sizeof(MSG)));
+        messagePool.reset(new boost::pool<>(size));
       } else {
-        assert(messagePool->get_requested_size() == sizeof(MSG));
+        assert(messagePool->get_requested_size() == size);
       }
       return messagePool->malloc();
     }
@@ -162,12 +172,9 @@ namespace SystemC_VPC { namespace Detail {
       PortOutInterface *>       portInterface;
   private:
     struct ChannelLink {
-      ChannelLink(ChannelInterface *ci)
-        : ci(ci), link(nullptr) {}
       ChannelLink(std::vector<ChannelInterface *> &link)
-        : ci(nullptr), link(&link) {}
+        : link(&link) {}
 
-      ChannelInterface                *ci;
       std::vector<ChannelInterface *> *link;
     };
 
@@ -178,6 +185,7 @@ namespace SystemC_VPC { namespace Detail {
     RouteId                     routeId;
     int                         facadeAdj;
     ChannelLinks                channelLinks;
+    Destinations                destinations;
 
     std::unique_ptr<boost::pool<>> messagePool;
 
