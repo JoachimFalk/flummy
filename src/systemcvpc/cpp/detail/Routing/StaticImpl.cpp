@@ -99,53 +99,39 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
   void StaticImpl::start(size_t quantitiy, void *userData, CallBack completed) {
     // This will auto delete.
-    new(allocate<MessageInstance>()) MessageInstance(this, quantitiy, userData, completed);
+    size_t bytes = sizeof(MessageInstance) + sizeof(HopImpl *)*(getDestinations().size()-1);
+
+    new(allocate(bytes)) MessageInstance(this, quantitiy, userData, completed);
   }
 
-  class StaticImpl::Visitor: public boost::static_visitor<void> {
-  public:
-    Visitor(int quantity, void *userData, StaticImpl::CallBack callBack)
-      : quantity(quantity), userData(userData), callBack(callBack) {}
-
-    result_type operator()(smoc::SimulatorAPI::PortInInterface *in) const {
-      (*callBack)(userData, quantity, reinterpret_cast<StaticImpl::ChannelInterface *>(in->getSource()));
-    }
-
-    result_type operator()(smoc::SimulatorAPI::PortOutInterface *out) const {
-      for (smoc::SimulatorAPI::ChannelSinkInterface *sink : out->getSinks()) {
-        (*callBack)(userData, quantity, reinterpret_cast<StaticImpl::ChannelInterface *>(sink));
-      }
-    }
-
-    result_type operator()(boost::blank &) const {
-      assert(!"WTF?!");
-    }
-  private:
-    int                   quantity;
-    void                 *userData;
-    StaticImpl::CallBack  callBack;
-  };
-
-  void StaticImpl::MessageInstance::startHop() {
-    if (!currHop) {
-      boost::apply_visitor(Visitor(quantitiy, userData, completed),
-          static_cast<StaticImpl *>(route)->portInterface);
-      static_cast<StaticImpl *>(route)->release(this);
-      return;
-    }
-    currHop->getComponent()
-        ->executeHop(currHop->pcb, quantitiy, [this](TaskInstance *) {
-          this->finishHop();
+  void StaticImpl::MessageInstance::startHop(size_t hop) {
+    assert(currHop[hop] != nullptr);
+    currHop[hop]->getComponent()
+        ->executeHop(currHop[hop]->pcb, quantitiy, [this, hop](TaskInstance *) {
+          this->finishHop(hop);
       });
   }
 
-  void StaticImpl::MessageInstance::finishHop() {
-    if (currHop->getChildHops().empty()) {
-      currHop = nullptr;
-    } else {
-      currHop = currHop->getChildHops().front();
+  void StaticImpl::MessageInstance::finishHop(size_t hop) {
+    for (ChannelInterface *ci : currHop[hop]->destinations) {
+      (*completed)(userData, quantitiy, ci);
     }
-    startHop();
+    if (!currHop[hop]->getChildHops().empty()) {
+      for (HopImpl *nextHop : currHop[hop]->getChildHops()) {
+        currHop[hop] = nextHop;
+        startHop(hop);
+        hop = nextFreeCurrHop++;
+      }
+    } else {
+      currHop[hop] = nullptr;
+      for (size_t i = 0; i < nextFreeCurrHop; ++i) {
+        if (currHop[i] != nullptr)
+          // Still some stuff running
+          return;
+      }
+      // Its all over
+      static_cast<StaticImpl *>(route)->release(this);
+    }
   }
 
   bool StaticImpl::closeStream(){

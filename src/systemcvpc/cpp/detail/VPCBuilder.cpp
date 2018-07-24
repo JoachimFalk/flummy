@@ -651,9 +651,9 @@ namespace SystemC_VPC { namespace Detail {
         } else if (nodeName == X("desthop")) {
           MaybeValue<std::string> channel = CX::getMaybeAttrValueAs<std::string>(node, X("channel"));
           if (channel.isDefined())
-            route->addDest(channel, parentHop);
+            route->addDest(channel, hop);
           else
-            route->addDest("DEFAULT", parentHop);
+            route->addDest("DEFAULT", hop);
         } else if (nodeName == X("timing")) {
           VC::Timing t = this->parseTiming(node);
           hop->setTransferTiming(t);

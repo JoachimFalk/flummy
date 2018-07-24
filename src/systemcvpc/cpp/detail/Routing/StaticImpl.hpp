@@ -99,8 +99,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     /// Other stuff
     ///
 
-    class Visitor;
-
     struct HopImpl: public Hop {
       HopImpl(Component::Ptr component)
         : Hop(component)
@@ -131,12 +129,13 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
           void           *userData,
           CallBack        completed)
         : AbstractRoute::MessageInstance(route, quantitiy, userData, completed)
-        , currHop(route->firstHopImpl) { startHop(); }
+        , nextFreeCurrHop(1), currHop { route->firstHopImpl } { startHop(0); }
     private:
-      void startHop();
-      void finishHop();
+      void startHop(size_t hop);
+      void finishHop(size_t hop);
     private:
-      HopImpl                *currHop;
+      size_t                  nextFreeCurrHop;
+      HopImpl                *currHop[1];
     };
   };
 
