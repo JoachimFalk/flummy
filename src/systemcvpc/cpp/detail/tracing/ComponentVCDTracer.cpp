@@ -36,7 +36,7 @@
 
 #include <systemcvpc/Component.hpp>
 
-#include "TracerIf.hpp"
+#include "ComponentTracerIf.hpp"
 
 #include <systemc>
 
@@ -52,11 +52,11 @@ namespace SystemC_VPC {
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-  class VcdTracer: public TracerIf {
+  class ComponentVCDTracer: public ComponentTracerIf {
   public:
-    VcdTracer(Component const *component);
+    ComponentVCDTracer(Component const *component);
 
-    ~VcdTracer();
+    ~ComponentVCDTracer();
 
     TTask         *registerTask(std::string const &name);
 
@@ -94,7 +94,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   /**
    * tiny little helper: toggle ASCII characters used for VCD tracing
    */
-  class VcdTracer::VcdTask: public TTask {
+  class ComponentVCDTracer::VcdTask: public TTask {
   public:
     static const trace_value S_SLEEP;
     static const trace_value S_BLOCKED;
@@ -204,12 +204,12 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
   }; // struct Tracing
 
-  const trace_value VcdTracer::VcdTask::S_SLEEP   = ' ';
-  const trace_value VcdTracer::VcdTask::S_BLOCKED = 'b';
-  const trace_value VcdTracer::VcdTask::S_READY   = 'w';
-  const trace_value VcdTracer::VcdTask::S_RUNNING = 'R';
+  const trace_value ComponentVCDTracer::VcdTask::S_SLEEP   = ' ';
+  const trace_value ComponentVCDTracer::VcdTask::S_BLOCKED = 'b';
+  const trace_value ComponentVCDTracer::VcdTask::S_READY   = 'w';
+  const trace_value ComponentVCDTracer::VcdTask::S_RUNNING = 'R';
 
-  class VcdTracer::VcdTaskInstance: public TTaskInstance {
+  class ComponentVCDTracer::VcdTaskInstance: public TTaskInstance {
   public:
     VcdTaskInstance(VcdTask *vcdTask)
       : vcdTask(vcdTask) {}
@@ -219,34 +219,34 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~VcdTaskInstance() {}
   };
 
-  class VcdTracer::RegisterMe {
+  class ComponentVCDTracer::RegisterMe {
   public:
     RegisterMe() {
-      VcdTracer::registerTracer("VCD",
-        [](Component const *comp) { return new VcdTracer(comp); });
+      ComponentVCDTracer::registerTracer("VCD",
+        [](Component const *comp) { return new ComponentVCDTracer(comp); });
     }
-  } VcdTracer::registerMe;
+  } ComponentVCDTracer::registerMe;
 
   #ifdef VPC_ENABLE_PLAIN_TRACING
   std::ostream * Tracing::plainTrace = new CoSupport::Streams::AOStream(std::cout, "vpc.trace", "-");
   #endif // VPC_ENABLE_PLAIN_TRACING
 
-  VcdTracer::VcdTracer(Component const *component)
+  ComponentVCDTracer::ComponentVCDTracer(Component const *component)
     : traceFile_(NULL)
     , name_(component->getName())
   {}
 
-  VcdTracer::~VcdTracer() {
+  ComponentVCDTracer::~ComponentVCDTracer() {
     if (traceFile_) {
       sc_core::sc_close_vcd_trace_file(traceFile_);
     }
   }
 
-  std::string VcdTracer::getName() const {
+  std::string ComponentVCDTracer::getName() const {
     return name_;
   }
 
-  TTask         *VcdTracer::registerTask(std::string const &name) {
+  TTask         *ComponentVCDTracer::registerTask(std::string const &name) {
     if (this->traceFile_ == NULL) {
       std::string tracefilename = this->getName(); //componentName;
 
@@ -263,7 +263,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     return newsignal;
   }
 
-  TTaskInstance *VcdTracer::release(TTask *ttask) {
+  TTaskInstance *ComponentVCDTracer::release(TTask *ttask) {
     VcdTaskInstance *ttaskInstance = new VcdTaskInstance(static_cast<VcdTask *>(ttask));
     ttaskInstance->vcdTask->traceReady();
   //// FIXME: This should become its own tracer!
@@ -271,23 +271,23 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     return ttaskInstance;
   }
 
-  void           VcdTracer::assign(TTaskInstance *ttaskInstance) {
+  void           ComponentVCDTracer::assign(TTaskInstance *ttaskInstance) {
     static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceRunning();
   }
 
-  void           VcdTracer::resign(TTaskInstance *ttaskInstance) {
+  void           ComponentVCDTracer::resign(TTaskInstance *ttaskInstance) {
     static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceReady();
   }
 
-  void           VcdTracer::block(TTaskInstance *ttaskInstance) {
+  void           ComponentVCDTracer::block(TTaskInstance *ttaskInstance) {
     static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceBlocking();
   }
 
-  void           VcdTracer::finishDii(TTaskInstance *ttaskInstance) {
+  void           ComponentVCDTracer::finishDii(TTaskInstance *ttaskInstance) {
     static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceSleeping();
   }
 
-  void           VcdTracer::finishLatency(TTaskInstance *ttaskInstance) {
+  void           ComponentVCDTracer::finishLatency(TTaskInstance *ttaskInstance) {
   //// FIXME: This should become its own tracer!
   //const_cast<Task *>(task)->traceFinishTaskLatency();
   }

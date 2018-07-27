@@ -51,7 +51,7 @@
 #include "../PowerMode.hpp"
 #include "../TaskInstance.hpp"
 #include "../Director.hpp"
-#include "../tracing/TracerIf.hpp"
+#include "../tracing/ComponentTracerIf.hpp"
 #include "../timetriggered/tt_support.hpp"
 
 #include <vector>

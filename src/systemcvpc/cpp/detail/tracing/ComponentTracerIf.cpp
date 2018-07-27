@@ -34,7 +34,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "TracerIf.hpp"
+#include "ComponentTracerIf.hpp"
 #include "TraceableComponent.hpp"
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
@@ -55,11 +55,11 @@ TTaskInstanceHolder::~TTaskInstanceHolder() {
   ttaskInstances.clear();
 }
 
-TracerIf::~TracerIf() {}
+ComponentTracerIf::~ComponentTracerIf() {}
 
-void TracerIf::registerTracer(
+void ComponentTracerIf::registerTracer(
     const char                                   *tracerName,
-    std::function<TracerIf *(Component const *)>  tracerFactory) {
+    std::function<ComponentTracerIf *(Component const *)>  tracerFactory) {
   TraceableComponent::registerTracer(tracerName, tracerFactory);
 }
 

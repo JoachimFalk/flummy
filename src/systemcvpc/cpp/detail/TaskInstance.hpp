@@ -41,7 +41,7 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/EventPair.hpp>
 
-#include "tracing/TracerIf.hpp"
+#include "tracing/ComponentTracerIf.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>

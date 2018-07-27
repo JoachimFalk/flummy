@@ -53,7 +53,7 @@
 #include "dynload/dll.hpp"
 #include "PluggablePowerGovernor.hpp"
 
-#include "tracing/TracerIf.hpp"
+#include "tracing/ComponentTracerIf.hpp"
 
 #include "ConfigCheck.hpp"
 

@@ -35,7 +35,7 @@
  */
 
 #include "RoundRobinComponent.hpp"
-#include "../tracing/TracerIf.hpp"
+#include "../tracing/ComponentTracerIf.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 

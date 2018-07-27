@@ -77,7 +77,7 @@ protected:
   ~TTaskInstanceHolder();
 };
 
-class TracerIf {
+class ComponentTracerIf {
 public:
   /// Called once per actor
   virtual TTask         *registerTask(std::string const &name) = 0;
@@ -100,11 +100,11 @@ public:
   /// Called once per actor firing to indicate that the latency of the task instance is over.
   virtual void           finishLatency(TTaskInstance *ttaskInstance) = 0;
 
-  virtual ~TracerIf();
+  virtual ~ComponentTracerIf();
 protected:
   static void registerTracer(
       const char                                   *tracerName,
-      std::function<TracerIf *(Component const *)>  tracerFactory);
+      std::function<ComponentTracerIf *(Component const *)>  tracerFactory);
 };
 
 } } } // namespace SystemC_VPC::Detail::Tracing
