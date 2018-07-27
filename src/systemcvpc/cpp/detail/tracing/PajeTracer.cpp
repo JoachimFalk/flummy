@@ -128,7 +128,12 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   PajeTracer::PajeTracer(Component const *component)
       : name_(component->getName()) {
     if (!myPajeTracer){
-      myPajeTracer.reset(new CoSupport::Tracing::PajeTracer("paje.trace"));
+      std::string traceFilename;
+
+      if (char *traceprefix = getenv("VPCTRACEFILEPREFIX"))
+        traceFilename = traceprefix;
+      traceFilename += "paje.trace";
+      myPajeTracer.reset(new CoSupport::Tracing::PajeTracer(traceFilename));
     }
     this->res_ = myPajeTracer->registerResource(component->getName().c_str());
   }
