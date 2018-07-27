@@ -37,7 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_TRACING_TRACEABLECOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_TRACING_TRACEABLECOMPONENT_HPP
 
-#include "TracerIf.hpp"
+#include "ComponentTracerIf.hpp"
 
 #include <vector>
 #include <map>
@@ -96,13 +96,13 @@ private:
   RegisterdTasks registerdTasks;
 
   /// List of all traces.
-  std::vector<TracerIf *> tracers;
+  std::vector<ComponentTracerIf *> tracers;
 
-  friend class TracerIf;
+  friend class ComponentTracerIf;
 
   static void registerTracer(
       const char                                   *tracerName,
-      std::function<TracerIf *(Component const *)>  tracerFactory);
+      std::function<ComponentTracerIf *(Component const *)>  tracerFactory);
 };
 
 } } } // namespace SystemC_VPC::Detail::Tracing

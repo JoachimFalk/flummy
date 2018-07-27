@@ -48,7 +48,7 @@
 #include "../PowerSumming.hpp"
 #include "../Director.hpp"
 #include "../timetriggered/tt_support.hpp"
-#include "../tracing/TracerIf.hpp"
+#include "../tracing/ComponentTracerIf.hpp"
 
 #include <systemc>
 

@@ -36,7 +36,7 @@
 
 #include <systemcvpc/Component.hpp>
 
-#include "TracerIf.hpp"
+#include "ComponentTracerIf.hpp"
 
 #include <CoSupport/String/color.hpp>
 #include <CoSupport/String/DoubleQuotedString.hpp>
@@ -60,9 +60,9 @@ namespace SystemC_VPC {
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-  class PajeTracer: public TracerIf {
+  class ComponentPajeTracer: public ComponentTracerIf {
   public:
-    PajeTracer(Component const *component);
+    ComponentPajeTracer(Component const *component);
 
     TTask         *registerTask(std::string const &name);
 
@@ -78,7 +78,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     void           finishLatency(TTaskInstance *ttaskInstance);
 
-    ~PajeTracer();
+    ~ComponentPajeTracer();
   private:
     class PajeTask;
     class PajeTaskInstance;
@@ -92,7 +92,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     sc_core::sc_time startTime;
   };
 
-  class PajeTracer::PajeTask: public TTask {
+  class ComponentPajeTracer::PajeTask: public TTask {
   public:
     PajeTask(std::string const &name)
       : task(myPajeTracer->registerActivity(name.c_str(),true))
@@ -107,7 +107,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~PajeTask() {}
   };
 
-  class PajeTracer::PajeTaskInstance: public TTaskInstance {
+  class ComponentPajeTracer::PajeTaskInstance: public TTaskInstance {
   public:
     PajeTaskInstance(PajeTask *pajeTask)
       : pajeTask(pajeTask) {}
@@ -117,15 +117,15 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~PajeTaskInstance() {}
   };
 
-  class PajeTracer::RegisterMe {
+  class ComponentPajeTracer::RegisterMe {
   public:
     RegisterMe() {
-      PajeTracer::registerTracer("PAJE",
-        [](Component const *comp) { return new PajeTracer(comp); });
+      ComponentPajeTracer::registerTracer("PAJE",
+        [](Component const *comp) { return new ComponentPajeTracer(comp); });
     }
-  } PajeTracer::registerMe;
+  } ComponentPajeTracer::registerMe;
 
-  PajeTracer::PajeTracer(Component const *component)
+  ComponentPajeTracer::ComponentPajeTracer(Component const *component)
       : name_(component->getName()) {
     if (!myPajeTracer){
       std::string traceFilename;
@@ -138,15 +138,15 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     this->res_ = myPajeTracer->registerResource(component->getName().c_str());
   }
 
-  PajeTracer::~PajeTracer() {
+  ComponentPajeTracer::~ComponentPajeTracer() {
 
   }
 
-  TTask         *PajeTracer::registerTask(std::string const &name) {
+  TTask         *ComponentPajeTracer::registerTask(std::string const &name) {
     return new PajeTask(name);
   }
 
-  TTaskInstance *PajeTracer::release(TTask *ttask) {
+  TTaskInstance *ComponentPajeTracer::release(TTask *ttask) {
     PajeTaskInstance *ttaskInstance = new PajeTaskInstance(static_cast<PajeTask *>(ttask));
     myPajeTracer->traceEvent(this->res_,
         ttaskInstance->pajeTask->releaseEvent,
@@ -154,29 +154,29 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     return  ttaskInstance;
   }
 
-  void           PajeTracer::assign(TTaskInstance *ttaskInstance) {
+  void           ComponentPajeTracer::assign(TTaskInstance *ttaskInstance) {
     this->startTime = sc_core::sc_time_stamp();
   }
 
-  void           PajeTracer::resign(TTaskInstance *ttaskInstance) {
+  void           ComponentPajeTracer::resign(TTaskInstance *ttaskInstance) {
     myPajeTracer->traceActivity(this->res_,
         static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
         this->startTime, sc_core::sc_time_stamp());
   }
 
-  void           PajeTracer::block(TTaskInstance *ttaskInstance) {
+  void           ComponentPajeTracer::block(TTaskInstance *ttaskInstance) {
     myPajeTracer->traceActivity(this->res_,
         static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
         this->startTime, sc_core::sc_time_stamp());
   }
 
-  void           PajeTracer::finishDii(TTaskInstance *ttaskInstance) {
+  void           ComponentPajeTracer::finishDii(TTaskInstance *ttaskInstance) {
     myPajeTracer->traceActivity(this->res_,
         static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
         this->startTime, sc_core::sc_time_stamp());
   }
 
-  void           PajeTracer::finishLatency(TTaskInstance *ttaskInstance) {
+  void           ComponentPajeTracer::finishLatency(TTaskInstance *ttaskInstance) {
     myPajeTracer->traceEvent(this->res_,
         static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->latencyEvent,
         sc_core::sc_time_stamp());

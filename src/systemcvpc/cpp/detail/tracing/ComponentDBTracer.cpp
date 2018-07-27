@@ -36,7 +36,7 @@
 
 #include <systemcvpc/Component.hpp>
 
-#include "TracerIf.hpp"
+#include "ComponentTracerIf.hpp"
 
 #include <sys/socket.h>
 #include <netdb.h>
@@ -49,9 +49,9 @@ namespace SystemC_VPC {
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-  class DataBaseTracer: public TracerIf {
+  class ComponentDBTracer: public ComponentTracerIf {
   public:
-    DataBaseTracer(Component const *component);
+    ComponentDBTracer(Component const *component);
 
     TTask         *registerTask(std::string const &name);
 
@@ -79,7 +79,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     std::string    resourceName_;
   };
 
-  class DataBaseTracer::DataBaseProxy {
+  class ComponentDBTracer::DataBaseProxy {
   public:
     static DataBaseProxy &getDataBaseProxy() {
       static DataBaseProxy dbProxy("VPC");
@@ -105,15 +105,15 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     void close();
   };
 
-  DataBaseTracer::DataBaseProxy::DataBaseProxy(const char* database_name, uint16_t port)
+  ComponentDBTracer::DataBaseProxy::DataBaseProxy(const char* database_name, uint16_t port)
     : databaseName_(database_name)
     , portNumber_(port)
     { open(); }
 
-  DataBaseTracer::DataBaseProxy::~DataBaseProxy()
+  ComponentDBTracer::DataBaseProxy::~DataBaseProxy()
     { close(); }
 
-  void DataBaseTracer::DataBaseProxy::addEvent(
+  void ComponentDBTracer::DataBaseProxy::addEvent(
       const char *resourceName,
       const char *taskName,
       const char *status,
@@ -124,7 +124,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
         timeStamp, taskId);
   }
 
-  void DataBaseTracer::DataBaseProxy::open() {
+  void ComponentDBTracer::DataBaseProxy::open() {
 
     struct sockaddr_in6 socketAddr;
     int socketFD;
@@ -152,11 +152,11 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     fprintf(socket_, "%s\r\n", databaseName_);
   }
 
-  void DataBaseTracer::DataBaseProxy::close() {
+  void ComponentDBTracer::DataBaseProxy::close() {
     fprintf(socket_, "CLOSE\r\n");
   }
 
-  class DataBaseTracer::DBTask: public TTask {
+  class ComponentDBTracer::DBTask: public TTask {
   public:
     DBTask(std::string const &name)
       : name(name) {}
@@ -166,7 +166,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~DBTask() {}
   };
 
-  class DataBaseTracer::DBTaskInstance: public TTaskInstance {
+  class ComponentDBTracer::DBTaskInstance: public TTaskInstance {
   public:
     DBTaskInstance(DBTask *dbTask)
       : dbTask(dbTask), instanceId(instanceIdCounter++) {}
@@ -179,46 +179,46 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~DBTaskInstance() {}
   };
 
-  class DataBaseTracer::RegisterMe {
+  class ComponentDBTracer::RegisterMe {
   public:
     RegisterMe() {
-      DataBaseTracer::registerTracer("DB",
-        [](Component const *comp) { return new DataBaseTracer(comp); });
+      ComponentDBTracer::registerTracer("DB",
+        [](Component const *comp) { return new ComponentDBTracer(comp); });
     }
-  } DataBaseTracer::registerMe;
+  } ComponentDBTracer::registerMe;
 
-  size_t DataBaseTracer::DBTaskInstance::instanceIdCounter = 0;
+  size_t ComponentDBTracer::DBTaskInstance::instanceIdCounter = 0;
 
-  DataBaseTracer::DataBaseTracer(Component const *component)
+  ComponentDBTracer::ComponentDBTracer(Component const *component)
     : dbProxy_(DataBaseProxy::getDataBaseProxy())
     , resourceName_(component->getName()) {}
 
-  TTask         *DataBaseTracer::registerTask(std::string const &name)
+  TTask         *ComponentDBTracer::registerTask(std::string const &name)
     { return new DBTask(name); }
 
-  TTaskInstance *DataBaseTracer::release(TTask *ttask) {
+  TTaskInstance *ComponentDBTracer::release(TTask *ttask) {
     TTaskInstance *ttaskInstance =
         new DBTaskInstance(static_cast<DBTask *>(ttask));
     this->addEvent(ttaskInstance, "s");
     return ttaskInstance;
   }
 
-  void DataBaseTracer::finishDii(TTaskInstance *ttaskInstance)
+  void ComponentDBTracer::finishDii(TTaskInstance *ttaskInstance)
     { this->addEvent(ttaskInstance, "d"); }
 
-  void DataBaseTracer::finishLatency(TTaskInstance *ttaskInstance)
+  void ComponentDBTracer::finishLatency(TTaskInstance *ttaskInstance)
     { this->addEvent(ttaskInstance, "l"); }
 
-  void DataBaseTracer::assign(TTaskInstance *ttaskInstance)
+  void ComponentDBTracer::assign(TTaskInstance *ttaskInstance)
     { this->addEvent(ttaskInstance, "a"); }
 
-  void DataBaseTracer::resign(TTaskInstance *ttaskInstance)
+  void ComponentDBTracer::resign(TTaskInstance *ttaskInstance)
     { this->addEvent(ttaskInstance, "r"); }
 
-  void DataBaseTracer::block(TTaskInstance *ttaskInstance)
+  void ComponentDBTracer::block(TTaskInstance *ttaskInstance)
     { this->addEvent(ttaskInstance, "b"); }
 
-  void DataBaseTracer::addEvent(TTaskInstance const *ttaskInstance_, char const *state) {
+  void ComponentDBTracer::addEvent(TTaskInstance const *ttaskInstance_, char const *state) {
     DBTaskInstance const *ttaskInstance = static_cast<DBTaskInstance const *>(ttaskInstance_);
 
     dbProxy_.addEvent(resourceName_.c_str(),

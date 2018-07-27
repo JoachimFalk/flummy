@@ -47,7 +47,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 TraceableComponent::TraceableComponent()
   : tracingStarted(false) {}
 
-typedef std::map<std::string, std::function<TracerIf *(Component const *)> > TracerByName;
+typedef std::map<std::string, std::function<ComponentTracerIf *(Component const *)> > TracerByName;
 
 /// We need this to be independent from the global variable initialization order.
 TracerByName &getTracerByName() {
@@ -57,7 +57,7 @@ TracerByName &getTracerByName() {
 
 void TraceableComponent::registerTracer(
     const char                                   *tracerName,
-    std::function<TracerIf *(Component const *)>  tracerFactory)
+    std::function<ComponentTracerIf *(Component const *)>  tracerFactory)
 {
   sassert(getTracerByName().insert(std::make_pair(tracerName, tracerFactory)).second);
 }
@@ -75,7 +75,7 @@ void TraceableComponent::addTracer(
     throw std::runtime_error(msg.str().c_str());
   }
   assert(registerdTasks.empty());
-  TracerIf *tracer = iter->second(componentConfig);
+  ComponentTracerIf *tracer = iter->second(componentConfig);
   assert(tracer);
   tracers.push_back(tracer);
 }
@@ -96,7 +96,7 @@ void TraceableComponent::startTracing() {
   for (RegisterdTasks::value_type const &entry : registerdTasks) {
     std::string const &name = entry.first;
     for (TTaskHolder *ttaskHolder : entry.second) {
-      for (TracerIf *tracer : tracers)
+      for (ComponentTracerIf *tracer : tracers)
         ttaskHolder->ttasks.push_back(tracer->registerTask(name));
     }
   }
@@ -162,7 +162,7 @@ void TraceableComponent::finishLatencyTaskInstance(TTaskInstanceHolder *ttaskIns
 }
 
 TraceableComponent::~TraceableComponent() {
-  for (TracerIf *tracer : tracers)
+  for (ComponentTracerIf *tracer : tracers)
     delete tracer;
   tracers.clear();
 }
