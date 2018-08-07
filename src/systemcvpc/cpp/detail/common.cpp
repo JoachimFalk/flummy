@@ -40,6 +40,7 @@
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
+#include <stdexcept>
 
 namespace SystemC_VPC { namespace Detail {
 
