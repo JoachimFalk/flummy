@@ -81,7 +81,7 @@ namespace SystemC_VPC { namespace Detail {
     /**
      * \brief Initializes VPC Framework using a configuration file
      */
-    void buildVPC();
+    void buildVPC(std::string const &vpcConfigFile);
 
   private:
     static const char *B_TRANSPORT;

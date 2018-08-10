@@ -191,13 +191,9 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief sets ups VPC Framework
    */
-  void VPCBuilder::buildVPC() {
-    char *cfile = getenv("VPCCONFIGURATION");
-
-    if (cfile == NULL)
-      FALLBACKMODE=true;
-    else if (!exists(fs::path(cfile))) {
-      std::cerr << "VPCBuilder> Warning: could not open '" << cfile << "'" << std::endl;
+  void VPCBuilder::buildVPC(std::string const &vpcConfigFile) {
+    if (!exists(fs::path(vpcConfigFile))) {
+      std::cerr << "VPCBuilder> Warning: could not open '" << vpcConfigFile << "'" << std::endl;
       FALLBACKMODE=true;
     } else
       FALLBACKMODE=false;
@@ -206,8 +202,8 @@ namespace SystemC_VPC { namespace Detail {
       this->director->FALLBACKMODE = true;
       DBG_OUT("running fallbackmode" << std::endl);
     } else { //!FALLBACKMODE
-      DBG_OUT("VPCBuilder> VPCCONFIGURATION set to " << cfile << std::endl);
-      handler.load(cfile);
+      DBG_OUT("VPCBuilder> VPCCONFIGURATION set to " << vpcConfigFile << std::endl);
+      handler.load(vpcConfigFile.c_str());
       
       // set treewalker to documentroot
       vpcConfigTreeWalker =

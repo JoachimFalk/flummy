@@ -134,6 +134,7 @@ void SystemCVPCSimulator::populateOptionsDescription(
       ("vpc-config",
        po::value<std::string>())
       ;
+    unsetenv("VPCCONFIGURATION");
   }
 }
 
@@ -163,16 +164,9 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 #endif //!defined(SYSTEMCVPC_ENABLE_DEBUG)
 
   if (retval != IS_DISABLED) {
-#ifdef _MSC_VER
-    std::string envVar("VPCCONFIGURATION=" + vpcConfigFile);
-    putenv((char *) envVar.c_str());
-#else
-    setenv("VPCCONFIGURATION", vpcConfigFile.c_str(), 1);
-#endif // _MSC_VER
-
     try {
       VPCBuilder builder(&Director::getInstance());
-      builder.buildVPC();
+      builder.buildVPC(vpcConfigFile);
     } catch (InvalidArgumentException &e) {
       std::cerr << "VPCBuilder> Got exception while setting up VPC:\n"
                 << e.what() << std::endl;
@@ -186,13 +180,12 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
     Director::getInstance().beforeVpcFinalize();
     if (Director::getInstance().FALLBACKMODE) {
       if (getDbgOut().isVisible(Debug::High))
-        getDbgOut() << "SystemC_VPC has invalid configuration " << getenv("VPCCONFIGURATION") << " => VPC still off" << std::endl;
+        getDbgOut() << "SystemC_VPC has invalid configuration " << vpcConfigFile << " => VPC still off" << std::endl;
       retval = IS_DISABLED;
     } else {
       if (getDbgOut().isVisible(Debug::High))
-        getDbgOut() << "SystemC_VPC has valid configuration " << getenv("VPCCONFIGURATION") << " => turning VPC on" << std::endl;
+        getDbgOut() << "SystemC_VPC has valid configuration " << vpcConfigFile << " => turning VPC on" << std::endl;
     }
-    unsetenv("VPCCONFIGURATION");
   }
 
   return retval;
