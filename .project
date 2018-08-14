@@ -3,20 +3,10 @@
 	<name>SystemC-VPC</name>
 	<comment></comment>
 	<projects>
-		<project>BuildSystem</project>
 		<project>Support</project>
+		<project>SysteMoC</project>
 	</projects>
 	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>org.eclipse.buildship.core.gradleprojectbuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.cdt.autotools.core.genmakebuilderV2</name>
 			<arguments>
@@ -36,8 +26,6 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
 		<nature>org.eclipse.cdt.core.cnature</nature>
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
@@ -48,7 +36,7 @@
 		<link>
 			<name>obj</name>
 			<type>2</type>
-			<locationURI>WORKSPACE_LOC/obj/SystemC-VPC</locationURI>
+			<locationURI>$%7BWORKSPACE_LOC%7D/obj/SystemC-VPC</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
