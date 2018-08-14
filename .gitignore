@@ -8,6 +8,7 @@ Debug-VPC
 Release
 Release-VPC
 Release-VPC-noVCD
+.classpath
 *.user
 .settings/org.eclipse.buildship.core.prefs
 /bin/
