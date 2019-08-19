@@ -23,7 +23,7 @@
 include $(auxdir)/jfrules.mk
 include ../BuildSystem/doxygen.am
 
-SUBDIRS = src/systemcvpc/headers/
+SUBDIRS = . src/systemcvpc/headers testcases
 
 AUTOMAKE_OPTIONS = nostdinc
 # This is only needed if there is a configure.ac in this directory
