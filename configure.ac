@@ -77,6 +77,9 @@ ACJF_CHECK_LIB_COSUPPORT_TRACING
 ACJF_CHECK_LIB_COSUPPORT_STREAMS
 ACJF_CHECK_LIB_SYSTEMOC
 
+SYSTEMOC_PLUGINPATH="$acjf_abs_top_builddir/.libs"
+AC_SUBST([SYSTEMOC_PLUGINPATH])
+
 ### VPC power tracing  ###
 # --enable-power-tracing option
 AC_ARG_ENABLE(
@@ -99,6 +102,7 @@ fi
 
 AC_CONFIG_FILES(
  [Makefile]dnl
+ [testcases/Makefile]dnl
  [src/systemcvpc/headers/Makefile]dnl
  [pkgconfig/libsystemcvpc.pc]dnl
 )
