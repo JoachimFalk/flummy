@@ -103,6 +103,7 @@ fi
 AC_CONFIG_FILES(
  [Makefile]dnl
  [testcases/Makefile]dnl
+ [tutorial/Makefile]dnl
  [src/systemcvpc/headers/Makefile]dnl
  [pkgconfig/libsystemcvpc.pc]dnl
 )
