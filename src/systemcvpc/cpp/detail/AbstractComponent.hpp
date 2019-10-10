@@ -226,10 +226,10 @@ namespace SystemC_VPC { namespace Detail {
     void end_of_elaboration();
 
     /// Called once per actor firing to indicate that the DII of the task instance is over.
-    void finishDiiTaskInstance(TaskInstance *taskInstance);
+    void finishDiiTaskInstance(TaskInstance *taskInstance, bool isGuard = false);
 
     /// Called once per actor firing to indicate that the latency of the task instance is over.
-    void finishLatencyTaskInstance(TaskInstance *taskInstance);
+    void finishLatencyTaskInstance(TaskInstance *taskInstance, bool isGuard = false);
 
     typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
     typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;

@@ -81,6 +81,7 @@ void RoundRobinComponent::setActivationCallback(bool flag) {
 }
 
 void RoundRobinComponent::end_of_elaboration() {
+  this->AbstractComponent::end_of_elaboration();
   PCBPool const &pcbPool = getPCBPool();
   for (PCBPool::const_iterator it=pcbPool.begin(); it!=pcbPool.end(); ++it) {
     if (it->second->hasScheduledTask()) {
@@ -121,8 +122,8 @@ void RoundRobinComponent::check(TaskInstance *actualTask) {
     releaseTask(actualTask->getPCB(), actualTask);
     assignTaskInstance(actualTask);
     wait(actualTask->getDelay());//Director::getInstance().getOverhead() +
-    finishDiiTaskInstance(actualTask);
-    finishLatencyTaskInstance(actualTask);
+    finishDiiTaskInstance(actualTask, true);
+    finishLatencyTaskInstance(actualTask, true);
 
     std::cout << "check: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
   }
@@ -187,6 +188,7 @@ bool RoundRobinComponent::scheduleMessageTasks() {
 }
 
 void RoundRobinComponent::scheduleThread() {
+  std::cout << "RoundRobinComponent::scheduleThread() [CALLED]" << std::endl;
   while (true) {
     bool progress = scheduleMessageTasks();
     for (TaskInterface *scheduledTask: taskList) {
