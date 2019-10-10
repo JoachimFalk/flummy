@@ -621,10 +621,13 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
-  void AbstractComponent::finishDiiTaskInstance(TaskInstance *taskInstance) {
+  void AbstractComponent::finishDiiTaskInstance(TaskInstance *taskInstance, bool isGuard) {
     this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
 
     taskInstance->diiExpired();
+
+    if (isGuard)
+      return;
 
     typedef smoc::SimulatorAPI::FiringRuleInterface FiringRuleInterface;
     typedef FiringRuleInterface::PortInInfo         PortInInfo;
@@ -637,11 +640,14 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
-  void AbstractComponent::finishLatencyTaskInstance(TaskInstance *taskInstance) {
+  void AbstractComponent::finishLatencyTaskInstance(TaskInstance *taskInstance, bool isGuard) {
     // Remember last acknowledged task time
     Director::getInstance().end = sc_core::sc_time_stamp();
     this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);
     taskInstance->latExpired();
+
+    if (isGuard)
+      return;
 
     typedef smoc::SimulatorAPI::FiringRuleInterface  FiringRuleInterface;
 //  typedef smoc::SimulatorAPI::ChannelSinkInterface ChannelSinkInterface;
