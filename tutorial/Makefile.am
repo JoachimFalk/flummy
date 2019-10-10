@@ -37,15 +37,15 @@ export SCRTREEMODE_PKG_CONFIG_PATH
 
 SCRTREEMODE_PKG_CONFIG_PATH := $(subst MAGICUNLIKELYPREFIX:,,$(subst :$(top_builddir)/,:$(abs_top_builddir)/,MAGICUNLIKELYPREFIX:$(PKG_CONFIG_PATH)))
 
-#src/Makefile: src/Makefile.sample
-#	@$(MKDIR_P) src && $(SED) \
-#	    -e 's|[@]prefix[@]|$(prefix)|g' \
-#	    -e 's|[@]exec_prefix[@]|$(exec_prefix)|g' \
-#	    -e 's|[@]libdir[@]|$(libdir)|g' \
-#	  < $^ > $@ || { rm -f $@ && false; }
+src/Makefile: src/Makefile.sample
+	@$(MKDIR_P) src && $(SED) \
+	    -e 's|[@]prefix[@]|$(prefix)|g' \
+	    -e 's|[@]exec_prefix[@]|$(exec_prefix)|g' \
+	    -e 's|[@]libdir[@]|$(libdir)|g' \
+	  < $^ > $@ || { rm -f $@ && false; }
 
-#all-local: src/Makefile
-#	@$(MAKE) -C src VPATH=$(abs_srcdir)/src all
+all-local: src/Makefile
+	@$(MAKE) -C src VPATH=$(abs_srcdir)/src all
 clean-local:
 	@if test -f src/Makefile; then \
 	  $(MAKE) -C src VPATH=$(abs_srcdir)/src clean; \
@@ -53,21 +53,16 @@ clean-local:
 	fi
 	@rmdir src 2>/dev/null || :
 
-#CLEANFILES=src/Makefile
+CLEANFILES=src/Makefile
 
 docdir = ${datarootdir}/doc/SystemC-VPC
 
-#nobase_doc_DATA = \
-#	src/Makefile \
-#	src/CMakeLists.txt \
-#	src/guards/cpp/guards.cpp \
-#	src/source-sink/cpp/source-sink.cpp \
-#	src/dynamics/cpp/dynamics.cpp \
-#	src/rates/cpp/rates.cpp \
-#	src/ping/cpp/ping.cpp \
-#	src/data-flow/cpp/data-flow.cpp \
-#	src/hello-systemoc/cpp/hello-systemoc.cpp \
-#	src/mini-filter/cpp/mini-filter.cpp
+nobase_doc_DATA = \
+	src/CMakeLists.txt \
+	src/Makefile \
+	src/source-sink-config-api/cpp/vpc-source-sink-config-api.cpp \
+	src/source-sink/cpp/vpc-source-sink.cpp \
+	src/source-sink/vpc/src-snk.vpc.xml
 
 doc_DATA = \
 	tex/VPC-Tutorial-slides.pdf \
