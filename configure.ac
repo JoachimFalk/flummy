@@ -66,6 +66,10 @@ AC_EXEEXT
 
 # Checks for library functions.
 
+dnl ACJF_CHECK_LIB_SYSTEMOC must be first in order for the tutorial to build.
+dnl The library link order used by the tutorial seems to depend on the order of
+dnl directories in PKG_CONFIG_PATH and, thus, the directory containg the
+dnl SysteMoC library must be the first one.
 ACJF_CHECK_LIB_SYSTEMOC
 ACJF_CHECK_LIB_BOOST
 ACJF_CHECK_LIB_SYSTEMC
