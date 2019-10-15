@@ -42,6 +42,7 @@ namespace SystemC_VPC { namespace Detail {
 RoundRobinComponent::RoundRobinComponent(std::string const &name)
   : AbstractComponent(name)
   , useActivationCallback(false)
+  , fireActorInLoop(true)
   , actualTask(NULL)
 {
   /// FIXME: WTF?! SLOW hardcoded?
@@ -49,6 +50,20 @@ RoundRobinComponent::RoundRobinComponent(std::string const &name)
 
   SC_THREAD(scheduleThread);
 }
+
+bool RoundRobinComponent::setAttribute(AttributePtr attributePtr) {
+  if (attributePtr->getType() == "RRNOPRE") {
+    std::cout << "FLUMMY: " <<  attributePtr->getValue() << std::endl;
+    if (attributePtr->hasAttribute("fireActorInLoop")) {
+      std::string value = attributePtr->getAttribute("fireActorInLoop")->getValue();
+      fireActorInLoop = (value == "1" || value == "true");
+      assert(value == "1" || value == "true" || value == "0" || value == "false");
+    }
+    return true;
+  }
+  return this->base_type::setAttribute(attributePtr);
+}
+
 
 void RoundRobinComponent::setActivationCallback(bool flag) {
   if (useActivationCallback == flag)
@@ -121,11 +136,12 @@ void RoundRobinComponent::check(TaskInstance *actualTask) {
   if (!useActivationCallback) {
     releaseTask(actualTask->getPCB(), actualTask);
     assignTaskInstance(actualTask);
-    wait(actualTask->getDelay());//Director::getInstance().getOverhead() +
+        std::cout << "check: " << actualTask->getName() << "@"
+            << sc_core::sc_time_stamp() << " with delay "
+            << actualTask->getDelay() << std::endl;
+    wait(actualTask->getDelay());
     finishDiiTaskInstance(actualTask, true);
     finishLatencyTaskInstance(actualTask, true);
-
-    std::cout << "check: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
   }
 }
 
@@ -193,24 +209,26 @@ void RoundRobinComponent::scheduleThread() {
     bool progress = scheduleMessageTasks();
     for (TaskInterface *scheduledTask: taskList) {
       std::cout << "Checking " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
-      while (scheduledTask->canFire()) {
-        progress = true;
-        assert(readyMsgTasks.empty());
-        std::cout << "Scheduling " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
-        assert(!this->actualTask);
-        // This will invoke our compute callback and setup actualTask.
-        scheduledTask->schedule();
-        while (!actualTask ||
-               !actualTask->getPCB()->hasScheduledTask() ||
-               actualTask->getPCB()->getScheduledTask() != scheduledTask) {
+      if (scheduledTask->canFire()) {
+        do {
+          progress = true;
+          assert(readyMsgTasks.empty());
+          std::cout << "Scheduling " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
+          assert(!this->actualTask);
+          // This will invoke our compute callback and setup actualTask.
+          scheduledTask->schedule();
+          while (!actualTask ||
+                 !actualTask->getPCB()->hasScheduledTask() ||
+                 actualTask->getPCB()->getScheduledTask() != scheduledTask) {
+            scheduleMessageTasks();
+            if (!actualTask ||
+                !actualTask->getPCB()->hasScheduledTask() ||
+                actualTask->getPCB()->getScheduledTask() != scheduledTask)
+              wait(readyEvent);
+          }
+          actualTask = nullptr;
           scheduleMessageTasks();
-          if (!actualTask ||
-              !actualTask->getPCB()->hasScheduledTask() ||
-              actualTask->getPCB()->getScheduledTask() != scheduledTask)
-            wait(readyEvent);
-        }
-        actualTask = nullptr;
-        scheduleMessageTasks();
+        } while (fireActorInLoop && scheduledTask->canFire());
       }
     }
     if (!progress) {

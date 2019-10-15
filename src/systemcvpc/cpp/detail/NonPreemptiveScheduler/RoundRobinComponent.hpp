@@ -49,12 +49,12 @@ namespace SystemC_VPC { namespace Detail {
 
 class RoundRobinComponent : public AbstractComponent {
   SC_HAS_PROCESS(RoundRobinComponent);
+
+  typedef AbstractComponent base_type;
 public:
   RoundRobinComponent(std::string const &name);
 
 protected:
-  bool useActivationCallback;
-
   void setActivationCallback(bool flag);
 
   void end_of_elaboration();
@@ -94,8 +94,14 @@ protected:
 
   void scheduleThread();
 
+  bool setAttribute(AttributePtr attributePtr);
+
   virtual ~RoundRobinComponent();
 private:
+  bool useActivationCallback;
+
+  /// Indicates if this scheduler will fire an actor till it is no longer fireable.
+  bool fireActorInLoop;
 
   /// This list contains the message tasks that will appear
   /// via compute calls.
