@@ -105,8 +105,8 @@ namespace SystemC_VPC {
       return this->type==check;
     }
 
-    void setValue(std::string);
-    void setType(std::string);
+//  void setValue(std::string);
+//  void setType(std::string);
 
     ~Attribute(){}
   private:

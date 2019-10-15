@@ -136,12 +136,12 @@ namespace SystemC_VPC {
     return type;
   }
 
-  void Attribute::setValue(std::string newValue){
-    value=newValue;
-  }
-
-  void Attribute::setType(std::string newType){
-    type=newType;
-  }
+//void Attribute::setValue(std::string newValue){
+//  value=newValue;
+//}
+//
+//void Attribute::setType(std::string newType){
+//  type=newType;
+//}
 
 } // namespace SystemC_VPC::Detail
