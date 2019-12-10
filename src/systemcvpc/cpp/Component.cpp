@@ -152,7 +152,7 @@ void Component::addAttribute(AttributePtr attribute) {
   } else if (attribute->isType("tracing")) {
     static_cast<Detail::AbstractComponent *>(this)->addTracer(attribute->getValue().c_str(), this);
   } else if (!static_cast<Detail::AbstractComponent *>(this)->setAttribute(attribute)) {
-    throw std::runtime_error("Unhandled attribute");
+    throw std::runtime_error("Unhandled attribute " + attribute->getType());
   }
 }
 
