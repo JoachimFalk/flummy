@@ -63,8 +63,6 @@
 
 #include "vpc-dtd.c" // get DTD
 
-#define X(x) reinterpret_cast<XMLCh const *>(u##x)
-
 namespace SystemC_VPC { namespace Detail {
 
   //using namespace CoSupport::XML::Xerces;
@@ -130,60 +128,13 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   VPCBuilder::VPCBuilder(Director *director)
-    : FALLBACKMODE(false),
-      vpcConfigTreeWalker(NULL),
-      director(director)
+    : FALLBACKMODE(false)
+    , vpcConfigTreeWalker(NULL)
+    , director(director)
   {
-    handler.setTopElementName(CX::XStr("vpcconfiguration"));
-    handler.setDTDUrl(CX::XStr("vpc.dtd"));
+    handler.setTopElementName(XMLCH("vpcconfiguration"));
+    handler.setDTDUrl(XMLCH("vpc.dtd"));
     handler.setDTD(vpcDTD, sizeof(vpcDTD));
-    /*
-     * SECTION: initialization of init tag values for comparison while initializing
-     */
-    resultfileStr       = "resultfile";
-    resourcesStr        = "resources";
-    mappingsStr         = "mappings";
-    componentStr        = "component";
-    mappingStr          = "mapping";
-    attributeStr        = "attribute";
-    timingStr           = "timing";
-    parameterStr        = "parameter";
-    topologyStr         = "topology";
-    hopStr              = "hop";
-    routeStr            = "route";
-    powerModeStr        = "powermode";
-    nameAttrStr         = "name";
-    countAttrStr        = "count";
-    typeAttrStr         = "type";
-    dividerAttrStr      = "divider";
-    schedulerAttrStr    = "scheduler";
-    valueAttrStr        = "value";
-    targetAttrStr       = "target";
-    sourceAttrStr       = "source";
-    delayAttrStr        = "delay";
-    diiAttrStr          = "dii";
-    latencyAttrStr      = "latency";
-    distributionsStr    = "distributions";
-    distributionStr     = "distribution";
-    minAttrStr          = "min";
-    maxAttrStr          = "max";
-    parameter1AttrStr   = "parameter1";
-    parameter2AttrStr   = "parameter2";
-    parameter3AttrStr   = "parameter3";
-    baseAttrStr         = "base";
-    fixedAttrStr        = "fixed";
-    distributionAttrStr = "distribution";
-    seedAttrStr         = "seed";
-    dataAttrStr         = "data";
-    scaleAttrStr        = "scale";
-    fnameAttrStr        = "fname";
-    destinationAttrStr  = "destination";
-    tracingAttrStr      = "tracing";
-    defaultRouteAttrStr = "default";
-
-    /*
-     * END OF SECTION: init tag values for comparison while initializing
-     */
   }
 
   VPCBuilder::~VPCBuilder() {};
@@ -218,7 +169,7 @@ namespace SystemC_VPC { namespace Detail {
       // set central seed for random number generation
       CX::XN::DOMNode *nodetest = handler.getDocument()->getDocumentElement();
 
-      MaybeValue<double> seed = CX::getAttrValueAs<MaybeValue<double> >(nodetest, seedAttrStr);
+      MaybeValue<double> seed = CX::getAttrValueAs<MaybeValue<double> >(nodetest, XMLCH("seed"));
       this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(
           seed.isDefined() ? seed.get() : time(NULL)));
       
@@ -229,7 +180,7 @@ namespace SystemC_VPC { namespace Detail {
         const CX::XStr xmlName = node->getNodeName();
         
         // find distributions tag
-        if( xmlName == distributionsStr ){
+        if( xmlName == XMLCH("distributions") ){
 
           DBG_OUT("VPCBuilder> processing distributions " << std::endl);
             
@@ -243,7 +194,7 @@ namespace SystemC_VPC { namespace Detail {
             node = vpcConfigTreeWalker->parentNode();
           }
 
-        } else if( xmlName == resourcesStr ){
+        } else if( xmlName == XMLCH("resources") ){
         
           // walk down hierachy to components
           node = vpcConfigTreeWalker->firstChild();
@@ -253,22 +204,22 @@ namespace SystemC_VPC { namespace Detail {
             for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
               const CX::XStr xmlName = node->getNodeName();
               try{
-                if( xmlName == VPCBuilder::componentStr ) {
+                if( xmlName == XMLCH("component") ) {
                   VC::Component::Ptr comp = initComponent();
                   DBG_OUT("VPCBuilder> register component: "
                           << comp->getName() << " to Director" << std::endl);
 
 
                 }else{
-                  if( xmlName == attributeStr ){
+                  if( xmlName == XMLCH("attribute") ){
 
                     const CX::XStr sType =
-                      node->getAttributes()->getNamedItem(typeAttrStr)->getNodeValue();
+                      node->getAttributes()->getNamedItem(XMLCH("type"))->getNodeValue();
                     CX::XStr sValue = "";
-                    CX::XN::DOMNode * value = node->getAttributes()->getNamedItem(valueAttrStr);
+                    CX::XN::DOMNode * value = node->getAttributes()->getNamedItem(XMLCH("value"));
                     if( value  != NULL){
                       sValue=
-                        node->getAttributes()->getNamedItem(valueAttrStr)->getNodeValue();
+                        node->getAttributes()->getNamedItem(XMLCH("value"))->getNodeValue();
                     }
 
                     if( sType == "global_governor" ){
@@ -290,7 +241,7 @@ namespace SystemC_VPC { namespace Detail {
             node = vpcConfigTreeWalker->parentNode();
           }
         // find mappings tag (not mapping)
-        }else if( xmlName == mappingsStr ){
+        }else if( xmlName == XMLCH("mappings") ){
 
           DBG_OUT("VPCBuilder> processing mappings " << std::endl);
             
@@ -305,14 +256,14 @@ namespace SystemC_VPC { namespace Detail {
             node = vpcConfigTreeWalker->parentNode();
           }
 
-        }else if( xmlName == resultfileStr ){
+        }else if( xmlName == XMLCH("resultfile") ){
            
            CX::XN::DOMNamedNodeMap * atts=node->getAttributes();
            CX::XStr vpc_result_file =
-             atts->getNamedItem(nameAttrStr)->getNodeValue();
+             atts->getNamedItem(XMLCH("name"))->getNodeValue();
            this->director->setResultFile(vpc_result_file);
         
-        }else if( xmlName == topologyStr ){
+        }else if( xmlName == XMLCH("topology") ){
           node = vpcConfigTreeWalker->getCurrentNode();
           parseTopology( node );
         }else{
@@ -334,9 +285,9 @@ namespace SystemC_VPC { namespace Detail {
     
     CX::XStr xmlName=node->getNodeName();
 
-    if( xmlName == distributionStr ){
+    if( xmlName == XMLCH("distribution") ){
       CX::XN::DOMNamedNodeMap* atts=node->getAttributes();
-      CX::NStr sName = atts->getNamedItem(nameAttrStr)->getNodeValue();
+      CX::NStr sName = atts->getNamedItem(XMLCH("name"))->getNodeValue();
       VC::createDistribution(sName,this->parseTimingModifier(node));
     }
   }
@@ -353,13 +304,13 @@ namespace SystemC_VPC { namespace Detail {
     const CX::XStr xmlName = node->getNodeName(); 
 
     // check for component tag
-    if( xmlName == VPCBuilder::componentStr ){
+    if( xmlName == XMLCH("component") ){
       
       CX::XN::DOMNamedNodeMap* atts = node->getAttributes();
   
       CX::XStr sScheduler =
-        atts->getNamedItem(VPCBuilder::schedulerAttrStr)->getNodeValue();
-      CX::XStr sName = atts->getNamedItem(VPCBuilder::nameAttrStr)->getNodeValue();
+        atts->getNamedItem(XMLCH("scheduler"))->getNodeValue();
+      CX::XStr sName = atts->getNamedItem(XMLCH("name"))->getNodeValue();
   
       DBG_OUT("VPCBuilder> initComponent: " << sName << std::endl);
 
@@ -393,15 +344,15 @@ namespace SystemC_VPC { namespace Detail {
         CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
 
         // check if its an attribute to add
-        if( xmlName == attributeStr ){
+        if( xmlName == XMLCH("attribute") ){
 
           //CX::NStr sType;
           CX::NStr sValue = "";
-          CX::NStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
+          CX::NStr sType = atts->getNamedItem(XMLCH("type"))->getNodeValue();
 
-          CX::XN::DOMNode * value = atts->getNamedItem(valueAttrStr);
+          CX::XN::DOMNode * value = atts->getNamedItem(XMLCH("value"));
           if( value  != NULL){
-            sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
+            sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
           }
 
           AttributePtr attributes(new Attribute( sType, sValue));
@@ -432,11 +383,11 @@ namespace SystemC_VPC { namespace Detail {
     DBG_OUT("VPCBuilder> entering initMappingAPStruct"<< std::endl);    
    
     // find mapping tag (not mappings)
-    if( xmlName == mappingStr ){
+    if( xmlName == XMLCH("mapping") ){
       CX::XN::DOMNamedNodeMap* atts=node->getAttributes();
-      CX::NStr sTarget = atts->getNamedItem(targetAttrStr)->getNodeValue();
+      CX::NStr sTarget = atts->getNamedItem(XMLCH("target"))->getNodeValue();
 
-      CX::NStr sSource = atts->getNamedItem(sourceAttrStr)->getNodeValue();
+      CX::NStr sSource = atts->getNamedItem(XMLCH("source"))->getNodeValue();
 
 
       DBG_OUT( "VPCBuilder> Found mapping attribute: source=" << sSource
@@ -462,7 +413,7 @@ namespace SystemC_VPC { namespace Detail {
             xmlName=attnode->getNodeName();
             CX::XN::DOMNamedNodeMap * atts=attnode->getAttributes();
 
-            if( xmlName == timingStr ){
+            if( xmlName == XMLCH("timing") ){
               try {
                 VC::Timing t = this->parseTiming( attnode );
                 if (t.getFunctionId() == defaultFunctionId) {
@@ -478,9 +429,9 @@ namespace SystemC_VPC { namespace Detail {
                 throw InvalidArgumentException(msg);
               }
               
-            }else if( xmlName == attributeStr ){
-              CX::XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
-              CX::XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
+            }else if( xmlName == XMLCH("attribute") ){
+              CX::XStr sType  = atts->getNamedItem(XMLCH("type"))->getNodeValue();
+              CX::XStr sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
 
               DBG_OUT("attribute values are: " <<sType
                       << " and " << sValue << std::endl);
@@ -523,11 +474,11 @@ namespace SystemC_VPC { namespace Detail {
       CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
 
       // check if its an attribute to add
-      if( xmlName == attributeStr ){
+      if( xmlName == XMLCH("attribute") ){
         CX::XStr sValue="";
-        CX::XStr sType = atts->getNamedItem(typeAttrStr)->getNodeValue();
-        if(atts->getNamedItem(valueAttrStr)!=NULL){
-          sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
+        CX::XStr sType = atts->getNamedItem(XMLCH("type"))->getNodeValue();
+        if(atts->getNamedItem(XMLCH("value"))!=NULL){
+          sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
         }
 
         AttributePtr fr_Attribute2(new Attribute(sType, sValue));
@@ -537,9 +488,9 @@ namespace SystemC_VPC { namespace Detail {
         attribute->addAttribute(sType, fr_Attribute2);
       }
       // check if its an Parameter to add
-      if( xmlName == parameterStr ){
-        CX::XStr sType  = atts->getNamedItem(typeAttrStr)->getNodeValue();
-        CX::XStr sValue = atts->getNamedItem(valueAttrStr)->getNodeValue();
+      if( xmlName == XMLCH("parameter") ){
+        CX::XStr sType  = atts->getNamedItem(XMLCH("type"))->getNodeValue();
+        CX::XStr sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
         attribute->addParameter( sType, sValue);
       }
     }
@@ -549,11 +500,11 @@ namespace SystemC_VPC { namespace Detail {
     try {
       // scan <topology>
       MaybeValue<bool> topologyTracing =
-          CX::getMaybeAttrValueAs<bool>(top, X("tracing"));
+          CX::getMaybeAttrValueAs<bool>(top, XMLCH("tracing"));
       if (!topologyTracing.isDefined())
         topologyTracing = false;
       MaybeValue<std::string> defaultRoute =
-          CX::getMaybeAttrValueAs<std::string>(top, X("default"));
+          CX::getMaybeAttrValueAs<std::string>(top, XMLCH("default"));
       director->defaultRoute = defaultRoute.isDefined() &&
           defaultRoute == "ignore";
 
@@ -567,15 +518,15 @@ namespace SystemC_VPC { namespace Detail {
         
         CX::XStr const xmlName = routeNode->getNodeName();
 
-        if (xmlName == X("route")) {
+        if (xmlName == XMLCH("route")) {
           // scan <route>
           MaybeValue<bool> tracing =
-              CX::getMaybeAttrValueAs<bool>(routeNode, X("tracing"));
+              CX::getMaybeAttrValueAs<bool>(routeNode, XMLCH("tracing"));
           if (!tracing.isDefined())
             tracing = topologyTracing;
 
           Route::Ptr  route;
-          std::string type = CX::getAttrValueAs<std::string>(routeNode, X("type"));
+          std::string type = CX::getAttrValueAs<std::string>(routeNode, XMLCH("type"));
 
           if (type ==  Routing::Static::Type) {
             route = parseStaticRoute(routeNode);
@@ -607,7 +558,7 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   Routing::Static::Ptr VPCBuilder::parseStaticRoute(CX::XN::DOMNode *routeNode) {
-    std::string name = CX::getAttrValueAs<std::string>(routeNode, X("name"));
+    std::string name = CX::getAttrValueAs<std::string>(routeNode, XMLCH("name"));
     Routing::Static::Ptr route = createRoute<Routing::Static>(name);
 
     // Add <hop>s
@@ -617,7 +568,7 @@ namespace SystemC_VPC { namespace Detail {
 
       CX::XStr const xmlName = hopNode->getNodeName();
 
-      if (xmlName == X("hop")) {
+      if (xmlName == XMLCH("hop")) {
         parseStaticHop(route.get(), nullptr, hopNode);
       } else {
         assert(!"WTF?! Unknown tag in <route>!");
@@ -631,7 +582,7 @@ namespace SystemC_VPC { namespace Detail {
       Routing::Static::Hop *parentHop,
       CX::XN::DOMNode      *hopNode)
   {
-    std::string hopComponent = CX::getAttrValueAs<std::string>(hopNode, X("component"));
+    std::string hopComponent = CX::getAttrValueAs<std::string>(hopNode, XMLCH("component"));
     try {
       Component::Ptr comp = getComponent(hopComponent);
 
@@ -642,21 +593,21 @@ namespace SystemC_VPC { namespace Detail {
           node != NULL;
           node = node->getNextSibling()){
         CX::XStr const nodeName = node->getNodeName();
-        if (nodeName == X("hop")) {
+        if (nodeName == XMLCH("hop")) {
           parseStaticHop(route, hop, node);
-        } else if (nodeName == X("desthop")) {
-          MaybeValue<std::string> channel = CX::getMaybeAttrValueAs<std::string>(node, X("channel"));
+        } else if (nodeName == XMLCH("desthop")) {
+          MaybeValue<std::string> channel = CX::getMaybeAttrValueAs<std::string>(node, XMLCH("channel"));
           if (channel.isDefined())
             route->addDest(channel, hop);
           else
             route->addDest("DEFAULT", hop);
-        } else if (nodeName == X("timing")) {
+        } else if (nodeName == XMLCH("timing")) {
           VC::Timing t = this->parseTiming(node);
           hop->setTransferTiming(t);
-        } else if (nodeName == X("attribute")) {
-          std::string type = CX::getAttrValueAs<std::string>(node, X("type"));
+        } else if (nodeName == XMLCH("attribute")) {
+          std::string type = CX::getAttrValueAs<std::string>(node, XMLCH("type"));
           if (type == STR_VPC_PRIORITY) {
-            hop->setPriority(CX::getAttrValueAs<int>(node, X("value")));
+            hop->setPriority(CX::getAttrValueAs<int>(node, XMLCH("value")));
           } else {
             assert(!"WTF?! Unknown attribute in <hop>!");
           }
@@ -677,17 +628,17 @@ namespace SystemC_VPC { namespace Detail {
     t.setPowerMode("SLOW");
 
     CX::XN::DOMNamedNodeMap* atts = node->getAttributes();
-    if( NULL != atts->getNamedItem(powerModeStr) ) {
-      t.setPowerMode(CX::NStr(atts->getNamedItem(powerModeStr)->getNodeValue()));
+    if( NULL != atts->getNamedItem(XMLCH("powermode")) ) {
+      t.setPowerMode(CX::NStr(atts->getNamedItem(XMLCH("powermode"))->getNodeValue()));
     }
-    if( NULL != atts->getNamedItem(fnameAttrStr) ) {
-      CX::XStr attribute = atts->getNamedItem(fnameAttrStr)->getNodeValue();
+    if( NULL != atts->getNamedItem(XMLCH("fname")) ) {
+      CX::XStr attribute = atts->getNamedItem(XMLCH("fname"))->getNodeValue();
       t.setFunction(attribute);
     }
 
-    CX::XN::DOMNode* dii     = atts->getNamedItem(diiAttrStr);
-    CX::XN::DOMNode* delay   = atts->getNamedItem(delayAttrStr);
-    CX::XN::DOMNode* latency = atts->getNamedItem(latencyAttrStr);
+    CX::XN::DOMNode* dii     = atts->getNamedItem(XMLCH("dii"));
+    CX::XN::DOMNode* delay   = atts->getNamedItem(XMLCH("delay"));
+    CX::XN::DOMNode* latency = atts->getNamedItem(XMLCH("latency"));
     bool hasDii     = (dii != NULL);
     bool hasDelay   = (delay != NULL);
     bool hasLatency = (latency != NULL);
@@ -712,7 +663,7 @@ namespace SystemC_VPC { namespace Detail {
     }
 
     //add the distribution to the timing if existant
-    CX::XN::DOMNode* distribution = atts->getNamedItem(distributionAttrStr);
+    CX::XN::DOMNode* distribution = atts->getNamedItem(XMLCH("distribution"));
     bool hasDistribution = (distribution != NULL);
     if (hasDistribution){
       std::string distr = CX::NStr(distribution->getNodeValue());
@@ -732,17 +683,17 @@ namespace SystemC_VPC { namespace Detail {
   boost::shared_ptr<DistributionTimingModifier> VPCBuilder::parseTimingModifier(CX::XN::DOMNode* node) {
     //parse attributes
     CX::XN::DOMNamedNodeMap* atts = node->getAttributes();
-    CX::XN::DOMNode* min = atts->getNamedItem(minAttrStr);
-    CX::XN::DOMNode* max = atts->getNamedItem(maxAttrStr);
-    CX::XN::DOMNode* parameter1 = atts->getNamedItem(parameter1AttrStr);
-    CX::XN::DOMNode* parameter2 = atts->getNamedItem(parameter2AttrStr);
-    CX::XN::DOMNode* parameter3 = atts->getNamedItem(parameter3AttrStr);
-    CX::XN::DOMNode* seed = atts->getNamedItem(seedAttrStr);
-    CX::XN::DOMNode* data = atts->getNamedItem(dataAttrStr);
-    CX::XN::DOMNode* scale = atts->getNamedItem(scaleAttrStr);
-    CX::XN::DOMNode* fixed = atts->getNamedItem(fixedAttrStr);
-    CX::XN::DOMNode* base = atts->getNamedItem(baseAttrStr);
-    CX::XN::DOMNode* distribution = atts->getNamedItem(typeAttrStr);
+    CX::XN::DOMNode* min = atts->getNamedItem(XMLCH("min"));
+    CX::XN::DOMNode* max = atts->getNamedItem(XMLCH("max"));
+    CX::XN::DOMNode* parameter1 = atts->getNamedItem(XMLCH("parameter1"));
+    CX::XN::DOMNode* parameter2 = atts->getNamedItem(XMLCH("parameter2"));
+    CX::XN::DOMNode* parameter3 = atts->getNamedItem(XMLCH("parameter3"));
+    CX::XN::DOMNode* seed = atts->getNamedItem(XMLCH("seed"));
+    CX::XN::DOMNode* data = atts->getNamedItem(XMLCH("data"));
+    CX::XN::DOMNode* scale = atts->getNamedItem(XMLCH("scale"));
+    CX::XN::DOMNode* fixed = atts->getNamedItem(XMLCH("fixed"));
+    CX::XN::DOMNode* base = atts->getNamedItem(XMLCH("base"));
+    CX::XN::DOMNode* distribution = atts->getNamedItem(XMLCH("type"));
     bool hasMin = (min != NULL);
     bool hasMax = (max != NULL);
     bool hasParameter1 = (parameter1 != NULL);
