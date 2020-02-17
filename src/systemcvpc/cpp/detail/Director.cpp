@@ -47,7 +47,6 @@
 #include "ConfigCheck.hpp"
 #include "DebugOStream.hpp"
 #include "HysteresisLocalGovernor.hpp"
-#include "FastLink.hpp"
 
 #include "PluggablePowerGovernor.hpp"
 #include "PowerSumming.hpp"
@@ -60,7 +59,7 @@
 
 #include <systemc>
 
-#include "detail/AbstractRoute.hpp"
+#include "AbstractRoute.hpp"
 
 #include <iostream>
 #include <map>
@@ -130,12 +129,6 @@ namespace SystemC_VPC { namespace Detail {
     }
     delete powerSumming;
 #endif // NO_POWER_SUM
-  }
-
-  //
-  const Delayer * Director::getComponent(FastLink const *vpcLink) const {
-    assert(vpcLink->component);
-    return vpcLink->component;
   }
 
   static

@@ -112,7 +112,6 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/DebugOStream.cpp \
 	src/systemcvpc/cpp/detail/Delayer.cpp \
 	src/systemcvpc/cpp/detail/Director.cpp \
-	src/systemcvpc/cpp/detail/FastLink.cpp \
 	src/systemcvpc/cpp/detail/FunctionTiming.cpp \
 	src/systemcvpc/cpp/detail/HysteresisLocalGovernor.cpp \
 	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \

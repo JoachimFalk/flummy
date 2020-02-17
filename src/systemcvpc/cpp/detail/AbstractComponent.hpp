@@ -271,6 +271,7 @@ namespace SystemC_VPC { namespace Detail {
 
     virtual ~AbstractComponent();
   private:
+    class FastLink;
     class InputsAvailableListener;
 
     /// Implement interface to SysteMoC

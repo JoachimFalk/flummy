@@ -48,7 +48,6 @@
 #include "ComponentObserver.hpp"
 #include "ComponentInfo.hpp"
 #include "HysteresisLocalGovernor.hpp"
-#include "FastLink.hpp"
 
 #include "dynload/dll.hpp"
 #include "PluggablePowerGovernor.hpp"
@@ -405,6 +404,32 @@ namespace SystemC_VPC { namespace Detail {
     task->setScheduler(this);
     task->setSchedulerInfo(pcb);
   }
+
+  /**
+   *
+   */
+  class AbstractComponent::FastLink {
+  public:
+    FastLink()
+      : component(nullptr)
+      , process(-1)
+      , complexity(0)
+    { }
+
+    FastLink(AbstractComponent *component, ProcessId pid, FunctionIds actionIds, FunctionIds guardIds, int complexity)
+      : component(component)
+      , process(pid)
+      , actionIds(actionIds)
+      , guardIds(guardIds)
+      , complexity(complexity)
+    { }
+
+    AbstractComponent   *component;
+    ProcessId            process;
+    FunctionIds          actionIds;
+    FunctionIds          guardIds;
+    int                  complexity;
+  };
 
   void AbstractComponent::registerFiringRule(TaskInterface *actor, smoc::SimulatorAPI::FiringRuleInterface *fr) {
     const char                        *actorName       = actor->name();

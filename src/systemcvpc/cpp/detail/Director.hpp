@@ -42,8 +42,7 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/InvalidArgumentException.hpp>
 #include <systemcvpc/Attribute.hpp>
-
-#include "FastLink.hpp"
+#include <systemcvpc/datatypes.hpp>
 
 #include <boost/function.hpp>
 
@@ -101,11 +100,6 @@ namespace SystemC_VPC { namespace Detail {
 
     ~Director();
 
-    /**
-     * \brief resolve mapping
-     */
-    const Delayer *getComponent(FastLink const *vpcLink) const ;
-    
     void setResultFile(std::string vpc_result_file){
       this->vpc_result_file = vpc_result_file;
       remove(vpc_result_file.c_str());

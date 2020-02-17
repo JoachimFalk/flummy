@@ -42,7 +42,6 @@
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
-#include "FastLink.hpp"
 #include "PowerMode.hpp"
 #include "FunctionTiming.hpp"
 #include "tracing/ComponentTracerIf.hpp"
