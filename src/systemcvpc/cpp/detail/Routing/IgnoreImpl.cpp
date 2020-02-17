@@ -35,7 +35,6 @@
  */
 
 #include "IgnoreImpl.hpp"
-#include "../Director.hpp"
 #include "../DebugOStream.hpp"
 
 #include <CoSupport/Tracing/TracingFactory.hpp>

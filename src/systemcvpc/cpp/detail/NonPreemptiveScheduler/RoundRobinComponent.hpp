@@ -38,7 +38,6 @@
 #define _INCLUDED_SYSTEMCVPC_DETAIL_NONPREEMPTIVESCHEDULER_ROUNDROBINCOMPONENT_HPP
 
 #include "../AbstractComponent.hpp"
-#include "../Director.hpp"
 
 //#include "memory.h"
 

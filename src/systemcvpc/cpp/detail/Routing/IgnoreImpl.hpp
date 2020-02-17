@@ -40,7 +40,6 @@
 #include <systemcvpc/Routing/Ignore.hpp>
 #include <systemcvpc/EventPair.hpp>
 
-#include "../Director.hpp"
 #include "../AbstractRoute.hpp"
 #include "../AbstractComponent.hpp"
 #include "../ProcessControlBlock.hpp"

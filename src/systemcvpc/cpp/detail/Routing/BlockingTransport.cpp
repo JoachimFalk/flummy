@@ -35,7 +35,6 @@
  */
 
 #include "BlockingTransport.hpp"
-#include "../Director.hpp"
 #include "../DebugOStream.hpp"
 
 namespace SystemC_VPC { namespace Detail { namespace Routing {
