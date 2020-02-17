@@ -298,6 +298,9 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
+  void AbstractComponent::initialize(const Director *d) {
+  }
+
   bool AbstractComponent::getCanExecuteTasks() const {
       return canExecuteTasks;
   }
@@ -352,11 +355,11 @@ namespace SystemC_VPC { namespace Detail {
 
   AbstractComponent::AbstractComponent(std::string const &name)
     : sc_core::sc_module(sc_core::sc_module_name(name.c_str()))
-    , Delayer(name)
     , requestExecuteTasks(false)
     , localGovernorFactory(nullptr)
     , midPowerGov(nullptr)
     , powerAttribute(new Attribute("",""))
+    , componentName(name)
     , powerMode(nullptr)
     , canExecuteTasks(true)
   {

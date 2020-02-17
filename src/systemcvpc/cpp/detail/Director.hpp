@@ -61,8 +61,6 @@ namespace SystemC_VPC { namespace Detail {
   typedef std::vector<std::string> FunctionNames;
 
   class PowerSumming;
-  class Delayer;
-  class AbstractRoute;
   class PluggableGlobalPowerGovernor;
 
   template <class T> class PlugInFactory;

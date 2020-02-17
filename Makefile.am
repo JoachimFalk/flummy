@@ -110,10 +110,10 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/ConfigCheck.cpp \
 	src/systemcvpc/cpp/detail/Configuration.cpp \
 	src/systemcvpc/cpp/detail/DebugOStream.cpp \
-	src/systemcvpc/cpp/detail/Delayer.cpp \
 	src/systemcvpc/cpp/detail/Director.cpp \
 	src/systemcvpc/cpp/detail/FunctionTiming.cpp \
 	src/systemcvpc/cpp/detail/HysteresisLocalGovernor.cpp \
+	src/systemcvpc/cpp/detail/ObservableComponent.cpp \
 	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \
 	src/systemcvpc/cpp/detail/PowerSumming.cpp \
 	src/systemcvpc/cpp/detail/ProcessControlBlock.cpp \

@@ -42,7 +42,6 @@
 #include <systemcvpc/Attribute.hpp>
 
 #include "tracing/TraceableComponent.hpp"
-#include "Delayer.hpp"
 #include "FunctionTiming.hpp"
 #include "TaskInstance.hpp"
 #include "PowerSumming.hpp"
@@ -52,6 +51,7 @@
 #include "ComponentModel.hpp"
 #include "timetriggered/tt_support.hpp"
 #include "ProcessControlBlock.hpp"
+#include "SequentiallyIdedObject.hpp"
 
 #include "config.h"
 
@@ -71,10 +71,11 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "ObservableComponent.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
-  class ComponentObserver;
+  class Director;
 
   using CoSupport::SystemC::Event;
 
@@ -92,7 +93,8 @@ namespace SystemC_VPC { namespace Detail {
     , public SystemC_VPC::ComponentInterface
     , public ComponentModel
     , public Tracing::TraceableComponent
-    , public Delayer
+    , public ObservableComponent
+    , private SequentiallyIdedObject
     , private smoc::SimulatorAPI::SchedulerInterface
   {
     typedef AbstractComponent this_type;
@@ -105,8 +107,6 @@ namespace SystemC_VPC { namespace Detail {
     ///
 
     // For resolving ambiguity
-    using Delayer::getName;
-    using Delayer::getComponentId;
     using Tracing::TraceableComponent::addTracer;
 
     /// Realize debug file interface from SystemC_VPC::Component with
@@ -118,6 +118,11 @@ namespace SystemC_VPC { namespace Detail {
     /// Realize debug file interface from SystemC_VPC::Component with
     /// a default unsupported implementation.
     virtual std::string getDebugFileName() const;
+
+    const ComponentId   getComponentId() const
+      { return this->getSequentialId(); }
+    const std::string  &getName() const
+      { return componentName; }
 
     ///
     /// Handle interfaces for SystemC_VPC::ComponentInterface
@@ -190,10 +195,15 @@ namespace SystemC_VPC { namespace Detail {
 
     /**
      * \brief Simulate an execution on this "Virtual Component".
-     *
      * While this simulation is running SystemC simulation time is consumed.
      */
     virtual void compute(TaskInstance* task)=0;
+
+    /**
+     * \brief Simulate the delay caused by the transition guard check on this "Virtual Component".
+     * While the simulation is running SystemC simulation time is consumed.
+     */
+    virtual void check(TaskInstance* task) {}
 
     /**
      *
@@ -215,6 +225,7 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void updatePowerConsumption() = 0;
 
+    virtual void initialize(const Director *d);
 
     /**
      *
@@ -223,6 +234,8 @@ namespace SystemC_VPC { namespace Detail {
 
     TaskInstance *executeHop(ProcessControlBlock *pcb, size_t quantum, std::function<void (TaskInstance *)> const &cb);
   protected:
+    AbstractComponent(std::string const &name);
+
     void end_of_elaboration();
 
     /// Called once per actor firing to indicate that the DII of the task instance is over.
@@ -256,8 +269,6 @@ namespace SystemC_VPC { namespace Detail {
     static Factories factories;
     PowerTables powerTables;
 
-    AbstractComponent(std::string const &name);
-
     MultiCastGroupInstance* getMultiCastGroupInstance(TaskInstance* actualTask);
 
     /**
@@ -289,6 +300,7 @@ namespace SystemC_VPC { namespace Detail {
 
     void loadLocalGovernorPlugin(std::string plugin);
 
+    std::string componentName;
     PCBPool pcbPool;
     FunctionTimingPoolPtr timingPool;
     std::map<const PowerMode*, FunctionTimingPoolPtr> timingPools;

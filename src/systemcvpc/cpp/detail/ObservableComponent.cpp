@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,68 +34,33 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_DELAYER_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_DELAYER_HPP
-
-#include <systemcvpc/datatypes.hpp>
-
-#include "ComponentInfo.hpp"
-#include "ComponentObserver.hpp"
-#include "TaskInstance.hpp"
-#include "SequentiallyIdedObject.hpp"
-
-#include <vector>
+#include "ObservableComponent.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
-  class Director;
+  void ObservableComponent::addObserver(ComponentObserver *obs) {
+    observers.push_back(obs);
+  }
 
-  /**
-   * \brief Interface for classes implementing delay simulation.
-   */
-  class Delayer
-    : private SequentiallyIdedObject {
-  public:
-    /**
-     * \brief Simulate the delay caused by the transition execution on this Delayer.
-     *
-     * While the simulation is running SystemC simulation time is consumed.
-     */
-    virtual void compute(TaskInstance* task) = 0;
-
-    /**
-     * \brief Simulate the delay caused by the transition guard check on this Delayer.
-     *
-     * While the simulation is running SystemC simulation time is consumed.
-     */
-    virtual void check(TaskInstance* task) {}
-
-    const std::string &getName() const
-      { return name_; }
-
-    const ComponentId getComponentId() const;
-
-    void addObserver(ComponentObserver *obs);
-
-    void removeObserver(ComponentObserver *obs);
-    
-    void fireNotification(ComponentInfo *compInf);
-
-    virtual void initialize(const Director* d) {};
-
-    virtual ~Delayer() {}
-
-  protected:
-    Delayer(std::string const &name);
-
-    typedef std::vector<ComponentObserver *> Observers;
-    
-    Observers observers;
-    
-  private:
-    std::string name_;
-  };
+  void ObservableComponent::removeObserver(ComponentObserver *obs) {
+    for(Observers::iterator iter = observers.begin();
+        iter != observers.end();
+        ++iter)
+    {
+      if(*iter == obs) {
+        observers.erase(iter);
+        break;
+      }
+    }
+  }
+      
+  void ObservableComponent::fireNotification(ComponentInfo *compInf) {
+    for(Observers::iterator iter = observers.begin();
+        iter != observers.end();
+        ++iter)
+    {
+      (*iter)->notify(compInf);
+    }
+  }
 
 } } // namespace SystemC_VPC::Detail
-
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_DELAYER_HPP */
