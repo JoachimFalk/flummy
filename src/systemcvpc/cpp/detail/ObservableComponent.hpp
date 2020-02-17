@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,40 +34,35 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "Delayer.hpp"
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
+
+#include "ComponentInfo.hpp"
+#include "ComponentObserver.hpp"
+
+#include <vector>
 
 namespace SystemC_VPC { namespace Detail {
 
-  Delayer::Delayer(std::string const &name)
-    : name_(name) {}
+  /**
+   * \brief Interface for classes implementing delay simulation.
+   */
+  class ObservableComponent {
+  public:
+    void addObserver(ComponentObserver *obs);
 
-  const ComponentId Delayer::getComponentId() const {
-    return this->getSequentialId();
-  }
+    void removeObserver(ComponentObserver *obs);
+    
+    void fireNotification(ComponentInfo *compInf);
 
-  void Delayer::addObserver(ComponentObserver *obs) {
-    observers.push_back(obs);
-  }
+    virtual ~ObservableComponent() {}
 
-  void Delayer::removeObserver(ComponentObserver *obs) {
-    for(Observers::iterator iter = observers.begin();
-        iter != observers.end();
-        ++iter)
-    {
-      if(*iter == obs) {
-        observers.erase(iter);
-        break;
-      }
-    }
-  }
-      
-  void Delayer::fireNotification(ComponentInfo *compInf) {
-    for(Observers::iterator iter = observers.begin();
-        iter != observers.end();
-        ++iter)
-    {
-      (*iter)->notify(compInf);
-    }
-  }
+  private:
+    typedef std::vector<ComponentObserver *> Observers;
+    
+    Observers observers;
+  };
 
 } } // namespace SystemC_VPC::Detail
+
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP */
