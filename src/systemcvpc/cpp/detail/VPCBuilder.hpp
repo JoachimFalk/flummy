@@ -93,52 +93,6 @@ namespace SystemC_VPC { namespace Detail {
     static const char *STR_VPC_PERIOD;
     static const char *STR_VPC_DEADLINE;
 
-    /*
-     * SECTION: init tag values for comparison while initializing
-     */
-    CX::XStr measurefileStr;
-    CX::XStr resultfileStr;
-    CX::XStr resourcesStr;
-    CX::XStr mappingsStr;
-    CX::XStr componentStr;
-    CX::XStr mappingStr;
-    CX::XStr attributeStr;
-    CX::XStr timingStr;
-    CX::XStr parameterStr;
-    CX::XStr topologyStr;
-    CX::XStr hopStr;
-    CX::XStr routeStr;
-    CX::XStr powerModeStr;
-    
-    CX::XStr nameAttrStr;
-    CX::XStr countAttrStr;
-    CX::XStr typeAttrStr;
-    CX::XStr dividerAttrStr;
-    CX::XStr schedulerAttrStr;
-    CX::XStr valueAttrStr;
-    CX::XStr targetAttrStr;
-    CX::XStr sourceAttrStr;
-    CX::XStr delayAttrStr;
-    CX::XStr diiAttrStr;
-    CX::XStr latencyAttrStr;
-    CX::XStr minAttrStr;
-    CX::XStr maxAttrStr;
-    CX::XStr parameter1AttrStr;
-    CX::XStr parameter2AttrStr;
-    CX::XStr parameter3AttrStr;
-    CX::XStr baseAttrStr;
-    CX::XStr fixedAttrStr;
-    CX::XStr distributionAttrStr;
-    CX::XStr seedAttrStr;
-    CX::XStr dataAttrStr;
-    CX::XStr scaleAttrStr;
-    CX::XStr distributionsStr;
-    CX::XStr distributionStr;
-    CX::XStr fnameAttrStr;
-    CX::XStr destinationAttrStr;
-    CX::XStr tracingAttrStr;
-    CX::XStr defaultRouteAttrStr;
-    
     // The handler for loading a xerces xml document
     CX::Handler handler;
 
