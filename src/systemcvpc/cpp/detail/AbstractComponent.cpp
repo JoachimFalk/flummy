@@ -39,6 +39,7 @@
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/VpcTask.hpp>
+#include <systemcvpc/PossibleAction.hpp>
 
 #include "common.hpp"
 #include "Director.hpp"
@@ -431,7 +432,7 @@ namespace SystemC_VPC { namespace Detail {
     int                  complexity;
   };
 
-  void AbstractComponent::registerFiringRule(TaskInterface *actor, smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  void AbstractComponent::registerFiringRule(TaskInterface *actor, PossibleAction *fr) {
     const char                        *actorName       = actor->name();
     smoc::SimulatorAPI::FunctionNames  actionNames     = fr->getActionNames();
     smoc::SimulatorAPI::FunctionNames  guardNames      = fr->getGuardNames();
@@ -512,7 +513,7 @@ namespace SystemC_VPC { namespace Detail {
     fr->setSchedulerInfo(new FastLink(this, actionIds, guardIds, guardComplexity));
   }
 
-  void AbstractComponent::checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  void AbstractComponent::checkFiringRule(TaskInterface *task, PossibleAction *fr) {
     FastLink *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
 
     ProcessControlBlock *pcb = getPCBOfTaskInterface(task);
@@ -542,7 +543,7 @@ namespace SystemC_VPC { namespace Detail {
   public:
     InputsAvailableListener(
         TaskInterface                           *task,
-        smoc::SimulatorAPI::FiringRuleInterface *fr)
+        PossibleAction *fr)
       : task(task), fr(fr)
       // We start with one more, i.e., +1, to ensure that
       // arrived does not call compute before wait is called!
@@ -559,7 +560,7 @@ namespace SystemC_VPC { namespace Detail {
     }
   private:
     TaskInterface                           *task;
-    smoc::SimulatorAPI::FiringRuleInterface *fr;
+    PossibleAction *fr;
     size_t                                   missing;
 
     void compute() {
@@ -592,11 +593,10 @@ namespace SystemC_VPC { namespace Detail {
     }
   };
 
-  void AbstractComponent::executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
+  void AbstractComponent::executeFiringRule(TaskInterface *task, PossibleAction *fr) {
 
-    typedef smoc::SimulatorAPI::FiringRuleInterface     FiringRuleInterface;
-    typedef FiringRuleInterface::PortInInfo             PortInInfo;
-    typedef FiringRuleInterface::PortOutInfo            PortOutInfo;
+    typedef PossibleAction::PortInInfo             PortInInfo;
+    typedef PossibleAction::PortOutInfo            PortOutInfo;
 
     InputsAvailableListener *ial = new InputsAvailableListener(task, fr);
 
@@ -651,10 +651,9 @@ namespace SystemC_VPC { namespace Detail {
     if (isGuard)
       return;
 
-    typedef smoc::SimulatorAPI::FiringRuleInterface FiringRuleInterface;
-    typedef FiringRuleInterface::PortInInfo         PortInInfo;
+    typedef PossibleAction::PortInInfo         PortInInfo;
 
-    if (FiringRuleInterface *fr = taskInstance->getFiringRule()) {
+    if (PossibleAction *fr = taskInstance->getFiringRule()) {
       for (PortInInfo const &portInfo : fr->getPortInInfos()) {
         portInfo.port.getSource()->commFinish(portInfo.consumed);
       }
@@ -671,11 +670,10 @@ namespace SystemC_VPC { namespace Detail {
     if (isGuard)
       return;
 
-    typedef smoc::SimulatorAPI::FiringRuleInterface  FiringRuleInterface;
 //  typedef smoc::SimulatorAPI::ChannelSinkInterface ChannelSinkInterface;
-    typedef FiringRuleInterface::PortOutInfo         PortOutInfo;
+    typedef PossibleAction::PortOutInfo         PortOutInfo;
 
-    if (FiringRuleInterface *fr = taskInstance->getFiringRule()) {
+    if (PossibleAction *fr = taskInstance->getFiringRule()) {
       for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
         AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
         route->start<void>(portInfo.produced, nullptr, [](void *, size_t n, smoc::SimulatorAPI::ChannelSinkInterface *out) {

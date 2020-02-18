@@ -144,8 +144,8 @@ namespace SystemC_VPC { namespace Detail {
   /// SysteMoC actor there must be a corresponding createVpcTask
   /// triggered by building the VPC configuration, e.g., by VPCBuilder.
   void Configuration::registerTask(
-      TaskInterface                          *task,
-      std::list<FiringRuleInterface *> const &firingRules)
+      TaskInterface                     *task,
+      std::list<PossibleAction *> const &firingRules)
   {
     assert(!finalized);
     sassert(registeredTasks.insert(
@@ -281,7 +281,7 @@ namespace SystemC_VPC { namespace Detail {
       AbstractComponent *comp = static_cast<AbstractComponent *>(configComponent.get());
       comp->registerTask(registeredTask.task);
 
-      for (FiringRuleInterface *fr : registeredTask.firingRules) {
+      for (PossibleAction *fr : registeredTask.firingRules) {
         comp->registerFiringRule(registeredTask.task, fr);
       }
     }
