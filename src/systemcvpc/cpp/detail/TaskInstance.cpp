@@ -47,7 +47,6 @@ namespace SystemC_VPC { namespace Detail {
     : instanceId(globalInstanceId++)
     , diiCallback(diiCallback)
     , latCallback(latCallback)
-    , fid()
     , blockingCompute(nullptr)
     , blockAck(false)
     , exec(false)

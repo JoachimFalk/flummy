@@ -522,7 +522,6 @@ namespace SystemC_VPC { namespace Detail {
     taskInstance.setPCB(pcb);
     taskInstance.setFiringRule(fr);
     taskInstance.setName(task->name()+std::string("_check"));
-    taskInstance.setFunctionIds(fLink->actionIds );
 
     FunctionTimingPtr timing =
         this->getTiming(this->getPowerMode(), pcb->getPid());
@@ -587,7 +586,6 @@ namespace SystemC_VPC { namespace Detail {
       taskInstance->setPCB(pcb);
       taskInstance->setFiringRule(fr);
       taskInstance->setName(task->name());
-      taskInstance->setFunctionIds(fLink->actionIds );
       comp->compute(taskInstance);
       delete this;
     }
@@ -636,7 +634,6 @@ namespace SystemC_VPC { namespace Detail {
 
     taskInstance->setPCB(pcb);
     taskInstance->setName(pcb->getName());
-    taskInstance->setFunctionIds(fids);
     taskInstance->setTimingScale(quantum);
     this->compute(taskInstance);
     return taskInstance;
