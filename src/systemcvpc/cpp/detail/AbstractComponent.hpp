@@ -40,6 +40,8 @@
 #include <systemcvpc/Component.hpp>
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Attribute.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/PossibleAction.hpp>
 
 #include "tracing/TraceableComponent.hpp"
 #include "FunctionTiming.hpp"
@@ -56,9 +58,6 @@
 #include "config.h"
 
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
-#include <smoc/SimulatorAPI/TaskInterface.hpp>
-#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
-#include <systemcvpc/ScheduledTask.hpp>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
@@ -174,8 +173,7 @@ namespace SystemC_VPC { namespace Detail {
     void registerTask(TaskInterface *task);
 
     void registerFiringRule(
-        TaskInterface                           *task,
-        smoc::SimulatorAPI::FiringRuleInterface *fr);
+        TaskInterface *task, PossibleAction *fr);
 
     /**
      * \brief Get the Process Control Block (PCB) for pid.
@@ -286,10 +284,10 @@ namespace SystemC_VPC { namespace Detail {
     class InputsAvailableListener;
 
     /// Implement interface to SysteMoC
-    void checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
+    void checkFiringRule(TaskInterface *task, PossibleAction *fr);
 
     /// Implement interface to SysteMoC
-    void executeFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr);
+    void executeFiringRule(TaskInterface *task, PossibleAction *fr);
 
     bool processPower(AttributePtr att);
 

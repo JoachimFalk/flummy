@@ -39,6 +39,7 @@
 
 #include <systemcvpc/vpc_config.h>
 #include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/EventPair.hpp>
 
 #include "tracing/ComponentTracerIf.hpp"
@@ -102,9 +103,9 @@ namespace SystemC_VPC { namespace Detail {
 
     int getInstanceId() const                            {return this->instanceId;}
 
-    void setFiringRule(smoc::SimulatorAPI::FiringRuleInterface *fr)
+    void setFiringRule(PossibleAction *fr)
       { this->firingRuleInterface = fr; }
-    smoc::SimulatorAPI::FiringRuleInterface *getFiringRule()
+    PossibleAction *getFiringRule()
       { return this->firingRuleInterface; }
 
     // Adaptor getter for ProcessControlBlock
@@ -141,7 +142,7 @@ namespace SystemC_VPC { namespace Detail {
     std::string name;
     double timingScale;
 
-    smoc::SimulatorAPI::FiringRuleInterface *firingRuleInterface;
+    PossibleAction *firingRuleInterface;
   };
 
   typedef std::map<int, TaskInstance*>  TaskMap;

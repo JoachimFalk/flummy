@@ -39,13 +39,13 @@
 
 #include <systemcvpc/VpcTask.hpp>
 #include <systemcvpc/TimingModifier.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/PossibleAction.hpp>
 
 #include "AbstractComponent.hpp"
 #include "AbstractRoute.hpp"
 
-#include <smoc/SimulatorAPI/TaskInterface.hpp>
 #include <smoc/SimulatorAPI/PortInterfaces.hpp>
-#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
 
 #include <map>
 #include <functional>
@@ -60,8 +60,6 @@ typedef std::map<std::string, TimingModifier::Ptr>      TimingModifiers;
 class Configuration {
   typedef Configuration this_type;
 
-  typedef smoc::SimulatorAPI::TaskInterface         TaskInterface;
-  typedef smoc::SimulatorAPI::FiringRuleInterface   FiringRuleInterface;
   typedef smoc::SimulatorAPI::PortInInterface       PortInInterface;
   typedef smoc::SimulatorAPI::PortOutInterface      PortOutInterface;
 public:
@@ -100,8 +98,8 @@ public:
   /// SysteMoC actor there must be a corresponding createVpcTask
   /// triggered by building the VPC configuration, e.g., by VPCBuilder.
   void registerTask(
-      TaskInterface                          *task,
-      std::list<FiringRuleInterface *> const &firingRules);
+      TaskInterface                     *task,
+      std::list<PossibleAction *> const &firingRules);
 
   /// This will return the map of all routes.
   Routes const &getRoutes() const;
@@ -146,14 +144,14 @@ private:
 
   struct RegisteredTask {
     RegisteredTask(
-        TaskInterface                          *task,
-        std::list<FiringRuleInterface *> const &firingRules)
+        TaskInterface                     *task,
+        std::list<PossibleAction *> const &firingRules)
       : task(task), firingRules(firingRules) {}
 
     // The registered task
-    TaskInterface *task;
+    TaskInterface                     *task;
     // Its firing rules.
-    std::list<FiringRuleInterface *> const &firingRules;
+    std::list<PossibleAction *> const &firingRules;
   };
 
   typedef std::map<std::string, RegisteredTask> RegisteredTasks;

@@ -37,12 +37,13 @@
 #include "config.h"
 
 #include <smoc/SimulatorAPI/SchedulerInterface.hpp>
-#include <smoc/SimulatorAPI/TaskInterface.hpp>
 #include <smoc/SimulatorAPI/PortInterfaces.hpp>
 #include <smoc/SimulatorAPI/SimulatorInterface.hpp>
 
 #include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/Routing/Ignore.hpp>
+#include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/PossibleAction.hpp>
 
 #include "Director.hpp"
 #include "Configuration.hpp"
@@ -82,8 +83,8 @@ public:
       boost::program_options::variables_map &vm);
 
   void registerTask(
-      TaskInterface                          *actor,
-      std::list<FiringRuleInterface *> const &firingRules);
+      TaskInterface                     *actor,
+      std::list<PossibleAction *> const &firingRules);
 
   void registerPort(PortInInterface *port);
   void registerPort(PortOutInterface *port);
@@ -192,8 +193,8 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 }
 
 void SystemCVPCSimulator::registerTask(
-    TaskInterface                          *actor,
-    std::list<FiringRuleInterface *> const &firingRules) {
+    TaskInterface                     *actor,
+    std::list<PossibleAction *> const &firingRules) {
   Configuration::getInstance().registerTask(actor, firingRules);
 }
 
