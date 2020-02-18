@@ -66,8 +66,6 @@ namespace SystemC_VPC { namespace Detail {
     // getter, setter
     std::string getName() const                          {return name;}
     void        setName(std::string name)                {this->name = name;}
-    FunctionIds getFunctionIds()                         {return fid;}
-    void        setFunctionIds(FunctionIds fid)          {this->fid = fid;}
     ProcessControlBlock *getPCB()                        {return this->pcb;}
     void        setPCB(ProcessControlBlock *pcb)         {this->pcb = pcb;}
 
@@ -125,8 +123,6 @@ namespace SystemC_VPC { namespace Detail {
 
     std::function<void (TaskInstance *)> const diiCallback;
     std::function<void (TaskInstance *)> const latCallback;
-
-    FunctionIds      fid;
 
     VPCEvent::Ptr blockingCompute;
     bool       blockAck;
