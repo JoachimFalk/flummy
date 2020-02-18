@@ -415,20 +415,17 @@ namespace SystemC_VPC { namespace Detail {
   public:
     FastLink()
       : component(nullptr)
-      , process(-1)
       , complexity(0)
     { }
 
-    FastLink(AbstractComponent *component, ProcessId pid, FunctionIds actionIds, FunctionIds guardIds, int complexity)
+    FastLink(AbstractComponent *component, FunctionIds actionIds, FunctionIds guardIds, int complexity)
       : component(component)
-      , process(pid)
       , actionIds(actionIds)
       , guardIds(guardIds)
       , complexity(complexity)
     { }
 
     AbstractComponent   *component;
-    ProcessId            process;
     FunctionIds          actionIds;
     FunctionIds          guardIds;
     int                  complexity;
@@ -512,7 +509,7 @@ namespace SystemC_VPC { namespace Detail {
       ConfigCheck::modelTiming(pid, *iter);
     }
 
-    fr->setSchedulerInfo(new FastLink(this, pid, actionIds, guardIds, guardComplexity));
+    fr->setSchedulerInfo(new FastLink(this, actionIds, guardIds, guardComplexity));
   }
 
   void AbstractComponent::checkFiringRule(TaskInterface *task, smoc::SimulatorAPI::FiringRuleInterface *fr) {
@@ -522,13 +519,12 @@ namespace SystemC_VPC { namespace Detail {
     std::function<void (TaskInstance *)> none([](TaskInstance *) {});
     TaskInstance taskInstance(none, none);
     taskInstance.setPCB(pcb);
-    taskInstance.setProcessId(fLink->process);
     taskInstance.setFiringRule(fr);
     taskInstance.setName(task->name()+std::string("_check"));
     taskInstance.setFunctionIds(fLink->actionIds );
 
     FunctionTimingPtr timing =
-        this->getTiming(this->getPowerMode(), fLink->process);
+        this->getTiming(this->getPowerMode(), pcb->getPid());
 
     if(!fLink->guardIds.empty())
       taskInstance.setDelay(
@@ -577,7 +573,7 @@ namespace SystemC_VPC { namespace Detail {
       assert(pcb != NULL);
 
       FunctionTimingPtr timing =
-          comp->getTiming(comp->getPowerMode(), fLink->process);
+          comp->getTiming(comp->getPowerMode(), pcb->getPid());
 
       //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
       // Initialize with DII
@@ -588,7 +584,6 @@ namespace SystemC_VPC { namespace Detail {
       taskInstance->setLatency(timing->getLatency(fLink->actionIds));
 
       taskInstance->setPCB(pcb);
-      taskInstance->setProcessId(fLink->process);
       taskInstance->setFiringRule(fr);
       taskInstance->setName(task->name());
       taskInstance->setFunctionIds(fLink->actionIds );
@@ -640,7 +635,6 @@ namespace SystemC_VPC { namespace Detail {
     taskInstance->setLatency(quantum * timing->getLatency(fids));
 
     taskInstance->setPCB(pcb);
-    taskInstance->setProcessId(pcb->getPid());
     taskInstance->setName(pcb->getName());
     taskInstance->setFunctionIds(fids);
     taskInstance->setTimingScale(quantum);

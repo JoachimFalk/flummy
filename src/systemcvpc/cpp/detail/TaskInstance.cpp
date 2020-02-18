@@ -47,7 +47,6 @@ namespace SystemC_VPC { namespace Detail {
     : instanceId(globalInstanceId++)
     , diiCallback(diiCallback)
     , latCallback(latCallback)
-    , pid(-1)
     , fid()
     , blockingCompute(nullptr)
     , blockAck(false)
@@ -62,13 +61,14 @@ namespace SystemC_VPC { namespace Detail {
   TaskInstance::~TaskInstance() {
   }
 
-  // Adaptor setter / getter for ProcessControlBlock
-  int TaskInstance::getPriority() const
-    { assert(pcb != NULL); return pcb->getPriority();}
+  // Adaptor getter for ProcessControlBlock
+  int              TaskInstance::getPriority() const
+    { assert(pcb != NULL); return pcb->getPriority(); }
   sc_core::sc_time TaskInstance::getPeriod() const
-    { assert(pcb != NULL); return pcb->getPeriod();}
-
-  bool TaskInstance::isPSM() const
+    { assert(pcb != NULL); return pcb->getPeriod(); }
+  ProcessId        TaskInstance::getProcessId() const
+    { assert(pcb != NULL); return pcb->getPid(); }
+  bool             TaskInstance::isPSM() const
     { return pcb->getTaskIsPSM(); }
 
 } } // namespace SystemC_VPC::Detail

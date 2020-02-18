@@ -65,8 +65,6 @@ namespace SystemC_VPC { namespace Detail {
     // getter, setter
     std::string getName() const                          {return name;}
     void        setName(std::string name)                {this->name = name;}
-    ProcessId   getProcessId()                           {return pid;}
-    void        setProcessId(ProcessId pid)              {this->pid = pid;}
     FunctionIds getFunctionIds()                         {return fid;}
     void        setFunctionIds(FunctionIds fid)          {this->fid = fid;}
     ProcessControlBlock *getPCB()                        {return this->pcb;}
@@ -109,11 +107,10 @@ namespace SystemC_VPC { namespace Detail {
     smoc::SimulatorAPI::FiringRuleInterface *getFiringRule()
       { return this->firingRuleInterface; }
 
-    // Adaptor setter / getter for ProcessControlBlock
+    // Adaptor getter for ProcessControlBlock
     int              getPriority() const;
-
     sc_core::sc_time getPeriod() const;
-
+    ProcessId        getProcessId() const;
     bool             isPSM() const;
 
     void diiExpired() { diiCallback(this); }
@@ -128,18 +125,12 @@ namespace SystemC_VPC { namespace Detail {
     std::function<void (TaskInstance *)> const diiCallback;
     std::function<void (TaskInstance *)> const latCallback;
 
-
-    ProcessId        pid;
     FunctionIds      fid;
 
     VPCEvent::Ptr blockingCompute;
     bool       blockAck;
     bool       exec;
     bool       write;
-
-    sc_core::sc_time startTime;
-    sc_core::sc_time endTime;
-    sc_core::sc_time blockingTime;
 
     sc_core::sc_time delay;
     sc_core::sc_time latency;
