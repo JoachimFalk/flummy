@@ -152,10 +152,6 @@ namespace SystemC_VPC { namespace Detail {
 
   };
 
-  typedef boost::shared_ptr<FunctionTiming> FunctionTimingPtr;
-  typedef std::map<ProcessId, FunctionTimingPtr>  FunctionTimingPool;
-  typedef boost::shared_ptr<FunctionTimingPool> FunctionTimingPoolPtr;
-
 } } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_DETAIL_FUNCTIONTIMING_HPP */
