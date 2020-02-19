@@ -73,7 +73,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
       parentImpl.getChildHops().push_back(&hopImpl);
     }
     hopImpl.pcb = hopImpl.getComponent()->createPCB(getName());
-    hopImpl.pcb->setTiming(hopImpl.getTransferTiming());
+    hopImpl.getComponent()->setTiming(hopImpl.getTransferTiming(), hopImpl.pcb);
     hopImpl.pcb->setPriority(hopImpl.getPriority());
     return &hopImpl;
   }

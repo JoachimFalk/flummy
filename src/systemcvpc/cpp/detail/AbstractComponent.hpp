@@ -228,7 +228,7 @@ namespace SystemC_VPC { namespace Detail {
     /**
      *
      */
-    FunctionTimingPtr getTiming(const PowerMode *mode, ProcessId pid);
+    void setTiming(Timing const &timing, ProcessControlBlock const *const pcb);
 
     TaskInstance *executeHop(ProcessControlBlock *pcb, size_t quantum, std::function<void (TaskInstance *)> const &cb);
   protected:
@@ -283,6 +283,11 @@ namespace SystemC_VPC { namespace Detail {
     class FastLink;
     class InputsAvailableListener;
 
+    typedef boost::shared_ptr<FunctionTiming> FunctionTimingPtr;
+    typedef std::map<ProcessControlBlock const *, FunctionTimingPtr>  FunctionTimingPool;
+    typedef boost::shared_ptr<FunctionTimingPool> FunctionTimingPoolPtr;
+    typedef std::map<const PowerMode*, FunctionTimingPoolPtr> TimingPools;
+
     /// Implement interface to SysteMoC
     void checkFiringRule(TaskInterface *task, PossibleAction *fr);
 
@@ -298,10 +303,12 @@ namespace SystemC_VPC { namespace Detail {
 
     void loadLocalGovernorPlugin(std::string plugin);
 
+    FunctionTimingPtr getTiming(PowerMode const *mode, ProcessControlBlock const *const pcb) const;
+
     std::string componentName;
     PCBPool pcbPool;
     FunctionTimingPoolPtr timingPool;
-    std::map<const PowerMode*, FunctionTimingPoolPtr> timingPools;
+    TimingPools timingPools;
     const PowerMode *powerMode;
     bool canExecuteTasks;
     sc_core::sc_time shutdownRequestAtTime;

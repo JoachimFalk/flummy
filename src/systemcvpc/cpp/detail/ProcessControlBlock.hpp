@@ -71,8 +71,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     ProcessControlBlock(AbstractComponent *component, std::string const &taskName);
 
-    void setTiming(const SystemC_VPC::Timing &timing);
-
     ProcessId getPid() const
       { return pid; }
 

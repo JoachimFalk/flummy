@@ -256,18 +256,26 @@ namespace SystemC_VPC { namespace Detail {
     localGovernorFactory = AbstractComponent::factories[plugin]->factory;
   }
 
-  FunctionTimingPtr AbstractComponent::getTiming(const PowerMode *mode, ProcessId pid) {
-    if (timingPools.find(mode) == timingPools.end()) {
-      timingPools[mode].reset(new FunctionTimingPool());
+  AbstractComponent::FunctionTimingPtr AbstractComponent::getTiming(PowerMode const *mode, ProcessControlBlock const *const pcb) const {
+    TimingPools::const_iterator modeIter = timingPools.find(mode);
+    assert(modeIter != timingPools.end());
+    FunctionTimingPool::const_iterator timingIter = modeIter->second->find(pcb);
+    assert(timingIter != modeIter->second->end());
+    return timingIter->second;
+  }
+
+  void AbstractComponent::setTiming(Timing const &timing, ProcessControlBlock const *const pcb) {
+    PowerMode const *mode = translatePowerMode(timing.getPowerMode());
+
+    FunctionTimingPoolPtr &modePtr = timingPools[mode];
+    if (!modePtr)
+      modePtr.reset(new FunctionTimingPool());
+    FunctionTimingPtr &timingPtr = (*modePtr)[pcb];
+    if (!timingPtr) {
+      timingPtr.reset(new FunctionTiming());
+      timingPtr->setBaseDelay(transactionDelays[mode]);
     }
-    FunctionTimingPoolPtr pool = this->timingPools[mode];
-    if (pool->find(pid) == pool->end()) {
-      (*pool)[pid].reset(new FunctionTiming());
-      (*pool)[pid]->setBaseDelay(this->transactionDelays[mode]);
-      //sc_core::sc_time a = this->transactionDelays[mode];
-      //std::cout << a;
-    }
-    return (*pool)[pid];
+    timingPtr->setTiming(timing);
   }
 
   void AbstractComponent::requestCanExecute(){
@@ -452,9 +460,8 @@ namespace SystemC_VPC { namespace Detail {
 
         for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
           std::string powermode = (*it).first;
-          pcb->setTiming(provider->getActionTiming(actorName,powermode));
+          setTiming(provider->getActionTiming(actorName,powermode), pcb);
         }
-
       }
       for (std::string const &guard : guardNames) {
         if (provider->hasGuardTimings(guard)) {
@@ -463,8 +470,7 @@ namespace SystemC_VPC { namespace Detail {
           for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
           {
             std::string powermode = (*it).first;
-            pcb->setTiming(provider->getGuardTiming(guard,powermode));
-
+            setTiming(provider->getGuardTiming(guard,powermode), pcb);
             ConfigCheck::configureTiming(pid, guard);
           }
         }
@@ -476,7 +482,7 @@ namespace SystemC_VPC { namespace Detail {
           for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
           {
             std::string powermode = (*it).first;
-            pcb->setTiming(provider->getActionTiming(action,powermode));
+            setTiming(provider->getActionTiming(action,powermode), pcb);
             ConfigCheck::configureTiming(pid, action);
           }
         }
@@ -524,7 +530,7 @@ namespace SystemC_VPC { namespace Detail {
     taskInstance.setName(task->name()+std::string("_check"));
 
     FunctionTimingPtr timing =
-        this->getTiming(this->getPowerMode(), pcb->getPid());
+        this->getTiming(this->getPowerMode(), pcb);
 
     if(!fLink->guardIds.empty())
       taskInstance.setDelay(
@@ -573,7 +579,7 @@ namespace SystemC_VPC { namespace Detail {
       assert(pcb != NULL);
 
       FunctionTimingPtr timing =
-          comp->getTiming(comp->getPowerMode(), pcb->getPid());
+          comp->getTiming(comp->getPowerMode(), pcb);
 
       //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
       // Initialize with DII
@@ -619,7 +625,7 @@ namespace SystemC_VPC { namespace Detail {
     assert(pcb != NULL);
 
     FunctionTimingPtr timing =
-        this->getTiming(this->getPowerMode(), pcb->getPid());
+        this->getTiming(this->getPowerMode(), pcb);
 
     FunctionIds fids; // empty functionIds
     fids.push_back(Director::getInstance().getFunctionId("1"));

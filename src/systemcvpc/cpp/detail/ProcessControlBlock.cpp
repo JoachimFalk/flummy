@@ -65,10 +65,4 @@ namespace SystemC_VPC { namespace Detail {
     return sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
   }
 
-  void ProcessControlBlock::setTiming(const SystemC_VPC::Timing &timing) {
-    const PowerMode *mode = this->component->translatePowerMode(timing.getPowerMode());
-    FunctionTimingPtr ft =this->component->getTiming(mode, this->getPid());
-    ft->setTiming(timing);
-  }
-
 } } // namespace SystemC_VPC::Detail
