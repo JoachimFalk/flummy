@@ -78,8 +78,6 @@ namespace SystemC_VPC { namespace Detail {
 
   typedef std::map<ComponentState, double> PowerTable;
   typedef std::map<const PowerMode*, PowerTable>  PowerTables;
-  typedef std::string MultiCastGroup;
-
 
   /**
    * \brief The interface of a Virtual-Processing-Component (VPC).
@@ -245,16 +243,6 @@ namespace SystemC_VPC { namespace Detail {
 
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
     bool requestExecuteTasks;
-    std::map<ProcessId, MultiCastGroup> multiCastGroups;
-
-    struct MultiCastGroupInstance{
-      MultiCastGroup mcg;
-      sc_core::sc_time timestamp;
-      TaskInstance* task;
-      std::list<TaskInstance*>* additional_tasks;
-    };
-
-    std::list<MultiCastGroupInstance*> multiCastGroupInstances;
 
     PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
     PluggableLocalPowerGovernor *midPowerGov;
@@ -264,8 +252,6 @@ namespace SystemC_VPC { namespace Detail {
       Factories;
     static Factories factories;
 //  PowerTables powerTables;
-
-    MultiCastGroupInstance* getMultiCastGroupInstance(TaskInstance* actualTask);
 
     /**
      *
@@ -287,11 +273,6 @@ namespace SystemC_VPC { namespace Detail {
     void executeFiringRule(TaskInterface *task, PossibleAction *fr);
 
     bool processPower(AttributePtr att);
-
-    /**
-     * process attributes/parameters for MultiCast Configuration
-     */
-    bool processMCG(AttributePtr attribute);
 
     void loadLocalGovernorPlugin(std::string plugin);
 
