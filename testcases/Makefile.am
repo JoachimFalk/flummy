@@ -120,8 +120,10 @@ check-logs: $(TEST_LOGS)
 	    test-*) \
 	      if test -f $(srcdir)/src/$${test}/golden.log; then \
 		if ! diff -u $${test}.log $(srcdir)/src/$${test}/golden.log > /dev/null; then \
-		  echo "Check for $${test} failed!!!"; error=1; \
+		  echo "FAILURE for $${test} LOG check."; error=1; \
 		  diff -u $${test}.log $(srcdir)/src/$${test}/golden.log; \
+		else \
+		  echo "SUCCESS for $${test} LOG check."; \		
 		fi; \
 	      else \
 		status=success; \
@@ -132,10 +134,12 @@ check-logs: $(TEST_LOGS)
 		  fi; \
 		done; \
 		if test x"$$status" = x"failed"; then \
-		  echo "Check for $${test} failed!!!"; error=1; \
+		  echo "FAILURE for $${test} LOG check."; error=1; \
 		  for log in $(srcdir)/src/$${test}/golden-*.log; do \
 		    diff -u $${test}-$${log##*/golden-} $${log}; \
 		  done; \
+		else \
+		  echo "SUCCESS for $${test} LOG check."; \		
 		fi; \
 	      fi; \
 	      ;; \
@@ -168,11 +172,13 @@ check-vcds: $(TEST_VPC_VCDS)
 		  fi; \
 		done; \
 		if test x"$$status" = x"failed"; then \
-		  echo "Check for $${test}-$${cmx} failed!!!"; error=1; \
+		  echo "FAILURE for $${test}-$${cmx} VCD check."; error=1; \
 		  for golden_vcd in $(srcdir)/src/$${test}/vpc/$${cmx}-*-golden.vcd; do \
 		    test_vcd=$${golden_vcd##*/}; test_vcd=$${test}-$${test_vcd%%-golden.vcd}.vcd; \
 		    diff -u $(diff_vcd_ignore) $${test_vcd} $${golden_vcd}; \
 		  done; \
+		else \
+		  echo "SUCCESS for $${test}-$${cmx} VCD check."; \		
 		fi; \
 	      done; \
 	      ;; \
