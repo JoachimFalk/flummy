@@ -37,9 +37,10 @@
 							</tool>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen.2074335003" name="autogen.sh" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen"/>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc.1950992271" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc">
-								<option id="gnu.c.compiler.option.include.paths.78501993" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.78501993" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SysteMoC/obj/src/systemoc/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SysteMoC/src/systemoc/headers}&quot;"/>
@@ -60,9 +61,10 @@
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.797758445" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp.289256257" name="GCC C++ Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp">
-								<option id="gnu.cpp.compiler.option.include.paths.220663166" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.220663166" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/obj/src/systemcvpc/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/cpp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SystemC-VPC/src/systemcvpc/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SysteMoC/obj/src/systemoc/headers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SysteMoC/src/systemoc/headers}&quot;"/>
@@ -86,6 +88,12 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/systemcvpc/cpp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/systemcvpc/headers"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="testcases/src/test-sqr-int/cpp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="testcases/src/test-sqr/cpp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="testcases/src/test-src-snk-multicast/cpp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="testcases/src/test-src-snk-multirate/cpp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="testcases/src/test-src-snk-plain/cpp"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -114,6 +122,7 @@
 					</externalSetting>
 				</externalSettings>
 			</storageModule>
+			<storageModule moduleId="packages"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
