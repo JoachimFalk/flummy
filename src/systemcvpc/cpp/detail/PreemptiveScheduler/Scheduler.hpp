@@ -37,7 +37,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_PREEMPTIVESCHEDULER_SCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_PREEMPTIVESCHEDULER_SCHEDULER_HPP
 
-#include "../ComponentModel.hpp"
 #include "../TaskInstance.hpp"
 
 #include <systemcvpc/Attribute.hpp>

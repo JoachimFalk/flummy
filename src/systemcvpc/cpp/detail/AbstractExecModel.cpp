@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2020 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,15 +34,15 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
-#define _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
+#include "AbstractExecModel.hpp"
 
-#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
+namespace SystemC_VPC { namespace Detail {
 
-namespace SystemC_VPC {
+  AbstractExecModel::AbstractExecModel(int facadeAdj)
+    : facadeAdj(facadeAdj)
+    {}
 
-typedef smoc::SimulatorAPI::FiringRuleInterface PossibleAction;
+  AbstractExecModel::~AbstractExecModel()
+    {}
 
-} // namespace SystemC_VPC
-
-#endif /* _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP */
+} } // namespace SystemC_VPC::Detail

@@ -41,6 +41,8 @@
 #include "Director.hpp"
 #include "DebugOStream.hpp"
 
+#include <systemcvpc/ExecModelling/LookupPowerTimeModel.hpp>
+
 #include <CoSupport/DataTypes/MaybeValue.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
 
@@ -368,6 +370,9 @@ namespace SystemC_VPC { namespace Detail {
       }
       vpcConfigTreeWalker->parentNode();
     }
+    if (!comp->getExecModel())
+      comp->setExecModel(createExecModel<VC::ExecModelling::LookupPowerTimeModel>());
+
   }
 
   /**
@@ -402,7 +407,10 @@ namespace SystemC_VPC { namespace Detail {
           VC::Component::Ptr comp = getComponent(sTarget);
           VC::VpcTask::Ptr   task = createTask(sSource);
           task->mapTo(comp);
-          VC::DefaultTimingsProvider::Ptr provider = comp->getDefaultTimingsProvider();
+          VC::ExecModel::Ptr execModel = comp->getExecModel();
+          if (!execModel)
+            throw ConfigException("\tComponent \"" + comp->getName()
+                + "\" has NO execution model!");
 
           //walk down hierarchy to attributes
           CX::XN::DOMNode* attnode = node->getFirstChild();
@@ -416,10 +424,10 @@ namespace SystemC_VPC { namespace Detail {
             if( xmlName == XMLCH("timing") ){
               try {
                 VC::Timing t = this->parseTiming( attnode );
-                if (t.getFunctionId() == defaultFunctionId) {
-                  provider->addDefaultActorTiming(sSource, t);
+                if (t.getFunction().empty()) {
+                  execModel->addDefaultActorTiming(sSource, t);
                 } else {
-                  provider->add(t);
+                  execModel->add(t);
                 }
 
               } catch(InvalidArgumentException &e) {
@@ -625,7 +633,6 @@ namespace SystemC_VPC { namespace Detail {
   //
   VC::Timing VPCBuilder::parseTiming(CX::XN::DOMNode* node) {
     VC::Timing t;
-    t.setPowerMode("SLOW");
 
     CX::XN::DOMNamedNodeMap* atts = node->getAttributes();
     if( NULL != atts->getNamedItem(XMLCH("powermode")) ) {

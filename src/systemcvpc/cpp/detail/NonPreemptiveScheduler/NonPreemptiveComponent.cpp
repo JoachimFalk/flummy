@@ -57,8 +57,6 @@ namespace SystemC_VPC { namespace Detail {
 
     SC_THREAD(remainingPipelineStages);
 
-    this->setPowerMode(this->translatePowerMode("SLOW"));
-
     this->midPowerGov = new InternalLoadHysteresisGovernor(sc_core::sc_time(12.5, sc_core::SC_MS),
         sc_core::sc_time(12.1, sc_core::SC_MS), sc_core::sc_time(4.0, sc_core::SC_MS));
     this->midPowerGov->setGlobalGovernor(Director::getInstance().topPowerGov);
@@ -154,7 +152,7 @@ namespace SystemC_VPC { namespace Detail {
 //  }
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
         << " ) at time: " << sc_core::sc_time_stamp()
-        << " mode: " << this->getPowerMode()->getName()
+        << " mode: " << this->getPowerMode()
         << " schedTask: " << actualTask->getPCB()->getScheduledTask()
         << std::endl);
 //  DBG_OUT("Using " << actualTask->getRemainingDelay()
@@ -334,20 +332,6 @@ namespace SystemC_VPC { namespace Detail {
 /**
  *
  */
-void NonPreemptiveComponent::updatePowerConsumption() {
-  this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
-  // Notify observers (e.g. powersum)
-  this->fireNotification(this);
-}
-
-void NonPreemptiveComponent::fireStateChanged(const ComponentState &state) {
-  this->setComponentState(state);
-  this->updatePowerConsumption();
-}
-
-/**
- *
- */
 void NonPreemptiveComponent::requestBlockingCompute(
     TaskInstance* task, VPCEvent::Ptr blocker)
 {
@@ -377,7 +361,7 @@ void NonPreemptiveComponent::abortBlockingCompute(
 }
 
 NonPreemptiveComponent::~NonPreemptiveComponent() {
-  this->setPowerConsumption(0.0);
+  //this->setPowerConsumption(0.0);
   this->fireNotification(this);
 #ifndef NO_POWER_SUM
   this->removeObserver(powerSumming);

@@ -205,6 +205,8 @@ namespace SystemC_VPC { namespace Detail {
 
   };
 
+  typedef std::map<int, TaskInstance *>  TaskMap;
+
 } } // namespace SystemC_VPC::Detail
 
 #endif /* _INCLUDED_SYSTEMCVPC_DETAIL_TASKINSTANCE_HPP */

@@ -34,15 +34,67 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
-#define _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_EXECMODEL_HPP
+#define _INCLUDED_SYSTEMCVPC_EXECMODEL_HPP
 
-#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
+#include "Timing.hpp"
+
+#include <CoSupport/SmartPtr/RefCountObject.hpp>
+
+#include <boost/noncopyable.hpp>
+#include <boost/intrusive_ptr.hpp>
+
+#include <string>
+
+namespace SystemC_VPC { namespace Detail {
+
+  class AbstractExecModel;
+
+} } // namespace SystemC_VPC::Detail
 
 namespace SystemC_VPC {
 
-typedef smoc::SimulatorAPI::FiringRuleInterface PossibleAction;
+class ExecModel
+  : private boost::noncopyable
+  , public CoSupport::SmartPtr::RefCountObject
+{
+  typedef ExecModel this_type;
+
+  friend class Component; // for getImpl
+public:
+  typedef boost::intrusive_ptr<this_type>       Ptr;
+  typedef boost::intrusive_ptr<this_type> const ConstPtr;
+
+//// Possible states of execution of a component.
+//enum { RUNNING, IDLE };
+
+  virtual void add(Timing timing) = 0;
+  virtual void addDefaultActorTiming(std::string actorName, Timing timing) = 0;
+
+  const char *getType() const
+    { return type; }
+protected:
+  ExecModel(const char *type, int implAdj);
+
+  ~ExecModel();
+private:
+  Detail::AbstractExecModel       *getImpl();
+  Detail::AbstractExecModel const *getImpl() const
+    { return const_cast<this_type *>(this)->getImpl(); }
+private:
+  const char *type;
+  int         implAdj;
+};
+
+ExecModel::Ptr createExecModel(const char *type);
+
+template <typename EXECMODEL>
+typename EXECMODEL::Ptr
+createExecModel() {
+  return boost::static_pointer_cast<EXECMODEL>(
+      createExecModel(EXECMODEL::Type));
+}
 
 } // namespace SystemC_VPC
 
-#endif /* _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_EXECMODEL_HPP */

@@ -44,6 +44,7 @@
 #include "detail/common.hpp"
 #include "detail/Configuration.hpp"
 #include "detail/AbstractComponent.hpp"
+#include "detail/AbstractExecModel.hpp"
 #include "detail/NonPreemptiveScheduler/DynamicPriorityComponent.hpp"
 #include "detail/NonPreemptiveScheduler/FcfsComponent.hpp"
 #include "detail/NonPreemptiveScheduler/NonPreemptiveComponent.hpp"
@@ -94,6 +95,18 @@ std::string Component::getName() const {
   return static_cast<Detail::AbstractComponent const *>(this)->getName();
 }
 
+PowerMode const &Component::getPowerMode() const {
+  return static_cast<Detail::AbstractComponent const *>(this)->getPowerMode();
+}
+
+ComponentState   Component::getComponentState() const {
+  return static_cast<Detail::AbstractComponent const *>(this)->getComponentState();
+}
+
+double           Component::getPowerConsumption() const {
+  return static_cast<Detail::AbstractComponent const *>(this)->getPowerConsumption();
+}
+
 void Component::addTracer(const char *tracer) {
   static_cast<Detail::AbstractComponent *>(this)->addTracer(tracer, this);
 }
@@ -104,29 +117,20 @@ bool Component::hasTask(ScheduledTask *actor) const {
 }
 
 //
-void Component::setTimingsProvider(TimingsProvider::Ptr provider) {
-  timingsProvider_ = provider;
+void Component::setExecModel(ExecModel::Ptr model) {
+  static_cast<Detail::AbstractComponent *>(this)->setExecModel(model->getImpl());
 }
 
 //
-TimingsProvider::Ptr Component::getTimingsProvider() {
-  if (timingsProvider_) {
-    return timingsProvider_;
-  } else if (defaultTimingsProvider_) {
-    return defaultTimingsProvider_;
-  }
-  throw ConfigException("\tComponent \"" + this->getName()
-      + "\" has NO timing provider"
-        "\n\tEither set one: Component::setTimingsProvider(TimingsProvider::Ptr )"
-        "\n\tOr use default one: Component::getDefaultTimingsProvider()");
-}
-
-//
-DefaultTimingsProvider::Ptr Component::getDefaultTimingsProvider() {
-  if (!defaultTimingsProvider_) {
-    defaultTimingsProvider_.reset(new DefaultTimingsProvider());
-  }
-  return defaultTimingsProvider_;
+ExecModel::Ptr Component::getExecModel() {
+  Detail::AbstractExecModel *execModel =
+      static_cast<Detail::AbstractComponent *>(this)->getExecModel();
+  if (execModel)
+    return execModel->getExecModel();
+  else
+    return nullptr;
+//throw ConfigException("\tComponent \"" + this->getName()
+//    + "\" has NO timing provider!");
 }
 
 void Component::addAttribute(AttributePtr attribute) {

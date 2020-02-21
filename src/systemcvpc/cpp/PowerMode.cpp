@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,64 +34,11 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_POWERMODE_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_POWERMODE_HPP
+#include <systemcvpc/PowerMode.hpp>
 
-#include <cstddef>
-#include <string>
+namespace SystemC_VPC {
 
-namespace SystemC_VPC { namespace Detail {
+PowerMode const PowerMode::OFF     = "OFF";
+PowerMode const PowerMode::DEFAULT = "DEFAULT";
 
-  /**
-   * 
-   */
-  class PowerMode
-  {
-  public:
-    PowerMode(const size_t &_mode, std::string name)
-      : mode(_mode),
-        name(name) {}
-
-    PowerMode(const PowerMode &powerMode)
-      : mode(powerMode.mode),
-        name(powerMode.name) {}
-
-    //FIXME: needed for std::map only
-    PowerMode() : mode(0) {}
-
-    bool operator==(const PowerMode &rhs) const
-    {
-      return mode == rhs.mode;
-    }
-
-    bool operator!=(const PowerMode &rhs) const
-    {
-      return mode != rhs.mode;
-    }
-
-    bool operator<(const PowerMode &rhs) const
-    {
-      return mode < rhs.mode;
-    }
-
-    bool operator>(const PowerMode &rhs) const
-    {
-      return mode > rhs.mode;
-    }
-
-    std::string getName() const {
-      return name;
-    }
-
-    static const std::string powerGated;
-    static const std::string clockGated;
-
-
-  private:
-    size_t mode;
-    std::string name;
-  };
-
-} } // namespace SystemC_VPC::Detail
-
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_POWERMODE_HPP */
+} // namespace SystemC_VPC

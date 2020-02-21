@@ -79,11 +79,6 @@ protected:
    */
   virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
 
-  /**
-   *
-   */
-  virtual void updatePowerConsumption();
-
   /*
    * from ComponentInterface
    */

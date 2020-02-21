@@ -37,8 +37,9 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_PLUGGABLEPOWERGOVERNOR_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_PLUGGABLEPOWERGOVERNOR_HPP
 
+#include <systemcvpc/PowerMode.hpp>
+
 #include "PowerGovernor.hpp"
-#include "PowerMode.hpp"
 #include "dynload/dll.hpp"
 
 namespace SystemC_VPC { namespace Detail {
@@ -56,8 +57,9 @@ namespace SystemC_VPC { namespace Detail {
    */
   class PowerModeParameter : public GenericParameter {
   public:
-    const PowerMode      *powerMode;
-    PowerModeParameter(PowerMode *mode);
+    PowerModeParameter(PowerMode const &mode);
+
+    PowerMode powerMode;
     virtual ~PowerModeParameter();
   };
 

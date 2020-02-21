@@ -37,7 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_HYSTERESISLOCALGOVERNOR_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_HYSTERESISLOCALGOVERNOR_HPP
 
-#include "PowerMode.hpp"
+#include <systemcvpc/PowerMode.hpp>
+
 #include "PluggablePowerGovernor.hpp"
 
 #include <CoSupport/SystemC/systemc_time.hpp>

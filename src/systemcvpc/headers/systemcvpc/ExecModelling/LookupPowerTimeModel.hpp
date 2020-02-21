@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,34 +34,27 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTMODEL_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTMODEL_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_EXECMODELLING_LOOKUPPOWERTIMEMODEL_HPP
+#define _INCLUDED_SYSTEMCVPC_EXECMODELLING_LOOKUPPOWERTIMEMODEL_HPP
 
-#include "ComponentInfo.hpp"
+#include "../ExecModel.hpp"
 
-namespace SystemC_VPC { namespace Detail {
+#include <map>
 
-  class TaskInstance;
-  typedef std::map<int, TaskInstance*>  TaskMap;
+namespace SystemC_VPC { namespace ExecModelling {
 
-  class ComponentModel : public ComponentInfo {
-  public:
-    ComponentModel() : ComponentInfo(this){}
+class LookupPowerTimeModel: public ExecModel {
+  typedef LookupPowerTimeModel this_type;
+public:
+  typedef boost::intrusive_ptr<this_type>       Ptr;
+  typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-    virtual void setPowerMode(const PowerMode *mode) = 0;
+  static const char *Type;
 
-  protected:
-    void setComponentState(const ComponentState cs)
-    {
-      componentState = cs;
-    }
+protected:
+  LookupPowerTimeModel(int implAdj);
+};
 
-    void setPowerConsumption(const double pc)
-    {
-      powerConsumption = pc;
-    }
-  };
+} } // namespace SystemC_VPC::ExecModelling
 
-} } // namespace SystemC_VPC::Detail
-
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTMODEL_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_EXECMODELLING_LOOKUPPOWERTIMEMODEL_HPP */

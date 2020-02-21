@@ -50,8 +50,6 @@ typedef size_t RouteId;
 typedef size_t                  FunctionId;
 typedef std::vector<FunctionId> FunctionIds;
 
-static const FunctionId defaultFunctionId = 0;
-
 } // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_DATATYPES_HPP */

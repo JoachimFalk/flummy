@@ -34,15 +34,27 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
-#define _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_POWERMODE_HPP
+#define _INCLUDED_SYSTEMCVPC_POWERMODE_HPP
 
-#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
+#include <string>
 
 namespace SystemC_VPC {
 
-typedef smoc::SimulatorAPI::FiringRuleInterface PossibleAction;
+  /**
+   * Represents a component power mode 
+   */
+  class PowerMode: public std::string {
+  public:
+    PowerMode(char const *mode)
+      : std::string(mode) {}
+    PowerMode(std::string const &mode)
+      : std::string(mode) {}
 
-} // namespace SystemC_VPC
+    static PowerMode const OFF;
+    static PowerMode const DEFAULT;
+  };
 
-#endif /* _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP */
+} // namespace SystemC_VPC::Detail
+
+#endif /* _INCLUDED_SYSTEMCVPC_POWERMODE_HPP */
