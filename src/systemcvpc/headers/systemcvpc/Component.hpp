@@ -42,9 +42,11 @@
 #include "Timing.hpp"
 #include "Attribute.hpp"
 #include "datatypes.hpp"
-#include "TimingModifier.hpp"
+//#include "TimingModifier.hpp"
 #include "ScheduledTask.hpp"
 #include "VPCEvent.hpp"
+#include "ExecModel.hpp"
+#include "PowerMode.hpp"
 
 #include <CoSupport/SmartPtr/RefCountObject.hpp>
 
@@ -54,6 +56,9 @@
 #include <string>
 
 namespace SystemC_VPC {
+
+
+enum class ComponentState { IDLE, RUNNING, STALLED };
 
 class ComponentInterface {
 public:
@@ -110,11 +115,8 @@ public:
   // Add a tracer. Use constants as defined in Tracer, e.g., Tracer::PAJE.
   void addTracer(const char *tracer);
 
-  void setTimingsProvider(TimingsProvider::Ptr provider);
-
-  TimingsProvider::Ptr getTimingsProvider();
-
-  DefaultTimingsProvider::Ptr getDefaultTimingsProvider();
+  void setExecModel(ExecModel::Ptr provider);
+  ExecModel::Ptr getExecModel();
 
   MappedTasks getMappedTasks();
 
@@ -129,12 +131,17 @@ public:
   virtual bool        hasDebugFile() const = 0;
   virtual void        setDebugFileName(std::string const &fileName) = 0;
   virtual std::string getDebugFileName() const = 0;
+
+  PowerMode const &getPowerMode() const;
+
+  ComponentState   getComponentState() const;
+
+  double           getPowerConsumption() const;
+
 protected:
   Component();
 private:
   Timing                      transferTiming_;
-  TimingsProvider::Ptr        timingsProvider_;
-  DefaultTimingsProvider::Ptr defaultTimingsProvider_;
 };
 
 bool hasComponent(std::string name);

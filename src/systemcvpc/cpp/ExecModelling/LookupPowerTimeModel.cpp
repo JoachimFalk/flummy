@@ -34,15 +34,13 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
-#define _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP
+#include <systemcvpc/ExecModelling/LookupPowerTimeModel.hpp>
 
-#include <smoc/SimulatorAPI/FiringRuleInterface.hpp>
+namespace SystemC_VPC { namespace ExecModelling {
 
-namespace SystemC_VPC {
+  const char *LookupPowerTimeModel::Type = "LookupPowerTimeModel";
 
-typedef smoc::SimulatorAPI::FiringRuleInterface PossibleAction;
+  LookupPowerTimeModel::LookupPowerTimeModel(int implAdj)
+    : ExecModel(Type, implAdj) {}
 
-} // namespace SystemC_VPC
-
-#endif /* _INCLUDED_SYSTEMCVPC_POSSIBLEACTION_HPP */
+} } // namespace SystemC_VPC::ExecModelling

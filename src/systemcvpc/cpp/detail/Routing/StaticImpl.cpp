@@ -73,7 +73,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
       parentImpl.getChildHops().push_back(&hopImpl);
     }
     hopImpl.pcb = hopImpl.getComponent()->createPCB(getName());
-    hopImpl.getComponent()->setTiming(hopImpl.getTransferTiming(), hopImpl.pcb);
     hopImpl.pcb->setPriority(hopImpl.getPriority());
     return &hopImpl;
   }
@@ -106,7 +105,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
   void StaticImpl::MessageInstance::startHop(size_t hop) {
     assert(currHop[hop] != nullptr);
     currHop[hop]->getComponent()
-        ->executeHop(currHop[hop]->pcb, quantitiy, [this, hop](TaskInstance *) {
+        ->executeHop(currHop[hop]->pcb, currHop[hop]->getTransferTiming(), quantitiy, [this, hop](TaskInstance *) {
           this->finishHop(hop);
       });
   }

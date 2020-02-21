@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -42,18 +42,16 @@
 #include <systemcvpc/Attribute.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/PossibleAction.hpp>
+#include <systemcvpc/PowerMode.hpp>
 
 #include "tracing/TraceableComponent.hpp"
-#include "FunctionTiming.hpp"
 #include "TaskInstance.hpp"
 #include "PowerSumming.hpp"
-#include "PowerMode.hpp"
 #include "PluggablePowerGovernor.hpp"
-#include "ComponentInfo.hpp"
-#include "ComponentModel.hpp"
 #include "timetriggered/tt_support.hpp"
 #include "ProcessControlBlock.hpp"
 #include "SequentiallyIdedObject.hpp"
+#include "AbstractExecModel.hpp"
 
 #include "config.h"
 
@@ -90,7 +88,6 @@ namespace SystemC_VPC { namespace Detail {
     : public sc_core::sc_module
     , public SystemC_VPC::Component
     , public SystemC_VPC::ComponentInterface
-    , public ComponentModel
     , public Tracing::TraceableComponent
     , public ObservableComponent
     , private SequentiallyIdedObject
@@ -123,6 +120,19 @@ namespace SystemC_VPC { namespace Detail {
     const std::string  &getName() const
       { return componentName; }
 
+    PowerMode const    &getPowerMode() const
+      { return powerMode; }
+
+    ComponentState      getComponentState() const
+      { return compState; }
+
+    double              getPowerConsumption() const
+      { return powerConsumption; }
+
+    void setExecModel(AbstractExecModel *model);
+    AbstractExecModel *getExecModel()
+      { return execModel.get(); }
+
     ///
     /// Handle interfaces for SystemC_VPC::ComponentInterface
     ///
@@ -146,13 +156,6 @@ namespace SystemC_VPC { namespace Detail {
 
     virtual bool addStream(ProcessId pid);
     virtual bool closeStream(ProcessId pid);
-
-    ///
-    /// Handle interfaces for SystemC_VPC::ComponentModel
-    ///
-
-    void             setPowerMode(const PowerMode *mode);
-    const PowerMode *getPowerMode() const;
 
     ///
     /// Other stuff
@@ -218,19 +221,12 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker)=0;
 
-    /**
-     * 
-     */
-    virtual void updatePowerConsumption() = 0;
-
     virtual void initialize(const Director *d);
 
-    /**
-     *
-     */
-    void setTiming(Timing const &timing, ProcessControlBlock const *const pcb);
-
-    TaskInstance *executeHop(ProcessControlBlock *pcb, size_t quantum, std::function<void (TaskInstance *)> const &cb);
+    TaskInstance *executeHop(ProcessControlBlock *pcb
+      , Timing const &transferTiming
+      , size_t quantum
+      , std::function<void (TaskInstance *)> const &cb);
   protected:
     AbstractComponent(std::string const &name);
 
@@ -241,6 +237,8 @@ namespace SystemC_VPC { namespace Detail {
 
     /// Called once per actor firing to indicate that the latency of the task instance is over.
     void finishLatencyTaskInstance(TaskInstance *taskInstance, bool isGuard = false);
+
+    void fireStateChanged(ComponentState state);
 
     typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
     typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
@@ -265,7 +263,7 @@ namespace SystemC_VPC { namespace Detail {
                      DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
       Factories;
     static Factories factories;
-    PowerTables powerTables;
+//  PowerTables powerTables;
 
     MultiCastGroupInstance* getMultiCastGroupInstance(TaskInstance* actualTask);
 
@@ -280,13 +278,7 @@ namespace SystemC_VPC { namespace Detail {
 
     virtual ~AbstractComponent();
   private:
-    class FastLink;
     class InputsAvailableListener;
-
-    typedef boost::shared_ptr<FunctionTiming> FunctionTimingPtr;
-    typedef std::map<ProcessControlBlock const *, FunctionTimingPtr>  FunctionTimingPool;
-    typedef boost::shared_ptr<FunctionTimingPool> FunctionTimingPoolPtr;
-    typedef std::map<const PowerMode*, FunctionTimingPoolPtr> TimingPools;
 
     /// Implement interface to SysteMoC
     void checkFiringRule(TaskInterface *task, PossibleAction *fr);
@@ -303,17 +295,19 @@ namespace SystemC_VPC { namespace Detail {
 
     void loadLocalGovernorPlugin(std::string plugin);
 
-    FunctionTimingPtr getTiming(PowerMode const *mode, ProcessControlBlock const *const pcb) const;
-
     std::string componentName;
     PCBPool pcbPool;
-    FunctionTimingPoolPtr timingPool;
-    TimingPools timingPools;
-    const PowerMode *powerMode;
     bool canExecuteTasks;
     sc_core::sc_time shutdownRequestAtTime;
     VPCEvent::Ptr componentWakeup;
     VPCEvent::Ptr componentIdle;
+
+    AbstractExecModel::Ptr        execModel;
+    AbstractExecModel::CompState *execModelComponentState;
+
+    PowerMode      powerMode;
+    ComponentState compState;
+    double         powerConsumption;
   };
 
 } } // namespace SystemC_VPC::Detail

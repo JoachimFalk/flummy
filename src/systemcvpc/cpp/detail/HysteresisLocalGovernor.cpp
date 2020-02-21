@@ -45,7 +45,7 @@ namespace SystemC_VPC { namespace Detail {
     m_windowTime(windowTime),
     m_fastTime(fastTime),
     m_slowTime(slowTime),
-    m_mode(NULL),
+    m_mode(PowerMode::DEFAULT),
     m_ci(NULL),
     m_lastState(ComponentState::IDLE)
   {
@@ -67,8 +67,7 @@ namespace SystemC_VPC { namespace Detail {
 
     const ComponentState newState = ci->getComponentState();
 
-    if(m_mode.powerMode == NULL) {
-      assert(m_ci == NULL);
+    if(m_ci == NULL) {
       m_ci = ci;
       m_mode.powerMode = m_ci->getPowerMode();
       m_tpg->notify_top(m_ci, &m_mode);
@@ -88,8 +87,8 @@ namespace SystemC_VPC { namespace Detail {
   {
     //    std::cerr << "InternalLoadHysteresisGovernor::process() @ " << sc_core::sc_time_stamp() << std::endl;
 
-    const PowerMode *SLOW = m_ci->translatePowerMode("SLOW");
-    const PowerMode *FAST = m_ci->translatePowerMode("FAST");
+    const PowerMode SLOW("SLOW");
+    const PowerMode FAST("FAST");
 
     sc_core::sc_time execTime(sc_core::SC_ZERO_TIME);
     sc_core::sc_time startTime(sc_core::SC_ZERO_TIME);

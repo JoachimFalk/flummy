@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,18 +34,36 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "ComponentInfo.hpp"
+//#include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/ExecModel.hpp>
 
-namespace SystemC_VPC { namespace Detail {
+#include "detail/ExecModelling/LookupPowerTimeModelImpl.hpp"
 
-const ComponentState ComponentState::IDLE    = 0;
-const ComponentState ComponentState::RUNNING = 1;
-const ComponentState ComponentState::STALLED = 2;
-//Execution state on which component is not ready to perform any task
-const ComponentState ComponentState::SLEEPING = 3;
+#include <string.h>
 
+namespace SystemC_VPC {
 
-const std::string PowerMode::powerGated = "powerGated";
-const std::string PowerMode::clockGated = "clockGated";
+ExecModel::ExecModel(const char *type, int implAdj)
+  : type(type), implAdj(implAdj) {}
 
-} } // namespace SystemC_VPC::Detail
+Detail::AbstractExecModel *ExecModel::getImpl() {
+  // Pointer magic. Shift our this pointer
+  // so that it points to the Detail::AbstractExecModel
+  // base class of our real implementation.
+  return reinterpret_cast<Detail::AbstractExecModel *>(
+      reinterpret_cast<char *>(this) + implAdj);
+}
+
+ExecModel::~ExecModel() {
+}
+
+ExecModel::Ptr createExecModel(const char *type) {
+  if (strcmp(type, Detail::ExecModelling::LookupPowerTimeModelImpl::Type) == 0)
+    return new Detail::ExecModelling::LookupPowerTimeModelImpl();
+  else {
+    assert(!"WTF?!");
+    throw std::runtime_error("Unknown exec model type!");
+  }
+}
+
+} // namespace SystemC_VPC

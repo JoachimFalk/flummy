@@ -35,12 +35,11 @@
  */
 
 #include "SelectFastestPowerModeGlobalGovernor.hpp"
-#include "ComponentModel.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
-  InternalSelectFastestPowerModeGovernor::InternalSelectFastestPowerModeGovernor() :
-    m_lastMode(NULL)
+  InternalSelectFastestPowerModeGovernor::InternalSelectFastestPowerModeGovernor()
+    : m_lastMode(PowerMode::DEFAULT)
   {
     //std::cout << "InternalSelectFastestPowerModeGovernor" << std::endl; 
   }
@@ -48,43 +47,44 @@ namespace SystemC_VPC { namespace Detail {
   void InternalSelectFastestPowerModeGovernor::notify_top(ComponentInfo *ci,
                                                   GenericParameter *param)
   {
+    /*
     // extract PowerMode from container "GenericParameter"
     PowerModeParameter * p = dynamic_cast<PowerModeParameter*>(param);
-    const PowerMode * newMode = p->powerMode;
-
-    if(m_lastMode == NULL)
-      m_lastMode = newMode;
+    PowerMode newMode = p->powerMode;
 
     if(m_components.find(ci) == m_components.end()) {
       //std::cerr << "@" << sc_core::sc_time_stamp() << ": setPowerMode(" << newMode->getName() << ");" << std::endl;
-      ci->getModel()->setPowerMode(m_lastMode);
+      m_lastMode = newMode;
+      ci->getComponentInterface()->changePowerMode(m_lastMode);
     }
 
     m_components[ci] = newMode;
 
-    if(*newMode < *m_lastMode) {
-      for(std::map<ComponentInfo*, const PowerMode*>::iterator
+    // FIXME: This is alphabetical comparison and not speed. Fix this!!!
+    if(newMode < m_lastMode) {
+      for(std::map<ComponentInfo *, PowerMode>::iterator
             iter  = m_components.begin();
           iter != m_components.end();
           iter++)
         {
-          if(*iter->second > *newMode)
+          if(iter->second > newMode)
             newMode = iter->second;
         }
     }
 
-    if(*newMode != *m_lastMode) {
-      std::cerr << "@" << sc_core::sc_time_stamp() << ": for all components setPowerMode(" << newMode->getName() << ");" << std::endl;
+    if(newMode != m_lastMode) {
+      std::cerr << "@" << sc_core::sc_time_stamp() << ": for all components setPowerMode(" << newMode << ");" << std::endl;
 
-      for(std::map<ComponentInfo*, const PowerMode*>::iterator
+      for(std::map<ComponentInfo *, PowerMode>::iterator
             iter  = m_components.begin();
           iter != m_components.end();
           iter++)
         {
-          iter->first->getModel()->setPowerMode(newMode);
+          iter->first->getComponentInterface()->changePowerMode(newMode);
         }
       m_lastMode = newMode;
     }
+    */
   }
 
 } } // namespace SystemC_VPC::Detail

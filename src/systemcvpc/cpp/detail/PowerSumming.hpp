@@ -61,8 +61,8 @@ namespace SystemC_VPC { namespace Detail {
     double           m_previousPowerSum;
     std::map<const ComponentInfo *, double> m_powerConsumption;
     std::map<const ComponentInfo *, double> m_lastChangedPowerConsumption;
-    std::map<const ComponentInfo *, const PowerMode *> m_powerMode;
-    std::map<const ComponentInfo *, const PowerMode *> m_lastChangedPowerMode;
+    std::map<const ComponentInfo *, PowerMode> m_powerMode;
+    std::map<const ComponentInfo *, PowerMode> m_lastChangedPowerMode;
 
     //sc_core::sc_time m_lastChangedTime;
     double           m_previousEnergySum;

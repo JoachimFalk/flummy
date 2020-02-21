@@ -168,54 +168,6 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  typedef std::map<std::string, FunctionId>  FunctionIdMap;
-
-  FunctionId uniqueFunctionId() {
-    static FunctionId globalFunctionId = 1;
-    return globalFunctionId++;
-  }
-
-
-  FunctionIdMap& getFunctionIdMap(){
-    static FunctionIdMap functionIdMap;
-    return functionIdMap;
-  }
-
-  // FunctionIds are created by VPC during XML parsing.
-  FunctionId Director::createFunctionId(const std::string& function) {
-    FunctionIdMap::const_iterator iter = getFunctionIdMap().find(function);
-    if( iter == getFunctionIdMap().end() ) {
-      // map empty function names to default timing
-      if(function == "") {
-        getFunctionIdMap()[function] = defaultFunctionId;
-      }else{
-        getFunctionIdMap()[function] = uniqueFunctionId();
-      }
-    }
-    iter = getFunctionIdMap().find(function);
-    return iter->second;
-  }
-
-  bool Director::hasFunctionId(const std::string& function){
-    FunctionIdMap::const_iterator iter = getFunctionIdMap().find(function);
-    return (iter != getFunctionIdMap().end());
-  }
-
-  // FunctionIds are used (get) by SysteMoC.
-  // The default ID (and a default timing) is used if no ID was created during
-  // parsing. (The function name was not given in the XML.)
-  FunctionId Director::getFunctionId(const std::string& function){
-    FunctionIdMap::const_iterator iter = getFunctionIdMap().find(function);
-
-    // the function name was not set in configuration
-    // -> we have to use the default delay
-    if( iter == getFunctionIdMap().end() ) {
-      return defaultFunctionId;
-    }
-    return iter->second;
-    
-  }
-
   /// begin section: VpcApi.hpp related stuff
 
   void Director::beforeVpcFinalize()

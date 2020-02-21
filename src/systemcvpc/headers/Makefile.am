@@ -30,8 +30,10 @@ nobase_include_HEADERS = \
 	systemcvpc/ConfigException.hpp \
 	systemcvpc/datatypes.hpp \
 	systemcvpc/EventPair.hpp \
+	systemcvpc/ExecModel.hpp \
 	systemcvpc/InvalidArgumentException.hpp \
 	systemcvpc/PossibleAction.hpp \
+	systemcvpc/PowerMode.hpp \
 	systemcvpc/Route.hpp \
 	systemcvpc/Routing/Ignore.hpp \
 	systemcvpc/Routing/Static.hpp \

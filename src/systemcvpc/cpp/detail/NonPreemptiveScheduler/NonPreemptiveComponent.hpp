@@ -48,7 +48,6 @@
 #include "../ComponentInfo.hpp"
 #include "../HysteresisLocalGovernor.hpp"
 #include "../PowerSumming.hpp"
-#include "../PowerMode.hpp"
 #include "../TaskInstance.hpp"
 #include "../Director.hpp"
 #include "../tracing/ComponentTracerIf.hpp"
@@ -91,11 +90,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
-    /**
-     *
-     */
-    virtual void updatePowerConsumption();
-
     /*
      * from ComponentInterface
      */
@@ -138,8 +132,6 @@ namespace SystemC_VPC { namespace Detail {
 
     sc_core::sc_event remainingPipelineStages_WakeUp;
     std::priority_queue<timePcbPair> pqueue;
-
-    void fireStateChanged(const ComponentState &state);
 
     Event blockCompute;
 #ifndef NO_POWER_SUM

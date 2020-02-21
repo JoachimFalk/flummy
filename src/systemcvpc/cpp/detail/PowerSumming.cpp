@@ -57,16 +57,20 @@ PowerSumming::~PowerSumming()
   /* calculateNewEnergySum() and printPowerChange is required to be performed twice
    * to get correct last PowerSumming - entries
    */
-  calculateNewEnergySum();
-  printPowerChange( m_powerMode[m_lastCi]->getName());
+  std::map<const ComponentInfo *, PowerMode>::iterator iter =
+      m_powerMode.find(m_lastCi);
 
-  m_changedTime = m_lastVirtualTime;
-  m_lastVirtualTime=Director::getEnd();
+  if (iter != m_powerMode.end()) {
+    calculateNewEnergySum();
+    printPowerChange(iter->second);
 
-  //Print last change
-  calculateNewEnergySum();
-  printPowerChange( m_powerMode[m_lastCi]->getName());
+    m_changedTime = m_lastVirtualTime;
+    m_lastVirtualTime=Director::getEnd();
 
+    //Print last change
+    calculateNewEnergySum();
+    printPowerChange(iter->second);
+  }
 }
 
 
@@ -86,9 +90,15 @@ void PowerSumming::notify(ComponentInfo *ci)
   double currentCi_powerConsumption = ci->getPowerConsumption();
   m_powerConsumption[ci] = currentCi_powerConsumption;
 
-  const PowerMode* oldCi_powerMode = m_powerMode[ci];
-  const PowerMode* currentCi_powerMode = ci->getPowerMode();
-  m_powerMode[ci] = currentCi_powerMode;
+  const PowerMode currentCi_powerMode = ci->getPowerMode();
+  std::pair<std::map<const ComponentInfo *, PowerMode>::iterator, bool> status =
+      m_powerMode.insert(std::make_pair(ci, currentCi_powerMode));
+  const PowerMode oldCi_powerMode = status.second
+      ? PowerMode("?")        // Insertion success, no old value
+      : status.first->second; // Insertion fail, get old value
+  if (!status.second)
+    // Insertion fail, overwrite old value
+    status.first->second = currentCi_powerMode;
 
   //special case for previousPowerSum
   // idea is to set it equal to the power sum for t=0
@@ -101,28 +111,30 @@ void PowerSumming::notify(ComponentInfo *ci)
     }
   }
   
-  
   //if current time is different than last time the power consumption changed
   // and power consumption actually changed (fake exec. state transtitions should be ignored)
-  if(m_lastVirtualTime != notifyTimeStamp && ( m_previousPowerSum != m_powerSum || oldCi_powerMode != m_lastChangedPowerMode[ci] ) )// && (currentCi_powerConsumption != m_lastChangedPowerConsumption[ci] || oldCi_powerMode != currentCi_powerMode))
-  {
-    calculateNewEnergySum();
+  if(m_lastVirtualTime != notifyTimeStamp) {
+    std::pair<std::map<const ComponentInfo *, PowerMode>::iterator, bool> status =
+        m_lastChangedPowerMode.insert(std::make_pair(ci, oldCi_powerMode));
+    PowerMode const powerMode = status.second
+        ? PowerMode("-")        // Insertion success, no old value
+        : status.first->second; // Insertion fail, get old value
+    if (!status.second)
+      // Insertion fail, overwrite old value
+      status.first->second = oldCi_powerMode;
+    if (m_previousPowerSum != m_powerSum || oldCi_powerMode != powerMode) {
+      calculateNewEnergySum();
 
-    std::string powerMode;
-    if(m_lastChangedPowerMode[ci] != NULL)
-      powerMode = m_lastChangedPowerMode[ci]->getName();
-    else
-      powerMode = "-";
-    printPowerChange( powerMode);
+      printPowerChange( powerMode);
 
-    m_changedTime = m_lastVirtualTime;
+      m_changedTime = m_lastVirtualTime;
 
-    //Only replace power consumption of component on the total components aggregate
-    //printing will take place at next power change instant
-    m_lastChangedPowerConsumption[ci] = currentCi_powerConsumption;
-    m_lastChangedPowerMode[ci] = oldCi_powerMode;
-    m_lastCi = ci;
-    m_previousPowerSum = m_powerSum;
+      //Only replace power consumption of component on the total components aggregate
+      //printing will take place at next power change instant
+      m_lastChangedPowerConsumption[ci] = currentCi_powerConsumption;
+      m_lastCi = ci;
+      m_previousPowerSum = m_powerSum;
+    }
   }
 
   m_lastVirtualTime = notifyTimeStamp;

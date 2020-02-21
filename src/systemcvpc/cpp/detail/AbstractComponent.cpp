@@ -88,7 +88,8 @@ namespace SystemC_VPC { namespace Detail {
   ///
 
   void AbstractComponent::changePowerMode(std::string powerMode) {
-    setPowerMode(translatePowerMode(powerMode));
+    execModel->setPowerMode(execModelComponentState, powerMode);
+    this->powerMode = powerMode;
   }
 
   void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event){
@@ -127,24 +128,6 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   ///
-  /// Handle interfaces for SystemC_VPC::ComponentModel
-  ///
-
-  void AbstractComponent::setPowerMode(const PowerMode* mode){
-    this->powerMode = translatePowerMode(mode->getName());
-    this->updatePowerConsumption();
-
-    if(timingPools.find(powerMode) == timingPools.end()){
-      timingPools[powerMode].reset(new FunctionTimingPool());
-    }
-    this->timingPool = timingPools[powerMode];
-  }
-
-  const PowerMode* AbstractComponent::getPowerMode() const {
-    return this->powerMode;
-  }
-
-  ///
   /// Other stuff
   ///
 
@@ -152,8 +135,17 @@ namespace SystemC_VPC { namespace Detail {
 
 
   AbstractComponent::~AbstractComponent() {
-    this->timingPools.clear();
   }
+
+  void AbstractComponent::fireStateChanged(ComponentState state)
+  {
+    compState = state;
+    // FIXME: update powerConsumption
+    //this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
+    // Notify observers (e.g. powersum)
+    this->fireNotification(this);
+  }
+
 
   bool AbstractComponent::processPower(AttributePtr attPtr)
   {
@@ -170,38 +162,38 @@ namespace SystemC_VPC { namespace Detail {
         continue;
       }
 
-      std::string powerMode = attPtr->getNextAttribute(i).first;
-      const PowerMode *power = this->translatePowerMode(powerMode);
-
-      if(powerTables.find(power) == powerTables.end()){
-        powerTables[power] = PowerTable();
-      }
-
-      PowerTable &powerTable=powerTables[power];
-
-      if(powerAtt->hasParameter("IDLE")){
-        std::string v = powerAtt->getParameter("IDLE");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::IDLE] = value;
-      }
-      if(powerAtt->hasParameter("RUNNING")){
-        std::string v = powerAtt->getParameter("RUNNING");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::RUNNING] = value;
-      }
-      if(powerAtt->hasParameter("STALLED")){
-        std::string v = powerAtt->getParameter("STALLED");
-        const double value = atof(v.c_str());
-        powerTable[ComponentState::STALLED] = value;
-      }
-      if(powerAtt->hasParameter("transaction_delay")) {
-        this->transactionDelays[power] =
-          createSC_Time(powerAtt->getParameter("transaction_delay").c_str());
-      }
-      if(powerAtt->hasParameter("transfer_delay")) {
-        this->transactionDelays[power] =
-          createSC_Time(powerAtt->getParameter("transfer_delay").c_str());
-      }
+//    std::string powerMode = attPtr->getNextAttribute(i).first;
+//    const PowerMode *power = this->translatePowerMode(powerMode);
+//
+//    if(powerTables.find(power) == powerTables.end()){
+//      powerTables[power] = PowerTable();
+//    }
+//
+//    PowerTable &powerTable=powerTables[power];
+//
+//    if(powerAtt->hasParameter("IDLE")){
+//      std::string v = powerAtt->getParameter("IDLE");
+//      const double value = atof(v.c_str());
+//      powerTable[ComponentState::IDLE] = value;
+//    }
+//    if(powerAtt->hasParameter("RUNNING")){
+//      std::string v = powerAtt->getParameter("RUNNING");
+//      const double value = atof(v.c_str());
+//      powerTable[ComponentState::RUNNING] = value;
+//    }
+//    if(powerAtt->hasParameter("STALLED")){
+//      std::string v = powerAtt->getParameter("STALLED");
+//      const double value = atof(v.c_str());
+//      powerTable[ComponentState::STALLED] = value;
+//    }
+//    if(powerAtt->hasParameter("transaction_delay")) {
+//      this->transactionDelays[power] =
+//        createSC_Time(powerAtt->getParameter("transaction_delay").c_str());
+//    }
+//    if(powerAtt->hasParameter("transfer_delay")) {
+//      this->transactionDelays[power] =
+//        createSC_Time(powerAtt->getParameter("transfer_delay").c_str());
+//    }
 
     }
 
@@ -254,28 +246,6 @@ namespace SystemC_VPC { namespace Detail {
     }
 
     localGovernorFactory = AbstractComponent::factories[plugin]->factory;
-  }
-
-  AbstractComponent::FunctionTimingPtr AbstractComponent::getTiming(PowerMode const *mode, ProcessControlBlock const *const pcb) const {
-    TimingPools::const_iterator modeIter = timingPools.find(mode);
-    assert(modeIter != timingPools.end());
-    FunctionTimingPool::const_iterator timingIter = modeIter->second->find(pcb);
-    assert(timingIter != modeIter->second->end());
-    return timingIter->second;
-  }
-
-  void AbstractComponent::setTiming(Timing const &timing, ProcessControlBlock const *const pcb) {
-    PowerMode const *mode = translatePowerMode(timing.getPowerMode());
-
-    FunctionTimingPoolPtr &modePtr = timingPools[mode];
-    if (!modePtr)
-      modePtr.reset(new FunctionTimingPool());
-    FunctionTimingPtr &timingPtr = (*modePtr)[pcb];
-    if (!timingPtr) {
-      timingPtr.reset(new FunctionTiming());
-      timingPtr->setBaseDelay(transactionDelays[mode]);
-    }
-    timingPtr->setTiming(timing);
   }
 
   void AbstractComponent::requestCanExecute(){
@@ -369,16 +339,19 @@ namespace SystemC_VPC { namespace Detail {
     , midPowerGov(nullptr)
     , powerAttribute(new Attribute("",""))
     , componentName(name)
-    , powerMode(nullptr)
     , canExecuteTasks(true)
+    , execModelComponentState(nullptr)
+    , powerMode(PowerMode::DEFAULT)
+    , compState(ComponentState::IDLE)
+    , powerConsumption(0)
   {
-    if(powerTables.find(getPowerMode()) == powerTables.end()){
-      powerTables[getPowerMode()] = PowerTable();
-    }
-
-    PowerTable &powerTable=powerTables[getPowerMode()];
-    powerTable[ComponentState::IDLE]    = 0.0;
-    powerTable[ComponentState::RUNNING] = 1.0;
+//  if(powerTables.find(getPowerMode()) == powerTables.end()){
+//    powerTables[getPowerMode()] = PowerTable();
+//  }
+//
+//  PowerTable &powerTable=powerTables[getPowerMode()];
+//  powerTable[ComponentState::IDLE]    = 0.0;
+//  powerTable[ComponentState::RUNNING] = 1.0;
   }
 
 
@@ -405,6 +378,12 @@ namespace SystemC_VPC { namespace Detail {
     return iter->second.get();
   }
 
+  void AbstractComponent::setExecModel(AbstractExecModel *model) {
+    assert(execModelComponentState == nullptr);
+    execModelComponentState = model->attachToComponent(this);
+    execModel.reset(model);
+  }
+
   void AbstractComponent::registerTask(TaskInterface *task) {
     // This should be the first time the actor appeared here.
     VpcTask::Ptr         vpcTask = getTask(static_cast<ScheduledTask &>(*task));
@@ -417,110 +396,14 @@ namespace SystemC_VPC { namespace Detail {
     task->setSchedulerInfo(pcb);
   }
 
-  /**
-   *
-   */
-  class AbstractComponent::FastLink {
-  public:
-    FastLink()
-      : component(nullptr)
-      , complexity(0)
-    { }
-
-    FastLink(AbstractComponent *component, FunctionIds actionIds, FunctionIds guardIds, int complexity)
-      : component(component)
-      , actionIds(actionIds)
-      , guardIds(guardIds)
-      , complexity(complexity)
-    { }
-
-    AbstractComponent   *component;
-    FunctionIds          actionIds;
-    FunctionIds          guardIds;
-    int                  complexity;
-  };
-
   void AbstractComponent::registerFiringRule(TaskInterface *actor, PossibleAction *fr) {
-    const char                        *actorName       = actor->name();
-    smoc::SimulatorAPI::FunctionNames  actionNames     = fr->getActionNames();
-    smoc::SimulatorAPI::FunctionNames  guardNames      = fr->getGuardNames();
-    size_t                             guardComplexity = fr->getGuardComplexity();
-
-    ProcessControlBlock       *pcb = static_cast<ProcessControlBlock *>(actor->getSchedulerInfo());
-    ProcessId           const  pid = pcb->getPid();
-
-    assert(Director::getInstance().getProcessId(actorName) == pid);
     assert(actor->getScheduler() == this);
-
-    try {
-      TimingsProvider::Ptr provider = this->getTimingsProvider();
-      if (provider->hasDefaultActorTiming(actorName)) {
-
-        SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(actorName);
-
-        for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
-          std::string powermode = (*it).first;
-          setTiming(provider->getActionTiming(actorName,powermode), pcb);
-        }
-      }
-      for (std::string const &guard : guardNames) {
-        if (provider->hasGuardTimings(guard)) {
-
-          SystemC_VPC::functionTimingsPM timingsPM = provider->getGuardTimings(guard);
-          for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-          {
-            std::string powermode = (*it).first;
-            setTiming(provider->getGuardTiming(guard,powermode), pcb);
-            ConfigCheck::configureTiming(pid, guard);
-          }
-        }
-      }
-      for (std::string const &action : actionNames) {
-        if (provider->hasActionTimings(action)) {
-
-          SystemC_VPC::functionTimingsPM timingsPM = provider->getActionTimings(action);
-          for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
-          {
-            std::string powermode = (*it).first;
-            setTiming(provider->getActionTiming(action,powermode), pcb);
-            ConfigCheck::configureTiming(pid, action);
-          }
-        }
-      }
-    } catch (std::exception &e) {
-      std::cerr << "Actor registration failed for \"" << actorName <<
-          "\". Got exception:\n" << e.what() << std::endl;
-      exit(-1);
-    }
-
-    FunctionIds     actionIds;
-    FunctionIds     guardIds;
-
-    for (FunctionNames::const_iterator iter = actionNames.begin();
-         iter != actionNames .end();
-         ++iter){
-      Director::getInstance().debugFunctionNames[pid].insert(*iter);
-      //check if we have timing data for this function in the XML configuration
-      if (Director::getInstance().hasFunctionId(*iter)) {
-        actionIds.push_back(Director::getInstance().getFunctionId(*iter) );
-      }
-      ConfigCheck::modelTiming(pid, *iter);
-    }
-    for (FunctionNames::const_iterator iter = guardNames.begin();
-         iter != guardNames.end();
-         ++iter){
-      Director::getInstance().debugFunctionNames[pid].insert(*iter);
-      if(Director::getInstance().hasFunctionId(*iter)){
-        guardIds.push_back(Director::getInstance().getFunctionId(*iter) );
-      }
-      ConfigCheck::modelTiming(pid, *iter);
-    }
-
-    fr->setSchedulerInfo(new FastLink(this, actionIds, guardIds, guardComplexity));
+    fr->setSchedulerInfo(getExecModel()->registerAction(execModelComponentState, actor, fr));
   }
 
   void AbstractComponent::checkFiringRule(TaskInterface *task, PossibleAction *fr) {
-    FastLink *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
+    AbstractExecModel::ActionInfo *ai =
+        static_cast<AbstractExecModel::ActionInfo *>(fr->getSchedulerInfo());
 
     ProcessControlBlock *pcb = getPCBOfTaskInterface(task);
     std::function<void (TaskInstance *)> none([](TaskInstance *) {});
@@ -528,19 +411,7 @@ namespace SystemC_VPC { namespace Detail {
     taskInstance.setPCB(pcb);
     taskInstance.setFiringRule(fr);
     taskInstance.setName(task->name()+std::string("_check"));
-
-    FunctionTimingPtr timing =
-        this->getTiming(this->getPowerMode(), pcb);
-
-    if(!fLink->guardIds.empty())
-      taskInstance.setDelay(
-          timing->getDelay(fLink->guardIds) +
-          fLink->complexity * sc_core::sc_time(0.1, sc_core::SC_NS));
-    else
-      taskInstance.setDelay(
-          fLink->complexity * sc_core::sc_time(0.1, sc_core::SC_NS));
-    taskInstance.setRemainingDelay(taskInstance.getDelay());
-    taskInstance.setLatency(taskInstance.getDelay());
+    getExecModel()->initTaskInstance(execModelComponentState, ai, &taskInstance, true);
     this->check(&taskInstance);
   }
 
@@ -564,34 +435,25 @@ namespace SystemC_VPC { namespace Detail {
         compute();
     }
   private:
-    TaskInterface                           *task;
+    TaskInterface  *task;
     PossibleAction *fr;
-    size_t                                   missing;
+    size_t          missing;
 
     void compute() {
-      FastLink            *fLink = static_cast<FastLink *>(fr->getSchedulerInfo());
+      AbstractExecModel::ActionInfo *ai =
+          static_cast<AbstractExecModel::ActionInfo *>(fr->getSchedulerInfo());
       AbstractComponent   *comp  = static_cast<AbstractComponent *>(task->getScheduler());
       ProcessControlBlock *pcb   = getPCBOfTaskInterface(task);
 
-      std::function<void (TaskInstance *)> none([](TaskInstance *) {});
-      TaskInstance *taskInstance = new TaskInstance(none, none);
-
       assert(pcb != NULL);
 
-      FunctionTimingPtr timing =
-          comp->getTiming(comp->getPowerMode(), pcb);
-
-      //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
-      // Initialize with DII
-      taskInstance->setDelay(timing->getDelay(fLink->actionIds));
-      // Initialize with DII
-      taskInstance->setRemainingDelay(taskInstance->getDelay());
-      // Initialize with Latency
-      taskInstance->setLatency(timing->getLatency(fLink->actionIds));
-
+      std::function<void (TaskInstance *)> none([](TaskInstance *) {});
+      TaskInstance *taskInstance = new TaskInstance(none, none);
       taskInstance->setPCB(pcb);
       taskInstance->setFiringRule(fr);
       taskInstance->setName(task->name());
+
+      comp->getExecModel()->initTaskInstance(comp->execModelComponentState, ai, taskInstance);
       comp->compute(taskInstance);
       delete this;
     }
@@ -618,29 +480,21 @@ namespace SystemC_VPC { namespace Detail {
     ial->wait();
   }
 
-  TaskInstance *AbstractComponent::executeHop(ProcessControlBlock *pcb, size_t quantum, std::function<void (TaskInstance *)> const &cb) {
+  TaskInstance *AbstractComponent::executeHop(ProcessControlBlock *pcb
+    , Timing const &transferTiming
+    , size_t quantum
+    , std::function<void (TaskInstance *)> const &cb)
+  {
+    assert(pcb != NULL);
     std::function<void (TaskInstance *)> none([](TaskInstance *) {});
     TaskInstance *taskInstance = new TaskInstance(none, cb);
-
-    assert(pcb != NULL);
-
-    FunctionTimingPtr timing =
-        this->getTiming(this->getPowerMode(), pcb);
-
-    FunctionIds fids; // empty functionIds
-    fids.push_back(Director::getInstance().getFunctionId("1"));
-
-    //ugly hack: to make the random timing work correctly getDelay has to be called before getLateny, see Processcontrollbock.cpp for more information
-    // Initialize with DII
-    taskInstance->setDelay(quantum * timing->getDelay(fids));
-    // Initialize with DII
-    taskInstance->setRemainingDelay(taskInstance->getDelay());
-    // Initialize with Latency
-    taskInstance->setLatency(quantum * timing->getLatency(fids));
-
     taskInstance->setPCB(pcb);
     taskInstance->setName(pcb->getName());
     taskInstance->setTimingScale(quantum);
+    // FIXME: Timing independent of power mode at the moment!
+    taskInstance->setDelay(quantum * transferTiming.getDii());
+    taskInstance->setRemainingDelay(taskInstance->getDelay());
+    taskInstance->setLatency(quantum * transferTiming.getLatency());
     this->compute(taskInstance);
     return taskInstance;
   }

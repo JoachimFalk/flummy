@@ -72,8 +72,6 @@ namespace SystemC_VPC { namespace Detail {
 
     SC_THREAD(remainingPipelineStages);
 
-    this->setPowerMode(this->translatePowerMode("SLOW"));
-
 #ifndef NO_POWER_SUM
     std::string powerSumFileName(this->getName());
     powerSumFileName += ".dat";
@@ -205,7 +203,7 @@ namespace SystemC_VPC { namespace Detail {
 
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
         << " ) at time: " << sc_core::sc_time_stamp()
-        << " mode: " << this->getPowerMode()->getName()
+        << " mode: " << this->getPowerMode()
         << " schedTask: " << actualTask->getPCB()->getScheduledTask()
         << std::endl);
     DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
@@ -587,12 +585,6 @@ namespace SystemC_VPC { namespace Detail {
   }
 
 
-  void PreemptiveComponent::updatePowerConsumption()
-  {
-    this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
-    // Notify observers (e.g. powersum)
-    this->fireNotification(this);
-  }
 
   /*
    * from ComponentInterface
@@ -600,12 +592,6 @@ namespace SystemC_VPC { namespace Detail {
   bool PreemptiveComponent::hasWaitingOrRunningTasks()
   {
     return !readyTasks.empty() || !runningTasks.empty();
-  }
-
-  void PreemptiveComponent::fireStateChanged(const ComponentState &state)
-  {
-    this->setComponentState(state);
-    this->updatePowerConsumption();
   }
 
   void PreemptiveComponent::initialize(const Director* d){
@@ -645,7 +631,6 @@ namespace SystemC_VPC { namespace Detail {
 
 
   PreemptiveComponent::~PreemptiveComponent(){
-    this->setPowerConsumption(0.0);
     this->fireNotification(this);
     delete scheduler;
 #ifndef NO_POWER_SUM

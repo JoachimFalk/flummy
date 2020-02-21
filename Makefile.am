@@ -63,17 +63,23 @@ lib_LTLIBRARIES = libsystemcvpc.la
 libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/Attribute.cpp \
 	src/systemcvpc/cpp/Component.cpp \
+	src/systemcvpc/cpp/ExecModel.cpp \
+	src/systemcvpc/cpp/PowerMode.cpp \
 	src/systemcvpc/cpp/Route.cpp \
 	src/systemcvpc/cpp/Scheduler.cpp \
 	src/systemcvpc/cpp/Timing.cpp \
 	src/systemcvpc/cpp/VpcApi.cpp \
 	src/systemcvpc/cpp/VpcTask.cpp \
 	\
+	src/systemcvpc/cpp/ExecModelling/LookupPowerTimeModel.cpp \
+	\
 	src/systemcvpc/cpp/Routing/Ignore.cpp \
 	src/systemcvpc/cpp/Routing/Static.cpp \
 	\
 	src/systemcvpc/cpp/detail/dynload/dll-elf.cpp \
 	src/systemcvpc/cpp/detail/dynload/dll-win32.cpp \
+	\
+	src/systemcvpc/cpp/detail/ExecModelling/LookupPowerTimeModelImpl.cpp \
 	\
 	src/systemcvpc/cpp/detail/NonPreemptiveScheduler/DynamicPriorityComponent.cpp \
 	src/systemcvpc/cpp/detail/NonPreemptiveScheduler/FcfsComponent.cpp \
@@ -104,14 +110,13 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/tracing/TraceableComponent.cpp \
 	\
 	src/systemcvpc/cpp/detail/AbstractComponent.cpp \
+	src/systemcvpc/cpp/detail/AbstractExecModel.cpp \
 	src/systemcvpc/cpp/detail/AbstractRoute.cpp \
 	src/systemcvpc/cpp/detail/common.cpp \
-	src/systemcvpc/cpp/detail/ComponentInfo.cpp \
 	src/systemcvpc/cpp/detail/ConfigCheck.cpp \
 	src/systemcvpc/cpp/detail/Configuration.cpp \
 	src/systemcvpc/cpp/detail/DebugOStream.cpp \
 	src/systemcvpc/cpp/detail/Director.cpp \
-	src/systemcvpc/cpp/detail/FunctionTiming.cpp \
 	src/systemcvpc/cpp/detail/HysteresisLocalGovernor.cpp \
 	src/systemcvpc/cpp/detail/ObservableComponent.cpp \
 	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \

@@ -44,7 +44,6 @@
 #include "Scheduler.hpp"
 #include "../AbstractComponent.hpp"
 #include "../ComponentInfo.hpp"
-#include "../PowerMode.hpp"
 #include "../PowerSumming.hpp"
 #include "../Director.hpp"
 #include "../timetriggered/tt_support.hpp"
@@ -97,11 +96,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
-    /**
-     *
-     */
-    virtual void updatePowerConsumption();
-
     /*
      * from ComponentInterface
      */
@@ -158,8 +152,6 @@ namespace SystemC_VPC { namespace Detail {
 
     Event    blockCompute;
     size_t   blockMutex;
-
-    void fireStateChanged(const ComponentState &state);
 
     TaskMap readyTasks;
     TaskMap runningTasks;

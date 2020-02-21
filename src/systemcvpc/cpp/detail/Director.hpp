@@ -110,10 +110,6 @@ namespace SystemC_VPC { namespace Detail {
     static ProcessId getProcessId(std::string process_or_source,
         std::string destination = "");
 
-    static bool hasFunctionId(const std::string& function);
-    static FunctionId getFunctionId(const std::string& function);
-    static FunctionId createFunctionId(const std::string& function);
-
     // FIXME !!!
     PluggableGlobalPowerGovernor   *topPowerGov;
     DLLFactory<PlugInFactory<PluggableGlobalPowerGovernor> >

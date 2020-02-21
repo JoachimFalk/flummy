@@ -45,9 +45,6 @@ RoundRobinComponent::RoundRobinComponent(std::string const &name)
   , fireActorInLoop(true)
   , actualTask(NULL)
 {
-  /// FIXME: WTF?! SLOW hardcoded?
-  this->setPowerMode(this->translatePowerMode("SLOW"));
-
   SC_THREAD(scheduleThread);
 }
 
@@ -167,12 +164,6 @@ void RoundRobinComponent::execBlockingCompute(TaskInstance* task, VPCEvent::Ptr 
 void RoundRobinComponent::abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker) {
 
 
-}
-
-/**
- *
- */
-void RoundRobinComponent::updatePowerConsumption() {
 }
 
 /*

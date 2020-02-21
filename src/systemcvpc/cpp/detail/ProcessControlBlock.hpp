@@ -42,8 +42,6 @@
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 
-#include "PowerMode.hpp"
-#include "FunctionTiming.hpp"
 #include "tracing/ComponentTracerIf.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>

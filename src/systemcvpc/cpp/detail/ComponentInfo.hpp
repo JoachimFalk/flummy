@@ -37,7 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTINFO_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTINFO_HPP
 
-#include "PowerMode.hpp"
+#include <systemcvpc/PowerMode.hpp>
+#include <systemcvpc/Component.hpp>
 
 #include <cstddef>
 #include <string>
@@ -47,86 +48,56 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  class ComponentModel;
-
   typedef std::map<std::string, PowerMode> PowerModes;
 
-  class ComponentState
-  {
-    public:
-      ComponentState()
-      {
-        *this = IDLE;
-      }
+  typedef Component ComponentInfo;
 
-      ComponentState(const size_t &_state) : state(_state) {}
+  /*
 
-      bool operator==(const ComponentState &rhs) const
-      {
-        return state == rhs.state;
-      }
+  class ComponentInfo {
+  public:
+    ComponentInfo()
+      : componentState(ComponentState::IDLE)
+      , powerConsumption(0.0) {}
 
-      bool operator!=(const ComponentState &rhs) const
-      {
-        return state != rhs.state;
-      }
+    virtual ~ComponentInfo(){};
 
-      bool operator<(const ComponentState &rhs) const
-      {
-        return state < rhs.state;
-      }
+    ComponentState getComponentState() const
+    {
+      return componentState;
+    }
 
-      static const ComponentState IDLE;
-      static const ComponentState RUNNING;
-      static const ComponentState STALLED;
-      //Execution state on which component is not ready to perform any task
-      static const ComponentState SLEEPING;
+    double getPowerConsumption() const
+    {
+      return powerConsumption;
+    }
 
-    private:
-      size_t state;
+    virtual const PowerMode* getPowerMode() const = 0;
+    virtual void setPowerMode(const PowerMode *mode) = 0;
+
+    const PowerMode* translatePowerMode(std::string mode)
+    {
+      std::pair<PowerModes::iterator, bool> status =
+          powerModes.insert(PowerModes::value_type(mode, mode));
+      return &status.first->second;
+    }
+  protected:
+    void setComponentState(const ComponentState cs)
+    {
+      componentState = cs;
+    }
+
+    void setPowerConsumption(const double pc)
+    {
+      powerConsumption = pc;
+    }
+
+    ComponentState componentState;
+    double         powerConsumption;
+    PowerModes     powerModes;
   };
 
-  class ComponentInfo
-  {
-    public:
-      ComponentInfo(ComponentModel *model)
-        : powerConsumption(0.0), model(model) {}
-
-      virtual ~ComponentInfo(){};
-
-      ComponentState getComponentState() const
-      {
-        return componentState;
-      }
-
-      double getPowerConsumption() const
-      {
-        return powerConsumption;
-      }
-
-      virtual const PowerMode* getPowerMode() const = 0;
-
-      const PowerMode* translatePowerMode(std::string mode)
-      {
-        PowerModes::const_iterator i = powerModes.find(mode);
-        if(i == powerModes.end()) {
-          size_t id = powerModes.size();
-          powerModes[mode] = PowerMode(id, mode);
-        }
-        return &powerModes[mode];
-      }
-
-
-      ComponentModel * getModel(){
-        return model;
-      }
-    protected:
-      ComponentState componentState;
-      ComponentState previousComponentState;
-      double         powerConsumption;
-      PowerModes     powerModes;
-      ComponentModel *model;
-  };
+  */
 
 } } // namespace SystemC_VPC::Detail
 

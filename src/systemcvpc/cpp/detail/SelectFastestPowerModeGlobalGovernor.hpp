@@ -41,7 +41,8 @@
 #include <deque>
 #include <systemc>
 
-#include "PowerMode.hpp"
+#include <systemcvpc/PowerMode.hpp>
+
 #include "PluggablePowerGovernor.hpp"
 
 namespace SystemC_VPC { namespace Detail {
@@ -55,8 +56,8 @@ namespace SystemC_VPC { namespace Detail {
     void notify_top(ComponentInfo *ci, GenericParameter *param);
 
   private:
-    const PowerMode                           *m_lastMode;
-    std::map<ComponentInfo*, const PowerMode*> m_components;
+    PowerMode                           m_lastMode;
+    std::map<ComponentInfo*, PowerMode> m_components;
   };
 
 } } // namespace SystemC_VPC::Detail
