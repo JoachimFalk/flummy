@@ -76,9 +76,6 @@ namespace SystemC_VPC { namespace Detail {
 
   using CoSupport::SystemC::Event;
 
-  typedef std::map<ComponentState, double> PowerTable;
-  typedef std::map<const PowerMode*, PowerTable>  PowerTables;
-
   /**
    * \brief The interface of a Virtual-Processing-Component (VPC).
    */
@@ -158,12 +155,6 @@ namespace SystemC_VPC { namespace Detail {
     ///
     /// Other stuff
     ///
-
-    /**
-     * \brief Set parameter for Component and Scheduler.
-     */
-    virtual bool setAttribute(AttributePtr attributePtr);
-
 
     /**
      * \brief Create the Process Control Block (PCB).
@@ -251,7 +242,6 @@ namespace SystemC_VPC { namespace Detail {
                      DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
       Factories;
     static Factories factories;
-//  PowerTables powerTables;
 
     /**
      *
@@ -271,8 +261,6 @@ namespace SystemC_VPC { namespace Detail {
 
     /// Implement interface to SysteMoC
     void executeFiringRule(TaskInterface *task, PossibleAction *fr);
-
-    bool processPower(AttributePtr att);
 
     void loadLocalGovernorPlugin(std::string plugin);
 

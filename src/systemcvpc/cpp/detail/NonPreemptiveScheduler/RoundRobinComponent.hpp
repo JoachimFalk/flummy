@@ -67,17 +67,17 @@ protected:
   /**
    *
    */
-  virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+  void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
 
   /**
    *
    */
-  virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+  void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
 
   /**
    *
    */
-  virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+  void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
 
   /*
    * from ComponentInterface
@@ -88,7 +88,7 @@ protected:
 
   void scheduleThread();
 
-  bool setAttribute(AttributePtr attributePtr);
+  void addAttribute(AttributePtr attributePtr);
 
   virtual ~RoundRobinComponent();
 private:

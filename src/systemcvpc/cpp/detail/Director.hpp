@@ -75,8 +75,6 @@ namespace SystemC_VPC { namespace Detail {
    */
   class Director {
   public:
-    bool FALLBACKMODE;
-    bool defaultRoute;
     bool checkVpcConfig;
 
     /**
@@ -124,16 +122,12 @@ namespace SystemC_VPC { namespace Detail {
 
     void beforeVpcFinalize();
     void endOfVpcFinalize();
-    bool hasValidConfig() const;
 
     // time of latest acknowledge simulated task
     static sc_core::sc_time end;
 
     std::map<ProcessId, std::set<std::string> > debugFunctionNames;
   private:
-
-//  void debugUnknownNames( ) const;
-
     /**
      * Singleton design pattern
      */

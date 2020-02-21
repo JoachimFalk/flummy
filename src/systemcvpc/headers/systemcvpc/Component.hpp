@@ -40,9 +40,9 @@
 #include "ConfigException.hpp"
 #include "Scheduler.hpp"
 #include "Timing.hpp"
+#include "TimingModifier.hpp"
 #include "Attribute.hpp"
 #include "datatypes.hpp"
-//#include "TimingModifier.hpp"
 #include "ScheduledTask.hpp"
 #include "VPCEvent.hpp"
 #include "ExecModel.hpp"
@@ -122,7 +122,10 @@ public:
 
   std::string getName() const;
 
-  void addAttribute(AttributePtr attribute);
+  /**
+   * \brief Set parameter for Component and Scheduler.
+   */
+  virtual void addAttribute(AttributePtr attribute);
 
   ComponentId getComponentId() const;
 

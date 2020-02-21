@@ -93,6 +93,14 @@ std::string Route::getName() const {
 //return "msg_" + getSource() + "_2_" + getDestination();
 }
 
+void setIgnoreMissingRoutes(bool ignore) {
+  Detail::Configuration::getInstance().setIgnoreMissingRoutes(ignore);
+}
+
+bool getIgnoreMissingRoutes() {
+  return Detail::Configuration::getInstance().getIgnoreMissingRoutes();
+}
+
 bool hasRoute(std::string const &name) {
   return Detail::Configuration::getInstance().hasRoute(name).get();
 }

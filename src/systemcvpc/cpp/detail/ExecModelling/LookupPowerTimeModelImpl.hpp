@@ -79,6 +79,8 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     void add(Timing timing);
     void addDefaultActorTiming(std::string actorName, Timing timing);
 
+    bool addAttribute(AttributePtr attr);
+
     ///
     /// Handle interfaces for SystemC_VPC::ExecModelling::LookupPowerTimeModel
     ///
@@ -140,34 +142,6 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
   void intrusive_ptr_release(LookupPowerTimeModelImpl *p) {
     ::intrusive_ptr_release(p);
   }
-/*
- *
-class LookupPowerTimeModelImpl
-  : public TimingsProvider
-{
-  typedef LookupPowerTimeModelImpl this_type;
-public:
-  typedef boost::shared_ptr<this_type> Ptr;
-
-  virtual bool hasActionTiming(const std::string &functionName,const std::string &powermode) const;
-  virtual bool hasActionTimings(const std::string &functionName) const;
-  virtual Timing getActionTiming(const std::string &functionName,const std::string &powermode) const;
-  virtual functionTimingsPM getActionTimings(const std::string &functionName) const;
-  //virtual bool hasGuardTiming(const std::string &functionName,const std::string &powermode) const;
-  virtual bool hasGuardTimings(const std::string &functionName) const;
-  virtual Timing getGuardTiming(const std::string &functionName,const std::string &powermode) const;
-  virtual functionTimingsPM getGuardTimings(const std::string &functionName) const;
-
-  virtual bool hasDefaultActorTiming(const std::string& actorName) const;
-  virtual Timing getDefaultActorTiming(const std::string& actorName,const std::string &powermode) const;
-
-  virtual void add(Timing timing);
-  virtual void addDefaultActorTiming(std::string actorName, Timing timing);
-private:
-  std::map<std::string, functionTimingsPM> functionTimings_;
-
-};
- */
 
 } } } // namespace SystemC_VPC::Detail::ExecModelling
 

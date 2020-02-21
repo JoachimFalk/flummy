@@ -101,6 +101,17 @@ public:
       TaskInterface                     *task,
       std::list<PossibleAction *> const &firingRules);
 
+  /// Usually, for all SysteMoC ports, i.e., messages, there must be a
+  /// route created via createRoute. However, if true is given to the
+  /// setIgnoreMissingRoutes method. Then, the routing of messages where
+  /// no route has been created is ignored, i.e., zero communication
+  /// overhead is assumed in the VPC simulation.
+  void setIgnoreMissingRoutes(bool ignore)
+    { ignoreMissingRoutes = ignore; }
+  /// Getter returning if VPC will ignore missing routes.
+  bool getIgnoreMissingRoutes()
+    { return ignoreMissingRoutes; }
+
   /// This will return the map of all routes.
   Routes const &getRoutes() const;
   /// This might return a nullptr.
@@ -114,9 +125,10 @@ public:
   AbstractRoute::Ptr createRoute(std::string const &name,
       std::function<AbstractRoute::Ptr ()> constr);
   /// This is triggered from SysteMoC via SystemCVPCSimulator to
-  /// register a route, i.e., a SysteMoC port. For each registered
-  /// SysteMoC port there must be a corresponding createRoute
-  /// triggered by building the VPC configuration, e.g., by VPCBuilder.
+  /// register a route, i.e., a SysteMoC port. If missing routes
+  /// are not ignored, then for each registered SysteMoC port there
+  /// must be a corresponding createRoute triggered by building
+  /// the VPC configuration, e.g., by VPCBuilder.
   void registerRoute(PortInInterface *port);
   /// This is triggered from SysteMoC via SystemCVPCSimulator to
   /// register a route, i.e., a SysteMoC port. For each registered
@@ -171,8 +183,11 @@ private:
   RegisteredTasks       registeredTasks;
   /// These are the created routes
   Routes                routes;
+  /// Should missing routes be ignored
+  bool                  ignoreMissingRoutes;
   /// These are the registered routes
   RegisteredRoutes      registeredRoutes;
+
   TimingModifiers       timingModifiers;
 };
 

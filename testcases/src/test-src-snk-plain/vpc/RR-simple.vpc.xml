@@ -6,8 +6,10 @@
 
  <resources>
   <component name="CPU" scheduler="RR">
-   <attribute type="tracing" value="VCD"/>
-   <attribute type="timeslice" value="13 ns"/>
+    <attribute type="tracing" value="VCD"/>
+    <attribute type="scheduler">
+      <attribute type="timeslice" value="13 ns"/>
+    </attribute>
   </component>
  </resources>
 

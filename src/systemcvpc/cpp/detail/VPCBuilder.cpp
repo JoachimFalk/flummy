@@ -38,10 +38,7 @@
 
 #include "VPCBuilder.hpp"
 #include "common.hpp"
-#include "Director.hpp"
 #include "DebugOStream.hpp"
-
-#include <systemcvpc/ExecModelling/LookupPowerTimeModel.hpp>
 
 #include <CoSupport/DataTypes/MaybeValue.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
@@ -129,10 +126,8 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  VPCBuilder::VPCBuilder(Director *director)
-    : FALLBACKMODE(false)
-    , vpcConfigTreeWalker(NULL)
-    , director(director)
+  VPCBuilder::VPCBuilder()
+    : vpcConfigTreeWalker(NULL)
   {
     handler.setTopElementName(XMLCH("vpcconfiguration"));
     handler.setDTDUrl(XMLCH("vpc.dtd"));
@@ -144,15 +139,15 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief sets ups VPC Framework
    */
-  void VPCBuilder::buildVPC(std::string const &vpcConfigFile) {
+  bool VPCBuilder::buildVPC(std::string const &vpcConfigFile) {
+    bool FALLBACKMODE = false;
+
     if (!exists(fs::path(vpcConfigFile))) {
       std::cerr << "VPCBuilder> Warning: could not open '" << vpcConfigFile << "'" << std::endl;
       FALLBACKMODE=true;
-    } else
-      FALLBACKMODE=false;
+    }
 
     if (FALLBACKMODE) {
-      this->director->FALLBACKMODE = true;
       DBG_OUT("running fallbackmode" << std::endl);
     } else { //!FALLBACKMODE
       DBG_OUT("VPCBuilder> VPCCONFIGURATION set to " << vpcConfigFile << std::endl);
@@ -224,12 +219,12 @@ namespace SystemC_VPC { namespace Detail {
                         node->getAttributes()->getNamedItem(XMLCH("value"))->getNodeValue();
                     }
 
-                    if( sType == "global_governor" ){
-                      AttributePtr gov(new Attribute("global_governor",
-                                                     sValue));
-                      nextAttribute(gov, node->getFirstChild());
-                      director->loadGlobalGovernorPlugin(sValue, gov);
-                    }
+//                  if( sType == "global_governor" ){
+//                    AttributePtr gov(new Attribute("global_governor",
+//                                                   sValue));
+//                    nextAttribute(gov, node->getFirstChild());
+//                    director->loadGlobalGovernorPlugin(sValue, gov);
+//                  }
                   }
                 }
               }catch(InvalidArgumentException &e){
@@ -258,13 +253,13 @@ namespace SystemC_VPC { namespace Detail {
             node = vpcConfigTreeWalker->parentNode();
           }
 
-        }else if( xmlName == XMLCH("resultfile") ){
-           
-           CX::XN::DOMNamedNodeMap * atts=node->getAttributes();
-           CX::XStr vpc_result_file =
-             atts->getNamedItem(XMLCH("name"))->getNodeValue();
-           this->director->setResultFile(vpc_result_file);
-        
+//      }else if( xmlName == XMLCH("resultfile") ){
+//
+//         CX::XN::DOMNamedNodeMap * atts=node->getAttributes();
+//         CX::XStr vpc_result_file =
+//           atts->getNamedItem(XMLCH("name"))->getNodeValue();
+//         this->director->setResultFile(vpc_result_file);
+//
         }else if( xmlName == XMLCH("topology") ){
           node = vpcConfigTreeWalker->getCurrentNode();
           parseTopology( node );
@@ -276,6 +271,8 @@ namespace SystemC_VPC { namespace Detail {
       }
     } //!FALLBACKMODE
     DBG_OUT("Initializing VPC finished!" << std::endl);
+
+    return FALLBACKMODE;
   }
 
   /**
@@ -513,8 +510,8 @@ namespace SystemC_VPC { namespace Detail {
         topologyTracing = false;
       MaybeValue<std::string> defaultRoute =
           CX::getMaybeAttrValueAs<std::string>(top, XMLCH("default"));
-      director->defaultRoute = defaultRoute.isDefined() &&
-          defaultRoute == "ignore";
+      setIgnoreMissingRoutes(defaultRoute.isDefined() &&
+          defaultRoute == "ignore");
 
       // check if tracing is enabled for any route -> open trace file
       bool tracingEnabled = false;

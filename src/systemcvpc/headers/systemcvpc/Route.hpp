@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -92,33 +92,63 @@ private:
   std::string destination_;
 };
 
+/// Usually, for all SysteMoC ports, i.e., messages, there must be a
+/// route created via createRoute. However, if true is given to the
+/// setIgnoreMissingRoutes function. Then, the routing of messages where
+/// no route has been created is ignored, i.e., zero communication
+/// overhead is assumed in the VPC simulation.
+void setIgnoreMissingRoutes(bool ignore);
+/// Getter returning if VPC will ignore missing routes.
+bool getIgnoreMissingRoutes();
+
+/// Check if a route has been created via createRoute.
 bool hasRoute(std::string const &name);
+/// Check if a route has been created via createRoute.
 bool hasRoute(smoc::SimulatorAPI::PortInInterface  const &port);
+/// Check if a route has been created via createRoute.
 bool hasRoute(smoc::SimulatorAPI::PortOutInterface const &port);
 
+/// This will not return a nullptr. If the route does not
+/// exists, then a ConfigException will be thrown.
 Route::Ptr getRoute(std::string const &name);
+/// This will not return a nullptr. If the route does not
+/// exists, then a ConfigException will be thrown.
 Route::Ptr getRoute(smoc::SimulatorAPI::PortInInterface  const &port);
+/// This will not return a nullptr. If the route does not
+/// exists, then a ConfigException will be thrown.
 Route::Ptr getRoute(smoc::SimulatorAPI::PortOutInterface const &port);
 
+/// This will create a route for the given message, i.e.,
+/// SysteMoC port, and type of route.
 Route::Ptr createRoute(std::string const &name,
     const char *type);
+/// This will create a route for the given message, i.e.,
+/// SysteMoC port, and type of route.
 Route::Ptr createRoute(smoc::SimulatorAPI::PortInInterface  const &port,
     const char *type);
+/// This will create a route for the given message, i.e.,
+/// SysteMoC port, and type of route.
 Route::Ptr createRoute(smoc::SimulatorAPI::PortOutInterface const &port,
     const char *type);
 
+/// This will create a route for the given message, i.e.,
+/// SysteMoC port, and type of route.
 template <typename ROUTE>
 typename ROUTE::Ptr
 createRoute(std::string const &name) {
   return boost::static_pointer_cast<ROUTE>(
       createRoute(name, ROUTE::Type));
 }
+/// This will create a route for the given message, i.e.,
+/// SysteMoC port, and type of route.
 template <typename ROUTE>
 typename ROUTE::Ptr
 createRoute(smoc::SimulatorAPI::PortInInterface  const &port) {
   return boost::static_pointer_cast<ROUTE>(
       createRoute(port, ROUTE::Type));
 }
+/// This will create a route for the given message, i.e.,
+/// SysteMoC port, and type of route.
 template <typename ROUTE>
 typename ROUTE::Ptr
 createRoute(smoc::SimulatorAPI::PortOutInterface const &port) {

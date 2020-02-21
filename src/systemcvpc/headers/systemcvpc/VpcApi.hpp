@@ -37,10 +37,14 @@
 #ifndef _INCLUDED_SYSTEMCVPC_VPCAPI_HPP
 #define _INCLUDED_SYSTEMCVPC_VPCAPI_HPP
 
+#include "Timing.hpp"
 #include "VpcTask.hpp"
 #include "Component.hpp"
 #include "Route.hpp"
-#include "Timing.hpp"
+#include "Routing/Ignore.hpp"
+#include "Routing/Static.hpp"
+#include "ExecModel.hpp"
+#include "ExecModelling/LookupPowerTimeModel.hpp"
 
 namespace SystemC_VPC {
 
@@ -49,8 +53,6 @@ bool hasDistribution(std::string const &name);
 TimingModifier::Ptr getDistribution(std::string const &name);
 
 void createDistribution(std::string const &name, boost::shared_ptr<DistributionTimingModifier> modifier);
-
-void ignoreMissingRoutes(bool ignore);
 
 } // namespace SystemC_VPC
 

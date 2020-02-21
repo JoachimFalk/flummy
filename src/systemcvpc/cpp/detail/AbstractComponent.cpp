@@ -40,6 +40,7 @@
 #include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/VpcTask.hpp>
 #include <systemcvpc/PossibleAction.hpp>
+#include <systemcvpc/ExecModel.hpp>
 
 #include "common.hpp"
 #include "Director.hpp"
@@ -135,79 +136,6 @@ namespace SystemC_VPC { namespace Detail {
 
 
   AbstractComponent::~AbstractComponent() {
-  }
-
-  void AbstractComponent::fireStateChanged(ComponentState state)
-  {
-    compState = state;
-    // FIXME: update powerConsumption
-    //this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
-    // Notify observers (e.g. powersum)
-    this->fireNotification(this);
-  }
-
-
-  bool AbstractComponent::processPower(AttributePtr attPtr)
-  {
-    // hierarchical format
-    if(!attPtr->isType("powermode")) {
-      return false;
-    }
-
-    for(size_t i=0; i<attPtr->getAttributeSize();++i){
-      AttributePtr powerAtt = attPtr->getNextAttribute(i).second;
-      if(powerAtt->isType("governor")){
-        this->loadLocalGovernorPlugin(powerAtt->getValue());
-        powerAttribute = powerAtt;
-        continue;
-      }
-
-//    std::string powerMode = attPtr->getNextAttribute(i).first;
-//    const PowerMode *power = this->translatePowerMode(powerMode);
-//
-//    if(powerTables.find(power) == powerTables.end()){
-//      powerTables[power] = PowerTable();
-//    }
-//
-//    PowerTable &powerTable=powerTables[power];
-//
-//    if(powerAtt->hasParameter("IDLE")){
-//      std::string v = powerAtt->getParameter("IDLE");
-//      const double value = atof(v.c_str());
-//      powerTable[ComponentState::IDLE] = value;
-//    }
-//    if(powerAtt->hasParameter("RUNNING")){
-//      std::string v = powerAtt->getParameter("RUNNING");
-//      const double value = atof(v.c_str());
-//      powerTable[ComponentState::RUNNING] = value;
-//    }
-//    if(powerAtt->hasParameter("STALLED")){
-//      std::string v = powerAtt->getParameter("STALLED");
-//      const double value = atof(v.c_str());
-//      powerTable[ComponentState::STALLED] = value;
-//    }
-//    if(powerAtt->hasParameter("transaction_delay")) {
-//      this->transactionDelays[power] =
-//        createSC_Time(powerAtt->getParameter("transaction_delay").c_str());
-//    }
-//    if(powerAtt->hasParameter("transfer_delay")) {
-//      this->transactionDelays[power] =
-//        createSC_Time(powerAtt->getParameter("transfer_delay").c_str());
-//    }
-
-    }
-
-    return true;
-  }
-
-  /**
-   *
-   */
-  bool AbstractComponent::setAttribute(AttributePtr attribute){
-    if (processPower(attribute)) {
-      return true;
-    }
-    return false;
   }
 
   void AbstractComponent::loadLocalGovernorPlugin(std::string plugin){
@@ -481,6 +409,15 @@ namespace SystemC_VPC { namespace Detail {
       }
     }
     delete taskInstance;
+  }
+
+  void AbstractComponent::fireStateChanged(ComponentState state)
+  {
+    compState = state;
+    // FIXME: update powerConsumption
+    //this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
+    // Notify observers (e.g. powersum)
+    this->fireNotification(this);
   }
 
 } } // namespace SystemC_VPC::Detail

@@ -62,9 +62,4 @@ namespace SystemC_VPC {
         [modifier]() -> TimingModifier::Ptr { return modifier; });
   }
 
-  //
-  void ignoreMissingRoutes(bool ignore) {
-    Detail::Director::getInstance().defaultRoute = ignore;
-  }
-
 } // namespace SystemC_VPC
