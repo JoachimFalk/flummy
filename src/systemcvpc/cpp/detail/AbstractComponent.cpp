@@ -200,36 +200,13 @@ namespace SystemC_VPC { namespace Detail {
     return true;
   }
 
-  bool AbstractComponent::processMCG(AttributePtr attPtr)
-  {
-    // hierarchical format
-    if(!attPtr->isType("multicastgroup")) {
-      return false;
-    }
-    MultiCastGroup mcg = attPtr->getValue();
-
-    for(size_t i=0; i<attPtr->getAttributeSize();++i){
-         AttributePtr mcgAtt = attPtr->getNextAttribute(i).second;
-         if(mcgAtt->isType("task")){
-             std::string task = mcgAtt->getValue();
-             ProcessId pid = Director::getInstance().getProcessId(task);
-             multiCastGroups[pid] = mcg;
-         }
-    }
-    return true;
-  }
-
-
   /**
    *
    */
   bool AbstractComponent::setAttribute(AttributePtr attribute){
     if (processPower(attribute)) {
       return true;
-    } else if (processMCG(attribute)) {
-      return true;
     }
-
     return false;
   }
 
@@ -295,41 +272,6 @@ namespace SystemC_VPC { namespace Detail {
 
   void AbstractComponent::reactivateExecution() {
 
-  }
-
-  AbstractComponent::MultiCastGroupInstance* AbstractComponent::getMultiCastGroupInstance(TaskInstance* actualTask){
-    if(multiCastGroupInstances.size()!=0 ){
-      //there are MultiCastGroupInstances, let's find the correct one
-      for(std::list<MultiCastGroupInstance*>::iterator list_iter = multiCastGroupInstances.begin();
-          list_iter != multiCastGroupInstances.end(); list_iter++)
-      {
-            MultiCastGroupInstance* mcgi = *list_iter;
-          if(mcgi->mcg == multiCastGroups[actualTask->getProcessId()]){
-            bool existing =  (mcgi->task->getProcessId() == actualTask->getProcessId());
-            for(std::list<TaskInstance*>::iterator tasks_iter = mcgi->additional_tasks->begin();
-                tasks_iter != mcgi->additional_tasks->end(); tasks_iter++){
-                TaskInstance* task = *tasks_iter;
-                if(task->getProcessId() == actualTask->getProcessId()){
-                    existing = true;
-                }
-            }
-            //we assume a fixed order of token-events, thus, the first free one is the correct one.
-            if(!existing){
-                mcgi->additional_tasks->push_back(actualTask);
-                assert(mcgi->timestamp == sc_core::sc_time_stamp()); // if not, MultiCastMessage reached at different times...
-                return mcgi;
-            }
-          }
-      }
-    }
-    // no Instance found, create new one
-    MultiCastGroupInstance* newInstance = new MultiCastGroupInstance();
-    newInstance->mcg = multiCastGroups[actualTask->getProcessId()];
-    newInstance->timestamp = sc_core::sc_time_stamp();
-    newInstance->task = actualTask;
-    newInstance->additional_tasks = new  std::list<TaskInstance*>();
-    multiCastGroupInstances.push_back(newInstance);
-    return newInstance;
   }
 
   AbstractComponent::AbstractComponent(std::string const &name)
