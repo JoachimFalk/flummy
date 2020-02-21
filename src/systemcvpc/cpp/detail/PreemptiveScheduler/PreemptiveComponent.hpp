@@ -65,6 +65,8 @@ namespace SystemC_VPC { namespace Detail {
    */
   class PreemptiveComponent: public AbstractComponent {
     SC_HAS_PROCESS(PreemptiveComponent);
+
+    typedef AbstractComponent base_type;
   public:
     /**
      * \brief An implementation of AbstractComponent.
@@ -74,27 +76,27 @@ namespace SystemC_VPC { namespace Detail {
     /**
      * implementation of AbstractComponent::compute(Task *)
      */
-    virtual void compute(TaskInstance* task);
+    void compute(TaskInstance* task);
 
     /**
      *
      */
-    bool setAttribute(AttributePtr attribute);
+    void addAttribute(AttributePtr attribute);
 
     /**
      *
      */
-    virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+    void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+    void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+    void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
     
     /*
      * from ComponentInterface

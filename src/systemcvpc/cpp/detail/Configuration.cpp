@@ -48,7 +48,8 @@ namespace SystemC_VPC { namespace Detail {
   using CoSupport::String::QuotedString;
 
   Configuration::Configuration()
-    : finalized(false) {}
+    : finalized(false)
+    , ignoreMissingRoutes(false) {}
 
   Configuration &Configuration::getInstance() {
     static Configuration conf;
@@ -289,8 +290,7 @@ namespace SystemC_VPC { namespace Detail {
       RegisteredRoute const &registeredRoute = v.second;
       Routes::iterator iter = routes.find(v.first);
 
-      if (iter == routes.end() &&
-          Director::getInstance().defaultRoute) {
+      if (iter == routes.end() && ignoreMissingRoutes) {
         bool status;
         std::tie(iter, status) =
                 routes.insert(Routes::value_type(v.first,

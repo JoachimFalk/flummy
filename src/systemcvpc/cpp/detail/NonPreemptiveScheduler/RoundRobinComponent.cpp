@@ -48,17 +48,20 @@ RoundRobinComponent::RoundRobinComponent(std::string const &name)
   SC_THREAD(scheduleThread);
 }
 
-bool RoundRobinComponent::setAttribute(AttributePtr attributePtr) {
-  if (attributePtr->getType() == "RRNOPRE") {
-    std::cout << "FLUMMY: " <<  attributePtr->getValue() << std::endl;
-    if (attributePtr->hasAttribute("fireActorInLoop")) {
-      std::string value = attributePtr->getAttribute("fireActorInLoop")->getValue();
-      fireActorInLoop = (value == "1" || value == "true");
-      assert(value == "1" || value == "true" || value == "0" || value == "false");
+void RoundRobinComponent::addAttribute(AttributePtr attr) {
+  if (attr->getType() == "scheduler") {
+    for(size_t i=0; i<attr->getAttributeSize();++i) {
+      AttributePtr schedAttr = attr->getNextAttribute(i).second;
+      if (schedAttr->isType("fireActorInLoop")) {
+        std::string value = schedAttr->getValue();
+        fireActorInLoop = (value == "1" || value == "true");
+        assert(value == "1" || value == "true" || value == "0" || value == "false");
+      } else {
+        throw ConfigException("Unknown attribute " + schedAttr->getType() + " for RRNOPRE scheduler!");
+      }
     }
-    return true;
-  }
-  return this->base_type::setAttribute(attributePtr);
+  } else
+    base_type::addAttribute(attr);
 }
 
 
@@ -74,7 +77,7 @@ void RoundRobinComponent::setActivationCallback(bool flag) {
          iter != taskList.end();
          ++iter) {
       // This will trigger notifyActivation with
-      // either false when the actor is still not fireabke
+      // either false when the actor is still not fireable
       // or     true when the actor is fireable.
       (*iter)->setUseActivationCallback(true);
       // Then, notifyActivation will reset useActivationCallback

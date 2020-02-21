@@ -43,9 +43,6 @@
 #include <systemcvpc/Attribute.hpp>
 #include <systemcvpc/TimingModifier.hpp>
 #include <systemcvpc/Route.hpp>
-#include <systemcvpc/Routing/Static.hpp>
-
-#include "AbstractComponent.hpp"
 
 #include <CoSupport/XML/Xerces/Handler.hpp>
 
@@ -61,8 +58,6 @@ namespace SystemC_VPC { namespace Detail {
 
   namespace CX = CoSupport::XML::Xerces;
 
-  class Director;
-
   /**
    * VPCBuilder sets up VPC framework through a given specification file before
    * simulation start.
@@ -70,18 +65,13 @@ namespace SystemC_VPC { namespace Detail {
   class VPCBuilder {
   public:
 
-    VPCBuilder(Director *director);
+    VPCBuilder();
     ~VPCBuilder();
-
-    void setDirector(Director *director)
-      { this->director = director; }
-
-    bool FALLBACKMODE;
 
     /**
      * \brief Initializes VPC Framework using a configuration file
      */
-    void buildVPC(std::string const &vpcConfigFile);
+    bool buildVPC(std::string const &vpcConfigFile);
 
   private:
     static const char *B_TRANSPORT;
@@ -99,15 +89,6 @@ namespace SystemC_VPC { namespace Detail {
     // walker over parsed configure file
     // used as instance variable to enable code modularization
     CX::XN::DOMTreeWalker* vpcConfigTreeWalker;
-    
-    /*
-     * HELPER STRUCTURES FOR INITIALIZATION
-     */
-    // map of all created components
-    std::map<std::string, AbstractComponent *> knownComps;
-
-    // pointer to Director to be initialized
-    Director *director;
     
     /**
      * \brief Initialize a distribution from the configuration file

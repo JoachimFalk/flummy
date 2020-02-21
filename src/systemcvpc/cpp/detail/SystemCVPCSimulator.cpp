@@ -165,9 +165,11 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
 #endif //!defined(SYSTEMCVPC_ENABLE_DEBUG)
 
   if (retval != IS_DISABLED) {
+    bool FALLBACKMODE = true;
+
     try {
-      VPCBuilder builder(&Director::getInstance());
-      builder.buildVPC(vpcConfigFile);
+      VPCBuilder builder;
+      FALLBACKMODE = builder.buildVPC(vpcConfigFile);
     } catch (InvalidArgumentException &e) {
       std::cerr << "VPCBuilder> Got exception while setting up VPC:\n"
                 << e.what() << std::endl;
@@ -179,7 +181,7 @@ SystemCVPCSimulator::EnablementStatus SystemCVPCSimulator::evaluateOptionsMap(
     }
 
     Director::getInstance().beforeVpcFinalize();
-    if (Director::getInstance().FALLBACKMODE) {
+    if (FALLBACKMODE) {
       if (getDbgOut().isVisible(Debug::High))
         getDbgOut() << "SystemC_VPC has invalid configuration " << vpcConfigFile << " => VPC still off" << std::endl;
       retval = IS_DISABLED;

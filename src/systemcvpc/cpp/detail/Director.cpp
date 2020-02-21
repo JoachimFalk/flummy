@@ -76,9 +76,7 @@ namespace SystemC_VPC { namespace Detail {
    *
    */
   Director::Director()
-    : FALLBACKMODE(false)
-    , defaultRoute(false)
-    , checkVpcConfig(true)
+    : checkVpcConfig(true)
     , topPowerGov(new InternalSelectFastestPowerModeGovernor)
     , topPowerGovFactory(NULL)
 #ifndef NO_POWER_SUM
@@ -192,12 +190,6 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  //
-  bool Director::hasValidConfig() const
-  {
-    return !FALLBACKMODE;
-  }
-
   void Director::loadGlobalGovernorPlugin(std::string plugin,
                                           AttributePtr attPtr){
     //std::cerr << "Director::loadGlobalGovernorPlugin" << std::endl;
@@ -212,75 +204,6 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-/*
-  void Director::debugUnknownNames( ) const {
-    bool route = false;
-    bool mappings = false;
-    for(std::map<ProcessId, std::pair<std::string, std::string> >::const_iterator
-          iter = ConfigCheck::routeNames().begin();
-        iter != ConfigCheck::routeNames().end();
-        ++iter){
-      if( !taskPool->contains( iter->first ) ){
-           if(!route){
-             std::cout << "Found unknown routes.\n"
-                       <<" Please add the following routes to the config file:"
-                       << std::endl;
-             route = true;
-           }
-
-        std::cout << "  <route  source=\""
-                  << iter->second.first
-                  << "\" destination=\""
-                  << iter->second.second
-                  << "\">\n   <hop name=\"?\">  </hop>\n  </route>"
-                  << std::endl;
-      }
-    }
-    for (VpcTasks::value_type const &v :
-            Configuration::getInstance().getVpcTasks()) {
-      if (!v.second->getComponent()) {
-        if(!mappings){
-          std::cout << "\n" << std::endl;
-          std::cout << "Unknown mapping for tasks.\n"
-                    <<" Please add the following mapping to the config file:"
-                    << std::endl;
-          mappings = true;
-        }
-        std::cout << "  <mapping source=\""
-                  << v.first
-                  << "\" target=\"?\">\n"
-                  << "    <!-- we may use a default delay: "
-                  << "    <timing dii=\"? us\""
-                  << " latency=\"? us\" />"
-                  << " --> "
-                  << std::endl;
-
-        const std::set<std::string> &functionNames =
-          debugFunctionNames.find(getProcessId(v.first))->second;
-
-        for(std::set<std::string>::const_iterator fiter =
-            functionNames.begin();
-            fiter != functionNames.end();
-            ++fiter){
-          if(0 == fiter->compare("???")){
-            std::cout << "    <!-- the \"???\" is caused by a SysteMoC"
-                      << " transition without function CALL  -->" << std::endl;
-          }
-          std::cout << "    <timing fname=\""
-                    << *fiter
-                    << "\" dii=\"? us\""
-                    << " latency=\"? us\" />"
-                    << std::endl;
-        }
-        std::cout <<"  </mapping>" << std::endl;
-      }
-    }
-    if(route || mappings){
-      std::cout << "\n" << std::endl;
-    }
-    exit(-1);
-  }
-*/
   //
   std::string Director::getTaskName(ProcessId id) {
     if(ConfigCheck::hasProcessName(id)){

@@ -75,6 +75,50 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     powerModeDependentTimings[timing.getPowerMode()][actorName] = timing;
   }
 
+  bool LookupPowerTimeModelImpl::addAttribute(AttributePtr attr) {
+//    if(attr->isType("governor")){
+//      this->loadLocalGovernorPlugin(attr->getValue());
+//      powerAttribute = powerAtt;
+//      continue;
+//    }
+
+//    std::string powerMode = attr->getNextAttribute(i).first;
+//    const PowerMode *power = this->translatePowerMode(powerMode);
+//
+//    if(powerTables.find(power) == powerTables.end()){
+//      powerTables[power] = PowerTable();
+//    }
+//
+//    PowerTable &powerTable=powerTables[power];
+//
+//    if(powerAtt->hasParameter("IDLE")){
+//      std::string v = powerAtt->getParameter("IDLE");
+//      const double value = atof(v.c_str());
+//      powerTable[ComponentState::IDLE] = value;
+//    }
+//    if(powerAtt->hasParameter("RUNNING")){
+//      std::string v = powerAtt->getParameter("RUNNING");
+//      const double value = atof(v.c_str());
+//      powerTable[ComponentState::RUNNING] = value;
+//    }
+//    if(powerAtt->hasParameter("STALLED")){
+//      std::string v = powerAtt->getParameter("STALLED");
+//      const double value = atof(v.c_str());
+//      powerTable[ComponentState::STALLED] = value;
+//    }
+//    if(powerAtt->hasParameter("transaction_delay")) {
+//      this->transactionDelays[power] =
+//        createSC_Time(powerAtt->getParameter("transaction_delay").c_str());
+//    }
+//    if(powerAtt->hasParameter("transfer_delay")) {
+//      this->transactionDelays[power] =
+//        createSC_Time(powerAtt->getParameter("transfer_delay").c_str());
+//    }
+
+    return false;
+  }
+
+
   /// Allocate opaque CompState object when attaching to an abstract component.
   LookupPowerTimeModelImpl::CompState  *LookupPowerTimeModelImpl::attachToComponent(
       AbstractComponent *comp)

@@ -38,6 +38,7 @@
 #define _INCLUDED_SYSTEMCVPC_EXECMODEL_HPP
 
 #include "Timing.hpp"
+#include "Attribute.hpp"
 
 #include <CoSupport/SmartPtr/RefCountObject.hpp>
 
@@ -65,11 +66,10 @@ public:
   typedef boost::intrusive_ptr<this_type>       Ptr;
   typedef boost::intrusive_ptr<this_type> const ConstPtr;
 
-//// Possible states of execution of a component.
-//enum { RUNNING, IDLE };
-
   virtual void add(Timing timing) = 0;
   virtual void addDefaultActorTiming(std::string actorName, Timing timing) = 0;
+
+  virtual bool addAttribute(AttributePtr attr) = 0;
 
   const char *getType() const
     { return type; }

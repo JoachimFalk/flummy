@@ -155,8 +155,16 @@ void Component::addAttribute(AttributePtr attribute) {
     // FIXME: add transactionSize
   } else if (attribute->isType("tracing")) {
     static_cast<Detail::AbstractComponent *>(this)->addTracer(attribute->getValue().c_str(), this);
-  } else if (!static_cast<Detail::AbstractComponent *>(this)->setAttribute(attribute)) {
-    throw std::runtime_error("Unhandled attribute " + attribute->getType());
+  } else if (attribute->isType("execModel")) {
+    ExecModel::Ptr execModel = createExecModel(attribute->getValue().c_str());
+    for(size_t i=0; i<attribute->getAttributeSize();++i) {
+      AttributePtr emAttr = attribute->getNextAttribute(i).second;
+      if (!execModel->addAttribute(emAttr))
+        throw ConfigException("Unhandled attribute " + emAttr->getType() + " for execution model " + attribute->getValue());
+    }
+    setExecModel(execModel);
+  } else {
+    throw ConfigException("Unhandled attribute " + attribute->getType());
   }
 }
 
