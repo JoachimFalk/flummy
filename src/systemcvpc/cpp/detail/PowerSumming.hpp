@@ -37,11 +37,11 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_POWERSUMMING_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_POWERSUMMING_HPP
 
+#include "ComponentObserver.hpp"
+
 #include <ostream>
 #include <map>
 #include <systemc>
-
-#include "ComponentObserver.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -51,7 +51,7 @@ namespace SystemC_VPC { namespace Detail {
     PowerSumming(std::ostream &os);
     ~PowerSumming();
 
-    void notify(ComponentInfo *ci);
+    void notify(Component *ci);
 
   private:
     std::ostream    &m_output;
@@ -59,16 +59,16 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_time m_lastVirtualTime;
     double           m_powerSum;
     double           m_previousPowerSum;
-    std::map<const ComponentInfo *, double> m_powerConsumption;
-    std::map<const ComponentInfo *, double> m_lastChangedPowerConsumption;
-    std::map<const ComponentInfo *, PowerMode> m_powerMode;
-    std::map<const ComponentInfo *, PowerMode> m_lastChangedPowerMode;
+    std::map<const Component *, double> m_powerConsumption;
+    std::map<const Component *, double> m_lastChangedPowerConsumption;
+    std::map<const Component *, PowerMode> m_powerMode;
+    std::map<const Component *, PowerMode> m_lastChangedPowerMode;
 
     //sc_core::sc_time m_lastChangedTime;
     double           m_previousEnergySum;
     double           m_energySum;
 
-    ComponentInfo *m_lastCi;
+    Component       *m_lastCi;
 
     /*
      * Flag to print the inital power change at 0s

@@ -57,7 +57,7 @@ PowerSumming::~PowerSumming()
   /* calculateNewEnergySum() and printPowerChange is required to be performed twice
    * to get correct last PowerSumming - entries
    */
-  std::map<const ComponentInfo *, PowerMode>::iterator iter =
+  std::map<const Component *, PowerMode>::iterator iter =
       m_powerMode.find(m_lastCi);
 
   if (iter != m_powerMode.end()) {
@@ -82,7 +82,7 @@ PowerSumming::~PowerSumming()
  * The power change is refreshed in all cases, and only during a valid condition the power info will be printed. This is done at the next time stamp
  *
  */
-void PowerSumming::notify(ComponentInfo *ci)
+void PowerSumming::notify(Component *ci)
 {
   notifyTimeStamp = sc_core::sc_time_stamp();
 
@@ -91,7 +91,7 @@ void PowerSumming::notify(ComponentInfo *ci)
   m_powerConsumption[ci] = currentCi_powerConsumption;
 
   const PowerMode currentCi_powerMode = ci->getPowerMode();
-  std::pair<std::map<const ComponentInfo *, PowerMode>::iterator, bool> status =
+  std::pair<std::map<const Component *, PowerMode>::iterator, bool> status =
       m_powerMode.insert(std::make_pair(ci, currentCi_powerMode));
   const PowerMode oldCi_powerMode = status.second
       ? PowerMode("?")        // Insertion success, no old value
@@ -114,7 +114,7 @@ void PowerSumming::notify(ComponentInfo *ci)
   //if current time is different than last time the power consumption changed
   // and power consumption actually changed (fake exec. state transtitions should be ignored)
   if(m_lastVirtualTime != notifyTimeStamp) {
-    std::pair<std::map<const ComponentInfo *, PowerMode>::iterator, bool> status =
+    std::pair<std::map<const Component *, PowerMode>::iterator, bool> status =
         m_lastChangedPowerMode.insert(std::make_pair(ci, oldCi_powerMode));
     PowerMode const powerMode = status.second
         ? PowerMode("-")        // Insertion success, no old value

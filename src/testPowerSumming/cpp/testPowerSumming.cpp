@@ -32,13 +32,13 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/ComponentInfo.hpp>
+#include <systemcvpc/Component.hpp>
 #include <systemcvpc/PowerSumming.hpp>
 
 #include <fstream>
 #include <systemc>
 
-class testmodule : public sc_core::sc_module, public ComponentInfo
+class testmodule : public sc_core::sc_module, public Component
 {
   public:
   

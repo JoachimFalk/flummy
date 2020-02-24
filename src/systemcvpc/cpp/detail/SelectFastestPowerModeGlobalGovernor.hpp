@@ -53,11 +53,11 @@ namespace SystemC_VPC { namespace Detail {
   public:
     InternalSelectFastestPowerModeGovernor();
 
-    void notify_top(ComponentInfo *ci, GenericParameter *param);
+    void notify_top(Component *ci, GenericParameter *param);
 
   private:
-    PowerMode                           m_lastMode;
-    std::map<ComponentInfo*, PowerMode> m_components;
+    PowerMode                        m_lastMode;
+    std::map<Component *, PowerMode> m_components;
   };
 
 } } // namespace SystemC_VPC::Detail

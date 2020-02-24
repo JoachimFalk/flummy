@@ -48,7 +48,6 @@
 #include "AbstractRoute.hpp"
 #include "ProcessControlBlock.hpp"
 #include "ComponentObserver.hpp"
-#include "ComponentInfo.hpp"
 #include "HysteresisLocalGovernor.hpp"
 
 #include "dynload/dll.hpp"

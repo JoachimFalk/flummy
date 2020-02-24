@@ -37,7 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTOBSERVER_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTOBSERVER_HPP
 
-#include "ComponentInfo.hpp"
+#include <systemcvpc/Component.hpp>
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -47,7 +47,7 @@ namespace SystemC_VPC { namespace Detail {
     virtual ~ComponentObserver() {}
 
     // this callback function shall be called on component state changes
-    virtual void notify(ComponentInfo *ci) = 0;
+    virtual void notify(Component *ci) = 0;
   };
 
 } } // namespace SystemC_VPC::Detail

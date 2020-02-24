@@ -45,7 +45,6 @@
 #include <systemcvpc/Component.hpp>
 
 #include "../AbstractComponent.hpp"
-#include "../ComponentInfo.hpp"
 #include "../HysteresisLocalGovernor.hpp"
 #include "../PowerSumming.hpp"
 #include "../TaskInstance.hpp"

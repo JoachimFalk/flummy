@@ -75,7 +75,7 @@ namespace SystemC_VPC { namespace Detail {
     virtual ~PluggableGlobalPowerGovernor()
     {}
 
-    virtual void notify_top(ComponentInfo *ci,
+    virtual void notify_top(Component *ci,
                             GenericParameter *param) = 0;
   };
 
@@ -93,7 +93,7 @@ namespace SystemC_VPC { namespace Detail {
     virtual ~PluggableLocalPowerGovernor()
     {}
 
-    virtual void notify(ComponentInfo *ci) = 0;
+    virtual void notify(Component *ci) = 0;
 
   };
 
