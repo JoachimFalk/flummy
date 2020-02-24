@@ -157,9 +157,10 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     PowerModeTiming *array = new PowerModeTiming[nrPowerModes]();
     powerModeTimingArrays.push_back(array);
 
-    std::string const                   actorName   = actor->name();
-    PossibleAction::FunctionNames const actionNames = action->getActionNames();
-    PossibleAction::FunctionNames const guardNames  = action->getGuardNames();
+    std::string const                   actorName       = actor->name();
+    PossibleAction::FunctionNames const actionNames     = action->getActionNames();
+    PossibleAction::FunctionNames const guardNames      = action->getGuardNames();
+    size_t                        const guardComplexity = action->getGuardComplexity();
 
     for (PowerModeToIndex::value_type const &entry : powerModeToIndex) {
       size_t         index = entry.second;
@@ -206,6 +207,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
         }
         guardDelay += iter->second.getDii();
       }
+      // FIXME: Don't use constant complexity factor 0.1 ns!!!
+      guardDelay += guardComplexity * sc_core::sc_time(0.1, sc_core::SC_NS);
+
       array[index].guardDelay = guardDelay;
       array[index].dii        = dii;
       array[index].latency    = latency;
