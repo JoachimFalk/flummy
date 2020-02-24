@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
+<vpcconfiguration>
+ <resources>
+  <component name="CPU" scheduler="RRNOPRE">
+    <attribute type="tracing" value="VCD"/>
+    <attribute type="tracing" value="PAJE"/>
+    <attribute type="scheduler">
+      <attribute type="fireActorInLoop" value="false"/>
+    </attribute>
+  </component>
+ </resources>
+
+ <mappings>
+  <mapping source="top.src" target="CPU">
+    <timing fname="m_h_src::src"   delay="5 ns"/>
+  </mapping>
+  <mapping source="top.snk" target="CPU">
+    <timing fname="m_h_sink::sink" delay="7 ns"/>
+  </mapping>
+ </mappings>
+
+ <topology default="ignore"/>
+</vpcconfiguration>
