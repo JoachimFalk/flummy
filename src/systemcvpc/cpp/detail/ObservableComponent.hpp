@@ -37,7 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
 
-#include "ComponentInfo.hpp"
+#include <systemcvpc/Component.hpp>
+
 #include "ComponentObserver.hpp"
 
 #include <vector>
@@ -53,7 +54,7 @@ namespace SystemC_VPC { namespace Detail {
 
     void removeObserver(ComponentObserver *obs);
     
-    void fireNotification(ComponentInfo *compInf);
+    void fireNotification(Component *compInf);
 
     virtual ~ObservableComponent() {}
 

@@ -54,7 +54,7 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
       
-  void ObservableComponent::fireNotification(ComponentInfo *compInf) {
+  void ObservableComponent::fireNotification(Component *compInf) {
     for(Observers::iterator iter = observers.begin();
         iter != observers.end();
         ++iter)

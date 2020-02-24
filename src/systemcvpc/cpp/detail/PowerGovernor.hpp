@@ -52,7 +52,7 @@ class GlobalPowerGovernor
     virtual ~GlobalPowerGovernor()
     {}
 
-    virtual void notify_top(ComponentInfo *ci, T val) = 0;
+    virtual void notify_top(Component *ci, T val) = 0;
 };
 
 template <class T>
@@ -66,7 +66,7 @@ class LocalPowerGovernor : public ComponentObserver
     virtual ~LocalPowerGovernor()
     {}
 
-    virtual void notify(ComponentInfo *ci) = 0;
+    virtual void notify(Component *ci) = 0;
 
     void setGlobalGovernor(GlobalPowerGovernor<T> *tpg)
     {

@@ -61,7 +61,7 @@ namespace SystemC_VPC { namespace Detail {
   InternalLoadHysteresisGovernor::~InternalLoadHysteresisGovernor()
   {}
 
-  void InternalLoadHysteresisGovernor::notify(ComponentInfo *ci)
+  void InternalLoadHysteresisGovernor::notify(Component *ci)
   {
     //    std::cerr << "InternalLoadHysteresisGovernor::notify() @ " << sc_core::sc_time_stamp() << std::endl;
 

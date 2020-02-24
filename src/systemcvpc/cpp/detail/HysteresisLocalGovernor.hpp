@@ -60,14 +60,14 @@ namespace SystemC_VPC { namespace Detail {
 
     SC_HAS_PROCESS(InternalLoadHysteresisGovernor);
 
-    virtual void notify(ComponentInfo *ci);
+    virtual void notify(Component *ci);
 
   private:
     sc_core::sc_time                                         m_windowTime;
     sc_core::sc_time                                         m_fastTime;
     sc_core::sc_time                                         m_slowTime;
     PowerModeParameter                              m_mode;
-    ComponentInfo                                  *m_ci;
+    Component                                      *m_ci;
     ComponentState                                  m_lastState;
     std::deque<std::pair<ComponentState, sc_core::sc_time> > m_stateHistory;
     sc_core::sc_event                                        m_wakeup_ev;

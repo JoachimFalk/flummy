@@ -44,7 +44,7 @@ namespace SystemC_VPC { namespace Detail {
     //std::cout << "InternalSelectFastestPowerModeGovernor" << std::endl; 
   }
 
-  void InternalSelectFastestPowerModeGovernor::notify_top(ComponentInfo *ci,
+  void InternalSelectFastestPowerModeGovernor::notify_top(Component *ci,
                                                   GenericParameter *param)
   {
     /*
@@ -62,7 +62,7 @@ namespace SystemC_VPC { namespace Detail {
 
     // FIXME: This is alphabetical comparison and not speed. Fix this!!!
     if(newMode < m_lastMode) {
-      for(std::map<ComponentInfo *, PowerMode>::iterator
+      for(std::map<Component *, PowerMode>::iterator
             iter  = m_components.begin();
           iter != m_components.end();
           iter++)
@@ -75,7 +75,7 @@ namespace SystemC_VPC { namespace Detail {
     if(newMode != m_lastMode) {
       std::cerr << "@" << sc_core::sc_time_stamp() << ": for all components setPowerMode(" << newMode << ");" << std::endl;
 
-      for(std::map<ComponentInfo *, PowerMode>::iterator
+      for(std::map<Component *, PowerMode>::iterator
             iter  = m_components.begin();
           iter != m_components.end();
           iter++)
