@@ -37,17 +37,95 @@
 #ifndef _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
 #define _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
 
-#include <systemcvpc/Component.hpp>
+#include "Component.hpp"
+#include "Extending/Task.hpp"
+#include "Extending/TaskInstance.hpp"
+
+#include <CoSupport/SmartPtr/RefCountObject.hpp>
+
+namespace SystemC_VPC { namespace Detail {
+
+  class ObservableComponent;
+
+} } // namespace SystemC_VPC::Detail
 
 namespace SystemC_VPC {
 
   class ComponentObserver
+    : public CoSupport::SmartPtr::RefCountObject
   {
-  public:
-    virtual ~ComponentObserver() {}
+    friend class Detail::ObservableComponent;
 
-    // this callback function shall be called on component state changes
-    virtual void notify(Component *ci) = 0;
+    typedef ComponentObserver this_type;
+  public:
+    typedef boost::intrusive_ptr<this_type>       Ptr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
+
+  protected:
+    class OTask         {};
+    class OTaskInstance {};
+
+    enum class ComponentOperation {
+      PWRCHANGE = 1,
+    };
+    enum class TaskOperation {
+      MEMOP_MASK = 3,
+      /// Operation done once per actor to construct OTask.
+      ALLOCATE   = 1,
+      /// Operation done once per actor to destroy OTask.
+      DEALLOCATE = 2
+    };
+    enum class TaskInstanceOperation {
+      MEMOP_MASK = 3,
+      /// Operation done once per actor firing to construct OTaskInstance.
+      ALLOCATE   = 1,
+      /// Operation done once per actor firing to destroy OTaskInstance.
+      DEALLOCATE = 2,
+      /// First operation of a task instance to indicate an enabled actor firing.
+      RELEASE    = 4,
+      /// Operation done possibly multiple times to indicate that the task
+      /// instance runs on the component.
+      ASSIGN     = 8,
+      /// Operation done possibly multiple times to indicate that the task
+      /// instance suspends execution on the component.
+      RESIGN     = 12,
+      /// Operation done possibly multiple times to indicate that the task
+      /// instance is blocked waiting for something.
+      BLOCK      = 16,
+      /// Operation done at most once per actor firing to indicate that
+      /// the DII of the task instance is over.
+      FINISHDII  = 20,
+      /// Final operation of a task instance to indicate that the latency
+      /// of the task instance is over.
+      FINISHLAT  = 24
+    };
+
+  protected:
+    ComponentObserver(size_t rt, size_t rti)
+      : reservePerTask(rt)
+      , reservePerTaskInstance(rti) {}
+
+    virtual void componentOperation(ComponentOperation co
+      , Component       const &c) = 0;
+
+    virtual void taskOperation(TaskOperation to
+      , Component       const &c
+      , Extending::Task const &t
+      , OTask                 &ot) = 0;
+
+    virtual void taskInstanceOperation(TaskInstanceOperation tio
+      , Component               const &c
+      , Extending::TaskInstance const &ti
+      , OTask                         &ot
+      , OTaskInstance                 &oti) = 0;
+
+    size_t getReservePerTask() const
+      { return reservePerTask; }
+    size_t getReservePerTaskInstance() const
+      { return reservePerTaskInstance; }
+  private:
+    size_t reservePerTask;
+    size_t reservePerTaskInstance;
   };
 
 } // namespace SystemC_VPC

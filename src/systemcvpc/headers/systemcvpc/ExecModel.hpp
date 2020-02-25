@@ -64,7 +64,7 @@ class ExecModel
   friend class Component; // for getImpl
 public:
   typedef boost::intrusive_ptr<this_type>       Ptr;
-  typedef boost::intrusive_ptr<this_type> const ConstPtr;
+  typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
   virtual void add(Timing timing) = 0;
   virtual void addDefaultActorTiming(std::string actorName, Timing timing) = 0;

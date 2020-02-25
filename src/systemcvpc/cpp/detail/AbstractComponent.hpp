@@ -91,7 +91,7 @@ namespace SystemC_VPC { namespace Detail {
     typedef AbstractComponent this_type;
   public:
     typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type> const ConstPtr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
     ///
     /// Handle interfaces for SystemC_VPC::Component
@@ -171,7 +171,7 @@ namespace SystemC_VPC { namespace Detail {
      * \brief Get a task for a pid.
      * The task must previously have been created via createTask.
      */
-    TaskImpl *getTask(ProcessId const pid) const;
+    //TaskImpl *getTask(ProcessId const pid) const;
 
 
     void requestCanExecute();

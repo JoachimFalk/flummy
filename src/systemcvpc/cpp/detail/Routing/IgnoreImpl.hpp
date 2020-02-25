@@ -60,7 +60,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     typedef IgnoreImpl this_type;
   public:
     typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type> const ConstPtr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
     IgnoreImpl(std::string const &name);
 

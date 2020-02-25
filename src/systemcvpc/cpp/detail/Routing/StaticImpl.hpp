@@ -60,7 +60,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     typedef StaticImpl this_type;
   public:
     typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type> const ConstPtr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
     StaticImpl(std::string const &name);
 

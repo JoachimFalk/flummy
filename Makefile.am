@@ -118,6 +118,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/DebugOStream.cpp \
 	src/systemcvpc/cpp/detail/Director.cpp \
 	src/systemcvpc/cpp/detail/HysteresisLocalGovernor.cpp \
+	src/systemcvpc/cpp/detail/LegacyComponentObserver.cpp \
 	src/systemcvpc/cpp/detail/ObservableComponent.cpp \
 	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \
 	src/systemcvpc/cpp/detail/PowerSumming.cpp \

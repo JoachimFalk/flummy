@@ -60,7 +60,7 @@ namespace SystemC_VPC { namespace Detail {
     typedef AbstractRoute this_type;
   public:
     typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type> const ConstPtr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
     typedef smoc::SimulatorAPI::PortInInterface         PortInInterface;
     typedef smoc::SimulatorAPI::PortOutInterface        PortOutInterface;

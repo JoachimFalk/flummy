@@ -61,7 +61,7 @@ namespace SystemC_VPC { namespace Detail {
     typedef AbstractExecModel this_type;
   public:
     typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type> const ConstPtr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
     class CompState {};
     class ActionInfo {};
