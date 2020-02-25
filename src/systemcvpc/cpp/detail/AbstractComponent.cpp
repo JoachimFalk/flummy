@@ -46,8 +46,7 @@
 #include "Director.hpp"
 #include "AbstractComponent.hpp"
 #include "AbstractRoute.hpp"
-#include "ProcessControlBlock.hpp"
-#include "ComponentObserver.hpp"
+#include "TaskImpl.hpp"
 #include "HysteresisLocalGovernor.hpp"
 
 #include "dynload/dll.hpp"
@@ -232,18 +231,18 @@ namespace SystemC_VPC { namespace Detail {
   /**
    * \brief Create the process control block.
    */
-  ProcessControlBlock *AbstractComponent::createPCB(std::string const &taskName) {
-    ProcessControlBlock *pcb = new ProcessControlBlock(this, taskName);
-    sassert(pcbPool.insert(std::make_pair(
-        pcb->getPid(),
-        ProcessControlBlockPtr(pcb))).second);
-    this->TraceableComponent::registerTask(pcb, taskName);
-    return pcb;
+  TaskImpl *AbstractComponent::createTask(std::string const &taskName) {
+    TaskImpl *taskImpl = new TaskImpl(this, taskName);
+    sassert(taskPool.insert(std::make_pair(
+        taskImpl->getPid(),
+        TaskImplPtr(taskImpl))).second);
+    this->TraceableComponent::registerTask(taskImpl, taskName);
+    return taskImpl;
   }
 
-  ProcessControlBlock *AbstractComponent::getPCB(ProcessId const pid) const {
-    PCBPool::const_iterator iter = pcbPool.find(pid);
-    assert(iter != pcbPool.end());
+  TaskImpl *AbstractComponent::getTask(ProcessId const pid) const {
+    TaskPool::const_iterator iter = taskPool.find(pid);
+    assert(iter != taskPool.end());
     return iter->second.get();
   }
 
@@ -255,14 +254,14 @@ namespace SystemC_VPC { namespace Detail {
 
   void AbstractComponent::registerTask(TaskInterface *task) {
     // This should be the first time the actor appeared here.
-    VpcTask::Ptr         vpcTask = getTask(static_cast<ScheduledTask &>(*task));
-    ProcessControlBlock *pcb = this->createPCB(task->name());
-    pcb->setScheduledTask(task);
-//  pcb->configure(task->name(), true);
-    pcb->setPriority(vpcTask->getPriority());
-    pcb->setTaskIsPSM(vpcTask->isPSM());
+    VpcTask::Ptr         vpcTask = SystemC_VPC::getTask(static_cast<ScheduledTask &>(*task));
+    TaskImpl *taskImpl = this->createTask(task->name());
+    taskImpl->setScheduledTask(task);
+//  taskImpl->configure(task->name(), true);
+    taskImpl->setPriority(vpcTask->getPriority());
+    taskImpl->setTaskIsPSM(vpcTask->isPSM());
     task->setScheduler(this);
-    task->setSchedulerInfo(pcb);
+    task->setSchedulerInfo(taskImpl);
   }
 
   void AbstractComponent::registerFiringRule(TaskInterface *actor, PossibleAction *fr) {
@@ -274,10 +273,10 @@ namespace SystemC_VPC { namespace Detail {
     AbstractExecModel::ActionInfo *ai =
         static_cast<AbstractExecModel::ActionInfo *>(fr->getSchedulerInfo());
 
-    ProcessControlBlock *pcb = getPCBOfTaskInterface(task);
-    std::function<void (TaskInstance *)> none([](TaskInstance *) {});
-    TaskInstance taskInstance(none, none);
-    taskInstance.setPCB(pcb);
+    TaskImpl *taskImpl = getTaskOfTaskInterface(task);
+    std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
+    TaskInstanceImpl taskInstance(none, none);
+    taskInstance.setTask(taskImpl);
     taskInstance.setFiringRule(fr);
     taskInstance.setName(task->name()+std::string("_check"));
     getExecModel()->initTaskInstance(execModelComponentState, ai, &taskInstance, true);
@@ -312,13 +311,13 @@ namespace SystemC_VPC { namespace Detail {
       AbstractExecModel::ActionInfo *ai =
           static_cast<AbstractExecModel::ActionInfo *>(fr->getSchedulerInfo());
       AbstractComponent   *comp  = static_cast<AbstractComponent *>(task->getScheduler());
-      ProcessControlBlock *pcb   = getPCBOfTaskInterface(task);
+      TaskImpl *taskImpl   = getTaskOfTaskInterface(task);
 
-      assert(pcb != NULL);
+      assert(taskImpl != NULL);
 
-      std::function<void (TaskInstance *)> none([](TaskInstance *) {});
-      TaskInstance *taskInstance = new TaskInstance(none, none);
-      taskInstance->setPCB(pcb);
+      std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
+      TaskInstanceImpl *taskInstance = new TaskInstanceImpl(none, none);
+      taskInstance->setTask(taskImpl);
       taskInstance->setFiringRule(fr);
       taskInstance->setName(task->name());
 
@@ -349,16 +348,16 @@ namespace SystemC_VPC { namespace Detail {
     ial->wait();
   }
 
-  TaskInstance *AbstractComponent::executeHop(ProcessControlBlock *pcb
+  TaskInstanceImpl *AbstractComponent::executeHop(TaskImpl *taskImpl
     , Timing const &transferTiming
     , size_t quantum
-    , std::function<void (TaskInstance *)> const &cb)
+    , std::function<void (TaskInstanceImpl *)> const &cb)
   {
-    assert(pcb != NULL);
-    std::function<void (TaskInstance *)> none([](TaskInstance *) {});
-    TaskInstance *taskInstance = new TaskInstance(none, cb);
-    taskInstance->setPCB(pcb);
-    taskInstance->setName(pcb->getName());
+    assert(taskImpl != NULL);
+    std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
+    TaskInstanceImpl *taskInstance = new TaskInstanceImpl(none, cb);
+    taskInstance->setTask(taskImpl);
+    taskInstance->setName(taskImpl->getName());
     taskInstance->setTimingScale(quantum);
     // FIXME: Timing independent of power mode at the moment!
     taskInstance->setDelay(quantum * transferTiming.getDii());
@@ -369,7 +368,7 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
-  void AbstractComponent::finishDiiTaskInstance(TaskInstance *taskInstance, bool isGuard) {
+  void AbstractComponent::finishDiiTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard) {
     this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
 
     taskInstance->diiExpired();
@@ -387,7 +386,7 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
-  void AbstractComponent::finishLatencyTaskInstance(TaskInstance *taskInstance, bool isGuard) {
+  void AbstractComponent::finishLatencyTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard) {
     // Remember last acknowledged task time
     Director::getInstance().end = sc_core::sc_time_stamp();
     this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);

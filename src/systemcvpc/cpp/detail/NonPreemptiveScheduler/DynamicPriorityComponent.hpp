@@ -43,7 +43,7 @@
 #include <systemcvpc/VpcApi.hpp>
 
 #include "../diagnostics/DebugOutput.hpp"
-#include "../TaskInstance.hpp"
+#include "../TaskInstanceImpl.hpp"
 
 #include "config.h"
 #include <systemcvpc/ScheduledTask.hpp>
@@ -77,20 +77,20 @@ public:
   ~DynamicPriorityComponent();
 protected:
   // Implement interface for NonPreemptiveComponent
-  void newReadyTask(TaskInstance *newTask);
+  void newReadyTask(TaskInstanceImpl *newTask);
 
   // Implement interface for NonPreemptiveComponent
-  TaskInstance *selectReadyTask();
+  TaskInstanceImpl *selectReadyTask();
 
   void start_of_simulation();
 
 private:
   PriorityList   priorities_;
 
-  std::list<TaskInstance *> readyTasks;
+  std::list<TaskInstanceImpl *> readyTasks;
 
   TaskInterface *yieldTask;
-  TaskInstance  *selectedTask;
+  TaskInstanceImpl  *selectedTask;
   std::ostream  *debugOut;
   std::string    debugFileName;
 

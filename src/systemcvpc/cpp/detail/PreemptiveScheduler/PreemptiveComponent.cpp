@@ -44,7 +44,7 @@
 
 #include "../PluggablePowerGovernor.hpp"
 #include "../HysteresisLocalGovernor.hpp"
-#include "../TaskInstance.hpp"
+#include "../TaskInstanceImpl.hpp"
 #include "../DebugOStream.hpp"
 #include "../Director.hpp"
 
@@ -94,7 +94,7 @@ namespace SystemC_VPC { namespace Detail {
         return;
       activeTasks.insert(scheduledTask);
       sc_core::sc_time delta = scheduledTask->getNextReleaseTime() - sc_core::sc_time_stamp();
-      if (getPCBOfTaskInterface(scheduledTask)->getTaskIsPSM()) {
+      if (getTaskOfTaskInterface(scheduledTask)->getTaskIsPSM()) {
         // PSM tasks are always executed even if the component is in power down mode, i.e.,
         // !this->getCanExecuteTasks().
         if (delta > sc_core::SC_ZERO_TIME) {
@@ -182,11 +182,11 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::compute(TaskInstance* actualTask){
+  void PreemptiveComponent::compute(TaskInstanceImpl* actualTask){
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
         << " ) at time: " << sc_core::sc_time_stamp()
         << " mode: " << this->getPowerMode()
-        << " schedTask: " << actualTask->getPCB()->getScheduledTask()
+        << " schedTask: " << actualTask->getTask()->getScheduledTask()
         << std::endl);
     DBG_OUT("dii: " << actualTask->getRemainingDelay() << std::endl);
     DBG_OUT("latency: " << actualTask->getLatency()  << std::endl);
@@ -199,11 +199,11 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::addTask(TaskInstance *newReadyTask) {
+  void PreemptiveComponent::addTask(TaskInstanceImpl *newReadyTask) {
     // A task can call compute only one time!
     assert(readyTasks.find(newReadyTask->getInstanceId())   == readyTasks.end());
     assert(runningTasks.find(newReadyTask->getInstanceId()) == runningTasks.end());
-    releaseTask(newReadyTask->getPCB(), newReadyTask);
+    releaseTask(newReadyTask->getTask(), newReadyTask);
     //insert new task in ready list
     readyTasks[newReadyTask->getInstanceId()]=newReadyTask;
     scheduler->addedNewTask(newReadyTask);
@@ -236,7 +236,7 @@ namespace SystemC_VPC { namespace Detail {
         if (iter->second->getRemainingDelay() == sc_core::SC_ZERO_TIME) {
           removeTask(iter->second);
           niter = runningTasks.erase(iter);
-          TaskInterface *scheduledTask = iter->second->getPCB()->getScheduledTask();
+          TaskInterface *scheduledTask = iter->second->getTask()->getScheduledTask();
           if (scheduledTask) {
             // The scheduledTask->canFire() method call might call notifyActivation in
             // case that scheduledTask is a periodic actor. For this case, the
@@ -507,7 +507,7 @@ namespace SystemC_VPC { namespace Detail {
  */
   }
 
-  void PreemptiveComponent::removeTask(TaskInstance *task) {
+  void PreemptiveComponent::removeTask(TaskInstanceImpl *task) {
     // all execution time simulated -> BLOCK running task.
 
     DBG_OUT(this->getName() << " IID: " << task->getInstanceId() << " > ");
@@ -524,7 +524,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker){
+  void PreemptiveComponent::requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker){
     task->setExec(false);
     task->setBlockingCompute( blocker );
     this->compute( task );
@@ -533,7 +533,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker){
+  void PreemptiveComponent::execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker){
     task->setExec(true);
     blockCompute.notify();
   }
@@ -542,7 +542,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker){
+  void PreemptiveComponent::abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker){
     task->resetBlockingCompute();
     blockCompute.notify();
   }
@@ -609,7 +609,7 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PreemptiveComponent::moveToRemainingPipelineStages(TaskInstance* task){
+  void PreemptiveComponent::moveToRemainingPipelineStages(TaskInstanceImpl* task){
     sc_core::sc_time now                 = sc_core::sc_time_stamp();
     sc_core::sc_time restOfLatency       = task->getLatency()  - task->getDelay();
     sc_core::sc_time end                 = now + restOfLatency;
@@ -639,7 +639,7 @@ namespace SystemC_VPC { namespace Detail {
         timePcbPair front = pqueue.top();
 
         //std::cerr << "Pop from list: " << front.time << " : "
-        //<< front.pcb->getBlockEvent().latency << std::endl;
+        //<< front.taskImpl->getBlockEvent().latency << std::endl;
         sc_core::sc_time waitFor = front.time-sc_core::sc_time_stamp();
 
         assert(front.time >= sc_core::sc_time_stamp());

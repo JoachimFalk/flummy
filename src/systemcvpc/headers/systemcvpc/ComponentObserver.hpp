@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,35 +34,22 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/TimingModifier.hpp>
-#include <systemcvpc/vpc_config.h>
+#ifndef _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
+#define _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
 
-#include "AbstractComponent.hpp"
-#include "ProcessControlBlock.hpp"
-#include "Director.hpp"
+#include <systemcvpc/Component.hpp>
 
-#include <CoSupport/Tracing/TracingFactory.hpp>
+namespace SystemC_VPC {
 
-#include <ctime>
-#include <cfloat>
+  class ComponentObserver
+  {
+  public:
+    virtual ~ComponentObserver() {}
 
-#include "DebugOStream.hpp"
+    // this callback function shall be called on component state changes
+    virtual void notify(Component *ci) = 0;
+  };
 
-namespace SystemC_VPC { namespace Detail {
+} // namespace SystemC_VPC
 
-  ProcessControlBlock::ProcessControlBlock(AbstractComponent *component, std::string const &taskName)
-    : scheduledTask(nullptr)
-    , component(component)
-    , name(taskName)
-    , pid(Director::getProcessId(taskName))
-    , priority(0)
-    , psm(false) {}
-
-  ProcessControlBlock::~ProcessControlBlock() {
-  }
-
-  sc_core::sc_time ProcessControlBlock::getPeriod() const{
-    return sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
-  }
-
-} } // namespace SystemC_VPC::Detail
+#endif /* _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP */

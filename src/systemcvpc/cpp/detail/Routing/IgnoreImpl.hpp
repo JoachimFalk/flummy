@@ -42,7 +42,7 @@
 
 #include "../AbstractRoute.hpp"
 #include "../AbstractComponent.hpp"
-#include "../ProcessControlBlock.hpp"
+#include "../TaskImpl.hpp"
 
 #include <systemc>
 

@@ -79,9 +79,9 @@ namespace SystemC_VPC { namespace Detail {
     
     bool getSchedulerTimeSlice(sc_core::sc_time &time,const TaskMap &ready_tasks,const TaskMap &running_tasks);
     
-    void addedNewTask(TaskInstance *task);
+    void addedNewTask(TaskInstanceImpl *task);
     
-    void removedTask(TaskInstance *task);
+    void removedTask(TaskInstanceImpl *task);
     
     sc_core::sc_event& getNotifyEvent();
     

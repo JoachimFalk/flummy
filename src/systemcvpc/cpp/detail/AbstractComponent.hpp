@@ -45,11 +45,11 @@
 #include <systemcvpc/PowerMode.hpp>
 
 #include "tracing/TraceableComponent.hpp"
-#include "TaskInstance.hpp"
+#include "TaskInstanceImpl.hpp"
 #include "PowerSumming.hpp"
 #include "PluggablePowerGovernor.hpp"
 #include "timetriggered/tt_support.hpp"
-#include "ProcessControlBlock.hpp"
+#include "TaskImpl.hpp"
 #include "SequentiallyIdedObject.hpp"
 #include "AbstractExecModel.hpp"
 
@@ -157,10 +157,10 @@ namespace SystemC_VPC { namespace Detail {
     ///
 
     /**
-     * \brief Create the Process Control Block (PCB).
-     * The PCB must not previously exist.
+     * \brief Create a task.
+     * The task must not previously exist.
      */
-    ProcessControlBlock *createPCB(std::string const &taskName);
+    TaskImpl *createTask(std::string const &taskName);
 
     void registerTask(TaskInterface *task);
 
@@ -168,10 +168,10 @@ namespace SystemC_VPC { namespace Detail {
         TaskInterface *task, PossibleAction *fr);
 
     /**
-     * \brief Get the Process Control Block (PCB) for pid.
-     * The PCB must previously have been created via createPCB.
+     * \brief Get a task for a pid.
+     * The task must previously have been created via createTask.
      */
-    ProcessControlBlock *getPCB(ProcessId const pid) const;
+    TaskImpl *getTask(ProcessId const pid) const;
 
 
     void requestCanExecute();
@@ -187,50 +187,50 @@ namespace SystemC_VPC { namespace Detail {
      * \brief Simulate an execution on this "Virtual Component".
      * While this simulation is running SystemC simulation time is consumed.
      */
-    virtual void compute(TaskInstance* task)=0;
+    virtual void compute(TaskInstanceImpl* task)=0;
 
     /**
      * \brief Simulate the delay caused by the transition guard check on this "Virtual Component".
      * While the simulation is running SystemC simulation time is consumed.
      */
-    virtual void check(TaskInstance* task) {}
+    virtual void check(TaskInstanceImpl* task) {}
 
     /**
      *
      */
-    virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker)=0;
+    virtual void requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker)=0;
+    virtual void execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker)=0;
 
     /**
      *
      */
-    virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker)=0;
+    virtual void abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker)=0;
 
     virtual void initialize(const Director *d);
 
-    TaskInstance *executeHop(ProcessControlBlock *pcb
+    TaskInstanceImpl *executeHop(TaskImpl *taskImpl
       , Timing const &transferTiming
       , size_t quantum
-      , std::function<void (TaskInstance *)> const &cb);
+      , std::function<void (TaskInstanceImpl *)> const &cb);
   protected:
     AbstractComponent(std::string const &name);
 
     void end_of_elaboration();
 
     /// Called once per actor firing to indicate that the DII of the task instance is over.
-    void finishDiiTaskInstance(TaskInstance *taskInstance, bool isGuard = false);
+    void finishDiiTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard = false);
 
     /// Called once per actor firing to indicate that the latency of the task instance is over.
-    void finishLatencyTaskInstance(TaskInstance *taskInstance, bool isGuard = false);
+    void finishLatencyTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard = false);
 
     void fireStateChanged(ComponentState state);
 
-    typedef boost::shared_ptr<ProcessControlBlock>        ProcessControlBlockPtr;
-    typedef std::map<ProcessId, ProcessControlBlockPtr>   PCBPool;
+    typedef boost::shared_ptr<TaskImpl>        TaskImplPtr;
+    typedef std::map<ProcessId, TaskImplPtr>   TaskPool;
 
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
     bool requestExecuteTasks;
@@ -246,8 +246,8 @@ namespace SystemC_VPC { namespace Detail {
     /**
      *
      */
-    const PCBPool& getPCBPool() const {
-      return this->pcbPool;
+    const TaskPool& getTaskPool() const {
+      return this->taskPool;
     }
 
     bool requestShutdown();
@@ -265,7 +265,7 @@ namespace SystemC_VPC { namespace Detail {
     void loadLocalGovernorPlugin(std::string plugin);
 
     std::string componentName;
-    PCBPool pcbPool;
+    TaskPool taskPool;
     bool canExecuteTasks;
     sc_core::sc_time shutdownRequestAtTime;
     VPCEvent::Ptr componentWakeup;

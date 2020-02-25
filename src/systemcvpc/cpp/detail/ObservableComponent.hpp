@@ -37,9 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
 
+#include <systemcvpc/ComponentObserver.hpp>
 #include <systemcvpc/Component.hpp>
-
-#include "ComponentObserver.hpp"
 
 #include <vector>
 

@@ -191,7 +191,7 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void
-  MostScheduler::removedTask(TaskInstance *task)
+  MostScheduler::removedTask(TaskInstanceImpl *task)
   {
 
     if (areaMap[task->getProcessId()] == true)
@@ -222,7 +222,7 @@ namespace SystemC_VPC { namespace Detail {
     return true;
   }
   void
-  MostScheduler::addedNewTask(TaskInstance *task)
+  MostScheduler::addedNewTask(TaskInstanceImpl *task)
   {
     std::cout<<"MostScheduler::addedNewTask " << task << " id: "
         << task->getProcessId() << " InstanceID=" << task->getInstanceId()

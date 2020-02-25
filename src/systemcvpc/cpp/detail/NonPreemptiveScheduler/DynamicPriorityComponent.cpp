@@ -74,7 +74,7 @@ std::list<ScheduledTask *> DynamicPriorityComponent::getDynamicPriority()
 
 // Implement ComponentInterface
 void DynamicPriorityComponent::scheduleAfterTransition() {
-  yieldTask = selectedTask->getPCB()->getScheduledTask();
+  yieldTask = selectedTask->getTask()->getScheduledTask();
   assert(yieldTask);
 }
 
@@ -84,19 +84,19 @@ DynamicPriorityComponent::~DynamicPriorityComponent() {
   debugOut = nullptr;
 }
 
-void DynamicPriorityComponent::newReadyTask(TaskInstance *newTask) {
+void DynamicPriorityComponent::newReadyTask(TaskInstanceImpl *newTask) {
   readyTasks.push_back(newTask);
 }
 
-TaskInstance *DynamicPriorityComponent::selectReadyTask() {
+TaskInstanceImpl *DynamicPriorityComponent::selectReadyTask() {
   assert(!readyTasks.empty());
   for (TaskInterface *priorityTask : priorities_) {
     if (yieldTask == priorityTask)
       continue;
-    for (std::list<TaskInstance *>::iterator readyTaskIter = readyTasks.begin();
+    for (std::list<TaskInstanceImpl *>::iterator readyTaskIter = readyTasks.begin();
          readyTaskIter != readyTasks.end();
          ++readyTaskIter) {
-      if ((*readyTaskIter)->getPCB()->getScheduledTask() == priorityTask) {
+      if ((*readyTaskIter)->getTask()->getScheduledTask() == priorityTask) {
         yieldTask    = nullptr;
         selectedTask = *readyTaskIter;
         readyTasks.erase(readyTaskIter);

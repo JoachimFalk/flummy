@@ -34,22 +34,40 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTOBSERVER_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTOBSERVER_HPP
-
-#include <systemcvpc/Component.hpp>
+#include "TaskInstanceImpl.hpp"
+#include "TaskImpl.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
-  class ComponentObserver
-  {
-  public:
-    virtual ~ComponentObserver() {}
+  int TaskInstanceImpl::globalInstanceId = 0;
 
-    // this callback function shall be called on component state changes
-    virtual void notify(Component *ci) = 0;
-  };
+  TaskInstanceImpl::TaskInstanceImpl(
+      std::function<void (TaskInstanceImpl *)> const &diiCallback,
+      std::function<void (TaskInstanceImpl *)> const &latCallback)
+    : instanceId(globalInstanceId++)
+    , diiCallback(diiCallback)
+    , latCallback(latCallback)
+    , blockingCompute(nullptr)
+    , blockAck(false)
+    , exec(false)
+    , write(false)
+    , taskImpl()
+    , name("NN")
+    , timingScale(1)
+    , firingRuleInterface(nullptr)
+    {}
+
+  TaskInstanceImpl::~TaskInstanceImpl() {
+  }
+
+  // Adaptor getter for TaskImpl
+  int              TaskInstanceImpl::getPriority() const
+    { assert(taskImpl != NULL); return taskImpl->getPriority(); }
+  sc_core::sc_time TaskInstanceImpl::getPeriod() const
+    { assert(taskImpl != NULL); return taskImpl->getPeriod(); }
+  ProcessId        TaskInstanceImpl::getProcessId() const
+    { assert(taskImpl != NULL); return taskImpl->getPid(); }
+  bool             TaskInstanceImpl::isPSM() const
+    { return taskImpl->getTaskIsPSM(); }
 
 } } // namespace SystemC_VPC::Detail
-
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_COMPONENTOBSERVER_HPP */

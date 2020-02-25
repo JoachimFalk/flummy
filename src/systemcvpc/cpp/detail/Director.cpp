@@ -50,9 +50,9 @@
 
 #include "PluggablePowerGovernor.hpp"
 #include "PowerSumming.hpp"
-#include "ProcessControlBlock.hpp"
+#include "TaskImpl.hpp"
 #include "SelectFastestPowerModeGlobalGovernor.hpp"
-#include "TaskInstance.hpp"
+#include "TaskInstanceImpl.hpp"
 #include "dynload/dll.hpp"
 
 #include <CoSupport/SystemC/systemc_time.hpp>

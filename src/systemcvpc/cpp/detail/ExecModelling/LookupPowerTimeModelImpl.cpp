@@ -218,7 +218,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 
     /*
      *     FunctionTimingPtr timing =
-        this->getTiming(this->getPowerMode(), pcb);
+        this->getTiming(this->getPowerMode(), taskImpl);
 
     if(!fLink->guardIds.empty())
       taskInstance.setDelay(
@@ -235,8 +235,8 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     smoc::SimulatorAPI::FunctionNames  guardNames      = fr->getGuardNames();
     size_t                             guardComplexity = fr->getGuardComplexity();
 
-    ProcessControlBlock       *pcb = static_cast<ProcessControlBlock *>(actor->getSchedulerInfo());
-    ProcessId           const  pid = pcb->getPid();
+    TaskImpl        *taskImpl = static_cast<TaskImpl *>(actor->getSchedulerInfo());
+    ProcessId const  pid = taskImpl->getPid();
 
     assert(Director::getInstance().getProcessId(actorName) == pid);
 
@@ -248,7 +248,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 
         for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ ) {
           std::string powermode = (*it).first;
-          setTiming(provider->getActionTiming(actorName,powermode), pcb);
+          setTiming(provider->getActionTiming(actorName,powermode), taskImpl);
         }
       }
       for (std::string const &guard : guardNames) {
@@ -258,7 +258,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
           for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
           {
             std::string powermode = (*it).first;
-            setTiming(provider->getGuardTiming(guard,powermode), pcb);
+            setTiming(provider->getGuardTiming(guard,powermode), taskImpl);
             ConfigCheck::configureTiming(pid, guard);
           }
         }
@@ -270,7 +270,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
           for (SystemC_VPC::functionTimingsPM::iterator it=timingsPM.begin() ; it != timingsPM.end(); it++ )
           {
             std::string powermode = (*it).first;
-            setTiming(provider->getActionTiming(action,powermode), pcb);
+            setTiming(provider->getActionTiming(action,powermode), taskImpl);
             ConfigCheck::configureTiming(pid, action);
           }
         }
@@ -311,9 +311,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
   /// Initialize ti with action or guard timing and power values.
   void  LookupPowerTimeModelImpl::initTaskInstance(
       AbstractExecModel::CompState *&execModelComponentState
-    , ActionInfo                    *ai
-    , TaskInstance                  *ti
-    , bool                           forGuard) const
+    , ActionInfo       *ai
+    , TaskInstanceImpl *ti
+    , bool              forGuard) const
   {
     CompState &cs = *static_cast<CompState *>(execModelComponentState);
 

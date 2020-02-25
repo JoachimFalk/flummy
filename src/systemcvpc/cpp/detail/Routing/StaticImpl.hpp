@@ -42,7 +42,7 @@
 
 #include "../AbstractRoute.hpp"
 #include "../AbstractComponent.hpp"
-#include "../ProcessControlBlock.hpp"
+#include "../TaskImpl.hpp"
 
 #include <systemc>
 
@@ -101,7 +101,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     struct HopImpl: public Hop {
       HopImpl(Component::Ptr component)
         : Hop(component)
-        , pcb(nullptr) {}
+        , taskImpl(nullptr) {}
 
       AbstractComponent::Ptr getComponent() const
         { return SystemC_VPC::getImpl(this->Hop::getComponent()); }
@@ -110,7 +110,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
         return reinterpret_cast<std::list<HopImpl *> &>(childHops);
       }
 
-      ProcessControlBlock             *pcb;
+      TaskImpl             *taskImpl;
       std::vector<ChannelInterface *>  destinations;
     };
 
