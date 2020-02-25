@@ -47,7 +47,7 @@
 #include "../AbstractComponent.hpp"
 #include "../HysteresisLocalGovernor.hpp"
 #include "../PowerSumming.hpp"
-#include "../TaskInstance.hpp"
+#include "../TaskInstanceImpl.hpp"
 #include "../Director.hpp"
 #include "../tracing/ComponentTracerIf.hpp"
 #include "../timetriggered/tt_support.hpp"
@@ -72,22 +72,22 @@ namespace SystemC_VPC { namespace Detail {
     /**
      * implementation of AbstractComponent::compute(Task *)
      */
-    virtual void compute(TaskInstance* task);
+    virtual void compute(TaskInstanceImpl* task);
 
     /**
      *
      */
-    virtual void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+    virtual void requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+    virtual void execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
     
     /**
      *
      */
-    virtual void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+    virtual void abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
     
     /*
      * from ComponentInterface
@@ -101,9 +101,9 @@ namespace SystemC_VPC { namespace Detail {
      */
     NonPreemptiveComponent(std::string const &name);
 
-    virtual void newReadyTask(TaskInstance *newTask) = 0;
+    virtual void newReadyTask(TaskInstanceImpl *newTask) = 0;
 
-    virtual TaskInstance *selectReadyTask() = 0;
+    virtual TaskInstanceImpl *selectReadyTask() = 0;
 
     virtual ~NonPreemptiveComponent();
 
@@ -120,10 +120,10 @@ namespace SystemC_VPC { namespace Detail {
     void ttReleaseQueueMethod();
     sc_core::sc_event ttReleaseQueueEvent;
 
-    void addTask(TaskInstance *newTask);
+    void addTask(TaskInstanceImpl *newTask);
 
     unsigned int  readyTasks;
-    TaskInstance         *runningTask;
+    TaskInstanceImpl         *runningTask;
 
     void scheduleThread();
     sc_core::sc_event scheduleEvent;
@@ -144,7 +144,7 @@ namespace SystemC_VPC { namespace Detail {
 
     bool processPower(Attribute att);
 
-    void moveToRemainingPipelineStages(TaskInstance *task);
+    void moveToRemainingPipelineStages(TaskInstanceImpl *task);
     
     void notifyActivation(TaskInterface *scheduledTask,
         bool active);

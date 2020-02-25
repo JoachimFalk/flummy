@@ -34,8 +34,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_TASKINSTANCE_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_TASKINSTANCE_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_TASKINSTANCEIMPL_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_TASKINSTANCEIMPL_HPP
 
 #include <systemcvpc/vpc_config.h>
 #include <systemcvpc/ScheduledTask.hpp>
@@ -51,23 +51,23 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  class ProcessControlBlock;
+  class TaskImpl;
 
   using CoSupport::SystemC::Event;
 
-  // Class representing a task instance, i.e., one execution of the task represented by the PCB.
-  class TaskInstance
+  // Class representing a task instance, i.e., one execution of a task.
+  class TaskInstanceImpl
     : public Tracing::TTaskInstanceHolder {
   public:
-    TaskInstance(
-        std::function<void (TaskInstance *)> const &diiCallback,
-        std::function<void (TaskInstance *)> const &latCallback);
+    TaskInstanceImpl(
+        std::function<void (TaskInstanceImpl *)> const &diiCallback,
+        std::function<void (TaskInstanceImpl *)> const &latCallback);
 
     // getter, setter
     std::string getName() const                          {return name;}
     void        setName(std::string name)                {this->name = name;}
-    ProcessControlBlock *getPCB()                        {return this->pcb;}
-    void        setPCB(ProcessControlBlock *pcb)         {this->pcb = pcb;}
+    TaskImpl *getTask()                        {return this->taskImpl;}
+    void        setTask(TaskImpl *taskImpl)         {this->taskImpl = taskImpl;}
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -106,7 +106,7 @@ namespace SystemC_VPC { namespace Detail {
     PossibleAction *getFiringRule()
       { return this->firingRuleInterface; }
 
-    // Adaptor getter for ProcessControlBlock
+    // Adaptor getter for TaskImpl
     int              getPriority() const;
     sc_core::sc_time getPeriod() const;
     ProcessId        getProcessId() const;
@@ -115,14 +115,14 @@ namespace SystemC_VPC { namespace Detail {
     void diiExpired() { diiCallback(this); }
     void latExpired() { latCallback(this); }
 
-    ~TaskInstance();
+    ~TaskInstanceImpl();
   private:
     static int globalInstanceId;
 
     int instanceId;
 
-    std::function<void (TaskInstance *)> const diiCallback;
-    std::function<void (TaskInstance *)> const latCallback;
+    std::function<void (TaskInstanceImpl *)> const diiCallback;
+    std::function<void (TaskInstanceImpl *)> const latCallback;
 
     VPCEvent::Ptr blockingCompute;
     bool       blockAck;
@@ -133,7 +133,7 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_time latency;
     sc_core::sc_time remainingDelay;
     
-    ProcessControlBlock *pcb;
+    TaskImpl *taskImpl;
 
     std::string name;
     double timingScale;
@@ -141,7 +141,7 @@ namespace SystemC_VPC { namespace Detail {
     PossibleAction *firingRuleInterface;
   };
 
-  typedef std::map<int, TaskInstance*>  TaskMap;
+  typedef std::map<int, TaskInstanceImpl*>  TaskMap;
 
   template<typename PAYLOAD>
   struct PriorityFcfsElement {
@@ -170,8 +170,8 @@ namespace SystemC_VPC { namespace Detail {
 
   struct p_queue_entry{
     int fifo_order;  // secondary scheduling policy
-    TaskInstance *task;
-    p_queue_entry(int fifo_order, TaskInstance *task) :
+    TaskInstanceImpl *task;
+    p_queue_entry(int fifo_order, TaskInstanceImpl *task) :
       fifo_order(fifo_order), task(task)
     {
     }
@@ -193,7 +193,7 @@ namespace SystemC_VPC { namespace Detail {
 
   struct timePcbPair{
     sc_core::sc_time time;
-    TaskInstance *task;
+    TaskInstanceImpl *task;
 
     bool operator<(const timePcbPair& right) const
     {
@@ -205,8 +205,8 @@ namespace SystemC_VPC { namespace Detail {
 
   };
 
-  typedef std::map<int, TaskInstance *>  TaskMap;
+  typedef std::map<int, TaskInstanceImpl *>  TaskMap;
 
 } } // namespace SystemC_VPC::Detail
 
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_TASKINSTANCE_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_TASKINSTANCEIMPL_HPP */

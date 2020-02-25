@@ -60,24 +60,24 @@ protected:
 
   void notifyActivation(TaskInterface * scheduledTask, bool active);
 
-  void compute(TaskInstance *actualTask);
+  void compute(TaskInstanceImpl *actualTask);
 
-  void check(TaskInstance *actualTask);
-
-  /**
-   *
-   */
-  void requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+  void check(TaskInstanceImpl *actualTask);
 
   /**
    *
    */
-  void execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+  void requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
 
   /**
    *
    */
-  void abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker);
+  void execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
+
+  /**
+   *
+   */
+  void abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
 
   /*
    * from ComponentInterface
@@ -99,7 +99,7 @@ private:
 
   /// This list contains the message tasks that will appear
   /// via compute calls.
-  std::deque<TaskInstance *>    readyMsgTasks;
+  std::deque<TaskInstanceImpl *>    readyMsgTasks;
   /// This list represent all the SysteMoC actors that
   /// are mapped to this component. The list will be
   /// filled by the the end_of_elaboration method.
@@ -108,7 +108,7 @@ private:
   /// be assigned by the compute method if
   /// on of the SysteMoC actors of the component
   /// is currently running.
-  TaskInstance                 *actualTask;
+  TaskInstanceImpl                 *actualTask;
   sc_core::sc_event             readyEvent;
 };
 

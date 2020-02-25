@@ -41,7 +41,7 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/ExecModel.hpp>
 
-#include "TaskInstance.hpp"
+#include "TaskInstanceImpl.hpp"
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/noncopyable.hpp>
@@ -97,7 +97,7 @@ namespace SystemC_VPC { namespace Detail {
     /// Initialize ti with action or guard timing and power values.
     virtual void  initTaskInstance(CompState *&execModelComponentState
       , ActionInfo *ai
-      , TaskInstance *ti
+      , TaskInstanceImpl *ti
       , bool forGuard = false) const = 0;
 
     virtual ~AbstractExecModel();

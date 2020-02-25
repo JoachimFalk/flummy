@@ -37,7 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_POWERSUMMING_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_POWERSUMMING_HPP
 
-#include "ComponentObserver.hpp"
+#include "LegacyComponentObserver.hpp"
 
 #include <ostream>
 #include <map>
@@ -45,7 +45,7 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  class PowerSumming : public ComponentObserver
+  class PowerSumming : public LegacyComponentObserver
   {
   public:
     PowerSumming(std::ostream &os);

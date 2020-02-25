@@ -97,8 +97,8 @@ void RoundRobinComponent::setActivationCallback(bool flag) {
 
 void RoundRobinComponent::end_of_elaboration() {
   this->AbstractComponent::end_of_elaboration();
-  PCBPool const &pcbPool = getPCBPool();
-  for (PCBPool::const_iterator it=pcbPool.begin(); it!=pcbPool.end(); ++it) {
+  TaskPool const &taskPool = getTaskPool();
+  for (TaskPool::const_iterator it=taskPool.begin(); it!=taskPool.end(); ++it) {
     if (it->second->hasScheduledTask()) {
       TaskInterface *scheduledTask = it->second->getScheduledTask();
       scheduledTask->setUseActivationCallback(false);
@@ -114,13 +114,13 @@ void RoundRobinComponent::notifyActivation(TaskInterface * scheduledTask, bool a
   }
 }
 
-void RoundRobinComponent::compute(TaskInstance *actualTask) {
+void RoundRobinComponent::compute(TaskInstanceImpl *actualTask) {
   std::cout << "\t " << sc_core::sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
-  if (actualTask->getPCB()->hasScheduledTask()) {
+  if (actualTask->getTask()->hasScheduledTask()) {
     assert(!useActivationCallback);
     scheduleMessageTasks();
     this->actualTask = actualTask;
-    releaseTask(actualTask->getPCB(), actualTask);
+    releaseTask(actualTask->getTask(), actualTask);
     assignTaskInstance(actualTask);
     std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
     wait(actualTask->getDelay());
@@ -132,9 +132,9 @@ void RoundRobinComponent::compute(TaskInstance *actualTask) {
   readyEvent.notify();
 }
 
-void RoundRobinComponent::check(TaskInstance *actualTask) {
+void RoundRobinComponent::check(TaskInstanceImpl *actualTask) {
   if (!useActivationCallback) {
-    releaseTask(actualTask->getPCB(), actualTask);
+    releaseTask(actualTask->getTask(), actualTask);
     assignTaskInstance(actualTask);
         std::cout << "check: " << actualTask->getName() << "@"
             << sc_core::sc_time_stamp() << " with delay "
@@ -148,7 +148,7 @@ void RoundRobinComponent::check(TaskInstance *actualTask) {
 /**
  *
  */
-void RoundRobinComponent::requestBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker) {
+void RoundRobinComponent::requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker) {
 
 
 }
@@ -156,7 +156,7 @@ void RoundRobinComponent::requestBlockingCompute(TaskInstance* task, VPCEvent::P
 /**
  *
  */
-void RoundRobinComponent::execBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker) {
+void RoundRobinComponent::execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker) {
 
 
 }
@@ -164,7 +164,7 @@ void RoundRobinComponent::execBlockingCompute(TaskInstance* task, VPCEvent::Ptr 
 /**
  *
  */
-void RoundRobinComponent::abortBlockingCompute(TaskInstance* task, VPCEvent::Ptr blocker) {
+void RoundRobinComponent::abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker) {
 
 
 }
@@ -182,10 +182,10 @@ bool RoundRobinComponent::hasWaitingOrRunningTasks()
 bool RoundRobinComponent::scheduleMessageTasks() {
   bool progress = !readyMsgTasks.empty();
   while (!readyMsgTasks.empty()) {
-    TaskInstance *messageTask = readyMsgTasks.front();
+    TaskInstanceImpl *messageTask = readyMsgTasks.front();
     readyMsgTasks.pop_front();
-    assert(!messageTask->getPCB()->hasScheduledTask());
-    releaseTask(messageTask->getPCB(), messageTask);
+    assert(!messageTask->getTask()->hasScheduledTask());
+    releaseTask(messageTask->getTask(), messageTask);
     assignTaskInstance(messageTask);
     /// This will setup the trigger for schedule_method to be called
     /// again when the task execution time is over.
@@ -212,12 +212,12 @@ void RoundRobinComponent::scheduleThread() {
           // This will invoke our compute callback and setup actualTask.
           scheduledTask->schedule();
           while (!actualTask ||
-                 !actualTask->getPCB()->hasScheduledTask() ||
-                 actualTask->getPCB()->getScheduledTask() != scheduledTask) {
+                 !actualTask->getTask()->hasScheduledTask() ||
+                 actualTask->getTask()->getScheduledTask() != scheduledTask) {
             scheduleMessageTasks();
             if (!actualTask ||
-                !actualTask->getPCB()->hasScheduledTask() ||
-                actualTask->getPCB()->getScheduledTask() != scheduledTask)
+                !actualTask->getTask()->hasScheduledTask() ||
+                actualTask->getTask()->getScheduledTask() != scheduledTask)
               wait(readyEvent);
           }
           actualTask = nullptr;

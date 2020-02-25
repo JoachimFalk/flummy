@@ -92,9 +92,9 @@ namespace SystemC_VPC { namespace Detail {
 
     bool area(int sysFreq,int framesize);
  
-    void addedNewTask(TaskInstance *task);
+    void addedNewTask(TaskInstanceImpl *task);
     
-    void removedTask(TaskInstance *task);
+    void removedTask(TaskInstanceImpl *task);
     
     sc_core::sc_event& getNotifyEvent();
     

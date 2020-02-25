@@ -59,8 +59,8 @@ namespace SystemC_VPC { namespace Detail {
     bool getSchedulerTimeSlice(sc_core::sc_time &time,
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
-    void addedNewTask(TaskInstance *task);
-    void removedTask(TaskInstance *task);
+    void addedNewTask(TaskInstanceImpl *task);
+    void removedTask(TaskInstanceImpl *task);
     sc_core::sc_event& getNotifyEvent();
     scheduling_decision schedulingDecision(int& task_to_resign,
                                            int& task_to_assign,

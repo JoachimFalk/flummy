@@ -160,7 +160,7 @@ namespace SystemC_VPC { namespace Detail {
   }
   
   
-  void TDMAScheduler::addedNewTask(TaskInstance *task){    
+  void TDMAScheduler::addedNewTask(TaskInstanceImpl *task){    
     //Neu fuer TDMA: Task der entsprechenden Liste des passenden
     //TDMA-Slots hinzufuegen
     if(PIDmap.find(task->getProcessId()) == PIDmap.end()){
@@ -187,7 +187,7 @@ namespace SystemC_VPC { namespace Detail {
   }
   
   
-  void TDMAScheduler::removedTask(TaskInstance *task){  
+  void TDMAScheduler::removedTask(TaskInstanceImpl *task){  
     std::deque<int>::iterator iter;
     for(iter = TDMA_slots[ PIDmap[task->getProcessId()] ].pid_fifo.begin();
         iter!=TDMA_slots[PIDmap[task->getProcessId()]].pid_fifo.end();

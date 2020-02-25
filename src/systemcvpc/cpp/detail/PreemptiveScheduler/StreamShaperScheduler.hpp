@@ -64,9 +64,9 @@ namespace SystemC_VPC { namespace Detail {
                                const TaskMap &ready_tasks,
                                const TaskMap &running_tasks);
     
-    void addedNewTask(TaskInstance *task);
+    void addedNewTask(TaskInstanceImpl *task);
     
-    void removedTask(TaskInstance *task);
+    void removedTask(TaskInstanceImpl *task);
     
     void setAttribute(AttributePtr attributePtr);
 

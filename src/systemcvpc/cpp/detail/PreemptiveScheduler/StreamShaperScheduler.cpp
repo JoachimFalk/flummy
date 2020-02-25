@@ -111,12 +111,12 @@ namespace SystemC_VPC { namespace Detail {
   }
   
   
-  void StreamShaperScheduler::addedNewTask(TaskInstance *task){
+  void StreamShaperScheduler::addedNewTask(TaskInstanceImpl *task){
     stream_fifo.push_back(task->getInstanceId());
   }
   
   
-  void StreamShaperScheduler::removedTask(TaskInstance *task){
+  void StreamShaperScheduler::removedTask(TaskInstanceImpl *task){
     std::deque<int>::iterator iter;
        for(iter=stream_fifo.begin();iter!=stream_fifo.end();iter++){
          if( *iter == task->getInstanceId()){

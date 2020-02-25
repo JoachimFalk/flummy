@@ -87,7 +87,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     /// Other stuff
     ///
 
-//  void compute( TaskInstance* task );
+//  void compute( TaskInstanceImpl* task );
 //
 //  void route( EventPair np );
 //
@@ -107,7 +107,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
       LOCK_ROUTE,
       COMPUTE_ROUTE
     };
-    typedef std::list<std::pair<AbstractComponent *, TaskInstance *> > Components;
+    typedef std::list<std::pair<AbstractComponent *, TaskInstanceImpl *> > Components;
 
     Components                             hopList;
     Components                             lockList;
@@ -117,7 +117,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     // a rout is either input (read) or output (write)
     bool                                   isWrite;
 
-    TaskInstance*                          task;
+    TaskInstanceImpl*                          task;
     EventPair                              taskEvents;
     VPCEvent::Ptr                          dummyDii;
     VPCEvent::Ptr                          routeLat;

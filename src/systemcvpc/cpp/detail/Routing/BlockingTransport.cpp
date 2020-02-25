@@ -64,7 +64,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     (*completed)(userData, quantitiy, nullptr);
   }
 
-//void BlockingTransport::compute( TaskInstance* _task ) {
+//void BlockingTransport::compute( TaskInstanceImpl* _task ) {
 //  task = _task;
 //  this->isWrite = task->isWrite();
 //  //this->reset();
@@ -84,11 +84,11 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 //    for(ComponentList::iterator iter = this->components.begin();
 //      iter != this->components.end();
 //      ++iter){
-//      TaskInstance* copy =
+//      TaskInstanceImpl* copy =
 //        Director::getInstance().allocateTask(task->getProcessId());
 //      copy->setFunctionIds(task->getFunctionIds());
 //      copy->setTimingScale(task->getTimingScale());
-//      copy->setPCB((*iter)->getPCB(task->getProcessId()));
+//      copy->setTask((*iter)->getTask(task->getProcessId()));
 //      hopList.push_back( std::make_pair(*iter, copy) );
 //      // we need to lock the route in write or in read direction
 //      if(this->isWrite){
@@ -123,9 +123,9 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 //           << (nextHop != hopList.end())  << std::endl);
 //
 //  if( phase == LOCK_ROUTE && nextHop != lockList.end() ){
-//    //EventPair np(pcb->getBlockEvent().dii, pcb->getBlockEvent().latency);
+//    //EventPair np(taskImpl->getBlockEvent().dii, taskImpl->getBlockEvent().latency);
 //    AbstractComponent* comp       = nextHop->first;
-//    TaskInstance*              actualTask = nextHop->second;
+//    TaskInstanceImpl*              actualTask = nextHop->second;
 //    actualTask->setBlockEvent(np);
 //    DBG_OUT("lock " << this->getName()
 //            << "on: " << comp->getName()
@@ -143,7 +143,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 //    comp->requestBlockingCompute(actualTask, routeLat);
 //  } else if( phase == COMPUTE_ROUTE && nextHop != hopList.end() ){
 //    AbstractComponent * comp = nextHop->first;
-//    TaskInstance* actualTask = nextHop->second;
+//    TaskInstanceImpl* actualTask = nextHop->second;
 //    DBG_OUT("compute " << this->getName()
 //            << "on: " << comp->getName()
 //            << std::endl);
@@ -179,7 +179,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 //    if( phase == LOCK_ROUTE && nextHop != lockList.end() ){
 //      assert(!hopList.empty());
 //      //AbstractComponent * comp = blockedComponents.back().first;
-//      TaskInstance* actualTask = nextHop->second;
+//      TaskInstanceImpl* actualTask = nextHop->second;
 //      // we need to test if a hop is locked already
 //      if( actualTask->isAckedBlocking()){
 //        // count iter for next hop if blocking compute is akk`ed only
@@ -229,7 +229,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     for(Components::iterator iter = lockList.begin();
         iter != lockList.end();
         ++iter){
-      TaskInstance* task = iter->second;
+      TaskInstanceImpl* task = iter->second;
       AbstractComponent * c = iter->first;
       task->resetBlockingCompute();
       c->abortBlockingCompute(task, routeLat);

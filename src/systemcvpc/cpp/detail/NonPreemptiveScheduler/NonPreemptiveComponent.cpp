@@ -132,11 +132,11 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void NonPreemptiveComponent::compute(TaskInstance *actualTask) {
+  void NonPreemptiveComponent::compute(TaskInstanceImpl *actualTask) {
     DBG_OUT(this->name() << "->compute ( " << actualTask->getName()
         << " ) at time: " << sc_core::sc_time_stamp()
         << " mode: " << this->getPowerMode()
-        << " schedTask: " << actualTask->getPCB()->getScheduledTask()
+        << " schedTask: " << actualTask->getTask()->getScheduledTask()
         << std::endl);
 //  DBG_OUT("Using " << actualTask->getRemainingDelay()
 //    << " as delay for function " << actualTask->getFunctionIds()() << "!"
@@ -148,8 +148,8 @@ namespace SystemC_VPC { namespace Detail {
     this->addTask(actualTask);
   }
 
-  void NonPreemptiveComponent::addTask(TaskInstance *newReadyTask) {
-    releaseTask(newReadyTask->getPCB(), newReadyTask);
+  void NonPreemptiveComponent::addTask(TaskInstanceImpl *newReadyTask) {
+    releaseTask(newReadyTask->getTask(), newReadyTask);
     this->newReadyTask(newReadyTask);
     ++readyTasks;
     //awake scheduler thread
@@ -189,7 +189,7 @@ namespace SystemC_VPC { namespace Detail {
           fireStateChanged(ComponentState::IDLE);
         wait(runningTask->getDelay());
         removeTask();
-        TaskInterface *scheduledTask = runningTask->getPCB()->getScheduledTask();
+        TaskInterface *scheduledTask = runningTask->getTask()->getScheduledTask();
         if (scheduledTask) {
           // The scheduledTask->canFire() method call might call notifyActivation in
           // case that scheduledTask is a periodic actor. For this case, the
@@ -233,7 +233,7 @@ namespace SystemC_VPC { namespace Detail {
    *
    */
   void NonPreemptiveComponent::moveToRemainingPipelineStages(
-      TaskInstance* task)
+      TaskInstanceImpl* task)
   {
     sc_core::sc_time now = sc_core::sc_time_stamp();
     sc_core::sc_time restOfLatency = task->getLatency() - task->getDelay();
@@ -264,7 +264,7 @@ namespace SystemC_VPC { namespace Detail {
         timePcbPair front = pqueue.top();
 
         //std::cerr << "Pop from list: " << front.time << " : "
-        //<< front.pcb->getBlockEvent().latency << std::endl;
+        //<< front.taskImpl->getBlockEvent().latency << std::endl;
         sc_core::sc_time waitFor = front.time - sc_core::sc_time_stamp();
         assert(front.time >= sc_core::sc_time_stamp());
         //std::cerr << "Pipeline> Wait till " << front.time
@@ -292,7 +292,7 @@ namespace SystemC_VPC { namespace Detail {
  *
  */
 void NonPreemptiveComponent::requestBlockingCompute(
-    TaskInstance* task, VPCEvent::Ptr blocker)
+    TaskInstanceImpl* task, VPCEvent::Ptr blocker)
 {
   task->setExec(false);
   task->setBlockingCompute(blocker);
@@ -303,7 +303,7 @@ void NonPreemptiveComponent::requestBlockingCompute(
  *
  */
 void NonPreemptiveComponent::execBlockingCompute(
-    TaskInstance* task, VPCEvent::Ptr blocker)
+    TaskInstanceImpl* task, VPCEvent::Ptr blocker)
 {
   task->setExec(true);
   blockCompute.notify();
@@ -313,7 +313,7 @@ void NonPreemptiveComponent::execBlockingCompute(
  *
  */
 void NonPreemptiveComponent::abortBlockingCompute(
-    TaskInstance* task, VPCEvent::Ptr blocker)
+    TaskInstanceImpl* task, VPCEvent::Ptr blocker)
 {
   task->resetBlockingCompute();
   blockCompute.notify();

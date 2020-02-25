@@ -113,7 +113,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     /// Initialize ti with action or guard timing and power values.
     void  initTaskInstance(AbstractExecModel::CompState *&execModelComponentState
       , ActionInfo *ai
-      , TaskInstance *ti
+      , TaskInstanceImpl *ti
       , bool forGuard = false) const;
 
     ///

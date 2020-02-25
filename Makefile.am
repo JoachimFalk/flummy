@@ -121,10 +121,10 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/ObservableComponent.cpp \
 	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \
 	src/systemcvpc/cpp/detail/PowerSumming.cpp \
-	src/systemcvpc/cpp/detail/ProcessControlBlock.cpp \
 	src/systemcvpc/cpp/detail/SelectFastestPowerModeGlobalGovernor.cpp \
 	src/systemcvpc/cpp/detail/SystemCVPCSimulator.cpp \
-	src/systemcvpc/cpp/detail/TaskInstance.cpp \
+	src/systemcvpc/cpp/detail/TaskImpl.cpp \
+	src/systemcvpc/cpp/detail/TaskInstanceImpl.cpp \
 	src/systemcvpc/cpp/detail/VPCBuilder.cpp
 
 libsystemcvpc_la_DEPENDENCIES = \

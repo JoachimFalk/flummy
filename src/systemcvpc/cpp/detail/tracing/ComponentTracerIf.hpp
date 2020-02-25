@@ -45,7 +45,7 @@
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-// Custom data for a tracer in the PCB.
+// Custom data for a tracer in TaskImpl.
 class TTask {
 public:
   virtual ~TTask();
@@ -54,7 +54,7 @@ public:
 class TTaskHolder {
   friend class TraceableComponent;
 private:
-  // Custom data for a tracer in the PCB.
+  // Custom data for a tracer in a task.
   // This can only be managed by TraceableComponent.
   std::vector<TTask *> ttasks;
 protected:
@@ -70,7 +70,7 @@ public:
 class TTaskInstanceHolder {
   friend class TraceableComponent;
 private:
-  // Custom data for a tracer in the PCB.
+  // Custom data for a tracer in a task instance.
   // This can only be managed by TraceableComponent.
   std::vector<TTaskInstance *> ttaskInstances;
 protected:

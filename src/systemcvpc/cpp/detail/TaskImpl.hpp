@@ -34,8 +34,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_PROCESSCONTROLBLOCK_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_PROCESSCONTROLBLOCK_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_TASKIMPL_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_TASKIMPL_HPP
 
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/datatypes.hpp>
@@ -60,14 +60,14 @@ namespace SystemC_VPC { namespace Detail {
   * This class represents all necessary data of a simulated process within VPC
   * and provides necessary access methods for its data.
   */
-  class ProcessControlBlock
+  class TaskImpl
     : public Tracing::TTaskHolder {
   public:
     /**
-     * \brief Default constructor of an PCB instance
-     * Initialize a newly created instance of ProcessControlBlock
+     * \brief Default constructor of a Task.
+     * Initialize a newly created instance of TaskImpl.
      */
-    ProcessControlBlock(AbstractComponent *component, std::string const &taskName);
+    TaskImpl(AbstractComponent *component, std::string const &taskName);
 
     ProcessId getPid() const
       { return pid; }
@@ -94,7 +94,7 @@ namespace SystemC_VPC { namespace Detail {
     bool hasScheduledTask() const
       { return this->scheduledTask != NULL; }
 
-    ~ProcessControlBlock();
+    ~TaskImpl();
   private:
     smoc::SimulatorAPI::TaskInterface   *scheduledTask;
     AbstractComponent                   *component;
@@ -105,9 +105,9 @@ namespace SystemC_VPC { namespace Detail {
   };
 
   static inline
-  ProcessControlBlock *getPCBOfTaskInterface(TaskInterface const *task)
-    { return reinterpret_cast<ProcessControlBlock *>(task->getSchedulerInfo()); }
+  TaskImpl *getTaskOfTaskInterface(TaskInterface const *task)
+    { return reinterpret_cast<TaskImpl *>(task->getSchedulerInfo()); }
 
 } } // namespace SystemC_VPC::Detail
 
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_PROCESSCONTROLBLOCK_HPP */
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_TASKIMPL_HPP */

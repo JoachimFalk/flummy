@@ -37,7 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_PREEMPTIVESCHEDULER_SCHEDULER_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_PREEMPTIVESCHEDULER_SCHEDULER_HPP
 
-#include "../TaskInstance.hpp"
+#include "../TaskInstanceImpl.hpp"
 
 #include <systemcvpc/Attribute.hpp>
 
@@ -71,12 +71,12 @@ namespace SystemC_VPC { namespace Detail {
     /**
      * \brief Inform Scheduler about new tasks.
      */
-    virtual void addedNewTask(TaskInstance *task)=0;
+    virtual void addedNewTask(TaskInstanceImpl *task)=0;
     
     /**
      * \brief Inform Scheduler about removed tasks.
      */
-    virtual void removedTask(TaskInstance *task)=0;
+    virtual void removedTask(TaskInstanceImpl *task)=0;
 
     /**
      * \brief Call the Scheduler to do a scheduling decision.

@@ -37,7 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_POWERGOVERNOR_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_POWERGOVERNOR_HPP
 
-#include "ComponentObserver.hpp"
+#include "LegacyComponentObserver.hpp"
+
 #include <systemcvpc/Attribute.hpp>
 
 namespace SystemC_VPC { namespace Detail {
@@ -56,7 +57,7 @@ class GlobalPowerGovernor
 };
 
 template <class T>
-class LocalPowerGovernor : public ComponentObserver
+class LocalPowerGovernor : public LegacyComponentObserver
 {
   public:
     LocalPowerGovernor() :

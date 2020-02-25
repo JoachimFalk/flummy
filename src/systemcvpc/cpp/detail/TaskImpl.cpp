@@ -34,40 +34,35 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "TaskInstance.hpp"
-#include "ProcessControlBlock.hpp"
+#include <systemcvpc/TimingModifier.hpp>
+#include <systemcvpc/vpc_config.h>
+
+#include "AbstractComponent.hpp"
+#include "TaskImpl.hpp"
+#include "Director.hpp"
+
+#include <CoSupport/Tracing/TracingFactory.hpp>
+
+#include <ctime>
+#include <cfloat>
+
+#include "DebugOStream.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
-  int TaskInstance::globalInstanceId = 0;
+  TaskImpl::TaskImpl(AbstractComponent *component, std::string const &taskName)
+    : scheduledTask(nullptr)
+    , component(component)
+    , name(taskName)
+    , pid(Director::getProcessId(taskName))
+    , priority(0)
+    , psm(false) {}
 
-  TaskInstance::TaskInstance(
-      std::function<void (TaskInstance *)> const &diiCallback,
-      std::function<void (TaskInstance *)> const &latCallback)
-    : instanceId(globalInstanceId++)
-    , diiCallback(diiCallback)
-    , latCallback(latCallback)
-    , blockingCompute(nullptr)
-    , blockAck(false)
-    , exec(false)
-    , write(false)
-    , pcb()
-    , name("NN")
-    , timingScale(1)
-    , firingRuleInterface(nullptr)
-    {}
-
-  TaskInstance::~TaskInstance() {
+  TaskImpl::~TaskImpl() {
   }
 
-  // Adaptor getter for ProcessControlBlock
-  int              TaskInstance::getPriority() const
-    { assert(pcb != NULL); return pcb->getPriority(); }
-  sc_core::sc_time TaskInstance::getPeriod() const
-    { assert(pcb != NULL); return pcb->getPeriod(); }
-  ProcessId        TaskInstance::getProcessId() const
-    { assert(pcb != NULL); return pcb->getPid(); }
-  bool             TaskInstance::isPSM() const
-    { return pcb->getTaskIsPSM(); }
+  sc_core::sc_time TaskImpl::getPeriod() const{
+    return sc_core::sc_time(DBL_MAX, sc_core::SC_SEC);
+  }
 
 } } // namespace SystemC_VPC::Detail

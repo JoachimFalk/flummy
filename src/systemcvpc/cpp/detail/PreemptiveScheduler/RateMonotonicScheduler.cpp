@@ -53,13 +53,13 @@ namespace SystemC_VPC { namespace Detail {
   }
   /**
    *
-   */  void RateMonotonicScheduler::addedNewTask(TaskInstance *task){
+   */  void RateMonotonicScheduler::addedNewTask(TaskInstanceImpl *task){
     p_queue_entry pqe(order_counter++, task);
     pqueue.push(pqe);
   }
   /**
    *
-   */  void RateMonotonicScheduler::removedTask(TaskInstance *task){
+   */  void RateMonotonicScheduler::removedTask(TaskInstanceImpl *task){
   }
 
   /**
@@ -84,7 +84,7 @@ namespace SystemC_VPC { namespace Detail {
     if(running_tasks.size()!=0){  // is another task running?
       TaskMap::const_iterator iter;
       iter=running_tasks.begin();
-      TaskInstance *task=iter->second;
+      TaskInstanceImpl *task=iter->second;
 
       //has running task higher priority (lesser value)
       if(task->getPriority() <= d_prior_ready){

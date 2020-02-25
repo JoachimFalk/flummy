@@ -54,14 +54,14 @@ namespace SystemC_VPC { namespace Detail {
   /**
    *
    */
-  void PriorityScheduler::addedNewTask(TaskInstance *task){
+  void PriorityScheduler::addedNewTask(TaskInstanceImpl *task){
     p_queue_entry pqe(order_counter++,task);
     pqueue.push(pqe);
   }
   /**
    *
    */
-  void PriorityScheduler::removedTask(TaskInstance *task){
+  void PriorityScheduler::removedTask(TaskInstanceImpl *task){
   }
 
   /**
@@ -86,7 +86,7 @@ namespace SystemC_VPC { namespace Detail {
      if(running_tasks.size()!=0){  // is another task running?
        TaskMap::const_iterator iter;
        iter=running_tasks.begin();
-       TaskInstance *task=iter->second;
+       TaskInstanceImpl *task=iter->second;
 
        //has running task higher priority (lesser value)
        if(task->getPriority() <= d_prior_ready){
