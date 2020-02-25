@@ -41,6 +41,7 @@
 #include <systemcvpc/datatypes.hpp>
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
+#include <systemcvpc/Extending/Task.hpp>
 
 #include "tracing/ComponentTracerIf.hpp"
 
@@ -61,7 +62,9 @@ namespace SystemC_VPC { namespace Detail {
   * and provides necessary access methods for its data.
   */
   class TaskImpl
-    : public Tracing::TTaskHolder {
+    : public Extending::Task
+    , public Tracing::TTaskHolder
+  {
   public:
     /**
      * \brief Default constructor of a Task.

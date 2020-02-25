@@ -134,6 +134,7 @@ namespace SystemC_VPC { namespace Detail {
 
 
   AbstractComponent::~AbstractComponent() {
+    componentOperation(ComponentOperation::PWRCHANGE, *this);
   }
 
   void AbstractComponent::loadLocalGovernorPlugin(std::string plugin){
@@ -240,11 +241,11 @@ namespace SystemC_VPC { namespace Detail {
     return taskImpl;
   }
 
-  TaskImpl *AbstractComponent::getTask(ProcessId const pid) const {
+/*TaskImpl *AbstractComponent::getTask(ProcessId const pid) const {
     TaskPool::const_iterator iter = taskPool.find(pid);
     assert(iter != taskPool.end());
     return iter->second.get();
-  }
+  }*/
 
   void AbstractComponent::setExecModel(AbstractExecModel *model) {
     assert(execModelComponentState == nullptr);
@@ -415,7 +416,7 @@ namespace SystemC_VPC { namespace Detail {
     // FIXME: update powerConsumption
     //this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
     // Notify observers (e.g. powersum)
-    this->fireNotification(this);
+    this->componentOperation(ComponentOperation::PWRCHANGE, *this);
   }
 
 } } // namespace SystemC_VPC::Detail

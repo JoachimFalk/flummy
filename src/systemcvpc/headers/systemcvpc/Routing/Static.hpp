@@ -47,7 +47,7 @@ class Static: public Route {
   typedef Static this_type;
 public:
   typedef boost::intrusive_ptr<this_type>       Ptr;
-  typedef boost::intrusive_ptr<this_type> const ConstPtr;
+  typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
   class Hop;
 

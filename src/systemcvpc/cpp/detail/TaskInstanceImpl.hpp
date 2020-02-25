@@ -41,6 +41,7 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/EventPair.hpp>
+#include <systemcvpc/Extending/TaskInstance.hpp>
 
 #include "tracing/ComponentTracerIf.hpp"
 
@@ -57,17 +58,18 @@ namespace SystemC_VPC { namespace Detail {
 
   // Class representing a task instance, i.e., one execution of a task.
   class TaskInstanceImpl
-    : public Tracing::TTaskInstanceHolder {
+    : public Extending::TaskInstance
+    , public Tracing::TTaskInstanceHolder {
   public:
     TaskInstanceImpl(
         std::function<void (TaskInstanceImpl *)> const &diiCallback,
         std::function<void (TaskInstanceImpl *)> const &latCallback);
 
     // getter, setter
-    std::string getName() const                          {return name;}
-    void        setName(std::string name)                {this->name = name;}
-    TaskImpl *getTask()                        {return this->taskImpl;}
-    void        setTask(TaskImpl *taskImpl)         {this->taskImpl = taskImpl;}
+    std::string getName() const             {return name;}
+    void        setName(std::string name)   {this->name = name;}
+    TaskImpl   *getTask() const             {return this->taskImpl;}
+    void        setTask(TaskImpl *taskImpl) {this->taskImpl = taskImpl;}
 
     void       ackBlockingCompute(){
       blockAck = true;

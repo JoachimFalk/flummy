@@ -40,26 +40,54 @@
 #include <systemcvpc/ComponentObserver.hpp>
 #include <systemcvpc/Component.hpp>
 
-#include <vector>
+#include "TaskImpl.hpp"
+#include "TaskInstanceImpl.hpp"
+
+#include <map>
 
 namespace SystemC_VPC { namespace Detail {
+
+  class AbstractComponent;
 
   /**
    * \brief Interface for classes implementing delay simulation.
    */
   class ObservableComponent {
   public:
-    void addObserver(ComponentObserver *obs);
+    void addObserver(ComponentObserver::Ptr const &obs);
 
-    void removeObserver(ComponentObserver *obs);
-    
-    void fireNotification(Component *compInf);
+  protected:
+    ObservableComponent();
 
-    virtual ~ObservableComponent() {}
+    typedef ComponentObserver::ComponentOperation
+        ComponentOperation;
+    typedef ComponentObserver::TaskOperation
+        TaskOperation;
+    typedef ComponentObserver::TaskInstanceOperation
+        TaskInstanceOperation;
 
+    void componentOperation(ComponentOperation co
+      , AbstractComponent const &c);
+
+    void taskOperation(TaskOperation to
+      , AbstractComponent const &c
+      , TaskImpl                &t);
+
+    void taskInstanceOperation(TaskInstanceOperation tio
+      , AbstractComponent const &c
+      , TaskInstanceImpl        &ti);
+
+    virtual ~ObservableComponent();
   private:
-    typedef std::vector<ComponentObserver *> Observers;
+    struct ObserverInfo {
+      int taskOffset;
+      int taskInstanceOffset;
+    };
+    typedef std::map<ComponentObserver::Ptr, ObserverInfo> Observers;
     
+    size_t nextFreeTaskOffset;
+    size_t nextFreeTaskInstanceOffset;
+
     Observers observers;
   };
 

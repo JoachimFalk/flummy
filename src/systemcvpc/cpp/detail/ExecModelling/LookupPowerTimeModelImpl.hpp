@@ -66,7 +66,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     typedef LookupPowerTimeModelImpl this_type;
   public:
     typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type> const ConstPtr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
     LookupPowerTimeModelImpl();
 
@@ -112,9 +112,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 
     /// Initialize ti with action or guard timing and power values.
     void  initTaskInstance(AbstractExecModel::CompState *&execModelComponentState
-      , ActionInfo *ai
+      , ActionInfo       *ai
       , TaskInstanceImpl *ti
-      , bool forGuard = false) const;
+      , bool              forGuard = false) const;
 
     ///
     /// Other stuff

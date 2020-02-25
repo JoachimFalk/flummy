@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  * --- This software and any associated documentation is provided "as is"
@@ -20,38 +20,28 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_LEGACYCOMPONENTOBSERVER_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_LEGACYCOMPONENTOBSERVER_HPP
-
-#include <systemcvpc/Component.hpp>
-#include <systemcvpc/ComponentObserver.hpp>
+#include "LegacyComponentObserver.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
-  class LegacyComponentObserver
-    : public ComponentObserver
-  {
-  protected:
-    LegacyComponentObserver();
+  LegacyComponentObserver::LegacyComponentObserver()
+    : ComponentObserver(0,0) {}
 
-    void componentOperation(ComponentOperation co
-      , Component       const &c);
+  void LegacyComponentObserver::componentOperation(ComponentOperation co
+    , Component       const &c)
+    { this->notify(const_cast<Component *>(&c)); }
 
-    void taskOperation(TaskOperation to
-      , Component       const &c
-      , Extending::Task const &t
-      , OTask                 &ot);
+  void LegacyComponentObserver::taskOperation(TaskOperation to
+    , Component       const &c
+    , Extending::Task const &t
+    , OTask                 &ot)
+    { this->notify(const_cast<Component *>(&c)); }
 
-    void taskInstanceOperation(TaskInstanceOperation tio
-      , Component               const &c
-      , Extending::TaskInstance const &ti
-      , OTask                         &ot
-      , OTaskInstance                 &oti);
-
-    // this callback function shall be called on component state changes
-    virtual void notify(Component *ci) = 0;
-  };
+  void LegacyComponentObserver::taskInstanceOperation(TaskInstanceOperation tio
+    , Component               const &c
+    , Extending::TaskInstance const &ti
+    , OTask                         &ot
+    , OTaskInstance                 &oti)
+    { this->notify(const_cast<Component *>(&c)); }
 
 } } // namespace SystemC_VPC::Detail
-
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_LEGACYCOMPONENTOBSERVER_HPP */

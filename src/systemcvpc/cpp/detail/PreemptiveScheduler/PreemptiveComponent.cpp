@@ -597,7 +597,6 @@ namespace SystemC_VPC { namespace Detail {
 
 
   PreemptiveComponent::~PreemptiveComponent(){
-    this->fireNotification(this);
     delete scheduler;
 #ifndef NO_POWER_SUM
     this->removeObserver(powerSumming);

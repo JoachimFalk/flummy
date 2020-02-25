@@ -36,31 +36,59 @@
 
 #include "ObservableComponent.hpp"
 
+#include "AbstractComponent.hpp"
+
 namespace SystemC_VPC { namespace Detail {
 
-  void ObservableComponent::addObserver(ComponentObserver *obs) {
-    observers.push_back(obs);
+  ObservableComponent::ObservableComponent()
+    : nextFreeTaskOffset(sizeof(TaskImpl))
+    , nextFreeTaskInstanceOffset(sizeof(TaskInstanceImpl)) {}
+
+  void ObservableComponent::addObserver(ComponentObserver::Ptr const &obs) {
+    ObserverInfo oi;
+    // Get next free 16 byte aligned task offset.
+    nextFreeTaskOffset = (nextFreeTaskOffset + 15UL) & ~15UL;
+    oi.taskOffset = nextFreeTaskOffset;
+    nextFreeTaskOffset += obs->getReservePerTask();
+    // Get next free 16 byte aligned task offset.
+    nextFreeTaskInstanceOffset = (nextFreeTaskInstanceOffset + 15UL) & ~15UL;
+    oi.taskInstanceOffset = nextFreeTaskInstanceOffset;
+    nextFreeTaskInstanceOffset += obs->getReservePerTaskInstance();
+    observers.insert(std::make_pair(obs, oi));
   }
 
-  void ObservableComponent::removeObserver(ComponentObserver *obs) {
-    for(Observers::iterator iter = observers.begin();
-        iter != observers.end();
-        ++iter)
-    {
-      if(*iter == obs) {
-        observers.erase(iter);
-        break;
-      }
+  void ObservableComponent::componentOperation(ComponentOperation co
+    , AbstractComponent const &c)
+  {
+    for (Observers::value_type const &e : observers)
+      e.first->componentOperation(co, c);
+  }
+
+  void ObservableComponent::taskOperation(TaskOperation to
+    , AbstractComponent const &c
+    , TaskImpl                &t)
+  {
+    for (Observers::value_type const &e : observers) {
+      e.first->taskOperation(to, c, t,
+          *reinterpret_cast<ComponentObserver::OTask *>(
+              reinterpret_cast<char *>(&t) + e.second.taskOffset));
     }
   }
-      
-  void ObservableComponent::fireNotification(Component *compInf) {
-    for(Observers::iterator iter = observers.begin();
-        iter != observers.end();
-        ++iter)
-    {
-      (*iter)->notify(compInf);
+
+  void ObservableComponent::taskInstanceOperation(TaskInstanceOperation tio
+    , AbstractComponent const &c
+    , TaskInstanceImpl        &ti)
+  {
+    for (Observers::value_type const &e : observers) {
+      e.first->taskInstanceOperation(tio, c, ti
+        , *reinterpret_cast<ComponentObserver::OTask *>(
+              reinterpret_cast<char *>(ti.getTask()) + e.second.taskOffset)
+        , *reinterpret_cast<ComponentObserver::OTaskInstance *>(
+            reinterpret_cast<char *>(&ti) + e.second.taskInstanceOffset));
     }
   }
+
+  ObservableComponent::~ObservableComponent()
+    {}
 
 } } // namespace SystemC_VPC::Detail

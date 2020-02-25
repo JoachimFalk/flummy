@@ -321,7 +321,7 @@ void NonPreemptiveComponent::abortBlockingCompute(
 
 NonPreemptiveComponent::~NonPreemptiveComponent() {
   //this->setPowerConsumption(0.0);
-  this->fireNotification(this);
+  //this->fireNotification(this);
 #ifndef NO_POWER_SUM
   this->removeObserver(powerSumming);
   delete powerSumming;
