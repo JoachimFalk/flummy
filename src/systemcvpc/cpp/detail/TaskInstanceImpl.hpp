@@ -42,34 +42,64 @@
 #include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/EventPair.hpp>
 #include <systemcvpc/Extending/TaskInstance.hpp>
-
-#include "tracing/ComponentTracerIf.hpp"
+#include <systemcvpc/datatypes.hpp>
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
 #include <functional>
 
+#include <boost/noncopyable.hpp>
+
 namespace SystemC_VPC { namespace Detail {
 
   class TaskImpl;
+  class ObservableComponent;
 
-  using CoSupport::SystemC::Event;
+//using CoSupport::SystemC::Event;
 
   // Class representing a task instance, i.e., one execution of a task.
   class TaskInstanceImpl
     : public Extending::TaskInstance
-    , public Tracing::TTaskInstanceHolder {
+    , private boost::noncopyable
+  {
   public:
-    TaskInstanceImpl(
-        std::function<void (TaskInstanceImpl *)> const &diiCallback,
-        std::function<void (TaskInstanceImpl *)> const &latCallback);
 
-    // getter, setter
-    std::string getName() const             {return name;}
-    void        setName(std::string name)   {this->name = name;}
-    TaskImpl   *getTask() const             {return this->taskImpl;}
-    void        setTask(TaskImpl *taskImpl) {this->taskImpl = taskImpl;}
+    enum class Type {
+      ACTION, GUARD, MESSAGE
+    };
+
+    // Getters
+    int             getInstanceId() const
+      { return instanceId; }
+    TaskImpl       *getTask() const
+      { return taskImpl; }
+    Type            getType() const
+      { return type; }
+    std::string     getName() const;
+    PossibleAction *getFiringRule() const
+      { return firingRuleInterface; }
+
+    void diiExpired() { diiCallback(this); }
+    void latExpired() { latCallback(this); }
+
+    // Timings getters and setters
+    void             setDelay(sc_core::sc_time delay)
+      { this->delay = delay; }
+    sc_core::sc_time getDelay() const
+      { return this->delay; }
+    void             setLatency(sc_core::sc_time latency)
+      { this->latency = latency; }
+    sc_core::sc_time getLatency() const
+      { return this->latency; }
+    void             setRemainingDelay(sc_core::sc_time delay)
+      { this->remainingDelay = delay; }
+    sc_core::sc_time getRemainingDelay() const
+      { return this->remainingDelay; }
+    void             setTimingScale(double scale)
+      { this->timingScale = scale; }
+    double           getTimingScale() const
+      { return this->timingScale; }
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -92,55 +122,45 @@ namespace SystemC_VPC { namespace Detail {
     void       setWrite( bool write ) {this->write=write;}
     bool       isWrite(  ) { return this->write;}
 
-    void setDelay(const sc_core::sc_time& delay)         {this->delay = delay;}
-    sc_core::sc_time getDelay() const                    {return this->delay;}
-    void setLatency(const sc_core::sc_time& latency)     {this->latency = latency;}
-    sc_core::sc_time getLatency() const                  {return this->latency;}
-    void setRemainingDelay(const sc_core::sc_time& delay){this->remainingDelay = delay;}
-    sc_core::sc_time getRemainingDelay() const           {return this->remainingDelay;}
-    void setTimingScale( double scale )                  {this->timingScale = scale;}
-    double getTimingScale()                              {return this->timingScale;}
-
-    int getInstanceId() const                            {return this->instanceId;}
-
-    void setFiringRule(PossibleAction *fr)
-      { this->firingRuleInterface = fr; }
-    PossibleAction *getFiringRule()
-      { return this->firingRuleInterface; }
-
-    // Adaptor getter for TaskImpl
+    // Getters forwarding to taskImpl
     int              getPriority() const;
     sc_core::sc_time getPeriod() const;
     ProcessId        getProcessId() const;
     bool             isPSM() const;
 
-    void diiExpired() { diiCallback(this); }
-    void latExpired() { latCallback(this); }
+  private:
+    friend class ObservableComponent; // To access constructor and destructor.
+
+    TaskInstanceImpl(
+        TaskImpl                                       *taskImpl
+      , Type                                            type
+      , PossibleAction                                 *firingRuleInterface
+      , std::function<void (TaskInstanceImpl *)> const &diiCallback
+      , std::function<void (TaskInstanceImpl *)> const &latCallback);
 
     ~TaskInstanceImpl();
-  private:
+
     static int globalInstanceId;
 
-    int instanceId;
+    int             instanceId;
+    TaskImpl       *taskImpl;
+    Type            type; /// Type of task instance, i.e., action, guard, or message.
+    PossibleAction *firingRuleInterface;
 
     std::function<void (TaskInstanceImpl *)> const diiCallback;
     std::function<void (TaskInstanceImpl *)> const latCallback;
 
+    // Timings
+    sc_core::sc_time delay;
+    sc_core::sc_time latency;
+    sc_core::sc_time remainingDelay;
+    double           timingScale;
+
+    // JF: Other stuff I still don't understand
     VPCEvent::Ptr blockingCompute;
     bool       blockAck;
     bool       exec;
     bool       write;
-
-    sc_core::sc_time delay;
-    sc_core::sc_time latency;
-    sc_core::sc_time remainingDelay;
-    
-    TaskImpl *taskImpl;
-
-    std::string name;
-    double timingScale;
-
-    PossibleAction *firingRuleInterface;
   };
 
   typedef std::map<int, TaskInstanceImpl*>  TaskMap;

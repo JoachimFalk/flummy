@@ -104,8 +104,13 @@ namespace SystemC_VPC { namespace Detail {
     int getRouteId() const
       { return routeId; }
 
+    ///
+    /// Interface used by Configuration::finalize(), which is run at end of elaboration.
+    ///
+
     void setPortInterface(PortInInterface  *port);
     void setPortInterface(PortOutInterface *port);
+    virtual void finalize() = 0;
 
     Route       *getRoute() {
       // Pointer magic. Shift our this pointer

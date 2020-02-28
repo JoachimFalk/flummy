@@ -94,6 +94,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     void start(size_t quantitiy, void *userData, CallBack completed);
 
+    void finalize();
+
     ///
     /// Other stuff
     ///
@@ -110,9 +112,11 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
         return reinterpret_cast<std::list<HopImpl *> &>(childHops);
       }
 
-      TaskImpl             *taskImpl;
+      TaskImpl                        *taskImpl;
       std::vector<ChannelInterface *>  destinations;
     };
+
+    void recurseHop(HopImpl *hopImpl);
 
     HopImpl                    *firstHopImpl;
 

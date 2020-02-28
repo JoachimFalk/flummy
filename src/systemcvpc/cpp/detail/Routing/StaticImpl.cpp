@@ -72,8 +72,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 #endif //NDEBUG
       parentImpl.getChildHops().push_back(&hopImpl);
     }
-    hopImpl.taskImpl = hopImpl.getComponent()->createTask(getName());
-    hopImpl.taskImpl->setPriority(hopImpl.getPriority());
     return &hopImpl;
   }
 
@@ -100,6 +98,17 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     size_t bytes = sizeof(MessageInstance) + sizeof(HopImpl *)*(getDestinations().size()-1);
 
     new(allocate(bytes)) MessageInstance(this, quantitiy, userData, completed);
+  }
+
+  void StaticImpl::recurseHop(HopImpl *hopImpl) {
+    hopImpl->taskImpl = hopImpl->getComponent()->createTask(getName());
+    hopImpl->taskImpl->setPriority(hopImpl->getPriority());
+    for (HopImpl *childHop : hopImpl->getChildHops())
+      recurseHop(childHop);
+  }
+
+  void StaticImpl::finalize() {
+    recurseHop(firstHopImpl);
   }
 
   void StaticImpl::MessageInstance::startHop(size_t hop) {

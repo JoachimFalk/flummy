@@ -149,7 +149,7 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void NonPreemptiveComponent::addTask(TaskInstanceImpl *newReadyTask) {
-    releaseTask(newReadyTask->getTask(), newReadyTask);
+    releaseTaskInstance(newReadyTask);
     this->newReadyTask(newReadyTask);
     ++readyTasks;
     //awake scheduler thread

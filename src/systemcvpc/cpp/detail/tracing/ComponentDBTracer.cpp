@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,9 +34,9 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/Component.hpp>
-
-#include "ComponentTracerIf.hpp"
+#include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/ComponentTracer.hpp>
+#include <systemcvpc/Extending/ComponentTracerIf.hpp>
 
 #include <sys/socket.h>
 #include <netdb.h>
@@ -49,23 +49,37 @@ namespace SystemC_VPC {
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-  class ComponentDBTracer: public ComponentTracerIf {
+  class ComponentDBTracer
+    : public Extending::ComponentTracerIf
+    , public ComponentTracer
+  {
   public:
     ComponentDBTracer(Component const *component);
 
-    TTask         *registerTask(std::string const &name);
+    ///
+    /// Implement interface for ComponentTracerIf
+    ///
 
-    TTaskInstance *release(TTask *ttask);
+    void componentOperation(ComponentOperation co
+      , Component const &c);
 
-    void           assign(TTaskInstance *ttaskInstance);
+    void taskOperation(TaskOperation to
+      , Component const &c
+      , Task      const &t
+      , OTask           &ot);
 
-    void           resign(TTaskInstance *ttaskInstance);
+    void taskInstanceOperation(TaskInstanceOperation tio
+      , Component    const &c
+      , TaskInstance const &ti
+      , OTask              &ot
+      , OTaskInstance      &oti);
 
-    void           block(TTaskInstance *ttaskInstance);
+    ///
+    /// Implement interface for ComponentTracer
+    ///
 
-    void           finishDii(TTaskInstance *ttaskInstance);
+    bool addAttribute(AttributePtr attr);
 
-    void           finishLatency(TTaskInstance *ttaskInstance);
   private:
     class DataBaseProxy;
     class DBTask;
@@ -74,7 +88,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     static RegisterMe registerMe;
 
-    void addEvent(TTaskInstance const *ttaskInstance_, char const *state);
+    void addEvent(DBTaskInstance &dbTaskInstance, char const *state);
     DataBaseProxy &dbProxy_;
     std::string    resourceName_;
   };
@@ -156,7 +170,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     fprintf(socket_, "CLOSE\r\n");
   }
 
-  class ComponentDBTracer::DBTask: public TTask {
+  class ComponentDBTracer::DBTask: public OTask {
   public:
     DBTask(std::string const &name)
       : name(name) {}
@@ -166,7 +180,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~DBTask() {}
   };
 
-  class ComponentDBTracer::DBTaskInstance: public TTaskInstance {
+  class ComponentDBTracer::DBTaskInstance: public OTaskInstance {
   public:
     DBTaskInstance(DBTask *dbTask)
       : dbTask(dbTask), instanceId(instanceIdCounter++) {}
@@ -190,42 +204,92 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   size_t ComponentDBTracer::DBTaskInstance::instanceIdCounter = 0;
 
   ComponentDBTracer::ComponentDBTracer(Component const *component)
-    : dbProxy_(DataBaseProxy::getDataBaseProxy())
+    : Extending::ComponentTracerIf(
+          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
+          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
+        , sizeof(DBTask), sizeof(DBTaskInstance))
+    , ComponentTracer(
+         reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
+         reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
+       , "DB")
+    , dbProxy_(DataBaseProxy::getDataBaseProxy())
     , resourceName_(component->getName()) {}
 
-  TTask         *ComponentDBTracer::registerTask(std::string const &name)
-    { return new DBTask(name); }
-
-  TTaskInstance *ComponentDBTracer::release(TTask *ttask) {
-    TTaskInstance *ttaskInstance =
-        new DBTaskInstance(static_cast<DBTask *>(ttask));
-    this->addEvent(ttaskInstance, "s");
-    return ttaskInstance;
+  void ComponentDBTracer::componentOperation(ComponentOperation co
+    , Component const &c) {
+    // Ignore
   }
 
-  void ComponentDBTracer::finishDii(TTaskInstance *ttaskInstance)
-    { this->addEvent(ttaskInstance, "d"); }
+  void ComponentDBTracer::taskOperation(TaskOperation to
+    , Component const &c
+    , Task      const &t
+    , OTask           &ot)
+  {
+    DBTask &dbTask = static_cast<DBTask &>(ot);
 
-  void ComponentDBTracer::finishLatency(TTaskInstance *ttaskInstance)
-    { this->addEvent(ttaskInstance, "l"); }
+    if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
+        TaskOperation::ALLOCATE) {
+      new (&dbTask) DBTask(t.getName());
+    }
+    if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
+        TaskOperation::DEALLOCATE) {
+      dbTask.~DBTask();
+    }
+  }
 
-  void ComponentDBTracer::assign(TTaskInstance *ttaskInstance)
-    { this->addEvent(ttaskInstance, "a"); }
+  void ComponentDBTracer::taskInstanceOperation(TaskInstanceOperation tio
+    , Component    const &c
+    , TaskInstance const &ti
+    , OTask              &ot
+    , OTaskInstance      &oti)
+  {
+    DBTask         &dbTask         = static_cast<DBTask &>(ot);
+    DBTaskInstance &dbTaskInstance = static_cast<DBTaskInstance &>(oti);
 
-  void ComponentDBTracer::resign(TTaskInstance *ttaskInstance)
-    { this->addEvent(ttaskInstance, "r"); }
+    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
+        TaskInstanceOperation::ALLOCATE) {
+      new (&dbTaskInstance) DBTaskInstance(&dbTask);
+    }
 
-  void ComponentDBTracer::block(TTaskInstance *ttaskInstance)
-    { this->addEvent(ttaskInstance, "b"); }
+    switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
+      case TaskInstanceOperation::RELEASE:
+        this->addEvent(dbTaskInstance, "s");
+        break;
+      case TaskInstanceOperation::ASSIGN:
+        this->addEvent(dbTaskInstance, "a");
+        break;
+      case TaskInstanceOperation::RESIGN:
+        this->addEvent(dbTaskInstance, "r");
+        break;
+      case TaskInstanceOperation::BLOCK:
+        this->addEvent(dbTaskInstance, "b");
+        break;
+      case TaskInstanceOperation::FINISHDII:
+        this->addEvent(dbTaskInstance, "d");
+        break;
+      case TaskInstanceOperation::FINISHLAT:
+        this->addEvent(dbTaskInstance, "l");
+        break;
+      default:
+        break;
+    }
 
-  void ComponentDBTracer::addEvent(TTaskInstance const *ttaskInstance_, char const *state) {
-    DBTaskInstance const *ttaskInstance = static_cast<DBTaskInstance const *>(ttaskInstance_);
+    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
+        TaskInstanceOperation::DEALLOCATE) {
+      dbTaskInstance.~DBTaskInstance();
+    }
+  }
 
+  bool ComponentDBTracer::addAttribute(AttributePtr attr) {
+    throw ConfigException("The DB tracer does not support attributes!");
+  }
+
+  void ComponentDBTracer::addEvent(DBTaskInstance &dbTaskInstance, char const *state) {
     dbProxy_.addEvent(resourceName_.c_str(),
-        ttaskInstance->dbTask->name.c_str(),
+        dbTaskInstance.dbTask->name.c_str(),
         state,
         sc_core::sc_time_stamp().value(),
-        ttaskInstance->instanceId);
+        dbTaskInstance.instanceId);
   }
 
 } } } // namespace SystemC_VPC::Detail::Tracing

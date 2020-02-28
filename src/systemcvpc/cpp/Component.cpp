@@ -35,6 +35,8 @@
  */
 
 #include <systemcvpc/Component.hpp>
+#include <systemcvpc/ComponentObserver.hpp>
+#include <systemcvpc/ComponentTracer.hpp>
 #include <systemcvpc/Scheduler.hpp>
 #include <systemcvpc/Timing.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
@@ -108,7 +110,8 @@ double           Component::getPowerConsumption() const {
 }
 
 void Component::addTracer(const char *tracer) {
-  static_cast<Detail::AbstractComponent *>(this)->addTracer(tracer, this);
+  static_cast<Detail::AbstractComponent *>(this)->
+      addObserver(createComponentTracer(tracer, this)->getImpl());
 }
 
 //
@@ -154,7 +157,7 @@ void Component::addAttribute(AttributePtr attribute) {
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
     // FIXME: add transactionSize
   } else if (attribute->isType("tracing")) {
-    static_cast<Detail::AbstractComponent *>(this)->addTracer(attribute->getValue().c_str(), this);
+    addTracer(attribute->getValue().c_str());
   } else if (attribute->isType("execModel")) {
     ExecModel::Ptr execModel = createExecModel(attribute->getValue().c_str());
     for(size_t i=0; i<attribute->getAttributeSize();++i) {

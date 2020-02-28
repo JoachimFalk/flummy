@@ -44,14 +44,13 @@
 #include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/PowerMode.hpp>
 
-#include "tracing/TraceableComponent.hpp"
 #include "TaskInstanceImpl.hpp"
 #include "PowerSumming.hpp"
 #include "PluggablePowerGovernor.hpp"
-#include "timetriggered/tt_support.hpp"
 #include "TaskImpl.hpp"
 #include "SequentiallyIdedObject.hpp"
 #include "AbstractExecModel.hpp"
+#include "ObservableComponent.hpp"
 
 #include "config.h"
 
@@ -68,7 +67,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "ObservableComponent.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -83,7 +81,6 @@ namespace SystemC_VPC { namespace Detail {
     : public sc_core::sc_module
     , public SystemC_VPC::Component
     , public SystemC_VPC::ComponentInterface
-    , public Tracing::TraceableComponent
     , public ObservableComponent
     , private SequentiallyIdedObject
     , private smoc::SimulatorAPI::SchedulerInterface
@@ -96,9 +93,6 @@ namespace SystemC_VPC { namespace Detail {
     ///
     /// Handle interfaces for SystemC_VPC::Component
     ///
-
-    // For resolving ambiguity
-    using Tracing::TraceableComponent::addTracer;
 
     /// Realize debug file interface from SystemC_VPC::Component with
     /// a default unsupported implementation.
@@ -153,26 +147,17 @@ namespace SystemC_VPC { namespace Detail {
     virtual bool closeStream(ProcessId pid);
 
     ///
-    /// Other stuff
+    /// Interface used by Configuration::finalize(), which is run at end of elaboration.
     ///
-
-    /**
-     * \brief Create a task.
-     * The task must not previously exist.
-     */
-    TaskImpl *createTask(std::string const &taskName);
 
     void registerTask(TaskInterface *task);
 
     void registerFiringRule(
         TaskInterface *task, PossibleAction *fr);
 
-    /**
-     * \brief Get a task for a pid.
-     * The task must previously have been created via createTask.
-     */
-    //TaskImpl *getTask(ProcessId const pid) const;
-
+    ///
+    /// Other stuff
+    ///
 
     void requestCanExecute();
 
@@ -219,18 +204,25 @@ namespace SystemC_VPC { namespace Detail {
   protected:
     AbstractComponent(std::string const &name);
 
-    void end_of_elaboration();
+    /// Called once per actor firing to indicate that the task instance is ready to execute on resource.
+    void releaseTaskInstance(TaskInstanceImpl *ti);
+
+    /// Called possibly multiple times to assign the task instance to the resource.
+    void assignTaskInstance(TaskInstanceImpl *ti);
+
+    /// Called possibly multiple times to resign the task instance from the resource.
+    void resignTaskInstance(TaskInstanceImpl *ti);
+
+    /// Called possibly multiple times to indicate that the task is blocked waiting for something.
+    void blockTaskInstance(TaskInstanceImpl *ti);
 
     /// Called once per actor firing to indicate that the DII of the task instance is over.
-    void finishDiiTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard = false);
+    void finishDiiTaskInstance(TaskInstanceImpl *ti);
 
     /// Called once per actor firing to indicate that the latency of the task instance is over.
-    void finishLatencyTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard = false);
+    void finishLatencyTaskInstance(TaskInstanceImpl *ti);
 
     void fireStateChanged(ComponentState state);
-
-    typedef boost::shared_ptr<TaskImpl>        TaskImplPtr;
-    typedef std::map<ProcessId, TaskImplPtr>   TaskPool;
 
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
     bool requestExecuteTasks;
@@ -243,29 +235,21 @@ namespace SystemC_VPC { namespace Detail {
       Factories;
     static Factories factories;
 
-    /**
-     *
-     */
-    const TaskPool& getTaskPool() const {
-      return this->taskPool;
-    }
-
     bool requestShutdown();
 
     virtual ~AbstractComponent();
   private:
     class InputsAvailableListener;
 
-    /// Implement interface to SysteMoC
+    /// Implement SchedulerInterface for SysteMoC
     void checkFiringRule(TaskInterface *task, PossibleAction *fr);
 
-    /// Implement interface to SysteMoC
+    /// Implement SchedulerInterface for SysteMoC
     void executeFiringRule(TaskInterface *task, PossibleAction *fr);
 
     void loadLocalGovernorPlugin(std::string plugin);
 
     std::string componentName;
-    TaskPool taskPool;
     bool canExecuteTasks;
     sc_core::sc_time shutdownRequestAtTime;
     VPCEvent::Ptr componentWakeup;

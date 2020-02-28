@@ -35,7 +35,6 @@
  */
 
 #include "RoundRobinComponent.hpp"
-#include "../tracing/ComponentTracerIf.hpp"
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -97,10 +96,10 @@ void RoundRobinComponent::setActivationCallback(bool flag) {
 
 void RoundRobinComponent::end_of_elaboration() {
   this->AbstractComponent::end_of_elaboration();
-  TaskPool const &taskPool = getTaskPool();
-  for (TaskPool::const_iterator it=taskPool.begin(); it!=taskPool.end(); ++it) {
-    if (it->second->hasScheduledTask()) {
-      TaskInterface *scheduledTask = it->second->getScheduledTask();
+  Tasks const &tasks = getTasks();
+  for (TaskImpl *taskImpl : tasks) {
+    if (taskImpl->hasScheduledTask()) {
+      TaskInterface *scheduledTask = taskImpl->getScheduledTask();
       scheduledTask->setUseActivationCallback(false);
       taskList.push_back(scheduledTask);
     }
@@ -120,7 +119,7 @@ void RoundRobinComponent::compute(TaskInstanceImpl *actualTask) {
     assert(!useActivationCallback);
     scheduleMessageTasks();
     this->actualTask = actualTask;
-    releaseTask(actualTask->getTask(), actualTask);
+    releaseTaskInstance(actualTask);
     assignTaskInstance(actualTask);
     std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
     wait(actualTask->getDelay());
@@ -134,14 +133,14 @@ void RoundRobinComponent::compute(TaskInstanceImpl *actualTask) {
 
 void RoundRobinComponent::check(TaskInstanceImpl *actualTask) {
   if (!useActivationCallback) {
-    releaseTask(actualTask->getTask(), actualTask);
+    releaseTaskInstance(actualTask);
     assignTaskInstance(actualTask);
         std::cout << "check: " << actualTask->getName() << "@"
             << sc_core::sc_time_stamp() << " with delay "
             << actualTask->getDelay() << std::endl;
     wait(actualTask->getDelay());
-    finishDiiTaskInstance(actualTask, true);
-    finishLatencyTaskInstance(actualTask, true);
+    finishDiiTaskInstance(actualTask);
+    finishLatencyTaskInstance(actualTask);
   }
 }
 
@@ -185,7 +184,7 @@ bool RoundRobinComponent::scheduleMessageTasks() {
     TaskInstanceImpl *messageTask = readyMsgTasks.front();
     readyMsgTasks.pop_front();
     assert(!messageTask->getTask()->hasScheduledTask());
-    releaseTask(messageTask->getTask(), messageTask);
+    releaseTaskInstance(messageTask);
     assignTaskInstance(messageTask);
     /// This will setup the trigger for schedule_method to be called
     /// again when the task execution time is over.

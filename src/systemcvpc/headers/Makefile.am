@@ -25,9 +25,20 @@ include $(auxdir)/jfrules.mk
 SUBDIRS=
 
 nobase_include_HEADERS = \
+	systemcvpc/ExecModelling/LookupPowerTimeModel.hpp \
+	\
+	systemcvpc/Extending/ComponentObserverIf.hpp \
+	systemcvpc/Extending/ComponentTracerIf.hpp \
+	systemcvpc/Extending/Task.hpp \
+	systemcvpc/Extending/TaskInstance.hpp \
+	\
+	systemcvpc/Routing/Ignore.hpp \
+	systemcvpc/Routing/Static.hpp \
+	\
 	systemcvpc/Attribute.hpp \
 	systemcvpc/Component.hpp \
 	systemcvpc/ComponentObserver.hpp \
+	systemcvpc/ComponentTracer.hpp \
 	systemcvpc/ConfigException.hpp \
 	systemcvpc/datatypes.hpp \
 	systemcvpc/EventPair.hpp \
@@ -36,15 +47,13 @@ nobase_include_HEADERS = \
 	systemcvpc/PossibleAction.hpp \
 	systemcvpc/PowerMode.hpp \
 	systemcvpc/Route.hpp \
-	systemcvpc/Routing/Ignore.hpp \
-	systemcvpc/Routing/Static.hpp \
 	systemcvpc/ScheduledTask.hpp \
 	systemcvpc/Scheduler.hpp \
 	systemcvpc/Timing.hpp \
 	systemcvpc/TimingModifier.hpp \
 	systemcvpc/VpcApi.hpp \
-	systemcvpc/vpc_config.h \
 	systemcvpc/VPCEvent.hpp \
 	systemcvpc/VpcTask.hpp \
+	\
 	vpc_api.hpp \
 	vpc.hpp

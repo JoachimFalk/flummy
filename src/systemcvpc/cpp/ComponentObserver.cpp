@@ -34,64 +34,33 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
-#define _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
+#include <systemcvpc/ComponentObserver.hpp>
+#include <systemcvpc/Extending/ComponentObserverIf.hpp>
 
-#include "Attribute.hpp"
-
-#include <boost/intrusive_ptr.hpp>
-
-namespace SystemC_VPC { namespace Extending {
-
-  class ComponentObserverIf;
-
-} } // namespace SystemC_VPC::Extending
+#include <string.h>
 
 namespace SystemC_VPC {
 
-  class Component;
-  class ComponentObserver;
-
-  void intrusive_ptr_add_ref(ComponentObserver *p);
-  void intrusive_ptr_release(ComponentObserver *p);
-
-  class ComponentObserver {
-    typedef ComponentObserver this_type;
-
-    friend void intrusive_ptr_add_ref(this_type *p); // for getImpl
-    friend void intrusive_ptr_release(this_type *p); // for getImpl
-    friend class Component; // for getImpl
-  public:
-    typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type const> ConstPtr;
-
-    virtual bool addAttribute(AttributePtr attr) = 0;
-
-    const char *getType() const
-      { return type; }
-  protected:
-    ComponentObserver(int implAdj, const char *type)
-      : implAdj(implAdj), type(type) {}
-
-    virtual ~ComponentObserver();
-  private:
-    Extending::ComponentObserverIf       *getImpl();
-    Extending::ComponentObserverIf const *getImpl() const
-      { return const_cast<this_type *>(this)->getImpl(); }
-  private:
-    int         implAdj;
-    const char *type;
-  };
-
-  ComponentObserver::Ptr createComponentObserver(const char *type);
-
-  template <typename OBSERVER>
-  typename OBSERVER::Ptr
-  createComponentObserver() {
-    return boost::static_pointer_cast<OBSERVER>(
-        createComponentObserver(OBSERVER::Type));
+  Extending::ComponentObserverIf *ComponentObserver::getImpl() {
+    // Pointer magic. Shift our this pointer
+    // so that it points to the Extending::ComponentObserverIf
+    // base class of our real implementation.
+    return reinterpret_cast<Extending::ComponentObserverIf *>(
+        reinterpret_cast<char *>(this) + implAdj);
   }
 
-} // namespace SystemC_VPC
+  void intrusive_ptr_add_ref(ComponentObserver *p) {
+    p->getImpl()->add_ref();
+  }
 
-#endif /* _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP */
+  void intrusive_ptr_release(ComponentObserver *p) {
+    if (p->getImpl()->del_ref())
+      delete p;
+  }
+
+  ComponentObserver::~ComponentObserver() {
+  }
+
+  // For createComponentObserver look into ComponentObserverIf.cpp
+
+} // namespace SystemC_VPC

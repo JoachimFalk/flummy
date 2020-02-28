@@ -63,6 +63,7 @@ lib_LTLIBRARIES = libsystemcvpc.la
 libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/Attribute.cpp \
 	src/systemcvpc/cpp/Component.cpp \
+	src/systemcvpc/cpp/ComponentObserver.cpp \
 	src/systemcvpc/cpp/ExecModel.cpp \
 	src/systemcvpc/cpp/PowerMode.cpp \
 	src/systemcvpc/cpp/Route.cpp \
@@ -72,6 +73,9 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/VpcTask.cpp \
 	\
 	src/systemcvpc/cpp/ExecModelling/LookupPowerTimeModel.cpp \
+	\
+	src/systemcvpc/cpp/Extending/ComponentObserverIf.cpp \
+	src/systemcvpc/cpp/Extending/ComponentTracerIf.cpp \
 	\
 	src/systemcvpc/cpp/Routing/Ignore.cpp \
 	src/systemcvpc/cpp/Routing/Static.cpp \
@@ -105,9 +109,7 @@ libsystemcvpc_la_SOURCES = \
 	\
 	src/systemcvpc/cpp/detail/tracing/ComponentDBTracer.cpp \
 	src/systemcvpc/cpp/detail/tracing/ComponentPajeTracer.cpp \
-	src/systemcvpc/cpp/detail/tracing/ComponentTracerIf.cpp \
 	src/systemcvpc/cpp/detail/tracing/ComponentVCDTracer.cpp \
-	src/systemcvpc/cpp/detail/tracing/TraceableComponent.cpp \
 	\
 	src/systemcvpc/cpp/detail/AbstractComponent.cpp \
 	src/systemcvpc/cpp/detail/AbstractExecModel.cpp \

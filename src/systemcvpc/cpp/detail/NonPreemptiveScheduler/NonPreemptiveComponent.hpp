@@ -49,7 +49,6 @@
 #include "../PowerSumming.hpp"
 #include "../TaskInstanceImpl.hpp"
 #include "../Director.hpp"
-#include "../tracing/ComponentTracerIf.hpp"
 #include "../timetriggered/tt_support.hpp"
 
 #include <vector>

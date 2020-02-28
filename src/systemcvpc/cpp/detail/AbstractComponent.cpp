@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -51,8 +51,6 @@
 
 #include "dynload/dll.hpp"
 #include "PluggablePowerGovernor.hpp"
-
-#include "tracing/ComponentTracerIf.hpp"
 
 #include "ConfigCheck.hpp"
 
@@ -213,39 +211,8 @@ namespace SystemC_VPC { namespace Detail {
     , powerMode(PowerMode::DEFAULT)
     , compState(ComponentState::IDLE)
     , powerConsumption(0)
-  {
-//  if(powerTables.find(getPowerMode()) == powerTables.end()){
-//    powerTables[getPowerMode()] = PowerTable();
-//  }
-//
-//  PowerTable &powerTable=powerTables[getPowerMode()];
-//  powerTable[ComponentState::IDLE]    = 0.0;
-//  powerTable[ComponentState::RUNNING] = 1.0;
-  }
+    {}
 
-
-  void AbstractComponent::end_of_elaboration() {
-    sc_core::sc_module::end_of_elaboration();
-    startTracing();
-  }
-
-  /**
-   * \brief Create the process control block.
-   */
-  TaskImpl *AbstractComponent::createTask(std::string const &taskName) {
-    TaskImpl *taskImpl = new TaskImpl(this, taskName);
-    sassert(taskPool.insert(std::make_pair(
-        taskImpl->getPid(),
-        TaskImplPtr(taskImpl))).second);
-    this->TraceableComponent::registerTask(taskImpl, taskName);
-    return taskImpl;
-  }
-
-/*TaskImpl *AbstractComponent::getTask(ProcessId const pid) const {
-    TaskPool::const_iterator iter = taskPool.find(pid);
-    assert(iter != taskPool.end());
-    return iter->second.get();
-  }*/
 
   void AbstractComponent::setExecModel(AbstractExecModel *model) {
     assert(execModelComponentState == nullptr);
@@ -256,9 +223,7 @@ namespace SystemC_VPC { namespace Detail {
   void AbstractComponent::registerTask(TaskInterface *task) {
     // This should be the first time the actor appeared here.
     VpcTask::Ptr         vpcTask = SystemC_VPC::getTask(static_cast<ScheduledTask &>(*task));
-    TaskImpl *taskImpl = this->createTask(task->name());
-    taskImpl->setScheduledTask(task);
-//  taskImpl->configure(task->name(), true);
+    TaskImpl *taskImpl = this->createTask(task);
     taskImpl->setPriority(vpcTask->getPriority());
     taskImpl->setTaskIsPSM(vpcTask->isPSM());
     task->setScheduler(this);
@@ -276,23 +241,20 @@ namespace SystemC_VPC { namespace Detail {
 
     TaskImpl *taskImpl = getTaskOfTaskInterface(task);
     std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
-    TaskInstanceImpl taskInstance(none, none);
-    taskInstance.setTask(taskImpl);
-    taskInstance.setFiringRule(fr);
-    taskInstance.setName(task->name()+std::string("_check"));
-    getExecModel()->initTaskInstance(execModelComponentState, ai, &taskInstance, true);
-    this->check(&taskInstance);
+
+    TaskInstanceImpl *taskInstanceImpl = createTaskInstance(taskImpl
+        , TaskInstanceImpl::Type::GUARD, fr,  none, none);
+    getExecModel()->initTaskInstance(execModelComponentState, ai, taskInstanceImpl, true);
+    this->check(taskInstanceImpl);
   }
 
   class AbstractComponent::InputsAvailableListener {
   public:
-    InputsAvailableListener(
-        TaskInterface                           *task,
-        PossibleAction *fr)
-      : task(task), fr(fr)
+    InputsAvailableListener(TaskInstanceImpl *taskInstanceImpl)
+      : taskInstanceImpl(taskInstanceImpl)
       // We start with one more, i.e., +1, to ensure that
       // arrived does not call compute before wait is called!
-      , missing(fr->getPortInInfos().size()+1) {}
+      , missing(taskInstanceImpl->getFiringRule()->getPortInInfos().size()+1) {}
 
     void wait() {
       if (!--missing)
@@ -304,38 +266,36 @@ namespace SystemC_VPC { namespace Detail {
         compute();
     }
   private:
-    TaskInterface  *task;
-    PossibleAction *fr;
-    size_t          missing;
+    TaskInstanceImpl *taskInstanceImpl;
+    size_t            missing;
 
     void compute() {
+      TaskImpl          *taskImpl = taskInstanceImpl->getTask();
+      assert(taskImpl != NULL);
+      TaskInterface     *task     = taskImpl->getScheduledTask();
+      assert(task != NULL);
+      AbstractComponent *comp     = static_cast<AbstractComponent *>(task->getScheduler());
+      PossibleAction    *fr       = taskInstanceImpl->getFiringRule();
+      assert(fr != NULL);
       AbstractExecModel::ActionInfo *ai =
           static_cast<AbstractExecModel::ActionInfo *>(fr->getSchedulerInfo());
-      AbstractComponent   *comp  = static_cast<AbstractComponent *>(task->getScheduler());
-      TaskImpl *taskImpl   = getTaskOfTaskInterface(task);
 
-      assert(taskImpl != NULL);
-
-      std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
-      TaskInstanceImpl *taskInstance = new TaskInstanceImpl(none, none);
-      taskInstance->setTask(taskImpl);
-      taskInstance->setFiringRule(fr);
-      taskInstance->setName(task->name());
-
-      comp->getExecModel()->initTaskInstance(comp->execModelComponentState, ai, taskInstance);
-      comp->compute(taskInstance);
+      comp->getExecModel()->initTaskInstance(comp->execModelComponentState, ai, taskInstanceImpl);
+      comp->compute(taskInstanceImpl);
       delete this;
     }
   };
 
   void AbstractComponent::executeFiringRule(TaskInterface *task, PossibleAction *fr) {
+    std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
 
-    typedef PossibleAction::PortInInfo             PortInInfo;
-    typedef PossibleAction::PortOutInfo            PortOutInfo;
+    TaskImpl         *taskImpl = getTaskOfTaskInterface(task);
+    TaskInstanceImpl *taskInstanceImpl = createTaskInstance(taskImpl
+        , TaskInstanceImpl::Type::ACTION, fr, none, none);
 
-    InputsAvailableListener *ial = new InputsAvailableListener(task, fr);
+    InputsAvailableListener *ial = new InputsAvailableListener(taskInstanceImpl);
 
-    for (PortInInfo const &portInfo : fr->getPortInInfos()) {
+    for (PossibleAction::PortInInfo const &portInfo : fr->getPortInInfos()) {
       portInfo.port.commStart(portInfo.consumed);
       AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
       route->start<InputsAvailableListener>(portInfo.required, ial,
@@ -343,7 +303,7 @@ namespace SystemC_VPC { namespace Detail {
             ial->arrived();
           });
     }
-    for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
+    for (PossibleAction::PortOutInfo const &portInfo : fr->getPortOutInfos()) {
       portInfo.port.commStart(portInfo.produced);
     }
     ial->wait();
@@ -356,9 +316,8 @@ namespace SystemC_VPC { namespace Detail {
   {
     assert(taskImpl != NULL);
     std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
-    TaskInstanceImpl *taskInstance = new TaskInstanceImpl(none, cb);
-    taskInstance->setTask(taskImpl);
-    taskInstance->setName(taskImpl->getName());
+    TaskInstanceImpl *taskInstance = createTaskInstance(taskImpl
+        , TaskInstanceImpl::Type::MESSAGE, nullptr, none, cb);
     taskInstance->setTimingScale(quantum);
     // FIXME: Timing independent of power mode at the moment!
     taskInstance->setDelay(quantum * transferTiming.getDii());
@@ -368,46 +327,66 @@ namespace SystemC_VPC { namespace Detail {
     return taskInstance;
   }
 
+  /// Called once per actor firing to indicate that the task instance is ready to execute on resource.
+  void AbstractComponent::releaseTaskInstance(TaskInstanceImpl *ti) {
+    this->taskInstanceOperation(TaskInstanceOperation::RELEASE
+        , *this, *ti);
+  }
+
+  /// Called possibly multiple times to assign the task instance to the resource.
+  void AbstractComponent::assignTaskInstance(TaskInstanceImpl *ti) {
+    this->taskInstanceOperation(TaskInstanceOperation::ASSIGN
+        , *this, *ti);
+  }
+
+  /// Called possibly multiple times to resign the task instance from the resource.
+  void AbstractComponent::resignTaskInstance(TaskInstanceImpl *ti) {
+    this->taskInstanceOperation(TaskInstanceOperation::RESIGN
+        , *this, *ti);
+  }
+
+  /// Called possibly multiple times to indicate that the task is blocked waiting for something.
+  void AbstractComponent::blockTaskInstance(TaskInstanceImpl *ti) {
+    this->taskInstanceOperation(TaskInstanceOperation::BLOCK
+        , *this, *ti);
+  }
+
   /// Called once per actor firing to indicate that the DII of the task instance is over.
-  void AbstractComponent::finishDiiTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard) {
-    this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
+  void AbstractComponent::finishDiiTaskInstance(TaskInstanceImpl *ti) {
+//  this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
+    ti->diiExpired();
 
-    taskInstance->diiExpired();
-
-    if (isGuard)
-      return;
-
-    typedef PossibleAction::PortInInfo         PortInInfo;
-
-    if (PossibleAction *fr = taskInstance->getFiringRule()) {
-      for (PortInInfo const &portInfo : fr->getPortInInfos()) {
+    if (ti->getType() == TaskInstanceImpl::Type::ACTION) {
+      PossibleAction *fr = ti->getFiringRule();
+      assert(fr != nullptr);
+      for (PossibleAction::PortInInfo const &portInfo : fr->getPortInInfos()) {
         portInfo.port.getSource()->commFinish(portInfo.consumed);
       }
     }
+    this->taskInstanceOperation(TaskInstanceOperation::FINISHDII
+        , *this, *ti);
   }
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
-  void AbstractComponent::finishLatencyTaskInstance(TaskInstanceImpl *taskInstance, bool isGuard) {
+  void AbstractComponent::finishLatencyTaskInstance(TaskInstanceImpl *ti) {
     // Remember last acknowledged task time
     Director::getInstance().end = sc_core::sc_time_stamp();
-    this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);
-    taskInstance->latExpired();
+//  this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);
+    ti->latExpired();
 
-    if (isGuard)
-      return;
-
-//  typedef smoc::SimulatorAPI::ChannelSinkInterface ChannelSinkInterface;
-    typedef PossibleAction::PortOutInfo         PortOutInfo;
-
-    if (PossibleAction *fr = taskInstance->getFiringRule()) {
-      for (PortOutInfo const &portInfo : fr->getPortOutInfos()) {
+    if (ti->getType() == TaskInstanceImpl::Type::ACTION) {
+      PossibleAction *fr = ti->getFiringRule();
+      assert(fr != nullptr);
+      for (PossibleAction::PortOutInfo const &portInfo : fr->getPortOutInfos()) {
         AbstractRoute *route = getAbstractRouteOfPort(portInfo.port);
         route->start<void>(portInfo.produced, nullptr, [](void *, size_t n, smoc::SimulatorAPI::ChannelSinkInterface *out) {
             out->commFinish(n);
           });
       }
     }
-    delete taskInstance;
+    // This may deallocate tII
+    this->taskInstanceOperation(TaskInstanceOperation::FINISHLAT
+        , *this, *ti);
   }
 
   void AbstractComponent::fireStateChanged(ComponentState state)

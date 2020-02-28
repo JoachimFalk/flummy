@@ -34,64 +34,53 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
-#define _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
+#include <systemcvpc/Extending/ComponentTracerIf.hpp>
+#include <systemcvpc/ConfigException.hpp>
 
-#include "Attribute.hpp"
+#include <string>
+#include <map>
+#include <functional>
+#include <stdexcept>
 
-#include <boost/intrusive_ptr.hpp>
+namespace {
+
+  typedef std::map<
+      std::string,
+      std::function<SystemC_VPC::Extending::ComponentTracerIf *(SystemC_VPC::Component const *)>
+    > TracerByName;
+
+  /// We need this to be independent from the global variable initialization order.
+  static TracerByName &getTracerByName() {
+    static TracerByName tracerByName;
+    return tracerByName;
+  }
+
+}
 
 namespace SystemC_VPC { namespace Extending {
 
-  class ComponentObserverIf;
+  void ComponentTracerIf::registerTracer(
+      const char                           *type,
+      std::function<ComponentTracerIf *(Component const *)>  factory) {
+
+    TracerByName &tracerByName = getTracerByName();
+    std::pair<TracerByName::iterator, bool> status =
+        tracerByName.insert(TracerByName::value_type(type, factory));
+    if (!status.second)
+      throw  std::runtime_error("Duplicate component tracer type " + std::string(type)+"!");
+  }
 
 } } // namespace SystemC_VPC::Extending
 
 namespace SystemC_VPC {
 
-  class Component;
-  class ComponentObserver;
+  ComponentTracer::Ptr createComponentTracer(const char *type, Component const *c) {
+    TracerByName &tracerByName = getTracerByName();
 
-  void intrusive_ptr_add_ref(ComponentObserver *p);
-  void intrusive_ptr_release(ComponentObserver *p);
-
-  class ComponentObserver {
-    typedef ComponentObserver this_type;
-
-    friend void intrusive_ptr_add_ref(this_type *p); // for getImpl
-    friend void intrusive_ptr_release(this_type *p); // for getImpl
-    friend class Component; // for getImpl
-  public:
-    typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type const> ConstPtr;
-
-    virtual bool addAttribute(AttributePtr attr) = 0;
-
-    const char *getType() const
-      { return type; }
-  protected:
-    ComponentObserver(int implAdj, const char *type)
-      : implAdj(implAdj), type(type) {}
-
-    virtual ~ComponentObserver();
-  private:
-    Extending::ComponentObserverIf       *getImpl();
-    Extending::ComponentObserverIf const *getImpl() const
-      { return const_cast<this_type *>(this)->getImpl(); }
-  private:
-    int         implAdj;
-    const char *type;
-  };
-
-  ComponentObserver::Ptr createComponentObserver(const char *type);
-
-  template <typename OBSERVER>
-  typename OBSERVER::Ptr
-  createComponentObserver() {
-    return boost::static_pointer_cast<OBSERVER>(
-        createComponentObserver(OBSERVER::Type));
+    TracerByName::const_iterator iter = tracerByName.find(type);
+    if (iter == tracerByName.end())
+      throw ConfigException("No component tracer of type "+std::string(type)+" registered!");
+    return iter->second(c)->getComponentTracer();
   }
 
 } // namespace SystemC_VPC
-
-#endif /* _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP */
