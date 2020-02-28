@@ -38,6 +38,7 @@
 #define _INCLUDED_SYSTEMCVPC_EXECMODELLING_LOOKUPPOWERTIMEMODEL_HPP
 
 #include "../ExecModel.hpp"
+#include "../PowerMode.hpp"
 
 #include <map>
 
@@ -50,6 +51,9 @@ public:
   typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
   static const char *Type;
+
+  PowerMode getStartPowerMode() const;
+  void      setStartPowerMode(PowerMode const &pm);
 
 protected:
   LookupPowerTimeModel(int implAdj);

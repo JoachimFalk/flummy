@@ -35,6 +35,7 @@
  */
 
 #include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/PowerMode.hpp>
 
 #include "LookupPowerTimeModelImpl.hpp"
 
@@ -58,6 +59,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
          reinterpret_cast<char *>(static_cast<AbstractExecModel *>(this)) -
          reinterpret_cast<char *>(static_cast<ExecModel         *>(this)))
     , registeredActions(false)
+    , startPowerMode(PowerMode::DEFAULT)
     {}
 
   LookupPowerTimeModelImpl::~LookupPowerTimeModelImpl() {
@@ -67,12 +69,16 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 
   void LookupPowerTimeModelImpl::add(Timing timing) {
     assert(!registeredActions);
-    powerModeDependentTimings[timing.getPowerMode()][timing.getFunction()] = timing;
+    PowerModeInfo &pmi = powerModes[timing.getPowerMode()];
+    if (!pmi.timings.insert(std::make_pair(timing.getFunction(), timing)).second)
+      throw ConfigException("Duplicate timing information for "+timing.getFunction());
   }
 
   void LookupPowerTimeModelImpl::addDefaultActorTiming(std::string actorName, Timing timing) {
     assert(!registeredActions);
-    powerModeDependentTimings[timing.getPowerMode()][actorName] = timing;
+    PowerModeInfo &pmi = powerModes[timing.getPowerMode()];
+    if (!pmi.timings.insert(std::make_pair(actorName, timing)).second)
+      throw ConfigException("Duplicate timing information for "+actorName);
   }
 
   bool LookupPowerTimeModelImpl::addAttribute(AttributePtr attr) {
@@ -81,6 +87,30 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 //      powerAttribute = powerAtt;
 //      continue;
 //    }
+
+    if (attr->isType("startup-powermode")) {
+      startPowerMode = attr->getValue();
+      return true;
+    }
+    if (attr->isType("powermode")) {
+      PowerModeInfo &pmi = powerModes[attr->getValue()];
+      for (size_t i=0; i<attr->getAttributeSize();++i) {
+        AttributePtr emAttr = attr->getNextAttribute(i).second;
+
+        if (emAttr->isType("powerIdle")) {
+          pmi.pwrIdle = atof(emAttr->getValue().c_str());
+        } else if (emAttr->isType("powerRunning")) {
+          pmi.pwrRunning = atof(emAttr->getValue().c_str());
+        } else if (emAttr->isType("powerStalled")) {
+          pmi.pwrStalled = atof(emAttr->getValue().c_str());
+        } else {
+          throw ConfigException("Unhandled attribute " + emAttr->getType()
+              + " for power mode "+attr->getType()
+              + " in execution model "+std::string(Type));
+        }
+      }
+      return true;
+    }
 
 //    std::string powerMode = attr->getNextAttribute(i).first;
 //    const PowerMode *power = this->translatePowerMode(powerMode);
@@ -134,9 +164,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
   {
     CompState &cs = *static_cast<CompState *>(execModelComponentState);
 
-    PowerModeToIndex::const_iterator iter = powerModeToIndex.find(mode);
-    assert(iter != powerModeToIndex.end());
-    cs.powerMode = iter->second;
+    PowerModes::const_iterator iter = powerModes.find(mode);
+    assert(iter != powerModes.end());
+    cs.powerMode = iter->second.index;
   }
 
   LookupPowerTimeModelImpl::ActionInfo *LookupPowerTimeModelImpl::registerAction(
@@ -144,15 +174,21 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     , TaskInterface const           *actor
     , PossibleAction const          *action)
   {
+    CompState &cs = *static_cast<CompState *>(execModelComponentState);
+
     if (!registeredActions) {
       registeredActions = true;
-      for (PowerModeDependentTimings::value_type const &entry : powerModeDependentTimings) {
-        size_t index = powerModeToIndex.size();
-        sassert(powerModeToIndex.insert(std::make_pair(entry.first, index)).second);
-      }
+      // Fill in index information for PowerModeInfo objects.
+      size_t index = 0;
+      for (PowerModes::value_type &entry : powerModes)
+        entry.second.index = index++;
+      PowerModes::iterator iter = powerModes.find(startPowerMode);
+      if (iter == powerModes.end())
+        throw ConfigException("Startup power mode "+startPowerMode+" was not defined!");
+      cs.powerMode = iter->second.index;
     }
 
-    size_t nrPowerModes = powerModeToIndex.size();
+    size_t nrPowerModes = powerModes.size();
 
     PowerModeTiming *array = new PowerModeTiming[nrPowerModes]();
     powerModeTimingArrays.push_back(array);
@@ -162,12 +198,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     PossibleAction::FunctionNames const guardNames      = action->getGuardNames();
     size_t                        const guardComplexity = action->getGuardComplexity();
 
-    for (PowerModeToIndex::value_type const &entry : powerModeToIndex) {
-      size_t         index = entry.second;
-
-      PowerModeDependentTimings::const_iterator iter = powerModeDependentTimings.find(entry.first);
-      assert(iter != powerModeDependentTimings.end());
-      Timings const &timings = iter->second;
+    for (PowerModes::value_type const &entry : powerModes) {
+      size_t         index   = entry.second.index;
+      Timings const &timings = entry.second.timings;
 
       sc_core::sc_time guardDelay, dii, latency;
 

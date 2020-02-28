@@ -34,19 +34,13 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_EXECMODELLING_DEFAULTTIMINGPROVIDER_HPP
-#define _INCLUDED_SYSTEMCVPC_DETAIL_EXECMODELLING_DEFAULTTIMINGPROVIDER_HPP
+#ifndef _INCLUDED_SYSTEMCVPC_DETAIL_EXECMODELLING_LOOKUPPOWERTIMEMODELIMPL_HPP
+#define _INCLUDED_SYSTEMCVPC_DETAIL_EXECMODELLING_LOOKUPPOWERTIMEMODELIMPL_HPP
 
 #include <systemcvpc/ExecModelling/LookupPowerTimeModel.hpp>
-
-#include "../AbstractExecModel.hpp"
-
-
-
 #include <systemcvpc/Timing.hpp>
 
-
-//#include <systemcvpc/datatypes.hpp>
+#include "../AbstractExecModel.hpp"
 
 #include <systemc>
 
@@ -84,6 +78,12 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     ///
     /// Handle interfaces for SystemC_VPC::ExecModelling::LookupPowerTimeModel
     ///
+
+    PowerMode getStartPowerMode() const
+      { return startPowerMode; }
+    void      setStartPowerMode(PowerMode const &pm)
+      { startPowerMode = pm; }
+
   private:
     ///
     /// Handle interfaces for AbstractExecModel
@@ -120,16 +120,27 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     /// Other stuff
     ///
 
-    struct PowerModeTiming;
-
     typedef std::map<std::string, Timing>  Timings;
-    typedef std::map<std::string, Timings> PowerModeDependentTimings;
-    typedef std::map<std::string, size_t>  PowerModeToIndex;
+
+    struct PowerModeInfo {
+      size_t  index;      ///< Index of power mode.
+      Timings timings;    ///< Power mode dependent action and guard timings
+      double  pwrIdle;    ///< Idle power in power mode
+      double  pwrRunning; ///< Default power consumption if a task is running.
+      double  pwrStalled; ///< Default power consumption for a stalled task.
+
+      PowerModeInfo()
+        : index(-1)
+        , pwrIdle(-1), pwrRunning(-1), pwrStalled(-1) {}
+    };
+    typedef std::map<std::string, PowerModeInfo> PowerModes;
+
+    struct PowerModeTiming;
     typedef std::vector<PowerModeTiming *> PowerModeTimingArrays;
 
     bool                      registeredActions;
-    PowerModeDependentTimings powerModeDependentTimings;
-    PowerModeToIndex          powerModeToIndex;
+    std::string               startPowerMode;
+    PowerModes                powerModes;
     PowerModeTimingArrays     powerModeTimingArrays;
   };
 
@@ -145,4 +156,15 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 
 } } } // namespace SystemC_VPC::Detail::ExecModelling
 
-#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_EXECMODELLING_DEFAULTTIMINGPROVIDER_HPP */
+namespace SystemC_VPC { namespace ExecModelling {
+
+  static inline
+  Detail::ExecModelling::LookupPowerTimeModelImpl       *getImpl(LookupPowerTimeModel       *m)
+    { return static_cast<Detail::ExecModelling::LookupPowerTimeModelImpl       *>(m); }
+  static inline
+  Detail::ExecModelling::LookupPowerTimeModelImpl const *getImpl(LookupPowerTimeModel const *m)
+    { return static_cast<Detail::ExecModelling::LookupPowerTimeModelImpl const *>(m); }
+
+} } // namespace SystemC_VPC::Detail::Routing
+
+#endif /* _INCLUDED_SYSTEMCVPC_DETAIL_EXECMODELLING_LOOKUPPOWERTIMEMODELIMPL_HPP */
