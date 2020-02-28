@@ -93,7 +93,7 @@ namespace SystemC_VPC { namespace Detail {
       return new InternalLoadHysteresisGovernor(windowTime, fastTime, slowTime);
     }
 
-    virtual void processAttributes(AttributePtr powerAtt){
+    virtual void processAttributes(Attribute::Ptr powerAtt){
       //std::cerr << "InternalLoadHysteresisGovernorFactory::processAttributes" << std::endl;
       if(powerAtt->isType("governor")){
         if(powerAtt->hasParameter("sliding_window")){

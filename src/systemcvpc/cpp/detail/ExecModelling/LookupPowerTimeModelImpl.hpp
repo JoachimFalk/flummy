@@ -73,7 +73,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     void add(Timing timing);
     void addDefaultActorTiming(std::string actorName, Timing timing);
 
-    bool addAttribute(AttributePtr attr);
+    bool addAttribute(Attribute::Ptr attr);
 
     ///
     /// Handle interfaces for SystemC_VPC::ExecModelling::LookupPowerTimeModel

@@ -153,6 +153,9 @@ namespace SystemC_VPC { namespace Extending {
     size_t reservePerTaskInstance;
   };
 
+  using ::intrusive_ptr_add_ref;
+  using ::intrusive_ptr_release;
+
 } } // namespace SystemC_VPC::Extending
 
 #endif /* _INCLUDED_SYSTEMCVPC_EXTENDING_COMPONENTOBSERVERIF_HPP */

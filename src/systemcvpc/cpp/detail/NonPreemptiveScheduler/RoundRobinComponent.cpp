@@ -47,10 +47,10 @@ RoundRobinComponent::RoundRobinComponent(std::string const &name)
   SC_THREAD(scheduleThread);
 }
 
-void RoundRobinComponent::addAttribute(AttributePtr attr) {
+void RoundRobinComponent::addAttribute(Attribute::Ptr attr) {
   if (attr->getType() == "scheduler") {
     for(size_t i=0; i<attr->getAttributeSize();++i) {
-      AttributePtr schedAttr = attr->getNextAttribute(i).second;
+      Attribute::Ptr schedAttr = attr->getNextAttribute(i).second;
       if (schedAttr->isType("fireActorInLoop")) {
         std::string value = schedAttr->getValue();
         fireActorInLoop = (value == "1" || value == "true");

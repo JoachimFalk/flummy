@@ -89,7 +89,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     /// Implement interface for ComponentTracer
     ///
 
-    bool addAttribute(AttributePtr attr);
+    bool addAttribute(Attribute::Ptr attr);
   private:
     class PajeTask;
     class PajeTaskInstance;
@@ -233,7 +233,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     }
   }
 
-  bool ComponentPajeTracer::addAttribute(AttributePtr attr) {
+  bool ComponentPajeTracer::addAttribute(Attribute::Ptr attr) {
     throw ConfigException("The PAJE tracer does not support attributes!");
   }
 

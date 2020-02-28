@@ -39,7 +39,10 @@
 
 #include "InvalidArgumentException.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include <CoSupport/SmartPtr/RefCount.hpp>
+#include <CoSupport/SmartPtr/intrusive_refcount_ptr.hpp>
+
+#include <boost/intrusive_ptr.hpp>
 
 #include <deque>
 #include <utility>
@@ -49,12 +52,22 @@ namespace SystemC_VPC {
 
   class Attribute;
 
-  typedef boost::shared_ptr<Attribute> AttributePtr;
-  typedef std::deque<std::pair<std::string, AttributePtr> >  Attributes;
-  typedef std::deque<std::pair<std::string, std::string>  >  Parameters;
+  DECL_INTRUSIVE_REFCOUNT_PTR(Attribute, PAttribute)
 
-  class Attribute{
+  typedef std::deque<std::pair<std::string, PAttribute> >  Attributes;
+  typedef std::deque<std::pair<std::string, std::string> > Parameters;
+
+  class Attribute
+    : private CoSupport::SmartPtr::RefCount
+  {
+    typedef Attribute this_type;
+
+    friend void intrusive_ptr_add_ref(this_type *);
+    friend void intrusive_ptr_release(this_type *);
   public:
+    typedef boost::intrusive_ptr<this_type>       Ptr;
+    typedef boost::intrusive_ptr<this_type const> ConstPtr;
+
     Attribute();
 
     /**
@@ -76,12 +89,12 @@ namespace SystemC_VPC {
 
     void addParameter(std::string type, std::string value);
 
-    std::pair<std::string, AttributePtr > getNextAttribute(size_t pos);
+    std::pair<std::string, Attribute::Ptr > getNextAttribute(size_t pos);
 
     /**
      *
      */
-    AttributePtr getAttribute(const std::string name);
+    Attribute::Ptr getAttribute(const std::string name);
 
     /**
      *
@@ -90,7 +103,7 @@ namespace SystemC_VPC {
 
     void addAttribute( std::string type, std::string value);
 
-    void addAttribute( std::string type, AttributePtr att );
+    void addAttribute( std::string type, Attribute::Ptr att );
 
     size_t getParameterSize();
     size_t getAttributeSize();

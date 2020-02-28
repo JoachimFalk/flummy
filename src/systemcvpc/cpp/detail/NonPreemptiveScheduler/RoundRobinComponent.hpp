@@ -88,7 +88,7 @@ protected:
 
   void scheduleThread();
 
-  void addAttribute(AttributePtr attributePtr);
+  void addAttribute(Attribute::Ptr attributePtr);
 
   virtual ~RoundRobinComponent();
 private:

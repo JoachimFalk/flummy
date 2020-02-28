@@ -577,10 +577,10 @@ namespace SystemC_VPC { namespace Detail {
     addObserver(midPowerGov);
   }
 
-  void PreemptiveComponent::addAttribute(AttributePtr attr) {
+  void PreemptiveComponent::addAttribute(Attribute::Ptr attr) {
     if (attr->isType("scheduler")) {
       for(size_t i=0; i<attr->getAttributeSize();++i) {
-        AttributePtr schedAttr = attr->getNextAttribute(i).second;
+        Attribute::Ptr schedAttr = attr->getNextAttribute(i).second;
         // FIXME: Handle unknown attributes
         scheduler->setAttribute(schedAttr);
       }

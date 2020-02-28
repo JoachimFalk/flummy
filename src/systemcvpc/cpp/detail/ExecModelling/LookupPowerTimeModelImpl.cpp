@@ -81,7 +81,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
       throw ConfigException("Duplicate timing information for "+actorName);
   }
 
-  bool LookupPowerTimeModelImpl::addAttribute(AttributePtr attr) {
+  bool LookupPowerTimeModelImpl::addAttribute(Attribute::Ptr attr) {
 //    if(attr->isType("governor")){
 //      this->loadLocalGovernorPlugin(attr->getValue());
 //      powerAttribute = powerAtt;
@@ -95,7 +95,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     if (attr->isType("powermode")) {
       PowerModeInfo &pmi = powerModes[attr->getValue()];
       for (size_t i=0; i<attr->getAttributeSize();++i) {
-        AttributePtr emAttr = attr->getNextAttribute(i).second;
+        Attribute::Ptr emAttr = attr->getNextAttribute(i).second;
 
         if (emAttr->isType("powerIdle")) {
           pmi.pwrIdle = atof(emAttr->getValue().c_str());
@@ -121,21 +121,6 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 //
 //    PowerTable &powerTable=powerTables[power];
 //
-//    if(powerAtt->hasParameter("IDLE")){
-//      std::string v = powerAtt->getParameter("IDLE");
-//      const double value = atof(v.c_str());
-//      powerTable[ComponentState::IDLE] = value;
-//    }
-//    if(powerAtt->hasParameter("RUNNING")){
-//      std::string v = powerAtt->getParameter("RUNNING");
-//      const double value = atof(v.c_str());
-//      powerTable[ComponentState::RUNNING] = value;
-//    }
-//    if(powerAtt->hasParameter("STALLED")){
-//      std::string v = powerAtt->getParameter("STALLED");
-//      const double value = atof(v.c_str());
-//      powerTable[ComponentState::STALLED] = value;
-//    }
 //    if(powerAtt->hasParameter("transaction_delay")) {
 //      this->transactionDelays[power] =
 //        createSC_Time(powerAtt->getParameter("transaction_delay").c_str());

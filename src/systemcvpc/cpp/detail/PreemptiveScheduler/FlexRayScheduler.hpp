@@ -89,7 +89,7 @@ namespace SystemC_VPC { namespace Detail {
     
     void setProperty(const char* key, const char* value);
     
-    void setAttribute(AttributePtr attributePtr);
+    void setAttribute(Attribute::Ptr attributePtr);
     
     sc_core::sc_time* schedulingOverhead();
     
