@@ -80,14 +80,14 @@ namespace SystemC_VPC {
     this->parameters.push_back( std::make_pair(type, value) );
   }
 
-  std::pair<std::string, AttributePtr > Attribute::getNextAttribute(size_t pos) {
+  std::pair<std::string, Attribute::Ptr > Attribute::getNextAttribute(size_t pos) {
     if(pos<=attributes.size()) return attributes[pos];
     throw InvalidArgumentException("getNextAttribute");
         
   }
 
   //
-  AttributePtr Attribute::getAttribute(const std::string name) {
+  Attribute::Ptr Attribute::getAttribute(const std::string name) {
     for(unsigned int i=0;
         i<this->getAttributeSize();
         ++i)
@@ -112,11 +112,11 @@ namespace SystemC_VPC {
   }
 
   void Attribute::addAttribute( std::string type, std::string value){
-    AttributePtr toadd(new Attribute(type, value));
+    Attribute::Ptr toadd(new Attribute(type, value));
     attributes.push_back( std::make_pair(type, toadd) );
   }
 
-  void Attribute::addAttribute( std::string type, AttributePtr att ){
+  void Attribute::addAttribute( std::string type, Attribute::Ptr att ){
     attributes.push_back( std::make_pair(type, att) );
   }
 
@@ -135,5 +135,7 @@ namespace SystemC_VPC {
   std::string Attribute::getType(){
     return type;
   }
+
+  IMPL_INTRUSIVE_REFCOUNT_PTR(Attribute)
 
 } // namespace SystemC_VPC::Detail

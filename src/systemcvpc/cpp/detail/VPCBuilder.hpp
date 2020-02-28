@@ -116,7 +116,7 @@ namespace SystemC_VPC { namespace Detail {
     /**
     * \brief Used to create the Attribute-Object recursively
     */
-    void nextAttribute(AttributePtr attributePtr, CX::XN::DOMNode *node);
+    void nextAttribute(Attribute::Ptr attributePtr, CX::XN::DOMNode *node);
      
     /**
      * \brief Topology parsing related code

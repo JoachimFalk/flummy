@@ -60,7 +60,7 @@ namespace SystemC_VPC { namespace Detail {
   }
 
 
-  void AVBScheduler::setAttribute(AttributePtr attributePtr){
+  void AVBScheduler::setAttribute(Attribute::Ptr attributePtr){
     std::istringstream is(attributePtr->getType());
     int priority;
     is >> priority;

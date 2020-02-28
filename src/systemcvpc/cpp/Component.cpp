@@ -136,7 +136,7 @@ ExecModel::Ptr Component::getExecModel() {
 //    + "\" has NO timing provider!");
 }
 
-void Component::addAttribute(AttributePtr attribute) {
+void Component::addAttribute(Attribute::Ptr attribute) {
   if (attribute->isType("transaction_delay")) {
     sc_core::sc_time transferDelay = Detail::createSC_Time(attribute->getValue().c_str());
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
@@ -161,7 +161,7 @@ void Component::addAttribute(AttributePtr attribute) {
   } else if (attribute->isType("execModel")) {
     ExecModel::Ptr execModel = createExecModel(attribute->getValue().c_str());
     for(size_t i=0; i<attribute->getAttributeSize();++i) {
-      AttributePtr emAttr = attribute->getNextAttribute(i).second;
+      Attribute::Ptr emAttr = attribute->getNextAttribute(i).second;
       if (!execModel->addAttribute(emAttr))
         throw ConfigException("Unhandled attribute " + emAttr->getType() + " for execution model " + attribute->getValue());
     }

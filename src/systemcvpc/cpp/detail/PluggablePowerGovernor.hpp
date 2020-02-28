@@ -111,7 +111,7 @@ namespace SystemC_VPC { namespace Detail {
       //std::cout << "PlugInFactory Destroy" << std::endl;
     }
 
-    virtual void processAttributes(AttributePtr attPtr) = 0;
+    virtual void processAttributes(Attribute::Ptr attPtr) = 0;
 
     virtual PlugIn * createPlugIn() = 0;
   };

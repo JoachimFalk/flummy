@@ -85,7 +85,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     /// Implement interface for ComponentTracer
     ///
 
-    bool addAttribute(AttributePtr attr);
+    bool addAttribute(Attribute::Ptr attr);
 
   private:
     class VcdTask;
@@ -348,7 +348,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     }
   }
 
-  bool ComponentVCDTracer::addAttribute(AttributePtr attr) {
+  bool ComponentVCDTracer::addAttribute(Attribute::Ptr attr) {
     throw ConfigException("The VCD tracer does not support attributes!");
   }
 

@@ -65,7 +65,7 @@ namespace SystemC_VPC {
     typedef boost::intrusive_ptr<this_type>       Ptr;
     typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
-    virtual bool addAttribute(AttributePtr attr) = 0;
+    virtual bool addAttribute(Attribute::Ptr attr) = 0;
 
     const char *getType() const
       { return type; }

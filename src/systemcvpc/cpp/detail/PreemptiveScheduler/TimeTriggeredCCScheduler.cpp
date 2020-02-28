@@ -131,7 +131,7 @@ namespace SystemC_VPC { namespace Detail {
     //  std::cout<<"add Function " <<  key << " to " << value<<std::endl; 
   }
 
-  void TimeTriggeredCCScheduler::setAttribute(AttributePtr attributePtr){
+  void TimeTriggeredCCScheduler::setAttribute(Attribute::Ptr attributePtr){
     std::string value = attributePtr->getType();
 
     if( value!="FlexRayParams" )
@@ -147,12 +147,12 @@ namespace SystemC_VPC { namespace Detail {
     }
 
     for(size_t i=0;i<attributePtr->getAttributeSize();i++){
-      std::pair<std::string, AttributePtr >attribute=attributePtr->getNextAttribute(i);
+      std::pair<std::string, Attribute::Ptr >attribute=attributePtr->getNextAttribute(i);
         
       if(attribute.first=="static"){
         StartslotDynamic=0;
         for(size_t k=0;k<attribute.second->getAttributeSize();k++){
-          std::pair<std::string, AttributePtr >attribute2=attribute.second->getNextAttribute(k);
+          std::pair<std::string, Attribute::Ptr >attribute2=attribute.second->getNextAttribute(k);
           //Slot einrichten
           StartslotDynamic++;
           slicecount++;
@@ -170,7 +170,7 @@ namespace SystemC_VPC { namespace Detail {
           //jetzt noch die Task-mappings!
           //für jeden Attribute-Eintrag Parameter verarbeiten
           for(size_t l=0;l<attribute2.second->getAttributeSize();l++){
-            std::pair<std::string, AttributePtr >attribute3=attribute2.second->getNextAttribute(l);
+            std::pair<std::string, Attribute::Ptr >attribute3=attribute2.second->getNextAttribute(l);
             std::pair<std::string, std::string > param3;
             if(attribute3.first=="mapping"){
 

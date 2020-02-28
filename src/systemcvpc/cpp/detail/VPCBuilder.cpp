@@ -220,7 +220,7 @@ namespace SystemC_VPC { namespace Detail {
                     }
 
 //                  if( sType == "global_governor" ){
-//                    AttributePtr gov(new Attribute("global_governor",
+//                    Attribute::Ptr gov(new Attribute("global_governor",
 //                                                   sValue));
 //                    nextAttribute(gov, node->getFirstChild());
 //                    director->loadGlobalGovernorPlugin(sValue, gov);
@@ -354,7 +354,7 @@ namespace SystemC_VPC { namespace Detail {
             sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
           }
 
-          AttributePtr attributes(new Attribute( sType, sValue));
+          Attribute::Ptr attributes(new Attribute( sType, sValue));
 
           nextAttribute(attributes, node->getFirstChild());
 
@@ -471,7 +471,7 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  void VPCBuilder::nextAttribute(SystemC_VPC::AttributePtr attribute,
+  void VPCBuilder::nextAttribute(SystemC_VPC::Attribute::Ptr attribute,
                                  CX::XN::DOMNode* node){
     //walk down hierarchy to attributes
     for(; node != NULL; node = node->getNextSibling()){
@@ -486,7 +486,7 @@ namespace SystemC_VPC { namespace Detail {
           sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
         }
 
-        AttributePtr fr_Attribute2(new Attribute(sType, sValue));
+        Attribute::Ptr fr_Attribute2(new Attribute(sType, sValue));
 
         //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
         nextAttribute(fr_Attribute2,node->getFirstChild());

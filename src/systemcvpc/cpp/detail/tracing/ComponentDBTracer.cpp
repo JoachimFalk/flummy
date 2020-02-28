@@ -78,7 +78,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     /// Implement interface for ComponentTracer
     ///
 
-    bool addAttribute(AttributePtr attr);
+    bool addAttribute(Attribute::Ptr attr);
 
   private:
     class DataBaseProxy;
@@ -280,7 +280,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     }
   }
 
-  bool ComponentDBTracer::addAttribute(AttributePtr attr) {
+  bool ComponentDBTracer::addAttribute(Attribute::Ptr attr) {
     throw ConfigException("The DB tracer does not support attributes!");
   }
 

@@ -160,7 +160,7 @@ namespace SystemC_VPC { namespace Detail {
                                            const  TaskMap &ready_tasks,
                                            const  TaskMap &running_tasks);
     void setProperty(const char* key, const char* value);
-    void setAttribute(AttributePtr attributePtr);
+    void setAttribute(Attribute::Ptr attributePtr);
 
     sc_core::sc_time* schedulingOverhead(){return 0;}//;
   protected:

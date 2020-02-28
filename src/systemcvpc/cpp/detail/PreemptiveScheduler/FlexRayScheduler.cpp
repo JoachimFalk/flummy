@@ -185,7 +185,7 @@ namespace SystemC_VPC { namespace Detail {
                 
   }
 
-  void FlexRayScheduler::setAttribute(AttributePtr attributePtr){
+  void FlexRayScheduler::setAttribute(Attribute::Ptr attributePtr){
     std::string value = attributePtr->getType();
     //assert(value!=NULL);
     if( value!="FlexRayParams" )
@@ -201,10 +201,10 @@ namespace SystemC_VPC { namespace Detail {
         
         
     if( attributePtr->hasAttribute("static") ){
-      AttributePtr fr_static = attributePtr->getAttribute("static");
+      Attribute::Ptr fr_static = attributePtr->getAttribute("static");
       StartslotDynamic=0;
       for(size_t k=0;k<fr_static->getAttributeSize();k++){
-        std::pair<std::string, AttributePtr >attribute2=fr_static->getNextAttribute(k);
+        std::pair<std::string, Attribute::Ptr >attribute2=fr_static->getNextAttribute(k);
         //Slot einrichten
         StartslotDynamic++;
         slicecount++;
@@ -223,7 +223,7 @@ namespace SystemC_VPC { namespace Detail {
         //jetzt noch die Task-mappings!
         //für jeden Attribute-Eintrag Parameter verarbeiten
         for(size_t l=0;l<attribute2.second->getAttributeSize();l++){
-          std::pair<std::string, AttributePtr >attribute3=attribute2.second->getNextAttribute(l);
+          std::pair<std::string, Attribute::Ptr >attribute3=attribute2.second->getNextAttribute(l);
           std::pair<std::string, std::string > param3;
           if(attribute3.first=="mapping"){
 
@@ -283,12 +283,12 @@ namespace SystemC_VPC { namespace Detail {
       */
     }   
     if( attributePtr->hasAttribute("dynamic") ){
-      AttributePtr fr_dynamic = attributePtr->getAttribute("dynamic");
+      Attribute::Ptr fr_dynamic = attributePtr->getAttribute("dynamic");
       this->TimeDynamicSegment = createSC_Time(fr_dynamic->getValue().c_str());
       cycle_length += this->TimeDynamicSegment; 
                 
       for(size_t k=0;k<fr_dynamic->getAttributeSize();k++){
-        std::pair<std::string, AttributePtr >attribute2=fr_dynamic->getNextAttribute(k);
+        std::pair<std::string, Attribute::Ptr >attribute2=fr_dynamic->getNextAttribute(k);
         //Slot einrichten
         slicecount++;
         std::pair<std::string, std::string > param;
