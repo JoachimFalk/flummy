@@ -36,11 +36,19 @@
 
 #include <systemcvpc/ExecModelling/LookupPowerTimeModel.hpp>
 
+#include "../detail/ExecModelling/LookupPowerTimeModelImpl.hpp"
+
+
 namespace SystemC_VPC { namespace ExecModelling {
 
   const char *LookupPowerTimeModel::Type = "LookupPowerTimeModel";
 
   LookupPowerTimeModel::LookupPowerTimeModel(int implAdj)
     : ExecModel(Type, implAdj) {}
+
+  PowerMode LookupPowerTimeModel::getStartPowerMode() const
+    { return ExecModelling::getImpl(this)->getStartPowerMode(); }
+  void      LookupPowerTimeModel::setStartPowerMode(PowerMode const &pm)
+    { ExecModelling::getImpl(this)->setStartPowerMode(pm); }
 
 } } // namespace SystemC_VPC::ExecModelling
