@@ -318,6 +318,7 @@ namespace SystemC_VPC { namespace Detail {
         AbstractRoute::Ptr &route;
       } visitor(iter->second);
       boost::apply_visitor(visitor, registeredRoute);
+      iter->second->finalize();
     }
     if (!msg.str().empty())
       throw ConfigException(msg.str().c_str());

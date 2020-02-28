@@ -42,22 +42,31 @@ namespace SystemC_VPC { namespace Detail {
   int TaskInstanceImpl::globalInstanceId = 0;
 
   TaskInstanceImpl::TaskInstanceImpl(
-      std::function<void (TaskInstanceImpl *)> const &diiCallback,
-      std::function<void (TaskInstanceImpl *)> const &latCallback)
+      TaskImpl                                       *taskImpl
+    , Type                                            type
+    , PossibleAction                                 *firingRuleInterface
+    , std::function<void (TaskInstanceImpl *)> const &diiCallback
+    , std::function<void (TaskInstanceImpl *)> const &latCallback)
     : instanceId(globalInstanceId++)
+    , taskImpl(taskImpl)
+    , type(type)
+    , firingRuleInterface(firingRuleInterface)
     , diiCallback(diiCallback)
     , latCallback(latCallback)
+    , timingScale(1)
     , blockingCompute(nullptr)
     , blockAck(false)
     , exec(false)
     , write(false)
-    , taskImpl()
-    , name("NN")
-    , timingScale(1)
-    , firingRuleInterface(nullptr)
-    {}
+  {}
 
   TaskInstanceImpl::~TaskInstanceImpl() {
+  }
+
+  std::string     TaskInstanceImpl::getName() const {
+    return type == Type::GUARD
+        ? taskImpl->getName() + "_check"
+        : taskImpl->getName();
   }
 
   // Adaptor getter for TaskImpl

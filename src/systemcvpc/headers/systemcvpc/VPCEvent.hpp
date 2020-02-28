@@ -76,6 +76,9 @@ namespace SystemC_VPC {
     }
   };
 
+  using ::intrusive_ptr_release;
+  using ::intrusive_ptr_add_ref;
+
 } // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPCEVENT_HPP */

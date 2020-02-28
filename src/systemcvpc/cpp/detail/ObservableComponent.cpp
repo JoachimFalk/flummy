@@ -38,13 +38,17 @@
 
 #include "AbstractComponent.hpp"
 
+#include <CoSupport/sassert.h>
+
 namespace SystemC_VPC { namespace Detail {
 
   ObservableComponent::ObservableComponent()
-    : nextFreeTaskOffset(sizeof(TaskImpl))
+    : observerRegistrationAllowed(true)
+    , nextFreeTaskOffset(sizeof(TaskImpl))
     , nextFreeTaskInstanceOffset(sizeof(TaskInstanceImpl)) {}
 
-  void ObservableComponent::addObserver(ComponentObserver::Ptr const &obs) {
+  void ObservableComponent::addObserver(Extending::ComponentObserverIf::Ptr const &obs) {
+    assert(observerRegistrationAllowed);
     ObserverInfo oi;
     // Get next free 16 byte aligned task offset.
     nextFreeTaskOffset = (nextFreeTaskOffset + 15UL) & ~15UL;
@@ -68,9 +72,10 @@ namespace SystemC_VPC { namespace Detail {
     , AbstractComponent const &c
     , TaskImpl                &t)
   {
+    assert(!observerRegistrationAllowed);
     for (Observers::value_type const &e : observers) {
       e.first->taskOperation(to, c, t,
-          *reinterpret_cast<ComponentObserver::OTask *>(
+          *reinterpret_cast<OTask *>(
               reinterpret_cast<char *>(&t) + e.second.taskOffset));
     }
   }
@@ -79,14 +84,93 @@ namespace SystemC_VPC { namespace Detail {
     , AbstractComponent const &c
     , TaskInstanceImpl        &ti)
   {
+    assert(!observerRegistrationAllowed);
+
+    if (tio == TaskInstanceOperation::FINISHLAT)
+      tio = TaskInstanceOperation((int) tio | (int) TaskInstanceOperation::DEALLOCATE);
+
     for (Observers::value_type const &e : observers) {
       e.first->taskInstanceOperation(tio, c, ti
-        , *reinterpret_cast<ComponentObserver::OTask *>(
+        , *reinterpret_cast<OTask *>(
               reinterpret_cast<char *>(ti.getTask()) + e.second.taskOffset)
-        , *reinterpret_cast<ComponentObserver::OTaskInstance *>(
+        , *reinterpret_cast<OTaskInstance *>(
             reinterpret_cast<char *>(&ti) + e.second.taskInstanceOffset));
     }
   }
+
+  TaskImpl *ObservableComponent::createTask(TaskInterface *taskInterface)
+  {
+    return createTask([taskInterface] (char *s) {
+      sassert(new (s) TaskImpl(taskInterface) == reinterpret_cast<TaskImpl *>(s));
+    });
+  }
+  TaskImpl *ObservableComponent::createTask(std::string const &taskName)
+  {
+    return createTask([&taskName] (char *s) {
+      sassert(new (s) TaskImpl(taskName) == reinterpret_cast<TaskImpl *>(s));
+    });
+  }
+  TaskImpl *ObservableComponent::createTask(std::function<void (char *)> factory)
+  {
+    observerRegistrationAllowed = false;
+
+    char *storage = (char *) malloc(nextFreeTaskOffset);
+    if (!storage)
+      throw std::bad_alloc();
+    try {
+      factory(storage);
+      TaskImpl *taskImpl = reinterpret_cast<TaskImpl *>(storage);
+      // FIXME: Exceptions
+      for (Observers::value_type const &e : observers) {
+        e.first->taskOperation(TaskOperation::ALLOCATE
+          , *static_cast<AbstractComponent *>(this)
+          , *taskImpl
+          , *reinterpret_cast<OTask *>(storage + e.second.taskOffset));
+      }
+      try {
+        tasks.push_back(taskImpl);
+        return taskImpl;
+      } catch (...) {
+        taskImpl->~TaskImpl();
+        throw;
+      }
+    } catch (...) {
+      free(storage);
+      throw;
+    }
+  }
+
+  TaskInstanceImpl *ObservableComponent::createTaskInstance(
+      TaskImpl                                       *taskImpl
+    , TaskInstanceImpl::Type                          type
+    , PossibleAction                                 *firingRuleInterface
+    , std::function<void (TaskInstanceImpl *)> const &diiCallback
+    , std::function<void (TaskInstanceImpl *)> const &latCallback)
+  {
+    observerRegistrationAllowed = false;
+
+    char *storage = (char *) malloc(nextFreeTaskInstanceOffset);
+    if (!storage)
+      throw std::bad_alloc();
+    try {
+      TaskInstanceImpl *taskInstanceImpl =
+          new (storage) TaskInstanceImpl(taskImpl, type
+              , firingRuleInterface, diiCallback, latCallback);
+      // FIXME: Exceptions
+      for (Observers::value_type const &e : observers) {
+        e.first->taskInstanceOperation(TaskInstanceOperation::ALLOCATE
+          , *static_cast<AbstractComponent *>(this)
+          , *taskInstanceImpl
+          , *reinterpret_cast<OTask *>(reinterpret_cast<char *>(taskImpl) + e.second.taskOffset)
+          , *reinterpret_cast<OTaskInstance *>(storage + e.second.taskInstanceOffset));
+      }
+      return taskInstanceImpl;
+    } catch (...) {
+      free(storage);
+      throw;
+    }
+  }
+
 
   ObservableComponent::~ObservableComponent()
     {}

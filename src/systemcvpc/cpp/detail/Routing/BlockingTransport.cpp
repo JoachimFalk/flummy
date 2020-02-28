@@ -64,6 +64,9 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     (*completed)(userData, quantitiy, nullptr);
   }
 
+  void BlockingTransport::finalize() {
+  }
+
 //void BlockingTransport::compute( TaskInstanceImpl* _task ) {
 //  task = _task;
 //  this->isWrite = task->isWrite();

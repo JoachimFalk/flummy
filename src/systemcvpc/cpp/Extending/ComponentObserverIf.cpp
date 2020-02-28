@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,33 +34,53 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "ComponentTracerIf.hpp"
-#include "TraceableComponent.hpp"
+#include <systemcvpc/Extending/ComponentObserverIf.hpp>
+#include <systemcvpc/ConfigException.hpp>
 
-namespace SystemC_VPC { namespace Detail { namespace Tracing {
+#include <string>
+#include <map>
+#include <functional>
+#include <stdexcept>
 
-TTask::~TTask() {}
+namespace {
 
-TTaskHolder::~TTaskHolder() {
-  for (TTask *ttask : ttasks)
-    delete ttask;
-  ttasks.clear();
+  typedef std::map<
+      std::string,
+      std::function<SystemC_VPC::Extending::ComponentObserverIf *()>
+    > ObserverByName;
+
+  /// We need this to be independent from the global variable initialization order.
+  static ObserverByName &getObserverByName() {
+    static ObserverByName observerByName;
+    return observerByName;
+  }
+
 }
 
-TTaskInstance::~TTaskInstance() {}
+namespace SystemC_VPC { namespace Extending {
 
-TTaskInstanceHolder::~TTaskInstanceHolder() {
-  for (TTaskInstance *ttaskInstance : ttaskInstances)
-    delete ttaskInstance;
-  ttaskInstances.clear();
-}
+  void ComponentObserverIf::registerObserver(
+      const char                             *type,
+      std::function<ComponentObserverIf *()>  factory) {
 
-ComponentTracerIf::~ComponentTracerIf() {}
+    ObserverByName &observerByName = getObserverByName();
+    std::pair<ObserverByName::iterator, bool> status =
+        observerByName.insert(ObserverByName::value_type(type, factory));
+    if (!status.second)
+      throw  std::runtime_error("Duplicate component observer type " + std::string(type)+"!");
+  }
 
-void ComponentTracerIf::registerTracer(
-    const char                                   *tracerName,
-    std::function<ComponentTracerIf *(Component const *)>  tracerFactory) {
-  TraceableComponent::registerTracer(tracerName, tracerFactory);
-}
+} } // namespace SystemC_VPC::Extending
 
-} } } // namespace SystemC_VPC::Detail::Tracing
+namespace SystemC_VPC {
+
+  ComponentObserver::Ptr createComponentObserver(const char *type) {
+    ObserverByName &observerByName = getObserverByName();
+
+    ObserverByName::const_iterator iter = observerByName.find(type);
+    if (iter == observerByName.end())
+      throw ConfigException("No component observer of type "+std::string(type)+" registered!");
+    return iter->second()->getComponentObserver();
+  }
+
+} // namespace SystemC_VPC

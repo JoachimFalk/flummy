@@ -203,7 +203,7 @@ namespace SystemC_VPC { namespace Detail {
     // A task can call compute only one time!
     assert(readyTasks.find(newReadyTask->getInstanceId())   == readyTasks.end());
     assert(runningTasks.find(newReadyTask->getInstanceId()) == runningTasks.end());
-    releaseTask(newReadyTask->getTask(), newReadyTask);
+    releaseTaskInstance(newReadyTask);
     //insert new task in ready list
     readyTasks[newReadyTask->getInstanceId()]=newReadyTask;
     scheduler->addedNewTask(newReadyTask);

@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -34,9 +34,9 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include <systemcvpc/Component.hpp>
-
-#include "ComponentTracerIf.hpp"
+#include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/ComponentTracer.hpp>
+#include <systemcvpc/Extending/ComponentTracerIf.hpp>
 
 #include <CoSupport/String/color.hpp>
 #include <CoSupport/String/DoubleQuotedString.hpp>
@@ -60,25 +60,36 @@ namespace SystemC_VPC {
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-  class ComponentPajeTracer: public ComponentTracerIf {
+  class ComponentPajeTracer
+    : public Extending::ComponentTracerIf
+    , public ComponentTracer
+  {
   public:
     ComponentPajeTracer(Component const *component);
 
-    TTask         *registerTask(std::string const &name);
+    ///
+    /// Implement interface for ComponentTracerIf
+    ///
 
-    TTaskInstance *release(TTask *ttask);
+    void componentOperation(ComponentOperation co
+      , Component const &c);
 
-    void           assign(TTaskInstance *ttaskInstance);
+    void taskOperation(TaskOperation to
+      , Component const &c
+      , Task      const &t
+      , OTask           &ot);
 
-    void           resign(TTaskInstance *ttaskInstance);
+    void taskInstanceOperation(TaskInstanceOperation tio
+      , Component    const &c
+      , TaskInstance const &ti
+      , OTask              &ot
+      , OTaskInstance      &oti);
 
-    void           block(TTaskInstance *ttaskInstance);
+    ///
+    /// Implement interface for ComponentTracer
+    ///
 
-    void           finishDii(TTaskInstance *ttaskInstance);
-
-    void           finishLatency(TTaskInstance *ttaskInstance);
-
-    ~ComponentPajeTracer();
+    bool addAttribute(AttributePtr attr);
   private:
     class PajeTask;
     class PajeTaskInstance;
@@ -92,7 +103,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     sc_core::sc_time startTime;
   };
 
-  class ComponentPajeTracer::PajeTask: public TTask {
+  class ComponentPajeTracer::PajeTask: public OTask {
   public:
     PajeTask(std::string const &name)
       : task(myPajeTracer->registerActivity(name.c_str(),true))
@@ -107,7 +118,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ~PajeTask() {}
   };
 
-  class ComponentPajeTracer::PajeTaskInstance: public TTaskInstance {
+  class ComponentPajeTracer::PajeTaskInstance: public OTaskInstance {
   public:
     PajeTaskInstance(PajeTask *pajeTask)
       : pajeTask(pajeTask) {}
@@ -126,7 +137,16 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   } ComponentPajeTracer::registerMe;
 
   ComponentPajeTracer::ComponentPajeTracer(Component const *component)
-      : name_(component->getName()) {
+    : Extending::ComponentTracerIf(
+          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
+          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
+        , sizeof(PajeTask), sizeof(PajeTaskInstance))
+    , ComponentTracer(
+         reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
+         reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
+       , "PAJE")
+    , name_(component->getName())
+  {
     if (!myPajeTracer){
       std::string traceFilename;
 
@@ -138,48 +158,83 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     this->res_ = myPajeTracer->registerResource(component->getName().c_str());
   }
 
-  ComponentPajeTracer::~ComponentPajeTracer() {
-
+  void ComponentPajeTracer::componentOperation(ComponentOperation co
+    , Component const &c) {
+    // Ignore
   }
 
-  TTask         *ComponentPajeTracer::registerTask(std::string const &name) {
-    return new PajeTask(name);
+  void ComponentPajeTracer::taskOperation(TaskOperation to
+    , Component const &c
+    , Task      const &t
+    , OTask           &ot)
+  {
+    PajeTask &pajeTask = static_cast<PajeTask &>(ot);
+
+    if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
+        TaskOperation::ALLOCATE) {
+      new (&pajeTask) PajeTask(t.getName());
+    }
+    if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
+        TaskOperation::DEALLOCATE) {
+      pajeTask.~PajeTask();
+    }
   }
 
-  TTaskInstance *ComponentPajeTracer::release(TTask *ttask) {
-    PajeTaskInstance *ttaskInstance = new PajeTaskInstance(static_cast<PajeTask *>(ttask));
-    myPajeTracer->traceEvent(this->res_,
-        ttaskInstance->pajeTask->releaseEvent,
-        sc_core::sc_time_stamp());
-    return  ttaskInstance;
+  void ComponentPajeTracer::taskInstanceOperation(TaskInstanceOperation tio
+    , Component    const &c
+    , TaskInstance const &ti
+    , OTask              &ot
+    , OTaskInstance      &oti)
+  {
+    PajeTask         &pajeTask         = static_cast<PajeTask &>(ot);
+    PajeTaskInstance &pajeTaskInstance = static_cast<PajeTaskInstance &>(oti);
+
+    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
+        TaskInstanceOperation::ALLOCATE) {
+      new (&pajeTaskInstance) PajeTaskInstance(&pajeTask);
+    }
+
+    switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
+      case TaskInstanceOperation::RELEASE:
+        myPajeTracer->traceEvent(this->res_,
+            pajeTask.releaseEvent,
+            sc_core::sc_time_stamp());
+        break;
+      case TaskInstanceOperation::ASSIGN:
+        this->startTime = sc_core::sc_time_stamp();
+        break;
+      case TaskInstanceOperation::RESIGN:
+        myPajeTracer->traceActivity(this->res_,
+            pajeTask.task,
+            this->startTime, sc_core::sc_time_stamp());
+        break;
+      case TaskInstanceOperation::BLOCK:
+        myPajeTracer->traceActivity(this->res_,
+            pajeTask.task,
+            this->startTime, sc_core::sc_time_stamp());
+        break;
+      case TaskInstanceOperation::FINISHDII:
+        myPajeTracer->traceActivity(this->res_,
+            pajeTask.task,
+            this->startTime, sc_core::sc_time_stamp());
+        break;
+      case TaskInstanceOperation::FINISHLAT:
+        myPajeTracer->traceEvent(this->res_,
+            pajeTask.latencyEvent,
+            sc_core::sc_time_stamp());
+        break;
+      default:
+        break;
+    }
+
+    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
+        TaskInstanceOperation::DEALLOCATE) {
+      pajeTaskInstance.~PajeTaskInstance();
+    }
   }
 
-  void           ComponentPajeTracer::assign(TTaskInstance *ttaskInstance) {
-    this->startTime = sc_core::sc_time_stamp();
-  }
-
-  void           ComponentPajeTracer::resign(TTaskInstance *ttaskInstance) {
-    myPajeTracer->traceActivity(this->res_,
-        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
-        this->startTime, sc_core::sc_time_stamp());
-  }
-
-  void           ComponentPajeTracer::block(TTaskInstance *ttaskInstance) {
-    myPajeTracer->traceActivity(this->res_,
-        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
-        this->startTime, sc_core::sc_time_stamp());
-  }
-
-  void           ComponentPajeTracer::finishDii(TTaskInstance *ttaskInstance) {
-    myPajeTracer->traceActivity(this->res_,
-        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->task,
-        this->startTime, sc_core::sc_time_stamp());
-  }
-
-  void           ComponentPajeTracer::finishLatency(TTaskInstance *ttaskInstance) {
-    myPajeTracer->traceEvent(this->res_,
-        static_cast<PajeTaskInstance *>(ttaskInstance)->pajeTask->latencyEvent,
-        sc_core::sc_time_stamp());
+  bool ComponentPajeTracer::addAttribute(AttributePtr attr) {
+    throw ConfigException("The PAJE tracer does not support attributes!");
   }
 
 } } } // namespace SystemC_VPC::Detail::Tracing

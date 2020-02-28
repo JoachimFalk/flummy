@@ -37,13 +37,14 @@
 #ifndef _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_DETAIL_OBSERVABLECOMPONENT_HPP
 
-#include <systemcvpc/ComponentObserver.hpp>
+#include <systemcvpc/Extending/ComponentObserverIf.hpp>
 #include <systemcvpc/Component.hpp>
 
 #include "TaskImpl.hpp"
 #include "TaskInstanceImpl.hpp"
 
 #include <map>
+#include <vector>
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -54,16 +55,27 @@ namespace SystemC_VPC { namespace Detail {
    */
   class ObservableComponent {
   public:
-    void addObserver(ComponentObserver::Ptr const &obs);
+    void addObserver(Extending::ComponentObserverIf::Ptr const &obs);
 
+    TaskImpl *createTask(TaskInterface     *taskInterface);
+    TaskImpl *createTask(std::string const &taskName);
+
+    TaskInstanceImpl *createTaskInstance(
+        TaskImpl                                       *taskImpl
+      , TaskInstanceImpl::Type                          type
+      , PossibleAction                                 *firingRuleInterface
+      , std::function<void (TaskInstanceImpl *)> const &diiCallback
+      , std::function<void (TaskInstanceImpl *)> const &latCallback);
   protected:
+    typedef std::vector<TaskImpl *> Tasks;
+
     ObservableComponent();
 
-    typedef ComponentObserver::ComponentOperation
+    typedef Extending::ComponentObserverIf::ComponentOperation
         ComponentOperation;
-    typedef ComponentObserver::TaskOperation
+    typedef Extending::ComponentObserverIf::TaskOperation
         TaskOperation;
-    typedef ComponentObserver::TaskInstanceOperation
+    typedef Extending::ComponentObserverIf::TaskInstanceOperation
         TaskInstanceOperation;
 
     void componentOperation(ComponentOperation co
@@ -77,18 +89,30 @@ namespace SystemC_VPC { namespace Detail {
       , AbstractComponent const &c
       , TaskInstanceImpl        &ti);
 
-    virtual ~ObservableComponent();
+    Tasks const &getTasks()
+      { return tasks; }
+
+    ~ObservableComponent();
   private:
+    TaskImpl *createTask(std::function<void (char *)> factory);
+
+    typedef Extending::ComponentObserverIf::OTask
+        OTask;
+    typedef Extending::ComponentObserverIf::OTaskInstance
+        OTaskInstance;
+
     struct ObserverInfo {
       int taskOffset;
       int taskInstanceOffset;
     };
-    typedef std::map<ComponentObserver::Ptr, ObserverInfo> Observers;
+    typedef std::map<Extending::ComponentObserverIf::Ptr, ObserverInfo> Observers;
     
+    bool   observerRegistrationAllowed;
     size_t nextFreeTaskOffset;
     size_t nextFreeTaskInstanceOffset;
 
     Observers observers;
+    Tasks     tasks;
   };
 
 } } // namespace SystemC_VPC::Detail

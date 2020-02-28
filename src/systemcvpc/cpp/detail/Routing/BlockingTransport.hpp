@@ -83,6 +83,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     void start(size_t quantitiy, void *userData, CallBack completed);
 
+    void finalize();
+
     ///
     /// Other stuff
     ///

@@ -50,10 +50,16 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  TaskImpl::TaskImpl(AbstractComponent *component, std::string const &taskName)
-    : scheduledTask(nullptr)
-    , component(component)
-    , name(taskName)
+  TaskImpl::TaskImpl(TaskInterface *taskInterface)
+    : Extending::Task(taskInterface->name())
+    , scheduledTask(taskInterface)
+    , pid(Director::getProcessId(taskInterface->name()))
+    , priority(0)
+    , psm(false) {}
+
+  TaskImpl::TaskImpl(std::string const &taskName)
+    : Extending::Task(taskName)
+    , scheduledTask(nullptr)
     , pid(Director::getProcessId(taskName))
     , priority(0)
     , psm(false) {}

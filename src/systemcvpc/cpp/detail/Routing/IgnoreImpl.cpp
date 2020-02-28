@@ -80,6 +80,9 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     boost::apply_visitor(Visitor(quantitiy, userData, completed), portInterface);
   }
 
+  void IgnoreImpl::finalize() {
+  }
+
   IgnoreImpl::~IgnoreImpl( ){
     DBG_OUT("Ignore::~Ignore( )" << std::endl);
   }

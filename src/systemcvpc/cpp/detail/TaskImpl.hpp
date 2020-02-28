@@ -43,8 +43,6 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/Extending/Task.hpp>
 
-#include "tracing/ComponentTracerIf.hpp"
-
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
@@ -56,6 +54,7 @@
 namespace SystemC_VPC { namespace Detail {
 
   class AbstractComponent;
+  class ObservableComponent;
 
  /**
   * This class represents all necessary data of a simulated process within VPC
@@ -63,14 +62,8 @@ namespace SystemC_VPC { namespace Detail {
   */
   class TaskImpl
     : public Extending::Task
-    , public Tracing::TTaskHolder
   {
   public:
-    /**
-     * \brief Default constructor of a Task.
-     * Initialize a newly created instance of TaskImpl.
-     */
-    TaskImpl(AbstractComponent *component, std::string const &taskName);
 
     ProcessId getPid() const
       { return pid; }
@@ -87,24 +80,28 @@ namespace SystemC_VPC { namespace Detail {
     bool getTaskIsPSM() const
       { return psm; }
 
-    std::string const &getName() const
-      { return name; }
-
-    void setScheduledTask(TaskInterface * st)
-      { this->scheduledTask = st; }
+//  void setScheduledTask(TaskInterface * st)
+//    { this->scheduledTask = st; }
     TaskInterface * getScheduledTask()
       { return this->scheduledTask; }
     bool hasScheduledTask() const
       { return this->scheduledTask != NULL; }
 
-    ~TaskImpl();
   private:
-    smoc::SimulatorAPI::TaskInterface   *scheduledTask;
-    AbstractComponent                   *component;
-    std::string                          name;
-    ProcessId                            pid;
-    int                                  priority;
-    bool                                 psm;
+    friend class ObservableComponent; // To access constructor and destructor.
+
+    /**
+     * \brief Initialize a newly created instance of TaskImpl.
+     */
+    TaskImpl(TaskInterface     *taskInterface);
+    TaskImpl(std::string const &taskName);
+
+    ~TaskImpl();
+
+    TaskInterface *scheduledTask;
+    ProcessId      pid;
+    int            priority;
+    bool           psm;
   };
 
   static inline

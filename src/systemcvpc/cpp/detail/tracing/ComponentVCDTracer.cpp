@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -35,8 +35,10 @@
  */
 
 #include <systemcvpc/Component.hpp>
+#include <systemcvpc/ConfigException.hpp>
 
-#include "ComponentTracerIf.hpp"
+#include <systemcvpc/Extending/ComponentTracerIf.hpp>
+#include <systemcvpc/ComponentTracer.hpp>
 
 #include <systemc>
 
@@ -52,25 +54,39 @@ namespace SystemC_VPC {
 
 namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
-  class ComponentVCDTracer: public ComponentTracerIf {
+  class ComponentVCDTracer
+    : public Extending::ComponentTracerIf
+    , public ComponentTracer
+  {
   public:
     ComponentVCDTracer(Component const *component);
 
     ~ComponentVCDTracer();
 
-    TTask         *registerTask(std::string const &name);
+    ///
+    /// Implement interface for ComponentTracerIf
+    ///
 
-    TTaskInstance *release(TTask *ttask);
+    void componentOperation(ComponentOperation co
+      , Component const &c);
 
-    void           assign(TTaskInstance *ttaskInstance);
+    void taskOperation(TaskOperation to
+      , Component const &c
+      , Task      const &t
+      , OTask           &ot);
 
-    void           resign(TTaskInstance *ttaskInstance);
+    void taskInstanceOperation(TaskInstanceOperation tio
+      , Component    const &c
+      , TaskInstance const &ti
+      , OTask              &ot
+      , OTaskInstance      &oti);
 
-    void           block(TTaskInstance *ttaskInstance);
+    ///
+    /// Implement interface for ComponentTracer
+    ///
 
-    void           finishDii(TTaskInstance *ttaskInstance);
+    bool addAttribute(AttributePtr attr);
 
-    void           finishLatency(TTaskInstance *ttaskInstance);
   private:
     class VcdTask;
     class VcdTaskInstance;
@@ -94,7 +110,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   /**
    * tiny little helper: toggle ASCII characters used for VCD tracing
    */
-  class ComponentVCDTracer::VcdTask: public TTask {
+  class ComponentVCDTracer::VcdTask: public OTask {
   public:
     static const trace_value S_SLEEP;
     static const trace_value S_BLOCKED;
@@ -110,6 +126,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
       , lastValue(0), currentValue(0)
     {
       sc_core::sc_trace(traceFile, currentValue, task);
+      traceSleeping();
     }
 
     void traceRunning(){
@@ -209,7 +226,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   const trace_value ComponentVCDTracer::VcdTask::S_READY   = 'w';
   const trace_value ComponentVCDTracer::VcdTask::S_RUNNING = 'R';
 
-  class ComponentVCDTracer::VcdTaskInstance: public TTaskInstance {
+  class ComponentVCDTracer::VcdTaskInstance: public OTaskInstance {
   public:
     VcdTaskInstance(VcdTask *vcdTask)
       : vcdTask(vcdTask) {}
@@ -232,7 +249,15 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   #endif // VPC_ENABLE_PLAIN_TRACING
 
   ComponentVCDTracer::ComponentVCDTracer(Component const *component)
-    : traceFile_(NULL)
+    : Extending::ComponentTracerIf(
+          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
+          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
+        , sizeof(VcdTask), sizeof(VcdTaskInstance))
+    , ComponentTracer(
+         reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
+         reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
+       , "VCD")
+    , traceFile_(NULL)
     , name_(component->getName())
   {}
 
@@ -246,9 +271,18 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     return name_;
   }
 
-  TTask         *ComponentVCDTracer::registerTask(std::string const &name) {
+  void ComponentVCDTracer::componentOperation(ComponentOperation co
+    , Component const &c) {
+    // Ignore
+  }
+
+  void ComponentVCDTracer::taskOperation(TaskOperation to
+    , Component const &c
+    , Task      const &t
+    , OTask           &ot)
+  {
     if (this->traceFile_ == NULL) {
-      std::string tracefilename = this->getName(); //componentName;
+      std::string tracefilename = c.getName(); //componentName;
 
       char* traceprefix = getenv("VPCTRACEFILEPREFIX");
       if (0 != traceprefix) {
@@ -258,38 +292,64 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
       this->traceFile_ = sc_core::sc_create_vcd_trace_file(tracefilename.c_str());
       this->traceFile_->set_time_unit(1, sc_core::SC_NS);
     }
-    VcdTask *newsignal = new VcdTask(this->traceFile_, getName(), name);
-    newsignal->traceSleeping();
-    return newsignal;
+
+    VcdTask &vcdTask = static_cast<VcdTask &>(ot);
+
+    if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
+        TaskOperation::ALLOCATE) {
+      new (&vcdTask) VcdTask(this->traceFile_, c.getName(), t.getName());
+    }
+    if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
+        TaskOperation::DEALLOCATE) {
+      vcdTask.~VcdTask();
+    }
   }
 
-  TTaskInstance *ComponentVCDTracer::release(TTask *ttask) {
-    VcdTaskInstance *ttaskInstance = new VcdTaskInstance(static_cast<VcdTask *>(ttask));
-    ttaskInstance->vcdTask->traceReady();
-  //// FIXME: This should become its own tracer!
-  //const_cast<Task *>(task)->traceReleaseTask();
-    return ttaskInstance;
+  void ComponentVCDTracer::taskInstanceOperation(TaskInstanceOperation tio
+    , Component    const &c
+    , TaskInstance const &ti
+    , OTask              &ot
+    , OTaskInstance      &oti)
+  {
+    VcdTask         &vcdTask         = static_cast<VcdTask &>(ot);
+    VcdTaskInstance &vcdTaskInstance = static_cast<VcdTaskInstance &>(oti);
+
+    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
+        TaskInstanceOperation::ALLOCATE) {
+      new (&vcdTaskInstance) VcdTaskInstance(&vcdTask);
+    }
+
+    switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
+      case TaskInstanceOperation::RELEASE:
+        vcdTaskInstance.vcdTask->traceReady();
+        break;
+      case TaskInstanceOperation::ASSIGN:
+        vcdTaskInstance.vcdTask->traceRunning();
+        break;
+      case TaskInstanceOperation::RESIGN:
+        vcdTaskInstance.vcdTask->traceReady();
+        break;
+      case TaskInstanceOperation::BLOCK:
+        vcdTaskInstance.vcdTask->traceBlocking();
+        break;
+      case TaskInstanceOperation::FINISHDII:
+        vcdTaskInstance.vcdTask->traceSleeping();
+        break;
+      case TaskInstanceOperation::FINISHLAT:
+        // Ignore this. Use PAJE tracer to visualize this.
+        break;
+      default:
+        break;
+    }
+
+    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
+        TaskInstanceOperation::DEALLOCATE) {
+      vcdTaskInstance.~VcdTaskInstance();
+    }
   }
 
-  void           ComponentVCDTracer::assign(TTaskInstance *ttaskInstance) {
-    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceRunning();
-  }
-
-  void           ComponentVCDTracer::resign(TTaskInstance *ttaskInstance) {
-    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceReady();
-  }
-
-  void           ComponentVCDTracer::block(TTaskInstance *ttaskInstance) {
-    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceBlocking();
-  }
-
-  void           ComponentVCDTracer::finishDii(TTaskInstance *ttaskInstance) {
-    static_cast<VcdTaskInstance *>(ttaskInstance)->vcdTask->traceSleeping();
-  }
-
-  void           ComponentVCDTracer::finishLatency(TTaskInstance *ttaskInstance) {
-  //// FIXME: This should become its own tracer!
-  //const_cast<Task *>(task)->traceFinishTaskLatency();
+  bool ComponentVCDTracer::addAttribute(AttributePtr attr) {
+    throw ConfigException("The VCD tracer does not support attributes!");
   }
 
 } } } // namespace SystemC_VPC::Detail::Tracing

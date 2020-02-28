@@ -4,6 +4,20 @@
  * Copyright (c) 2004-2018 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
+ *   This library is free software; you can redistribute it and/or modify it under
+ *   the terms of the GNU Lesser General Public License as published by the Free
+ *   Software Foundation; either version 2 of the License, or (at your option) any
+ *   later version.
+ * 
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ *   details.
+ * 
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation, Inc.,
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+ * 
  * --- This software and any associated documentation is provided "as is"
  * 
  * IN NO EVENT SHALL HARDWARE-SOFTWARE-CODESIGN, UNIVERSITY OF ERLANGEN NUREMBERG
@@ -23,14 +37,29 @@
 #ifndef _INCLUDED_SYSTEMCVPC_EXTENDING_TASK_HPP
 #define _INCLUDED_SYSTEMCVPC_EXTENDING_TASK_HPP
 
+#include <boost/noncopyable.hpp>
+
+#include <string>
+
 namespace SystemC_VPC { namespace Extending {
 
  /**
   * This class represents the publicly visible information of a
   * task running on a component.
   */
-  class Task {
+  class Task
+    : private boost::noncopyable
+  {
   public:
+    std::string const &getName() const
+      { return name; }
+
+  protected:
+    Task(std::string const &name)
+      : name(name)
+      {}
+  private:
+    std::string name;
   };
 
 } } // namespace SystemC_VPC::Extending
