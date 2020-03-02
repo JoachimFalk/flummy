@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -38,6 +38,7 @@
 #include <systemcvpc/PowerMode.hpp>
 
 #include "LookupPowerTimeModelImpl.hpp"
+#include "../common.hpp"
 
 #include <CoSupport/sassert.h>
 
@@ -88,7 +89,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 //      continue;
 //    }
 
-    if (attr->isType("startup-powermode")) {
+    if (attr->isType("startupPowermode")) {
       startPowerMode = attr->getValue();
       return true;
     }
@@ -103,6 +104,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
           pmi.pwrRunning = atof(emAttr->getValue().c_str());
         } else if (emAttr->isType("powerStalled")) {
           pmi.pwrStalled = atof(emAttr->getValue().c_str());
+
+        } else if (emAttr->isType("guardComplexityFactor")) {
+          pmi.guardComplexityFactor = createSC_Time(emAttr->getValue().c_str());
         } else {
           throw ConfigException("Unhandled attribute " + emAttr->getType()
               + " for power mode "+attr->getType()
@@ -225,8 +229,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
         }
         guardDelay += iter->second.getDii();
       }
-      // FIXME: Don't use constant complexity factor 0.1 ns!!!
-      guardDelay += guardComplexity * sc_core::sc_time(0.1, sc_core::SC_NS);
+      guardDelay += guardComplexity * entry.second.guardComplexityFactor;
 
       array[index].guardDelay = guardDelay;
       array[index].dii        = dii;

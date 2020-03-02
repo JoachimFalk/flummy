@@ -19,7 +19,7 @@
      <attribute type="powerStalled" value="0.75"/>
      <attribute type="powerRunning" value="1.3"/>
     </attribute>
-    <attribute type="startup-powermode" value="flummy"/>
+    <attribute type="startupPowermode" value="flummy"/>
    </attribute>
   </component>
  </resources>
