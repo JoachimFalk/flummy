@@ -128,6 +128,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
       double  pwrIdle;    ///< Idle power in power mode
       double  pwrRunning; ///< Default power consumption if a task is running.
       double  pwrStalled; ///< Default power consumption for a stalled task.
+      /// Delay factor for the guard complexity to determine the guard delay, i.e.,
+      /// guard delay is guard complexity multiplied by guard complexity factor.
+      sc_core::sc_time guardComplexityFactor;
 
       PowerModeInfo()
         : index(-1)

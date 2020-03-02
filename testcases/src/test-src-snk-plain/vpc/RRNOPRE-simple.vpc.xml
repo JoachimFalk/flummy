@@ -8,6 +8,11 @@
     <attribute type="scheduler">
       <attribute type="fireActorInLoop" value="false"/>
     </attribute>
+    <attribute type="execModel" value="LookupPowerTimeModel">
+      <attribute type="powermode" value="DEFAULT">
+        <attribute type="guardComplexityFactor" value="0.1 ns"/>
+      </attribute>
+    </attribute>
   </component>
  </resources>
 
