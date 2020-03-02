@@ -318,7 +318,6 @@ namespace SystemC_VPC { namespace Detail {
     std::function<void (TaskInstanceImpl *)> none([](TaskInstanceImpl *) {});
     TaskInstanceImpl *taskInstance = createTaskInstance(taskImpl
         , TaskInstanceImpl::Type::MESSAGE, nullptr, none, cb);
-    taskInstance->setTimingScale(quantum);
     // FIXME: Timing independent of power mode at the moment!
     taskInstance->setDelay(quantum * transferTiming.getDii());
     taskInstance->setRemainingDelay(taskInstance->getDelay());

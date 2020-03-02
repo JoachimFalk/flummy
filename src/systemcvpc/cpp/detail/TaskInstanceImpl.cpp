@@ -53,7 +53,6 @@ namespace SystemC_VPC { namespace Detail {
     , firingRuleInterface(firingRuleInterface)
     , diiCallback(diiCallback)
     , latCallback(latCallback)
-    , timingScale(1)
     , blockingCompute(nullptr)
     , blockAck(false)
     , exec(false)
