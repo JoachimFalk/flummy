@@ -96,10 +96,6 @@ namespace SystemC_VPC { namespace Detail {
       { this->remainingDelay = delay; }
     sc_core::sc_time getRemainingDelay() const
       { return this->remainingDelay; }
-    void             setTimingScale(double scale)
-      { this->timingScale = scale; }
-    double           getTimingScale() const
-      { return this->timingScale; }
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -154,7 +150,6 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_time delay;
     sc_core::sc_time latency;
     sc_core::sc_time remainingDelay;
-    double           timingScale;
 
     // JF: Other stuff I still don't understand
     VPCEvent::Ptr blockingCompute;
