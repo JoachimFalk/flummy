@@ -10,14 +10,14 @@
    <attribute type="tracing" value="PAJE"/>
    <attribute type="execModel" value="LookupPowerTimeModel">
     <attribute type="powermode" value="flummy">
-     <attribute type="powerIdle"    value="0.25"/>
-     <attribute type="powerStalled" value="0.5"/>
-     <attribute type="powerRunning" value="0.7"/>
+     <attribute type="powerIdle"    value="0.25 mW"/>
+     <attribute type="powerStalled" value="0.5 mW"/>
+     <attribute type="powerRunning" value="0.7 mW"/>
     </attribute>
     <attribute type="powermode" value="flammy">
-     <attribute type="powerIdle"    value="0.5"/>
-     <attribute type="powerStalled" value="0.75"/>
-     <attribute type="powerRunning" value="1.3"/>
+     <attribute type="powerIdle"    value="0.5 mW"/>
+     <attribute type="powerStalled" value="0.75 mW"/>
+     <attribute type="powerRunning" value="1.3 mW"/>
     </attribute>
     <attribute type="startupPowermode" value="flummy"/>
    </attribute>

@@ -65,9 +65,11 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/Component.cpp \
 	src/systemcvpc/cpp/ComponentObserver.cpp \
 	src/systemcvpc/cpp/ExecModel.cpp \
+	src/systemcvpc/cpp/Power.cpp \
 	src/systemcvpc/cpp/PowerMode.cpp \
 	src/systemcvpc/cpp/Route.cpp \
 	src/systemcvpc/cpp/Scheduler.cpp \
+	src/systemcvpc/cpp/Time.cpp \
 	src/systemcvpc/cpp/Timing.cpp \
 	src/systemcvpc/cpp/VpcApi.cpp \
 	src/systemcvpc/cpp/VpcTask.cpp \
