@@ -101,6 +101,14 @@ namespace SystemC_VPC { namespace Detail {
       , bool forGuard = false) const = 0;
 
     virtual ~AbstractExecModel();
+  protected:
+    // Accessor methods for execution models to inject information into task instances.
+    static void setDelay(TaskInstanceImpl *ti, sc_core::sc_time delay)
+      { ti->setDelay(delay); ti->setRemainingDelay(delay); }
+    static void setLatency(TaskInstanceImpl *ti, sc_core::sc_time latency)
+      { ti->setLatency(latency); }
+    static void setPower(TaskInstanceImpl *ti, Power pwr)
+      { ti->setPower(pwr); }
   private:
     int                         facadeAdj;
   };

@@ -55,6 +55,8 @@ namespace SystemC_VPC { namespace Detail {
 
   class TaskImpl;
   class ObservableComponent;
+  class AbstractExecModel;
+  class AbstractComponent;
 
 //using CoSupport::SystemC::Event;
 
@@ -82,20 +84,6 @@ namespace SystemC_VPC { namespace Detail {
 
     void diiExpired() { diiCallback(this); }
     void latExpired() { latCallback(this); }
-
-    // Timings getters and setters
-    void             setDelay(sc_core::sc_time delay)
-      { this->delay = delay; }
-    sc_core::sc_time getDelay() const
-      { return this->delay; }
-    void             setLatency(sc_core::sc_time latency)
-      { this->latency = latency; }
-    sc_core::sc_time getLatency() const
-      { return this->latency; }
-    void             setRemainingDelay(sc_core::sc_time delay)
-      { this->remainingDelay = delay; }
-    sc_core::sc_time getRemainingDelay() const
-      { return this->remainingDelay; }
 
     void       ackBlockingCompute(){
       blockAck = true;
@@ -126,6 +114,8 @@ namespace SystemC_VPC { namespace Detail {
 
   private:
     friend class ObservableComponent; // To access constructor and destructor.
+    friend class AbstractExecModel;   // To access setDelay, setLatency, and setPower.
+    friend class AbstractComponent;   // To access setDelay, setLatency, and setRemainingDelay.
 
     TaskInstanceImpl(
         TaskImpl                                       *taskImpl
@@ -145,11 +135,6 @@ namespace SystemC_VPC { namespace Detail {
 
     std::function<void (TaskInstanceImpl *)> const diiCallback;
     std::function<void (TaskInstanceImpl *)> const latCallback;
-
-    // Timings
-    sc_core::sc_time delay;
-    sc_core::sc_time latency;
-    sc_core::sc_time remainingDelay;
 
     // JF: Other stuff I still don't understand
     VPCEvent::Ptr blockingCompute;

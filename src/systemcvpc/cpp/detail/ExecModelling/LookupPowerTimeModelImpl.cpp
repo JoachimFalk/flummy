@@ -50,6 +50,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     sc_core::sc_time guardDelay;
     sc_core::sc_time dii;
     sc_core::sc_time latency;
+    Power            pwrRunning;
   };
 
   LookupPowerTimeModelImpl::LookupPowerTimeModelImpl()
@@ -234,6 +235,7 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
       array[index].guardDelay = guardDelay;
       array[index].dii        = dii;
       array[index].latency    = latency;
+      array[index].pwrRunning = entry.second.pwrRunning;
     }
     return reinterpret_cast<ActionInfo *>(array);
 
@@ -341,13 +343,13 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     PowerModeTiming *array = reinterpret_cast<PowerModeTiming *>(ai);
 
     if (forGuard) {
-      ti->setDelay(array[cs.powerMode].guardDelay);
-      ti->setRemainingDelay(array[cs.powerMode].guardDelay);
-      ti->setLatency(array[cs.powerMode].guardDelay);
+      setDelay(ti, array[cs.powerMode].guardDelay);
+      setLatency(ti, array[cs.powerMode].guardDelay);
+      setPower(ti, array[cs.powerMode].pwrRunning);
     } else {
-      ti->setDelay(array[cs.powerMode].dii);
-      ti->setRemainingDelay(array[cs.powerMode].dii);
-      ti->setLatency(array[cs.powerMode].latency);
+      setDelay(ti, array[cs.powerMode].dii);
+      setLatency(ti, array[cs.powerMode].latency);
+      setPower(ti, array[cs.powerMode].pwrRunning);
     }
   }
 
