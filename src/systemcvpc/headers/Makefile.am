@@ -45,10 +45,12 @@ nobase_include_HEADERS = \
 	systemcvpc/ExecModel.hpp \
 	systemcvpc/InvalidArgumentException.hpp \
 	systemcvpc/PossibleAction.hpp \
+	systemcvpc/Power.hpp \
 	systemcvpc/PowerMode.hpp \
 	systemcvpc/Route.hpp \
 	systemcvpc/ScheduledTask.hpp \
 	systemcvpc/Scheduler.hpp \
+	systemcvpc/Time.hpp \
 	systemcvpc/Timing.hpp \
 	systemcvpc/TimingModifier.hpp \
 	systemcvpc/VpcApi.hpp \

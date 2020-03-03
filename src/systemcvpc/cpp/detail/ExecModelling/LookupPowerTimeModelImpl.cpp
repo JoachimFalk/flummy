@@ -99,11 +99,11 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
         Attribute::Ptr emAttr = attr->getNextAttribute(i).second;
 
         if (emAttr->isType("powerIdle")) {
-          pmi.pwrIdle = atof(emAttr->getValue().c_str());
+          pmi.pwrIdle = Power(emAttr->getValue());
         } else if (emAttr->isType("powerRunning")) {
-          pmi.pwrRunning = atof(emAttr->getValue().c_str());
+          pmi.pwrRunning = Power(emAttr->getValue());
         } else if (emAttr->isType("powerStalled")) {
-          pmi.pwrStalled = atof(emAttr->getValue().c_str());
+          pmi.pwrStalled = Power(emAttr->getValue());
 
         } else if (emAttr->isType("guardComplexityFactor")) {
           pmi.guardComplexityFactor = createSC_Time(emAttr->getValue().c_str());

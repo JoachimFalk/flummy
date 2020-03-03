@@ -39,6 +39,7 @@
 
 #include <systemcvpc/ExecModelling/LookupPowerTimeModel.hpp>
 #include <systemcvpc/Timing.hpp>
+#include <systemcvpc/Power.hpp>
 
 #include "../AbstractExecModel.hpp"
 
@@ -125,16 +126,15 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     struct PowerModeInfo {
       size_t  index;      ///< Index of power mode.
       Timings timings;    ///< Power mode dependent action and guard timings
-      double  pwrIdle;    ///< Idle power in power mode
-      double  pwrRunning; ///< Default power consumption if a task is running.
-      double  pwrStalled; ///< Default power consumption for a stalled task.
+      Power   pwrIdle;    ///< Idle power in power mode
+      Power   pwrRunning; ///< Default power consumption if a task is running.
+      Power   pwrStalled; ///< Default power consumption for a stalled task.
       /// Delay factor for the guard complexity to determine the guard delay, i.e.,
       /// guard delay is guard complexity multiplied by guard complexity factor.
       sc_core::sc_time guardComplexityFactor;
 
       PowerModeInfo()
-        : index(-1)
-        , pwrIdle(-1), pwrRunning(-1), pwrStalled(-1) {}
+        : index(-1) {}
     };
     typedef std::map<std::string, PowerModeInfo> PowerModes;
 

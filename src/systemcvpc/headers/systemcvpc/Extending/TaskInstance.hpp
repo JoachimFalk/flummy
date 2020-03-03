@@ -37,15 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_EXTENDING_TASKINSTANCE_HPP
 #define _INCLUDED_SYSTEMCVPC_EXTENDING_TASKINSTANCE_HPP
 
-#include <systemcvpc/vpc_config.h>
-#include <systemcvpc/ScheduledTask.hpp>
-#include <systemcvpc/PossibleAction.hpp>
-#include <systemcvpc/EventPair.hpp>
-
-#include <CoSupport/SystemC/systemc_support.hpp>
-#include <CoSupport/Tracing/TaskTracer.hpp>
-
-#include <functional>
+#include "../Power.hpp"
 
 namespace SystemC_VPC { namespace Extending {
 
@@ -56,6 +48,17 @@ namespace SystemC_VPC { namespace Extending {
    */
   class TaskInstance {
   public:
+
+    Power getPower() const
+      { return pwr; }
+
+  protected:
+    void setPower(Power pwr)
+      { this->pwr = pwr; }
+  private:
+
+    Power pwr;
+
   };
 
 } } // namespace SystemC_VPC::Extending
