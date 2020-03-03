@@ -229,7 +229,8 @@ namespace SystemC_VPC { namespace Detail {
       for (TaskMap::iterator niter, iter = runningTasks.begin();
            iter != runningTasks.end();
            iter = niter) {
-        iter->second->setRemainingDelay(iter->second->getRemainingDelay() - runTime);
+        ranTaskInstance(iter->second);
+//      iter->second->setRemainingDelay(iter->second->getRemainingDelay() - runTime);
         DBG_OUT(this->getName() << " IID: " << iter->first << "> Remaining delay for "
              << iter->second->getName() << " is " << iter->second->getRemainingDelay() << std::endl);
         assert(iter->second->getRemainingDelay() >= sc_core::SC_ZERO_TIME);

@@ -210,6 +210,9 @@ namespace SystemC_VPC { namespace Detail {
     /// Called possibly multiple times to assign the task instance to the resource.
     void assignTaskInstance(TaskInstanceImpl *ti);
 
+    /// Called possibly multiple times to adjust remaining delay of assigned task instance.
+    void ranTaskInstance(TaskInstanceImpl *ti);
+
     /// Called possibly multiple times to resign the task instance from the resource.
     void resignTaskInstance(TaskInstanceImpl *ti);
 
@@ -257,6 +260,9 @@ namespace SystemC_VPC { namespace Detail {
 
     AbstractExecModel::Ptr        execModel;
     AbstractExecModel::CompState *execModelComponentState;
+
+    TaskInstanceImpl *assignedTaskInstance;
+    sc_core::sc_time  assignedTaskInstanceTime;
 
     PowerMode      powerMode;
     ComponentState compState;

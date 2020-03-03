@@ -39,6 +39,8 @@
 
 #include "../Power.hpp"
 
+#include <systemc>
+
 namespace SystemC_VPC { namespace Extending {
 
 
@@ -49,16 +51,34 @@ namespace SystemC_VPC { namespace Extending {
   class TaskInstance {
   public:
 
-    Power getPower() const
+    sc_core::sc_time getDelay() const
+      { return this->delay; }
+    sc_core::sc_time getLatency() const
+      { return this->latency; }
+    sc_core::sc_time getRemainingDelay() const
+      { return this->remainingDelay; }
+
+    Power            getPower() const
       { return pwr; }
 
   protected:
+    void setDelay(sc_core::sc_time delay)
+      { this->delay = delay; }
+    void setLatency(sc_core::sc_time latency)
+      { this->latency = latency; }
+    void setRemainingDelay(sc_core::sc_time delay)
+      { this->remainingDelay = delay; }
+
     void setPower(Power pwr)
       { this->pwr = pwr; }
   private:
 
-    Power pwr;
+    // Timings
+    sc_core::sc_time delay;
+    sc_core::sc_time latency;
+    sc_core::sc_time remainingDelay;
 
+    Power pwr; ///< Power consumption when this task instance is running on a component.
   };
 
 } } // namespace SystemC_VPC::Extending

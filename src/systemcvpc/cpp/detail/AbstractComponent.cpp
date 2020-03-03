@@ -208,6 +208,7 @@ namespace SystemC_VPC { namespace Detail {
     , componentName(name)
     , canExecuteTasks(true)
     , execModelComponentState(nullptr)
+    , assignedTaskInstance(nullptr)
     , powerMode(PowerMode::DEFAULT)
     , compState(ComponentState::IDLE)
     , powerConsumption(0)
@@ -334,24 +335,41 @@ namespace SystemC_VPC { namespace Detail {
 
   /// Called possibly multiple times to assign the task instance to the resource.
   void AbstractComponent::assignTaskInstance(TaskInstanceImpl *ti) {
+    assert(!assignedTaskInstance);
+    assignedTaskInstance = ti;
+    assignedTaskInstanceTime = sc_core::sc_time_stamp();
     this->taskInstanceOperation(TaskInstanceOperation::ASSIGN
         , *this, *ti);
   }
 
+  /// Called possibly multiple times to adjust remaining delay of assigned task instance.
+  void AbstractComponent::ranTaskInstance(TaskInstanceImpl *ti) {
+    assert(assignedTaskInstance == ti);
+    sc_core::sc_time now = sc_core::sc_time_stamp();
+    ti->setRemainingDelay(ti->getRemainingDelay()
+        - now + assignedTaskInstanceTime);
+    assignedTaskInstanceTime = now;
+  }
+
   /// Called possibly multiple times to resign the task instance from the resource.
   void AbstractComponent::resignTaskInstance(TaskInstanceImpl *ti) {
+    assert(assignedTaskInstance == ti);
     this->taskInstanceOperation(TaskInstanceOperation::RESIGN
         , *this, *ti);
+    assignedTaskInstance = nullptr;
   }
 
   /// Called possibly multiple times to indicate that the task is blocked waiting for something.
   void AbstractComponent::blockTaskInstance(TaskInstanceImpl *ti) {
+    assert(assignedTaskInstance == ti);
     this->taskInstanceOperation(TaskInstanceOperation::BLOCK
         , *this, *ti);
+    assignedTaskInstance = nullptr;
   }
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
   void AbstractComponent::finishDiiTaskInstance(TaskInstanceImpl *ti) {
+    assert(assignedTaskInstance == ti);
 //  this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
     ti->diiExpired();
 
@@ -364,6 +382,7 @@ namespace SystemC_VPC { namespace Detail {
     }
     this->taskInstanceOperation(TaskInstanceOperation::FINISHDII
         , *this, *ti);
+    assignedTaskInstance = nullptr;
   }
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
