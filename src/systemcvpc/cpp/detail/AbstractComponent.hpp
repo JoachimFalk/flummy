@@ -225,8 +225,6 @@ namespace SystemC_VPC { namespace Detail {
     /// Called once per actor firing to indicate that the latency of the task instance is over.
     void finishLatencyTaskInstance(TaskInstanceImpl *ti);
 
-    void fireStateChanged(ComponentState state);
-
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
     bool requestExecuteTasks;
 

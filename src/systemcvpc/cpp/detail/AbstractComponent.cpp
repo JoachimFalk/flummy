@@ -87,6 +87,7 @@ namespace SystemC_VPC { namespace Detail {
   void AbstractComponent::changePowerMode(std::string powerMode) {
     execModel->setPowerMode(execModelComponentState, powerMode);
     this->powerMode = powerMode;
+    this->componentOperation(ComponentOperation::PWRCHANGE, *this);
   }
 
   void AbstractComponent::registerComponentWakeup(const ScheduledTask * actor, VPCEvent::Ptr event){
@@ -336,6 +337,11 @@ namespace SystemC_VPC { namespace Detail {
   /// Called possibly multiple times to assign the task instance to the resource.
   void AbstractComponent::assignTaskInstance(TaskInstanceImpl *ti) {
     assert(!assignedTaskInstance);
+    compState = ti->isPSM()
+        // Assuming PSM actors are assigned to the same component they model,
+        // the executing state of the component should be IDLE.
+        ? ComponentState::IDLE
+        : ComponentState::RUNNING;
     assignedTaskInstance = ti;
     assignedTaskInstanceTime = sc_core::sc_time_stamp();
     this->taskInstanceOperation(TaskInstanceOperation::ASSIGN
@@ -362,6 +368,7 @@ namespace SystemC_VPC { namespace Detail {
   /// Called possibly multiple times to indicate that the task is blocked waiting for something.
   void AbstractComponent::blockTaskInstance(TaskInstanceImpl *ti) {
     assert(assignedTaskInstance == ti);
+    compState = ComponentState::STALLED;
     this->taskInstanceOperation(TaskInstanceOperation::BLOCK
         , *this, *ti);
     assignedTaskInstance = nullptr;
@@ -370,6 +377,7 @@ namespace SystemC_VPC { namespace Detail {
   /// Called once per actor firing to indicate that the DII of the task instance is over.
   void AbstractComponent::finishDiiTaskInstance(TaskInstanceImpl *ti) {
     assert(assignedTaskInstance == ti);
+    compState = ComponentState::IDLE;
 //  this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
     ti->diiExpired();
 
@@ -407,13 +415,5 @@ namespace SystemC_VPC { namespace Detail {
         , *this, *ti);
   }
 
-  void AbstractComponent::fireStateChanged(ComponentState state)
-  {
-    compState = state;
-    // FIXME: update powerConsumption
-    //this->setPowerConsumption(powerTables[getPowerMode()][getComponentState()]);
-    // Notify observers (e.g. powersum)
-    this->componentOperation(ComponentOperation::PWRCHANGE, *this);
-  }
 
 } } // namespace SystemC_VPC::Detail
