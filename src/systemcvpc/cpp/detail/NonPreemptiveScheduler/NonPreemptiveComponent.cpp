@@ -79,7 +79,6 @@ namespace SystemC_VPC { namespace Detail {
     powerSumming = new PowerSumming(*powerSumStream);
     this->addObserver(powerSumming);
 #endif // NO_POWER_SUM
-    fireStateChanged(ComponentState::IDLE);
   }
 
   void NonPreemptiveComponent::notifyActivation(
@@ -181,12 +180,6 @@ namespace SystemC_VPC { namespace Detail {
         assert(runningTask != nullptr);
         --readyTasks;
         assignTaskInstance(runningTask);
-        if (!runningTask->isPSM())
-          fireStateChanged(ComponentState::RUNNING);
-        else
-          // Assuming PSM actors are assigned to the same component they model,
-          // the executing state of the component should be IDLE.
-          fireStateChanged(ComponentState::IDLE);
         wait(runningTask->getDelay());
         removeTask();
         TaskInterface *scheduledTask = runningTask->getTask()->getScheduledTask();
@@ -206,7 +199,6 @@ namespace SystemC_VPC { namespace Detail {
         runningTask = NULL;
       }
       assert(runningTask == nullptr);
-      fireStateChanged(ComponentState::IDLE);
       wait(scheduleEvent);
       assert(readyTasks > 0);
       DBG_SC_OUT("NonPreemptiveComponent::scheduleThread for " << this->getName() << " triggered" << std::endl);
@@ -214,7 +206,6 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void NonPreemptiveComponent::removeTask(){
-    fireStateChanged(ComponentState::IDLE);
     finishDiiTaskInstance(runningTask);
 
     DBG_OUT(

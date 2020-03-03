@@ -220,7 +220,6 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_time startTime = sc_core::SC_ZERO_TIME;
 
     scheduler->initialize();
-    fireStateChanged(ComponentState::IDLE);
 
     while (true) {
       sc_core::sc_time    now = sc_core::sc_time_stamp();
