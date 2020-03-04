@@ -105,7 +105,7 @@ ComponentState   Component::getComponentState() const {
   return static_cast<Detail::AbstractComponent const *>(this)->getComponentState();
 }
 
-double           Component::getPowerConsumption() const {
+Power            Component::getPowerConsumption() const {
   return static_cast<Detail::AbstractComponent const *>(this)->getPowerConsumption();
 }
 

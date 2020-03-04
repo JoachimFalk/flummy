@@ -47,6 +47,7 @@
 #include "VPCEvent.hpp"
 #include "ExecModel.hpp"
 #include "PowerMode.hpp"
+#include "Power.hpp"
 
 #include <CoSupport/SmartPtr/RefCountObject.hpp>
 
@@ -139,7 +140,7 @@ public:
 
   ComponentState   getComponentState() const;
 
-  double           getPowerConsumption() const;
+  Power            getPowerConsumption() const;
 
 protected:
   Component();

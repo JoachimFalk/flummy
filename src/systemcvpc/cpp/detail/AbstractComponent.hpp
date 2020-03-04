@@ -117,7 +117,7 @@ namespace SystemC_VPC { namespace Detail {
     ComponentState      getComponentState() const
       { return compState; }
 
-    double              getPowerConsumption() const
+    Power               getPowerConsumption() const
       { return powerConsumption; }
 
     void setExecModel(AbstractExecModel *model)
@@ -270,7 +270,7 @@ namespace SystemC_VPC { namespace Detail {
 
     PowerMode      powerMode;
     ComponentState compState;
-    double         powerConsumption;
+    Power          powerConsumption;
   };
 
 } } // namespace SystemC_VPC::Detail
