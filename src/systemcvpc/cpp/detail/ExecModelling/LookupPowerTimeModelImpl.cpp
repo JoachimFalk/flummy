@@ -140,32 +140,30 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 
 
   /// Allocate opaque CompState object when attaching to an abstract component.
-  LookupPowerTimeModelImpl::CompState  *LookupPowerTimeModelImpl::attachToComponent(
-      AbstractComponent *comp)
+  void LookupPowerTimeModelImpl::attachToComponent(
+      ComponentMixIn *comp)
   {
-    return new CompState();
+    setExecModel(comp, this);
+    setCompState(comp, new CompState());
   }
 
   /// Change the power mode of a component. This should update the
   /// opaque object pointed to by execModelComponentState.
   void  LookupPowerTimeModelImpl::setPowerMode(
-      AbstractExecModel::CompState *&execModelComponentState
-    , std::string const             &mode) const
+      ComponentMixIn     *comp
+    , std::string const  &mode) const
   {
-    CompState &cs = *static_cast<CompState *>(execModelComponentState);
-
     PowerModes::const_iterator iter = powerModes.find(mode);
     assert(iter != powerModes.end());
-    cs.powerMode = iter->second.index;
+    getCompState(comp)->powerMode = iter->second.index;
+    setPowerIdle(comp, iter->second.pwrIdle);
   }
 
   LookupPowerTimeModelImpl::ActionInfo *LookupPowerTimeModelImpl::registerAction(
-      AbstractExecModel::CompState *&execModelComponentState
-    , TaskInterface const           *actor
-    , PossibleAction const          *action)
+      ComponentMixIn       *comp
+    , TaskInterface const  *actor
+    , PossibleAction const *action)
   {
-    CompState &cs = *static_cast<CompState *>(execModelComponentState);
-
     if (!registeredActions) {
       registeredActions = true;
       // Fill in index information for PowerModeInfo objects.
@@ -175,7 +173,8 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
       PowerModes::iterator iter = powerModes.find(startPowerMode);
       if (iter == powerModes.end())
         throw ConfigException("Startup power mode "+startPowerMode+" was not defined!");
-      cs.powerMode = iter->second.index;
+      getCompState(comp)->powerMode = iter->second.index;
+      setPowerIdle(comp, iter->second.pwrIdle);
     }
 
     size_t nrPowerModes = powerModes.size();
@@ -333,23 +332,22 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
 
   /// Initialize ti with action or guard timing and power values.
   void  LookupPowerTimeModelImpl::initTaskInstance(
-      AbstractExecModel::CompState *&execModelComponentState
+      ComponentMixIn   *comp
     , ActionInfo       *ai
     , TaskInstanceImpl *ti
     , bool              forGuard) const
   {
-    CompState &cs = *static_cast<CompState *>(execModelComponentState);
-
-    PowerModeTiming *array = reinterpret_cast<PowerModeTiming *>(ai);
+    PowerModeTiming &pmi = reinterpret_cast<PowerModeTiming *>(ai)
+        [getCompState(comp)->powerMode];
 
     if (forGuard) {
-      setDelay(ti, array[cs.powerMode].guardDelay);
-      setLatency(ti, array[cs.powerMode].guardDelay);
-      setPower(ti, array[cs.powerMode].pwrRunning);
+      setDelay(ti, pmi.guardDelay);
+      setLatency(ti, pmi.guardDelay);
+      setPower(ti, pmi.pwrRunning);
     } else {
-      setDelay(ti, array[cs.powerMode].dii);
-      setLatency(ti, array[cs.powerMode].latency);
-      setPower(ti, array[cs.powerMode].pwrRunning);
+      setDelay(ti, pmi.dii);
+      setLatency(ti, pmi.latency);
+      setPower(ti, pmi.pwrRunning);
     }
   }
 

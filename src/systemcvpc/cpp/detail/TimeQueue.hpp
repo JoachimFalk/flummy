@@ -39,6 +39,8 @@ namespace SystemC_VPC { namespace Detail {
   public:
     TimeQueue(sc_core::sc_module_name name, std::function<void (TaskInstanceImpl *)> const &callback);
 
+    /// Add a task instance to the queue. After the given delay, the callback given
+    /// in the constructor will be called with this task instance.
     void add(TaskInstanceImpl *task, sc_core::sc_time delay);
   private:
     struct QueueEntry {

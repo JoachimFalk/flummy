@@ -45,4 +45,7 @@ namespace SystemC_VPC { namespace Detail {
   AbstractExecModel::~AbstractExecModel()
     {}
 
+  AbstractExecModel::ComponentMixIn::ComponentMixIn()
+    : execModelComponentState(nullptr) {}
+
 } } // namespace SystemC_VPC::Detail

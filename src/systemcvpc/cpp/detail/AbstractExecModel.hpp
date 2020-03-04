@@ -40,6 +40,7 @@
 #include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/ExecModel.hpp>
+#include <systemcvpc/Power.hpp>
 
 #include "TaskInstanceImpl.hpp"
 
@@ -51,8 +52,6 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  class AbstractComponent;
-
   /**
    * \brief Interface for classes implementing an execution model
    */
@@ -63,7 +62,6 @@ namespace SystemC_VPC { namespace Detail {
     typedef boost::intrusive_ptr<this_type>       Ptr;
     typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
-    class CompState {};
     class ActionInfo {};
 
     AbstractExecModel(int facadeAdj);
@@ -79,29 +77,54 @@ namespace SystemC_VPC { namespace Detail {
       { return const_cast<this_type *>(this)->getExecModel(); }
 
     ///
+    /// Interfaces to AbstractComponent
+    ///
+
+    class ComponentMixIn {
+      friend AbstractExecModel;
+    public:
+      ComponentMixIn();
+
+      AbstractExecModel *getExecModel()
+        { return execModel.get(); }
+
+      Power              getPowerIdle()
+        { return pwrIdle; }
+
+    private:
+      class CompState {};
+
+      Ptr        execModel;
+      CompState *execModelComponentState;
+      Power      pwrIdle;
+    };
+
+    ///
     /// Interfaces for AbstractComponent
     ///
 
     /// Allocate opaque CompState object when attaching to an abstract component.
-    virtual CompState  *attachToComponent(AbstractComponent *comp) = 0;
+    virtual void attachToComponent(ComponentMixIn *comp) = 0;
 
-    virtual ActionInfo *registerAction(CompState *&execModelComponentState
+    virtual ActionInfo *registerAction(ComponentMixIn *comp
       , TaskInterface const *actor
       , PossibleAction const *action) = 0;
 
     /// Change the power mode of a component. This should update the
     /// opaque object pointed to by execModelComponentState.
-    virtual void  setPowerMode(CompState *&execModelComponentState
+    virtual void  setPowerMode(ComponentMixIn *comp
       , std::string const &mode) const = 0;
 
     /// Initialize ti with action or guard timing and power values.
-    virtual void  initTaskInstance(CompState *&execModelComponentState
+    virtual void  initTaskInstance(ComponentMixIn *comp
       , ActionInfo *ai
       , TaskInstanceImpl *ti
       , bool forGuard = false) const = 0;
 
     virtual ~AbstractExecModel();
   protected:
+    typedef ComponentMixIn::CompState CompState;
+
     // Accessor methods for execution models to inject information into task instances.
     static void setDelay(TaskInstanceImpl *ti, sc_core::sc_time delay)
       { ti->setDelay(delay); ti->setRemainingDelay(delay); }
@@ -109,6 +132,17 @@ namespace SystemC_VPC { namespace Detail {
       { ti->setLatency(latency); }
     static void setPower(TaskInstanceImpl *ti, Power pwr)
       { ti->setPower(pwr); }
+
+    // Accessor methods for execution models to inject information into the ComponentMixIn
+    static void setExecModel(ComponentMixIn *c, this_type *m)
+      { c->execModel.reset(m); }
+    static void setPowerIdle(ComponentMixIn *c, Power p)
+      { c->pwrIdle = p; }
+
+    static CompState *getCompState(ComponentMixIn *c)
+      { return c->execModelComponentState; }
+    static void       setCompState(ComponentMixIn *c, CompState *cs)
+      { c->execModelComponentState = cs; }
   private:
     int                         facadeAdj;
   };
