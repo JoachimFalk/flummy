@@ -87,7 +87,7 @@ void PowerSumming::notify(Component *ci)
   notifyTimeStamp = sc_core::sc_time_stamp();
 
   double oldCi_powerConsumption = m_powerConsumption[ci];
-  double currentCi_powerConsumption = ci->getPowerConsumption();
+  double currentCi_powerConsumption = ci->getPowerConsumption().value();
   m_powerConsumption[ci] = currentCi_powerConsumption;
 
   const PowerMode currentCi_powerMode = ci->getPowerMode();

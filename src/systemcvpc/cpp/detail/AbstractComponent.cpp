@@ -213,7 +213,6 @@ namespace SystemC_VPC { namespace Detail {
         , [this] (TaskInstanceImpl *ti) { this->finishLatencyTaskInstance(ti); })
     , powerMode(PowerMode::DEFAULT)
     , compState(ComponentState::IDLE)
-    , powerConsumption(0)
     {}
 
   void AbstractComponent::registerTask(TaskInterface *task) {
@@ -228,7 +227,9 @@ namespace SystemC_VPC { namespace Detail {
 
   void AbstractComponent::registerFiringRule(TaskInterface *actor, PossibleAction *fr) {
     assert(actor->getScheduler() == this);
+    // This will update idle power on first call.
     fr->setSchedulerInfo(getExecModel()->registerAction(this, actor, fr));
+    powerConsumption = getPowerIdle(); // Only important on first call
   }
 
   void AbstractComponent::checkFiringRule(TaskInterface *task, PossibleAction *fr) {
@@ -336,6 +337,9 @@ namespace SystemC_VPC { namespace Detail {
         // the executing state of the component should be IDLE.
         ? ComponentState::IDLE
         : ComponentState::RUNNING;
+    powerConsumption = ti->isPSM()
+        ? getPowerIdle()
+        : ti->getPower();
     assignedTaskInstance = ti;
     assignedTaskInstanceTime = sc_core::sc_time_stamp();
     this->taskInstanceOperation(TaskInstanceOperation::ASSIGN
@@ -356,23 +360,25 @@ namespace SystemC_VPC { namespace Detail {
     assert(assignedTaskInstance == ti);
     this->taskInstanceOperation(TaskInstanceOperation::RESIGN
         , *this, *ti);
+    compState = ComponentState::IDLE;
+    powerConsumption = getPowerIdle();
     assignedTaskInstance = nullptr;
   }
 
   /// Called possibly multiple times to indicate that the task is blocked waiting for something.
   void AbstractComponent::blockTaskInstance(TaskInstanceImpl *ti) {
     assert(assignedTaskInstance == ti);
-    compState = ComponentState::STALLED;
     this->taskInstanceOperation(TaskInstanceOperation::BLOCK
         , *this, *ti);
+    compState = ComponentState::STALLED;
+    // FIXME: Maybe stalled power instead of idle!
+    powerConsumption = getPowerIdle();
     assignedTaskInstance = nullptr;
   }
 
   /// Called once per actor firing to indicate that the DII of the task instance is over.
   void AbstractComponent::finishDiiTaskInstance(TaskInstanceImpl *ti) {
     assert(assignedTaskInstance == ti);
-    compState = ComponentState::IDLE;
-//  this->Tracing::TraceableComponent::finishDiiTaskInstance(taskInstance);
     ti->diiExpired();
 
     if (ti->getType() == TaskInstanceImpl::Type::ACTION) {
@@ -384,6 +390,8 @@ namespace SystemC_VPC { namespace Detail {
     }
     this->taskInstanceOperation(TaskInstanceOperation::FINISHDII
         , *this, *ti);
+    compState = ComponentState::IDLE;
+    powerConsumption = getPowerIdle();
     assignedTaskInstance = nullptr;
     latencyQueue.add(ti, ti->getLatency() - ti->getDelay());
   }
