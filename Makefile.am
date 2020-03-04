@@ -130,6 +130,7 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/SystemCVPCSimulator.cpp \
 	src/systemcvpc/cpp/detail/TaskImpl.cpp \
 	src/systemcvpc/cpp/detail/TaskInstanceImpl.cpp \
+	src/systemcvpc/cpp/detail/TimeQueue.cpp \
 	src/systemcvpc/cpp/detail/VPCBuilder.cpp
 
 libsystemcvpc_la_DEPENDENCIES = \

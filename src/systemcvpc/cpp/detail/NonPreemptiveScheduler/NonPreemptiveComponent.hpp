@@ -127,10 +127,6 @@ namespace SystemC_VPC { namespace Detail {
     void scheduleThread();
     sc_core::sc_event scheduleEvent;
 
-
-    sc_core::sc_event remainingPipelineStages_WakeUp;
-    std::priority_queue<timePcbPair> pqueue;
-
     Event blockCompute;
 #ifndef NO_POWER_SUM
     std::ofstream *powerSumStream;
@@ -142,13 +138,9 @@ namespace SystemC_VPC { namespace Detail {
     void removeTask();
 
     bool processPower(Attribute att);
-
-    void moveToRemainingPipelineStages(TaskInstanceImpl *task);
     
     void notifyActivation(TaskInterface *scheduledTask,
         bool active);
-
-    void remainingPipelineStages();
   };
 
 } } // namespace SystemC_VPC::Detail

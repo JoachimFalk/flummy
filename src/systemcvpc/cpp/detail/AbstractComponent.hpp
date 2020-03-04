@@ -44,13 +44,14 @@
 #include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/PowerMode.hpp>
 
+#include "TaskImpl.hpp"
 #include "TaskInstanceImpl.hpp"
 #include "PowerSumming.hpp"
 #include "PluggablePowerGovernor.hpp"
-#include "TaskImpl.hpp"
 #include "SequentiallyIdedObject.hpp"
 #include "AbstractExecModel.hpp"
 #include "ObservableComponent.hpp"
+#include "TimeQueue.hpp"
 
 #include "config.h"
 
@@ -222,8 +223,10 @@ namespace SystemC_VPC { namespace Detail {
     /// Called once per actor firing to indicate that the DII of the task instance is over.
     void finishDiiTaskInstance(TaskInstanceImpl *ti);
 
+  private:
     /// Called once per actor firing to indicate that the latency of the task instance is over.
     void finishLatencyTaskInstance(TaskInstanceImpl *ti);
+  protected:
 
     std::map<const PowerMode*, sc_core::sc_time> transactionDelays;
     bool requestExecuteTasks;
@@ -261,6 +264,10 @@ namespace SystemC_VPC { namespace Detail {
 
     TaskInstanceImpl *assignedTaskInstance;
     sc_core::sc_time  assignedTaskInstanceTime;
+
+    // Queue for task instances where their DII has expired but still
+    // waiting for their latency.
+    TimeQueue         latencyQueue;
 
     PowerMode      powerMode;
     ComponentState compState;

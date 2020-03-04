@@ -124,8 +124,6 @@ void RoundRobinComponent::compute(TaskInstanceImpl *actualTask) {
     std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
     wait(actualTask->getDelay());
     finishDiiTaskInstance(actualTask);
-    /// FIXME: What about DII != latency
-    finishLatencyTaskInstance(actualTask);
   } else
     readyMsgTasks.push_back(actualTask);
   readyEvent.notify();
@@ -140,7 +138,6 @@ void RoundRobinComponent::check(TaskInstanceImpl *actualTask) {
             << actualTask->getDelay() << std::endl;
     wait(actualTask->getDelay());
     finishDiiTaskInstance(actualTask);
-    finishLatencyTaskInstance(actualTask);
   }
 }
 
@@ -190,8 +187,6 @@ bool RoundRobinComponent::scheduleMessageTasks() {
     /// again when the task execution time is over.
     wait(messageTask->getDelay());
     finishDiiTaskInstance(messageTask);
-    /// FIXME: What about dii != latency
-    finishLatencyTaskInstance(messageTask);
   }
   return progress;
 }

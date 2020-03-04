@@ -70,8 +70,6 @@ namespace SystemC_VPC { namespace Detail {
 
     SC_THREAD(scheduleThread);
 
-    SC_THREAD(remainingPipelineStages);
-
 #ifndef NO_POWER_SUM
     std::string powerSumFileName(this->getName());
     powerSumFileName += ".dat";
@@ -517,8 +515,6 @@ namespace SystemC_VPC { namespace Detail {
 
     scheduler->removedTask(task);
     finishDiiTaskInstance(task);
-    moveToRemainingPipelineStages(task);
-    //wait(sc_core::SC_ZERO_TIME);
   }
 
   /**
@@ -603,66 +599,6 @@ namespace SystemC_VPC { namespace Detail {
     delete powerSumming;
     delete powerSumStream;
 #endif // NO_POWER_SUM
-  }
-
-  /**
-   *
-   */
-  void PreemptiveComponent::moveToRemainingPipelineStages(TaskInstanceImpl* task){
-    sc_core::sc_time now                 = sc_core::sc_time_stamp();
-    sc_core::sc_time restOfLatency       = task->getLatency()  - task->getDelay();
-    sc_core::sc_time end                 = now + restOfLatency;
-    if(end <= now){
-      //early exit if (Latency-DII) <= 0
-      //std::cerr << "Early exit: " << task->getName() << std::endl;
-      finishLatencyTaskInstance(task);
-      return;
-    }
-    timePcbPair pair;
-    pair.time = end;
-    pair.task  = task;
-    //std::cerr << "Rest of pipeline added: " << task->getName()
-    //<< " (EndTime: " << pair.time << ") " << std::endl;
-    pqueue.push(pair);
-    remainingPipelineStages_WakeUp.notify();
-  }
-
-  /**
-   *
-   */
-  void PreemptiveComponent::remainingPipelineStages(){
-    while(1){
-      if(pqueue.size() == 0){
-        wait(remainingPipelineStages_WakeUp);
-      }else{
-        timePcbPair front = pqueue.top();
-
-        //std::cerr << "Pop from list: " << front.time << " : "
-        //<< front.taskImpl->getBlockEvent().latency << std::endl;
-        sc_core::sc_time waitFor = front.time-sc_core::sc_time_stamp();
-
-        assert(front.time >= sc_core::sc_time_stamp());
-        //std::cerr << "Pipeline> Wait till " << front.time
-        //<< " (" << waitFor << ") at: " << sc_core::sc_time_stamp() << std::endl;
-        wait( waitFor, remainingPipelineStages_WakeUp );
-
-        sc_core::sc_time rest = front.time-sc_core::sc_time_stamp();
-        assert(rest >= sc_core::SC_ZERO_TIME);
-        if(rest > sc_core::SC_ZERO_TIME){
-          //std::cerr << "------------------------------" << std::endl;
-        }else{
-          assert(rest == sc_core::SC_ZERO_TIME);
-          //std::cerr << "Ready! releasing task (" <<  front.time <<") at: "
-          //<< sc_core::sc_time_stamp() << std::endl;
-
-          finishLatencyTaskInstance(front.task);
-
-          //wait(sc_core::SC_ZERO_TIME);
-          pqueue.pop();
-        }
-      }
-
-    }
   }
 
 } } // namespace SystemC_VPC::Detail

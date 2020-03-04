@@ -193,20 +193,6 @@ namespace SystemC_VPC { namespace Detail {
 
   };
 
-  struct timePcbPair{
-    sc_core::sc_time time;
-    TaskInstanceImpl *task;
-
-    bool operator<(const timePcbPair& right) const
-    {
-      if (time > right.time)
-        return true;
-      else
-        return false;
-    }
-
-  };
-
   typedef std::map<int, TaskInstanceImpl *>  TaskMap;
 
 } } // namespace SystemC_VPC::Detail

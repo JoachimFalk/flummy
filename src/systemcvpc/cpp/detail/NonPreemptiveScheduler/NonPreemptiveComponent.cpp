@@ -55,22 +55,9 @@ namespace SystemC_VPC { namespace Detail {
 
     SC_THREAD(scheduleThread);
 
-    SC_THREAD(remainingPipelineStages);
-
     this->midPowerGov = new InternalLoadHysteresisGovernor(sc_core::sc_time(12.5, sc_core::SC_MS),
         sc_core::sc_time(12.1, sc_core::SC_MS), sc_core::sc_time(4.0, sc_core::SC_MS));
     this->midPowerGov->setGlobalGovernor(Director::getInstance().topPowerGov);
-
-
-
-    //if(powerTables.find(getPowerMode()) == powerTables.end()){
-    //  powerTables[getPowerMode()] = PowerTable();
-    // }
-
-    //PowerTable &powerTable=powerTables[getPowerMode()];
-    //powerTable[ComponentState::IDLE]    = 0.0;
-    //powerTable[ComponentState::RUNNING] = 1.0;
-
 #ifndef NO_POWER_SUM
     std::string powerSumFileName(this->getName());
     powerSumFileName += ".dat";
@@ -206,77 +193,9 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void NonPreemptiveComponent::removeTask(){
-    finishDiiTaskInstance(runningTask);
-
     DBG_OUT(
-        this->getName() << " resign Task: " << runningTask->getName() << " @ " << sc_core::sc_time_stamp().to_default_time_units() << std::endl);
-
-//  ProcessId pid = runningTask->getProcessId();
-//  Task &task = Director::getInstance().taskPool->getPrototype(pid);
-//  TaskInterface * scheduledTask;
-
-    moveToRemainingPipelineStages(runningTask);
-
-    DBG_OUT("remove Task " << runningTask->getName() << std::endl);
-  }
-
-  /**
-   *
-   */
-  void NonPreemptiveComponent::moveToRemainingPipelineStages(
-      TaskInstanceImpl* task)
-  {
-    sc_core::sc_time now = sc_core::sc_time_stamp();
-    sc_core::sc_time restOfLatency = task->getLatency() - task->getDelay();
-    sc_core::sc_time end = now + restOfLatency;
-    if (end <= now) {
-      //early exit if (Latency-DII) <= 0
-      //std::cerr << "Early exit: " << task->getName() << std::endl;
-      finishLatencyTaskInstance(task);
-      return;
-    }
-    timePcbPair pair;
-    pair.time = end;
-    pair.task = task;
-    //std::cerr << "Rest of pipeline added: " << task->getName()
-    //<< " (EndTime: " << pair.time << ") " << std::endl;
-    pqueue.push(pair);
-    remainingPipelineStages_WakeUp.notify();
-  }
-
-  /**
-   *
-   */
-  void NonPreemptiveComponent::remainingPipelineStages() {
-    while (1) {
-      if (pqueue.size() == 0) {
-        wait( remainingPipelineStages_WakeUp);
-      } else {
-        timePcbPair front = pqueue.top();
-
-        //std::cerr << "Pop from list: " << front.time << " : "
-        //<< front.taskImpl->getBlockEvent().latency << std::endl;
-        sc_core::sc_time waitFor = front.time - sc_core::sc_time_stamp();
-        assert(front.time >= sc_core::sc_time_stamp());
-        //std::cerr << "Pipeline> Wait till " << front.time
-        //<< " (" << waitFor << ") at: " << sc_core::sc_time_stamp() << std::endl;
-        wait(waitFor, remainingPipelineStages_WakeUp);
-
-        sc_core::sc_time rest = front.time - sc_core::sc_time_stamp();
-        assert(rest >= sc_core::SC_ZERO_TIME);
-        if (rest > sc_core::SC_ZERO_TIME) {
-          //std::cerr << "------------------------------" << std::endl;
-        } else {
-          assert(rest == sc_core::SC_ZERO_TIME);
-          //std::cerr << "Ready! releasing task (" <<  front.time <<") at: "
-          //<< sc_core::sc_time_stamp() << std::endl;
-
-          // Latency over -> remove Task
-          finishLatencyTaskInstance(front.task);
-          pqueue.pop();
-        }
-      }
-    }
+        this->getName() << " resign Task: " << runningTask->getName() << " @ " << sc_core::sc_time_stamp() << std::endl);
+    finishDiiTaskInstance(runningTask);
   }
 
 /**
