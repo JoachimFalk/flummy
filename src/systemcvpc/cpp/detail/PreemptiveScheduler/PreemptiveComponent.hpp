@@ -142,12 +142,6 @@ namespace SystemC_VPC { namespace Detail {
 
     void removeTask(TaskInstanceImpl *removedTask);
 
-    void remainingPipelineStages();
-    void moveToRemainingPipelineStages(TaskInstanceImpl *task);
-
-    sc_core::sc_event remainingPipelineStages_WakeUp;
-    std::priority_queue<timePcbPair> pqueue;
-
     Scheduler *scheduler;
 
     Event    blockCompute;

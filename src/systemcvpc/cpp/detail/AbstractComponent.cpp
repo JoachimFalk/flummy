@@ -210,6 +210,8 @@ namespace SystemC_VPC { namespace Detail {
     , canExecuteTasks(true)
     , execModelComponentState(nullptr)
     , assignedTaskInstance(nullptr)
+    , latencyQueue("latencyQueue"
+        , [this] (TaskInstanceImpl *ti) { this->finishLatencyTaskInstance(ti); })
     , powerMode(PowerMode::DEFAULT)
     , compState(ComponentState::IDLE)
     , powerConsumption(0)
@@ -391,6 +393,7 @@ namespace SystemC_VPC { namespace Detail {
     this->taskInstanceOperation(TaskInstanceOperation::FINISHDII
         , *this, *ti);
     assignedTaskInstance = nullptr;
+    latencyQueue.add(ti, ti->getLatency() - ti->getDelay());
   }
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
