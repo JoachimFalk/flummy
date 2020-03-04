@@ -83,6 +83,7 @@ namespace SystemC_VPC { namespace Detail {
     , public SystemC_VPC::Component
     , public SystemC_VPC::ComponentInterface
     , public ObservableComponent
+    , private AbstractExecModel::ComponentMixIn
     , private SequentiallyIdedObject
     , private smoc::SimulatorAPI::SchedulerInterface
   {
@@ -119,9 +120,10 @@ namespace SystemC_VPC { namespace Detail {
     double              getPowerConsumption() const
       { return powerConsumption; }
 
-    void setExecModel(AbstractExecModel *model);
+    void setExecModel(AbstractExecModel *model)
+      { model->attachToComponent(this); }
     AbstractExecModel *getExecModel()
-      { return execModel.get(); }
+      { return this->ComponentMixIn::getExecModel(); }
 
     ///
     /// Handle interfaces for SystemC_VPC::ComponentInterface
@@ -258,9 +260,6 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_time shutdownRequestAtTime;
     VPCEvent::Ptr componentWakeup;
     VPCEvent::Ptr componentIdle;
-
-    AbstractExecModel::Ptr        execModel;
-    AbstractExecModel::CompState *execModelComponentState;
 
     TaskInstanceImpl *assignedTaskInstance;
     sc_core::sc_time  assignedTaskInstanceTime;

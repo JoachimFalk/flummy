@@ -85,7 +85,7 @@ namespace SystemC_VPC { namespace Detail {
   ///
 
   void AbstractComponent::changePowerMode(std::string powerMode) {
-    execModel->setPowerMode(execModelComponentState, powerMode);
+    getExecModel()->setPowerMode(this, powerMode);
     this->powerMode = powerMode;
     this->componentOperation(ComponentOperation::PWRCHANGE, *this);
   }
@@ -208,7 +208,6 @@ namespace SystemC_VPC { namespace Detail {
     , powerAttribute(new Attribute("",""))
     , componentName(name)
     , canExecuteTasks(true)
-    , execModelComponentState(nullptr)
     , assignedTaskInstance(nullptr)
     , latencyQueue("latencyQueue"
         , [this] (TaskInstanceImpl *ti) { this->finishLatencyTaskInstance(ti); })
@@ -216,13 +215,6 @@ namespace SystemC_VPC { namespace Detail {
     , compState(ComponentState::IDLE)
     , powerConsumption(0)
     {}
-
-
-  void AbstractComponent::setExecModel(AbstractExecModel *model) {
-    assert(execModelComponentState == nullptr);
-    execModelComponentState = model->attachToComponent(this);
-    execModel.reset(model);
-  }
 
   void AbstractComponent::registerTask(TaskInterface *task) {
     // This should be the first time the actor appeared here.
@@ -236,7 +228,7 @@ namespace SystemC_VPC { namespace Detail {
 
   void AbstractComponent::registerFiringRule(TaskInterface *actor, PossibleAction *fr) {
     assert(actor->getScheduler() == this);
-    fr->setSchedulerInfo(getExecModel()->registerAction(execModelComponentState, actor, fr));
+    fr->setSchedulerInfo(getExecModel()->registerAction(this, actor, fr));
   }
 
   void AbstractComponent::checkFiringRule(TaskInterface *task, PossibleAction *fr) {
@@ -248,7 +240,7 @@ namespace SystemC_VPC { namespace Detail {
 
     TaskInstanceImpl *taskInstanceImpl = createTaskInstance(taskImpl
         , TaskInstanceImpl::Type::GUARD, fr,  none, none);
-    getExecModel()->initTaskInstance(execModelComponentState, ai, taskInstanceImpl, true);
+    getExecModel()->initTaskInstance(this, ai, taskInstanceImpl, true);
     this->check(taskInstanceImpl);
   }
 
@@ -284,7 +276,7 @@ namespace SystemC_VPC { namespace Detail {
       AbstractExecModel::ActionInfo *ai =
           static_cast<AbstractExecModel::ActionInfo *>(fr->getSchedulerInfo());
 
-      comp->getExecModel()->initTaskInstance(comp->execModelComponentState, ai, taskInstanceImpl);
+      comp->getExecModel()->initTaskInstance(comp, ai, taskInstanceImpl);
       comp->compute(taskInstanceImpl);
       delete this;
     }

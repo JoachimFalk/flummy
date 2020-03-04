@@ -100,19 +100,19 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     };
 
     /// Allocate opaque CompState object when attaching to an abstract component.
-    CompState  *attachToComponent(AbstractComponent *comp);
+    void attachToComponent(ComponentMixIn *comp);
 
-    ActionInfo *registerAction(AbstractExecModel::CompState *&execModelComponentState
+    ActionInfo *registerAction(ComponentMixIn *comp
       , TaskInterface const *actor
       , PossibleAction const *action);
 
     /// Change the power mode of a component. This should update the
     /// opaque object pointed to by execModelComponentState.
-    void  setPowerMode(AbstractExecModel::CompState *&execModelComponentState
+    void  setPowerMode(ComponentMixIn *comp
       , std::string const &mode) const;
 
     /// Initialize ti with action or guard timing and power values.
-    void  initTaskInstance(AbstractExecModel::CompState *&execModelComponentState
+    void  initTaskInstance(ComponentMixIn *comp
       , ActionInfo       *ai
       , TaskInstanceImpl *ti
       , bool              forGuard = false) const;
@@ -120,6 +120,9 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
     ///
     /// Other stuff
     ///
+
+    static CompState *getCompState(ComponentMixIn *c)
+      { return static_cast<CompState *>(AbstractExecModel::getCompState(c)); }
 
     typedef std::map<std::string, Timing>  Timings;
 
