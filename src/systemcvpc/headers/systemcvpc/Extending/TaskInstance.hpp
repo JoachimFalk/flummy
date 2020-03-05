@@ -41,15 +41,29 @@
 
 #include <systemc>
 
+#include <boost/noncopyable.hpp>
+
 namespace SystemC_VPC { namespace Extending {
 
+  class Task;
 
   /**
    * This class represents the publicly visible information of a
    * task instance, i.e., one execution of a task on a component.
    */
-  class TaskInstance {
+  class TaskInstance: private boost::noncopyable {
   public:
+
+    enum class Type {
+      ACTION, GUARD, MESSAGE
+    };
+
+    // Getters
+    Task            *getTask() const
+      { return task; }
+    Type             getType() const
+      { return type; }
+    std::string      getName() const;
 
     sc_core::sc_time getDelay() const
       { return this->delay; }
@@ -62,6 +76,9 @@ namespace SystemC_VPC { namespace Extending {
       { return pwr; }
 
   protected:
+    TaskInstance(Task *task, Type type)
+      : task(task), type(type) {}
+
     void setDelay(sc_core::sc_time delay)
       { this->delay = delay; }
     void setLatency(sc_core::sc_time latency)
@@ -72,6 +89,8 @@ namespace SystemC_VPC { namespace Extending {
     void setPower(Power pwr)
       { this->pwr = pwr; }
   private:
+    Task            *task;
+    Type             type; /// Type of task instance, i.e., action, guard, or message.
 
     // Timings
     sc_core::sc_time delay;

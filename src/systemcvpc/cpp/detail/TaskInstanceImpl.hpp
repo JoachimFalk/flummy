@@ -44,16 +44,15 @@
 #include <systemcvpc/Extending/TaskInstance.hpp>
 #include <systemcvpc/datatypes.hpp>
 
+#include "TaskImpl.hpp"
+
 #include <CoSupport/SystemC/systemc_support.hpp>
 #include <CoSupport/Tracing/TaskTracer.hpp>
 
 #include <functional>
 
-#include <boost/noncopyable.hpp>
-
 namespace SystemC_VPC { namespace Detail {
 
-  class TaskImpl;
   class ObservableComponent;
   class AbstractExecModel;
   class AbstractComponent;
@@ -63,22 +62,15 @@ namespace SystemC_VPC { namespace Detail {
   // Class representing a task instance, i.e., one execution of a task.
   class TaskInstanceImpl
     : public Extending::TaskInstance
-    , private boost::noncopyable
   {
+    typedef Extending::TaskInstance base_type;
   public:
-
-    enum class Type {
-      ACTION, GUARD, MESSAGE
-    };
 
     // Getters
     int             getInstanceId() const
       { return instanceId; }
     TaskImpl       *getTask() const
-      { return taskImpl; }
-    Type            getType() const
-      { return type; }
-    std::string     getName() const;
+      { return static_cast<TaskImpl *>(this->base_type::getTask()); }
     PossibleAction *getFiringRule() const
       { return firingRuleInterface; }
 
@@ -129,8 +121,6 @@ namespace SystemC_VPC { namespace Detail {
     static int globalInstanceId;
 
     int             instanceId;
-    TaskImpl       *taskImpl;
-    Type            type; /// Type of task instance, i.e., action, guard, or message.
     PossibleAction *firingRuleInterface;
 
     std::function<void (TaskInstanceImpl *)> const diiCallback;

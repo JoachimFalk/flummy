@@ -78,6 +78,7 @@ libsystemcvpc_la_SOURCES = \
 	\
 	src/systemcvpc/cpp/Extending/ComponentObserverIf.cpp \
 	src/systemcvpc/cpp/Extending/ComponentTracerIf.cpp \
+	src/systemcvpc/cpp/Extending/TaskInstance.cpp \
 	\
 	src/systemcvpc/cpp/Routing/Ignore.cpp \
 	src/systemcvpc/cpp/Routing/Static.cpp \

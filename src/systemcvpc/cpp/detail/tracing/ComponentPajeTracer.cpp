@@ -107,11 +107,18 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   public:
     PajeTask(std::string const &name)
       : task(myPajeTracer->registerActivity(name.c_str(),true))
-      , releaseEvent(myPajeTracer->registerEvent((name+" released").c_str(),true))
-      , latencyEvent(myPajeTracer->registerEvent((name+" latency").c_str(),true))
+      , guard(myPajeTracer->registerActivity((name+"_check").c_str(),
+          CoSupport::String::Color(
+              myPajeTracer->getColor(task).r() / 2
+            , myPajeTracer->getColor(task).g() / 2
+            , myPajeTracer->getColor(task).b() / 2
+          )))
+      , releaseEvent(myPajeTracer->registerEvent((name+" released").c_str(), myPajeTracer->getColor(task)))
+      , latencyEvent(myPajeTracer->registerEvent((name+" latency").c_str(), myPajeTracer->getColor(task)))
       {}
 
     CoSupport::Tracing::PajeTracer::Activity *task;
+    CoSupport::Tracing::PajeTracer::Activity *guard;
     CoSupport::Tracing::PajeTracer::Event    *releaseEvent;
     CoSupport::Tracing::PajeTracer::Event    *latencyEvent;
 
@@ -204,19 +211,25 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
         this->startTime = sc_core::sc_time_stamp();
         break;
       case TaskInstanceOperation::RESIGN:
-        myPajeTracer->traceActivity(this->res_,
-            pajeTask.task,
-            this->startTime, sc_core::sc_time_stamp());
+        myPajeTracer->traceActivity(this->res_
+          , ti.getType() == TaskInstance::Type::GUARD
+              ? pajeTask.guard
+              : pajeTask.task
+          , this->startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::BLOCK:
-        myPajeTracer->traceActivity(this->res_,
-            pajeTask.task,
-            this->startTime, sc_core::sc_time_stamp());
+        myPajeTracer->traceActivity(this->res_
+          , ti.getType() == TaskInstance::Type::GUARD
+              ? pajeTask.guard
+              : pajeTask.task
+          , this->startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::FINISHDII:
-        myPajeTracer->traceActivity(this->res_,
-            pajeTask.task,
-            this->startTime, sc_core::sc_time_stamp());
+        myPajeTracer->traceActivity(this->res_
+          , ti.getType() == TaskInstance::Type::GUARD
+              ? pajeTask.guard
+              : pajeTask.task
+          , this->startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::FINISHLAT:
         myPajeTracer->traceEvent(this->res_,
