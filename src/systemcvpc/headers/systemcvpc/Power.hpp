@@ -52,8 +52,8 @@ public:
   Power(boost::units::quantity<U, T> v)
     : base_type(v) {}
 
-  Power(std::string const &v);
-  Power(char const *v);
+  explicit Power(std::string const &v);
+  explicit Power(char const *v);
 };
 
 std::ostream &operator <<(std::ostream &out, Power const &p);

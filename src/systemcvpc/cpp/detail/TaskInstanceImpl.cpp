@@ -47,9 +47,8 @@ namespace SystemC_VPC { namespace Detail {
     , PossibleAction                                 *firingRuleInterface
     , std::function<void (TaskInstanceImpl *)> const &diiCallback
     , std::function<void (TaskInstanceImpl *)> const &latCallback)
-    : instanceId(globalInstanceId++)
-    , taskImpl(taskImpl)
-    , type(type)
+    : base_type(taskImpl, type)
+    , instanceId(globalInstanceId++)
     , firingRuleInterface(firingRuleInterface)
     , diiCallback(diiCallback)
     , latCallback(latCallback)
@@ -62,20 +61,14 @@ namespace SystemC_VPC { namespace Detail {
   TaskInstanceImpl::~TaskInstanceImpl() {
   }
 
-  std::string     TaskInstanceImpl::getName() const {
-    return type == Type::GUARD
-        ? taskImpl->getName() + "_check"
-        : taskImpl->getName();
-  }
-
   // Adaptor getter for TaskImpl
   int              TaskInstanceImpl::getPriority() const
-    { assert(taskImpl != NULL); return taskImpl->getPriority(); }
+    { assert(getTask() != NULL); return getTask()->getPriority(); }
   sc_core::sc_time TaskInstanceImpl::getPeriod() const
-    { assert(taskImpl != NULL); return taskImpl->getPeriod(); }
+    { assert(getTask() != NULL); return getTask()->getPeriod(); }
   ProcessId        TaskInstanceImpl::getProcessId() const
-    { assert(taskImpl != NULL); return taskImpl->getPid(); }
+    { assert(getTask() != NULL); return getTask()->getPid(); }
   bool             TaskInstanceImpl::isPSM() const
-    { return taskImpl->getTaskIsPSM(); }
+    { assert(getTask() != NULL); return getTask()->getTaskIsPSM(); }
 
 } } // namespace SystemC_VPC::Detail
