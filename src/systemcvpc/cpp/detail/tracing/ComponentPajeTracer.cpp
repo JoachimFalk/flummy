@@ -46,9 +46,11 @@
 #include <memory>
 #include <boost/algorithm/string.hpp>
 
+using CoSupport::Tracing::PajeTracer;
+
 namespace {
 
-  std::unique_ptr<CoSupport::Tracing::PajeTracer> myPajeTracer;
+  std::unique_ptr<PajeTracer> myPajeTracer;
 
 }
 
@@ -99,22 +101,26 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     std::string  name_;
 
-    CoSupport::Tracing::PajeTracer::Resource const *res_;
+    PajeTracer::Container *res_;
+    PajeTracer::Gauge     *power_;
     sc_core::sc_time startTime;
   };
 
   class ComponentPajeTracer::PajeTask: public OTask {
   public:
-    PajeTask(std::string const &name)
-      : task(myPajeTracer->registerActivity(name.c_str(),true))
-      , guard(myPajeTracer->registerActivity((name+"_check").c_str(),
-          CoSupport::String::Color(
-              myPajeTracer->getColor(task).r() / 2
-            , myPajeTracer->getColor(task).g() / 2
-            , myPajeTracer->getColor(task).b() / 2
-          )))
-      , releaseEvent(myPajeTracer->registerEvent((name+" released").c_str(), myPajeTracer->getColor(task)))
-      , latencyEvent(myPajeTracer->registerEvent((name+" latency").c_str(), myPajeTracer->getColor(task)))
+    PajeTask(std::string const &name, CoSupport::Tracing::PajeTracer::Container *c)
+      : task(myPajeTracer->getOrCreateActivity(name.c_str(), c, "action"))
+      , guard(myPajeTracer->getOrCreateActivity(name.c_str()
+          , CoSupport::String::Color(
+                myPajeTracer->getColor(task).r() / 2
+              , myPajeTracer->getColor(task).g() / 2
+              , myPajeTracer->getColor(task).b() / 2
+            )
+          , c, "guard"))
+      , releaseEvent(myPajeTracer->getOrCreateEvent(
+          name.c_str(), myPajeTracer->getColor(task), c, "release"))
+      , latencyEvent(myPajeTracer->getOrCreateEvent(
+          name.c_str(), myPajeTracer->getColor(task), c, "latency"))
       {}
 
     CoSupport::Tracing::PajeTracer::Activity *task;
@@ -162,7 +168,10 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
       traceFilename += "paje.trace";
       myPajeTracer.reset(new CoSupport::Tracing::PajeTracer(traceFilename));
     }
-    this->res_ = myPajeTracer->registerResource(component->getName().c_str());
+
+    PajeTracer::Container *arch = myPajeTracer->getOrCreateContainer("Architecture");
+    this->res_   = myPajeTracer->getOrCreateContainer(component->getName().c_str(), arch);
+    this->power_ = myPajeTracer->getOrCreateGauge("power", res_);
   }
 
   void ComponentPajeTracer::componentOperation(ComponentOperation co
@@ -179,7 +188,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::ALLOCATE) {
-      new (&pajeTask) PajeTask(t.getName());
+      new (&pajeTask) PajeTask(t.getName(), res_);
     }
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::DEALLOCATE) {
@@ -209,6 +218,8 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
         break;
       case TaskInstanceOperation::ASSIGN:
         this->startTime = sc_core::sc_time_stamp();
+        myPajeTracer->traceGauge(this->res_, this->power_, this->startTime,
+            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::RESIGN:
         myPajeTracer->traceActivity(this->res_
@@ -216,6 +227,8 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
               ? pajeTask.guard
               : pajeTask.task
           , this->startTime, sc_core::sc_time_stamp());
+        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
+            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::BLOCK:
         myPajeTracer->traceActivity(this->res_
@@ -223,6 +236,8 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
               ? pajeTask.guard
               : pajeTask.task
           , this->startTime, sc_core::sc_time_stamp());
+        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
+            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::FINISHDII:
         myPajeTracer->traceActivity(this->res_
@@ -230,11 +245,15 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
               ? pajeTask.guard
               : pajeTask.task
           , this->startTime, sc_core::sc_time_stamp());
+        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
+            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::FINISHLAT:
         myPajeTracer->traceEvent(this->res_,
             pajeTask.latencyEvent,
             sc_core::sc_time_stamp());
+        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
+            c.getPowerConsumption().value());
         break;
       default:
         break;
