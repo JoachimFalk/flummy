@@ -104,6 +104,10 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     PajeTracer::Container *res_;
     PajeTracer::Gauge     *power_;
     sc_core::sc_time startTime;
+
+    sc_core::sc_time powerTime;
+    double           powerValue;
+    double           powerValueOld;
   };
 
   class ComponentPajeTracer::PajeTask: public OTask {
@@ -159,6 +163,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
        , "PAJE")
     , name_(component->getName())
+    , powerValue(0), powerValueOld(-1)
   {
     if (!myPajeTracer){
       std::string traceFilename;
@@ -172,11 +177,22 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     PajeTracer::Container *arch = myPajeTracer->getOrCreateContainer("Architecture");
     this->res_   = myPajeTracer->getOrCreateContainer(component->getName().c_str(), arch);
     this->power_ = myPajeTracer->getOrCreateGauge("power", res_);
+//  myPajeTracer->traceGauge(this->res_, this->power_, sc_core::SC_ZERO_TIME, 0);
   }
 
   void ComponentPajeTracer::componentOperation(ComponentOperation co
     , Component const &c) {
-    // Ignore
+
+    sc_core::sc_time const &now = sc_core::sc_time_stamp();
+
+    if (now > this->powerTime &&
+        this->powerValue != this->powerValueOld) {
+        myPajeTracer->traceGauge(this->res_, this->power_,
+            this->powerTime, this->powerValue);
+        this->powerValueOld = this->powerValue;
+    }
+    this->powerTime  = now;
+    this->powerValue = c.getPowerConsumption().value();
   }
 
   void ComponentPajeTracer::taskOperation(TaskOperation to
@@ -210,6 +226,17 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
       new (&pajeTaskInstance) PajeTaskInstance(&pajeTask);
     }
 
+    sc_core::sc_time const &now = sc_core::sc_time_stamp();
+
+    if (now > this->powerTime &&
+        this->powerValue != this->powerValueOld) {
+        myPajeTracer->traceGauge(this->res_, this->power_,
+            this->powerTime, this->powerValue);
+        this->powerValueOld = this->powerValue;
+    }
+    this->powerTime  = now;
+    this->powerValue = c.getPowerConsumption().value();
+
     switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
       case TaskInstanceOperation::RELEASE:
         myPajeTracer->traceEvent(this->res_,
@@ -218,8 +245,6 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
         break;
       case TaskInstanceOperation::ASSIGN:
         this->startTime = sc_core::sc_time_stamp();
-        myPajeTracer->traceGauge(this->res_, this->power_, this->startTime,
-            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::RESIGN:
         myPajeTracer->traceActivity(this->res_
@@ -227,8 +252,6 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
               ? pajeTask.guard
               : pajeTask.task
           , this->startTime, sc_core::sc_time_stamp());
-        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
-            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::BLOCK:
         myPajeTracer->traceActivity(this->res_
@@ -236,8 +259,6 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
               ? pajeTask.guard
               : pajeTask.task
           , this->startTime, sc_core::sc_time_stamp());
-        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
-            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::FINISHDII:
         myPajeTracer->traceActivity(this->res_
@@ -245,15 +266,11 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
               ? pajeTask.guard
               : pajeTask.task
           , this->startTime, sc_core::sc_time_stamp());
-        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
-            c.getPowerConsumption().value());
         break;
       case TaskInstanceOperation::FINISHLAT:
         myPajeTracer->traceEvent(this->res_,
             pajeTask.latencyEvent,
             sc_core::sc_time_stamp());
-        myPajeTracer->traceGauge(this->res_, this->power_, sc_core::sc_time_stamp(),
-            c.getPowerConsumption().value());
         break;
       default:
         break;
