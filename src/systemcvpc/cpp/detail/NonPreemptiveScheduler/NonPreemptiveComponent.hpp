@@ -51,6 +51,8 @@
 #include "../Director.hpp"
 #include "../timetriggered/tt_support.hpp"
 
+#include <CoSupport/SystemC/systemc_support.hpp>
+
 #include <vector>
 #include <map>
 #include <deque>
@@ -126,6 +128,8 @@ namespace SystemC_VPC { namespace Detail {
 
     void scheduleThread();
     sc_core::sc_event scheduleEvent;
+
+    typedef CoSupport::SystemC::Event Event;
 
     Event blockCompute;
 #ifndef NO_POWER_SUM

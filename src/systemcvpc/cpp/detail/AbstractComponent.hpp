@@ -43,6 +43,7 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/PowerMode.hpp>
+#include <systemcvpc/VPCEvent.hpp>
 
 #include "TaskImpl.hpp"
 #include "TaskInstanceImpl.hpp"
@@ -70,8 +71,6 @@
 #include <string>
 
 namespace SystemC_VPC { namespace Detail {
-
-  using CoSupport::SystemC::Event;
 
   /**
    * \brief The interface of a Virtual-Processing-Component (VPC).

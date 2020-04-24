@@ -46,6 +46,8 @@
 #include "../PowerSumming.hpp"
 #include "../timetriggered/tt_support.hpp"
 
+#include <CoSupport/SystemC/systemc_support.hpp>
+
 #include <systemc>
 
 #include <vector>
@@ -140,6 +142,8 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_event scheduleEvent;
 
     void removeTask(TaskInstanceImpl *removedTask);
+
+    typedef CoSupport::SystemC::Event Event;
 
     Scheduler *scheduler;
 
