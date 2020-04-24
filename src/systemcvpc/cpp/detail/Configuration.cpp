@@ -36,8 +36,9 @@
 
 #include "Configuration.hpp"
 
-#include "Director.hpp"
 #include "Routing/IgnoreImpl.hpp"
+
+#include <systemcvpc/ConfigException.hpp>
 
 #include <CoSupport/String/QuotedString.hpp>
 
@@ -262,6 +263,10 @@ namespace SystemC_VPC { namespace Detail {
     std::stringstream msg;
 
     finalized = true;
+    for (Components::value_type const &v : components) {
+      AbstractComponent::Ptr const &comp = v.second;
+      comp->finalize();
+    }
     for (RegisteredTasks::value_type const &v : registeredTasks) {
       RegisteredTask const &registeredTask = v.second;
       VpcTasks::iterator iter = vpcTasks.find(v.first);

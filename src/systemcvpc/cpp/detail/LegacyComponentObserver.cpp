@@ -44,7 +44,7 @@ namespace SystemC_VPC { namespace Detail {
     : Extending::ComponentObserverIf(
           reinterpret_cast<char *>(static_cast<ComponentObserver              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentObserverIf *>(this))
-        , 0, 0)
+        , 0, 0, 0)
     , ComponentObserver(
          reinterpret_cast<char *>(static_cast<Extending::ComponentObserverIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentObserver              *>(this))
@@ -52,20 +52,23 @@ namespace SystemC_VPC { namespace Detail {
     {}
 
   void LegacyComponentObserver::componentOperation(ComponentOperation co
-    , Component       const &c)
+    , Component const &c
+    , OComponent      &oc)
     { this->notify(const_cast<Component *>(&c)); }
 
   void LegacyComponentObserver::taskOperation(TaskOperation to
-    , Component       const &c
-    , Extending::Task const &t
-    , OTask                 &ot)
+    , Component const &c
+    , OComponent      &oc
+    , Task      const &t
+    , OTask           &ot)
     { this->notify(const_cast<Component *>(&c)); }
 
   void LegacyComponentObserver::taskInstanceOperation(TaskInstanceOperation tio
-    , Component               const &c
-    , Extending::TaskInstance const &ti
-    , OTask                         &ot
-    , OTaskInstance                 &oti)
+    , Component    const &c
+    , OComponent         &oc
+    , OTask              &ot
+    , TaskInstance const &ti
+    , OTaskInstance      &oti)
     { this->notify(const_cast<Component *>(&c)); }
 
   bool LegacyComponentObserver::addAttribute(Attribute::Ptr attr) {

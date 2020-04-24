@@ -59,12 +59,15 @@ public:
     { return const_cast<this_type *>(this)->getComponentTracer(); }
 
 protected:
-  ComponentTracerIf(int facadeAdj, size_t rt, size_t rti)
-    : ComponentObserverIf(facadeAdj, rt, rti) {}
+  ComponentTracerIf(int facadeAdj, size_t rc, size_t rt, size_t rti)
+    : ComponentObserverIf(facadeAdj, rc, rt, rti) {}
+
+  typedef std::function<
+      this_type *(Attribute::Ptr)> FactoryFunction;
 
   static void registerTracer(
-      const char                                   *tracerName,
-      std::function<ComponentTracerIf *(Component const *)>  tracerFactory);
+      const char      *type,
+      FactoryFunction  factory);
 };
 
 } } // namespace SystemC_VPC::Extending

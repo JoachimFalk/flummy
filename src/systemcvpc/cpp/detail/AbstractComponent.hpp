@@ -71,8 +71,6 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  class Director;
-
   using CoSupport::SystemC::Event;
 
   /**
@@ -91,6 +89,8 @@ namespace SystemC_VPC { namespace Detail {
   public:
     typedef boost::intrusive_ptr<this_type>       Ptr;
     typedef boost::intrusive_ptr<this_type const> ConstPtr;
+
+    using ObservableComponent::addObserver;
 
     ///
     /// Handle interfaces for SystemC_VPC::Component
@@ -198,7 +198,7 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker)=0;
 
-    virtual void initialize(const Director *d);
+    virtual void finalize();
 
     TaskInstanceImpl *executeHop(TaskImpl *taskImpl
       , Timing const &transferTiming

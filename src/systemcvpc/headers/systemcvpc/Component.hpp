@@ -37,7 +37,6 @@
 #ifndef _INCLUDED_SYSTEMCVPC_COMPONENT_HPP
 #define _INCLUDED_SYSTEMCVPC_COMPONENT_HPP
 
-#include "ConfigException.hpp"
 #include "Scheduler.hpp"
 #include "Timing.hpp"
 #include "TimingModifier.hpp"
@@ -48,6 +47,7 @@
 #include "ExecModel.hpp"
 #include "PowerMode.hpp"
 #include "Power.hpp"
+#include "ComponentObserver.hpp"
 
 #include <CoSupport/SmartPtr/RefCountObject.hpp>
 
@@ -114,14 +114,16 @@ public:
   bool hasTask(ScheduledTask * actor) const;
 
   // Add a tracer. Use constants as defined in Tracer, e.g., Tracer::PAJE.
-  void addTracer(const char *tracer);
+  void addTracer(const char *tracerType, Attribute::Ptr attr = nullptr);
+
+  void addObserver(ComponentObserver::Ptr observer);
 
   void setExecModel(ExecModel::Ptr provider);
   ExecModel::Ptr getExecModel();
 
   MappedTasks getMappedTasks();
 
-  std::string getName() const;
+  std::string const &getName() const;
 
   /**
    * \brief Set parameter for Component and Scheduler.

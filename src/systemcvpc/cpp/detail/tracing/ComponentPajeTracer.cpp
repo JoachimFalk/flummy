@@ -67,24 +67,27 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     , public ComponentTracer
   {
   public:
-    ComponentPajeTracer(Component const *component);
+    ComponentPajeTracer(Attribute::Ptr attr);
 
     ///
     /// Implement interface for ComponentTracerIf
     ///
 
     void componentOperation(ComponentOperation co
-      , Component const &c);
+      , Component const &c
+      , OComponent      &oc);
 
     void taskOperation(TaskOperation to
       , Component const &c
+      , OComponent      &oc
       , Task      const &t
       , OTask           &ot);
 
     void taskInstanceOperation(TaskInstanceOperation tio
       , Component    const &c
-      , TaskInstance const &ti
+      , OComponent         &oc
       , OTask              &ot
+      , TaskInstance const &ti
       , OTaskInstance      &oti);
 
     ///
@@ -93,16 +96,27 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     bool addAttribute(Attribute::Ptr attr);
   private:
+    class PajeComponent;
     class PajeTask;
     class PajeTaskInstance;
     class RegisterMe;
 
     static RegisterMe registerMe;
 
-    std::string  name_;
+    PajeTracer::Container *arch;
+  };
+
+  class ComponentPajeTracer::PajeComponent: public OComponent {
+  public:
+    PajeComponent(ComponentPajeTracer *parent, Component const &c)
+      : res_(myPajeTracer->getOrCreateContainer(c.getName().c_str(), parent->arch))
+      , power_(myPajeTracer->getOrCreateGauge("power", res_))
+      , powerValue(0), powerValueOld(-1)
+      {}
 
     PajeTracer::Container *res_;
     PajeTracer::Gauge     *power_;
+
     sc_core::sc_time startTime;
 
     sc_core::sc_time powerTime;
@@ -149,21 +163,19 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   public:
     RegisterMe() {
       ComponentPajeTracer::registerTracer("PAJE",
-        [](Component const *comp) { return new ComponentPajeTracer(comp); });
+        [](Attribute::Ptr attr) { return new ComponentPajeTracer(attr); });
     }
   } ComponentPajeTracer::registerMe;
 
-  ComponentPajeTracer::ComponentPajeTracer(Component const *component)
+  ComponentPajeTracer::ComponentPajeTracer(Attribute::Ptr attr)
     : Extending::ComponentTracerIf(
           reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
-        , sizeof(PajeTask), sizeof(PajeTaskInstance))
+        , sizeof(PajeComponent), sizeof(PajeTask), sizeof(PajeTaskInstance))
     , ComponentTracer(
          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
        , "PAJE")
-    , name_(component->getName())
-    , powerValue(0), powerValueOld(-1)
   {
     if (!myPajeTracer){
       std::string traceFilename;
@@ -174,38 +186,56 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
       myPajeTracer.reset(new CoSupport::Tracing::PajeTracer(traceFilename));
     }
 
-    PajeTracer::Container *arch = myPajeTracer->getOrCreateContainer("Architecture");
-    this->res_   = myPajeTracer->getOrCreateContainer(component->getName().c_str(), arch);
-    this->power_ = myPajeTracer->getOrCreateGauge("power", res_);
+    this->arch = myPajeTracer->getOrCreateContainer("Architecture");
 //  myPajeTracer->traceGauge(this->res_, this->power_, sc_core::SC_ZERO_TIME, 0);
   }
 
   void ComponentPajeTracer::componentOperation(ComponentOperation co
-    , Component const &c) {
+    , Component const &c
+    , OComponent      &oc)
+  {
+    PajeComponent &pajeComponent = static_cast<PajeComponent &>(oc);
 
-    sc_core::sc_time const &now = sc_core::sc_time_stamp();
-
-    if (now > this->powerTime &&
-        this->powerValue != this->powerValueOld) {
-        myPajeTracer->traceGauge(this->res_, this->power_,
-            this->powerTime, this->powerValue);
-        this->powerValueOld = this->powerValue;
+    if (ComponentOperation((int) co & (int) ComponentOperation::MEMOP_MASK) ==
+        ComponentOperation::ALLOCATE) {
+      new (&pajeComponent) PajeComponent(this, c);
     }
-    this->powerTime  = now;
-    this->powerValue = c.getPowerConsumption().value();
+    switch (ComponentOperation((int) co & ~ (int) ComponentOperation::MEMOP_MASK)) {
+      case ComponentOperation::PWRCHANGE: {
+        sc_core::sc_time const &now = sc_core::sc_time_stamp();
+
+        if (now > pajeComponent.powerTime &&
+            pajeComponent.powerValue != pajeComponent.powerValueOld) {
+            myPajeTracer->traceGauge(pajeComponent.res_, pajeComponent.power_,
+                pajeComponent.powerTime, pajeComponent.powerValue);
+            pajeComponent.powerValueOld = pajeComponent.powerValue;
+        }
+        pajeComponent.powerTime  = now;
+        pajeComponent.powerValue = c.getPowerConsumption().value();
+        break;
+      }
+      default:
+        break;
+    }
+    if (ComponentOperation((int) co & (int) ComponentOperation::MEMOP_MASK) ==
+        ComponentOperation::DEALLOCATE) {
+      pajeComponent.~PajeComponent();
+    }
   }
 
   void ComponentPajeTracer::taskOperation(TaskOperation to
     , Component const &c
+    , OComponent      &oc
     , Task      const &t
     , OTask           &ot)
   {
-    PajeTask &pajeTask = static_cast<PajeTask &>(ot);
+    PajeComponent &pajeComponent = static_cast<PajeComponent &>(oc);
+    PajeTask      &pajeTask      = static_cast<PajeTask &>(ot);
 
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::ALLOCATE) {
-      new (&pajeTask) PajeTask(t.getName(), res_);
-    }
+      new (&pajeTask) PajeTask(t.getName(), pajeComponent.res_);
+    } else
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::DEALLOCATE) {
       pajeTask.~PajeTask();
@@ -214,10 +244,12 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
   void ComponentPajeTracer::taskInstanceOperation(TaskInstanceOperation tio
     , Component    const &c
-    , TaskInstance const &ti
+    , OComponent         &oc
     , OTask              &ot
+    , TaskInstance const &ti
     , OTaskInstance      &oti)
   {
+    PajeComponent    &pajeComponent    = static_cast<PajeComponent &>(oc);
     PajeTask         &pajeTask         = static_cast<PajeTask &>(ot);
     PajeTaskInstance &pajeTaskInstance = static_cast<PajeTaskInstance &>(oti);
 
@@ -228,47 +260,47 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     sc_core::sc_time const &now = sc_core::sc_time_stamp();
 
-    if (now > this->powerTime &&
-        this->powerValue != this->powerValueOld) {
-        myPajeTracer->traceGauge(this->res_, this->power_,
-            this->powerTime, this->powerValue);
-        this->powerValueOld = this->powerValue;
+    if (now > pajeComponent.powerTime &&
+        pajeComponent.powerValue != pajeComponent.powerValueOld) {
+        myPajeTracer->traceGauge(pajeComponent.res_, pajeComponent.power_,
+            pajeComponent.powerTime, pajeComponent.powerValue);
+        pajeComponent.powerValueOld = pajeComponent.powerValue;
     }
-    this->powerTime  = now;
-    this->powerValue = c.getPowerConsumption().value();
+    pajeComponent.powerTime  = now;
+    pajeComponent.powerValue = c.getPowerConsumption().value();
 
     switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
       case TaskInstanceOperation::RELEASE:
-        myPajeTracer->traceEvent(this->res_,
+        myPajeTracer->traceEvent(pajeComponent.res_,
             pajeTask.releaseEvent,
             sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::ASSIGN:
-        this->startTime = sc_core::sc_time_stamp();
+        pajeComponent.startTime = sc_core::sc_time_stamp();
         break;
       case TaskInstanceOperation::RESIGN:
-        myPajeTracer->traceActivity(this->res_
+        myPajeTracer->traceActivity(pajeComponent.res_
           , ti.getType() == TaskInstance::Type::GUARD
               ? pajeTask.guard
               : pajeTask.task
-          , this->startTime, sc_core::sc_time_stamp());
+          , pajeComponent.startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::BLOCK:
-        myPajeTracer->traceActivity(this->res_
+        myPajeTracer->traceActivity(pajeComponent.res_
           , ti.getType() == TaskInstance::Type::GUARD
               ? pajeTask.guard
               : pajeTask.task
-          , this->startTime, sc_core::sc_time_stamp());
+          , pajeComponent.startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::FINISHDII:
-        myPajeTracer->traceActivity(this->res_
+        myPajeTracer->traceActivity(pajeComponent.res_
           , ti.getType() == TaskInstance::Type::GUARD
               ? pajeTask.guard
               : pajeTask.task
-          , this->startTime, sc_core::sc_time_stamp());
+          , pajeComponent.startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::FINISHLAT:
-        myPajeTracer->traceEvent(this->res_,
+        myPajeTracer->traceEvent(pajeComponent.res_,
             pajeTask.latencyEvent,
             sc_core::sc_time_stamp());
         break;

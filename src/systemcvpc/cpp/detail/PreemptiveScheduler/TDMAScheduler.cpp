@@ -53,6 +53,8 @@
 
 #include "TDMAScheduler.hpp"
 #include "PreemptiveComponent.hpp"
+
+#include "../Director.hpp"
 #include "../common.hpp"
 
 #include <CoSupport/SystemC/algorithm.hpp>

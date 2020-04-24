@@ -54,9 +54,6 @@ namespace SystemC_VPC {
 
   DECL_INTRUSIVE_REFCOUNT_PTR(Attribute, PAttribute)
 
-  typedef std::deque<std::pair<std::string, PAttribute> >  Attributes;
-  typedef std::deque<std::pair<std::string, std::string> > Parameters;
-
   class Attribute
     : private CoSupport::SmartPtr::RefCount
   {
@@ -122,6 +119,9 @@ namespace SystemC_VPC {
   private:
     std::string type;
     std::string value;
+
+    typedef std::deque<std::pair<std::string, PAttribute> >  Attributes;
+    typedef std::deque<std::pair<std::string, std::string> > Parameters;
 
     Parameters  parameters;
     Attributes  attributes;

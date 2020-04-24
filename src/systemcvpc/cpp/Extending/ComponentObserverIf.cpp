@@ -42,30 +42,30 @@
 #include <functional>
 #include <stdexcept>
 
-namespace {
+namespace SystemC_VPC { namespace {
 
   typedef std::map<
       std::string,
-      std::function<SystemC_VPC::Extending::ComponentObserverIf *()>
-    > ObserverByName;
+      std::function<Extending::ComponentObserverIf *(Attribute::Ptr)>
+    > ObserverByType;
 
   /// We need this to be independent from the global variable initialization order.
-  static ObserverByName &getObserverByName() {
-    static ObserverByName observerByName;
-    return observerByName;
+  static ObserverByType &getObserverByType() {
+    static ObserverByType observerByType;
+    return observerByType;
   }
 
-}
+} }
 
 namespace SystemC_VPC { namespace Extending {
 
   void ComponentObserverIf::registerObserver(
-      const char                             *type,
-      std::function<ComponentObserverIf *()>  factory) {
-
-    ObserverByName &observerByName = getObserverByName();
-    std::pair<ObserverByName::iterator, bool> status =
-        observerByName.insert(ObserverByName::value_type(type, factory));
+      const char      *type,
+      FactoryFunction  factory)
+  {
+    ObserverByType &observerByType = getObserverByType();
+    std::pair<ObserverByType::iterator, bool> status =
+        observerByType.insert(ObserverByType::value_type(type, factory));
     if (!status.second)
       throw  std::runtime_error("Duplicate component observer type " + std::string(type)+"!");
   }
@@ -74,13 +74,17 @@ namespace SystemC_VPC { namespace Extending {
 
 namespace SystemC_VPC {
 
-  ComponentObserver::Ptr createComponentObserver(const char *type) {
-    ObserverByName &observerByName = getObserverByName();
+  ComponentObserver::Ptr createComponentObserver(const char *type, Attribute::Ptr attr) {
+    ObserverByType &observerByType = getObserverByType();
 
-    ObserverByName::const_iterator iter = observerByName.find(type);
-    if (iter == observerByName.end())
+    ObserverByType::const_iterator iter = observerByType.find(type);
+    if (iter == observerByType.end())
       throw ConfigException("No component observer of type "+std::string(type)+" registered!");
-    return iter->second()->getComponentObserver();
+    return iter->second(attr)->getComponentObserver();
+  }
+
+  ComponentObserver::Ptr getComponentObserver(const char *name) {
+    return nullptr;
   }
 
 } // namespace SystemC_VPC
