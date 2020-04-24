@@ -194,10 +194,10 @@ namespace SystemC_VPC { namespace Detail {
       return;
 
     //std::cout<<attributePtr->getAttributeSize()<<std::endl;
-    if(attributePtr->getParameterSize()!=0){
+    if(attributePtr->getAttributeSize()!=0){
       //es gibt folglich globale FlexRay-Parameter!
-      if(attributePtr->hasParameter("duachannel")){
-        dualchannel=(attributePtr->getParameter("dualchannel") == "true");
+      if(attributePtr->hasAttribute("duachannel")){
+        dualchannel=(attributePtr->getAttribute("dualchannel")->getValue() == "true");
       }
     }
         
@@ -235,23 +235,23 @@ namespace SystemC_VPC { namespace Detail {
                             
             this->_properties.push_back(param3);
             ProcessParams_string[param3.first]=SlotParameters(0,0);
-            if(attribute3.second->getParameterSize()==0){
+            if(attribute3.second->getAttributeSize()==0){
               //we don't have further Parameters, so let them as they are
             }else{
               //parse parameters
-              if(attribute3.second->hasParameter("offset")){
+              if(attribute3.second->hasAttribute("offset")){
                 ProcessParams_string[param3.first].offset
                   = atoi(
-                         attribute3.second->getParameter("offset")
-                         .c_str()
+                         attribute3.second->getAttribute("offset")
+                         ->getValue().c_str()
                          );
                 //                                   std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
               }
-              if(attribute3.second->hasParameter("multiplex")){
+              if(attribute3.second->hasAttribute("multiplex")){
                 ProcessParams_string[param3.first].multiplex
                   = atoi(
-                         attribute3.second->getParameter("multiplex")
-                         .c_str()
+                         attribute3.second->getAttribute("multiplex")
+                         ->getValue().c_str()
                          );
                 //                                   std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
               }
@@ -310,8 +310,9 @@ namespace SystemC_VPC { namespace Detail {
         //                      std::cout<<"new Dynamic One! " << newSlot.length <<std::endl;
                 
         //jetzt noch die Task-mappings!
-        for(size_t j=0;j<attribute2.second->getParameterSize();j++){
-          std::pair<std::string, std::string > param2 =attribute2.second->getNextParameter(j);
+        for(size_t j=0;j<attribute2.second->getAttributeSize();j++){
+          std::pair<std::string, Attribute::Ptr > paramx =attribute2.second->getNextAttribute(j);
+          std::pair<std::string, std::string > param2(paramx.first, paramx.second->getValue());
           if(param2.first == "mapping"){
             param2.first=param2.second;
             param2.second=param.first;

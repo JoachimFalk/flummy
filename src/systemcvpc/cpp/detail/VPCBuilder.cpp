@@ -496,7 +496,7 @@ namespace SystemC_VPC { namespace Detail {
       if( xmlName == XMLCH("parameter") ){
         CX::XStr sType  = atts->getNamedItem(XMLCH("type"))->getNodeValue();
         CX::XStr sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
-        attribute->addParameter( sType, sValue);
+        attribute->addAttribute( sType, sValue);
       }
     }
   }

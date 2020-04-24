@@ -108,7 +108,7 @@ namespace SystemC_VPC { namespace Detail {
     
     virtual void setAttribute(Attribute::Ptr attPtr)
     {
-      if(attPtr->getAttributeSize() != 0 || attPtr->getParameterSize() != 0){
+      if(attPtr->getAttributeSize() != 0){
         return;
       }
       this->setProperty(attPtr->getType().c_str(), attPtr->getValue().c_str());
