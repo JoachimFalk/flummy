@@ -43,14 +43,13 @@
 namespace SystemC_VPC { namespace Detail {
 
   ObservableComponent::ObservableComponent()
-    : observerRegistrationAllowed(true)
-    , nextFreeCompOffset(0)
+    : nextFreeCompOffset(0)
     , nextFreeTaskOffset(sizeof(TaskImpl))
     , nextFreeTaskInstanceOffset(sizeof(TaskInstanceImpl))
     , oComponent(nullptr) {}
 
   void ObservableComponent::addObserver(Extending::ComponentObserverIf::Ptr const &obs) {
-    assert(observerRegistrationAllowed);
+    assert(isObserverRegistrationAllowed());
     ObserverInfo oi;
     // Get next free 16 byte aligned component offset.
     nextFreeCompOffset = (nextFreeCompOffset + 15UL) & ~15UL;
@@ -70,7 +69,7 @@ namespace SystemC_VPC { namespace Detail {
   void ObservableComponent::componentOperation(ComponentOperation co
     , AbstractComponent const &c)
   {
-    assert(!observerRegistrationAllowed);
+    assert(oComponent);
     for (Observers::value_type const &e : observers)
       e.first->componentOperation(co
         , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset));
@@ -80,7 +79,7 @@ namespace SystemC_VPC { namespace Detail {
     , AbstractComponent const &c
     , TaskImpl                &t)
   {
-    assert(!observerRegistrationAllowed);
+    assert(oComponent);
     for (Observers::value_type const &e : observers) {
       e.first->taskOperation(to
         , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
@@ -93,7 +92,7 @@ namespace SystemC_VPC { namespace Detail {
     , AbstractComponent const &c
     , TaskInstanceImpl        &ti)
   {
-    assert(!observerRegistrationAllowed);
+    assert(oComponent);
 
     if (tio == TaskInstanceOperation::FINISHLAT)
       tio = TaskInstanceOperation((int) tio | (int) TaskInstanceOperation::DEALLOCATE);
@@ -109,12 +108,17 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void ObservableComponent::finalize() {
+    // This function will disable observer registration.
+    assert(isObserverRegistrationAllowed());
+
     Observers::const_iterator iter = observers.begin();
 
     char *storage = (char *) malloc(nextFreeCompOffset);
     if (!storage)
       throw std::bad_alloc();
     try {
+      /// Iterate over all observers and let them initialize
+      /// their component private data.
       while (iter != observers.end()) {
         Observers::value_type const &e = *iter++; // this line must not throw
         e.first->componentOperation(ComponentOperation::ALLOCATE
@@ -125,17 +129,20 @@ namespace SystemC_VPC { namespace Detail {
       // Cleanup
       assert(iter != observers.begin());
       // This really must not throw!
-      do {
-        Observers::value_type const &e = *--iter;
-        e.first->componentOperation(ComponentOperation::DEALLOCATE
-          , *static_cast<AbstractComponent *>(this)
-          , *reinterpret_cast<OComponent *>(storage + e.second.compOffset));
-      } while (iter != observers.begin());
+      try {
+        do {
+          Observers::value_type const &e = *--iter;
+          e.first->componentOperation(ComponentOperation::DEALLOCATE
+            , *static_cast<AbstractComponent *>(this)
+            , *reinterpret_cast<OComponent *>(storage + e.second.compOffset));
+        } while (iter != observers.begin());
+      } catch (...) {
+        assert(!"Oops, OComponent destruction throws!");
+      }
       free(storage);
       throw;
     }
-    observerRegistrationAllowed = false;
-    oComponent = storage;
+    oComponent = storage; // This disables observer registration.
   }
 
   TaskImpl *ObservableComponent::createTask(TaskInterface *taskInterface)
@@ -152,31 +159,51 @@ namespace SystemC_VPC { namespace Detail {
   }
   TaskImpl *ObservableComponent::createTask(std::function<void (char *)> factory)
   {
-    assert(!observerRegistrationAllowed);
+    assert(oComponent);
+
+    Observers::const_iterator iter = observers.begin();
 
     char *storage = (char *) malloc(nextFreeTaskOffset);
     if (!storage)
       throw std::bad_alloc();
     try {
-      AbstractComponent &c = *static_cast<AbstractComponent *>(this);
-
       factory(storage);
-      TaskImpl *taskImpl = reinterpret_cast<TaskImpl *>(storage);
-      // FIXME: Exceptions
-      for (Observers::value_type const &e : observers) {
+    } catch (...) {
+      free(storage);
+      throw;
+    }
+
+    TaskImpl          *taskImpl = reinterpret_cast<TaskImpl *>(storage);
+    AbstractComponent &c        = *static_cast<AbstractComponent *>(this);
+
+    try {
+      /// Iterate over all observers and let them initialize
+      /// their task private data.
+      while (iter != observers.end()) {
+        Observers::value_type const &e = *iter++; // this line must not throw
         e.first->taskOperation(TaskOperation::ALLOCATE
           , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
           , *taskImpl
           , *reinterpret_cast<OTask *>(storage + e.second.taskOffset));
       }
-      try {
-        tasks.push_back(taskImpl);
-        return taskImpl;
-      } catch (...) {
-        taskImpl->~TaskImpl();
-        throw;
-      }
+      tasks.push_back(taskImpl);
+      return taskImpl;
     } catch (...) {
+      // Cleanup
+      assert(iter != observers.begin());
+      // This really must not throw!
+      try {
+        do {
+          Observers::value_type const &e = *--iter;
+          e.first->taskOperation(TaskOperation::DEALLOCATE
+            , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
+            , *taskImpl
+            , *reinterpret_cast<OTask *>(storage + e.second.taskOffset));
+        } while (iter != observers.begin());
+      } catch (...) {
+        assert(!"Oops, OTask destruction throws!");
+      }
+      taskImpl->~TaskImpl();
       free(storage);
       throw;
     }
@@ -189,18 +216,33 @@ namespace SystemC_VPC { namespace Detail {
     , std::function<void (TaskInstanceImpl *)> const &diiCallback
     , std::function<void (TaskInstanceImpl *)> const &latCallback)
   {
-    assert(!observerRegistrationAllowed);
+    assert(oComponent);
+
+    Observers::const_iterator iter = observers.begin();
+
     char *storage = (char *) malloc(nextFreeTaskInstanceOffset);
     if (!storage)
       throw std::bad_alloc();
-    try {
-      AbstractComponent &c = *static_cast<AbstractComponent *>(this);
 
-      TaskInstanceImpl *taskInstanceImpl =
+    TaskInstanceImpl *taskInstanceImpl = nullptr;
+
+    try {
+      taskInstanceImpl =
           new (storage) TaskInstanceImpl(taskImpl, type
               , firingRuleInterface, diiCallback, latCallback);
-      // FIXME: Exceptions
-      for (Observers::value_type const &e : observers) {
+    } catch (...) {
+      free(storage);
+      throw;
+    }
+    assert(taskInstanceImpl == reinterpret_cast<TaskInstanceImpl *>(storage));
+
+    AbstractComponent &c = *static_cast<AbstractComponent *>(this);
+
+    try {
+      /// Iterate over all observers and let them initialize
+      /// their task instance private data.
+      while (iter != observers.end()) {
+        Observers::value_type const &e = *iter++; // this line must not throw
         e.first->taskInstanceOperation(TaskInstanceOperation::ALLOCATE
           , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
           , *reinterpret_cast<OTask *>(reinterpret_cast<char *>(taskImpl) + e.second.taskOffset)
@@ -209,11 +251,26 @@ namespace SystemC_VPC { namespace Detail {
       }
       return taskInstanceImpl;
     } catch (...) {
+      // Cleanup
+      assert(iter != observers.begin());
+      // This really must not throw!
+      try {
+        do {
+          Observers::value_type const &e = *--iter;
+          e.first->taskInstanceOperation(TaskInstanceOperation::DEALLOCATE
+            , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
+            , *reinterpret_cast<OTask *>(reinterpret_cast<char *>(taskImpl) + e.second.taskOffset)
+            , *taskInstanceImpl
+            , *reinterpret_cast<OTaskInstance *>(storage + e.second.taskInstanceOffset));
+        } while (iter != observers.begin());
+      } catch (...) {
+        assert(!"Oops, OTaskInstance destruction throws!");
+      }
+      taskInstanceImpl->~TaskInstanceImpl();
       free(storage);
       throw;
     }
   }
-
 
   ObservableComponent::~ObservableComponent()
     {}
