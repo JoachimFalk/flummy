@@ -96,16 +96,16 @@ namespace SystemC_VPC { namespace Detail {
     virtual void processAttributes(Attribute::Ptr powerAtt){
       //std::cerr << "InternalLoadHysteresisGovernorFactory::processAttributes" << std::endl;
       if(powerAtt->isType("governor")){
-        if(powerAtt->hasParameter("sliding_window")){
-          std::string v = powerAtt->getParameter("sliding_window");
+        if(powerAtt->hasAttribute("sliding_window")){
+          std::string v = powerAtt->getAttribute("sliding_window")->getValue();
           windowTime = CoSupport::SystemC::createSCTime(v.c_str());
         }
-        if(powerAtt->hasParameter("upper_threshold")){
-          std::string v = powerAtt->getParameter("upper_threshold");
+        if(powerAtt->hasAttribute("upper_threshold")){
+          std::string v = powerAtt->getAttribute("upper_threshold")->getValue();
           fastTime = windowTime * atof(v.c_str());
         }
-        if(powerAtt->hasParameter("lower_threshold")){
-          std::string v = powerAtt->getParameter("lower_threshold");
+        if(powerAtt->hasAttribute("lower_threshold")){
+          std::string v = powerAtt->getAttribute("lower_threshold")->getValue();
           slowTime = windowTime * atof(v.c_str());
         }
       }

@@ -153,8 +153,8 @@ void Component::addAttribute(Attribute::Ptr attribute) {
   } else if (attribute->isType("transaction")) {
 //  unsigned int transactionSize = 1;
     sc_core::sc_time transferDelay = sc_core::SC_ZERO_TIME;
-    if (attribute->hasParameter("delay")) {
-      transferDelay = Detail::createSC_Time(attribute->getParameter("delay").c_str());
+    if (attribute->hasAttribute("delay")) {
+      transferDelay = Detail::createSC_Time(attribute->getAttribute("delay")->getValue().c_str());
     }
 
 //  if (attribute->hasParameter("size")) {

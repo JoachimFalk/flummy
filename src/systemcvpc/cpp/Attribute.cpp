@@ -46,40 +46,6 @@ namespace SystemC_VPC {
   Attribute::Attribute( std::string type, std::string value)
     : type(type), value(value){}
 
-  std::pair<std::string, std::string> Attribute::getNextParameter(size_t pos) {
-    if(pos<=parameters.size()) return parameters[pos];
-    throw InvalidArgumentException("getNextParameter");
-  }
-
-  //
-  std::string Attribute::getParameter(const std::string type) {
-    for(unsigned int i=0;
-        i<this->getParameterSize();
-        ++i){
-      if(parameters[i].first == type){
-        return parameters[i].second;
-      }
-    }
-    throw InvalidArgumentException("getParameter> unknown parameter:"
-                                       + type);
-  }
-
-  //
-  bool Attribute::hasParameter(const std::string type){
-    for(unsigned int i=0;
-        i<this->getParameterSize();
-        ++i){
-      if(parameters[i].first == type){
-        return true;
-      }
-    }
-    return false;
-  }
-
-  void Attribute::addParameter(std::string type,std::string value){
-    this->parameters.push_back( std::make_pair(type, value) );
-  }
-
   std::pair<std::string, Attribute::Ptr > Attribute::getNextAttribute(size_t pos) {
     if(pos<=attributes.size()) return attributes[pos];
     throw InvalidArgumentException("getNextAttribute");
@@ -118,10 +84,6 @@ namespace SystemC_VPC {
 
   void Attribute::addAttribute( std::string type, Attribute::Ptr att ){
     attributes.push_back( std::make_pair(type, att) );
-  }
-
-  size_t Attribute::getParameterSize(){
-    return parameters.size();
   }
 
   size_t Attribute::getAttributeSize(){

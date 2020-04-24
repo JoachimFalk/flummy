@@ -72,20 +72,6 @@ namespace SystemC_VPC {
      */
     Attribute( std::string type, std::string value);
 
-    std::pair<std::string, std::string> getNextParameter(size_t pos);
-
-    /**
-     *
-     */
-    std::string getParameter(const std::string type);
-
-    /**
-     *
-     */
-    bool hasParameter(const std::string type);
-
-    void addParameter(std::string type, std::string value);
-
     std::pair<std::string, Attribute::Ptr > getNextAttribute(size_t pos);
 
     /**
@@ -102,7 +88,6 @@ namespace SystemC_VPC {
 
     void addAttribute( std::string type, Attribute::Ptr att );
 
-    size_t getParameterSize();
     size_t getAttributeSize();
 
     std::string getValue();
@@ -121,9 +106,7 @@ namespace SystemC_VPC {
     std::string value;
 
     typedef std::deque<std::pair<std::string, PAttribute> >  Attributes;
-    typedef std::deque<std::pair<std::string, std::string> > Parameters;
 
-    Parameters  parameters;
     Attributes  attributes;
   };
 

@@ -139,12 +139,12 @@ namespace SystemC_VPC { namespace Detail {
     if( value!="FlexRayParams" )
       return;
 
-    if(attributePtr->getParameterSize()!=0){
+    if(attributePtr->getAttributeSize()!=0){
       //es gibt folglich globale FlexRay-Parameter!
-      for(size_t j=0;j<attributePtr->getParameterSize();j++){
-        std::pair<std::string, std::string > param2 =attributePtr->getNextParameter(j);
+      for(size_t j=0;j<attributePtr->getAttributeSize();j++){
+        std::pair<std::string, Attribute::Ptr> param2 =attributePtr->getNextAttribute(j);
         if(param2.first == "dualchannel")
-          dualchannel=(param2.second == "true");
+          dualchannel=(param2.second->getValue() == "true");
       }
     }
 
@@ -182,18 +182,18 @@ namespace SystemC_VPC { namespace Detail {
                             
               this->_properties.push_back(param3);
               ProcessParams_string[param3.first]=SlotParameters(0,0);
-              if(attribute3.second->getParameterSize()==0){
+              if(attribute3.second->getAttributeSize()==0){
                 //we don't have further Parameters, so let them as they are
               }else{
                 //parse parameters
-                for(size_t m=0;m<attribute3.second->getParameterSize();m++){
-                  std::pair<std::string, std::string > param4 =attribute3.second->getNextParameter(m);
+                for(size_t m=0;m<attribute3.second->getAttributeSize();m++){
+                  std::pair<std::string, Attribute::Ptr > param4 =attribute3.second->getNextAttribute(m);
                   if(param4.first=="offset"){
-                    ProcessParams_string[param3.first].offset=atoi(param4.second.c_str());
+                    ProcessParams_string[param3.first].offset=atoi(param4.second->getValue().c_str());
                     //                                  std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
                   }
                   if(param4.first=="multiplex"){
-                    ProcessParams_string[param3.first].multiplex=atoi(param4.second.c_str());
+                    ProcessParams_string[param3.first].multiplex=atoi(param4.second->getValue().c_str());
                     //                                   std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
                   }
                 }
