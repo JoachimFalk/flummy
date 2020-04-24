@@ -83,14 +83,16 @@ namespace SystemC_VPC {
     const char *type;
   };
 
-  ComponentObserver::Ptr createComponentObserver(const char *type);
+  ComponentObserver::Ptr createComponentObserver(const char *type, Attribute::Ptr attr = nullptr);
 
   template <typename OBSERVER>
   typename OBSERVER::Ptr
-  createComponentObserver() {
+  createComponentObserver(Attribute::Ptr attr = nullptr) {
     return boost::static_pointer_cast<OBSERVER>(
-        createComponentObserver(OBSERVER::Type));
+        createComponentObserver(OBSERVER::Type, attr));
   }
+
+  ComponentObserver::Ptr getComponentObserver(const char *name);
 
 } // namespace SystemC_VPC
 

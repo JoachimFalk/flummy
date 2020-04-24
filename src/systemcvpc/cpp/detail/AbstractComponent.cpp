@@ -41,9 +41,9 @@
 #include <systemcvpc/VpcTask.hpp>
 #include <systemcvpc/PossibleAction.hpp>
 #include <systemcvpc/ExecModel.hpp>
+#include <systemcvpc/ConfigException.hpp>
 
 #include "common.hpp"
-#include "Director.hpp"
 #include "AbstractComponent.hpp"
 #include "AbstractRoute.hpp"
 #include "TaskImpl.hpp"
@@ -180,7 +180,8 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  void AbstractComponent::initialize(const Director *d) {
+  void AbstractComponent::finalize() {
+    ObservableComponent::finalize();
   }
 
   bool AbstractComponent::getCanExecuteTasks() const {
@@ -398,8 +399,8 @@ namespace SystemC_VPC { namespace Detail {
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
   void AbstractComponent::finishLatencyTaskInstance(TaskInstanceImpl *ti) {
-    // Remember last acknowledged task time
-    Director::getInstance().end = sc_core::sc_time_stamp();
+//  // Remember last acknowledged task time
+//  Director::getInstance().end = sc_core::sc_time_stamp();
 //  this->Tracing::TraceableComponent::finishLatencyTaskInstance(taskInstance);
     ti->latExpired();
 

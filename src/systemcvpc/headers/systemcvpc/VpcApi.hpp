@@ -41,6 +41,7 @@
 #include "VpcTask.hpp"
 #include "Component.hpp"
 #include "Route.hpp"
+#include "ConfigException.hpp"
 #include "Routing/Ignore.hpp"
 #include "Routing/Static.hpp"
 #include "ExecModel.hpp"

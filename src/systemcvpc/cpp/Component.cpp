@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -42,6 +42,7 @@
 #include <systemcvpc/ScheduledTask.hpp>
 #include <systemcvpc/TimingModifier.hpp>
 #include <systemcvpc/VpcApi.hpp>
+#include <systemcvpc/ConfigException.hpp>
 
 #include "detail/common.hpp"
 #include "detail/Configuration.hpp"
@@ -93,7 +94,7 @@ void Component::addTask(ScheduledTask &actor) {
 }
 
 //
-std::string Component::getName() const {
+std::string const &Component::getName() const {
   return static_cast<Detail::AbstractComponent const *>(this)->getName();
 }
 
@@ -109,9 +110,15 @@ Power            Component::getPowerConsumption() const {
   return static_cast<Detail::AbstractComponent const *>(this)->getPowerConsumption();
 }
 
-void Component::addTracer(const char *tracer) {
+void Component::addTracer(const char *tracerType, Attribute::Ptr attr) {
+  ComponentTracer::Ptr tracer = createComponentTracer(tracerType, attr);
   static_cast<Detail::AbstractComponent *>(this)->
-      addObserver(createComponentTracer(tracer, this)->getImpl());
+      addObserver(tracer->getImpl());
+}
+
+void Component::addObserver(ComponentObserver::Ptr observer) {
+  static_cast<Detail::AbstractComponent *>(this)->
+      addObserver(observer->getImpl());
 }
 
 //

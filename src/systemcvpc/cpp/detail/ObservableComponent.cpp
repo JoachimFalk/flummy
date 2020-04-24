@@ -44,12 +44,18 @@ namespace SystemC_VPC { namespace Detail {
 
   ObservableComponent::ObservableComponent()
     : observerRegistrationAllowed(true)
+    , nextFreeCompOffset(0)
     , nextFreeTaskOffset(sizeof(TaskImpl))
-    , nextFreeTaskInstanceOffset(sizeof(TaskInstanceImpl)) {}
+    , nextFreeTaskInstanceOffset(sizeof(TaskInstanceImpl))
+    , oComponent(nullptr) {}
 
   void ObservableComponent::addObserver(Extending::ComponentObserverIf::Ptr const &obs) {
     assert(observerRegistrationAllowed);
     ObserverInfo oi;
+    // Get next free 16 byte aligned component offset.
+    nextFreeCompOffset = (nextFreeCompOffset + 15UL) & ~15UL;
+    oi.compOffset = nextFreeCompOffset;
+    nextFreeCompOffset += obs->getReservePerComponent();
     // Get next free 16 byte aligned task offset.
     nextFreeTaskOffset = (nextFreeTaskOffset + 15UL) & ~15UL;
     oi.taskOffset = nextFreeTaskOffset;
@@ -64,8 +70,10 @@ namespace SystemC_VPC { namespace Detail {
   void ObservableComponent::componentOperation(ComponentOperation co
     , AbstractComponent const &c)
   {
+    assert(!observerRegistrationAllowed);
     for (Observers::value_type const &e : observers)
-      e.first->componentOperation(co, c);
+      e.first->componentOperation(co
+        , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset));
   }
 
   void ObservableComponent::taskOperation(TaskOperation to
@@ -74,9 +82,10 @@ namespace SystemC_VPC { namespace Detail {
   {
     assert(!observerRegistrationAllowed);
     for (Observers::value_type const &e : observers) {
-      e.first->taskOperation(to, c, t,
-          *reinterpret_cast<OTask *>(
-              reinterpret_cast<char *>(&t) + e.second.taskOffset));
+      e.first->taskOperation(to
+        , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
+        , t, *reinterpret_cast<OTask *>(
+            reinterpret_cast<char *>(&t) + e.second.taskOffset));
     }
   }
 
@@ -90,12 +99,43 @@ namespace SystemC_VPC { namespace Detail {
       tio = TaskInstanceOperation((int) tio | (int) TaskInstanceOperation::DEALLOCATE);
 
     for (Observers::value_type const &e : observers) {
-      e.first->taskInstanceOperation(tio, c, ti
+      e.first->taskInstanceOperation(tio
+        , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
         , *reinterpret_cast<OTask *>(
-              reinterpret_cast<char *>(ti.getTask()) + e.second.taskOffset)
-        , *reinterpret_cast<OTaskInstance *>(
+            reinterpret_cast<char *>(ti.getTask()) + e.second.taskOffset)
+        , ti, *reinterpret_cast<OTaskInstance *>(
             reinterpret_cast<char *>(&ti) + e.second.taskInstanceOffset));
     }
+  }
+
+  void ObservableComponent::finalize() {
+    Observers::const_iterator iter = observers.begin();
+
+    char *storage = (char *) malloc(nextFreeCompOffset);
+    if (!storage)
+      throw std::bad_alloc();
+    try {
+      while (iter != observers.end()) {
+        Observers::value_type const &e = *iter++; // this line must not throw
+        e.first->componentOperation(ComponentOperation::ALLOCATE
+          , *static_cast<AbstractComponent *>(this)
+          , *reinterpret_cast<OComponent *>(storage + e.second.compOffset));
+      }
+    } catch (...) {
+      // Cleanup
+      assert(iter != observers.begin());
+      // This really must not throw!
+      do {
+        Observers::value_type const &e = *--iter;
+        e.first->componentOperation(ComponentOperation::DEALLOCATE
+          , *static_cast<AbstractComponent *>(this)
+          , *reinterpret_cast<OComponent *>(storage + e.second.compOffset));
+      } while (iter != observers.begin());
+      free(storage);
+      throw;
+    }
+    observerRegistrationAllowed = false;
+    oComponent = storage;
   }
 
   TaskImpl *ObservableComponent::createTask(TaskInterface *taskInterface)
@@ -112,18 +152,20 @@ namespace SystemC_VPC { namespace Detail {
   }
   TaskImpl *ObservableComponent::createTask(std::function<void (char *)> factory)
   {
-    observerRegistrationAllowed = false;
+    assert(!observerRegistrationAllowed);
 
     char *storage = (char *) malloc(nextFreeTaskOffset);
     if (!storage)
       throw std::bad_alloc();
     try {
+      AbstractComponent &c = *static_cast<AbstractComponent *>(this);
+
       factory(storage);
       TaskImpl *taskImpl = reinterpret_cast<TaskImpl *>(storage);
       // FIXME: Exceptions
       for (Observers::value_type const &e : observers) {
         e.first->taskOperation(TaskOperation::ALLOCATE
-          , *static_cast<AbstractComponent *>(this)
+          , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
           , *taskImpl
           , *reinterpret_cast<OTask *>(storage + e.second.taskOffset));
       }
@@ -147,21 +189,22 @@ namespace SystemC_VPC { namespace Detail {
     , std::function<void (TaskInstanceImpl *)> const &diiCallback
     , std::function<void (TaskInstanceImpl *)> const &latCallback)
   {
-    observerRegistrationAllowed = false;
-
+    assert(!observerRegistrationAllowed);
     char *storage = (char *) malloc(nextFreeTaskInstanceOffset);
     if (!storage)
       throw std::bad_alloc();
     try {
+      AbstractComponent &c = *static_cast<AbstractComponent *>(this);
+
       TaskInstanceImpl *taskInstanceImpl =
           new (storage) TaskInstanceImpl(taskImpl, type
               , firingRuleInterface, diiCallback, latCallback);
       // FIXME: Exceptions
       for (Observers::value_type const &e : observers) {
         e.first->taskInstanceOperation(TaskInstanceOperation::ALLOCATE
-          , *static_cast<AbstractComponent *>(this)
-          , *taskInstanceImpl
+          , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
           , *reinterpret_cast<OTask *>(reinterpret_cast<char *>(taskImpl) + e.second.taskOffset)
+          , *taskInstanceImpl
           , *reinterpret_cast<OTaskInstance *>(storage + e.second.taskInstanceOffset));
       }
       return taskInstanceImpl;

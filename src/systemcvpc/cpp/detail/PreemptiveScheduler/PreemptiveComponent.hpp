@@ -44,7 +44,6 @@
 #include "Scheduler.hpp"
 #include "../AbstractComponent.hpp"
 #include "../PowerSumming.hpp"
-#include "../Director.hpp"
 #include "../timetriggered/tt_support.hpp"
 
 #include <systemc>
@@ -110,7 +109,7 @@ namespace SystemC_VPC { namespace Detail {
 
     bool closeStream(ProcessId pid);
 
-    void initialize(const Director* d);
+    void finalize();
 
     virtual ~PreemptiveComponent();
   private:

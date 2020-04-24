@@ -553,8 +553,8 @@ namespace SystemC_VPC { namespace Detail {
     return !readyTasks.empty() || !runningTasks.empty();
   }
 
-  void PreemptiveComponent::initialize(const Director* d){
-    //std::cerr << "Component::initialize" << std::endl;
+  void PreemptiveComponent::finalize() {
+/*  //std::cerr << "Component::initialize" << std::endl;
     if(powerAttribute->isType("")){
       //std::cerr << "disabled local power governor" << std::endl;
       return;
@@ -571,6 +571,8 @@ namespace SystemC_VPC { namespace Detail {
     midPowerGov=localGovernorFactory->createPlugIn();
     midPowerGov->setGlobalGovernor(d->topPowerGov);
     addObserver(midPowerGov);
+ */
+    AbstractComponent::finalize();
   }
 
   void PreemptiveComponent::addAttribute(Attribute::Ptr attr) {

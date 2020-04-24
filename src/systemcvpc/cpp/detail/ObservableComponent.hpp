@@ -92,27 +92,35 @@ namespace SystemC_VPC { namespace Detail {
     Tasks const &getTasks()
       { return tasks; }
 
+    void finalize();
+
     ~ObservableComponent();
   private:
     TaskImpl *createTask(std::function<void (char *)> factory);
 
+    typedef Extending::ComponentObserverIf::OComponent
+        OComponent;
     typedef Extending::ComponentObserverIf::OTask
         OTask;
     typedef Extending::ComponentObserverIf::OTaskInstance
         OTaskInstance;
 
     struct ObserverInfo {
+      int compOffset;
       int taskOffset;
       int taskInstanceOffset;
     };
     typedef std::map<Extending::ComponentObserverIf::Ptr, ObserverInfo> Observers;
     
     bool   observerRegistrationAllowed;
+    size_t nextFreeCompOffset;
     size_t nextFreeTaskOffset;
     size_t nextFreeTaskInstanceOffset;
 
     Observers observers;
     Tasks     tasks;
+    /// Component private data for the observers
+    char     *oComponent;
   };
 
 } } // namespace SystemC_VPC::Detail

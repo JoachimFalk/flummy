@@ -59,7 +59,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     , public ComponentTracer
   {
   public:
-    ComponentVCDTracer(Component const *component);
+    ComponentVCDTracer(Attribute::Ptr attr);
 
     ~ComponentVCDTracer();
 
@@ -68,17 +68,20 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     ///
 
     void componentOperation(ComponentOperation co
-      , Component const &c);
+      , Component const &c
+      , OComponent      &oc);
 
     void taskOperation(TaskOperation to
       , Component const &c
+      , OComponent      &oc
       , Task      const &t
       , OTask           &ot);
 
     void taskInstanceOperation(TaskInstanceOperation tio
       , Component    const &c
-      , TaskInstance const &ti
+      , OComponent         &oc
       , OTask              &ot
+      , TaskInstance const &ti
       , OTaskInstance      &oti);
 
     ///
@@ -94,10 +97,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     static RegisterMe registerMe;
 
-    std::string getName() const;
-
     sc_core::sc_trace_file *traceFile_;
-    std::string name_;
   //std::map<std::string, Trace::Tracing*> trace_map_by_name_;
   };
 
@@ -240,7 +240,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   public:
     RegisterMe() {
       ComponentVCDTracer::registerTracer("VCD",
-        [](Component const *comp) { return new ComponentVCDTracer(comp); });
+        [](Attribute::Ptr attr) { return new ComponentVCDTracer(attr); });
     }
   } ComponentVCDTracer::registerMe;
 
@@ -248,17 +248,16 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   std::ostream * Tracing::plainTrace = new CoSupport::Streams::AOStream(std::cout, "vpc.trace", "-");
   #endif // VPC_ENABLE_PLAIN_TRACING
 
-  ComponentVCDTracer::ComponentVCDTracer(Component const *component)
+  ComponentVCDTracer::ComponentVCDTracer(Attribute::Ptr attr)
     : Extending::ComponentTracerIf(
           reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
-        , sizeof(VcdTask), sizeof(VcdTaskInstance))
+        , 0, sizeof(VcdTask), sizeof(VcdTaskInstance))
     , ComponentTracer(
          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
        , "VCD")
     , traceFile_(NULL)
-    , name_(component->getName())
   {}
 
   ComponentVCDTracer::~ComponentVCDTracer() {
@@ -267,17 +266,16 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     }
   }
 
-  std::string ComponentVCDTracer::getName() const {
-    return name_;
-  }
-
   void ComponentVCDTracer::componentOperation(ComponentOperation co
-    , Component const &c) {
+    , Component const &c
+    , OComponent      &oc)
+  {
     // Ignore
   }
 
   void ComponentVCDTracer::taskOperation(TaskOperation to
     , Component const &c
+    , OComponent      &oc
     , Task      const &t
     , OTask           &ot)
   {
@@ -307,8 +305,9 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
   void ComponentVCDTracer::taskInstanceOperation(TaskInstanceOperation tio
     , Component    const &c
-    , TaskInstance const &ti
+    , OComponent         &oc
     , OTask              &ot
+    , TaskInstance const &ti
     , OTaskInstance      &oti)
   {
     VcdTask         &vcdTask         = static_cast<VcdTask &>(ot);

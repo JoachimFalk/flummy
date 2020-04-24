@@ -38,8 +38,6 @@
 #include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/TimingModifier.hpp>
 
-//#include "detail/Director.hpp"
-
 namespace SystemC_VPC {
 
 Timing::Timing(sc_core::sc_time const &delay)
@@ -108,7 +106,6 @@ boost::shared_ptr<TimingModifier> Timing::getTimingModifier() const
 
 void Timing::setFunction(std::string function_)
 {
-//this->fid_ = Detail::Director::createFunctionId(function_);
   this->function_ = function_;
 }
 

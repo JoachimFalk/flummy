@@ -177,7 +177,7 @@ namespace SystemC_VPC { namespace Detail {
 #ifndef NO_POWER_SUM
       v.second->addObserver(powerSumming);
 #endif // NO_POWER_SUM
-      v.second->initialize(this);
+//    v.second->initialize(this);
     }
   }
   /// end section: VpcApi.hpp related stuff

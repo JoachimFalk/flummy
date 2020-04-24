@@ -54,24 +54,27 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     , public ComponentTracer
   {
   public:
-    ComponentDBTracer(Component const *component);
+    ComponentDBTracer(Attribute::Ptr attr);
 
     ///
     /// Implement interface for ComponentTracerIf
     ///
 
     void componentOperation(ComponentOperation co
-      , Component const &c);
+      , Component const &c
+      , OComponent      &oc);
 
     void taskOperation(TaskOperation to
       , Component const &c
+      , OComponent      &oc
       , Task      const &t
       , OTask           &ot);
 
     void taskInstanceOperation(TaskInstanceOperation tio
       , Component    const &c
-      , TaskInstance const &ti
+      , OComponent         &oc
       , OTask              &ot
+      , TaskInstance const &ti
       , OTaskInstance      &oti);
 
     ///
@@ -88,9 +91,12 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
     static RegisterMe registerMe;
 
-    void addEvent(DBTaskInstance &dbTaskInstance, char const *state);
+    void addEvent(
+        std::string const &resourceName,
+        DBTaskInstance    &dbTaskInstance,
+        char const        *state);
+
     DataBaseProxy &dbProxy_;
-    std::string    resourceName_;
   };
 
   class ComponentDBTracer::DataBaseProxy {
@@ -197,31 +203,33 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   public:
     RegisterMe() {
       ComponentDBTracer::registerTracer("DB",
-        [](Component const *comp) { return new ComponentDBTracer(comp); });
+        [](Attribute::Ptr attr) { return new ComponentDBTracer(attr); });
     }
   } ComponentDBTracer::registerMe;
 
   size_t ComponentDBTracer::DBTaskInstance::instanceIdCounter = 0;
 
-  ComponentDBTracer::ComponentDBTracer(Component const *component)
+  ComponentDBTracer::ComponentDBTracer(Attribute::Ptr attr)
     : Extending::ComponentTracerIf(
           reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
-        , sizeof(DBTask), sizeof(DBTaskInstance))
+        , 0, sizeof(DBTask), sizeof(DBTaskInstance))
     , ComponentTracer(
          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
        , "DB")
-    , dbProxy_(DataBaseProxy::getDataBaseProxy())
-    , resourceName_(component->getName()) {}
+    , dbProxy_(DataBaseProxy::getDataBaseProxy()) {}
 
   void ComponentDBTracer::componentOperation(ComponentOperation co
-    , Component const &c) {
+    , Component const &c
+    , OComponent      &oc)
+  {
     // Ignore
   }
 
   void ComponentDBTracer::taskOperation(TaskOperation to
     , Component const &c
+    , OComponent      &oc
     , Task      const &t
     , OTask           &ot)
   {
@@ -239,8 +247,9 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
 
   void ComponentDBTracer::taskInstanceOperation(TaskInstanceOperation tio
     , Component    const &c
-    , TaskInstance const &ti
+    , OComponent         &oc
     , OTask              &ot
+    , TaskInstance const &ti
     , OTaskInstance      &oti)
   {
     DBTask         &dbTask         = static_cast<DBTask &>(ot);
@@ -251,24 +260,26 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
       new (&dbTaskInstance) DBTaskInstance(&dbTask);
     }
 
+    std::string const &resourceName = c.getName();
+
     switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
       case TaskInstanceOperation::RELEASE:
-        this->addEvent(dbTaskInstance, "s");
+        this->addEvent(resourceName, dbTaskInstance, "s");
         break;
       case TaskInstanceOperation::ASSIGN:
-        this->addEvent(dbTaskInstance, "a");
+        this->addEvent(resourceName, dbTaskInstance, "a");
         break;
       case TaskInstanceOperation::RESIGN:
-        this->addEvent(dbTaskInstance, "r");
+        this->addEvent(resourceName, dbTaskInstance, "r");
         break;
       case TaskInstanceOperation::BLOCK:
-        this->addEvent(dbTaskInstance, "b");
+        this->addEvent(resourceName, dbTaskInstance, "b");
         break;
       case TaskInstanceOperation::FINISHDII:
-        this->addEvent(dbTaskInstance, "d");
+        this->addEvent(resourceName, dbTaskInstance, "d");
         break;
       case TaskInstanceOperation::FINISHLAT:
-        this->addEvent(dbTaskInstance, "l");
+        this->addEvent(resourceName, dbTaskInstance, "l");
         break;
       default:
         break;
@@ -284,8 +295,12 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     throw ConfigException("The DB tracer does not support attributes!");
   }
 
-  void ComponentDBTracer::addEvent(DBTaskInstance &dbTaskInstance, char const *state) {
-    dbProxy_.addEvent(resourceName_.c_str(),
+  void ComponentDBTracer::addEvent(
+      std::string const &resourceName,
+      DBTaskInstance    &dbTaskInstance,
+      char const        *state)
+  {
+    dbProxy_.addEvent(resourceName.c_str(),
         dbTaskInstance.dbTask->name.c_str(),
         state,
         sc_core::sc_time_stamp().value(),

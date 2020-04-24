@@ -65,6 +65,8 @@ Sebastian Graf - Mai 2008
 
 #include "TimeTriggeredCCScheduler.hpp"
 #include "PreemptiveComponent.hpp"
+
+#include "../Director.hpp"
 #include "../common.hpp"
 
 

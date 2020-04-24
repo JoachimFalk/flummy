@@ -81,11 +81,18 @@ namespace SystemC_VPC { namespace Extending {
     typedef Extending::Task         Task;
     typedef Extending::TaskInstance TaskInstance;
 
+    class OComponent    {};
     class OTask         {};
     class OTaskInstance {};
 
     enum class ComponentOperation {
-      PWRCHANGE = 1,
+      MEMOP_MASK = 3,
+      /// Operation done once per component to construct OComponent.
+      ALLOCATE   = 1,
+      /// Operation done once per actor to destroy OTask.
+      DEALLOCATE = 2,
+      /// Operation done to indicate a power change of the component.
+      PWRCHANGE  = 4
     };
     enum class TaskOperation {
       MEMOP_MASK = 3,
@@ -120,35 +127,45 @@ namespace SystemC_VPC { namespace Extending {
     };
 
   protected:
-    ComponentObserverIf(int facadeAdj, size_t rt, size_t rti)
+    ComponentObserverIf(int facadeAdj, size_t rc, size_t rt, size_t rti)
       : facadeAdj(facadeAdj)
+      , reservePerComponent(rc)
       , reservePerTask(rt)
       , reservePerTaskInstance(rti) {}
 
     virtual void componentOperation(ComponentOperation co
-      , Component const &c) = 0;
+      , Component const &c
+      , OComponent      &oc) = 0;
 
     virtual void taskOperation(TaskOperation to
       , Component const &c
+      , OComponent      &oc
       , Task      const &t
       , OTask           &ot) = 0;
 
     virtual void taskInstanceOperation(TaskInstanceOperation tio
       , Component    const &c
-      , TaskInstance const &ti
+      , OComponent         &oc
       , OTask              &ot
+      , TaskInstance const &ti
       , OTaskInstance      &oti) = 0;
 
+    size_t getReservePerComponent() const
+      { return reservePerComponent; }
     size_t getReservePerTask() const
       { return reservePerTask; }
     size_t getReservePerTaskInstance() const
       { return reservePerTaskInstance; }
 
+    typedef std::function<
+        this_type *(Attribute::Ptr)> FactoryFunction;
+
     static void registerObserver(
-        const char                             *type,
-        std::function<ComponentObserverIf *()>  factory);
+        const char      *type,
+        FactoryFunction  factory);
   private:
     int    facadeAdj;
+    size_t reservePerComponent;
     size_t reservePerTask;
     size_t reservePerTaskInstance;
   };

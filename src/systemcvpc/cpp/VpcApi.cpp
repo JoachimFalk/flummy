@@ -41,7 +41,6 @@
 #include <systemcvpc/VpcApi.hpp>
 #include <systemcvpc/Scheduler.hpp>
 
-#include "detail/Director.hpp"
 #include "detail/Configuration.hpp"
 
 #include <string>

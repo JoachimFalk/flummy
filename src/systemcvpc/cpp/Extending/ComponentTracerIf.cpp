@@ -42,30 +42,30 @@
 #include <functional>
 #include <stdexcept>
 
-namespace {
+namespace SystemC_VPC { namespace {
 
   typedef std::map<
       std::string,
-      std::function<SystemC_VPC::Extending::ComponentTracerIf *(SystemC_VPC::Component const *)>
-    > TracerByName;
+      std::function<Extending::ComponentTracerIf *(Attribute::Ptr)>
+    > TracerByType;
 
   /// We need this to be independent from the global variable initialization order.
-  static TracerByName &getTracerByName() {
-    static TracerByName tracerByName;
-    return tracerByName;
+  static TracerByType &getTracerByType() {
+    static TracerByType tracerByType;
+    return tracerByType;
   }
 
-}
+} }
 
 namespace SystemC_VPC { namespace Extending {
 
   void ComponentTracerIf::registerTracer(
-      const char                           *type,
-      std::function<ComponentTracerIf *(Component const *)>  factory) {
-
-    TracerByName &tracerByName = getTracerByName();
-    std::pair<TracerByName::iterator, bool> status =
-        tracerByName.insert(TracerByName::value_type(type, factory));
+      const char       *type,
+      FactoryFunction  factory)
+  {
+    TracerByType &tracerByName = getTracerByType();
+    std::pair<TracerByType::iterator, bool> status =
+        tracerByName.insert(TracerByType::value_type(type, factory));
     if (!status.second)
       throw  std::runtime_error("Duplicate component tracer type " + std::string(type)+"!");
   }
@@ -74,13 +74,18 @@ namespace SystemC_VPC { namespace Extending {
 
 namespace SystemC_VPC {
 
-  ComponentTracer::Ptr createComponentTracer(const char *type, Component const *c) {
-    TracerByName &tracerByName = getTracerByName();
+  ComponentTracer::Ptr createComponentTracer(const char *type, Attribute::Ptr attr) {
+    TracerByType &tracerByType = getTracerByType();
 
-    TracerByName::const_iterator iter = tracerByName.find(type);
-    if (iter == tracerByName.end())
+    TracerByType::const_iterator iter = tracerByType.find(type);
+    if (iter == tracerByType.end())
       throw ConfigException("No component tracer of type "+std::string(type)+" registered!");
-    return iter->second(c)->getComponentTracer();
+    return iter->second(attr)->getComponentTracer();
+  }
+
+  ComponentTracer::Ptr getComponentTracer(const char *name) {
+
+    return nullptr;
   }
 
 } // namespace SystemC_VPC

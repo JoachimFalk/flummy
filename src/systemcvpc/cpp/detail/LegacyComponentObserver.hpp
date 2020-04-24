@@ -50,18 +50,21 @@ namespace SystemC_VPC { namespace Detail {
     LegacyComponentObserver();
 
     void componentOperation(ComponentOperation co
-      , Component       const &c);
+      , Component const &c
+      , OComponent      &oc);
 
     void taskOperation(TaskOperation to
-      , Component       const &c
-      , Extending::Task const &t
-      , OTask                 &ot);
+      , Component const &c
+      , OComponent      &oc
+      , Task      const &t
+      , OTask           &ot);
 
     void taskInstanceOperation(TaskInstanceOperation tio
-      , Component               const &c
-      , Extending::TaskInstance const &ti
-      , OTask                         &ot
-      , OTaskInstance                 &oti);
+      , Component    const &c
+      , OComponent         &oc
+      , OTask              &ot
+      , TaskInstance const &ti
+      , OTaskInstance      &oti);
 
     bool addAttribute(Attribute::Ptr);
 

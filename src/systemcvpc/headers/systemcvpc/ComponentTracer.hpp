@@ -62,14 +62,16 @@ namespace SystemC_VPC {
 //    { return const_cast<this_type *>(this)->getImpl(); }
   };
 
-  ComponentTracer::Ptr createComponentTracer(const char *type, Component const *c);
+  ComponentTracer::Ptr createComponentTracer(const char *type, Attribute::Ptr attr = nullptr);
 
   template <typename TRACER>
   typename TRACER::Ptr
-  createComponentTracer(Component const *c) {
+  createComponentTracer(Attribute::Ptr attr = nullptr) {
     return boost::static_pointer_cast<TRACER>(
-        createComponentTracer(TRACER::Type, c));
+        createComponentTracer(TRACER::Type, attr));
   }
+
+  ComponentTracer::Ptr getComponentTracer(const char *name);
 
 } // namespace SystemC_VPC
 

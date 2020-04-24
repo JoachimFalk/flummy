@@ -36,6 +36,8 @@
 
 #include "RoundRobinComponent.hpp"
 
+#include <systemcvpc/ConfigException.hpp>
+
 namespace SystemC_VPC { namespace Detail {
 
 RoundRobinComponent::RoundRobinComponent(std::string const &name)
