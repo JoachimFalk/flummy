@@ -91,6 +91,21 @@ namespace SystemC_VPC { namespace Detail {
     CX::XN::DOMTreeWalker* vpcConfigTreeWalker;
     
     /**
+     * \brief Parse the resources tag.
+     */
+    void parseResources();
+
+    /**
+     * \brief Parse the observer tag configuring a resource observer.
+     */
+    void parseResourceObserve();
+
+    /**
+     * \brief Parse the tracer tag configuring a resource tracer.
+     */
+    void parseResourceTracer();
+
+    /**
      * \brief Initialize a distribution from the configuration file
      */
     void initDistribution();
@@ -114,9 +129,14 @@ namespace SystemC_VPC { namespace Detail {
     void initMappingAPStruct();
 
     /**
-    * \brief Used to create the Attribute-Object recursively
-    */
+     * \brief Used to create the Attribute-Object recursively
+     */
     void nextAttribute(Attribute::Ptr attributePtr, CX::XN::DOMNode *node);
+
+    /**
+     * \brief Parse nested attribute tags inside a parent tag.
+     */
+    Attributes parseAttributes(CX::XN::DOMNode *parent);
      
     /**
      * \brief Topology parsing related code

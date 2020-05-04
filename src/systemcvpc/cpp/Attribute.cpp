@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -35,9 +35,20 @@
  */
 
 #include <systemcvpc/Attribute.hpp>
-#include <iostream>
 
 namespace SystemC_VPC {
+
+  Attributes::iterator Attributes::insert(const_iterator iter, const_reference val) {
+    Attributes::iterator retval = attributeList.insert(iter, val);
+
+    std::pair<AM::iterator, bool> status =
+        attributeMap.insert(AM::value_type(val.getType(), retval));
+
+
+    return retval;
+  }
+
+
 
   //
   Attribute::Attribute() : type(), value() {}
@@ -88,14 +99,6 @@ namespace SystemC_VPC {
 
   size_t Attribute::getAttributeSize(){
     return attributes.size();
-  }
-
-  std::string Attribute::getValue(){
-    return value;
-  }
-
-  std::string Attribute::getType(){
-    return type;
   }
 
   IMPL_INTRUSIVE_REFCOUNT_PTR(Attribute)

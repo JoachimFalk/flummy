@@ -42,6 +42,8 @@
 
 #include <CoSupport/DataTypes/MaybeValue.hpp>
 #include <CoSupport/Tracing/TracingFactory.hpp>
+#include <CoSupport/XML/Xerces/common.hpp>
+
 
 #include <boost/random/mersenne_twister.hpp> // for boost::mt19937
 
@@ -192,51 +194,7 @@ namespace SystemC_VPC { namespace Detail {
           }
 
         } else if( xmlName == XMLCH("resources") ){
-        
-          // walk down hierachy to components
-          node = vpcConfigTreeWalker->firstChild();
-          if(node != NULL){
-            // pointer to currently initiated component
-            // init all components
-            for(; node != NULL; node = vpcConfigTreeWalker->nextSibling()){
-              const CX::XStr xmlName = node->getNodeName();
-              try{
-                if( xmlName == XMLCH("component") ) {
-                  VC::Component::Ptr comp = initComponent();
-                  DBG_OUT("VPCBuilder> register component: "
-                          << comp->getName() << " to Director" << std::endl);
-
-
-                }else{
-                  if( xmlName == XMLCH("attribute") ){
-
-                    const CX::XStr sType =
-                      node->getAttributes()->getNamedItem(XMLCH("type"))->getNodeValue();
-                    CX::XStr sValue = "";
-                    CX::XN::DOMNode * value = node->getAttributes()->getNamedItem(XMLCH("value"));
-                    if( value  != NULL){
-                      sValue=
-                        node->getAttributes()->getNamedItem(XMLCH("value"))->getNodeValue();
-                    }
-
-//                  if( sType == "global_governor" ){
-//                    Attribute::Ptr gov(new Attribute("global_governor",
-//                                                   sValue));
-//                    nextAttribute(gov, node->getFirstChild());
-//                    director->loadGlobalGovernorPlugin(sValue, gov);
-//                  }
-                  }
-                }
-              }catch(InvalidArgumentException &e){
-                std::cerr << "VPCBuilder> " << e.what() << std::endl;
-                std::cerr << "VPCBuilder> ignoring specification of component,"
-                  " going on with initialization" << std::endl;
-                continue;
-              }
-            }
-
-            node = vpcConfigTreeWalker->parentNode();
-          }
+          parseResources();
         // find mappings tag (not mapping)
         }else if( xmlName == XMLCH("mappings") ){
 
@@ -253,18 +211,9 @@ namespace SystemC_VPC { namespace Detail {
             node = vpcConfigTreeWalker->parentNode();
           }
 
-//      }else if( xmlName == XMLCH("resultfile") ){
-//
-//         CX::XN::DOMNamedNodeMap * atts=node->getAttributes();
-//         CX::XStr vpc_result_file =
-//           atts->getNamedItem(XMLCH("name"))->getNodeValue();
-//         this->director->setResultFile(vpc_result_file);
-//
         }else if( xmlName == XMLCH("topology") ){
           node = vpcConfigTreeWalker->getCurrentNode();
           parseTopology( node );
-        }else{
-        
         }
 
         node = vpcConfigTreeWalker->nextSibling();
@@ -273,6 +222,64 @@ namespace SystemC_VPC { namespace Detail {
     DBG_OUT("Initializing VPC finished!" << std::endl);
 
     return FALLBACKMODE;
+  }
+
+  /**
+   * \brief Parse the resources tag.
+   */
+  void VPCBuilder::parseResources() {
+    // Iterate over child tags of resource tag
+    for (CX::XN::DOMNode *child = vpcConfigTreeWalker->firstChild();
+         child != nullptr;
+         child = vpcConfigTreeWalker->nextSibling()) {
+      XMLCh const *tag = child->getNodeName();
+      if (!CX::XN::XMLString::compareString(tag, XMLCH("component"))) {
+        try{
+          VC::Component::Ptr comp = initComponent();
+          DBG_OUT("VPCBuilder> register component: "
+                  << comp->getName() << " to Director" << std::endl);
+        }catch(InvalidArgumentException &e){
+          std::cerr << "VPCBuilder> " << e.what() << std::endl;
+          std::cerr << "VPCBuilder> ignoring specification of component,"
+            " going on with initialization" << std::endl;
+          continue;
+        }
+      } else if (!CX::XN::XMLString::compareString(tag, XMLCH("observer"))) {
+        parseResourceObserve();
+      } else if (!CX::XN::XMLString::compareString(tag, XMLCH("tracer"))) {
+        parseResourceTracer();
+      } else {
+        CX::XN::DOMNode *parent = vpcConfigTreeWalker->parentNode();
+        throw ConfigException("Tag "+CX::NStr(parent->getNodeName())+ " must only contain component, observer, or tracer tags!");
+      }
+    }
+    vpcConfigTreeWalker->parentNode();
+  }
+
+  /**
+   * \brief Parse the observer tag configuring a resource observer.
+   */
+  void VPCBuilder::parseResourceObserve() {
+    CX::XN::DOMNode *parent = vpcConfigTreeWalker->getCurrentNode();
+
+    std::string type  = CX::getAttrValueAs<std::string>(parent, XMLCH("type"));
+    std::string name  = CX::getAttrValueAs<std::string>(parent, XMLCH("name"));
+    Attributes  attrs = parseAttributes(parent);
+
+    createComponentObserver(type.c_str(), name.c_str(), attrs);
+  }
+
+  /**
+   * \brief Parse the tracer tag configuring a resource tracer.
+   */
+  void VPCBuilder::parseResourceTracer() {
+    CX::XN::DOMNode *parent = vpcConfigTreeWalker->getCurrentNode();
+
+    std::string type  = CX::getAttrValueAs<std::string>(parent, XMLCH("type"));
+    std::string name  = CX::getAttrValueAs<std::string>(parent, XMLCH("name"));
+    Attributes  attrs = parseAttributes(parent);
+
+    createComponentTracer(type.c_str(), name.c_str(), attrs);
   }
 
   /**
@@ -499,6 +506,27 @@ namespace SystemC_VPC { namespace Detail {
         attribute->addAttribute( sType, sValue);
       }
     }
+  }
+
+  /**
+   * \brief Parse nested attribute tags inside a parent tag.
+   */
+  Attributes VPCBuilder::parseAttributes(CX::XN::DOMNode *parent) {
+    Attributes retval;
+
+    // Here, parent is an XML tag, and we iterate over all its child tags.
+    for(CX::XN::DOMNode *child = parent->getFirstChild();
+        child != nullptr;
+        child = child->getNextSibling()) {
+      if (!CX::XN::XMLString::compareString(child->getNodeName(), XMLCH("attribute"))) {
+        retval.insert(retval.begin(), Attribute(
+            CX::getAttrValueAs<std::string>(child, XMLCH("type"))
+          , CX::getAttrValueAs<std::string>(child, XMLCH("value"), "")));
+      } else {
+        throw ConfigException("Tag "+CX::NStr(parent->getNodeName())+ " must only contain attribute tags!");
+      }
+    }
+    return retval;
   }
 
   void VPCBuilder::parseTopology(CX::XN::DOMNode *top ){

@@ -158,7 +158,7 @@ namespace SystemC_VPC { namespace Extending {
       { return reservePerTaskInstance; }
 
     typedef std::function<
-        this_type *(Attribute::Ptr)> FactoryFunction;
+        this_type *(Attributes)> FactoryFunction;
 
     static void registerObserver(
         const char      *type,

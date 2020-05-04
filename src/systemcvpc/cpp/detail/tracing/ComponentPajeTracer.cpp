@@ -67,7 +67,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     , public ComponentTracer
   {
   public:
-    ComponentPajeTracer(Attribute::Ptr attr);
+    ComponentPajeTracer(Attributes const &attrs);
 
     ///
     /// Implement interface for ComponentTracerIf
@@ -94,7 +94,8 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     /// Implement interface for ComponentTracer
     ///
 
-    bool addAttribute(Attribute::Ptr attr);
+    bool addAttribute(Attribute const &attr);
+
   private:
     class PajeComponent;
     class PajeTask;
@@ -163,11 +164,11 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   public:
     RegisterMe() {
       ComponentPajeTracer::registerTracer("PAJE",
-        [](Attribute::Ptr attr) { return new ComponentPajeTracer(attr); });
+        [](Attributes const &attrs) { return new ComponentPajeTracer(attrs); });
     }
   } ComponentPajeTracer::registerMe;
 
-  ComponentPajeTracer::ComponentPajeTracer(Attribute::Ptr attr)
+  ComponentPajeTracer::ComponentPajeTracer(Attributes const &attrs)
     : Extending::ComponentTracerIf(
           reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
@@ -314,7 +315,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     }
   }
 
-  bool ComponentPajeTracer::addAttribute(Attribute::Ptr attr) {
+  bool ComponentPajeTracer::addAttribute(Attribute const &attr) {
     throw ConfigException("The PAJE tracer does not support attributes!");
   }
 

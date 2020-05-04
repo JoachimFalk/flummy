@@ -1,7 +1,7 @@
 // -*- tab-width:8; intent-tabs-mode:nil; c-basic-offset:2; -*-
 // vim: set sw=2 ts=8 et:
 /*
- * Copyright (c) 2004-2016 Hardware-Software-CoDesign, University of
+ * Copyright (c) 2004-2020 Hardware-Software-CoDesign, University of
  * Erlangen-Nuremberg. All rights reserved.
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -44,11 +44,71 @@
 
 #include <boost/intrusive_ptr.hpp>
 
+#include <list>
+#include <map>
+#include <string>
+
 #include <deque>
-#include <utility>
-#include <iostream>
 
 namespace SystemC_VPC {
+
+  class Attribute;
+
+  class Attributes {
+  private:
+    typedef std::list<Attribute> AL;
+  public:
+    typedef Attribute           value_type;
+    typedef value_type         &reference;
+    typedef value_type const   &const_reference;
+
+    typedef AL::iterator        iterator;
+    typedef AL::const_iterator  const_iterator;
+
+    typedef AL::difference_type difference_type;
+    typedef AL::size_type       size_type;
+  public:
+
+    iterator       begin() noexcept
+      { return attributeList.begin(); }
+    const_iterator begin() const noexcept
+      { return attributeList.begin(); }
+    const_iterator cbegin() const noexcept
+      { return attributeList.begin(); }
+
+    iterator       end() noexcept
+      { return attributeList.end(); }
+    const_iterator end() const noexcept
+      { return attributeList.end(); }
+    const_iterator cend() const noexcept
+      { return attributeList.end(); }
+
+    bool      empty() const noexcept
+      { return attributeList.empty(); }
+    size_type size() const noexcept
+      { return attributeList.size(); }
+    size_type max_size() const noexcept
+      { return attributeList.max_size(); }
+
+    reference       front()
+      { return attributeList.front(); }
+    const_reference front() const
+      { return attributeList.front(); }
+
+    reference       back()
+      { return attributeList.back(); }
+    const_reference back() const
+      { return attributeList.back(); }
+
+    iterator insert(const_iterator iter, const_reference val);
+
+
+  private:
+    typedef std::map<std::string, iterator> AM;
+
+    AL attributeList;
+    AM attributeMap;
+  };
 
   class Attribute;
 
@@ -90,8 +150,10 @@ namespace SystemC_VPC {
 
     size_t getAttributeSize();
 
-    std::string getValue();
-    std::string getType();
+    std::string const &getValue() const noexcept
+      { return value; }
+    std::string const &getType() const noexcept
+    { return type; }
 
     /**
      *

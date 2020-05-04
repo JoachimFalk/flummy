@@ -114,7 +114,7 @@ public:
   bool hasTask(ScheduledTask * actor) const;
 
   // Add a tracer. Use constants as defined in Tracer, e.g., Tracer::PAJE.
-  void addTracer(const char *tracerType, Attribute::Ptr attr = nullptr);
+  void addTracer(const char *tracerTypeOrName, Attributes const &attrs = Attributes());
 
   void addObserver(ComponentObserver::Ptr observer);
 

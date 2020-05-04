@@ -46,7 +46,7 @@ namespace SystemC_VPC { namespace {
 
   typedef std::map<
       std::string,
-      std::function<Extending::ComponentObserverIf *(Attribute::Ptr)>
+      std::function<Extending::ComponentObserverIf *(Attributes)>
     > ObserverByType;
 
   /// We need this to be independent from the global variable initialization order.
@@ -74,13 +74,17 @@ namespace SystemC_VPC { namespace Extending {
 
 namespace SystemC_VPC {
 
-  ComponentObserver::Ptr createComponentObserver(const char *type, Attribute::Ptr attr) {
+  ComponentObserver::Ptr createComponentObserver(
+      char const       *type
+    , char const       *name
+    , Attributes const &attrs)
+  {
     ObserverByType &observerByType = getObserverByType();
 
     ObserverByType::const_iterator iter = observerByType.find(type);
     if (iter == observerByType.end())
       throw ConfigException("No component observer of type "+std::string(type)+" registered!");
-    return iter->second(attr)->getComponentObserver();
+    return iter->second(attrs)->getComponentObserver();
   }
 
   ComponentObserver::Ptr getComponentObserver(const char *name) {

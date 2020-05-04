@@ -63,7 +63,7 @@ protected:
     : ComponentObserverIf(facadeAdj, rc, rt, rti) {}
 
   typedef std::function<
-      this_type *(Attribute::Ptr)> FactoryFunction;
+      this_type *(Attributes)> FactoryFunction;
 
   static void registerTracer(
       const char      *type,

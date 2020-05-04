@@ -46,7 +46,7 @@ namespace SystemC_VPC { namespace {
 
   typedef std::map<
       std::string,
-      std::function<Extending::ComponentTracerIf *(Attribute::Ptr)>
+      std::function<Extending::ComponentTracerIf *(Attributes)>
     > TracerByType;
 
   /// We need this to be independent from the global variable initialization order.
@@ -74,17 +74,27 @@ namespace SystemC_VPC { namespace Extending {
 
 namespace SystemC_VPC {
 
-  ComponentTracer::Ptr createComponentTracer(const char *type, Attribute::Ptr attr) {
+  TracerTypeUnknown::TracerTypeUnknown(const char *type)
+    : ConfigException("No component tracer of type "+std::string(type)+" registered!") {}
+
+  TracerNameUnknown::TracerNameUnknown(const char *name)
+    : ConfigException("No component tracer of name "+std::string(name)+" registered!") {}
+
+  ComponentTracer::Ptr createComponentTracer(
+      char const       *type
+    , char const       *name
+    , Attributes const &attrs)
+  {
     TracerByType &tracerByType = getTracerByType();
 
     TracerByType::const_iterator iter = tracerByType.find(type);
     if (iter == tracerByType.end())
-      throw ConfigException("No component tracer of type "+std::string(type)+" registered!");
-    return iter->second(attr)->getComponentTracer();
+      throw TracerTypeUnknown(type);
+    return iter->second(attrs)->getComponentTracer();
   }
 
   ComponentTracer::Ptr getComponentTracer(const char *name) {
-
+    throw TracerNameUnknown(name);
     return nullptr;
   }
 

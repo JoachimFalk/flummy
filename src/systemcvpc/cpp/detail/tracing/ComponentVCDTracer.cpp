@@ -59,7 +59,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     , public ComponentTracer
   {
   public:
-    ComponentVCDTracer(Attribute::Ptr attr);
+    ComponentVCDTracer(Attributes const &attrs);
 
     ~ComponentVCDTracer();
 
@@ -88,7 +88,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     /// Implement interface for ComponentTracer
     ///
 
-    bool addAttribute(Attribute::Ptr attr);
+    bool addAttribute(Attribute const &attr);
 
   private:
     class VcdTask;
@@ -240,7 +240,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   public:
     RegisterMe() {
       ComponentVCDTracer::registerTracer("VCD",
-        [](Attribute::Ptr attr) { return new ComponentVCDTracer(attr); });
+        [](Attributes const &attrs) { return new ComponentVCDTracer(attrs); });
     }
   } ComponentVCDTracer::registerMe;
 
@@ -248,7 +248,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   std::ostream * Tracing::plainTrace = new CoSupport::Streams::AOStream(std::cout, "vpc.trace", "-");
   #endif // VPC_ENABLE_PLAIN_TRACING
 
-  ComponentVCDTracer::ComponentVCDTracer(Attribute::Ptr attr)
+  ComponentVCDTracer::ComponentVCDTracer(Attributes const &attrs)
     : Extending::ComponentTracerIf(
           reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
@@ -347,7 +347,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     }
   }
 
-  bool ComponentVCDTracer::addAttribute(Attribute::Ptr attr) {
+  bool ComponentVCDTracer::addAttribute(Attribute const &attr) {
     throw ConfigException("The VCD tracer does not support attributes!");
   }
 

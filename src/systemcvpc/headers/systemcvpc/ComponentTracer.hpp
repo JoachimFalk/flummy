@@ -37,6 +37,8 @@
 #ifndef _INCLUDED_SYSTEMCVPC_COMPONENTTRACER_HPP
 #define _INCLUDED_SYSTEMCVPC_COMPONENTTRACER_HPP
 
+#include <systemcvpc/ConfigException.hpp>
+
 #include "ComponentObserver.hpp"
 
 #include <boost/intrusive_ptr.hpp>
@@ -62,13 +64,46 @@ namespace SystemC_VPC {
 //    { return const_cast<this_type *>(this)->getImpl(); }
   };
 
-  ComponentTracer::Ptr createComponentTracer(const char *type, Attribute::Ptr attr = nullptr);
+  class TracerTypeUnknown: public ConfigException {
+  public:
+    TracerTypeUnknown(const char *type);
+  };
+
+  class TracerNameUnknown: public ConfigException {
+  public:
+    TracerNameUnknown(const char *type);
+  };
+
+  ComponentTracer::Ptr createComponentTracer(
+      char const       *type
+    , char const       *name
+    , Attributes const &attrs = Attributes());
+
+  inline
+  ComponentTracer::Ptr createComponentTracer(
+      char const       *type
+    , Attributes const &attrs = Attributes())
+    { return createComponentTracer(type, nullptr, attrs); }
 
   template <typename TRACER>
   typename TRACER::Ptr
-  createComponentTracer(Attribute::Ptr attr = nullptr) {
+  inline
+  createComponentTracer(
+      char const       *name
+    , Attributes const &attrs = Attributes())
+  {
     return boost::static_pointer_cast<TRACER>(
-        createComponentTracer(TRACER::Type, attr));
+        createComponentTracer(TRACER::Type, name, attrs));
+  }
+
+  template <typename TRACER>
+  typename TRACER::Ptr
+  inline
+  createComponentTracer(
+      Attributes const &attrs = Attributes())
+  {
+    return boost::static_pointer_cast<TRACER>(
+        createComponentTracer(TRACER::Type, nullptr, attrs));
   }
 
   ComponentTracer::Ptr getComponentTracer(const char *name);

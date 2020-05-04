@@ -46,6 +46,8 @@
 #include "Routing/Static.hpp"
 #include "ExecModel.hpp"
 #include "ExecModelling/LookupPowerTimeModel.hpp"
+#include "ComponentObserver.hpp"
+#include "ComponentTracer.hpp"
 
 namespace SystemC_VPC {
 
