@@ -1,16 +1,18 @@
-<!ELEMENT vpcconfiguration (distributions?,resultfile?, measurefile?, resources, mappings, topology?)>
+<!ELEMENT vpcconfiguration (distributions?,resources,mappings,topology?)>
 <!ATTLIST vpcconfiguration
 seed CDATA #IMPLIED>
 
-<!ELEMENT resultfile EMPTY>
-<!ATTLIST resultfile
+<!ELEMENT resources ((observer|tracer|component)*)>
+
+<!ELEMENT observer ((attribute)*)>
+<!ATTLIST observer
+type CDATA #REQUIRED
 name CDATA #REQUIRED>
 
-<!ELEMENT measurefile EMPTY>
-<!ATTLIST measurefile
+<!ELEMENT tracer ((attribute)*)>
+<!ATTLIST tracer
+type CDATA #REQUIRED
 name CDATA #REQUIRED>
-
-<!ELEMENT resources ((attribute)*, (component)*)>
 
 <!ELEMENT component ((attribute)*)>
 <!ATTLIST component

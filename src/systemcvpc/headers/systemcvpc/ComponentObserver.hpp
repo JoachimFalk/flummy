@@ -65,7 +65,7 @@ namespace SystemC_VPC {
     typedef boost::intrusive_ptr<this_type>       Ptr;
     typedef boost::intrusive_ptr<this_type const> ConstPtr;
 
-    virtual bool addAttribute(Attribute::Ptr attr) = 0;
+    virtual bool addAttribute(Attribute const &attr) = 0;
 
     const char *getType() const
       { return type; }
@@ -83,13 +83,36 @@ namespace SystemC_VPC {
     const char *type;
   };
 
-  ComponentObserver::Ptr createComponentObserver(const char *type, Attribute::Ptr attr = nullptr);
+  ComponentObserver::Ptr createComponentObserver(
+      char const       *type
+    , char const       *name
+    , Attributes const &attrs = Attributes());
+
+  inline
+  ComponentObserver::Ptr createComponentObserver(
+      char const       *type
+    , Attributes const &attrs = Attributes())
+    { return createComponentObserver(type, nullptr, attrs); }
 
   template <typename OBSERVER>
   typename OBSERVER::Ptr
-  createComponentObserver(Attribute::Ptr attr = nullptr) {
+  inline
+  createComponentObserver(
+      char const       *name
+    , Attributes const &attrs = Attributes())
+  {
     return boost::static_pointer_cast<OBSERVER>(
-        createComponentObserver(OBSERVER::Type, attr));
+        createComponentObserver(OBSERVER::Type, name, attrs));
+  }
+
+  template <typename OBSERVER>
+  typename OBSERVER::Ptr
+  inline
+  createComponentObserver(
+      Attributes const &attrs = Attributes())
+  {
+    return boost::static_pointer_cast<OBSERVER>(
+        createComponentObserver(OBSERVER::Type, nullptr, attrs));
   }
 
   ComponentObserver::Ptr getComponentObserver(const char *name);

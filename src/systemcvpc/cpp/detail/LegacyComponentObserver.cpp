@@ -71,7 +71,7 @@ namespace SystemC_VPC { namespace Detail {
     , OTaskInstance      &oti)
     { this->notify(const_cast<Component *>(&c)); }
 
-  bool LegacyComponentObserver::addAttribute(Attribute::Ptr attr) {
+  bool LegacyComponentObserver::addAttribute(Attribute const &attr) {
     throw ConfigException("Legacy component observers do not support attributes!");
   }
 

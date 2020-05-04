@@ -110,8 +110,18 @@ Power            Component::getPowerConsumption() const {
   return static_cast<Detail::AbstractComponent const *>(this)->getPowerConsumption();
 }
 
-void Component::addTracer(const char *tracerType, Attribute::Ptr attr) {
-  ComponentTracer::Ptr tracer = createComponentTracer(tracerType, attr);
+void Component::addTracer(const char *tracerTypeOrName, Attributes const &attrs) {
+  ComponentTracer::Ptr tracer;
+
+  try {
+    tracer = createComponentTracer(tracerTypeOrName, attrs);
+  } catch (TracerTypeUnknown const &) {
+    tracer = getComponentTracer(tracerTypeOrName);
+    assert(tracer);
+    for (Attribute attr : attrs) {
+      tracer->addAttribute(attr);
+    }
+  }
   static_cast<Detail::AbstractComponent *>(this)->
       addObserver(tracer->getImpl());
 }

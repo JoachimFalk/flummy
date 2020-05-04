@@ -66,7 +66,7 @@ namespace SystemC_VPC { namespace Detail {
       , TaskInstance const &ti
       , OTaskInstance      &oti);
 
-    bool addAttribute(Attribute::Ptr);
+    bool addAttribute(Attribute const &attr);
 
     // this callback function shall be called on component state changes
     virtual void notify(Component *ci) = 0;

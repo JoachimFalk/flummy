@@ -54,7 +54,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     , public ComponentTracer
   {
   public:
-    ComponentDBTracer(Attribute::Ptr attr);
+    ComponentDBTracer(Attributes const &attrs);
 
     ///
     /// Implement interface for ComponentTracerIf
@@ -81,7 +81,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     /// Implement interface for ComponentTracer
     ///
 
-    bool addAttribute(Attribute::Ptr attr);
+    bool addAttribute(Attribute const &attr);
 
   private:
     class DataBaseProxy;
@@ -203,13 +203,13 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
   public:
     RegisterMe() {
       ComponentDBTracer::registerTracer("DB",
-        [](Attribute::Ptr attr) { return new ComponentDBTracer(attr); });
+        [](Attributes const &attrs) { return new ComponentDBTracer(attrs); });
     }
   } ComponentDBTracer::registerMe;
 
   size_t ComponentDBTracer::DBTaskInstance::instanceIdCounter = 0;
 
-  ComponentDBTracer::ComponentDBTracer(Attribute::Ptr attr)
+  ComponentDBTracer::ComponentDBTracer(Attributes const &attrs)
     : Extending::ComponentTracerIf(
           reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
@@ -291,7 +291,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     }
   }
 
-  bool ComponentDBTracer::addAttribute(Attribute::Ptr attr) {
+  bool ComponentDBTracer::addAttribute(Attribute const &attr) {
     throw ConfigException("The DB tracer does not support attributes!");
   }
 
