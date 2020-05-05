@@ -48,6 +48,7 @@
 #include "PowerMode.hpp"
 #include "Power.hpp"
 #include "ComponentObserver.hpp"
+#include "ComponentTracer.hpp"
 
 #include <CoSupport/SmartPtr/RefCountObject.hpp>
 
@@ -113,10 +114,27 @@ public:
 
   bool hasTask(ScheduledTask * actor) const;
 
-  // Add a tracer. Use constants as defined in Tracer, e.g., Tracer::PAJE.
+  /**
+   * \brief Add a tracer. Either specify a tracer type, e.g., Tracer::PAJE,
+   * or a tracer name, e.g., one given to createComponentTracer.
+   */
   void addTracer(const char *tracerTypeOrName, Attributes const &attrs = Attributes());
 
-  void addObserver(ComponentObserver::Ptr observer);
+  /**
+   * \brief Add a tracer.
+   */
+  void addTracer(ComponentTracer::Ptr const &tracer);
+
+  /**
+   * \brief Add an observer. Either specify an observer type or name, e.g.,
+   * one given to createComponentObserver.
+   */
+  void addObserver(const char *observerTypeOrName, Attributes const &attrs = Attributes());
+
+  /**
+   * \brief Add an observer.
+   */
+  void addObserver(ComponentObserver::Ptr const &observer);
 
   void setExecModel(ExecModel::Ptr provider);
   ExecModel::Ptr getExecModel();

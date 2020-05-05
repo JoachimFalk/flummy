@@ -37,6 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
 #define _INCLUDED_SYSTEMCVPC_COMPONENTOBSERVER_HPP
 
+#include "ConfigException.hpp"
 #include "Attribute.hpp"
 
 #include <boost/intrusive_ptr.hpp>
@@ -81,6 +82,16 @@ namespace SystemC_VPC {
   private:
     int         implAdj;
     const char *type;
+  };
+
+  class ObserverTypeUnknown: public ConfigException {
+  public:
+    ObserverTypeUnknown(const char *type);
+  };
+
+  class ObserverNameUnknown: public ConfigException {
+  public:
+    ObserverNameUnknown(const char *type);
   };
 
   ComponentObserver::Ptr createComponentObserver(

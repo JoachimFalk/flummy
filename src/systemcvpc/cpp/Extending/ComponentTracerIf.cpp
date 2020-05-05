@@ -55,6 +55,17 @@ namespace SystemC_VPC { namespace {
     return tracerByType;
   }
 
+  typedef std::map<
+      std::string,
+      ComponentTracer::Ptr
+    > TracerByName;
+
+  /// We need this to be independent from the global variable initialization order.
+  static TracerByName &getTracerByName() {
+    static TracerByName tracerByName;
+    return tracerByName;
+  }
+
 } }
 
 namespace SystemC_VPC { namespace Extending {
@@ -90,12 +101,30 @@ namespace SystemC_VPC {
     TracerByType::const_iterator iter = tracerByType.find(type);
     if (iter == tracerByType.end())
       throw TracerTypeUnknown(type);
-    return iter->second(attrs)->getComponentTracer();
+
+    if (name) {
+      TracerByName &tracerByName = getTracerByName();
+      std::pair<TracerByName::iterator, bool> status =
+          tracerByName.insert(TracerByName::value_type(name, nullptr));
+      if (!status.second)
+        throw ConfigException("Duplicate name "+std::string(name)+ " for creating component tracer of type "+std::string(type)+"!");
+      try {
+        return status.first->second = iter->second(attrs)->getComponentTracer();
+      } catch (...) {
+        tracerByName.erase(status.first);
+        throw;
+      }
+    } else
+      return iter->second(attrs)->getComponentTracer();
   }
 
   ComponentTracer::Ptr getComponentTracer(const char *name) {
-    throw TracerNameUnknown(name);
-    return nullptr;
+    TracerByName &tracerByName = getTracerByName();
+
+    TracerByName::const_iterator iter = tracerByName.find(name);
+    if (iter == tracerByName.end())
+      throw TracerNameUnknown(name);
+    return iter->second;
   }
 
 } // namespace SystemC_VPC

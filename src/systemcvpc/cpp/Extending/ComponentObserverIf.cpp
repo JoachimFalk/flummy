@@ -55,6 +55,17 @@ namespace SystemC_VPC { namespace {
     return observerByType;
   }
 
+  typedef std::map<
+      std::string,
+      ComponentObserver::Ptr
+    > ObserverByName;
+
+  /// We need this to be independent from the global variable initialization order.
+  static ObserverByName &getObserverByName() {
+    static ObserverByName observerByName;
+    return observerByName;
+  }
+
 } }
 
 namespace SystemC_VPC { namespace Extending {
@@ -74,6 +85,12 @@ namespace SystemC_VPC { namespace Extending {
 
 namespace SystemC_VPC {
 
+  ObserverTypeUnknown::ObserverTypeUnknown(const char *type)
+    : ConfigException("No component observer of type "+std::string(type)+" registered!") {}
+
+  ObserverNameUnknown::ObserverNameUnknown(const char *name)
+    : ConfigException("No component observer of name "+std::string(name)+" registered!") {}
+
   ComponentObserver::Ptr createComponentObserver(
       char const       *type
     , char const       *name
@@ -83,11 +100,32 @@ namespace SystemC_VPC {
 
     ObserverByType::const_iterator iter = observerByType.find(type);
     if (iter == observerByType.end())
-      throw ConfigException("No component observer of type "+std::string(type)+" registered!");
-    return iter->second(attrs)->getComponentObserver();
+      throw ObserverTypeUnknown(type);
+
+    if (name) {
+      ObserverByName &observerByName = getObserverByName();
+      std::pair<ObserverByName::iterator, bool> status =
+          observerByName.insert(ObserverByName::value_type(name, nullptr));
+      if (!status.second)
+        throw ConfigException("Duplicate name "+std::string(name)+ " for creating component observer of type "+std::string(type)+"!");
+      try {
+        return status.first->second = iter->second(attrs)->getComponentObserver();
+      } catch (...) {
+        observerByName.erase(status.first);
+        throw;
+      }
+    } else
+      return iter->second(attrs)->getComponentObserver();
   }
 
   ComponentObserver::Ptr getComponentObserver(const char *name) {
+    ObserverByName &observerByName = getObserverByName();
+
+    ObserverByName::const_iterator iter = observerByName.find(name);
+    if (iter == observerByName.end())
+      throw ObserverNameUnknown(name);
+    return iter->second;
+
     return nullptr;
   }
 
