@@ -98,7 +98,7 @@ test_src_snk_plain_DEPENDENCIES			= $(SYSTEMOC_DEPENDENCIES)
 test_src_snk_plain_SOURCES			= \
 	src/test-src-snk-plain/cpp/design-src-snk-plain.cpp
 
-test-src-snk-plain-%.log test-src-snk-plain-%-CPU.vcd test-src-snk-plain-%-BUS.vcd test-src-snk-plain-%-MEM.vcd: test-src-snk-plain src/test-src-snk-plain/vpc/%.vpc.xml $(SYSTEMOC_PLUGINVPC)
+test-src-snk-plain-%.log test-src-snk-plain-%.vcd test-src-snk-plain-%-CPU.vcd test-src-snk-plain-%-BUS.vcd test-src-snk-plain-%-MEM.vcd: test-src-snk-plain src/test-src-snk-plain/vpc/%.vpc.xml $(SYSTEMOC_PLUGINVPC)
 	set -- $^; \
 	VPCTRACEFILEPREFIX=test-src-snk-plain-$*- \
 	VPCCONFIGURATION="$$2" \
@@ -165,7 +165,7 @@ check-vcds: $(TEST_VPC_VCDS)
 	      for cmx in $(srcdir)/src/$${test}/vpc/*.vpc.xml; do \
 		cmx=$${cmx##*/}; cmx=$${cmx%%.vpc.xml}; \
 		status=success; \
-		for golden_vcd in $(srcdir)/src/$${test}/vpc/$${cmx}-*-golden.vcd; do \
+		for golden_vcd in $(srcdir)/src/$${test}/vpc/$${cmx}-*golden.vcd; do \
 		  test_vcd=$${golden_vcd##*/}; test_vcd=$${test}-$${test_vcd%%-golden.vcd}.vcd; \
 		  if test -f $${golden_vcd} && ! diff -u $(diff_vcd_ignore) $${test_vcd} $${golden_vcd} > /dev/null; then \
 		    status=failed; \
@@ -173,7 +173,7 @@ check-vcds: $(TEST_VPC_VCDS)
 		done; \
 		if test x"$$status" = x"failed"; then \
 		  echo "FAILURE for $${test}-$${cmx} VCD check."; error=1; \
-		  for golden_vcd in $(srcdir)/src/$${test}/vpc/$${cmx}-*-golden.vcd; do \
+		  for golden_vcd in $(srcdir)/src/$${test}/vpc/$${cmx}-*golden.vcd; do \
 		    test_vcd=$${golden_vcd##*/}; test_vcd=$${test}-$${test_vcd%%-golden.vcd}.vcd; \
 		    diff -u $(diff_vcd_ignore) $${test_vcd} $${golden_vcd}; \
 		  done; \
