@@ -43,6 +43,7 @@
 #include <systemc>
 
 #include <string>
+#include <sstream>
 
 #include <systemcvpc/vpc_config.h>
 
@@ -257,8 +258,33 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
        , "VCD")
-    , traceFile_(NULL)
-  {}
+    , traceFile_(nullptr)
+  {
+    for (Attribute const &attr : attrs) {
+      if (attr.getType() == "traceFileName") {
+        if (traceFile_) {
+          throw ConfigException(
+              "Duplicate attribute traceFileName in VCD component tracer!");
+        }
+        std::string const &traceFileName = attr.getValue();
+        if (traceFileName.size() < 4 ||
+            traceFileName.substr(traceFileName.size()-4,4) != ".vcd") {
+          throw ConfigException(
+              "The traceFileName "+traceFileName+" must end in .vcd for VCD component tracers!");
+        }
+
+        traceFile_ = sc_core::sc_create_vcd_trace_file(
+            traceFileName.substr(0, traceFileName.size()-4).c_str());
+        traceFile_->set_time_unit(1, sc_core::SC_NS);
+      } else {
+        std::stringstream msg;
+
+        msg << "Component VCD tracers do not support the "+attr.getType()+" attribute! ";
+        msg << "Only the traceFileName attribute is supported.";
+        throw ConfigException(msg.str());
+      }
+    }
+  }
 
   ComponentVCDTracer::~ComponentVCDTracer() {
     if (traceFile_) {
