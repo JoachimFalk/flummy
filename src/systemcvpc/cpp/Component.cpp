@@ -126,7 +126,28 @@ void Component::addTracer(const char *tracerTypeOrName, Attributes const &attrs)
       addObserver(tracer->getImpl());
 }
 
-void Component::addObserver(ComponentObserver::Ptr observer) {
+void Component::addTracer(ComponentTracer::Ptr const &tracer) {
+  static_cast<Detail::AbstractComponent *>(this)->
+      addObserver(tracer->getImpl());
+}
+
+void Component::addObserver(const char *observerTypeOrName, Attributes const &attrs) {
+  ComponentObserver::Ptr observer;
+
+  try {
+    observer = createComponentObserver(observerTypeOrName, attrs);
+  } catch (ObserverTypeUnknown const &) {
+    observer = createComponentObserver(observerTypeOrName);
+    assert(observer);
+    for (Attribute attr : attrs) {
+      observer->addAttribute(attr);
+    }
+  }
+  static_cast<Detail::AbstractComponent *>(this)->
+      addObserver(observer->getImpl());
+}
+
+void Component::addObserver(ComponentObserver::Ptr const &observer) {
   static_cast<Detail::AbstractComponent *>(this)->
       addObserver(observer->getImpl());
 }

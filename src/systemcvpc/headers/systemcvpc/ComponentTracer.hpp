@@ -37,8 +37,7 @@
 #ifndef _INCLUDED_SYSTEMCVPC_COMPONENTTRACER_HPP
 #define _INCLUDED_SYSTEMCVPC_COMPONENTTRACER_HPP
 
-#include <systemcvpc/ConfigException.hpp>
-
+#include "ConfigException.hpp"
 #include "ComponentObserver.hpp"
 
 #include <boost/intrusive_ptr.hpp>
