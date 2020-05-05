@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
+<vpcconfiguration>
+ <resources>
+  <tracer type="VCD" name="mytracer">
+   <attribute type="traceFileName" value="test-src-snk-plain-FCFS-dualcore.vcd"/>
+  </tracer>
+  <component name="CPU1" scheduler="FCFS">
+   <attribute type="tracing" value="mytracer"/>
+  </component>
+  <component name="CPU2" scheduler="FCFS">
+   <attribute type="tracing" value="mytracer"/>
+  </component>
+ </resources>
+
+ <mappings>
+  <mapping source="top.src" target="CPU1">
+    <timing fname="m_h_src::src"   delay="7.5 ms"/>
+  </mapping>
+  <mapping source="top.snk" target="CPU2">
+    <timing fname="m_h_sink::sink" delay="10.0 ms"/>
+  </mapping>
+ </mappings>
+
+ <topology default="ignore"/>
+</vpcconfiguration>
