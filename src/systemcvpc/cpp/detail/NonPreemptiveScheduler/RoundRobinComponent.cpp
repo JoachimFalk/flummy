@@ -49,16 +49,15 @@ RoundRobinComponent::RoundRobinComponent(std::string const &name)
   SC_THREAD(scheduleThread);
 }
 
-void RoundRobinComponent::addAttribute(Attribute::Ptr attr) {
-  if (attr->getType() == "scheduler") {
-    for(size_t i=0; i<attr->getAttributeSize();++i) {
-      Attribute::Ptr schedAttr = attr->getNextAttribute(i).second;
-      if (schedAttr->isType("fireActorInLoop")) {
-        std::string value = schedAttr->getValue();
+void RoundRobinComponent::addAttribute(Attribute const &attr) {
+  if (attr.getType() == "scheduler") {
+    for (Attribute const &schedAttr : attr.getAttributes()) {
+      if (schedAttr.getType() == "fireActorInLoop") {
+        std::string value = schedAttr.getValue();
         fireActorInLoop = (value == "1" || value == "true");
         assert(value == "1" || value == "true" || value == "0" || value == "false");
       } else {
-        throw ConfigException("Unknown attribute " + schedAttr->getType() + " for RRNOPRE scheduler!");
+        throw ConfigException("Unknown attribute " + schedAttr.getType() + " for RRNOPRE scheduler!");
       }
     }
   } else

@@ -106,12 +106,12 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void setProperty(const char* key, const char* value){}
     
-    virtual void setAttribute(Attribute::Ptr attPtr)
+    virtual void setAttribute(Attribute const &attr)
     {
-      if(attPtr->getAttributeSize() != 0){
+      if(!attr.getAttributes().empty()) {
         return;
       }
-      this->setProperty(attPtr->getType().c_str(), attPtr->getValue().c_str());
+      this->setProperty(attr.getType().c_str(), attr.getValue().c_str());
     }
 
     virtual void initialize(){}

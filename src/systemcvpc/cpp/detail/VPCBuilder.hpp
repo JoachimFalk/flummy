@@ -129,9 +129,9 @@ namespace SystemC_VPC { namespace Detail {
     void initMappingAPStruct();
 
     /**
-     * \brief Used to create the Attribute-Object recursively
+     * \brief Parse attribute tag
      */
-    void nextAttribute(Attribute::Ptr attributePtr, CX::XN::DOMNode *node);
+    Attribute parseAttribute(CX::XN::DOMNode *node);
 
     /**
      * \brief Parse nested attribute tags inside a parent tag.

@@ -39,16 +39,11 @@
 
 #include "InvalidArgumentException.hpp"
 
-#include <CoSupport/SmartPtr/RefCount.hpp>
-#include <CoSupport/SmartPtr/intrusive_refcount_ptr.hpp>
-
 #include <boost/intrusive_ptr.hpp>
 
 #include <list>
 #include <map>
 #include <string>
-
-#include <deque>
 
 namespace SystemC_VPC {
 
@@ -103,6 +98,8 @@ namespace SystemC_VPC {
     iterator insert(const_iterator iter, const_reference val);
 
 
+    void     push_back(const_reference val)
+      { insert(end(), val); }
   private:
     typedef std::map<std::string, iterator> AM;
 
@@ -110,64 +107,46 @@ namespace SystemC_VPC {
     AM attributeMap;
   };
 
-  class Attribute;
-
-  DECL_INTRUSIVE_REFCOUNT_PTR(Attribute, PAttribute)
-
-  class Attribute
-    : private CoSupport::SmartPtr::RefCount
-  {
+  class Attribute {
     typedef Attribute this_type;
-
-    friend void intrusive_ptr_add_ref(this_type *);
-    friend void intrusive_ptr_release(this_type *);
   public:
-    typedef boost::intrusive_ptr<this_type>       Ptr;
-    typedef boost::intrusive_ptr<this_type const> ConstPtr;
+    /**
+     *
+     */
+    Attribute(std::string const &type, std::string const &value);
+    Attribute(std::string const &type, Attributes const &attrs);
+    Attribute(std::string const &type, std::string const &value, Attributes const &attrs);
 
-    Attribute();
+    Attributes const &getAttributes() const
+      { return attributes; }
 
     /**
      *
      */
-    Attribute( std::string type, std::string value);
-
-    std::pair<std::string, Attribute::Ptr > getNextAttribute(size_t pos);
+    Attribute const &getAttribute(std::string const &type) const;
 
     /**
      *
      */
-    Attribute::Ptr getAttribute(const std::string name);
-
-    /**
-     *
-     */
-    bool hasAttribute(const std::string name);
-
-    void addAttribute( std::string type, std::string value);
-
-    void addAttribute( std::string type, Attribute::Ptr att );
+    bool hasAttribute(std::string const &type) const;
 
     size_t getAttributeSize();
 
     std::string const &getValue() const noexcept
       { return value; }
     std::string const &getType() const noexcept
-    { return type; }
+      { return type; }
 
     /**
      *
      */
-    bool isType(std::string check){
-      return this->type==check;
-    }
+    bool isType(std::string const &check) const
+      { return this->type==check; }
 
     ~Attribute(){}
   private:
     std::string type;
     std::string value;
-
-    typedef std::deque<std::pair<std::string, PAttribute> >  Attributes;
 
     Attributes  attributes;
   };

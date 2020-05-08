@@ -174,18 +174,18 @@ ExecModel::Ptr Component::getExecModel() {
 //    + "\" has NO timing provider!");
 }
 
-void Component::addAttribute(Attribute::Ptr attribute) {
-  if (attribute->isType("transaction_delay")) {
-    sc_core::sc_time transferDelay = Detail::createSC_Time(attribute->getValue().c_str());
+void Component::addAttribute(Attribute const &attribute) {
+  if (attribute.isType("transaction_delay")) {
+    sc_core::sc_time transferDelay = Detail::createSC_Time(attribute.getValue().c_str());
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
-  } else if (attribute->isType("transfer_delay")) {
-    sc_core::sc_time transferDelay = Detail::createSC_Time(attribute->getValue().c_str());
+  } else if (attribute.isType("transfer_delay")) {
+    sc_core::sc_time transferDelay = Detail::createSC_Time(attribute.getValue().c_str());
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
-  } else if (attribute->isType("transaction")) {
+  } else if (attribute.isType("transaction")) {
 //  unsigned int transactionSize = 1;
     sc_core::sc_time transferDelay = sc_core::SC_ZERO_TIME;
-    if (attribute->hasAttribute("delay")) {
-      transferDelay = Detail::createSC_Time(attribute->getAttribute("delay")->getValue().c_str());
+    if (attribute.hasAttribute("delay")) {
+      transferDelay = Detail::createSC_Time(attribute.getAttribute("delay").getValue().c_str());
     }
 
 //  if (attribute->hasParameter("size")) {
@@ -194,18 +194,17 @@ void Component::addAttribute(Attribute::Ptr attribute) {
 
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
     // FIXME: add transactionSize
-  } else if (attribute->isType("tracing")) {
-    addTracer(attribute->getValue().c_str());
-  } else if (attribute->isType("execModel")) {
-    ExecModel::Ptr execModel = createExecModel(attribute->getValue().c_str());
-    for(size_t i=0; i<attribute->getAttributeSize();++i) {
-      Attribute::Ptr emAttr = attribute->getNextAttribute(i).second;
+  } else if (attribute.isType("tracing")) {
+    addTracer(attribute.getValue().c_str());
+  } else if (attribute.isType("execModel")) {
+    ExecModel::Ptr execModel = createExecModel(attribute.getValue().c_str());
+    for (Attribute emAttr : attribute.getAttributes()) {
       if (!execModel->addAttribute(emAttr))
-        throw ConfigException("Unhandled attribute " + emAttr->getType() + " for execution model " + attribute->getValue());
+        throw ConfigException("Unhandled attribute " + emAttr.getType() + " for execution model " + attribute.getValue());
     }
     setExecModel(execModel);
   } else {
-    throw ConfigException("Unhandled attribute " + attribute->getType());
+    throw ConfigException("Unhandled attribute " + attribute.getType());
   }
 }
 

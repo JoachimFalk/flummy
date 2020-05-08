@@ -83,34 +83,32 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
       throw ConfigException("Duplicate timing information for "+actorName);
   }
 
-  bool LookupPowerTimeModelImpl::addAttribute(Attribute::Ptr attr) {
+  bool LookupPowerTimeModelImpl::addAttribute(Attribute const &attr) {
 //    if(attr->isType("governor")){
 //      this->loadLocalGovernorPlugin(attr->getValue());
 //      powerAttribute = powerAtt;
 //      continue;
 //    }
 
-    if (attr->isType("startupPowermode")) {
-      startPowerMode = attr->getValue();
+    if (attr.isType("startupPowermode")) {
+      startPowerMode = attr.getValue();
       return true;
     }
-    if (attr->isType("powermode")) {
-      PowerModeInfo &pmi = powerModes[attr->getValue()];
-      for (size_t i=0; i<attr->getAttributeSize();++i) {
-        Attribute::Ptr emAttr = attr->getNextAttribute(i).second;
+    if (attr.isType("powermode")) {
+      PowerModeInfo &pmi = powerModes[attr.getValue()];
+      for (Attribute const &emAttr : attr.getAttributes()) {
+        if (emAttr.isType("powerIdle")) {
+          pmi.pwrIdle = Power(emAttr.getValue());
+        } else if (emAttr.isType("powerRunning")) {
+          pmi.pwrRunning = Power(emAttr.getValue());
+        } else if (emAttr.isType("powerStalled")) {
+          pmi.pwrStalled = Power(emAttr.getValue());
 
-        if (emAttr->isType("powerIdle")) {
-          pmi.pwrIdle = Power(emAttr->getValue());
-        } else if (emAttr->isType("powerRunning")) {
-          pmi.pwrRunning = Power(emAttr->getValue());
-        } else if (emAttr->isType("powerStalled")) {
-          pmi.pwrStalled = Power(emAttr->getValue());
-
-        } else if (emAttr->isType("guardComplexityFactor")) {
-          pmi.guardComplexityFactor = createSC_Time(emAttr->getValue().c_str());
+        } else if (emAttr.isType("guardComplexityFactor")) {
+          pmi.guardComplexityFactor = createSC_Time(emAttr.getValue().c_str());
         } else {
-          throw ConfigException("Unhandled attribute " + emAttr->getType()
-              + " for power mode "+attr->getType()
+          throw ConfigException("Unhandled attribute " + emAttr.getType()
+              + " for power mode "+attr.getType()
               + " in execution model "+std::string(Type));
         }
       }

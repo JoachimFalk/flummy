@@ -234,7 +234,6 @@ namespace SystemC_VPC { namespace Detail {
 
     PlugInFactory<PluggableLocalPowerGovernor> *localGovernorFactory;
     PluggableLocalPowerGovernor *midPowerGov;
-    Attribute::Ptr powerAttribute;
     typedef std::map<std::string,
                      DLLFactory<PlugInFactory<PluggableLocalPowerGovernor> >* >
       Factories;

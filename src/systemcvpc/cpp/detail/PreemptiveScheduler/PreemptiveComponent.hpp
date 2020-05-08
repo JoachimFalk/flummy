@@ -80,7 +80,7 @@ namespace SystemC_VPC { namespace Detail {
     /**
      *
      */
-    void addAttribute(Attribute::Ptr attribute);
+    void addAttribute(Attribute const &attribute);
 
     /**
      *

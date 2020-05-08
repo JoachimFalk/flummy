@@ -68,7 +68,7 @@ namespace SystemC_VPC { namespace Detail {
     
     void removedTask(TaskInstanceImpl *task);
     
-    void setAttribute(Attribute::Ptr attributePtr);
+    void setAttribute(Attribute const &attribute);
 
     sc_core::sc_event& getNotifyEvent();
     
