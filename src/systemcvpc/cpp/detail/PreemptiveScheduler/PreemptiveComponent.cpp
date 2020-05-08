@@ -575,10 +575,9 @@ namespace SystemC_VPC { namespace Detail {
     AbstractComponent::finalize();
   }
 
-  void PreemptiveComponent::addAttribute(Attribute::Ptr attr) {
-    if (attr->isType("scheduler")) {
-      for(size_t i=0; i<attr->getAttributeSize();++i) {
-        Attribute::Ptr schedAttr = attr->getNextAttribute(i).second;
+  void PreemptiveComponent::addAttribute(Attribute const &attr) {
+    if (attr.getType() == "scheduler") {
+      for (Attribute const &schedAttr : attr.getAttributes()) {
         // FIXME: Handle unknown attributes
         scheduler->setAttribute(schedAttr);
       }

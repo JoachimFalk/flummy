@@ -206,7 +206,6 @@ namespace SystemC_VPC { namespace Detail {
     , requestExecuteTasks(false)
     , localGovernorFactory(nullptr)
     , midPowerGov(nullptr)
-    , powerAttribute(new Attribute("",""))
     , componentName(name)
     , canExecuteTasks(true)
     , assignedTaskInstance(nullptr)

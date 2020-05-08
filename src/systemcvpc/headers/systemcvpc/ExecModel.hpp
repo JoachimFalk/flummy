@@ -69,7 +69,7 @@ public:
   virtual void add(Timing timing) = 0;
   virtual void addDefaultActorTiming(std::string actorName, Timing timing) = 0;
 
-  virtual bool addAttribute(Attribute::Ptr attr) = 0;
+  virtual bool addAttribute(Attribute const &attr) = 0;
 
   const char *getType() const
     { return type; }

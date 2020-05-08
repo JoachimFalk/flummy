@@ -133,36 +133,25 @@ namespace SystemC_VPC { namespace Detail {
     //  std::cout<<"add Function " <<  key << " to " << value<<std::endl; 
   }
 
-  void TimeTriggeredCCScheduler::setAttribute(Attribute::Ptr attributePtr){
-    std::string value = attributePtr->getType();
-
-    if( value!="FlexRayParams" )
+  void TimeTriggeredCCScheduler::setAttribute(Attribute const &attribute) {
+    if (attribute.getType() != "FlexRayParams")
       return;
 
-    if(attributePtr->getAttributeSize()!=0){
-      //es gibt folglich globale FlexRay-Parameter!
-      for(size_t j=0;j<attributePtr->getAttributeSize();j++){
-        std::pair<std::string, Attribute::Ptr> param2 =attributePtr->getNextAttribute(j);
-        if(param2.first == "dualchannel")
-          dualchannel=(param2.second->getValue() == "true");
-      }
-    }
-
-    for(size_t i=0;i<attributePtr->getAttributeSize();i++){
-      std::pair<std::string, Attribute::Ptr >attribute=attributePtr->getNextAttribute(i);
-        
-      if(attribute.first=="static"){
+    //es gibt folglich globale FlexRay-Parameter!
+    for (Attribute const &attr : attribute.getAttributes()) {
+      if (attr.getType() == "dualchannel")
+        dualchannel = attr.getValue() == "true";
+      else if(attr.getType() == "static") {
         StartslotDynamic=0;
-        for(size_t k=0;k<attribute.second->getAttributeSize();k++){
-          std::pair<std::string, Attribute::Ptr >attribute2=attribute.second->getNextAttribute(k);
+        for (Attribute const &attr2 : attr.getAttributes()) {
           //Slot einrichten
           StartslotDynamic++;
           slicecount++;
           std::pair<std::string, std::string > param;
-          param.first=attribute2.second->getType();
-          param.second=attribute2.second->getValue();
+          param.first=attr2.getType();
+          param.second=attr2.getValue();
 
-          //                         std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
+          //std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
           TDMASlot newSlot;
           //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
           newSlot.length = createSC_Time(param.second.c_str() );
@@ -171,31 +160,23 @@ namespace SystemC_VPC { namespace Detail {
 
           //jetzt noch die Task-mappings!
           //für jeden Attribute-Eintrag Parameter verarbeiten
-          for(size_t l=0;l<attribute2.second->getAttributeSize();l++){
-            std::pair<std::string, Attribute::Ptr >attribute3=attribute2.second->getNextAttribute(l);
+          for (Attribute const &attr3 : attr2.getAttributes()) {
             std::pair<std::string, std::string > param3;
-            if(attribute3.first=="mapping"){
-
-              param3.first=attribute3.second->getValue();
+            if (attr3.getType() == "mapping") {
+              param3.first =attr3.getValue();
               param3.second=param.first;
-              //                    std::cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<std::endl;
+              //std::cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<std::endl;
                             
               this->_properties.push_back(param3);
               ProcessParams_string[param3.first]=SlotParameters(0,0);
-              if(attribute3.second->getAttributeSize()==0){
-                //we don't have further Parameters, so let them as they are
-              }else{
+              for (Attribute const &attr4 : attr3.getAttributes()) {
                 //parse parameters
-                for(size_t m=0;m<attribute3.second->getAttributeSize();m++){
-                  std::pair<std::string, Attribute::Ptr > param4 =attribute3.second->getNextAttribute(m);
-                  if(param4.first=="offset"){
-                    ProcessParams_string[param3.first].offset=atoi(param4.second->getValue().c_str());
-                    //                                  std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
-                  }
-                  if(param4.first=="multiplex"){
-                    ProcessParams_string[param3.first].multiplex=atoi(param4.second->getValue().c_str());
-                    //                                   std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
-                  }
+                if (attr4.getType() == "offset") {
+                  ProcessParams_string[param3.first].offset=atoi(attr4.getValue().c_str());
+                  //std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
+                } else if (attr4.getType() == "multiplex") {
+                  ProcessParams_string[param3.first].multiplex=atoi(attr4.getValue().c_str());
+                  //std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
                 }
               }
             }

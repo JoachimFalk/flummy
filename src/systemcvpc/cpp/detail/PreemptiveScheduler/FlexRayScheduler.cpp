@@ -187,149 +187,124 @@ namespace SystemC_VPC { namespace Detail {
                 
   }
 
-  void FlexRayScheduler::setAttribute(Attribute::Ptr attributePtr){
-    std::string value = attributePtr->getType();
-    //assert(value!=NULL);
-    if( value!="FlexRayParams" )
+  void FlexRayScheduler::setAttribute(Attribute const &attribute) {
+    if (attribute.getType() != "FlexRayParams" )
       return;
 
-    //std::cout<<attributePtr->getAttributeSize()<<std::endl;
-    if(attributePtr->getAttributeSize()!=0){
-      //es gibt folglich globale FlexRay-Parameter!
-      if(attributePtr->hasAttribute("duachannel")){
-        dualchannel=(attributePtr->getAttribute("dualchannel")->getValue() == "true");
-      }
-    }
-        
-        
-    if( attributePtr->hasAttribute("static") ){
-      Attribute::Ptr fr_static = attributePtr->getAttribute("static");
-      StartslotDynamic=0;
-      for(size_t k=0;k<fr_static->getAttributeSize();k++){
-        std::pair<std::string, Attribute::Ptr >attribute2=fr_static->getNextAttribute(k);
-        //Slot einrichten
-        StartslotDynamic++;
-        slicecount++;
-        std::pair<std::string, std::string > param;
-        param.first=attribute2.second->getType();
-        param.second=attribute2.second->getValue();
-                        
-        //std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
-        TDMASlot newSlot;
-        //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
-        newSlot.length = createSC_Time(param.second.c_str() );
-        cycle_length += newSlot.length;      
-        newSlot.name = param.first;
-        TDMA_slots.insert(TDMA_slots.end(), newSlot);
-                        
-        //jetzt noch die Task-mappings!
-        //für jeden Attribute-Eintrag Parameter verarbeiten
-        for(size_t l=0;l<attribute2.second->getAttributeSize();l++){
-          std::pair<std::string, Attribute::Ptr >attribute3=attribute2.second->getNextAttribute(l);
-          std::pair<std::string, std::string > param3;
-          if(attribute3.first=="mapping"){
+    for (Attribute const &attr : attribute.getAttributes()) {
+      if (attr.getType() == "dualchannel")
+        dualchannel = attr.getValue() == "true";
+      else if(attr.getType() == "static") {
+        Attribute const &fr_static = attr;
+        StartslotDynamic=0;
+        for (Attribute const &attr2 : fr_static.getAttributes()) {
+          //Slot einrichten
+          StartslotDynamic++;
+          slicecount++;
+          std::pair<std::string, std::string > param;
+          param.first = attr2.getType();
+          param.second= attr2.getValue();
 
-            param3.first=attribute3.second->getValue();
-            param3.second=param.first;
-            // std::cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<std::endl;
-                            
-            this->_properties.push_back(param3);
-            ProcessParams_string[param3.first]=SlotParameters(0,0);
-            if(attribute3.second->getAttributeSize()==0){
-              //we don't have further Parameters, so let them as they are
-            }else{
-              //parse parameters
-              if(attribute3.second->hasAttribute("offset")){
-                ProcessParams_string[param3.first].offset
-                  = atoi(
-                         attribute3.second->getAttribute("offset")
-                         ->getValue().c_str()
-                         );
-                //                                   std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
-              }
-              if(attribute3.second->hasAttribute("multiplex")){
-                ProcessParams_string[param3.first].multiplex
-                  = atoi(
-                         attribute3.second->getAttribute("multiplex")
-                         ->getValue().c_str()
-                         );
-                //                                   std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
+          //std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
+          TDMASlot newSlot;
+          //Werte aus dem Attribute auslesen und damit neuen Slot erzeugen
+          newSlot.length = createSC_Time(param.second.c_str() );
+          cycle_length += newSlot.length;
+          newSlot.name = param.first;
+          TDMA_slots.insert(TDMA_slots.end(), newSlot);
+
+          //jetzt noch die Task-mappings!
+          //für jeden Attribute-Eintrag Parameter verarbeiten
+          for (Attribute const &attr3 : attr2.getAttributes()) {
+            std::pair<std::string, std::string > param3;
+            if (attr3.getType() == "mapping") {
+              param3.first = attr3.getValue();
+              param3.second= param.first;
+              // std::cout<<"found static binding: "<<param3.second <<" with value: "<<param3.first<<std::endl;
+
+              this->_properties.push_back(param3);
+              ProcessParams_string[param3.first]=SlotParameters(0,0);
+              for (Attribute const &attr4 : attr3.getAttributes()) {
+                //parse parameters
+                if(attr4.getType() == "offset") {
+                  ProcessParams_string[param3.first].offset
+                    = atoi(attr4.getValue().c_str());
+                  // std::cout<<"found Offset-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
+                }
+                else if(attr4.getType() == "multiplex") {
+                  ProcessParams_string[param3.first].multiplex
+                    = atoi(attr4.getValue().c_str());
+                  // std::cout<<"found Multiplex-Setting for "<<param3.first<<" with value: "<<param4.second<<std::endl;
+                }
               }
             }
           }
+          /*
+            for(j=0;j<attribute2.second->getParameterSize();j++){
+            std::pair<std::string, std::string > param2 =attribute2.second->getNextParameter(j);
+            if(param2.first == "mapping"){
+            param2.first=param2.second;
+            param2.second=param.first;
+            std::cout<<"found static binding: "<<param2.second <<" with value: "<<param2.first<<std::endl;
+            this->_properties.push_back(param2);
+            }
+
+            }
+          */
         }
-                          
-                            
-                        
+
         /*
           for(j=0;j<attribute2.second->getParameterSize();j++){
-          std::pair<std::string, std::string > param2 =attribute2.second->getNextParameter(j);
-          if(param2.first == "mapping"){
-          param2.first=param2.second;
-          param2.second=param.first;
-          std::cout<<"found static binding: "<<param2.second <<" with value: "<<param2.first<<std::endl;
-          this->_properties.push_back(param2);
-          }
-                                
+          std::pair<std::string, std::string > param=attribute2.second->getNextParameter(j);
+          std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second <<std::endl;
+          this->_properties.push_back(param);
+
           }
         */
       }
-                
-      /*
-        for(j=0;j<attribute2.second->getParameterSize();j++){
-        std::pair<std::string, std::string > param=attribute2.second->getNextParameter(j);
-        std::cout<<"found static Slot: "<<param.first <<" with value: "<<param.second <<std::endl;
-        this->_properties.push_back(param);
-                        
-        }
-      */
-    }   
-    if( attributePtr->hasAttribute("dynamic") ){
-      Attribute::Ptr fr_dynamic = attributePtr->getAttribute("dynamic");
-      this->TimeDynamicSegment = createSC_Time(fr_dynamic->getValue().c_str());
-      cycle_length += this->TimeDynamicSegment; 
-                
-      for(size_t k=0;k<fr_dynamic->getAttributeSize();k++){
-        std::pair<std::string, Attribute::Ptr >attribute2=fr_dynamic->getNextAttribute(k);
-        //Slot einrichten
-        slicecount++;
-        std::pair<std::string, std::string > param;
-        param.first=attribute2.second->getType();
-        param.second=attribute2.second->getValue();
-        //                      std::cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second <<std::endl;
-                        
-        TDMASlot newSlot;
-        std::string temp = param.second;
-        if(temp==""){
-          //Default-Value fuer eine Dynamic-Slot-Laenge
-          param.second="30us";
-        }
-        newSlot.length = createSC_Time(param.second.c_str() );
-        newSlot.name = param.first;
-        Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
-        //                      std::cout<<"new Dynamic One! " << newSlot.length <<std::endl;
-                
-        //jetzt noch die Task-mappings!
-        for(size_t j=0;j<attribute2.second->getAttributeSize();j++){
-          std::pair<std::string, Attribute::Ptr > paramx =attribute2.second->getNextAttribute(j);
-          std::pair<std::string, std::string > param2(paramx.first, paramx.second->getValue());
-          if(param2.first == "mapping"){
-            param2.first=param2.second;
-            param2.second=param.first;
-            //                          std::cout<<"found dyn. binding: "<<param2.first <<"value: "<<param2.second<<std::endl;
-            this->_properties.push_back(param2);
+      else if(attr.getType() == "dynamic") {
+        Attribute const &fr_dynamic = attr;
+        this->TimeDynamicSegment = createSC_Time(fr_dynamic.getValue().c_str());
+        cycle_length += this->TimeDynamicSegment;
+
+        for (Attribute const &attr2 : fr_dynamic.getAttributes()) {
+          //Slot einrichten
+          slicecount++;
+          std::pair<std::string, std::string > param;
+          param.first = attr2.getType();
+          param.second= attr2.getValue();
+          // std::cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second <<std::endl;
+
+          TDMASlot newSlot;
+          std::string temp = param.second;
+          if(temp==""){
+            //Default-Value fuer eine Dynamic-Slot-Laenge
+            param.second="30us";
+          }
+          newSlot.length = createSC_Time(param.second.c_str() );
+          newSlot.name = param.first;
+          Dynamic_slots.insert(Dynamic_slots.end(), newSlot);
+          //                      std::cout<<"new Dynamic One! " << newSlot.length <<std::endl;
+
+          //jetzt noch die Task-mappings!
+          for (Attribute const &paramx : attr2.getAttributes()) {
+            if(paramx.getType() == "mapping"){
+              std::pair<std::string, std::string > param2(paramx.getValue(), param.first);
+              // std::cout<<"found dyn. binding: "<<param2.first <<"value: "<<param2.second<<std::endl;
+              this->_properties.push_back(param2);
+            }
           }
         }
+
+        /*        std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(0);
+                  for(j=0;j<attribute2.second->getParameterSize();j++){
+                  std::pair<std::string, std::string > param=attribute2.second->getNextParameter(j);
+                  std::cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
+                  this->_properties.push_back(param);
+                  }
+        */
       }
-                
-      /*        std::pair<std::string, Attribute >attribute2=attribute.second.getNextAttribute(0);
-                for(j=0;j<attribute2.second->getParameterSize();j++){
-                std::pair<std::string, std::string > param=attribute2.second->getNextParameter(j);
-                std::cout<<"found dynamic Slot: "<<param.first <<" with value: "<<param.second<<std::endl;
-                this->_properties.push_back(param);
-                }
-      */
-    }   
+    }
   }
   
   bool FlexRayScheduler::getSchedulerTimeSlice( sc_core::sc_time& time,

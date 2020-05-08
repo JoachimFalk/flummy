@@ -48,59 +48,40 @@ namespace SystemC_VPC {
     return retval;
   }
 
-
+  Attribute::Attribute(
+      std::string const &type
+    , std::string const &value)
+    : type(type), value(value) {}
+  Attribute::Attribute(
+      std::string const &type
+    , Attributes const &attrs)
+    : type(type), attributes(attrs) {}
+  Attribute::Attribute(
+      std::string const &type
+    , std::string const &value
+    , Attributes const &attrs)
+    : type(type), value(value), attributes(attrs) {}
 
   //
-  Attribute::Attribute() : type(), value() {}
-
-  //
-  Attribute::Attribute( std::string type, std::string value)
-    : type(type), value(value){}
-
-  std::pair<std::string, Attribute::Ptr > Attribute::getNextAttribute(size_t pos) {
-    if(pos<=attributes.size()) return attributes[pos];
-    throw InvalidArgumentException("getNextAttribute");
-        
+  Attribute const &Attribute::getAttribute(std::string const &type) const {
+    for (Attribute const &attr : attributes) {
+      if (attr.getType() == type)
+        return attr;
+    }
+    throw InvalidArgumentException("getAttribute> Unknown Attribute: " + type);
   }
 
   //
-  Attribute::Ptr Attribute::getAttribute(const std::string name) {
-    for(unsigned int i=0;
-        i<this->getAttributeSize();
-        ++i)
-      {
-        if(attributes[i].first == name)
-          return attributes[i].second;
-      }
-    throw InvalidArgumentException("getAttribute> Unknown Attribute:"
-                                       + name);
-  }
-
-  //
-  bool Attribute::hasAttribute(const std::string name) {
-    for(unsigned int i=0;
-        i<this->getAttributeSize();
-        ++i)
-      {
-        if(attributes[i].first == name)
-          return true;
-      }
+  bool Attribute::hasAttribute(std::string const &type) const {
+    for (Attribute const &attr : attributes) {
+      if (attr.getType() == type)
+        return true;
+    }
     return false;
-  }
-
-  void Attribute::addAttribute( std::string type, std::string value){
-    Attribute::Ptr toadd(new Attribute(type, value));
-    attributes.push_back( std::make_pair(type, toadd) );
-  }
-
-  void Attribute::addAttribute( std::string type, Attribute::Ptr att ){
-    attributes.push_back( std::make_pair(type, att) );
   }
 
   size_t Attribute::getAttributeSize(){
     return attributes.size();
   }
-
-  IMPL_INTRUSIVE_REFCOUNT_PTR(Attribute)
 
 } // namespace SystemC_VPC::Detail

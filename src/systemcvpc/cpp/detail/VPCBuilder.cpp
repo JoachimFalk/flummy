@@ -351,25 +351,12 @@ namespace SystemC_VPC { namespace Detail {
 
         // check if its an attribute to add
         if( xmlName == XMLCH("attribute") ){
-
-          //CX::NStr sType;
-          CX::NStr sValue = "";
-          CX::NStr sType = atts->getNamedItem(XMLCH("type"))->getNodeValue();
-
-          CX::XN::DOMNode * value = atts->getNamedItem(XMLCH("value"));
-          if( value  != NULL){
-            sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
-          }
-
-          Attribute::Ptr attributes(new Attribute( sType, sValue));
-
-          nextAttribute(attributes, node->getFirstChild());
-
+          Attribute attr = parseAttribute(node);
           // add distribution to the timing
-          if (sType == "distribution"){
-            comp->setTransferTimingModifier(getDistribution(sValue));
+          if (attr.getType() == "distribution"){
+            comp->setTransferTimingModifier(getDistribution(attr.getValue()));
           }
-          comp->addAttribute(attributes);
+          comp->addAttribute(attr);
         }
       }
       vpcConfigTreeWalker->parentNode();
@@ -478,33 +465,21 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  void VPCBuilder::nextAttribute(SystemC_VPC::Attribute::Ptr attribute,
-                                 CX::XN::DOMNode* node){
-    //walk down hierarchy to attributes
-    for(; node != NULL; node = node->getNextSibling()){
-      const CX::XStr xmlName = node->getNodeName();
-      CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
-
-      // check if its an attribute to add
-      if( xmlName == XMLCH("attribute") ){
-        CX::XStr sValue="";
-        CX::XStr sType = atts->getNamedItem(XMLCH("type"))->getNodeValue();
-        if(atts->getNamedItem(XMLCH("value"))!=NULL){
-          sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
-        }
-
-        Attribute::Ptr fr_Attribute2(new Attribute(sType, sValue));
-
-        //fr_Attribute.addNewAttribute(fr_Attribute2, sValue);
-        nextAttribute(fr_Attribute2,node->getFirstChild());
-        attribute->addAttribute(sType, fr_Attribute2);
-      }
-      // check if its an Parameter to add
-      if( xmlName == XMLCH("parameter") ){
-        CX::XStr sType  = atts->getNamedItem(XMLCH("type"))->getNodeValue();
-        CX::XStr sValue = atts->getNamedItem(XMLCH("value"))->getNodeValue();
-        attribute->addAttribute( sType, sValue);
-      }
+  /**
+   * \brief Parse attribute tag
+   */
+  Attribute VPCBuilder::parseAttribute(CX::XN::DOMNode *node) {
+    if (!CX::XN::XMLString::compareString(node->getNodeName(), XMLCH("attribute"))) {
+      return Attribute(
+          CX::getAttrValueAs<std::string>(node, XMLCH("type"))
+        , CX::getAttrValueAs<std::string>(node, XMLCH("value"), "")
+        , parseAttributes(node));
+    } else if (!CX::XN::XMLString::compareString(node->getNodeName(), XMLCH("parameter"))) {
+      return Attribute(
+          CX::getAttrValueAs<std::string>(node, XMLCH("type"))
+        , CX::getAttrValueAs<std::string>(node, XMLCH("value"), ""));
+    } else {
+      throw ConfigException("Tag "+CX::NStr(node->getNodeName())+ " must be an attribute tag!");
     }
   }
 
@@ -518,11 +493,9 @@ namespace SystemC_VPC { namespace Detail {
     for(CX::XN::DOMNode *child = parent->getFirstChild();
         child != nullptr;
         child = child->getNextSibling()) {
-      if (!CX::XN::XMLString::compareString(child->getNodeName(), XMLCH("attribute"))) {
-        retval.insert(retval.begin(), Attribute(
-            CX::getAttrValueAs<std::string>(child, XMLCH("type"))
-          , CX::getAttrValueAs<std::string>(child, XMLCH("value"), "")));
-      } else {
+      try {
+        retval.push_back(parseAttribute(child));
+      } catch (ConfigException const &) {
         throw ConfigException("Tag "+CX::NStr(parent->getNodeName())+ " must only contain attribute tags!");
       }
     }

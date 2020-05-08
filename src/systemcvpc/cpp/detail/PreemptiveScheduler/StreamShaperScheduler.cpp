@@ -88,10 +88,9 @@ namespace SystemC_VPC { namespace Detail {
     //nothing to do yet
   }
 
-  void StreamShaperScheduler::setAttribute(Attribute::Ptr attributePtr){
-    std::string value = attributePtr->getType();
-    if(value=="shapePeriod"){
-        shapeCycle = createSC_Time(attributePtr->getValue().c_str());
+  void StreamShaperScheduler::setAttribute(Attribute const &attribute){
+    if(attribute.getType() == "shapePeriod"){
+        shapeCycle = createSC_Time(attribute.getValue().c_str());
     }
   }
 

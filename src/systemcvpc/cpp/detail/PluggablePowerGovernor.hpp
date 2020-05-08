@@ -111,14 +111,13 @@ namespace SystemC_VPC { namespace Detail {
       //std::cout << "PlugInFactory Destroy" << std::endl;
     }
 
-    virtual void processAttributes(Attribute::Ptr attPtr) = 0;
+    virtual void processAttributes(Attribute const &attr) = 0;
 
     virtual PlugIn * createPlugIn() = 0;
   };
 
   /**
    * factory for plug-in creation
-   */
   template<class ConcretePlugIn, class PlugIn>
   class ConcretePlugInFactory : public PlugInFactory<PlugIn> {
   public:
@@ -133,10 +132,11 @@ namespace SystemC_VPC { namespace Detail {
     virtual PlugIn * createPlugIn(){
       return new ConcretePlugIn();
     }
-    virtual void processAttributes(Attribute att){
+    virtual void processAttributes(Attribute const &attr){
       //std::cerr << "Concrete__PlugInFactory::processAttributes" << std::endl;
     }
   };
+   */
 
 } } // namespace SystemC_VPC::Detail
 

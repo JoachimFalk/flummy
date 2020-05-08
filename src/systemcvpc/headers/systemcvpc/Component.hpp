@@ -146,7 +146,7 @@ public:
   /**
    * \brief Set parameter for Component and Scheduler.
    */
-  virtual void addAttribute(Attribute::Ptr attribute);
+  virtual void addAttribute(Attribute const &attribute);
 
   ComponentId getComponentId() const;
 
