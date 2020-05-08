@@ -40,6 +40,7 @@
 #include <systemcvpc/PowerMode.hpp>
 
 #include "PluggablePowerGovernor.hpp"
+#include "common.hpp"
 
 #include <CoSupport/SystemC/systemc_time.hpp>
 
@@ -98,7 +99,7 @@ namespace SystemC_VPC { namespace Detail {
       if(powerAtt->isType("governor")){
         if(powerAtt->hasAttribute("sliding_window")){
           std::string v = powerAtt->getAttribute("sliding_window")->getValue();
-          windowTime = CoSupport::SystemC::createSCTime(v.c_str());
+          windowTime = createSC_Time(v.c_str());
         }
         if(powerAtt->hasAttribute("upper_threshold")){
           std::string v = powerAtt->getAttribute("upper_threshold")->getValue();
