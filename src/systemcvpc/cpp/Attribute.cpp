@@ -80,8 +80,4 @@ namespace SystemC_VPC {
     return false;
   }
 
-  size_t Attribute::getAttributeSize(){
-    return attributes.size();
-  }
-
 } // namespace SystemC_VPC::Detail

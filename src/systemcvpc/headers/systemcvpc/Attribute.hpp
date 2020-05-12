@@ -130,8 +130,6 @@ namespace SystemC_VPC {
      */
     bool hasAttribute(std::string const &type) const;
 
-    size_t getAttributeSize();
-
     std::string const &getValue() const noexcept
       { return value; }
     std::string const &getType() const noexcept
