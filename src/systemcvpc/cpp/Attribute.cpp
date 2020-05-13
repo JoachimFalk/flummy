@@ -48,6 +48,33 @@ namespace SystemC_VPC {
     return retval;
   }
 
+  /**
+   * Returns an iterator to an attribute with the given type.
+   * If no such attribute is present, returns end(). If multiple
+   * such attributes are present, returns an iterator to one of
+   * them. Incrementing the returned iterator will, in general,
+   * NOT point to the next attribute with the given type if multiple
+   * of them are present!
+   */
+  Attributes::iterator Attributes::find(std::string const &type) {
+    AM::iterator iter = attributeMap.find(type);
+    return iter !=  attributeMap.end()
+        ? iter->second
+        : attributeList.end();
+  }
+
+  /**
+   * Returns attribute with given type. If no such attribute
+   * is present, throws InvalidArgumentException. If multiple
+   * such attributes are present, returns one of them.
+   */
+  Attributes::reference Attributes::operator[](std::string const &type) {
+    AM::iterator iter = attributeMap.find(type);
+    if (iter != attributeMap.end())
+      return *iter->second;
+    throw InvalidArgumentException("Unknown Attribute: " + type);
+  }
+
   Attribute::Attribute(
       std::string const &type
     , std::string const &value)
@@ -61,23 +88,5 @@ namespace SystemC_VPC {
     , std::string const &value
     , Attributes const &attrs)
     : type(type), value(value), attributes(attrs) {}
-
-  //
-  Attribute const &Attribute::getAttribute(std::string const &type) const {
-    for (Attribute const &attr : attributes) {
-      if (attr.getType() == type)
-        return attr;
-    }
-    throw InvalidArgumentException("getAttribute> Unknown Attribute: " + type);
-  }
-
-  //
-  bool Attribute::hasAttribute(std::string const &type) const {
-    for (Attribute const &attr : attributes) {
-      if (attr.getType() == type)
-        return true;
-    }
-    return false;
-  }
 
 } // namespace SystemC_VPC::Detail

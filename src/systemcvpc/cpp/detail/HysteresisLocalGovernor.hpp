@@ -97,17 +97,16 @@ namespace SystemC_VPC { namespace Detail {
     virtual void processAttributes(Attribute const &powerAtt){
       //std::cerr << "InternalLoadHysteresisGovernorFactory::processAttributes" << std::endl;
       if(powerAtt.isType("governor")){
-        if(powerAtt.hasAttribute("sliding_window")){
-          std::string v = powerAtt.getAttribute("sliding_window").getValue();
-          windowTime = createSC_Time(v.c_str());
+        Attributes const           &attrs = powerAtt.getAttributes();
+        Attributes::const_iterator  iter;
+        if ((iter = attrs.find("sliding_window")) != attrs.end()) {
+          windowTime = createSC_Time(iter->getValue().c_str());
         }
-        if(powerAtt.hasAttribute("upper_threshold")){
-          std::string v = powerAtt.getAttribute("upper_threshold").getValue();
-          fastTime = windowTime * atof(v.c_str());
+        if ((iter = attrs.find("upper_threshold")) != attrs.end()) {
+          fastTime = windowTime * atof(iter->getValue().c_str());
         }
-        if(powerAtt.hasAttribute("lower_threshold")){
-          std::string v = powerAtt.getAttribute("lower_threshold").getValue();
-          slowTime = windowTime * atof(v.c_str());
+        if ((iter = attrs.find("lower_threshold")) != attrs.end()) {
+          slowTime = windowTime * atof(iter->getValue().c_str());
         }
       }
     }
