@@ -182,10 +182,12 @@ void Component::addAttribute(Attribute const &attribute) {
     sc_core::sc_time transferDelay = Detail::createSC_Time(attribute.getValue().c_str());
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
   } else if (attribute.isType("transaction")) {
+    Attributes const           &attrs = attribute.getAttributes();
+    Attributes::const_iterator  iter;
 //  unsigned int transactionSize = 1;
     sc_core::sc_time transferDelay = sc_core::SC_ZERO_TIME;
-    if (attribute.hasAttribute("delay")) {
-      transferDelay = Detail::createSC_Time(attribute.getAttribute("delay").getValue().c_str());
+    if ((iter = attrs.find("delay")) != attrs.end()) {
+      transferDelay = Detail::createSC_Time(iter->getValue().c_str());
     }
 
 //  if (attribute->hasParameter("size")) {

@@ -51,6 +51,7 @@ namespace SystemC_VPC {
 
   class Attributes {
   private:
+    typedef Attributes this_type;
     typedef std::list<Attribute> AL;
   public:
     typedef Attribute           value_type;
@@ -97,9 +98,43 @@ namespace SystemC_VPC {
 
     iterator insert(const_iterator iter, const_reference val);
 
-
     void     push_back(const_reference val)
       { insert(end(), val); }
+
+    /**
+     * Returns an iterator to an attribute with the given type.
+     * If no such attribute is present, returns end(). If multiple
+     * such attributes are present, returns an iterator to one of
+     * them. Incrementing the returned iterator will, in general,
+     * NOT point to the next attribute with the given type if multiple
+     * of them are present!
+     */
+    iterator       find(std::string const &type);
+    /**
+     * Returns an iterator to an attribute with the given type.
+     * If no such attribute is present, returns end(). If multiple
+     * such attributes are present, returns an iterator to one of
+     * them. Incrementing the returned iterator will, in general,
+     * NOT point to the next attribute with the given type if multiple
+     * of them are present!
+     */
+    const_iterator find(std::string const &type) const
+      { return const_cast<this_type *>(this)->find(type); }
+
+    /**
+     * Returns attribute with given type. If no such attribute
+     * is present, throws InvalidArgumentException. If multiple
+     * such attributes are present, returns one of them.
+     */
+    reference       operator[](std::string const &type);
+    /**
+     * Returns attribute with given type. If no such attribute
+     * is present, throws InvalidArgumentException. If multiple
+     * such attributes are present, returns one of them.
+     */
+    const_reference operator[](std::string const &type) const
+      { return (*const_cast<this_type *>(this))[type]; }
+
   private:
     typedef std::map<std::string, iterator> AM;
 
@@ -119,16 +154,6 @@ namespace SystemC_VPC {
 
     Attributes const &getAttributes() const
       { return attributes; }
-
-    /**
-     *
-     */
-    Attribute const &getAttribute(std::string const &type) const;
-
-    /**
-     *
-     */
-    bool hasAttribute(std::string const &type) const;
 
     std::string const &getValue() const noexcept
       { return value; }
