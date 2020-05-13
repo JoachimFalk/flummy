@@ -1,0 +1,35 @@
+// vim: set syntax=groovy sts=4 ts=8 et:
+
+plugins {
+//  id 'de.jfalk.gradle.utilities'
+    id 'java-library'
+}
+
+// Here, ``this'' is the current org.gradle.api.Project
+//this.buildDir = 'obj-gradle'
+
+if (javaBuild) {
+
+compileJava {
+    options.debug = true
+}
+
+dependencies {
+//  analysis "dependencies", it
+    implementation project(':opendse')
+    implementation project(':LibSGX:opendse-sgxio')
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.3.1'
+}
+
+sourceSets {
+    main {
+//      analysis("main", it)
+        java {
+//          analysis("main.java", it)
+            srcDir "src/main/java"
+            srcDir "${buildDir}/src/main/java"
+        }
+    }
+}
+
+}
