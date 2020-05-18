@@ -43,7 +43,6 @@
 #include "HysteresisLocalGovernor.hpp"
 
 #include "PluggablePowerGovernor.hpp"
-#include "PowerSumming.hpp"
 #include "TaskImpl.hpp"
 #include "SelectFastestPowerModeGlobalGovernor.hpp"
 #include "TaskInstanceImpl.hpp"
@@ -73,10 +72,6 @@ namespace SystemC_VPC { namespace Detail {
     : checkVpcConfig(true)
     , topPowerGov(new InternalSelectFastestPowerModeGovernor)
     , topPowerGovFactory(NULL)
-#ifndef NO_POWER_SUM
-    , powerConsStream("powerconsumption.dat")
-    , powerSumming(NULL)
-#endif // NO_POWER_SUM
   {
     sc_core::sc_report_handler::set_actions(
         sc_core::SC_ID_MORE_THAN_ONE_SIGNAL_DRIVER_,
@@ -114,13 +109,6 @@ namespace SystemC_VPC { namespace Detail {
     }else{
       std::cerr << "[VPC] overall simulated time: " << end - start << std::endl;
     }
-
-#ifndef NO_POWER_SUM
-    for (SystemC_VPC::Components::value_type const &v : getComponents()) {
-      v.second->removeObserver(powerSumming);
-    }
-    delete powerSumming;
-#endif // NO_POWER_SUM
   }
 
   static
@@ -164,15 +152,6 @@ namespace SystemC_VPC { namespace Detail {
 
   void Director::beforeVpcFinalize()
   {
-#ifndef NO_POWER_SUM
-    powerSumming = new PowerSumming(powerConsStream);
-#endif // NO_POWER_SUM
-    for (Components::value_type const &v : Configuration::getInstance().getComponents()) {
-#ifndef NO_POWER_SUM
-      v.second->addObserver(powerSumming);
-#endif // NO_POWER_SUM
-//    v.second->initialize(this);
-    }
   }
   /// end section: VpcApi.hpp related stuff
 

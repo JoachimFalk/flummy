@@ -124,6 +124,8 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/Routing/IgnoreImpl.cpp \
 	src/systemcvpc/cpp/detail/Routing/StaticImpl.cpp \
 	\
+	src/systemcvpc/cpp/detail/observers/PowerSumming.cpp \
+	\
 	src/systemcvpc/cpp/detail/tracers/ComponentDBTracer.cpp \
 	src/systemcvpc/cpp/detail/tracers/ComponentPajeTracer.cpp \
 	src/systemcvpc/cpp/detail/tracers/ComponentVCDTracer.cpp \
@@ -140,7 +142,6 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/LegacyComponentObserver.cpp \
 	src/systemcvpc/cpp/detail/ObservableComponent.cpp \
 	src/systemcvpc/cpp/detail/PluggablePowerGovernor.cpp \
-	src/systemcvpc/cpp/detail/PowerSumming.cpp \
 	src/systemcvpc/cpp/detail/SelectFastestPowerModeGlobalGovernor.cpp \
 	src/systemcvpc/cpp/detail/SystemCVPCSimulator.cpp \
 	src/systemcvpc/cpp/detail/TaskImpl.cpp \

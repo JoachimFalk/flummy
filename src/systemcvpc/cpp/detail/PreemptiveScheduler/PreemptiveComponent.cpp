@@ -65,15 +65,6 @@ namespace SystemC_VPC { namespace Detail {
     sensitive << ttReleaseQueuePSMEvent;
 
     SC_THREAD(scheduleThread);
-
-#ifndef NO_POWER_SUM
-    std::string powerSumFileName(this->getName());
-    powerSumFileName += ".dat";
-
-    powerSumStream = new std::ofstream(powerSumFileName.c_str());
-    powerSumming   = new PowerSumming(*powerSumStream);
-    this->addObserver(powerSumming);
-#endif // NO_POWER_SUM
   }
 
   void PreemptiveComponent::notifyActivation(
@@ -591,11 +582,6 @@ namespace SystemC_VPC { namespace Detail {
 
   PreemptiveComponent::~PreemptiveComponent(){
     delete scheduler;
-#ifndef NO_POWER_SUM
-    this->removeObserver(powerSumming);
-    delete powerSumming;
-    delete powerSumStream;
-#endif // NO_POWER_SUM
   }
 
 } } // namespace SystemC_VPC::Detail
