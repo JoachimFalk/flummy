@@ -26,12 +26,53 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
+#include "../Director.hpp"
+#include "../LegacyComponentObserver.hpp"
+
+#include <systemc>
+
+#include <ostream>
+#include <map>
 #include <cassert>
 
-#include "PowerSumming.hpp"
-#include "Director.hpp"
+namespace SystemC_VPC { namespace Detail { namespace Observers {
 
-namespace SystemC_VPC { namespace Detail {
+class PowerSumming : public LegacyComponentObserver
+{
+public:
+  PowerSumming(std::ostream &os);
+  ~PowerSumming();
+
+  void notify(Component *ci);
+
+private:
+  std::ostream    &m_output;
+  sc_core::sc_time m_changedTime;
+  sc_core::sc_time m_lastVirtualTime;
+  double           m_powerSum;
+  double           m_previousPowerSum;
+  std::map<const Component *, double> m_powerConsumption;
+  std::map<const Component *, double> m_lastChangedPowerConsumption;
+  std::map<const Component *, PowerMode> m_powerMode;
+  std::map<const Component *, PowerMode> m_lastChangedPowerMode;
+
+  //sc_core::sc_time m_lastChangedTime;
+  double           m_previousEnergySum;
+  double           m_energySum;
+
+  Component       *m_lastCi;
+
+  /*
+   * Flag to print the inital power change at 0s
+   */
+  bool init_print;
+
+
+  sc_core::sc_time notifyTimeStamp;
+
+  void printPowerChange(std::string mode);
+  void calculateNewEnergySum();
+};
 
 PowerSumming::PowerSumming(std::ostream &os) :
   m_output(os),
@@ -158,4 +199,4 @@ void PowerSumming::printPowerChange(std::string mode)
   m_output << timeStamp << '\t' << m_previousPowerSum << '\t' << m_previousEnergySum << '\t'<< mode << std::endl;
 }
 
-} } // namespace SystemC_VPC::Detail
+} } } // namespace SystemC_VPC::Detail::Observers

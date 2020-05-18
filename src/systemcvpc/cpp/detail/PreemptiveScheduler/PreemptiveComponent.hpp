@@ -40,7 +40,6 @@
 
 #include "Scheduler.hpp"
 #include "../AbstractComponent.hpp"
-#include "../PowerSumming.hpp"
 #include "../timetriggered/tt_support.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
@@ -149,12 +148,6 @@ namespace SystemC_VPC { namespace Detail {
 
     TaskMap readyTasks;
     TaskMap runningTasks;
-
-#ifndef NO_POWER_SUM
-    std::ofstream *powerSumStream;
-    PowerSumming  *powerSumming;
-#endif // NO_POWER_SUM
-
   };
 
 } } // namespace SystemC_VPC::Detail

@@ -44,7 +44,6 @@
 
 #include "TaskImpl.hpp"
 #include "TaskInstanceImpl.hpp"
-#include "PowerSumming.hpp"
 #include "PluggablePowerGovernor.hpp"
 #include "SequentiallyIdedObject.hpp"
 #include "AbstractExecModel.hpp"

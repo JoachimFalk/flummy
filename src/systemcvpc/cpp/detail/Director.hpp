@@ -52,7 +52,6 @@ namespace SystemC_VPC { namespace Detail {
 
   typedef std::vector<std::string> FunctionNames;
 
-  class PowerSumming;
   class PluggableGlobalPowerGovernor;
 
   template <class T> class PlugInFactory;
@@ -132,12 +131,6 @@ namespace SystemC_VPC { namespace Detail {
 
     // output file to write result to
     std::string vpc_result_file;
-    
-
-#ifndef NO_POWER_SUM
-    std::ofstream  powerConsStream;
-    PowerSumming  *powerSumming;
-#endif // NO_POWER_SUM
   };
 
 } } // namespace SystemC_VPC::Detail

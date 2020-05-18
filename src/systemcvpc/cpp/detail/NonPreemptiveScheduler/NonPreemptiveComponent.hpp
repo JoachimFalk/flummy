@@ -41,7 +41,6 @@
 
 #include "../AbstractComponent.hpp"
 #include "../HysteresisLocalGovernor.hpp"
-#include "../PowerSumming.hpp"
 #include "../TaskInstanceImpl.hpp"
 #include "../Director.hpp"
 #include "../timetriggered/tt_support.hpp"
@@ -127,10 +126,6 @@ namespace SystemC_VPC { namespace Detail {
     typedef CoSupport::SystemC::Event Event;
 
     Event blockCompute;
-#ifndef NO_POWER_SUM
-    std::ofstream *powerSumStream;
-    PowerSumming  *powerSumming;
-#endif // NO_POWER_SUM
 
     InternalLoadHysteresisGovernor *midPowerGov;
 

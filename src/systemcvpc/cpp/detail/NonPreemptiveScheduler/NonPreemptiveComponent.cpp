@@ -46,14 +46,6 @@ namespace SystemC_VPC { namespace Detail {
     this->midPowerGov = new InternalLoadHysteresisGovernor(sc_core::sc_time(12.5, sc_core::SC_MS),
         sc_core::sc_time(12.1, sc_core::SC_MS), sc_core::sc_time(4.0, sc_core::SC_MS));
     this->midPowerGov->setGlobalGovernor(Director::getInstance().topPowerGov);
-#ifndef NO_POWER_SUM
-    std::string powerSumFileName(this->getName());
-    powerSumFileName += ".dat";
-
-    powerSumStream = new std::ofstream(powerSumFileName.c_str());
-    powerSumming = new PowerSumming(*powerSumStream);
-    this->addObserver(powerSumming);
-#endif // NO_POWER_SUM
   }
 
   void NonPreemptiveComponent::notifyActivation(
@@ -220,11 +212,6 @@ void NonPreemptiveComponent::abortBlockingCompute(
 NonPreemptiveComponent::~NonPreemptiveComponent() {
   //this->setPowerConsumption(0.0);
   //this->fireNotification(this);
-#ifndef NO_POWER_SUM
-  this->removeObserver(powerSumming);
-  delete powerSumming;
-  delete powerSumStream;
-#endif // NO_POWER_SUM
 }
 
 } } // namespace SystemC_VPC::Detail
