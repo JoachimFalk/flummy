@@ -37,7 +37,7 @@ namespace SystemC_VPC {
 
 } // namespace SystemC_VPC
 
-namespace SystemC_VPC { namespace Detail { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
   class ComponentDBTracer
     : public Extending::ComponentTracerIf
@@ -297,4 +297,4 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
         dbTaskInstance.instanceId);
   }
 
-} } } // namespace SystemC_VPC::Detail::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracers

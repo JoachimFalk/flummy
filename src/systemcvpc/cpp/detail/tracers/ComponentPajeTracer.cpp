@@ -48,7 +48,7 @@ namespace SystemC_VPC {
 
 } // namespace SystemC_VPC
 
-namespace SystemC_VPC { namespace Detail { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
   class ComponentPajeTracer
     : public Extending::ComponentTracerIf
@@ -307,4 +307,4 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     throw ConfigException("The PAJE tracer does not support attributes!");
   }
 
-} } } // namespace SystemC_VPC::Detail::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracers
