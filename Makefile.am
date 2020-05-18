@@ -124,9 +124,9 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/Routing/IgnoreImpl.cpp \
 	src/systemcvpc/cpp/detail/Routing/StaticImpl.cpp \
 	\
-	src/systemcvpc/cpp/detail/tracing/ComponentDBTracer.cpp \
-	src/systemcvpc/cpp/detail/tracing/ComponentPajeTracer.cpp \
-	src/systemcvpc/cpp/detail/tracing/ComponentVCDTracer.cpp \
+	src/systemcvpc/cpp/detail/tracers/ComponentDBTracer.cpp \
+	src/systemcvpc/cpp/detail/tracers/ComponentPajeTracer.cpp \
+	src/systemcvpc/cpp/detail/tracers/ComponentVCDTracer.cpp \
 	\
 	src/systemcvpc/cpp/detail/AbstractComponent.cpp \
 	src/systemcvpc/cpp/detail/AbstractExecModel.cpp \

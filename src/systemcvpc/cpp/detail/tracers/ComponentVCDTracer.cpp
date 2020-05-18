@@ -40,7 +40,7 @@ namespace SystemC_VPC {
 
 } // namespace SystemC_VPC
 
-namespace SystemC_VPC { namespace Detail { namespace Tracing {
+namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
   class ComponentVCDTracer
     : public Extending::ComponentTracerIf
@@ -364,4 +364,4 @@ namespace SystemC_VPC { namespace Detail { namespace Tracing {
     throw ConfigException("The VCD tracer does not support attributes!");
   }
 
-} } } // namespace SystemC_VPC::Detail::Tracing
+} } } // namespace SystemC_VPC::Detail::Tracers
