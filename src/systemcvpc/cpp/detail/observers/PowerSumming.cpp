@@ -26,177 +26,189 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-#include "../Director.hpp"
-#include "../LegacyComponentObserver.hpp"
+#include <systemcvpc/ConfigException.hpp>
+#include <systemcvpc/ComponentObserver.hpp>
+#include <systemcvpc/Extending/ComponentObserverIf.hpp>
 
 #include <systemc>
 
-#include <ostream>
+#include <fstream>
 #include <map>
 #include <cassert>
+#include <memory> // for std::unique_ptr
 
 namespace SystemC_VPC { namespace Detail { namespace Observers {
 
-class PowerSumming : public LegacyComponentObserver
-{
-public:
-  PowerSumming(std::ostream &os);
-  ~PowerSumming();
-
-  void notify(Component *ci);
-
-private:
-  std::ostream    &m_output;
-  sc_core::sc_time m_changedTime;
-  sc_core::sc_time m_lastVirtualTime;
-  double           m_powerSum;
-  double           m_previousPowerSum;
-  std::map<const Component *, double> m_powerConsumption;
-  std::map<const Component *, double> m_lastChangedPowerConsumption;
-  std::map<const Component *, PowerMode> m_powerMode;
-  std::map<const Component *, PowerMode> m_lastChangedPowerMode;
-
-  //sc_core::sc_time m_lastChangedTime;
-  double           m_previousEnergySum;
-  double           m_energySum;
-
-  Component       *m_lastCi;
-
-  /*
-   * Flag to print the inital power change at 0s
-   */
-  bool init_print;
-
-
-  sc_core::sc_time notifyTimeStamp;
-
-  void printPowerChange(std::string mode);
-  void calculateNewEnergySum();
-};
-
-PowerSumming::PowerSumming(std::ostream &os) :
-  m_output(os),
-  m_changedTime(sc_core::SC_ZERO_TIME),
-  m_lastVirtualTime(sc_core::SC_ZERO_TIME),
-  m_powerSum(0.0),
-  m_previousPowerSum(0.0),
-  m_energySum(0.0)
-{
-  assert(m_output.good());
-}
-
-PowerSumming::~PowerSumming()
-{
-  /* calculateNewEnergySum() and printPowerChange is required to be performed twice
-   * to get correct last PowerSumming - entries
-   */
-  std::map<const Component *, PowerMode>::iterator iter =
-      m_powerMode.find(m_lastCi);
-
-  if (iter != m_powerMode.end()) {
-    calculateNewEnergySum();
-    printPowerChange(iter->second);
-
-    m_changedTime = m_lastVirtualTime;
-    m_lastVirtualTime=Director::getEnd();
-
-    //Print last change
-    calculateNewEnergySum();
-    printPowerChange(iter->second);
-  }
-}
-
-
-/*
- * This method process events to calculate the power consumption.
- *
- * It determines if there has been a time period since the last notification, in order to print only one message per timestamp
- * It also determines if there has been a change on the power consumption as several calls during a single simulation delta should be ignored
- * The power change is refreshed in all cases, and only during a valid condition the power info will be printed. This is done at the next time stamp
- *
- */
-void PowerSumming::notify(Component *ci)
-{
-  notifyTimeStamp = sc_core::sc_time_stamp();
-
-  double oldCi_powerConsumption = m_powerConsumption[ci];
-  double currentCi_powerConsumption = ci->getPowerConsumption().value();
-  m_powerConsumption[ci] = currentCi_powerConsumption;
-
-  const PowerMode currentCi_powerMode = ci->getPowerMode();
-  std::pair<std::map<const Component *, PowerMode>::iterator, bool> status =
-      m_powerMode.insert(std::make_pair(ci, currentCi_powerMode));
-  const PowerMode oldCi_powerMode = status.second
-      ? PowerMode("?")        // Insertion success, no old value
-      : status.first->second; // Insertion fail, get old value
-  if (!status.second)
-    // Insertion fail, overwrite old value
-    status.first->second = currentCi_powerMode;
-
-  //special case for previousPowerSum
-  // idea is to set it equal to the power sum for t=0
-  if(!init_print)//speed up
+  class PowerSumming
+    : public Extending::ComponentObserverIf
+    , public ComponentObserver
   {
-    if(notifyTimeStamp != sc_core::SC_ZERO_TIME)
-    {
-      m_previousPowerSum=m_powerSum;
-      init_print=true;
+  public:
+    PowerSumming(Attributes const &attrs);
+
+    ~PowerSumming();
+
+    bool addAttribute(Attribute const &attr);
+
+    void componentOperation(ComponentOperation co
+      , Component const &c
+      , OComponent      &oc);
+
+    void taskOperation(TaskOperation to
+      , Component const &c
+      , OComponent      &oc
+      , Task      const &t
+      , OTask           &ot);
+
+    void taskInstanceOperation(TaskInstanceOperation tio
+      , Component    const &c
+      , OComponent         &oc
+      , OTask              &ot
+      , TaskInstance const &ti
+      , OTaskInstance      &oti);
+
+  private:
+    class PSComponent;
+    class RegisterMe;
+
+    static RegisterMe registerMe;
+
+    double energySum;
+
+    std::unique_ptr<std::ostream> resultFile;
+
+    void calculateNewEnergySum(
+        Component const &component
+      , PSComponent     &psComponent);
+  };
+
+  class PowerSumming::PSComponent: public OComponent {
+  public:
+    PSComponent()
+      : powerValue(0.0), powerValueOld(-1) {}
+
+    sc_core::sc_time powerTime;
+    double           powerValue;
+    double           powerValueOld;
+
+  };
+
+  class PowerSumming::RegisterMe {
+  public:
+    RegisterMe() {
+      PowerSumming::registerObserver("PowerSumming",
+        [](Attributes const &attrs) { return new PowerSumming(attrs); });
     }
+  } PowerSumming::registerMe;
+
+  PowerSumming::PowerSumming(Attributes const &attrs)
+    : Extending::ComponentObserverIf(
+          reinterpret_cast<char *>(static_cast<ComponentObserver              *>(this)) -
+          reinterpret_cast<char *>(static_cast<Extending::ComponentObserverIf *>(this))
+        , sizeof(PSComponent), 0, 0)
+    , ComponentObserver(
+          reinterpret_cast<char *>(static_cast<Extending::ComponentObserverIf *>(this)) -
+          reinterpret_cast<char *>(static_cast<ComponentObserver              *>(this))
+        , "DB")
+    , energySum(0)
+  {
+    for (Attribute const &attr : attrs) {
+      if (attr.getType() == "resultFileName") {
+        if (resultFile) {
+          throw ConfigException(
+              "Duplicate attribute resultFileName in PowerSumming component observer!");
+        }
+        std::string const &resultFileName = attr.getValue();
+        resultFile.reset(new std::ofstream(resultFileName));
+        if (!resultFile->good()) {
+          std::stringstream msg;
+
+          msg << "PowerSumming component observer failed to open " << resultFileName << " for output: " << strerror(errno);
+          throw ConfigException(msg.str());
+        }
+      } else {
+        std::stringstream msg;
+
+        msg << "PowerSumming component observers do not support the "+attr.getType()+" attribute! ";
+        msg << "Only the resultFileName attribute is supported.";
+        throw ConfigException(msg.str());
+      }
+    }
+    if (!resultFile) {
+      throw ConfigException(
+          "PowerSumming component observer is missing required resultFileName attribute!");
+    }
+  }
+
+  PowerSumming::~PowerSumming()
+  {
+    *resultFile << "Sum: " << energySum << std::endl;
   }
   
-  //if current time is different than last time the power consumption changed
-  // and power consumption actually changed (fake exec. state transtitions should be ignored)
-  if(m_lastVirtualTime != notifyTimeStamp) {
-    std::pair<std::map<const Component *, PowerMode>::iterator, bool> status =
-        m_lastChangedPowerMode.insert(std::make_pair(ci, oldCi_powerMode));
-    PowerMode const powerMode = status.second
-        ? PowerMode("-")        // Insertion success, no old value
-        : status.first->second; // Insertion fail, get old value
-    if (!status.second)
-      // Insertion fail, overwrite old value
-      status.first->second = oldCi_powerMode;
-    if (m_previousPowerSum != m_powerSum || oldCi_powerMode != powerMode) {
-      calculateNewEnergySum();
+  bool PowerSumming::addAttribute(Attribute const &attr) {
+    throw ConfigException("The PowerSumming observer does not support attributes!");
+  }
 
-      printPowerChange( powerMode);
+  void PowerSumming::componentOperation(ComponentOperation co
+    , Component const &c
+    , OComponent      &oc)
+  {
+    PSComponent &psComponent = static_cast<PSComponent &>(oc);
 
-      m_changedTime = m_lastVirtualTime;
-
-      //Only replace power consumption of component on the total components aggregate
-      //printing will take place at next power change instant
-      m_lastChangedPowerConsumption[ci] = currentCi_powerConsumption;
-      m_lastCi = ci;
-      m_previousPowerSum = m_powerSum;
+    if (ComponentOperation((int) co & (int) ComponentOperation::MEMOP_MASK) ==
+        ComponentOperation::ALLOCATE) {
+      new (&psComponent) PSComponent();
+    }
+    switch (ComponentOperation((int) co & ~ (int) ComponentOperation::MEMOP_MASK)) {
+      case ComponentOperation::PWRCHANGE:
+        calculateNewEnergySum(c, psComponent);
+        break;
+      default:
+        break;
+    }
+    if (ComponentOperation((int) co & (int) ComponentOperation::MEMOP_MASK) ==
+        ComponentOperation::DEALLOCATE) {
+      psComponent.~PSComponent();
     }
   }
 
-  m_lastVirtualTime = notifyTimeStamp;
-  m_powerSum -= oldCi_powerConsumption;
-  m_powerSum += currentCi_powerConsumption;
-}
+  void PowerSumming::taskOperation(TaskOperation to
+    , Component const &c
+    , OComponent      &oc
+    , Task      const &t
+    , OTask           &ot)
+  {}
 
+  void PowerSumming::taskInstanceOperation(TaskInstanceOperation tio
+    , Component    const &c
+    , OComponent         &oc
+    , OTask              &ot
+    , TaskInstance const &ti
+    , OTaskInstance      &oti)
+  {
+    PSComponent &psComponent = static_cast<PSComponent &>(oc);
+    calculateNewEnergySum(c, psComponent);
+  }
 
-/*
- * This method calculates the energy by integrating the power throughout the time period between the last power mode change and the current timestamp
- * It also stores the current energysum as the previous energy sum, which will be printed along the previous power mode change
- */
-void PowerSumming::calculateNewEnergySum()
-{
-  m_previousEnergySum = m_energySum;
+  /*
+   * This method calculates the energy by integrating the power throughout
+   * the time period between the last power mode change and the current time
+   * stamp and increments the energySum by the calculated value.
+   */
+  void PowerSumming::calculateNewEnergySum(
+      Component const &component
+    , PSComponent     &psComponent)
+  {
+    sc_core::sc_time const &now = sc_core::sc_time_stamp();
 
-  double duration = (m_lastVirtualTime - m_changedTime).to_seconds();
-
-  m_energySum      += m_previousPowerSum * duration;
-
-}
-
-/*
- * This method prints the last power mode change including the energy up to that point
- */
-void PowerSumming::printPowerChange(std::string mode)
-{
-  unsigned long long timeStamp = m_changedTime.to_seconds() * 1000000000.0;
-  m_output << timeStamp << '\t' << m_previousPowerSum << '\t' << m_previousEnergySum << '\t'<< mode << std::endl;
-}
+    if (now > psComponent.powerTime &&
+        psComponent.powerValue != psComponent.powerValueOld) {
+      // Energy calculation
+      energySum += psComponent.powerValue * (now - psComponent.powerTime).to_seconds();
+      psComponent.powerValueOld = psComponent.powerValue;
+    }
+    psComponent.powerTime  = now;
+    psComponent.powerValue = component.getPowerConsumption().value();
+  }
 
 } } } // namespace SystemC_VPC::Detail::Observers
