@@ -2,9 +2,13 @@
 <!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
 <vpcconfiguration>
  <resources>
+  <observer type="PowerSumming" name="powerSummer">
+   <attribute type="resultFileName" value="powerSum.txt"/>
+  </observer>
   <component name="CPU" scheduler="FCFS">
    <attribute type="tracing" value="VCD"/>
    <attribute type="tracing" value="PAJE"/>
+   <attribute type="observer" value="powerSummer"/>
    <attribute type="execModel" value="LookupPowerTimeModel">
     <attribute type="powermode" value="flummy">
      <attribute type="powerIdle"    value="0.25 mW"/>
