@@ -129,7 +129,7 @@ void Component::addObserver(const char *observerTypeOrName, Attributes const &at
   try {
     observer = createComponentObserver(observerTypeOrName, attrs);
   } catch (ObserverTypeUnknown const &) {
-    observer = createComponentObserver(observerTypeOrName);
+    observer = getComponentObserver(observerTypeOrName);
     assert(observer);
     for (Attribute attr : attrs) {
       observer->addAttribute(attr);
@@ -188,8 +188,10 @@ void Component::addAttribute(Attribute const &attribute) {
 
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
     // FIXME: add transactionSize
-  } else if (attribute.isType("tracing")) {
+  } else if (attribute.isType("tracing") || attribute.isType("tracer")) {
     addTracer(attribute.getValue().c_str());
+  } else if (attribute.isType("observer")) {
+    addObserver(attribute.getValue().c_str());
   } else if (attribute.isType("execModel")) {
     ExecModel::Ptr execModel = createExecModel(attribute.getValue().c_str());
     for (Attribute emAttr : attribute.getAttributes()) {
