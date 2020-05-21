@@ -113,7 +113,7 @@ check-logs: $(TEST_LOGS)
 		  echo "FAILURE for $${test} LOG check."; error=1; \
 		  diff -u $${test}.log $(srcdir)/src/$${test}/golden.log; \
 		else \
-		  echo "SUCCESS for $${test} LOG check."; \		
+		  echo "SUCCESS for $${test} LOG check."; \
 		fi; \
 	      else \
 		status=success; \
@@ -129,7 +129,7 @@ check-logs: $(TEST_LOGS)
 		    diff -u $${test}-$${log##*/golden-} $${log}; \
 		  done; \
 		else \
-		  echo "SUCCESS for $${test} LOG check."; \		
+		  echo "SUCCESS for $${test} LOG check."; \
 		fi; \
 	      fi; \
 	      ;; \
@@ -168,7 +168,7 @@ check-vcds: $(TEST_VPC_VCDS)
 		    diff -u $(diff_vcd_ignore) $${test_vcd} $${golden_vcd}; \
 		  done; \
 		else \
-		  echo "SUCCESS for $${test}-$${cmx} VCD check."; \		
+		  echo "SUCCESS for $${test}-$${cmx} VCD check."; \
 		fi; \
 	      done; \
 	      ;; \
