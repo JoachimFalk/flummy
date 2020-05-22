@@ -49,6 +49,8 @@ class Power
 public:
   typedef base_type quantity_type;
 
+  enum unit_type { W, mW, uW, nW, pW };
+
   Power() {}
   Power(this_type const &v)
     : base_type(v) {}
@@ -56,6 +58,7 @@ public:
   Power(boost::units::quantity<U, T> v)
     : base_type(v) {}
 
+  explicit Power(value_type v, unit_type u);
   explicit Power(std::string const &v);
   explicit Power(char const *v);
 };

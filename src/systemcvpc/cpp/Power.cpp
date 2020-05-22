@@ -43,6 +43,18 @@ namespace SystemC_VPC {
 #define UNITCASE4(x1,x2,x3,x4)          (UNITCASE_VALUE(x1)+UNITCASE3(x2,x3,x4)*UNITCASE_BASE)
 #define UNITCASE5(x1,x2,x3,x4,x5)       (UNITCASE_VALUE(x1)+UNITCASE4(x2,x3,x4,x5)*UNITCASE_BASE)
 
+  static Power::quantity_type convert(Power::value_type v, Power::unit_type u) {
+    double scale;
+    switch (u) {
+      case Power::W:  scale = 1e0;   break;
+      case Power::mW: scale = 1e-3;  break;
+      case Power::uW: scale = 1e-6;  break;
+      case Power::nW: scale = 1e-9;  break;
+      case Power::pW: scale = 1e-12; break;
+    }
+    return  Power::quantity_type(scale*v*boost::units::si::watt);
+  }
+
   static Power::quantity_type convert(std::string const &v, bool *error = nullptr) {
     size_t len = v.size();
 
@@ -103,6 +115,8 @@ namespace SystemC_VPC {
     return Power::quantity_type();
   }
 
+  Power::Power(value_type v, unit_type u)
+    : base_type(convert(v, u)) {}
   Power::Power(std::string const &v)
     : base_type(convert(v)) {}
   Power::Power(char const *v)
