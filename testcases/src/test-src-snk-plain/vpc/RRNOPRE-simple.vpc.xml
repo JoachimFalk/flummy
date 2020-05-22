@@ -3,8 +3,8 @@
 <vpcconfiguration>
  <resources>
   <component name="CPU" scheduler="RRNOPRE">
-    <attribute type="tracing" value="VCD"/>
-    <attribute type="tracing" value="PAJE"/>
+    <attribute type="tracer" value="VCD"/>
+    <attribute type="tracer" value="PAJE"/>
     <attribute type="scheduler">
       <attribute type="fireActorInLoop" value="false"/>
     </attribute>

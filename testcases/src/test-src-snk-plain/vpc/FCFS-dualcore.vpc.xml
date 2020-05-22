@@ -6,10 +6,10 @@
    <attribute type="traceFileName" value="test-src-snk-plain-FCFS-dualcore.vcd"/>
   </tracer>
   <component name="CPU1" scheduler="FCFS">
-   <attribute type="tracing" value="mytracer"/>
+   <attribute type="tracer" value="mytracer"/>
   </component>
   <component name="CPU2" scheduler="FCFS">
-   <attribute type="tracing" value="mytracer"/>
+   <attribute type="tracer" value="mytracer"/>
   </component>
  </resources>
 
