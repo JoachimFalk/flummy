@@ -2,29 +2,32 @@
 <!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
 <vpcconfiguration>
  <resources>
+  <tracer type="PAJE" name="pajeTracer">
+    <attribute type="traceFileName" value="test-src-snk-multicast-SPNOPRE-route-pajeTracer.paje"/>
+  </tracer>
   <component name="CPU1" scheduler="SPNOPRE">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="200 us" />
   </component>
   <component name="CPU2" scheduler="SPNOPRE">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="250 us" />
   </component>
   <component name="BUS" scheduler="FCFS">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="300 us" />
   </component>
   <component name="MEM1" scheduler="FCFS">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="400 us" />
   </component>
   <component name="MEM2" scheduler="FCFS">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="450 us" />
   </component>
  </resources>
