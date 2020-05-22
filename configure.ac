@@ -11,6 +11,7 @@
 #   2016 FAU -- Joachim Falk <joachim.falk@fau.de>
 #   2018 FAU -- Joachim Falk <joachim.falk@fau.de>
 #   2019 FAU -- Joachim Falk <joachim.falk@fau.de>
+#   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
 # 
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -111,26 +112,6 @@ ACJF_CHECK_LIB_COSUPPORT_STREAMS
 
 SYSTEMOC_PLUGINPATH="$acjf_abs_top_builddir/.libs"
 AC_SUBST([SYSTEMOC_PLUGINPATH])
-
-### VPC power tracing  ###
-# --enable-power-tracing option
-AC_ARG_ENABLE(
- [power-tracing],
- [[  --enable-power-tracing  enable power tracing for VPC [default=no]]],
- [case "$enableval" in
-    yes)  enable_power_tracing=yes  ;;
-    no)   enable_power_tracing=no   ;;
-    *)    AC_MSG_ERROR(bad value ${enableval} for --enable-power-tracing) ;;
-  esac],
- [enable_power_tracing=no #default]
-)
-
-AM_CONDITIONAL([NO_POWER_SUM], [test x"$enable_power_tracing" = x"no"])
-# This is a define for pkginclude/systemcvpc/vpc_config.h to guarantee
-# consistency for Examples and Testcases
-if test x"$enable_power_tracing" = x"no"; then
-  AC_DEFINE([NO_POWER_SUM], [yes], [Define to suppress power tracing for VPC])
-fi
 
 AC_CONFIG_FILES(
  [Makefile]dnl
