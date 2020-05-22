@@ -85,12 +85,12 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
   class PowerSumming::PSComponent: public OComponent {
   public:
     PSComponent()
-      : powerValue(0.0), powerValueOld(-1) {}
+      : powerValue(0, Power::W)
+      , powerValueOld(-1, Power::W) {}
 
     sc_core::sc_time powerTime;
-    double           powerValue;
-    double           powerValueOld;
-
+    Power            powerValue;
+    Power            powerValueOld;
   };
 
   class PowerSumming::RegisterMe {
@@ -201,14 +201,15 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
   {
     sc_core::sc_time const &now = sc_core::sc_time_stamp();
 
-    if (now > psComponent.powerTime &&
-        psComponent.powerValue != psComponent.powerValueOld) {
+    if (now > psComponent.powerTime) {
+      if (psComponent.powerValue != psComponent.powerValueOld)
+        *resultFile << component.getName() << "@" << psComponent.powerTime << " consumes " << psComponent.powerValue << std::endl;
       // Energy calculation
-      energySum += psComponent.powerValue * (now - psComponent.powerTime).to_seconds();
+      energySum += psComponent.powerValue.value() * (now - psComponent.powerTime).to_seconds();
       psComponent.powerValueOld = psComponent.powerValue;
     }
     psComponent.powerTime  = now;
-    psComponent.powerValue = component.getPowerConsumption().value();
+    psComponent.powerValue = component.getPowerConsumption();
   }
 
 } } } // namespace SystemC_VPC::Detail::Observers
