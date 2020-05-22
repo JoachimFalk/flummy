@@ -2,19 +2,22 @@
 <!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
 <vpcconfiguration>
  <resources>
+  <tracer type="PAJE" name="pajeTracer">
+    <attribute type="traceFileName" value="test-src-snk-plain-FCFS-route-pajeTracer.paje"/>
+  </tracer>
   <component name="CPU" scheduler="FCFS">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="200 us" />
   </component>
   <component name="BUS" scheduler="FCFS">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="300 us" />
   </component>
   <component name="MEM" scheduler="FCFS">
     <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="transaction_delay" value="400 us" />
   </component>
  </resources>

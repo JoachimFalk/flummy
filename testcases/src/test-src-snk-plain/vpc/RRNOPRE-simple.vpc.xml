@@ -2,9 +2,14 @@
 <!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
 <vpcconfiguration>
  <resources>
+  <tracer type="PAJE" name="pajeTracer">
+    <attribute type="traceFileName" value="test-src-snk-plain-RRNOPRE-simple-pajeTracer.paje"/>
+  </tracer>
   <component name="CPU" scheduler="RRNOPRE">
-    <attribute type="tracer" value="VCD"/>
-    <attribute type="tracer" value="PAJE"/>
+    <attribute type="tracer" value="VCD">
+      <attribute type="traceFileName" value="test-src-snk-plain-RRNOPRE-simple-CPU.vcd"/>
+    </attribute>
+    <attribute type="tracer" value="pajeTracer"/>
     <attribute type="scheduler">
       <attribute type="fireActorInLoop" value="false"/>
     </attribute>
