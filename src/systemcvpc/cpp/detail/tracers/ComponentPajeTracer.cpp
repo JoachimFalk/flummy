@@ -34,13 +34,13 @@
 #include <memory>
 #include <boost/algorithm/string.hpp>
 
-using CoSupport::Tracing::PajeTracer;
+//using CoSupport::Tracing::PajeTracer;
 
-namespace {
-
-  std::unique_ptr<PajeTracer> myPajeTracer;
-
-}
+//namespace {
+//
+//  std::unique_ptr<PajeTracer> myPajeTracer;
+//
+//}
 
 namespace SystemC_VPC {
 
@@ -50,9 +50,49 @@ namespace SystemC_VPC {
 
 namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
+  class ComponentPajeTracerBase {
+  protected:
+    ComponentPajeTracerBase(Attributes const &attrs);
+
+    std::string const &getTraceFileName() const
+      { return traceFileName; }
+
+  private:
+    std::string traceFileName;
+  };
+
+  ComponentPajeTracerBase::ComponentPajeTracerBase(Attributes const &attrs)
+  {
+    bool haveTraceFileName = false;
+
+    for (Attribute const &attr : attrs) {
+      if (attr.getType() == "traceFileName") {
+        if (haveTraceFileName) {
+          throw ConfigException(
+              "Duplicate attribute traceFileName in PAJE component tracer!");
+        }
+        traceFileName = attr.getValue();
+        haveTraceFileName = true;
+      } else {
+        std::stringstream msg;
+
+        msg << "Component PAJE tracers do not support the "+attr.getType()+" attribute! ";
+        msg << "Only the traceFileName attribute is supported.";
+        throw ConfigException(msg.str());
+      }
+    }
+    if (!haveTraceFileName) {
+      if (char *traceprefix = getenv("VPCTRACEFILEPREFIX"))
+        traceFileName = traceprefix;
+      traceFileName += "PAJE.paje";
+    }
+  }
+
   class ComponentPajeTracer
     : public Extending::ComponentTracerIf
     , public ComponentTracer
+    , public ComponentPajeTracerBase
+    , public CoSupport::Tracing::PajeTracer
   {
   public:
     ComponentPajeTracer(Attributes const &attrs);
@@ -98,8 +138,8 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
   class ComponentPajeTracer::PajeComponent: public OComponent {
   public:
     PajeComponent(ComponentPajeTracer *parent, Component const &c)
-      : res_(myPajeTracer->getOrCreateContainer(c.getName().c_str(), parent->arch))
-      , power_(myPajeTracer->getOrCreateGauge("power", res_))
+      : res_(parent->getOrCreateContainer(c.getName().c_str(), parent->arch))
+      , power_(parent->getOrCreateGauge("power", res_))
       , powerValue(0), powerValueOld(-1)
       {}
 
@@ -115,19 +155,21 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
   class ComponentPajeTracer::PajeTask: public OTask {
   public:
-    PajeTask(std::string const &name, CoSupport::Tracing::PajeTracer::Container *c)
-      : task(myPajeTracer->getOrCreateActivity(name.c_str(), c, "action"))
-      , guard(myPajeTracer->getOrCreateActivity(name.c_str()
+    PajeTask(ComponentPajeTracer *parent
+      , std::string const &name
+      , CoSupport::Tracing::PajeTracer::Container *c
+    ) : task(parent->getOrCreateActivity(name.c_str(), c, "action"))
+      , guard(parent->getOrCreateActivity(name.c_str()
           , CoSupport::String::Color(
-                myPajeTracer->getColor(task).r() / 2
-              , myPajeTracer->getColor(task).g() / 2
-              , myPajeTracer->getColor(task).b() / 2
+                parent->getColor(task).r() / 2
+              , parent->getColor(task).g() / 2
+              , parent->getColor(task).b() / 2
             )
           , c, "guard"))
-      , releaseEvent(myPajeTracer->getOrCreateEvent(
-          name.c_str(), myPajeTracer->getColor(task), c, "release"))
-      , latencyEvent(myPajeTracer->getOrCreateEvent(
-          name.c_str(), myPajeTracer->getColor(task), c, "latency"))
+      , releaseEvent(parent->getOrCreateEvent(
+          name.c_str(), parent->getColor(task), c, "release"))
+      , latencyEvent(parent->getOrCreateEvent(
+          name.c_str(), parent->getColor(task), c, "latency"))
       {}
 
     CoSupport::Tracing::PajeTracer::Activity *task;
@@ -165,19 +207,10 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
        , "PAJE")
-  {
-    if (!myPajeTracer){
-      std::string traceFilename;
-
-      if (char *traceprefix = getenv("VPCTRACEFILEPREFIX"))
-        traceFilename = traceprefix;
-      traceFilename += "paje.trace";
-      myPajeTracer.reset(new CoSupport::Tracing::PajeTracer(traceFilename));
-    }
-
-    this->arch = myPajeTracer->getOrCreateContainer("Architecture");
-//  myPajeTracer->traceGauge(this->res_, this->power_, sc_core::SC_ZERO_TIME, 0);
-  }
+    , ComponentPajeTracerBase(attrs)
+    , PajeTracer(getTraceFileName())
+    , arch(getOrCreateContainer("Architecture"))
+  {}
 
   void ComponentPajeTracer::componentOperation(ComponentOperation co
     , Component const &c
@@ -195,7 +228,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
         if (now > pajeComponent.powerTime &&
             pajeComponent.powerValue != pajeComponent.powerValueOld) {
-            myPajeTracer->traceGauge(pajeComponent.res_, pajeComponent.power_,
+            traceGauge(pajeComponent.res_, pajeComponent.power_,
                 pajeComponent.powerTime, pajeComponent.powerValue);
             pajeComponent.powerValueOld = pajeComponent.powerValue;
         }
@@ -223,7 +256,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::ALLOCATE) {
-      new (&pajeTask) PajeTask(t.getName(), pajeComponent.res_);
+      new (&pajeTask) PajeTask(this, t.getName(), pajeComponent.res_);
     } else
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::DEALLOCATE) {
@@ -251,7 +284,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
     if (now > pajeComponent.powerTime &&
         pajeComponent.powerValue != pajeComponent.powerValueOld) {
-        myPajeTracer->traceGauge(pajeComponent.res_, pajeComponent.power_,
+        traceGauge(pajeComponent.res_, pajeComponent.power_,
             pajeComponent.powerTime, pajeComponent.powerValue);
         pajeComponent.powerValueOld = pajeComponent.powerValue;
     }
@@ -260,7 +293,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
     switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
       case TaskInstanceOperation::RELEASE:
-        myPajeTracer->traceEvent(pajeComponent.res_,
+        traceEvent(pajeComponent.res_,
             pajeTask.releaseEvent,
             sc_core::sc_time_stamp());
         break;
@@ -268,28 +301,28 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
         pajeComponent.startTime = sc_core::sc_time_stamp();
         break;
       case TaskInstanceOperation::RESIGN:
-        myPajeTracer->traceActivity(pajeComponent.res_
+        traceActivity(pajeComponent.res_
           , ti.getType() == TaskInstance::Type::GUARD
               ? pajeTask.guard
               : pajeTask.task
           , pajeComponent.startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::BLOCK:
-        myPajeTracer->traceActivity(pajeComponent.res_
+        traceActivity(pajeComponent.res_
           , ti.getType() == TaskInstance::Type::GUARD
               ? pajeTask.guard
               : pajeTask.task
           , pajeComponent.startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::FINISHDII:
-        myPajeTracer->traceActivity(pajeComponent.res_
+        traceActivity(pajeComponent.res_
           , ti.getType() == TaskInstance::Type::GUARD
               ? pajeTask.guard
               : pajeTask.task
           , pajeComponent.startTime, sc_core::sc_time_stamp());
         break;
       case TaskInstanceOperation::FINISHLAT:
-        myPajeTracer->traceEvent(pajeComponent.res_,
+        traceEvent(pajeComponent.res_,
             pajeTask.latencyEvent,
             sc_core::sc_time_stamp());
         break;
