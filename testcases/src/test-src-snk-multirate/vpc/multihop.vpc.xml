@@ -3,16 +3,16 @@
 <vpcconfiguration>
  <resources>
   <component name="HW_SRC" type="threaded" scheduler="RoundRobin">
-    <attribute type="tracing" value="PAJE"/>
+    <attribute type="tracer" value="PAJE"/>
   </component>
   <component name="Mem" type="threaded" scheduler="RoundRobin" >
-    <attribute type="tracing" value="PAJE"/>
+    <attribute type="tracer" value="PAJE"/>
   </component> 
   <component name="Bus" type="threaded" scheduler="RoundRobin" >
-    <attribute type="tracing" value="PAJE"/>
+    <attribute type="tracer" value="PAJE"/>
   </component>  
   <component name="HW_SNK" type="threaded" scheduler="RoundRobin">
-    <attribute type="tracing" value="PAJE"/>
+    <attribute type="tracer" value="PAJE"/>
   </component>  
  </resources>
 

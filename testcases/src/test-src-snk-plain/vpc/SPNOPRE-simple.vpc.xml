@@ -3,7 +3,7 @@
 <vpcconfiguration>
  <resources>
   <component name="CPU" scheduler="SPNOPRE">
-   <attribute type="tracing" value="VCD"/>
+   <attribute type="tracer" value="VCD"/>
   </component>
  </resources>
 
