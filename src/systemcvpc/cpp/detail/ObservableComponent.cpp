@@ -95,6 +95,11 @@ namespace SystemC_VPC { namespace Detail {
         , ti, *reinterpret_cast<OTaskInstance *>(
             reinterpret_cast<char *>(&ti) + e.second.taskInstanceOffset));
     }
+    // FIXME: Free storage in case of TaskInstanceOperation::DEALLOCATE; This causes SIGSEGV
+    //if ((int) tio & (int) TaskInstanceOperation::DEALLOCATE) {
+    //  ti.~TaskInstanceImpl();
+    //  free(&ti);
+    //}
   }
 
   void ObservableComponent::finalize() {
@@ -262,7 +267,47 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  ObservableComponent::~ObservableComponent()
-    {}
+  ObservableComponent::~ObservableComponent() {
+    AbstractComponent &c        = *static_cast<AbstractComponent *>(this);
+
+    // FIXME: Free storage remaining task instances!
+
+    for (TaskImpl *taskImpl : tasks) {
+      char *storage = reinterpret_cast<char *>(taskImpl);
+
+      try {
+        for (Observers::reverse_iterator iter = observers.rbegin();
+             iter != observers.rend();
+             ++iter) {
+          Observers::value_type const &e = *iter;
+          e.first->taskOperation(TaskOperation::DEALLOCATE
+            , c, *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset)
+            , *taskImpl
+            , *reinterpret_cast<OTask *>(storage + e.second.taskOffset));
+        }
+      } catch (...) {
+        assert(!"Oops, OTask destruction throws!");
+      }
+
+      taskImpl->~TaskImpl();
+      free(storage);
+    }
+    if (oComponent) {
+    // This really must not throw!
+      try {
+        for (Observers::reverse_iterator iter = observers.rbegin();
+             iter != observers.rend();
+             ++iter) {
+          Observers::value_type const &e = *iter;
+          e.first->componentOperation(ComponentOperation::DEALLOCATE
+            , *static_cast<AbstractComponent *>(this)
+            , *reinterpret_cast<OComponent *>(oComponent + e.second.compOffset));
+        }
+      } catch (...) {
+        assert(!"Oops, OComponent destruction throws!");
+      }
+      free(oComponent);
+    }
+  }
 
 } } // namespace SystemC_VPC::Detail
