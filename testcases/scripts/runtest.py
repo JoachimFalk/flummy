@@ -10,6 +10,7 @@ import os
 from os import path
 import re
 import glob
+from shutil import rmtree
 
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
@@ -80,7 +81,7 @@ In this case, {prog} will also die.'''.format(prog=PROG)
     os.remove(args.log)
     if args.clean:
       for clean in glob.iglob(args.clean):
-        os.remove(clean)
+        rmtree(clean)
     return PUT.returncode
 
 if __name__ == '__main__':
