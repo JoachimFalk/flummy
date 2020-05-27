@@ -104,7 +104,7 @@ $(foreach TEST_LOG,$(TEST_LOGS),\
 # $(1) is test name
 # $(2) is VPC config name
 define TEST_VPC_template =
-$(1)-output/vpc/$(2)/sim.log: $(1) src/$(1)/vpc/$(2).vpc.xml
+$(1)-output/vpc/$(2)/sim.log: $(1) src/$(1)/vpc/$(2).vpc.xml $$(SYSTEMOC_PLUGINVPC)
 	{ set -- $$^; mkdir -p '$$(dir $$@)' && \
 	  VPCTRACEFILEPREFIX='$$(dir $$@)' \
 	  VPCCONFIGURATION="$$$$2" \
