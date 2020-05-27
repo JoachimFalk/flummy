@@ -43,17 +43,6 @@ noinst_PROGRAMS= \
 	test-src-snk-multirate \
 	test-src-snk-plain
 
-%.smx: %
-	./'$<' --systemoc-export-smx='$@' || \
-	  { rm -f "$@"; exit 1; }
-
-%.log: %
-	$(srcdir)/scripts/runtest.py --log '$@' --filter '^((sqrroot|top)\.[^:]*|src|sink|A|B|Src|Snk):' -- ./'$<' 100
-	
-TEST_LOGS	= $(foreach TEST,$(noinst_PROGRAMS),$(patsubst $(srcdir)/src/$(TEST)/golden%.log,$(TEST)%.log,$(wildcard $(srcdir)/src/$(TEST)/golden*.log)))
-TEST_VPC_LOGS	= $(foreach TEST,$(noinst_PROGRAMS),$(patsubst $(srcdir)/src/$(TEST)/vpc/%.vpc.xml,$(TEST)-%.log,$(wildcard $(srcdir)/src/$(TEST)/vpc/*.vpc.xml)))
-TEST_VPC_VCDS	= $(foreach TEST,$(noinst_PROGRAMS),$(patsubst $(srcdir)/src/$(TEST)/vpc/%-golden.vcd,$(TEST)-%.vcd,$(wildcard $(srcdir)/src/$(TEST)/vpc/*-golden.vcd)))
-
 test_sqr_LDADD					= $(SYSTEMOC_LIBS)
 test_sqr_DEPENDENCIES				= $(SYSTEMOC_DEPENDENCIES)
 test_sqr_SOURCES				= \
@@ -91,8 +80,50 @@ test-src-snk-plain-%.log test-src-snk-plain-%.vcd test-src-snk-plain-%-CPU.vcd t
 		--clean 'test-src-snk-plain-$*-*' \
 		-- ./'$<' 100
 
+%.smx: %
+	./'$<' --systemoc-export-smx='$@' || \
+	  { rm -f "$@"; exit 1; }
+
+# $(1) is test name
+define TEST_template =
+$(1)-output/novpc/sim.log: $(1)
+	{ mkdir -p '$$(dir $$@)' && \
+	  OUTPUTPREFIX='$$(dir $$@)' \
+	  $$(srcdir)/scripts/runtest.py \
+	    --log '$$@' \
+	    --clean '$$(dir $$@)' \
+	    --filter '^((sqrroot|top)\.[^:]*|src|sink|A|B|Src|Snk):' \
+	    -- ./'$$<' 100; }
+endef
+
+TEST_LOGS	= $(foreach TEST,$(noinst_PROGRAMS),$(TEST)-output/novpc/sim.log)
+
+$(foreach TEST_LOG,$(TEST_LOGS),\
+  $(eval $(call TEST_template,$(patsubst %-output/novpc/sim.log,%,$(TEST_LOG)))))
+
+# $(1) is test name
+# $(2) is VPC config name
+define TEST_VPC_template =
+$(1)-output/vpc/$(2)/sim.log: $(1) src/$(1)/vpc/$(2).vpc.xml
+	{ set -- $$^; mkdir -p '$$(dir $$@)' && \
+	  VPCTRACEFILEPREFIX='$$(dir $$@)' \
+	  VPCCONFIGURATION="$$$$2" \
+	  $$(srcdir)/scripts/runtest.py \
+	    --log '$$@' \
+	    --clean '$$(dir $$@)' \
+	    -- ./'$$<' 100; }
+endef
+
+TEST_VPCS 	= $(foreach TEST,$(noinst_PROGRAMS),$(patsubst $(srcdir)/src/$(TEST)/vpc/%.vpc.xml,$(TEST)-output/vpc/%/sim.log,$(wildcard $(srcdir)/src/$(TEST)/vpc/*.vpc.xml)))
+
+$(foreach TEST_VPC,$(TEST_VPCS),\
+  $(eval $(call TEST_VPC_template,$(word 1,$(subst -output/vpc/, ,$(patsubst %/sim.log,%,$(TEST_VPC)))),$(word 2,$(subst -output/vpc/, ,$(patsubst %/sim.log,%,$(TEST_VPC)))))))
+
+
 clean-local:
-	rm -f $(TEST_LOGS) $(TEST_VPC_VCDS) $(TEST_VPC_LOGS)
+	for test in $(noinst_PROGRAMS); do \
+	  rm -rf $${test}-output; \
+	done
 
 .PHONY: test-logs check-logs
 check-am: check-logs
@@ -100,72 +131,74 @@ test-logs: $(TEST_LOGS)
 check-logs: $(TEST_LOGS)
 	@error=0; \
 	for test in $(noinst_PROGRAMS); do \
-	  case "$$test" in \
-	    test-*) \
-	      if test -f $(srcdir)/src/$${test}/golden.log; then \
-		if ! diff -u $${test}.log $(srcdir)/src/$${test}/golden.log > /dev/null; then \
-		  echo "FAILURE for $${test} LOG check."; error=1; \
-		  diff -u $${test}.log $(srcdir)/src/$${test}/golden.log; \
-		else \
-		  echo "SUCCESS for $${test} LOG check."; \
-		fi; \
-	      else \
-		status=success; \
-		shopt -s nullglob; \
-		for log in $(srcdir)/src/$${test}/golden-*.log; do \
-		  if ! diff -u $${test}-$${log##*/golden-} $${log} > /dev/null; then \
-		    status=failed; \
-		  fi; \
-		done; \
-		if test x"$$status" = x"failed"; then \
-		  echo "FAILURE for $${test} LOG check."; error=1; \
-		  for log in $(srcdir)/src/$${test}/golden-*.log; do \
-		    diff -u $${test}-$${log##*/golden-} $${log}; \
-		  done; \
-		else \
-		  echo "SUCCESS for $${test} LOG check."; \
-		fi; \
-	      fi; \
-	      ;; \
- 	  esac; \
+	  if test -f $(srcdir)/src/$${test}/golden.log; then \
+	    if ! diff -u $${test}-output/novpc/sim.log $(srcdir)/src/$${test}/golden.log > /dev/null; then \
+	      echo "FAILURE for $${test} LOG check."; error=1; \
+	      diff -u $${test}-output/novpc/sim.log $(srcdir)/src/$${test}/golden.log | head -10; \
+	    else \
+	      echo "SUCCESS for $${test} LOG check."; \
+	    fi; \
+	  else \
+	    echo "MISSING for $${test} LOG check."; \
+	  fi; \
 	done; \
 	exit $$error
 
-
-
-.PHONY: test-vcds check-vcds
+.PHONY: test-vpcs check-vpcs
 
 diff_vcd_ignore_date=-I '[[:blank:]]*[[:alpha:]]\{3\}[[:blank:]][[:digit:]]\{2\},[[:blank:]][[:digit:]]\{4\}[[:blank:]]*[[:digit:]]\{1,2\}:[[:digit:]]\{2\}:[[:digit:]]\{2\}$$'
 diff_vcd_ignore_systemc_version=-I 'SystemC[[:blank:]][[:digit:].]\+\(-Accellera\)\?[[:blank:]]---[[:blank:]]'
 diff_vcd_ignore=$(diff_vcd_ignore_date) $(diff_vcd_ignore_systemc_version)
 
-check-am: check-vcds
-test-vcds: $(TEST_VPC_VCDS)
-check-vcds: $(TEST_VPC_VCDS)
+check-am: check-vpcs
+test-vpcs: $(TEST_VPCS)
+check-vpcs: $(TEST_VPCS)
 	@error=0; \
-	for test in $(noinst_PROGRAMS); do \
-	  case "$$test" in \
-	    test-*) \
-	      for cmx in $(srcdir)/src/$${test}/vpc/*.vpc.xml; do \
-		cmx=$${cmx##*/}; cmx=$${cmx%%.vpc.xml}; \
-		status=success; \
-		for golden_vcd in $(srcdir)/src/$${test}/vpc/$${cmx}-*golden.vcd; do \
-		  test_vcd=$${golden_vcd##*/}; test_vcd=$${test}-$${test_vcd%%-golden.vcd}.vcd; \
-		  if test -f $${golden_vcd} && ! diff -u $(diff_vcd_ignore) $${test_vcd} $${golden_vcd} > /dev/null; then \
-		    status=failed; \
-		  fi; \
-		done; \
-		if test x"$$status" = x"failed"; then \
-		  echo "FAILURE for $${test}-$${cmx} VCD check."; error=1; \
-		  for golden_vcd in $(srcdir)/src/$${test}/vpc/$${cmx}-*golden.vcd; do \
-		    test_vcd=$${golden_vcd##*/}; test_vcd=$${test}-$${test_vcd%%-golden.vcd}.vcd; \
-		    diff -u $(diff_vcd_ignore) $${test_vcd} $${golden_vcd}; \
-		  done; \
+	for simlog in $^; do \
+	  test=$${simlog%%-output/vpc/*}; \
+	  cmx=$${simlog##*-output/vpc/}; cmx=$${cmx%%/sim.log}; \
+	  status=undef; \
+	  for golden in $(srcdir)/src/$${test}/vpc/$${cmx}/golden/*; do \
+	    output=$${simlog%%/sim.log}/$${golden##*/}; \
+	    case "$${golden}" in \
+	      */\*|*~|*.bak|.*.sw*) \
+	        ;; \
+	      *.vcd) \
+		if ! diff -u -N $(diff_vcd_ignore) $${output} $${golden} > /dev/null; then \
+		  status=failed; \
 		else \
-		  echo "SUCCESS for $${test}-$${cmx} VCD check."; \
+		  status=success; \
 		fi; \
-	      done; \
-	      ;; \
- 	  esac; \
+	      	;; \
+	      *) \
+		if ! diff -u -N $${output} $${golden} > /dev/null; then \
+		  status=failed; \
+		else \
+		  status=success; \
+		fi; \
+		;; \
+	    esac; \
+	  done; \
+	  if test x"$$status" = x"failed"; then \
+	    echo "FAILURE for $${test} VCD $${cmx} check."; error=1; \
+	    for golden in $(srcdir)/src/$${test}/vpc/$${cmx}/golden/*; do \
+	      output=$${simlog%%/sim.log}/$${golden##*/}; \
+	      case "$${golden}" in \
+		*/\*|*~|*.bak|.*.sw*) \
+		  ;; \
+		*.vcd) \
+		  diff -u -N $(diff_vcd_ignore) $${output} $${golden} | head -10; \
+		  ;; \
+		*) \
+		  diff -u -N $${output} $${golden} | head -10; \
+		  ;; \
+	      esac; \
+	    done; \
+	  elif test x"$$status" = x"success"; then \
+	    echo "SUCCESS for $${test} VCD $${cmx} check."; \
+	  else \
+	    echo "MISSING for $${test} VCD $${cmx} check."; \
+	  fi; \
 	done; \
 	exit $$error
+

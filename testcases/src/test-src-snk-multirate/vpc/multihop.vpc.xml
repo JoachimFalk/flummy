@@ -1,20 +1,23 @@
 <?xml version="1.0"?>
 <!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
 <vpcconfiguration>
- <resources>
-  <component name="HW_SRC" type="threaded" scheduler="RoundRobin">
-    <attribute type="tracer" value="PAJE"/>
-  </component>
-  <component name="Mem" type="threaded" scheduler="RoundRobin" >
-    <attribute type="tracer" value="PAJE"/>
-  </component> 
-  <component name="Bus" type="threaded" scheduler="RoundRobin" >
-    <attribute type="tracer" value="PAJE"/>
-  </component>  
-  <component name="HW_SNK" type="threaded" scheduler="RoundRobin">
-    <attribute type="tracer" value="PAJE"/>
-  </component>  
- </resources>
+  <resources>
+    <tracer type="PAJE" name="pajeTracer">
+      <attribute type="traceFileName" value="test-src-snk-multirate-output/vpc/multihop/pajeTracer.paje"/>
+    </tracer>
+    <component name="HW_SRC" type="threaded" scheduler="RoundRobin">
+      <attribute type="tracer" value="pajeTracer"/>
+    </component>
+    <component name="Mem" type="threaded" scheduler="RoundRobin" >
+      <attribute type="tracer" value="pajeTracer"/>
+    </component> 
+    <component name="Bus" type="threaded" scheduler="RoundRobin" >
+      <attribute type="tracer" value="pajeTracer"/>
+    </component>  
+    <component name="HW_SNK" type="threaded" scheduler="RoundRobin">
+      <attribute type="tracer" value="pajeTracer"/>
+    </component>  
+  </resources>
 
  <mappings>
 
@@ -38,16 +41,29 @@
  </mappings>
 
  <topology>
-  <route source="top.src" destination="cf_top.src_top.snk_1">
-   <hop name="HW_SRC">     <timing dii="10" latency="10" /> </hop>
-   <hop name="Bus">        <timing dii="10" latency="10" /> </hop>
-   <hop name="Mem">        <timing dii="10" latency="10" /> </hop>
+  <route name="top.src.o_0" type="StaticRoute">
+    <hop component="HW_SRC">
+      <timing dii="10" latency="10"/>
+      <hop component="Bus">
+        <timing dii="10" latency="10"/>
+        <hop component="Mem">
+          <timing dii="10" latency="10"/>
+          <desthop/>
+        </hop>
+      </hop>
+    </hop>
   </route>
-
-  <route source="cf_top.src_top.snk_1" destination="top.snk">
-   <hop name="Mem">        <timing dii="10" latency="10" /> </hop>
-   <hop name="Bus">        <timing dii="10" latency="10" /> </hop>
-   <hop name="HW_SNK">     <timing dii="10" latency="10" /> </hop>
+  <route name="top.snk.i_0" type="StaticRoute">
+    <hop component="Mem">
+      <timing dii="10" latency="10"/>
+      <hop component="Bus">
+        <timing dii="10" latency="10"/>
+        <hop component="HW_SNK">
+          <timing dii="10" latency="10"/>
+          <desthop/>
+        </hop>
+      </hop>
+    </hop>
   </route>
  </topology>
 </vpcconfiguration>

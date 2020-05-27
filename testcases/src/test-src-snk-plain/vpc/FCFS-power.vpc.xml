@@ -3,13 +3,15 @@
 <vpcconfiguration>
   <resources>
     <observer type="PowerSumming" name="powerSummer">
-      <attribute type="resultFileName" value="test-src-snk-plain-FCFS-power-powerSummer.txt"/>
+      <attribute type="resultFileName" value="test-src-snk-plain-output/vpc/FCFS-power/powerSummer.txt"/>
     </observer>
     <tracer type="PAJE" name="pajeTracer">
-      <attribute type="traceFileName" value="test-src-snk-plain-FCFS-power-pajeTracer.paje"/>
+      <attribute type="traceFileName" value="test-src-snk-plain-output/vpc/FCFS-power/pajeTracer.paje"/>
     </tracer>
     <component name="CPU" scheduler="FCFS">
-      <attribute type="tracer" value="VCD"/>
+      <attribute type="tracer" value="VCD">
+        <attribute type="traceFileName" value="test-src-snk-plain-output/vpc/FCFS-power/CPU.vcd"/>
+      </attribute>
       <attribute type="tracer" value="pajeTracer"/>
       <attribute type="observer" value="powerSummer"/>
       <attribute type="execModel" value="LookupPowerTimeModel">
