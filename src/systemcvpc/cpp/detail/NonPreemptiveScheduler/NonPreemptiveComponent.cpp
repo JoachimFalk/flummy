@@ -128,11 +128,8 @@ namespace SystemC_VPC { namespace Detail {
           // NonPreemptiveComponent::notifyActivation will ignored it and an
           // activation might be lost.
           sassert(activeTasks.erase(scheduledTask) == 1);
-          if (scheduledTask->canFire()) {
-            sassert(activeTasks.insert(scheduledTask).second);
-            // This will trigger compute in due time.
-            scheduledTask->schedule();
-          }
+          if (scheduledTask->canFire())
+            notifyActivation(scheduledTask, true);
         }
         runningTask = NULL;
       }

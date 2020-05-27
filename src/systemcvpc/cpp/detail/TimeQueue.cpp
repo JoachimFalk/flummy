@@ -55,13 +55,9 @@ namespace SystemC_VPC { namespace Detail {
   }
 
   void TimeQueueImpl::add(void *obj, sc_core::sc_time delay) {
-    if (delay > sc_core::SC_ZERO_TIME) {
-      queue.push(QueueEntry(sc_core::sc_time_stamp() + delay, obj));
-      queueEvent.notify(delay);
-    } else {
-      assert(delay == sc_core::SC_ZERO_TIME);
-      callback(obj);
-    }
+    assert(delay >= sc_core::SC_ZERO_TIME);
+    queue.push(QueueEntry(sc_core::sc_time_stamp() + delay, obj));
+    queueEvent.notify(delay);
   }
 
 } } // namespace SystemC_VPC::Detail

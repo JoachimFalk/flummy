@@ -388,7 +388,10 @@ namespace SystemC_VPC { namespace Detail {
     compState = ComponentState::IDLE;
     powerConsumption = getPowerIdle();
     assignedTaskInstance = nullptr;
-    latencyQueue.add(ti, ti->getLatency() - ti->getDelay());
+    if (ti->getLatency() == ti->getDelay()) {
+      finishLatencyTaskInstance(ti);
+    } else
+      latencyQueue.add(ti, ti->getLatency() - ti->getDelay());
   }
 
   /// Called once per actor firing to indicate that the latency of the task instance is over.
