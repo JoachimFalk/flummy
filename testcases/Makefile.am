@@ -111,6 +111,7 @@ $(1)-output/vpc/$(2)/sim.log: $(1) src/$(1)/vpc/$(2).vpc.xml
 	  $$(srcdir)/scripts/runtest.py \
 	    --log '$$@' \
 	    --clean '$$(dir $$@)' \
+	    --filter '^((sqrroot|top)\.[^:]*|src|sink|A|B|Src|Snk):' \
 	    -- ./'$$<' 100; }
 endef
 

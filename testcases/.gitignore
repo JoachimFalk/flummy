@@ -6,3 +6,4 @@ autom4te.cache
 tags
 *~
 !*golden*
+!sim.log
