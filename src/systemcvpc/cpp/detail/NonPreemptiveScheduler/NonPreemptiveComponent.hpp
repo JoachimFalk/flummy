@@ -43,7 +43,7 @@
 #include "../HysteresisLocalGovernor.hpp"
 #include "../TaskInstanceImpl.hpp"
 #include "../Director.hpp"
-#include "../timetriggered/tt_support.hpp"
+#include "../TimeQueue.hpp"
 
 #include <CoSupport/SystemC/systemc_support.hpp>
 
@@ -108,12 +108,8 @@ namespace SystemC_VPC { namespace Detail {
     // getNextReleaseTime() > sc_core::sc_time_stamp().
     std::set<TaskInterface *> activeTasks;
 
-    // This is the queue for tasks arriving via notifyActivation but where
-    // getNextReleaseTime() > sc_core::sc_time_stamp().
-    TT::TimedQueue ttReleaseQueue;
-
-    void ttReleaseQueueMethod();
-    sc_core::sc_event ttReleaseQueueEvent;
+    // This is the queue for tasks arriving via notifyActivation.
+    TimeQueue<TaskInterface> ttReleaseQueue;
 
     void addTask(TaskInstanceImpl *newTask);
 
