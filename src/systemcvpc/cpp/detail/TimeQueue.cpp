@@ -28,7 +28,7 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  TimeQueue::TimeQueue(sc_core::sc_module_name name, std::function<void (TaskInstanceImpl *)> const &callback)
+  TimeQueueImpl::TimeQueueImpl(sc_core::sc_module_name const &name, std::function<void (void *)> const &callback)
     : sc_core::sc_module(name), callback(callback)
   {
     SC_METHOD(queueMethod);
@@ -36,13 +36,13 @@ namespace SystemC_VPC { namespace Detail {
     sensitive << queueEvent;
   }
 
-  void TimeQueue::queueMethod() {
+  void TimeQueueImpl::queueMethod() {
     assert(!queue.empty());
     while (true) {
       assert(queue.top().time == sc_core::sc_time_stamp());
-      TaskInstanceImpl *ti = queue.top().ti;
+      void *obj = queue.top().obj;
       queue.pop();
-      callback(ti);
+      callback(obj);
       if (queue.empty())
         break;
       sc_core::sc_time delta = queue.top().time -
@@ -54,14 +54,13 @@ namespace SystemC_VPC { namespace Detail {
     }
   }
 
-  void TimeQueue::add(TaskInstanceImpl *ti, sc_core::sc_time delay) {
-
+  void TimeQueueImpl::add(void *obj, sc_core::sc_time delay) {
     if (delay > sc_core::SC_ZERO_TIME) {
-      queue.push(QueueEntry(sc_core::sc_time_stamp() + delay, ti));
+      queue.push(QueueEntry(sc_core::sc_time_stamp() + delay, obj));
       queueEvent.notify(delay);
     } else {
       assert(delay == sc_core::SC_ZERO_TIME);
-      callback(ti);
+      callback(obj);
     }
   }
 

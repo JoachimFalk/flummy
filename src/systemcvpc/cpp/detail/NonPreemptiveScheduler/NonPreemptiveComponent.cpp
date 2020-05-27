@@ -34,13 +34,10 @@ namespace SystemC_VPC { namespace Detail {
   NonPreemptiveComponent::NonPreemptiveComponent(
       std::string const &name)
     : AbstractComponent(name)
+    , ttReleaseQueue("ttReleaseQueue", [] (TaskInterface *t) { t->schedule(); })
     , readyTasks(0)
     , runningTask(NULL)
   {
-    SC_METHOD(ttReleaseQueueMethod);
-    dont_initialize();
-    sensitive << ttReleaseQueueEvent;
-
     SC_THREAD(scheduleThread);
 
     this->midPowerGov = new InternalLoadHysteresisGovernor(sc_core::sc_time(12.5, sc_core::SC_MS),
@@ -60,38 +57,12 @@ namespace SystemC_VPC { namespace Detail {
         return;
       activeTasks.insert(scheduledTask);
       sc_core::sc_time delta = scheduledTask->getNextReleaseTime() - sc_core::sc_time_stamp();
-      if (delta > sc_core::SC_ZERO_TIME) {
-        ttReleaseQueue.push(
-            TT::TimeNodePair(scheduledTask->getNextReleaseTime(), scheduledTask));
-        ttReleaseQueueEvent.notify(delta);
-      } else {
-        // This will trigger compute in due time.
-        scheduledTask->schedule();
-      }
+      ttReleaseQueue.add(scheduledTask, delta);
     } else {
       if (activeTasks.find(scheduledTask) == activeTasks.end())
         // Nothing to do
         return;
       assert(!"Oops, Removal of task from the active list not supported!");
-    }
-  }
-
-  void NonPreemptiveComponent::ttReleaseQueueMethod() {
-    assert(!ttReleaseQueue.empty());
-    while (true) {
-      assert(ttReleaseQueue.top().time == sc_core::sc_time_stamp());
-      TaskInterface *scheduledTask = ttReleaseQueue.top().node;
-      ttReleaseQueue.pop();
-      // This will trigger compute in due time.
-      scheduledTask->schedule();
-      if (ttReleaseQueue.empty())
-        break;
-      sc_core::sc_time delta = ttReleaseQueue.top().time -
-          sc_core::sc_time_stamp();
-      if (delta > sc_core::SC_ZERO_TIME) {
-        ttReleaseQueueEvent.notify(delta);
-        break;
-      }
     }
   }
 

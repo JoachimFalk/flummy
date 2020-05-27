@@ -36,37 +36,51 @@
 
 namespace SystemC_VPC { namespace Detail {
 
-  class TimeQueue
+  class TimeQueueImpl
     : public sc_core::sc_module
   {
-    SC_HAS_PROCESS(TimeQueue);
-  public:
-    TimeQueue(sc_core::sc_module_name name, std::function<void (TaskInstanceImpl *)> const &callback);
+    SC_HAS_PROCESS(TimeQueueImpl);
+  protected:
+    TimeQueueImpl(sc_core::sc_module_name const &name, std::function<void (void *)> const &callback);
 
-    /// Add a task instance to the queue. After the given delay, the callback given
-    /// in the constructor will be called with this task instance.
-    void add(TaskInstanceImpl *task, sc_core::sc_time delay);
+    void add(void *obj, sc_core::sc_time delay);
   private:
     struct QueueEntry {
-      QueueEntry(sc_core::sc_time time, TaskInstanceImpl *ti)
-        : time(time), ti(ti) {}
+      QueueEntry(sc_core::sc_time time, void *obj)
+        : time(time), obj(obj) {}
 
       bool operator<(QueueEntry const &right) const
         { return time > right.time; }
 
-      sc_core::sc_time time;
-      TaskInstanceImpl *ti;
+      sc_core::sc_time  time;
+      void             *obj;
     };
 
     typedef std::priority_queue<QueueEntry> Queue;
 
     void queueMethod();
 
-    std::function<void (TaskInstanceImpl *)> callback;
+    std::function<void (void *)> callback;
 
     Queue             queue;
     sc_core::sc_event queueEvent;
   };
+
+  template <class T>
+  class TimeQueue
+    : public TimeQueueImpl
+  {
+    typedef TimeQueueImpl base_type;
+  public:
+    TimeQueue(sc_core::sc_module_name name, std::function<void (T *)> const &callback)
+      : TimeQueueImpl(name, reinterpret_cast<std::function<void (void *)> const &>(callback)) {}
+
+    /// Add a object to the queue. After the given delay, the callback given
+    /// in the constructor will be called with this object.
+    void add(T *obj, sc_core::sc_time delay)
+      { base_type::add(obj, delay); }
+  };
+
 
 } } // namespace SystemC_VPC::Detail
 

@@ -260,7 +260,7 @@ namespace SystemC_VPC { namespace Detail {
 
     // Queue for task instances where their DII has expired but still
     // waiting for their latency.
-    TimeQueue         latencyQueue;
+    TimeQueue<TaskInstanceImpl> latencyQueue;
 
     PowerMode      powerMode;
     ComponentState compState;
