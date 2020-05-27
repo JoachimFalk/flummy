@@ -189,9 +189,9 @@ void Component::addAttribute(Attribute const &attribute) {
     this->setTransferTiming(SystemC_VPC::Timing(transferDelay));
     // FIXME: add transactionSize
   } else if (attribute.isType("tracing") || attribute.isType("tracer")) {
-    addTracer(attribute.getValue().c_str());
+    addTracer(attribute.getValue().c_str(), attribute.getAttributes());
   } else if (attribute.isType("observer")) {
-    addObserver(attribute.getValue().c_str());
+    addObserver(attribute.getValue().c_str(), attribute.getAttributes());
   } else if (attribute.isType("execModel")) {
     ExecModel::Ptr execModel = createExecModel(attribute.getValue().c_str());
     for (Attribute emAttr : attribute.getAttributes()) {
