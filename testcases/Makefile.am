@@ -39,7 +39,6 @@ AM_LDFLAGS = @AM_LDFLAGS@  $(SYSTEMOC_LDFLAGS) $(BOOST_LDFLAGS)
 
 noinst_PROGRAMS= \
 	test-sqr \
-	test-sqr-int \
 	test-src-snk-multicast \
 	test-src-snk-multirate \
 	test-src-snk-plain
@@ -59,11 +58,6 @@ test_sqr_LDADD					= $(SYSTEMOC_LIBS)
 test_sqr_DEPENDENCIES				= $(SYSTEMOC_DEPENDENCIES)
 test_sqr_SOURCES				= \
 	src/test-sqr/cpp/design-sqr.cpp
-
-test_sqr_int_LDADD				= $(SYSTEMOC_LIBS)
-test_sqr_int_DEPENDENCIES			= $(SYSTEMOC_DEPENDENCIES)
-test_sqr_int_SOURCES				= \
-	src/test-sqr-int/cpp/design-sqr.cpp
 
 test_src_snk_multicast_LDADD			= $(SYSTEMOC_LIBS)
 test_src_snk_multicast_DEPENDENCIES		= $(SYSTEMOC_DEPENDENCIES)
