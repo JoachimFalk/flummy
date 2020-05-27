@@ -1,0 +1,2 @@
+CPU@0 s consumes 700 uW
+Sum: 0.001225
