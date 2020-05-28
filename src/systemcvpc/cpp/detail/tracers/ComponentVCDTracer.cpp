@@ -80,7 +80,6 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
   private:
     class VcdTask;
-    class VcdTaskInstance;
     class RegisterMe;
 
     static RegisterMe registerMe;
@@ -105,7 +104,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
     static const trace_value S_READY;
     static const trace_value S_RUNNING;
 
-     VcdTask(
+    VcdTask(
          sc_core::sc_trace_file *traceFile,
          std::string      const &resource,
          std::string      const &task)
@@ -214,16 +213,6 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
   const trace_value ComponentVCDTracer::VcdTask::S_READY   = 'w';
   const trace_value ComponentVCDTracer::VcdTask::S_RUNNING = 'R';
 
-  class ComponentVCDTracer::VcdTaskInstance: public OTaskInstance {
-  public:
-    VcdTaskInstance(VcdTask *vcdTask)
-      : vcdTask(vcdTask) {}
-
-    VcdTask *vcdTask;
-
-    ~VcdTaskInstance() {}
-  };
-
   class ComponentVCDTracer::RegisterMe {
   public:
     RegisterMe() {
@@ -240,7 +229,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
     : Extending::ComponentTracerIf(
           reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this)) -
           reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this))
-        , 0, sizeof(VcdTask), sizeof(VcdTaskInstance))
+        , 0, sizeof(VcdTask), 0)
     , ComponentTracer(
          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
@@ -323,40 +312,29 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
     , TaskInstance const &ti
     , OTaskInstance      &oti)
   {
-    VcdTask         &vcdTask         = static_cast<VcdTask &>(ot);
-    VcdTaskInstance &vcdTaskInstance = static_cast<VcdTaskInstance &>(oti);
-
-    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
-        TaskInstanceOperation::ALLOCATE) {
-      new (&vcdTaskInstance) VcdTaskInstance(&vcdTask);
-    }
+    VcdTask &vcdTask = static_cast<VcdTask &>(ot);
 
     switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
       case TaskInstanceOperation::RELEASE:
-        vcdTaskInstance.vcdTask->traceReady();
+        vcdTask.traceReady();
         break;
       case TaskInstanceOperation::ASSIGN:
-        vcdTaskInstance.vcdTask->traceRunning();
+        vcdTask.traceRunning();
         break;
       case TaskInstanceOperation::RESIGN:
-        vcdTaskInstance.vcdTask->traceReady();
+        vcdTask.traceReady();
         break;
       case TaskInstanceOperation::BLOCK:
-        vcdTaskInstance.vcdTask->traceBlocking();
+        vcdTask.traceBlocking();
         break;
       case TaskInstanceOperation::FINISHDII:
-        vcdTaskInstance.vcdTask->traceSleeping();
+        vcdTask.traceSleeping();
         break;
       case TaskInstanceOperation::FINISHLAT:
         // Ignore this. Use PAJE tracer to visualize this.
         break;
       default:
         break;
-    }
-
-    if (TaskInstanceOperation((int) tio & (int) TaskInstanceOperation::MEMOP_MASK) ==
-        TaskInstanceOperation::DEALLOCATE) {
-      vcdTaskInstance.~VcdTaskInstance();
     }
   }
 
