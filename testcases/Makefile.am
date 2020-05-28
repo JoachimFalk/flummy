@@ -74,6 +74,7 @@ $(1)-output/novpc/sim.log: $(1)
 	  OUTPUTPREFIX='$$(dir $$@)' \
 	  $$(srcdir)/scripts/runtest.py \
 	    --log '$$@' \
+	    --error '$(1)-output/novpc/sim.err' \
 	    --clean '$$(dir $$@)' \
 	    --filter '^((sqrroot|top)\.[^:]*|src|sink|A|B|Src|Snk):' \
 	    -- ./'$$<' 100; }
@@ -93,6 +94,7 @@ $(1)-output/vpc/$(2)/sim.log: $(1) src/$(1)/vpc/$(2).vpc.xml $$(SYSTEMOC_PLUGINV
 	  VPCCONFIGURATION="$$$$2" \
 	  $$(srcdir)/scripts/runtest.py \
 	    --log '$$@' \
+	    --error '$(1)-output/vpc/$(2)/sim.err' \
 	    --clean '$$(dir $$@)' \
 	    --filter '^((sqrroot|top)\.[^:]*|src|sink|A|B|Src|Snk):' \
 	    -- ./'$$<' 100; }
