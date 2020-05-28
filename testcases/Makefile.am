@@ -53,14 +53,6 @@ test_src_snk_multicast_DEPENDENCIES		= $(SYSTEMOC_DEPENDENCIES)
 test_src_snk_multicast_SOURCES			= \
 	src/test-src-snk-multicast/cpp/design-src-snk-multicast.cpp
 
-test-src-snk-multicast-%.log test-src-snk-multicast-%-CPU.vcd test-src-snk-multicast-%-CPU1.vcd test-src-snk-multicast-%-CPU2.vcd test-src-snk-multicast-%-BUS.vcd test-src-snk-multicast-%-MEM.vcd test-src-snk-multicast-%-MEM1.vcd test-src-snk-multicast-%-MEM2.vcd: test-src-snk-multicast src/test-src-snk-multicast/vpc/%.vpc.xml $(SYSTEMOC_PLUGINVPC)
-	set -- $^; \
-	VPCTRACEFILEPREFIX=test-src-snk-multicast-$*- \
-	$(srcdir)/scripts/runtest.py \
-		--log 'test-src-snk-multicast-$*.log' \
-		--clean 'test-src-snk-multicast-$*-*' \
-		-- ./'$<' --systemoc-vpc-config "$$2" 100
-
 test_src_snk_multirate_LDADD			= $(SYSTEMOC_LIBS)
 test_src_snk_multirate_DEPENDENCIES		= $(SYSTEMOC_DEPENDENCIES)
 test_src_snk_multirate_SOURCES			= \
@@ -70,15 +62,6 @@ test_src_snk_plain_LDADD			= $(SYSTEMOC_LIBS)
 test_src_snk_plain_DEPENDENCIES			= $(SYSTEMOC_DEPENDENCIES)
 test_src_snk_plain_SOURCES			= \
 	src/test-src-snk-plain/cpp/design-src-snk-plain.cpp
-
-test-src-snk-plain-%.log test-src-snk-plain-%.vcd test-src-snk-plain-%-CPU.vcd test-src-snk-plain-%-BUS.vcd test-src-snk-plain-%-MEM.vcd: test-src-snk-plain src/test-src-snk-plain/vpc/%.vpc.xml $(SYSTEMOC_PLUGINVPC)
-	set -- $^; \
-	VPCTRACEFILEPREFIX=test-src-snk-plain-$*- \
-	VPCCONFIGURATION="$$2" \
-	$(srcdir)/scripts/runtest.py \
-		--log 'test-src-snk-plain-$*.log' \
-		--clean 'test-src-snk-plain-$*-*' \
-		-- ./'$<' 100
 
 %.smx: %
 	./'$<' --systemoc-export-smx='$@' || \
