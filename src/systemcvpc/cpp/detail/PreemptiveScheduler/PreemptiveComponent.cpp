@@ -194,7 +194,11 @@ namespace SystemC_VPC { namespace Detail {
     scheduler->addedNewTask(newReadyTask);
     DBG_SC_OUT("PreemptiveComponent::addTask (" << newReadyTask->getName()
         << ") for " << this->getName() << " notifying scheduler" << std::endl);
-    scheduleEvent.notify();
+    // In SystemC 2.3.3, immediate notification is not allowed during update
+    // phase or elaboration. This can be changed back to use immediate
+    // notification if notifyActivation introduces at least one delta cycle
+    // delay before calling scheduledTask->schedule().
+    scheduleEvent.notify(sc_core::SC_ZERO_TIME);
   }
 
   /**
