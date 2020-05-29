@@ -8,6 +8,7 @@
     <component name="CPU" scheduler="RRNOPRE">
       <attribute type="tracer" value="VCD">
         <attribute type="traceFileName" value="test-src-snk-plain-output/vpc/RRNOPRE-simple/CPU.vcd"/>
+        <attribute type="traceTimeUnit" value="ps"/>
       </attribute>
       <attribute type="tracer" value="pajeTracer"/>
       <attribute type="scheduler">
