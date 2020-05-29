@@ -151,6 +151,7 @@ check-vpcs: $(TEST_VPCS)
 	      */\*|*~|*.bak|.*.sw*) \
 	        ;; \
 	      *.vcd) \
+		$(srcdir)/scripts/adjust-vcd.py --test $${output} --golden $${golden}; \
 		if ! diff -u -N $(diff_vcd_ignore) $${output} $${golden} > /dev/null; then \
 		  status=failed; \
 		elif test x"$${status}" = x"undef"; then \
