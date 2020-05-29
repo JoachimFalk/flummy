@@ -84,7 +84,9 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
 
     static RegisterMe registerMe;
 
-    sc_core::sc_trace_file *traceFile_;
+    sc_core::sc_time_unit   traceTimeUnit;
+    std::string             traceFileName;
+    sc_core::sc_trace_file *traceFile;
   //std::map<std::string, Trace::Tracing*> trace_map_by_name_;
   };
 
@@ -234,37 +236,53 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
          reinterpret_cast<char *>(static_cast<Extending::ComponentTracerIf *>(this)) -
          reinterpret_cast<char *>(static_cast<ComponentTracer              *>(this))
        , "VCD")
-    , traceFile_(nullptr)
+    , traceTimeUnit(sc_core::SC_NS)
+    , traceFile(nullptr)
   {
     for (Attribute const &attr : attrs) {
       if (attr.getType() == "traceFileName") {
-        if (traceFile_) {
-          throw ConfigException(
-              "Duplicate attribute traceFileName in VCD component tracer!");
-        }
-        std::string const &traceFileName = attr.getValue();
+        traceFileName = attr.getValue();
         if (traceFileName.size() < 4 ||
             traceFileName.substr(traceFileName.size()-4,4) != ".vcd") {
           throw ConfigException(
               "The traceFileName "+traceFileName+" must end in .vcd for VCD component tracers!");
         }
-
-        traceFile_ = sc_core::sc_create_vcd_trace_file(
-            traceFileName.substr(0, traceFileName.size()-4).c_str());
-        traceFile_->set_time_unit(1, sc_core::SC_NS);
+      } else if (attr.getType() == "traceTimeUnit") {
+        if (attr.getValue() == "fs") {
+          traceTimeUnit = sc_core::SC_FS;
+        } else if (attr.getValue() == "ps") {
+          traceTimeUnit = sc_core::SC_PS;
+        } else if (attr.getValue() == "ns") {
+          traceTimeUnit = sc_core::SC_NS;
+        } else if (attr.getValue() == "us") {
+          traceTimeUnit = sc_core::SC_US;
+        } else if (attr.getValue() == "ms") {
+          traceTimeUnit = sc_core::SC_MS;
+        } else if (attr.getValue() == "s" ||
+                   attr.getValue() == "sec") {
+          traceTimeUnit = sc_core::SC_SEC;
+        } else {
+          throw ConfigException(
+              "The traceTimeUnit "+attr.getType()+" is not one of fs, ps, ns, us, ms, or s!");
+        }
       } else {
         std::stringstream msg;
 
         msg << "Component VCD tracers do not support the "+attr.getType()+" attribute! ";
-        msg << "Only the traceFileName attribute is supported.";
+        msg << "Only the traceTimeUnit and traceFileName attributes are supported.";
         throw ConfigException(msg.str());
       }
+    }
+    if (!traceFileName.empty()) {
+      traceFile = sc_core::sc_create_vcd_trace_file(
+          traceFileName.substr(0, traceFileName.size()-4).c_str());
+      traceFile->set_time_unit(1, traceTimeUnit);
     }
   }
 
   ComponentVCDTracer::~ComponentVCDTracer() {
-    if (traceFile_) {
-      sc_core::sc_close_vcd_trace_file(traceFile_);
+    if (traceFile) {
+      sc_core::sc_close_vcd_trace_file(traceFile);
     }
   }
 
@@ -281,7 +299,7 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
     , Task      const &t
     , OTask           &ot)
   {
-    if (this->traceFile_ == NULL) {
+    if (traceFile == NULL) {
       std::string tracefilename = c.getName(); //componentName;
 
       char* traceprefix = getenv("VPCTRACEFILEPREFIX");
@@ -289,15 +307,15 @@ namespace SystemC_VPC { namespace Detail { namespace Tracers {
         tracefilename.insert(0, traceprefix);
       }
 
-      this->traceFile_ = sc_core::sc_create_vcd_trace_file(tracefilename.c_str());
-      this->traceFile_->set_time_unit(1, sc_core::SC_NS);
+      traceFile = sc_core::sc_create_vcd_trace_file(tracefilename.c_str());
+      traceFile->set_time_unit(1, traceTimeUnit);
     }
 
     VcdTask &vcdTask = static_cast<VcdTask &>(ot);
 
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::ALLOCATE) {
-      new (&vcdTask) VcdTask(this->traceFile_, c.getName(), t.getName());
+      new (&vcdTask) VcdTask(this->traceFile, c.getName(), t.getName());
     }
     if (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK) ==
         TaskOperation::DEALLOCATE) {
