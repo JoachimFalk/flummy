@@ -134,7 +134,8 @@ check-logs: $(TEST_LOGS)
 
 diff_vcd_ignore_date=-I '[[:blank:]]*[[:alpha:]]\{3\}[[:blank:]][[:digit:]]\{2\},[[:blank:]][[:digit:]]\{4\}[[:blank:]]*[[:digit:]]\{1,2\}:[[:digit:]]\{2\}:[[:digit:]]\{2\}$$'
 diff_vcd_ignore_systemc_version=-I 'SystemC[[:blank:]][[:digit:].]\+\(-Accellera\)\?[[:blank:]]---[[:blank:]]'
-diff_vcd_ignore=$(diff_vcd_ignore_date) $(diff_vcd_ignore_systemc_version)
+diff_vcd_ignore_wire_defs=-I '^$$scope module' -I '^$$var wire' -I '^\$$upscope \$$end$$'
+diff_vcd_ignore=$(diff_vcd_ignore_date) $(diff_vcd_ignore_systemc_version) $(diff_vcd_ignore_wire_defs)
 
 check-am: check-vpcs
 test-vpcs: $(TEST_VPCS)
@@ -152,14 +153,14 @@ check-vpcs: $(TEST_VPCS)
 	      *.vcd) \
 		if ! diff -u -N $(diff_vcd_ignore) $${output} $${golden} > /dev/null; then \
 		  status=failed; \
-		else \
+		elif test x"$${status}" = x"undef"; then \
 		  status=success; \
 		fi; \
 	      	;; \
 	      *) \
 		if ! diff -u -N $${output} $${golden} > /dev/null; then \
 		  status=failed; \
-		else \
+		elif test x"$${status}" = x"undef"; then \
 		  status=success; \
 		fi; \
 		;; \
