@@ -1,6 +1,11 @@
+apply plugin: 'org.gradle.lifecycle-base'
 
-if (parent.name.find("systemoc") == "systemoc") {
+if (cxxBuild) {
   apply from: 'build-cpp.gradle'
-} else {
-  apply from: 'build-java.gradle'
 }
+
+//if (parent.name.find("systemoc") == "systemoc") {
+//  apply from: 'build-cpp.gradle'
+//} else {
+//  apply from: 'build-java.gradle'
+//}
