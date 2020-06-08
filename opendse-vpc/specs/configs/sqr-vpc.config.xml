@@ -1,0 +1,42 @@
+<configuration>
+  <module class="de.fau.scd.SGX.SGXReaderModule">
+    <property name="filename">/scratch-local/falk/systemoc-top--devel--1.0/obj/SystemC-VPC/testcases/sqr-spec.sgx</property>
+  </module>
+  <module class="de.fau.scd.VPC.evaluation.VPCEvaluatorModule">
+    <property name="numberOfIterations">100</property>
+    <property name="schedulerType">RRNOPRE</property>
+    <property name="fireActorInLoop">false</property>
+    <property name="timeSlice">1.7E-4</property>
+    <property name="traceType">PAJE</property>
+    <property name="applicationGraph"/>
+    <property name="executableOfSimulation"/>
+  </module>
+  <module class="net.sf.opendse.encoding.module.OptimizationNewModule">
+    <property name="allocationEncoding">UTILIZATION</property>
+    <property name="removeCyclesManually">false</property>
+    <property name="routingEncoding">FLOW</property>
+    <property name="routingEncodingType">NONE</property>
+    <property name="stagnationRestartEnabled">true</property>
+    <property name="maximalNumberStagnatingGenerations">20</property>
+    <property name="useModularEncoding">false</property>
+    <property name="usePreprocessing">true</property>
+    <property name="useVariableOrder">true</property>
+  </module>
+  <module class="net.sf.opendse.optimization.evaluator.SumEvaluatorModule">
+    <property name="sum">cost</property>
+    <property name="type">MIN</property>
+    <property name="priority">0</property>
+  </module>
+  <module class="org.opt4j.optimizers.ea.EvolutionaryAlgorithmModule">
+    <property name="generations">1000</property>
+    <property name="alpha">100</property>
+    <property name="mu">25</property>
+    <property name="lambda">25</property>
+    <property name="crossoverRate">0.95</property>
+  </module>
+  <module class="org.opt4j.viewer.ViewerModule">
+    <property name="closeEvent">STOP</property>
+    <property name="closeOnStop">false</property>
+    <property name="title">Opt4J v3.2 Viewer</property>
+  </module>
+</configuration>
