@@ -40,6 +40,7 @@ import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.ExecutableOfSimulation;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
+import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
 
 public class VPCEvaluatorModule extends EvaluatorModule {
@@ -97,6 +98,19 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     public enum TraceTypeEnum{
         PAJE,
         VCD
+    }
+
+    @Info("The VPC configuration template.")
+    @Order(1)
+    @File
+    protected String vpcConfigTemplate = "";
+
+    public String getVpcConfigTemplate() {
+        return vpcConfigTemplate;
+    }
+
+    public void setVpcConfigTemplate(String vpcConfigTemplate) {
+        this.vpcConfigTemplate = vpcConfigTemplate;
     }
 
     @Info("The VPC simulation start script.")
@@ -178,6 +192,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         bindConstant(TimeSlice.class).to(timeSlice);
         bindConstant(FireActorInLoop.class).to(fireActorInLoop);
         bindConstant(TraceType.class).to(traceType);
+        bindConstant(VPCConfigTemplate.class).to(vpcConfigTemplate);
         bindEvaluator(VPCEvaluator.class);
     }
 

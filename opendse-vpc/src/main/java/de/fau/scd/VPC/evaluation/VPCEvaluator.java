@@ -30,6 +30,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -89,8 +90,15 @@ import net.sf.opendse.model.Task;
 import net.sf.opendse.optimization.ImplementationEvaluator;
 import net.sf.opendse.model.Routings;
 
+import de.fau.scd.VPC.helper.VPCConfigReader;
+import de.fau.scd.VPC.helper.VPCConfigReader.VPCFormatErrorException;
 
 public class VPCEvaluator implements ImplementationEvaluator {
+
+    @Retention(RUNTIME)
+    @BindingAnnotation
+    public @interface VPCConfigTemplate {
+    }
 
     @Retention(RUNTIME)
     @BindingAnnotation
@@ -137,6 +145,8 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
     protected final TraceTypeEnum traceType;
 
+    protected final VPCConfigReader vpcConfigTemplate;
+
     // Labels for generating the VPC configuration file
     static protected final String configFileName = "config.xml";
 
@@ -173,15 +183,25 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
     // Constructor of the VPC evaluator
     @Inject
-    public VPCEvaluator(@ExecutableOfSimulation String executableOfSimulation, @NumberOfIterations int numberOfIterations,
-                        @SchedulerType SchedulerTypeEnum schedulerType, @TimeSlice double timeSlice,
-                        @FireActorInLoop boolean fireActorInLoop, @TraceType TraceTypeEnum traceType) {
-        this.executableOfSimulation         = executableOfSimulation;
-        this.numberOfIterations             = numberOfIterations;
-        this.schedulerType                  = schedulerType;
-        this.timeSlice                      = timeSlice;
-        this.fireActorInLoop                = fireActorInLoop;
-        this.traceType                      = traceType;
+    public VPCEvaluator(
+        @ExecutableOfSimulation String executableOfSimulation
+      , @NumberOfIterations int numberOfIterations
+      , @SchedulerType SchedulerTypeEnum schedulerType
+      , @TimeSlice double timeSlice
+      , @FireActorInLoop boolean fireActorInLoop
+      , @TraceType TraceTypeEnum traceType
+      , @VPCConfigTemplate String vpcConfigTemplate
+      ) throws
+        FileNotFoundException
+      , VPCFormatErrorException
+    {
+        this.executableOfSimulation = executableOfSimulation;
+        this.numberOfIterations     = numberOfIterations;
+        this.schedulerType          = schedulerType;
+        this.timeSlice              = timeSlice;
+        this.fireActorInLoop        = fireActorInLoop;
+        this.traceType              = traceType;
+        this.vpcConfigTemplate      = new VPCConfigReader(vpcConfigTemplate);
     }
 
     @Override
