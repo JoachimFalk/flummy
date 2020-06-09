@@ -37,7 +37,6 @@ import org.opt4j.core.config.annotations.Required;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.FireActorInLoop;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.NumberOfIterations;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.ApplicationGraph;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.ExecutableOfSimulation;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
@@ -100,11 +99,6 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         VCD
     }
 
-    @Info("Application graph")
-    @Order(2)
-    @File
-    protected String applicationGraph = "";
-
     @Info("The VPC simulation start script.")
     @Order(2)
     @File
@@ -127,14 +121,6 @@ public class VPCEvaluatorModule extends EvaluatorModule {
 
     @Required(property = "schedulerType", elements = { "RRNOPRE" })
     protected boolean fireActorInLoop = false;
-
-    public String getApplicationGraph() {
-        return this.applicationGraph;
-    }
-
-    public void setApplicationGraph(String applicationGraph) {
-        this.applicationGraph = applicationGraph;
-    }
 
     public TraceTypeEnum getTraceType() {
         return this.traceType;
@@ -187,7 +173,6 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     @Override
     protected void config() {
         bindConstant(ExecutableOfSimulation.class).to(executableOfSimulation);
-        bindConstant(ApplicationGraph.class).to(applicationGraph);
         bindConstant(NumberOfIterations.class).to(numberOfIterations);
         bindConstant(SchedulerType.class).to(schedulerType);
         bindConstant(TimeSlice.class).to(timeSlice);
