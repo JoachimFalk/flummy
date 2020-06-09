@@ -8,8 +8,7 @@
     <property name="fireActorInLoop">false</property>
     <property name="timeSlice">1.7E-4</property>
     <property name="traceType">PAJE</property>
-    <property name="applicationGraph"/>
-    <property name="executableOfSimulation"/>
+    <property name="executableOfSimulation">/scratch-local/falk/systemoc-top--devel--1.0/obj/SystemC-VPC/testcases/test-sqr</property>
   </module>
   <module class="net.sf.opendse.encoding.module.OptimizationNewModule">
     <property name="allocationEncoding">UTILIZATION</property>
