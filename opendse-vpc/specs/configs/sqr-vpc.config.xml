@@ -1,8 +1,12 @@
+<!DOCTYPE configuration [
+  <!ENTITY CONFIGDIR SYSTEM "opt4j://CONFIGDIR">
+]>
 <configuration>
   <module class="de.fau.scd.SGX.SGXReaderModule">
     <property name="filename">/scratch-local/falk/systemoc-top--devel--1.0/obj/SystemC-VPC/testcases/sqr-spec.sgx</property>
   </module>
   <module class="de.fau.scd.VPC.evaluation.VPCEvaluatorModule">
+    <property name="vpcConfigTemplate">&CONFIGDIR;/sqr.vpc.xml</property>
     <property name="numberOfIterations">100</property>
     <property name="schedulerType">RRNOPRE</property>
     <property name="fireActorInLoop">false</property>
