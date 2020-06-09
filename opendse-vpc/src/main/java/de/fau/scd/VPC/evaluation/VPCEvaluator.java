@@ -92,13 +92,6 @@ import net.sf.opendse.model.Routings;
 
 public class VPCEvaluator implements ImplementationEvaluator {
 
-    Objective SimTime = new Objective("SimTime[ns]", Objective.Sign.MIN);
-
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface ApplicationGraph {
-    }
-
     @Retention(RUNTIME)
     @BindingAnnotation
     public @interface ExecutableOfSimulation {
@@ -129,7 +122,8 @@ public class VPCEvaluator implements ImplementationEvaluator {
     public @interface TraceType{
     }
 
-    protected final String applicationGraph;
+//  Objective SimTime = new Objective("SimTime[ns]", Objective.Sign.MIN);
+    Objective objective =  new Objective("#throughput VPC", Sign.MAX);
 
     protected final String executableOfSimulation;
 
@@ -142,8 +136,6 @@ public class VPCEvaluator implements ImplementationEvaluator {
     protected final boolean fireActorInLoop;
 
     protected final TraceTypeEnum traceType;
-
-    Objective objective =  new Objective("#throughput VPC", Sign.MAX);
 
     // Labels for generating the VPC configuration file
     static protected final String configFileName = "config.xml";
@@ -183,14 +175,13 @@ public class VPCEvaluator implements ImplementationEvaluator {
     @Inject
     public VPCEvaluator(@ExecutableOfSimulation String executableOfSimulation, @NumberOfIterations int numberOfIterations,
                         @SchedulerType SchedulerTypeEnum schedulerType, @TimeSlice double timeSlice,
-                        @FireActorInLoop boolean fireActorInLoop, @TraceType TraceTypeEnum traceType,@ApplicationGraph String applicationGraph) {
+                        @FireActorInLoop boolean fireActorInLoop, @TraceType TraceTypeEnum traceType) {
         this.executableOfSimulation         = executableOfSimulation;
         this.numberOfIterations             = numberOfIterations;
         this.schedulerType                  = schedulerType;
         this.timeSlice                      = timeSlice;
         this.fireActorInLoop                = fireActorInLoop;
         this.traceType                      = traceType;
-        this.applicationGraph               = applicationGraph;
     }
 
     @Override
@@ -233,17 +224,11 @@ public class VPCEvaluator implements ImplementationEvaluator {
             bw.close();
 
             String cmd;// = "export SRC_ITERS="+this.numberOfIterations;
-            Process exec_process;// = Runtime.getRuntime().exec(cmd);
 
-            // get filename for graph file
-            Path p = Paths.get(applicationGraph);
-            String graphFileName = p.getFileName().toString();
-            String graphFileNameWithoutExt = graphFileName.substring(0, graphFileName.lastIndexOf("."));
-
-            cmd = this.executableOfSimulation + " --systemoc-import-smx " + clusterDir.getCanonicalPath()+"/"+graphFileNameWithoutExt+"-synth-multicore-fsm-sched.smx"+" --systemoc-vpc-config "+clusterDir.getCanonicalPath()+"/config.xml";
+            cmd = this.executableOfSimulation + " --systemoc-vpc-config "+clusterDir.getCanonicalPath()+"/config.xml";
             String[] envV = {"SRC_ITERS="+this.numberOfIterations};
 
-            exec_process = Runtime.getRuntime().exec(cmd,envV,clusterDir.getAbsoluteFile());
+            Process exec_process = Runtime.getRuntime().exec(cmd,envV,clusterDir.getAbsoluteFile());
 
         } catch (IOException e) {
             System.err.println("Got an exception during I/O with simulation:\n" + e);
