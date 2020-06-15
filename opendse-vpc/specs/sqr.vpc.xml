@@ -7,7 +7,19 @@
       <attribute type="traceFileName" value="test-sqr-output/vpc/sqr/pajeTracer.paje"/>
     </tracer>
 
-    <component name="CPU" scheduler="FCFS">
+    <component name="CPU1" scheduler="FCFS">
+      <attribute type="tracer" value="pajeTracer"/>
+      <attribute type="transaction_delay" value="20 ns" />
+    </component>
+    <component name="CPU2" scheduler="FCFS">
+      <attribute type="tracer" value="pajeTracer"/>
+      <attribute type="transaction_delay" value="20 ns" />
+    </component>
+    <component name="CPU3" scheduler="FCFS">
+      <attribute type="tracer" value="pajeTracer"/>
+      <attribute type="transaction_delay" value="20 ns" />
+    </component>
+    <component name="CPU4" scheduler="FCFS">
       <attribute type="tracer" value="pajeTracer"/>
       <attribute type="transaction_delay" value="20 ns" />
     </component>
@@ -24,12 +36,12 @@
   </resources>
 
   <mappings>
-    <mapping source="sqrroot.a1" target="CPU">
+    <mapping source="sqrroot.a1" target="CPU1">
       <timing delay="100 ns"/>
       <timing fname="Src::src" delay="100 ns"/>
     </mapping>
    
-    <mapping source="sqrroot.a2" target="CPU">
+    <mapping source="sqrroot.a2" target="CPU1">
       <timing delay="100"/>
       <timing fname="SqrLoop::check"      delay="50 ns" />
       <timing fname="SqrLoop::copyStore"  delay="100 ns"/>
@@ -37,17 +49,17 @@
       <timing fname="SqrLoop::copyApprox" delay="100 ns"/>
     </mapping>
    
-    <mapping source="sqrroot.a3" target="CPU">
+    <mapping source="sqrroot.a3" target="CPU1">
       <timing delay="100 ns"/>
       <timing fname="Approx::approx" delay="100 ns"/>
     </mapping>
    
-    <mapping source="sqrroot.a4" target="CPU">
+    <mapping source="sqrroot.a4" target="CPU1">
       <timing delay="100 ns"/>
       <timing fname="Dup::dup" delay="100 ns"/>
     </mapping>
    
-    <mapping source="sqrroot.a5" target="CPU">
+    <mapping source="sqrroot.a5" target="CPU1">
       <timing delay="100 ns"/>
       <timing fname="Sink::sink" delay="100 ns"/>
     </mapping>
@@ -55,7 +67,7 @@
 
   <topology tracing="true">
     <route name="sqrroot.a1.o1" type="StaticRoute" tracing="false">
-      <hop component="CPU">
+      <hop component="CPU1">
         <hop component="Bus">
           <hop component="Mem">
             <desthop/>
@@ -66,7 +78,7 @@
     <route name="sqrroot.a2.i1" type="StaticRoute">
       <hop component="Mem">
         <hop component="Bus">
-          <hop component="CPU">
+          <hop component="CPU1">
             <desthop/>
           </hop>
         </hop>
@@ -75,14 +87,14 @@
     <route name="sqrroot.a2.i2" type="StaticRoute">
       <hop component="Mem">
         <hop component="Bus">
-          <hop component="CPU">
+          <hop component="CPU1">
             <desthop/>
           </hop>
         </hop>
       </hop>
     </route>
     <route name="sqrroot.a2.o1" type="StaticRoute">
-      <hop component="CPU">
+      <hop component="CPU1">
         <hop component="Bus">
           <hop component="Mem">
             <desthop/>
@@ -91,7 +103,7 @@
       </hop>
     </route>
     <route name="sqrroot.a2.o2" type="StaticRoute">
-      <hop component="CPU">
+      <hop component="CPU1">
         <hop component="Bus">
           <hop component="Mem">
             <desthop/>
@@ -102,7 +114,7 @@
     <route name="sqrroot.a3.i1" type="StaticRoute">
       <hop component="Mem">
         <hop component="Bus">
-          <hop component="CPU">
+          <hop component="CPU1">
             <desthop/>
           </hop>
         </hop>
@@ -111,14 +123,14 @@
     <route name="sqrroot.a3.i2" type="StaticRoute">
       <hop component="Mem">
         <hop component="Bus">
-          <hop component="CPU">
+          <hop component="CPU1">
             <desthop/>
           </hop>
         </hop>
       </hop>
     </route>
     <route name="sqrroot.a3.o1" type="StaticRoute">
-      <hop component="CPU">
+      <hop component="CPU1">
         <hop component="Bus">
           <hop component="Mem">
             <desthop/>
@@ -129,14 +141,14 @@
     <route name="sqrroot.a4.i1" type="StaticRoute">
       <hop component="Mem">
         <hop component="Bus">
-          <hop component="CPU">
+          <hop component="CPU1">
             <desthop/>
           </hop>
         </hop>
       </hop>
     </route>
     <route name="sqrroot.a4.o1" type="StaticRoute">
-      <hop component="CPU">
+      <hop component="CPU1">
         <hop component="Bus">
           <hop component="Mem">
             <desthop/>
@@ -145,7 +157,7 @@
       </hop>
     </route>
     <route name="sqrroot.a4.o2" type="StaticRoute">
-      <hop component="CPU">
+      <hop component="CPU1">
         <hop component="Bus">
           <hop component="Mem">
             <desthop/>
@@ -156,7 +168,7 @@
     <route name="sqrroot.a5.i1" type="StaticRoute">
       <hop component="Mem">
         <hop component="Bus">
-          <hop component="CPU">
+          <hop component="CPU1">
             <desthop/>
           </hop>
         </hop>
