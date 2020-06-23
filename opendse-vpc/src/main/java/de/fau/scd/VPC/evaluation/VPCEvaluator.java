@@ -242,8 +242,11 @@ public class VPCEvaluator implements ImplementationEvaluator {
             transf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transf.setOutputProperty(OutputKeys.INDENT, "yes");
             transf.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-            DOMSource source = new DOMSource(eVPCConfig);
+            org.w3c.dom.DocumentType docType = vpcDocument.getImplementation()
+                    .createDocumentType("doctype", null, "vpc.dtd");
+//          transf.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, docType.getPublicId());
+            transf.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, docType.getSystemId());
+            DOMSource source = new DOMSource(vpcDocument);
     //      transf.transform(source, new StreamResult(System.out));
             transf.transform(source, new StreamResult(outputVPCConfig));
         } catch (TransformerException ex) {
