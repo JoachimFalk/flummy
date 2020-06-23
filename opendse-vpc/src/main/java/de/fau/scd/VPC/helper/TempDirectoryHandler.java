@@ -51,8 +51,8 @@ public class TempDirectoryHandler {
         if (topTempDirectory == null) {
             topTempDirectory = Files.createTempDirectory("opendse-vpc-");
         }
-        tempDirectory = Files.createTempDirectory(topTempDirectory,
-                "dse_" + getTempDirectoryCounter() + "_").toFile();
+        tempDirectory = new File(topTempDirectory.toFile(), String.format("dse_%05d", getTempDirectoryCounter()));
+        tempDirectory.mkdir();
         tempDirectory.deleteOnExit();
         implementation.setAttribute(TEMP_DIRECTORY, this);
     }
@@ -103,12 +103,13 @@ public class TempDirectoryHandler {
      */
     @Override
     protected void finalize() throws Throwable {
+//      System.err.println("TempDirectoryHandler.finalize() for "+getDirectory());
         if (tempDirectoryCleanups == null) {
             delete(tempDirectory);
-            super.finalize();
         } else {
             tempDirectoryCleanups.cleanUpTmpDir();
         }
+        super.finalize();
     }
 
     /**
