@@ -25,6 +25,7 @@
 
 package de.fau.scd.VPC.evaluation;
 
+
 //import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 //import java.lang.annotation.Retention;
@@ -33,6 +34,19 @@ import org.opt4j.core.config.annotations.File;
 import org.opt4j.core.config.annotations.Info;
 import org.opt4j.core.config.annotations.Order;
 import org.opt4j.core.config.annotations.Required;
+import org.opt4j.core.config.annotations.Panel;
+
+import java.awt.Component;
+import java.util.Map.Entry;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import org.opt4j.core.config.Property;
+import org.opt4j.core.config.PropertyModule;
+import org.opt4j.core.config.visualization.FileChooser;
+import org.opt4j.core.config.visualization.Format;
+import org.opt4j.core.config.visualization.PropertyPanel;
 
 import de.fau.scd.VPC.evaluation.VPCEvaluator.FireActorInLoop;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.NumberOfIterations;
@@ -41,9 +55,92 @@ import de.fau.scd.VPC.evaluation.VPCEvaluator.ExecutableOfSimulation;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
+
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
 
+import de.fau.scd.VPC.helper.Environment;
+
+@Panel(value = VPCEvaluatorModule.Panel.class)
 public class VPCEvaluatorModule extends EvaluatorModule {
+
+    @SuppressWarnings("serial")
+    static public class Panel extends PropertyPanel {
+
+        public Panel(PropertyModule module, FileChooser fileChooser, Format format) {
+            super(module, fileChooser, format);
+        }
+
+        protected Component createComponent(final Property property) {
+            Class<?> type = property.getType();
+
+            if (type.equals(Environment.class)) {
+                Environment value = (Environment) property.getValue();
+
+                final DefaultTableModel model = new DefaultTableModel(
+                        new Object[]{"Environment variable", "value"}, 0);
+                for (Entry<String, String> e : value.entrySet()) {
+                    model.addRow(new Object[]{e.getKey(), e.getValue()});
+                }
+                model.addRow(new Object[]{"foo", "bar"});
+                final JTable table = new JTable(model);
+                return table;
+            } else {
+                return super.createComponent(property);
+            }
+        }
+
+    }
+
+    @Info("The VPC configuration template.")
+    @Order(0)
+    @File
+    protected String vpcConfigTemplate = "";
+
+    public String getVpcConfigTemplate() {
+        return vpcConfigTemplate;
+    }
+
+    public void setVpcConfigTemplate(String vpcConfigTemplate) {
+        this.vpcConfigTemplate = vpcConfigTemplate;
+    }
+
+    @Info("The VPC simulator executable")
+    @Order(1)
+    @File
+    protected String simulatorExecutable = "";
+
+    public String getSimulatorExecutable() {
+        return simulatorExecutable;
+    }
+
+    public void setSimulatorExecutable(String exe) {
+        this.simulatorExecutable = exe;
+    }
+
+    @Info("Environment for the VPC simulator executable")
+    @Order(2)
+    protected Environment simulatorEnvironment = new Environment();
+
+    public Environment getSimulatorEnvironment() {
+        return simulatorEnvironment;
+    }
+
+    public void setSimulatorEnvironment(Environment env) {
+        this.simulatorEnvironment = env;
+    }
+
+    @Order(4)
+    @Info("Set the number of iterations")
+    protected int numberOfIterations = 100;
+
+    public int getNumberOfIterations() {
+        return numberOfIterations;
+    }
+
+    public void setNumberOfIterations(int numberOfIterations) {
+        this.numberOfIterations = numberOfIterations;
+    }
+
     public enum SchedulerTypeEnum {
         /**
          * Use TDMA scheduler
@@ -95,78 +192,9 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         STREAMSHAPER
     }
 
-    public enum TraceTypeEnum{
-        PAJE,
-        VCD
-    }
-
-    @Info("The VPC configuration template.")
-    @Order(1)
-    @File
-    protected String vpcConfigTemplate = "";
-
-    public String getVpcConfigTemplate() {
-        return vpcConfigTemplate;
-    }
-
-    public void setVpcConfigTemplate(String vpcConfigTemplate) {
-        this.vpcConfigTemplate = vpcConfigTemplate;
-    }
-
-    @Info("The VPC simulation start script.")
-    @Order(2)
-    @File
-    protected String executableOfSimulation = "";
-
-    @Order(0)
-    @Info("Set the number of iterations")
-    protected int numberOfIterations = 100;
-
-    @Order(0)
-    @Info("Select the trace format")
-    protected TraceTypeEnum traceType = TraceTypeEnum.PAJE;
-
-    @Order(0)
     @Info("Choose the scheduler for the VPC simulation")
+    @Order(5)
     protected SchedulerTypeEnum schedulerType = SchedulerTypeEnum.RRNOPRE;
-
-    @Required(property = "schedulerType", elements = { "RR" })
-    protected double timeSlice = 0.00017;
-
-    @Required(property = "schedulerType", elements = { "RRNOPRE" })
-    protected boolean fireActorInLoop = false;
-
-    public TraceTypeEnum getTraceType() {
-        return this.traceType;
-    }
-
-    public void setTraceType(TraceTypeEnum traceType) {
-        this.traceType = traceType;
-    }
-
-    public boolean getFireActorInLoop() {
-        return this.fireActorInLoop;
-    }
-
-    public void setFireActorInLoop(boolean fireActorInLoop) {
-        this.fireActorInLoop = fireActorInLoop;
-    }
-
-    public double getTimeSlice() {
-        return this.timeSlice;
-    }
-
-    public void setTimeSlice(double timeSlice) {
-        this.timeSlice = timeSlice;
-    }
-
-    public int getNumberOfIterations() {
-        return numberOfIterations;
-    }
-
-    public void setNumberOfIterations(int numberOfIterations) {
-        this.numberOfIterations = numberOfIterations;
-    }
 
     public SchedulerTypeEnum getSchedulerType() {
         return schedulerType;
@@ -176,17 +204,50 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.schedulerType = schedulerType;
     }
 
-    public String getExecutableOfSimulation() {
-        return executableOfSimulation;
+    @Order(6)
+    @Required(property = "schedulerType", elements = { "RR" })
+    protected double timeSlice = 0.00017;
+
+    public double getTimeSlice() {
+        return this.timeSlice;
     }
 
-    public void setExecutableOfSimulation(String executableOfSimulation) {
-        this.executableOfSimulation = executableOfSimulation;
+    public void setTimeSlice(double timeSlice) {
+        this.timeSlice = timeSlice;
+    }
+
+    @Order(7)
+    @Required(property = "schedulerType", elements = { "RRNOPRE" })
+    protected boolean fireActorInLoop = false;
+
+    public boolean getFireActorInLoop() {
+        return this.fireActorInLoop;
+    }
+
+    public void setFireActorInLoop(boolean fireActorInLoop) {
+        this.fireActorInLoop = fireActorInLoop;
+    }
+
+    public enum TraceTypeEnum {
+        PAJE,
+        VCD
+    }
+
+    @Order(8)
+    @Info("Select the trace format")
+    protected TraceTypeEnum traceType = TraceTypeEnum.PAJE;
+
+    public TraceTypeEnum getTraceType() {
+        return this.traceType;
+    }
+
+    public void setTraceType(TraceTypeEnum traceType) {
+        this.traceType = traceType;
     }
 
     @Override
     protected void config() {
-        bindConstant(ExecutableOfSimulation.class).to(executableOfSimulation);
+        bindConstant(ExecutableOfSimulation.class).to(simulatorExecutable);
         bindConstant(NumberOfIterations.class).to(numberOfIterations);
         bindConstant(SchedulerType.class).to(schedulerType);
         bindConstant(TimeSlice.class).to(timeSlice);
