@@ -36,20 +36,6 @@ import org.opt4j.core.config.annotations.Order;
 import org.opt4j.core.config.annotations.Required;
 import org.opt4j.core.config.annotations.Panel;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.util.Map.Entry;
-
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-
-import org.opt4j.core.config.Property;
-import org.opt4j.core.config.PropertyModule;
-import org.opt4j.core.config.visualization.FileChooser;
-import org.opt4j.core.config.visualization.Format;
-import org.opt4j.core.config.visualization.PropertyPanel;
-
 import de.fau.scd.VPC.evaluation.VPCEvaluator.FireActorInLoop;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.NumberOfIterations;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
@@ -61,44 +47,10 @@ import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
 
 import de.fau.scd.VPC.helper.Environment;
+import de.fau.scd.VPC.helper.PropertyPanel;
 
-@Panel(value = VPCEvaluatorModule.Panel.class)
+@Panel(value = PropertyPanel.class)
 public class VPCEvaluatorModule extends EvaluatorModule {
-
-    @SuppressWarnings("serial")
-    static public class Panel extends PropertyPanel {
-
-        public Panel(PropertyModule module, FileChooser fileChooser, Format format) {
-            super(module, fileChooser, format);
-        }
-
-        protected Component createComponent(final Property property) {
-            Class<?> type = property.getType();
-
-            if (type.equals(Environment.class)) {
-                Environment value = (Environment) property.getValue();
-
-                final DefaultTableModel model = new DefaultTableModel(
-                        new Object[]{"Environment variable", "value"}, 0);
-                for (Entry<String, String> e : value.entrySet()) {
-                    model.addRow(new Object[]{e.getKey(), e.getValue()});
-                }
-                model.addRow(new Object[]{"foo", "bar"});
-                final JTable table = new JTable(model);
-                final JScrollPane scrollPane = new JScrollPane(table);
-//              System.err.println(table.getMinimumSize());
-//              System.err.println(table.getPreferredSize());
-//              System.err.println(scrollPane.getMinimumSize());
-//              System.err.println(scrollPane.getPreferredSize());
-                scrollPane.setMinimumSize(new Dimension(-1, 22*4));
-                scrollPane.setPreferredSize(scrollPane.getMinimumSize());
-                return scrollPane;
-            } else {
-                return super.createComponent(property);
-            }
-        }
-
-    }
 
     @Info("The VPC configuration template.")
     @Order(0)
