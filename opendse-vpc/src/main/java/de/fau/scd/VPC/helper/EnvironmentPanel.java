@@ -24,54 +24,63 @@ package de.fau.scd.VPC.helper;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map.Entry;
+import java.util.Vector;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.opt4j.core.config.Property;
 
 @SuppressWarnings("serial")
-public class EnvironmentPanel extends JScrollPane implements ActionListener {
+public class EnvironmentPanel
+    extends
+        JScrollPane
+    implements
+        ActionListener
+      , TableModelListener
+{
 
     public EnvironmentPanel(Property property) {
-        Environment value = (Environment) property.getValue();
+        this.property = property;
+        this.environment = (Environment) property.getValue();
 
         tableModel = new DefaultTableModel(
                 new Object[]{"Environment variable", "value"}, 0);
-        for (Entry<String, String> e : value.entrySet()) {
+        for (Entry<String, String> e : environment.entrySet()) {
             tableModel.addRow(new Object[]{e.getKey(), e.getValue()});
         }
         tableModel.addRow(new Object[]{"foo", "bar"});
+        tableModel.addTableModelListener(this);
         table = new JTable(tableModel);
         this.setViewportView(table);
 
         {
             JPopupMenu popupMenu = new JPopupMenu();
-            menuItemAdd1 = new JMenuItem("Add New Row");
+            menuItemAdd1 = new JMenuItem("New variable");
             menuItemAdd1.addActionListener(this);
             popupMenu.add(menuItemAdd1);
-            menuItemRemove = new JMenuItem("Remove Current Row");
-            menuItemRemove.addActionListener(this);
-            popupMenu.add(menuItemRemove);
-            menuItemRemoveAll1 = new JMenuItem("Remove All Rows");
-            menuItemRemoveAll1.addActionListener(this);
-            popupMenu.add(menuItemRemoveAll1);
+            menuItemRemove1 = new JMenuItem("Remove selected variables");
+            menuItemRemove1.addActionListener(this);
+            popupMenu.add(menuItemRemove1);
             // Set the popup menu for the table
             table.setComponentPopupMenu(popupMenu);
         }
 
         {
             JPopupMenu popupMenu = new JPopupMenu();
-            menuItemAdd2 = new JMenuItem("Add New Row");
+            menuItemAdd2 = new JMenuItem("New variable");
             menuItemAdd2.addActionListener(this);
             popupMenu.add(menuItemAdd2);
-            menuItemRemoveAll2 = new JMenuItem("Remove All Rows");
-            menuItemRemoveAll2.addActionListener(this);
-            popupMenu.add(menuItemRemoveAll2);
+            menuItemRemove2 = new JMenuItem("Remove selected variables");
+            menuItemRemove2.addActionListener(this);
+            popupMenu.add(menuItemRemove2);
             // Set the popup menu for the table
             this.setComponentPopupMenu(popupMenu);
         }
@@ -85,21 +94,20 @@ public class EnvironmentPanel extends JScrollPane implements ActionListener {
 
     }
 
+    private final Property property;
+    private final Environment environment;
     private final DefaultTableModel tableModel;
     private final JTable table;
     private final JMenuItem menuItemAdd1, menuItemAdd2;
-    private final JMenuItem menuItemRemove;
-    private final JMenuItem menuItemRemoveAll1, menuItemRemoveAll2;
+    private final JMenuItem menuItemRemove1, menuItemRemove2;
 
     @Override
     public void actionPerformed(ActionEvent event) {
         JMenuItem menu = (JMenuItem) event.getSource();
         if (menu == menuItemAdd1 || menu == menuItemAdd2) {
             addNewRow();
-        } else if (menu == menuItemRemove) {
-            removeCurrentRow();
-        } else if (menu == menuItemRemoveAll1 || menu == menuItemRemoveAll2) {
-            removeAllRows();
+        } else if (menu == menuItemRemove1 || menu == menuItemRemove2) {
+            removeSelectedRows();
         }
     }
 
@@ -107,15 +115,31 @@ public class EnvironmentPanel extends JScrollPane implements ActionListener {
         tableModel.addRow(new String[0]);
     }
 
-    private void removeCurrentRow() {
-        int selectedRow = table.getSelectedRow();
-        tableModel.removeRow(selectedRow);
-    }
+    private void removeSelectedRows() {
+        int[] selectedRows = table.getSelectedRows();
 
-    private void removeAllRows() {
-        int rowCount = tableModel.getRowCount();
-        for (int i = 0; i < rowCount; i++) {
-            tableModel.removeRow(0);
+        for (int i = selectedRows.length-1; i >= 0; --i) {
+            tableModel.removeRow(selectedRows[i]);
         }
     }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+//      System.err.println(e);
+        environment.clear();
+        @SuppressWarnings("unchecked")
+        Vector<Vector<String>> rows = tableModel.getDataVector();
+        System.err.println(rows);
+        for (Vector<String> row : rows) {
+            if (row.get(0) != null && row.get(1) != null) {
+                environment.put(row.get(0), row.get(1));
+            }
+        }
+        try {
+            property.setValue(environment);
+        } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+        }
+    }
+
 }
