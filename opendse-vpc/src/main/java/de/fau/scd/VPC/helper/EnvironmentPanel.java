@@ -35,52 +35,43 @@ import javax.swing.table.DefaultTableModel;
 import org.opt4j.core.config.Property;
 
 @SuppressWarnings("serial")
-public class EnvironmentPanel extends JScrollPane {
+public class EnvironmentPanel extends JScrollPane implements ActionListener {
 
     public EnvironmentPanel(Property property) {
         Environment value = (Environment) property.getValue();
 
-        final DefaultTableModel model = new DefaultTableModel(
+        tableModel = new DefaultTableModel(
                 new Object[]{"Environment variable", "value"}, 0);
         for (Entry<String, String> e : value.entrySet()) {
-            model.addRow(new Object[]{e.getKey(), e.getValue()});
+            tableModel.addRow(new Object[]{e.getKey(), e.getValue()});
         }
-        model.addRow(new Object[]{"foo", "bar"});
-        final JTable table = new JTable(model);
+        tableModel.addRow(new Object[]{"foo", "bar"});
+        table = new JTable(tableModel);
         this.setViewportView(table);
-
-        final JMenuItem menuItemAdd = new JMenuItem("Add New Row");
-        final JMenuItem menuItemRemove = new JMenuItem("Remove Current Row");
-        final JMenuItem menuItemRemoveAll = new JMenuItem("Remove All Rows");
-        {
-            ActionListener menuActionListener = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // TODO Auto-generated method stub
-
-                }
-
-
-            };
-            menuItemAdd.addActionListener(menuActionListener);
-            menuItemRemove.addActionListener(menuActionListener);
-            menuItemRemoveAll.addActionListener(menuActionListener);
-        }
 
         {
             JPopupMenu popupMenu = new JPopupMenu();
-            popupMenu.add(menuItemAdd);
+            menuItemAdd1 = new JMenuItem("Add New Row");
+            menuItemAdd1.addActionListener(this);
+            popupMenu.add(menuItemAdd1);
+            menuItemRemove = new JMenuItem("Remove Current Row");
+            menuItemRemove.addActionListener(this);
             popupMenu.add(menuItemRemove);
-            popupMenu.add(menuItemRemoveAll);
+            menuItemRemoveAll1 = new JMenuItem("Remove All Rows");
+            menuItemRemoveAll1.addActionListener(this);
+            popupMenu.add(menuItemRemoveAll1);
             // Set the popup menu for the table
             table.setComponentPopupMenu(popupMenu);
         }
 
         {
             JPopupMenu popupMenu = new JPopupMenu();
-            popupMenu.add(menuItemAdd);
-            popupMenu.add(menuItemRemoveAll);
+            menuItemAdd2 = new JMenuItem("Add New Row");
+            menuItemAdd2.addActionListener(this);
+            popupMenu.add(menuItemAdd2);
+            menuItemRemoveAll2 = new JMenuItem("Remove All Rows");
+            menuItemRemoveAll2.addActionListener(this);
+            popupMenu.add(menuItemRemoveAll2);
             // Set the popup menu for the table
             this.setComponentPopupMenu(popupMenu);
         }
@@ -92,5 +83,39 @@ public class EnvironmentPanel extends JScrollPane {
         this.setMinimumSize(new Dimension(-1, 22*4));
         this.setPreferredSize(this.getMinimumSize());
 
+    }
+
+    private final DefaultTableModel tableModel;
+    private final JTable table;
+    private final JMenuItem menuItemAdd1, menuItemAdd2;
+    private final JMenuItem menuItemRemove;
+    private final JMenuItem menuItemRemoveAll1, menuItemRemoveAll2;
+
+    @Override
+    public void actionPerformed(ActionEvent event) {
+        JMenuItem menu = (JMenuItem) event.getSource();
+        if (menu == menuItemAdd1 || menu == menuItemAdd2) {
+            addNewRow();
+        } else if (menu == menuItemRemove) {
+            removeCurrentRow();
+        } else if (menu == menuItemRemoveAll1 || menu == menuItemRemoveAll2) {
+            removeAllRows();
+        }
+    }
+
+    private void addNewRow() {
+        tableModel.addRow(new String[0]);
+    }
+
+    private void removeCurrentRow() {
+        int selectedRow = table.getSelectedRow();
+        tableModel.removeRow(selectedRow);
+    }
+
+    private void removeAllRows() {
+        int rowCount = tableModel.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            tableModel.removeRow(0);
+        }
     }
 }
