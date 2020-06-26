@@ -37,8 +37,10 @@ import org.opt4j.core.config.annotations.Required;
 import org.opt4j.core.config.annotations.Panel;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.util.Map.Entry;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -83,7 +85,14 @@ public class VPCEvaluatorModule extends EvaluatorModule {
                 }
                 model.addRow(new Object[]{"foo", "bar"});
                 final JTable table = new JTable(model);
-                return table;
+                final JScrollPane scrollPane = new JScrollPane(table);
+//              System.err.println(table.getMinimumSize());
+//              System.err.println(table.getPreferredSize());
+//              System.err.println(scrollPane.getMinimumSize());
+//              System.err.println(scrollPane.getPreferredSize());
+                scrollPane.setMinimumSize(new Dimension(-1, 22*4));
+                scrollPane.setPreferredSize(scrollPane.getMinimumSize());
+                return scrollPane;
             } else {
                 return super.createComponent(property);
             }
