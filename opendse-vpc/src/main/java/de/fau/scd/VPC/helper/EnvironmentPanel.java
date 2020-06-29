@@ -56,7 +56,7 @@ public class EnvironmentPanel
         for (Entry<String, String> e : environment.entrySet()) {
             tableModel.addRow(new Object[]{e.getKey(), e.getValue()});
         }
-        tableModel.addRow(new Object[]{"foo", "bar"});
+//      tableModel.addRow(new Object[]{"foo", "bar"});
         tableModel.addTableModelListener(this);
         table = new JTable(tableModel);
         this.setViewportView(table);
@@ -129,10 +129,14 @@ public class EnvironmentPanel
         environment.clear();
         @SuppressWarnings("unchecked")
         Vector<Vector<String>> rows = tableModel.getDataVector();
-        System.err.println(rows);
+//      System.err.println(rows);
         for (Vector<String> row : rows) {
-            if (row.get(0) != null && row.get(1) != null) {
-                environment.put(row.get(0), row.get(1));
+            final String var   = row.get(0);
+            final String value = row.get(1);
+            if (var != null) {
+                environment.put(
+                    var
+                  , value != null ? value : "");
             }
         }
         try {
