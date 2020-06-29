@@ -34,22 +34,62 @@ public class Environment extends TreeMap<String, String> {
 
     public Environment(String encoding) {
         super();
-        for (int start = 0; start < encoding.length();) {
-            int index = encoding.indexOf(0, start);
-            if (index == -1)
-                index = encoding.length();
-            String envVarDef = encoding.substring(start, index);
-            if (!envVarDef.isEmpty()) {
-                int indexAssign = envVarDef.indexOf('=');
-                assert indexAssign != -1 : "Environment variable definition " + envVarDef + " must contain a '='!";
-                String var   = envVarDef.substring(0, indexAssign);
-                String value = envVarDef.substring(indexAssign+1);
-                this.put(var, value);
+//      System.err.println("Encoding: "+encoding);
+        for (int n = 0, m = encoding.length(); n < m;) {
+            char c = '\0';
+            String var = "";
+            for (; n < m; ++n) {
+                c = encoding.charAt(n);
+                if (c == '=' || c == ';') {
+                    break;
+                } else if (c != '\\') {
+                    var += c;
+                } else {
+                    ++n;
+                    if (n >= m) {
+                        throw new RuntimeException(
+                            "Environemnt variable escape char '\\' must not be the last" +
+                            " char in the evironment definition \""+encoding+"\"!");
+                    }
+                    char ce = encoding.charAt(n);
+                    if (ce == '=') {
+                        throw new RuntimeException(
+                            "Environemnt variable escape char '\\' can not escape a '='!");
+                    }
+                    var += ce;
+                }
             }
-            start = index + 1;
+            if (c != '=') {
+                throw new RuntimeException(
+                    "Environment variable definition \"" + var + "\" must contain a '='!");
+            }
+            ++n; // Skip '='
+//          System.err.println("Var: "+var+", encoding: "+encoding.substring(n));
+            String value = "";
+            for (; n < m; ++n) {
+                c = encoding.charAt(n);
+                if (c == ';') {
+                    break;
+                } else if (c != '\\') {
+                    value += c;
+                } else {
+                    ++n;
+                    if (n >= m) {
+                        throw new RuntimeException(
+                            "Environemnt variable escape char '\\' must not be the last" +
+                            " char in the evironment definition \""+encoding+"\"!");
+                    }
+                    value += encoding.charAt(n);
+                }
+            }
+            if (c == ';') {
+                ++n; // Skip ';'
+            }
+//          System.err.println("Value: "+value+", encoding: "+encoding.substring(n));
+            this.put(var, value);
         }
     }
-    
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
@@ -57,11 +97,33 @@ public class Environment extends TreeMap<String, String> {
         if (i.hasNext()) {
             for (;;) {
                 Entry<String, String> e = i.next();
-                sb.append(e.getKey());
+                {
+                    final String var   = e.getKey();
+                    for(int n = 0, m = var.length() ; n < m ; ++n) {
+                        char c = var.charAt(n);
+                        if (c == '\\' || c == ';') {
+                            sb.append('\\');
+                            sb.append(c);
+                        } else {
+                            sb.append(c);
+                        }
+                    }
+                }
                 sb.append('=');
-                sb.append(e.getValue());
+                {
+                    final String value = e.getValue();
+                    for(int n = 0, m = value.length() ; n < m ; ++n) {
+                        char c = value.charAt(n);
+                        if (c == '\\' || c == ';') {
+                            sb.append('\\');
+                            sb.append(c);
+                        } else {
+                            sb.append(c);
+                        }
+                    }
+                }
                 if (i.hasNext())
-                    sb.append('\0');
+                    sb.append(';');
                 else
                     break;
             }
