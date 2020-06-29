@@ -36,10 +36,10 @@ import org.opt4j.core.config.annotations.Order;
 import org.opt4j.core.config.annotations.Required;
 import org.opt4j.core.config.annotations.Panel;
 
+import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorExecutable;
+import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorEnvironment;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.FireActorInLoop;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.NumberOfIterations;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.ExecutableOfSimulation;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
@@ -78,28 +78,28 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.simulatorExecutable = exe;
     }
 
+    @SuppressWarnings("serial")
+    protected static class SimulatorEnvironmentImpl
+        extends
+            Environment
+        implements
+            SimulatorEnvironment
+    {
+    }
+
     @Info("Environment for the VPC simulator executable")
     @Order(2)
-    protected Environment simulatorEnvironment = new Environment();
+    protected final SimulatorEnvironmentImpl simulatorEnvironment = new SimulatorEnvironmentImpl();
 
     public Environment getSimulatorEnvironment() {
         return simulatorEnvironment;
     }
 
     public void setSimulatorEnvironment(Environment env) {
-        this.simulatorEnvironment = env;
-    }
-
-    @Order(4)
-    @Info("Set the number of iterations")
-    protected int numberOfIterations = 100;
-
-    public int getNumberOfIterations() {
-        return numberOfIterations;
-    }
-
-    public void setNumberOfIterations(int numberOfIterations) {
-        this.numberOfIterations = numberOfIterations;
+        if (env != simulatorEnvironment) {
+            this.simulatorEnvironment.clear();
+            this.simulatorEnvironment.putAll(env);
+        }
     }
 
     public enum SchedulerTypeEnum {
@@ -208,8 +208,8 @@ public class VPCEvaluatorModule extends EvaluatorModule {
 
     @Override
     protected void config() {
-        bindConstant(ExecutableOfSimulation.class).to(simulatorExecutable);
-        bindConstant(NumberOfIterations.class).to(numberOfIterations);
+        bindConstant(SimulatorExecutable.class).to(simulatorExecutable);
+        bind(SimulatorEnvironment.class).toInstance(simulatorEnvironment);
         bindConstant(SchedulerType.class).to(schedulerType);
         bindConstant(TimeSlice.class).to(timeSlice);
         bindConstant(FireActorInLoop.class).to(fireActorInLoop);

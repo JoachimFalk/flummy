@@ -131,4 +131,18 @@ public class Environment extends TreeMap<String, String> {
         return sb.toString();
     }
 
+    public String [] getEnvironment() {
+        String[] retval = new String[size()];
+
+        int i = 0;
+        for (Entry<String, String> e : entrySet()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(e.getKey());
+            sb.append('=');
+            sb.append(e.getValue());
+            retval[i++] = sb.toString();
+        }
+        return retval;
+    }
+
 }

@@ -50,13 +50,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-//import org.jdom.Attribute;
-//import org.jdom.DocType;
-//import org.jdom.Document;
-//import org.jdom.Element;
-//import org.jdom.output.Format;
-//import org.jdom.output.XMLOutputter;
-
 import org.opt4j.core.DoubleValue;
 import org.opt4j.core.Objective;
 import org.opt4j.core.Objectives;
@@ -71,6 +64,7 @@ import com.google.inject.Inject;
 import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.SchedulerTypeEnum;
 import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.TraceTypeEnum;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
+
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Attributes;
@@ -110,12 +104,11 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
     @Retention(RUNTIME)
     @BindingAnnotation
-    public @interface ExecutableOfSimulation {
+    public @interface SimulatorExecutable {
     }
 
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface NumberOfIterations {
+    public interface SimulatorEnvironment {
+        public String [] getEnvironment();
     }
 
     @Retention(RUNTIME)
@@ -141,9 +134,9 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //  Objective SimTime = new Objective("SimTime[ns]", Objective.Sign.MIN);
     Objective objective =  new Objective("#throughput VPC", Sign.MAX);
 
-    protected final String executableOfSimulation;
+    protected final String simulatorExecutable;
 
-    protected final int numberOfIterations;
+    protected final SimulatorEnvironment simulatorEnvironment;
 
     protected final SchedulerTypeEnum schedulerType;
 
@@ -192,8 +185,8 @@ public class VPCEvaluator implements ImplementationEvaluator {
     // Constructor of the VPC evaluator
     @Inject
     public VPCEvaluator(
-        @ExecutableOfSimulation String executableOfSimulation
-      , @NumberOfIterations int numberOfIterations
+        @SimulatorExecutable String simulatorExecutable
+      , SimulatorEnvironment simulatorEnvironment
       , @SchedulerType SchedulerTypeEnum schedulerType
       , @TimeSlice double timeSlice
       , @FireActorInLoop boolean fireActorInLoop
@@ -203,8 +196,8 @@ public class VPCEvaluator implements ImplementationEvaluator {
         FileNotFoundException
       , VPCFormatErrorException
     {
-        this.executableOfSimulation = executableOfSimulation;
-        this.numberOfIterations     = numberOfIterations;
+        this.simulatorExecutable    = simulatorExecutable;
+        this.simulatorEnvironment   = simulatorEnvironment;
         this.schedulerType          = schedulerType;
         this.timeSlice              = timeSlice;
         this.fireActorInLoop        = fireActorInLoop;
@@ -274,10 +267,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
         //root.addContent(routingsToJdom(oneToOneRoutings, implementation, resources));
 
-//      DocType vpcXml = new DocType(VPCCONFIGURATION, dtdFileName);
-//      Document doc = new Document(root, vpcXml);
-
-        double simTime = Double.MAX_VALUE;
+//      double simTime = Double.MAX_VALUE;
 
         try {
 //          // generate temporary directory
@@ -285,17 +275,21 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //          // generate VPC config
 //          File confFile = new File(clusterDir, configFileName);
 //          BufferedWriter bw = new BufferedWriter(new FileWriter(confFile));
-//
-//          XMLOutputter serializer = new XMLOutputter(Format.getPrettyFormat());
-//          serializer.output(doc, bw);
-//          bw.close();
 
-            String cmd;// = "export SRC_ITERS="+this.numberOfIterations;
+            String[] cmd = {
+                    this.simulatorExecutable
+                  , "--systemoc-vpc-config"
+                  , outputVPCConfig.getCanonicalPath()
+                };
+//          String[] env = simulatorEnvironment.getEnvironment();
+//          System.err.println("==============");
+//          for (int n = 0, m = env.length; n < m; ++n) {
+//              System.err.println(env[n]);
+//          }
+//          System.err.println("==============");
 
-            cmd = this.executableOfSimulation + " --systemoc-vpc-config "+outputVPCConfig.getCanonicalPath();
-            String[] envV = {"SRC_ITERS="+this.numberOfIterations};
-
-            Process exec_process = Runtime.getRuntime().exec(cmd,envV,
+            Process exec_process = Runtime.getRuntime().exec(cmd,
+                    simulatorEnvironment.getEnvironment(),
                     tempDirectoryHandler.getDirectory());
         } catch (IOException e) {
             System.err.println("Got an exception during I/O with simulation:\n" + e);
