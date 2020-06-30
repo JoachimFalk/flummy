@@ -47,6 +47,7 @@ import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
 
 import de.fau.scd.VPC.helper.Environment;
+import de.fau.scd.VPC.helper.Objectives;
 import de.fau.scd.VPC.helper.PropertyPanel;
 
 @Panel(value = PropertyPanel.class)
@@ -99,6 +100,21 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         if (env != simulatorEnvironment) {
             this.simulatorEnvironment.clear();
             this.simulatorEnvironment.putAll(env);
+        }
+    }
+
+    @Info("Objectives of the VPC evaluator")
+    @Order(3)
+    protected final Objectives objectives = new Objectives();
+
+    public Objectives getObjectives() {
+        return objectives;
+    }
+
+    public void setObjectives(Objectives objs) {
+        if (objs != objectives) {
+            this.objectives.clear();
+            this.objectives.putAll(objs);
         }
     }
 
