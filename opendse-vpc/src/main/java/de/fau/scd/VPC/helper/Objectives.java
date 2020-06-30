@@ -21,12 +21,17 @@
 
 package de.fau.scd.VPC.helper;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.PrimitiveIterator;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.function.IntConsumer;
 
 @SuppressWarnings("serial")
-public class Objectives extends TreeMap<String, String> {
+public class Objectives extends TreeMap<String, ObjectiveInfo> {
 
     public Objectives() {
         super();
@@ -34,115 +39,103 @@ public class Objectives extends TreeMap<String, String> {
 
     public Objectives(String encoding) {
         super();
-//      System.err.println("Encoding: "+encoding);
-        for (int n = 0, m = encoding.length(); n < m;) {
-            char c = '\0';
-            String var = "";
-            for (; n < m; ++n) {
-                c = encoding.charAt(n);
-                if (c == '=' || c == ';') {
-                    break;
-                } else if (c != '\\') {
-                    var += c;
-                } else {
-                    ++n;
-                    if (n >= m) {
-                        throw new RuntimeException(
-                            "Environemnt variable escape char '\\' must not be the last" +
-                            " char in the evironment definition \""+encoding+"\"!");
-                    }
-                    char ce = encoding.charAt(n);
-                    if (ce == '=') {
-                        throw new RuntimeException(
-                            "Environemnt variable escape char '\\' can not escape a '='!");
-                    }
-                    var += ce;
-                }
-            }
-            if (c != '=') {
-                throw new RuntimeException(
-                    "Objectives variable definition \"" + var + "\" must contain a '='!");
-            }
-            ++n; // Skip '='
-//          System.err.println("Var: "+var+", encoding: "+encoding.substring(n));
-            String value = "";
-            for (; n < m; ++n) {
-                c = encoding.charAt(n);
-                if (c == ';') {
-                    break;
-                } else if (c != '\\') {
-                    value += c;
-                } else {
-                    ++n;
-                    if (n >= m) {
-                        throw new RuntimeException(
-                            "Environemnt variable escape char '\\' must not be the last" +
-                            " char in the evironment definition \""+encoding+"\"!");
-                    }
-                    value += encoding.charAt(n);
-                }
-            }
-            if (c == ';') {
-                ++n; // Skip ';'
-            }
-//          System.err.println("Value: "+value+", encoding: "+encoding.substring(n));
-            this.put(var, value);
+
+        CharIterator in = new CharIterator(encoding);
+
+        while (in.hasNext()) {
+            String objName    = deQuote(in, ',');
+            String objSign    = deQuote(in, ',');
+            String parseFile  = deQuote(in, ',');
+            String parseRegex = deQuote(in, ';');
+            this.put(objName, new ObjectiveInfo(objSign, parseFile, parseRegex));
         }
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        Iterator<Entry<String, String>> i = entrySet().iterator();
-        if (i.hasNext()) {
-            for (;;) {
-                Entry<String, String> e = i.next();
-                {
-                    final String var   = e.getKey();
-                    for(int n = 0, m = var.length() ; n < m ; ++n) {
-                        char c = var.charAt(n);
-                        if (c == '\\' || c == ';') {
-                            sb.append('\\');
-                            sb.append(c);
-                        } else {
-                            sb.append(c);
-                        }
-                    }
-                }
-                sb.append('=');
-                {
-                    final String value = e.getValue();
-                    for(int n = 0, m = value.length() ; n < m ; ++n) {
-                        char c = value.charAt(n);
-                        if (c == '\\' || c == ';') {
-                            sb.append('\\');
-                            sb.append(c);
-                        } else {
-                            sb.append(c);
-                        }
-                    }
-                }
-                if (i.hasNext())
-                    sb.append(';');
-                else
-                    break;
-            }
+        Iterator<Entry<String, ObjectiveInfo>> i = entrySet().iterator();
+        while (i.hasNext()) {
+            Entry<String, ObjectiveInfo> e = i.next();
+            enQuote(sb, e.getKey());
+            sb.append(',');
+            enQuote(sb, e.getValue().getObjSign().name());
+            sb.append(',');
+            enQuote(sb, e.getValue().getParseFile().toString());
+            sb.append(',');
+            enQuote(sb, e.getValue().getParseRegex().pattern());
+            if (i.hasNext())
+                sb.append(';');
         }
         return sb.toString();
     }
 
-    public String [] getObjectives() {
-        String[] retval = new String[size()];
-
-        int i = 0;
-        for (Entry<String, String> e : entrySet()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(e.getKey());
-            sb.append('=');
-            sb.append(e.getValue());
-            retval[i++] = sb.toString();
+    protected void enQuote(StringBuilder sb, String value) {
+        for(int n = 0, m = value.length() ; n < m ; ++n) {
+            char c = value.charAt(n);
+            if (c == '\\' || c == ';' || c == ',')
+                sb.append('\\');
+            sb.append(c);
         }
-        return retval;
     }
 
+    static class CharIterator implements PrimitiveIterator.OfInt {
+        int cur = 0;
+
+        CharIterator(String str) {
+            this.str = str;
+        }
+
+        public boolean hasNext() {
+            return cur < str.length();
+        }
+
+        public int nextInt() {
+            if (hasNext()) {
+                return str.charAt(cur++);
+            } else {
+                throw new NoSuchElementException();
+            }
+        }
+
+        @Override
+        public void forEachRemaining(IntConsumer block) {
+            for (; cur < str.length(); cur++) {
+                block.accept(str.charAt(cur));
+            }
+        }
+
+        public String getString() {
+            return str;
+        }
+
+        protected final String str;
+    }
+
+    protected String deQuote(CharIterator in, char end) {
+        String value = "";
+        char c = '\0';
+        while (in.hasNext()) {
+            c = (char) in.nextInt();
+            if (c == ';' || c == ',' || c == end) {
+                break;
+            } else if (c != '\\') {
+                value += c;
+            } else {
+                if (!in.hasNext())
+                    throw new RuntimeException(
+                        "Escape char '\\' must not be the last" +
+                        " char in \""+in.getString()+"\"!");
+                value += (char) in.nextInt();
+            }
+        }
+        if (c != end && (end != ';' || in.hasNext()))
+            throw new RuntimeException(
+                    "Expected '"+end+"' after \""+value+"\"!");
+        return value;
+    }
+
+    public Map<String, ObjectiveInfo> getObjectives() {
+        return Collections.unmodifiableMap(this);
+    }
 }
