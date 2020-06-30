@@ -38,8 +38,10 @@ public class PropertyPanel extends org.opt4j.core.config.visualization.PropertyP
     protected Component createComponent(final Property property) {
         Class<?> type = property.getType();
 
-        if (type.equals(Environment.class)) {
+        if (type.isAssignableFrom(Environment.class)) {
             return new EnvironmentPanel(property);
+        } else if (type.isAssignableFrom(Objectives.class)) {
+            return new ObjectivesPanel(property);
         } else {
             return super.createComponent(property);
         }
