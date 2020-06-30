@@ -36,6 +36,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
+import org.opt4j.core.Objective.Sign;
 import org.opt4j.core.config.Property;
 
 @SuppressWarnings("serial")
@@ -49,12 +50,16 @@ public class ObjectivesPanel
 
     public ObjectivesPanel(Property property) {
         this.property = property;
-        this.environment = (Objectives) property.getValue();
+        this.objectives = (Objectives) property.getValue();
 
         tableModel = new DefaultTableModel(
-                new Object[]{"Objectives variable", "value"}, 0);
-        for (Entry<String, String> e : environment.entrySet()) {
-            tableModel.addRow(new Object[]{e.getKey(), e.getValue()});
+                new Object[]{"Name", "MIN/MAX", "File", "Regex"}, 0);
+        for (Entry<String, ObjectiveInfo> e : objectives.entrySet()) {
+            tableModel.addRow(new Object[]{
+                e.getKey()
+              , e.getValue().getObjSign().name()
+              , e.getValue().getParseFile().toString()
+              , e.getValue().getParseRegex().pattern()});
         }
 //      tableModel.addRow(new Object[]{"foo", "bar"});
         tableModel.addTableModelListener(this);
@@ -63,10 +68,10 @@ public class ObjectivesPanel
 
         {
             JPopupMenu popupMenu = new JPopupMenu();
-            menuItemAdd1 = new JMenuItem("New variable");
+            menuItemAdd1 = new JMenuItem("New objective");
             menuItemAdd1.addActionListener(this);
             popupMenu.add(menuItemAdd1);
-            menuItemRemove1 = new JMenuItem("Remove selected variables");
+            menuItemRemove1 = new JMenuItem("Remove selected objectives");
             menuItemRemove1.addActionListener(this);
             popupMenu.add(menuItemRemove1);
             // Set the popup menu for the table
@@ -75,10 +80,10 @@ public class ObjectivesPanel
 
         {
             JPopupMenu popupMenu = new JPopupMenu();
-            menuItemAdd2 = new JMenuItem("New variable");
+            menuItemAdd2 = new JMenuItem("New objective");
             menuItemAdd2.addActionListener(this);
             popupMenu.add(menuItemAdd2);
-            menuItemRemove2 = new JMenuItem("Remove selected variables");
+            menuItemRemove2 = new JMenuItem("Remove selected objectives");
             menuItemRemove2.addActionListener(this);
             popupMenu.add(menuItemRemove2);
             // Set the popup menu for the table
@@ -95,7 +100,7 @@ public class ObjectivesPanel
     }
 
     private final Property property;
-    private final Objectives environment;
+    private final Objectives objectives;
     private final DefaultTableModel tableModel;
     private final JTable table;
     private final JMenuItem menuItemAdd1, menuItemAdd2;
@@ -126,21 +131,22 @@ public class ObjectivesPanel
     @Override
     public void tableChanged(TableModelEvent e) {
 //      System.err.println(e);
-        environment.clear();
+        objectives.clear();
         @SuppressWarnings("unchecked")
         Vector<Vector<String>> rows = tableModel.getDataVector();
 //      System.err.println(rows);
         for (Vector<String> row : rows) {
-            final String var   = row.get(0);
-            final String value = row.get(1);
-            if (var != null) {
-                environment.put(
-                    var
-                  , value != null ? value : "");
+            String objName    = row.get(0);
+            String objSign    = row.get(1) != null ? row.get(1) : Sign.MIN.name();
+            String parseFile  = row.get(2) != null ? row.get(2) : "";
+            String parseRegex = row.get(3) != null ? row.get(3) : "";
+            if (objName != null) {
+                objectives.put(objName,
+                    new ObjectiveInfo(objSign, parseFile, parseRegex));
             }
         }
         try {
-            property.setValue(environment);
+            property.setValue(objectives);
         } catch (InvocationTargetException e1) {
             e1.printStackTrace();
         }
