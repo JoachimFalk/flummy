@@ -28,27 +28,18 @@ package de.fau.scd.VPC.evaluation;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.annotation.Retention;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.regex.Matcher;
 
 import org.opt4j.core.DoubleValue;
 import org.opt4j.core.Objective;
@@ -63,6 +54,7 @@ import com.google.inject.Inject;
 
 import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.SchedulerTypeEnum;
 import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.TraceTypeEnum;
+import de.fau.scd.VPC.helper.ObjectiveInfo;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 
 import net.sf.opendse.model.Application;
@@ -111,6 +103,10 @@ public class VPCEvaluator implements ImplementationEvaluator {
         public String [] getEnvironment();
     }
 
+    public interface VPCObjectives {
+        public List<ObjectiveInfo> getObjectives();
+    }
+
     @Retention(RUNTIME)
     @BindingAnnotation
     public @interface SchedulerType {
@@ -137,6 +133,8 @@ public class VPCEvaluator implements ImplementationEvaluator {
     protected final String simulatorExecutable;
 
     protected final SimulatorEnvironment simulatorEnvironment;
+
+    protected final VPCObjectives vpcObjectives;
 
     protected final SchedulerTypeEnum schedulerType;
 
@@ -187,6 +185,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
     public VPCEvaluator(
         @SimulatorExecutable String simulatorExecutable
       , SimulatorEnvironment simulatorEnvironment
+      , VPCObjectives vpcObjectives
       , @SchedulerType SchedulerTypeEnum schedulerType
       , @TimeSlice double timeSlice
       , @FireActorInLoop boolean fireActorInLoop
@@ -198,6 +197,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
     {
         this.simulatorExecutable    = simulatorExecutable;
         this.simulatorEnvironment   = simulatorEnvironment;
+        this.vpcObjectives          = vpcObjectives;
         this.schedulerType          = schedulerType;
         this.timeSlice              = timeSlice;
         this.fireActorInLoop        = fireActorInLoop;
@@ -247,11 +247,6 @@ public class VPCEvaluator implements ImplementationEvaluator {
             infeasible = true;
         }
 
-
-
-
-        // Define the objective
-        Value<?> objectiveValue                     = Objective.INFEASIBLE;
 //      // Create the VPC configuration
 //      Element root = new Element(VPCCONFIGURATION);
 //      // Extract the architecture graph
@@ -270,12 +265,6 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //      double simTime = Double.MAX_VALUE;
 
         try {
-//          // generate temporary directory
-//          File clusterDir = tempDirectoryHandler.getDirectory();
-//          // generate VPC config
-//          File confFile = new File(clusterDir, configFileName);
-//          BufferedWriter bw = new BufferedWriter(new FileWriter(confFile));
-
             String[] cmd = {
                     this.simulatorExecutable
                   , "--systemoc-vpc-config"
@@ -291,16 +280,36 @@ public class VPCEvaluator implements ImplementationEvaluator {
             Process exec_process = Runtime.getRuntime().exec(cmd,
                     simulatorEnvironment.getEnvironment(),
                     tempDirectoryHandler.getDirectory());
+            for (ObjectiveInfo objInfo : vpcObjectives.getObjectives()) {
+                Double objValue = null;
+
+                try {
+                    File parseFile = new File(
+                        tempDirectoryHandler.getDirectory().getPath()
+                      , objInfo.getParseFile().getPath());
+                    BufferedReader br = new BufferedReader(
+                            new FileReader(parseFile));
+                    for (String line = br.readLine();
+                         line != null;
+                         line = br.readLine()) {
+                        Matcher m = objInfo.getParseRegex().matcher(line);
+                        if (m.matches()) {
+                            objValue = Double.parseDouble(m.group(1));
+                            break;
+                        }
+                    }
+                    br.close();
+                } catch (FileNotFoundException e) {
+                    System.err.println("Got an exception during I/O with simulation:\n" + e);
+                }
+                if (infeasible || objValue == null)
+                    objectives.add(objective, Objective.INFEASIBLE);
+                else
+                    objectives.add(objective, objValue);
+            }
         } catch (IOException e) {
             System.err.println("Got an exception during I/O with simulation:\n" + e);
         }
-
-        objectiveValue = new DoubleValue(69.0);
-
-        if (infeasible)
-            objectives.add(objective, Objective.INFEASIBLE);
-        else
-            objectives.add(objective, objectiveValue);
 
         return implementation;
     }

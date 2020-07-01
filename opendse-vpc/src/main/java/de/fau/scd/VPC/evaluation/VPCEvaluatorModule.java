@@ -25,11 +25,6 @@
 
 package de.fau.scd.VPC.evaluation;
 
-
-//import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-//import java.lang.annotation.Retention;
-
 import org.opt4j.core.config.annotations.File;
 import org.opt4j.core.config.annotations.Info;
 import org.opt4j.core.config.annotations.Order;
@@ -43,6 +38,7 @@ import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
+import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCObjectives;
 
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
 
@@ -103,9 +99,18 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         }
     }
 
+    @SuppressWarnings("serial")
+    protected static class VPCObjectivesImpl
+        extends
+            Objectives
+        implements
+            VPCObjectives
+    {
+    }
+
     @Info("Objectives of the VPC evaluator")
     @Order(3)
-    protected final Objectives objectives = new Objectives();
+    protected final VPCObjectivesImpl objectives = new VPCObjectivesImpl();
 
     public Objectives getObjectives() {
         return objectives;
@@ -114,7 +119,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     public void setObjectives(Objectives objs) {
         if (objs != objectives) {
             this.objectives.clear();
-            this.objectives.putAll(objs);
+            this.objectives.addAll(objs);
         }
     }
 
@@ -226,6 +231,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     protected void config() {
         bindConstant(SimulatorExecutable.class).to(simulatorExecutable);
         bind(SimulatorEnvironment.class).toInstance(simulatorEnvironment);
+        bind(VPCObjectives.class).toInstance(objectives);
         bindConstant(SchedulerType.class).to(schedulerType);
         bindConstant(TimeSlice.class).to(timeSlice);
         bindConstant(FireActorInLoop.class).to(fireActorInLoop);
