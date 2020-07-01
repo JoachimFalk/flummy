@@ -164,12 +164,16 @@ namespace SystemC_VPC { namespace Detail {
       // set central seed for random number generation
       CX::XN::DOMNode *nodetest = handler.getDocument()->getDocumentElement();
       {
-        MaybeValue<double> seed = CX::getAttrValueAs<MaybeValue<double> >(nodetest, XMLCH("seed"));
+        MaybeValue<double> seed =
+            CX::getAttrValueAs<MaybeValue<double> >
+            (nodetest, XMLCH("seed"));
         this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(
             seed.isDefined() ? seed.get() : time(NULL)));
       }
       {
-        MaybeValue<std::string> resultFile = CX::getAttrValueAs<std::string>(nodetest, XMLCH("resultFile"));
+        MaybeValue<std::string> resultFile =
+            CX::getAttrValueAs<MaybeValue<std::string> >
+            (nodetest, XMLCH("resultFile"));
         if (resultFile.isDefined())
           setResultFile(resultFile.get());
       }
