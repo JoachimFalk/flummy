@@ -24,33 +24,46 @@ package de.fau.scd.VPC.helper;
 import java.io.File;
 import java.util.regex.Pattern;
 import org.opt4j.core.Objective.Sign;
+import org.opt4j.core.Objective;
 
 public class ObjectiveInfo {
-    
+
     public ObjectiveInfo(
-        Sign    objSign
+        String  objName
+      , Sign    objSign
       , File    parseFile
       , Pattern parseRegex)
     {
-        this.objSign    = objSign;
+        this.objective  = new Objective(objName
+                , objSign);
         this.parseFile  = parseFile;
         this.parseRegex = parseRegex;
     }
-    
+
     public ObjectiveInfo(
-            String  objSign
+            String  objName
+          , String  objSign
           , String  parseFile
           , String  parseRegex)
     {
-        this.objSign    = Sign.valueOf(objSign);
+        this.objective  = new Objective(objName
+                , Sign.valueOf(objSign));
         this.parseFile  = new File(parseFile);
         this.parseRegex = Pattern.compile(parseRegex);
     }
 
-    public Sign getObjSign() {
-        return objSign;
+    public Objective getObjective() {
+        return objective;
     }
-    
+
+    public String getObjName() {
+        return objective.getName();
+    }
+
+    public Sign getObjSign() {
+        return objective.getSign();
+    }
+
     public File getParseFile() {
         return parseFile;
     }
@@ -58,8 +71,8 @@ public class ObjectiveInfo {
     public Pattern getParseRegex() {
         return parseRegex;
     }
-    
-    protected final Sign    objSign;
-    protected final File    parseFile;        
-    protected final Pattern parseRegex;
+
+    protected final Objective objective;
+    protected final File      parseFile;
+    protected final Pattern   parseRegex;
 }

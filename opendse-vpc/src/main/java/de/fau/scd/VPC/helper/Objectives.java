@@ -23,15 +23,14 @@ package de.fau.scd.VPC.helper;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
-import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.function.IntConsumer;
 
 @SuppressWarnings("serial")
-public class Objectives extends TreeMap<String, ObjectiveInfo> {
+public class Objectives extends LinkedList<ObjectiveInfo> {
 
     public Objectives() {
         super();
@@ -47,23 +46,27 @@ public class Objectives extends TreeMap<String, ObjectiveInfo> {
             String objSign    = deQuote(in, ',');
             String parseFile  = deQuote(in, ',');
             String parseRegex = deQuote(in, ';');
-            this.put(objName, new ObjectiveInfo(objSign, parseFile, parseRegex));
+            this.add(new ObjectiveInfo(
+                objName
+              , objSign
+              , parseFile
+              , parseRegex));
         }
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        Iterator<Entry<String, ObjectiveInfo>> i = entrySet().iterator();
+        Iterator<ObjectiveInfo> i = iterator();
         while (i.hasNext()) {
-            Entry<String, ObjectiveInfo> e = i.next();
-            enQuote(sb, e.getKey());
+            ObjectiveInfo objInfo = i.next();
+            enQuote(sb, objInfo.getObjName());
             sb.append(',');
-            enQuote(sb, e.getValue().getObjSign().name());
+            enQuote(sb, objInfo.getObjSign().name());
             sb.append(',');
-            enQuote(sb, e.getValue().getParseFile().toString());
+            enQuote(sb, objInfo.getParseFile().toString());
             sb.append(',');
-            enQuote(sb, e.getValue().getParseRegex().pattern());
+            enQuote(sb, objInfo.getParseRegex().pattern());
             if (i.hasNext())
                 sb.append(';');
         }
@@ -135,7 +138,7 @@ public class Objectives extends TreeMap<String, ObjectiveInfo> {
         return value;
     }
 
-    public Map<String, ObjectiveInfo> getObjectives() {
-        return Collections.unmodifiableMap(this);
+    public List<ObjectiveInfo> getObjectives() {
+        return Collections.unmodifiableList(this);
     }
 }

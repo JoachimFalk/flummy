@@ -54,12 +54,12 @@ public class ObjectivesPanel
 
         tableModel = new DefaultTableModel(
                 new Object[]{"Name", "MIN/MAX", "File", "Regex"}, 0);
-        for (Entry<String, ObjectiveInfo> e : objectives.entrySet()) {
+        for (ObjectiveInfo e : objectives) {
             tableModel.addRow(new Object[]{
-                e.getKey()
-              , e.getValue().getObjSign().name()
-              , e.getValue().getParseFile().toString()
-              , e.getValue().getParseRegex().pattern()});
+                e.getObjName()
+              , e.getObjSign().name()
+              , e.getParseFile().toString()
+              , e.getParseRegex().pattern()});
         }
 //      tableModel.addRow(new Object[]{"foo", "bar"});
         tableModel.addTableModelListener(this);
@@ -141,8 +141,11 @@ public class ObjectivesPanel
             String parseFile  = row.get(2) != null ? row.get(2) : "";
             String parseRegex = row.get(3) != null ? row.get(3) : "";
             if (objName != null) {
-                objectives.put(objName,
-                    new ObjectiveInfo(objSign, parseFile, parseRegex));
+                objectives.add(new ObjectiveInfo(
+                    objName
+                  , objSign
+                  , parseFile
+                  , parseRegex));
             }
         }
         try {
