@@ -83,6 +83,8 @@ public:
   void start_of_simulation();
 
   void end_of_simulation();
+
+  ~SystemCVPCSimulator();
 };
 
 SystemCVPCSimulator::SystemCVPCSimulator(sc_core::sc_module_name name)
@@ -203,6 +205,12 @@ void SystemCVPCSimulator::start_of_simulation() {
 
 void SystemCVPCSimulator::end_of_simulation() {
   Director::endOfSystemcSimulation();
+}
+
+SystemCVPCSimulator::~SystemCVPCSimulator() {
+  sc_core::sc_time const &end =  sc_core::sc_time_stamp();
+
+  getResultFile() << "[VPC] overall simulated time: " << end.to_seconds() << " sec (" << end << ")" << std::endl;
 }
 
 } } // namespace SystemC_VPC::Detail

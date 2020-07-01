@@ -56,4 +56,21 @@ namespace SystemC_VPC {
         [modifier]() -> TimingModifier::Ptr { return modifier; });
   }
 
+  std::string   getResultFileName() {
+    return Detail::Configuration::getInstance().getResultFileName();
+  }
+  std::ostream &getResultFile() {
+    return Detail::Configuration::getInstance().getResultFile();
+  }
+
+  void setResultFile(std::string const &resultFileName) {
+    Detail::Configuration::getInstance().setResultFile(resultFileName);
+  }
+  void setResultFile(
+      std::ostream &resultFile
+    , std::string const &resultFileName)
+  {
+    Detail::Configuration::getInstance().setResultFile(resultFile, resultFileName);
+  }
+
 } // namespace SystemC_VPC

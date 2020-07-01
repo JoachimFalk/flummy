@@ -135,10 +135,18 @@ public:
   TimingModifier::Ptr createTimingModifier(std::string const &name,
       std::function<TimingModifier::Ptr ()> constr);
 
+  std::string   getResultFileName();
+  std::ostream &getResultFile();
+
+  void setResultFile(std::string const &resultFileName);
+  void setResultFile(
+      std::ostream      &resultFile
+    , std::string const &resultFileName);
   /// Do a consistency check and finalize stuff for start of simulation.
   void finalize();
 private:
   Configuration();
+  ~Configuration();
 
   struct RegisteredTask {
     RegisteredTask(
@@ -175,6 +183,10 @@ private:
   RegisteredRoutes      registeredRoutes;
 
   TimingModifiers       timingModifiers;
+
+  std::string           resultFileName;
+  std::ostream         *resultFile;
+  bool                  resultFileOwned;
 };
 
 } } // namespace SystemC_VPC::Detail
