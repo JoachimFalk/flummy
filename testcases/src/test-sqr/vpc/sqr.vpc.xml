@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE vpcconfiguration SYSTEM "vpc.dtd">
-<vpcconfiguration>
+<vpcconfiguration resultFile="test-sqr-output/vpc/sqr/results.txt">
 
   <resources>
     <tracer type="PAJE" name="pajeTracer">
