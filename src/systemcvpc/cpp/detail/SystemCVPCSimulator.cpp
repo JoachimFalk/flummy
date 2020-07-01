@@ -205,12 +205,11 @@ void SystemCVPCSimulator::start_of_simulation() {
 
 void SystemCVPCSimulator::end_of_simulation() {
   Director::endOfSystemcSimulation();
+  sc_core::sc_time const &end =  sc_core::sc_time_stamp();
+  getResultFile() << "[VPC] overall simulated time: " << end.to_seconds() << " sec (" << end << ")" << std::endl;
 }
 
 SystemCVPCSimulator::~SystemCVPCSimulator() {
-  sc_core::sc_time const &end =  sc_core::sc_time_stamp();
-
-  getResultFile() << "[VPC] overall simulated time: " << end.to_seconds() << " sec (" << end << ")" << std::endl;
 }
 
 } } // namespace SystemC_VPC::Detail
