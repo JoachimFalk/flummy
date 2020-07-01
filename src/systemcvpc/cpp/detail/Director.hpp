@@ -85,17 +85,6 @@ namespace SystemC_VPC { namespace Detail {
       delete singleton.release();
     }
 
-    ~Director();
-
-    void setResultFile(std::string vpc_result_file){
-      this->vpc_result_file = vpc_result_file;
-      remove(vpc_result_file.c_str());
-    }
-    
-    std::string getResultFile(){
-      return this->vpc_result_file;
-    }
-
     static ProcessId getProcessId(std::string process_or_source,
         std::string destination = "");
 
@@ -107,15 +96,8 @@ namespace SystemC_VPC { namespace Detail {
 
     std::string getTaskName(ProcessId id);
     
-    static sc_core::sc_time getEnd() {
-      return end;
-    }
-
     void beforeVpcFinalize();
     void endOfVpcFinalize();
-
-    // time of latest acknowledge simulated task
-    static sc_core::sc_time end;
 
     std::map<ProcessId, std::set<std::string> > debugFunctionNames;
   private:
@@ -128,9 +110,6 @@ namespace SystemC_VPC { namespace Detail {
      * \brief Reads allocation and binding from file.
      */
     Director();
-
-    // output file to write result to
-    std::string vpc_result_file;
   };
 
 } } // namespace SystemC_VPC::Detail

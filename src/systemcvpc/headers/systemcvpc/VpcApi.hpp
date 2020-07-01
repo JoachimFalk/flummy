@@ -51,6 +51,14 @@ TimingModifier::Ptr getDistribution(std::string const &name);
 
 void createDistribution(std::string const &name, boost::shared_ptr<DistributionTimingModifier> modifier);
 
+std::string   getResultFileName();
+std::ostream &getResultFile();
+
+void setResultFile(std::string const &resultFileName);
+void setResultFile(
+    std::ostream      &resultFile
+  , std::string const &resultFileName = "???");
+
 } // namespace SystemC_VPC
 
 #endif /* _INCLUDED_SYSTEMCVPC_VPCAPI_HPP */

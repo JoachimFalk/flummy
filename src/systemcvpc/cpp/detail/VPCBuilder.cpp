@@ -163,10 +163,16 @@ namespace SystemC_VPC { namespace Detail {
 
       // set central seed for random number generation
       CX::XN::DOMNode *nodetest = handler.getDocument()->getDocumentElement();
-
-      MaybeValue<double> seed = CX::getAttrValueAs<MaybeValue<double> >(nodetest, XMLCH("seed"));
-      this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(
-          seed.isDefined() ? seed.get() : time(NULL)));
+      {
+        MaybeValue<double> seed = CX::getAttrValueAs<MaybeValue<double> >(nodetest, XMLCH("seed"));
+        this->gen = boost::shared_ptr<boost::mt19937>(new boost::mt19937(
+            seed.isDefined() ? seed.get() : time(NULL)));
+      }
+      {
+        MaybeValue<std::string> resultFile = CX::getAttrValueAs<std::string>(nodetest, XMLCH("resultFile"));
+        if (resultFile.isDefined())
+          setResultFile(resultFile.get());
+      }
       
       // moves the Treewalker to the first Child 
       CX::XN::DOMNode* node = vpcConfigTreeWalker->firstChild();
@@ -343,8 +349,6 @@ namespace SystemC_VPC { namespace Detail {
       // find all attributes
       for(; node != NULL; node = this->vpcConfigTreeWalker->nextSibling()){
         const CX::XStr xmlName = node->getNodeName();
-        CX::XN::DOMNamedNodeMap * atts = node->getAttributes();
-
         // check if its an attribute to add
         if( xmlName == XMLCH("attribute") ){
           Attribute attr = parseAttribute(node);
@@ -359,7 +363,6 @@ namespace SystemC_VPC { namespace Detail {
     }
     if (!comp->getExecModel())
       comp->setExecModel(createExecModel<VC::ExecModelling::LookupPowerTimeModel>());
-
   }
 
   /**

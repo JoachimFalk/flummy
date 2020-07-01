@@ -63,8 +63,6 @@ namespace SystemC_VPC { namespace Detail {
 
   std::unique_ptr<Director> Director::singleton;
 
-  sc_core::sc_time Director::end = sc_core::SC_ZERO_TIME;
-
   /**
    *
    */
@@ -81,34 +79,6 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_report_handler::set_actions(
         sc_core::SC_WARNING,
         sc_core::SC_DO_NOTHING);
-  }
-
-  /**
-   *
-   */
-  Director::~Director(){
-
-    sc_core::sc_time start = sc_core::SC_ZERO_TIME;
-    sc_core::sc_time end = this->end;
-#ifdef DBG_DIRECTOR
-    std::cerr << "start: " << start << " end: " << end  << std::endl;
-#endif //DBG_DIRECTOR
-
-    if(0 != this->vpc_result_file.compare("")) {
-#ifdef DBG_DIRECTOR
-      std::cerr << "Director> result_file: "
-                << this->vpc_result_file << std::endl;
-#endif //DBG_DIRECTOR
-      std::ofstream resultFile;
-      resultFile.open(this->vpc_result_file.c_str());
-      if(resultFile){
-        resultFile << (end-start).to_default_time_units();
-      }
-      resultFile.flush();
-      resultFile.close();
-    }else{
-      std::cerr << "[VPC] overall simulated time: " << end - start << std::endl;
-    }
   }
 
   static

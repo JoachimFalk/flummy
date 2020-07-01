@@ -29,6 +29,7 @@
 #include <CoSupport/String/QuotedString.hpp>
 
 #include <sstream>
+#include <fstream>
 
 namespace SystemC_VPC { namespace Detail {
 
@@ -36,7 +37,15 @@ namespace SystemC_VPC { namespace Detail {
 
   Configuration::Configuration()
     : finalized(false)
-    , ignoreMissingRoutes(false) {}
+    , ignoreMissingRoutes(false)
+    , resultFileName("STDERR")
+    , resultFile(&std::cerr)
+    , resultFileOwned(false) {}
+
+  Configuration::~Configuration() {
+    if (resultFileOwned)
+      delete resultFile;
+  }
 
   Configuration &Configuration::getInstance() {
     static Configuration conf;
@@ -243,6 +252,34 @@ namespace SystemC_VPC { namespace Detail {
     std::stringstream msg;
     msg << "Multiple creation of timing modifier " << QuotedString(name) << " is not supported. Use getTimingModifier instead.";
     throw ConfigException(msg.str().c_str());
+  }
+
+  std::string   Configuration::getResultFileName()
+    { return resultFileName; }
+  std::ostream &Configuration::getResultFile()
+    { return *resultFile; }
+
+  void Configuration::setResultFile(std::string const &resultFileName) {
+    std::unique_ptr<std::ofstream> out(new std::ofstream(resultFileName));
+    if (out->is_open()) {
+      this->resultFileName = resultFileName;
+      if (this->resultFileOwned)
+        delete this->resultFile;
+      this->resultFile = out.release();
+      this->resultFileOwned = true;
+    } else {
+      std::stringstream msg;
+      msg << "Can't open '" << resultFileName << "' for writing:" << strerror(errno);
+      throw std::runtime_error(msg.str());
+    }
+  }
+  void Configuration::setResultFile(
+      std::ostream      &resultFile
+    , std::string const &resultFileName)
+  {
+    this->resultFileName  = resultFileName;
+    this->resultFile      = &resultFile;
+    this->resultFileOwned = false;
   }
 
   void Configuration::finalize() {

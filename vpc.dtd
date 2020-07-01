@@ -1,6 +1,7 @@
 <!ELEMENT vpcconfiguration (distributions?,resources,mappings,topology?)>
 <!ATTLIST vpcconfiguration
-seed CDATA #IMPLIED>
+seed CDATA #IMPLIED
+resultFile CDATA #IMPLIED>
 
 <!ELEMENT resources ((observer|tracer|component)*)>
 
