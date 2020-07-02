@@ -9,6 +9,7 @@
     <property name="vpcConfigTemplate">&CONFIGDIR;/../sqr.vpc.xml</property>
     <property name="simulatorExecutable">/scratch-local/falk/systemoc-top--devel--1.0/obj/SystemC-VPC/testcases/test-sqr</property>
     <property name="simulatorEnvironment">SRC_ITERS=11;SYSTEMOC_PLUGINPATH=/scratch-local/falk/systemoc-top--devel--1.0/obj/SystemC-VPC/.libs</property>
+    <property name="objectives">makeSpan,MIN,results.txt,overall simulated time: (.*) sec</property>
     <property name="schedulerType">RRNOPRE</property>
     <property name="fireActorInLoop">false</property>
     <property name="timeSlice">1.7E-4</property>
