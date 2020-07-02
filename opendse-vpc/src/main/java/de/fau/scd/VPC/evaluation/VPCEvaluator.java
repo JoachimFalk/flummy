@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.opt4j.core.DoubleValue;
 import org.opt4j.core.Objective;
@@ -126,9 +127,6 @@ public class VPCEvaluator implements ImplementationEvaluator {
     @BindingAnnotation
     public @interface TraceType{
     }
-
-//  Objective SimTime = new Objective("SimTime[ns]", Objective.Sign.MIN);
-    Objective objective =  new Objective("#throughput VPC", Sign.MAX);
 
     protected final String simulatorExecutable;
 
@@ -280,35 +278,53 @@ public class VPCEvaluator implements ImplementationEvaluator {
             Process exec_process = Runtime.getRuntime().exec(cmd,
                     simulatorEnvironment.getEnvironment(),
                     tempDirectoryHandler.getDirectory());
-            for (ObjectiveInfo objInfo : vpcObjectives.getObjectives()) {
-                Double objValue = null;
-
-                try {
-                    File parseFile = new File(
-                        tempDirectoryHandler.getDirectory().getPath()
-                      , objInfo.getParseFile().getPath());
-                    BufferedReader br = new BufferedReader(
-                            new FileReader(parseFile));
-                    for (String line = br.readLine();
-                         line != null;
-                         line = br.readLine()) {
-                        Matcher m = objInfo.getParseRegex().matcher(line);
-                        if (m.matches()) {
-                            objValue = Double.parseDouble(m.group(1));
-                            break;
-                        }
-                    }
-                    br.close();
-                } catch (FileNotFoundException e) {
-                    System.err.println("Got an exception during I/O with simulation:\n" + e);
-                }
-                if (infeasible || objValue == null)
-                    objectives.add(objective, Objective.INFEASIBLE);
-                else
-                    objectives.add(objective, objValue);
-            }
+            int status = exec_process.waitFor();
+            if (status != 0)
+                infeasible = true;
         } catch (IOException e) {
             System.err.println("Got an exception during I/O with simulation:\n" + e);
+            infeasible = true;
+        } catch (InterruptedException e) {
+            System.err.println("Got an exception during simulation:\n" + e);
+            infeasible = true;
+        }
+        for (ObjectiveInfo objInfo : vpcObjectives.getObjectives()) {
+            Double objValue = null;
+
+            try {
+                File parseFile = new File(
+                    tempDirectoryHandler.getDirectory().getPath()
+                  , objInfo.getParseFile().getPath());
+                Pattern regex = objInfo.getParseRegex();
+                BufferedReader br = new BufferedReader(
+                        new FileReader(parseFile));
+                for (String line = br.readLine();
+                     line != null;
+                     line = br.readLine()) {
+                    Matcher m = regex.matcher(line);
+                    if (m.find()) {
+                        try {
+                            objValue = Double.parseDouble(m.group(1));
+                        } catch (IndexOutOfBoundsException e) {
+                            System.err.println("For objective " + objInfo.getObjName()
+                                + ": Regex \"" + regex.pattern() + "\" is missing a capture group!");
+                        } catch (NumberFormatException e) {
+                            System.err.println("For objective " + objInfo.getObjName()
+                                + ": Can't parse " + m.group(1) + " as a double!");
+                        }
+                        break;
+                    }
+                }
+                br.close();
+            } catch (FileNotFoundException e) {
+                System.err.println("Got an exception during reading results:\n" + e);
+            } catch (IOException e) {
+                System.err.println("Got an exception during reading results:\n" + e);
+            }
+            if (infeasible || objValue == null)
+                objectives.add(objInfo.getObjective(), Objective.INFEASIBLE);
+            else
+                objectives.add(objInfo.getObjective(), objValue);
         }
 
         return implementation;
