@@ -103,14 +103,14 @@ void RoundRobinComponent::notifyActivation(TaskInterface * scheduledTask, bool a
 }
 
 void RoundRobinComponent::compute(TaskInstanceImpl *actualTask) {
-  std::cout << "\t " << sc_core::sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
+//std::cout << "\t " << sc_core::sc_time_stamp() << " : task PID " << actualTask->getProcessId() << std::endl;
   if (actualTask->getTask()->hasScheduledTask()) {
     assert(!useActivationCallback);
     scheduleMessageTasks();
     this->actualTask = actualTask;
     releaseTaskInstance(actualTask);
     assignTaskInstance(actualTask);
-    std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
+//  std::cout << "compute: " <<  actualTask->getName() << "@" << sc_core::sc_time_stamp() << std::endl;
     wait(actualTask->getDelay());
     finishDiiTaskInstance(actualTask);
   } else
@@ -122,9 +122,9 @@ void RoundRobinComponent::check(TaskInstanceImpl *actualTask) {
   if (!useActivationCallback) {
     releaseTaskInstance(actualTask);
     assignTaskInstance(actualTask);
-        std::cout << "check: " << actualTask->getName() << "@"
-            << sc_core::sc_time_stamp() << " with delay "
-            << actualTask->getDelay() << std::endl;
+//  std::cout << "check: " << actualTask->getName() << "@"
+//      << sc_core::sc_time_stamp() << " with delay "
+//      << actualTask->getDelay() << std::endl;
     wait(actualTask->getDelay());
     finishDiiTaskInstance(actualTask);
   }
@@ -181,16 +181,16 @@ bool RoundRobinComponent::scheduleMessageTasks() {
 }
 
 void RoundRobinComponent::scheduleThread() {
-  std::cout << "RoundRobinComponent::scheduleThread() [CALLED]" << std::endl;
+//std::cout << "RoundRobinComponent::scheduleThread() [CALLED]" << std::endl;
   while (true) {
     bool progress = scheduleMessageTasks();
     for (TaskInterface *scheduledTask: taskList) {
-      std::cout << "Checking " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
+//    std::cout << "Checking " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
       if (scheduledTask->canFire()) {
         do {
           progress = true;
           assert(readyMsgTasks.empty());
-          std::cout << "Scheduling " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
+//        std::cout << "Scheduling " << scheduledTask->name() << "@" << sc_core::sc_time_stamp() << std::endl;
           assert(!this->actualTask);
           // This will invoke our compute callback and setup actualTask.
           scheduledTask->schedule();
