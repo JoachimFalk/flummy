@@ -27,6 +27,8 @@
 
 #include <assert.h>
 
+#include <algorithm> // for set_difference
+
 namespace SystemC_VPC { namespace Detail {
 
 void dumpSet(FunctionSet s, std::ostream & stream = std::cerr)
