@@ -32,7 +32,7 @@ import java.nio.file.Files;
 import net.sf.opendse.model.Specification;
 
 public class TempDirectoryHandler {
-    private static final String TEMP_DIRECTORY = "TEMP_DIRECTORY";
+    private static final String TEMP_DIRECTORY = "TEMP_DIRECTORY_VPC";
 
     private static Path topTempDirectory = null;
 
