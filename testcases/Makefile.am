@@ -41,7 +41,8 @@ noinst_PROGRAMS= \
 	test-sqr \
 	test-src-snk-multicast \
 	test-src-snk-multirate \
-	test-src-snk-plain
+	test-src-snk-plain \
+	test-idct2d
 
 test_sqr_LDADD					= $(SYSTEMOC_LIBS)
 test_sqr_DEPENDENCIES				= $(SYSTEMOC_DEPENDENCIES)
@@ -63,48 +64,18 @@ test_src_snk_plain_DEPENDENCIES			= $(SYSTEMOC_DEPENDENCIES)
 test_src_snk_plain_SOURCES			= \
 	src/test-src-snk-plain/cpp/design-src-snk-plain.cpp
 
-%.smx: %
-	./'$<' --systemoc-export-smx='$@' || \
-	  { rm -f "$@"; exit 1; }
+test_idct2d_LDADD				= $(SYSTEMOC_LIBS)
+test_idct2d_DEPENDENCIES			= $(SYSTEMOC_DEPENDENCIES)
+test_idct2d_SOURCES				= \
+	src/test-idct2d/cpp/design-idct2d-finegrained.cpp
 
-# $(1) is test name
-define TEST_template =
-$(1)-output/novpc/sim.log: $(1)
-	{ mkdir -p '$$(dir $$@)' && \
-	  OUTPUTPREFIX='$$(dir $$@)' \
-	  $$(srcdir)/scripts/runtest.py \
-	    --log '$$@' \
-	    --error '$(1)-output/novpc/sim.err' \
-	    --clean '$$(dir $$@)' \
-	    --filter '^((sqrroot|top)\.[^:]*|src|sink|A|B|Src|Snk):' \
-	    -- ./'$$<' 100; }
-endef
+#test-%.smx: test-%
+#	./'$<' --systemoc-export-smx='$@' || \
+#	  { rm -f "$@"; exit 1; }
 
-TEST_LOGS	= $(foreach TEST,$(noinst_PROGRAMS),$(TEST)-output/novpc/sim.log)
+flummysrcdir := $(shell echo "$(srcdir)")
 
-$(foreach TEST_LOG,$(TEST_LOGS),\
-  $(eval $(call TEST_template,$(patsubst %-output/novpc/sim.log,%,$(TEST_LOG)))))
-
-# $(1) is test name
-# $(2) is VPC config name
-define TEST_VPC_template =
-$(1)-output/vpc/$(2)/sim.log: $(1) src/$(1)/vpc/$(2).vpc.xml $$(SYSTEMOC_PLUGINVPC)
-	{ set -- $$^; mkdir -p '$$(dir $$@)' && \
-	  VPCTRACEFILEPREFIX='$$(dir $$@)' \
-	  VPCCONFIGURATION="$$$$2" \
-	  $$(srcdir)/scripts/runtest.py \
-	    --log '$$@' \
-	    --error '$(1)-output/vpc/$(2)/sim.err' \
-	    --clean '$$(dir $$@)' \
-	    --filter '^((sqrroot|top)\.[^:]*|src|sink|A|B|Src|Snk):' \
-	    -- ./'$$<' 100; }
-endef
-
-TEST_VPCS 	= $(foreach TEST,$(noinst_PROGRAMS),$(patsubst $(srcdir)/src/$(TEST)/vpc/%.vpc.xml,$(TEST)-output/vpc/%/sim.log,$(wildcard $(srcdir)/src/$(TEST)/vpc/*.vpc.xml)))
-
-$(foreach TEST_VPC,$(TEST_VPCS),\
-  $(eval $(call TEST_VPC_template,$(word 1,$(subst -output/vpc/, ,$(patsubst %/sim.log,%,$(TEST_VPC)))),$(word 2,$(subst -output/vpc/, ,$(patsubst %/sim.log,%,$(TEST_VPC)))))))
-
+include $(flummysrcdir)/test.mk
 
 clean-local:
 	for test in $(noinst_PROGRAMS); do \
