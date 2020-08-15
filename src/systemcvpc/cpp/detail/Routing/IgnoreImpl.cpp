@@ -69,8 +69,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
   void IgnoreImpl::finalize() {
   }
 
-  IgnoreImpl::~IgnoreImpl( ){
-    DBG_OUT("Ignore::~Ignore( )" << std::endl);
+  IgnoreImpl::~IgnoreImpl() {
+//  DBG_OUT("Ignore::~Ignore()" << std::endl);
   }
 
 
