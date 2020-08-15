@@ -67,5 +67,7 @@ nobase_include_HEADERS = \
 	systemcvpc/VPCEvent.hpp \
 	systemcvpc/VpcTask.hpp \
 	\
+	systemcvpc/vpc_config.h \
+	\
 	vpc_api.hpp \
 	vpc.hpp
