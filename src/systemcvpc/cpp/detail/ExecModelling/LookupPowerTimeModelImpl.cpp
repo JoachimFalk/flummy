@@ -24,6 +24,7 @@
 
 #include "LookupPowerTimeModelImpl.hpp"
 #include "../common.hpp"
+#include "../DebugOStream.hpp"
 
 #include <CoSupport/sassert.h>
 
@@ -57,6 +58,22 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
   void LookupPowerTimeModelImpl::add(Timing timing) {
     assert(!registeredActions);
     PowerModeInfo &pmi = powerModes[timing.getPowerMode()];
+#ifdef SYSTEMCVPC_ENABLE_DEBUG
+    if (DBG_STREAM.isVisible(Debug::High)) {
+      if (timing.getLatency() == timing.getDii()) {
+        DBG_STREAM << "Got " << timing.getLatency()
+            << " delay for action/guard "
+            << timing.getFunction()
+            << " in power mode " << timing.getPowerMode() << std::endl;
+      } else {
+        DBG_STREAM << "Got " << timing.getDii()
+            << " dii and " << timing.getLatency()
+            << "lat for action/guard "
+            << timing.getFunction()
+            << " in power mode " << timing.getPowerMode() << std::endl;
+      }
+    }
+#endif //SYSTEMCVPC_ENABLE_DEBUG
     if (!pmi.timings.insert(std::make_pair(timing.getFunction(), timing)).second)
       throw ConfigException("Duplicate timing information for "+timing.getFunction());
   }
@@ -64,6 +81,20 @@ namespace SystemC_VPC { namespace Detail { namespace ExecModelling {
   void LookupPowerTimeModelImpl::addDefaultActorTiming(std::string actorName, Timing timing) {
     assert(!registeredActions);
     PowerModeInfo &pmi = powerModes[timing.getPowerMode()];
+#ifdef SYSTEMCVPC_ENABLE_DEBUG
+    if (DBG_STREAM.isVisible(Debug::High)) {
+      if (timing.getLatency() == timing.getDii()) {
+        DBG_STREAM << "Got default " << timing.getLatency()
+            << " delay for actor " << actorName
+            << " in power mode " << timing.getPowerMode() << std::endl;
+      } else {
+        DBG_STREAM << "Got default " << timing.getDii()
+            << " dii and " << timing.getLatency()
+            << "lat for actor " << actorName
+            << " in power mode " << timing.getPowerMode() << std::endl;
+      }
+    }
+#endif //SYSTEMCVPC_ENABLE_DEBUG
     if (!pmi.timings.insert(std::make_pair(actorName, timing)).second)
       throw ConfigException("Duplicate timing information for "+actorName);
   }
