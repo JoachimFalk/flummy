@@ -53,7 +53,7 @@ clean-local:
 	fi
 	@rmdir src 2>/dev/null || :
 
-CLEANFILES=src/Makefile
+# CLEANFILES=src/Makefile # cleaned by clean-local
 
 docdir = ${datarootdir}/doc/SystemC-VPC
 
