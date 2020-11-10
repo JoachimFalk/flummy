@@ -277,7 +277,7 @@ public class SNGReader implements SpecificationWrapper {
 
     protected static class ArchitectureGraphReader {
         
-        protected final SNGReader sgxReader;
+        protected final SNGReader sngReader;
         protected final Architecture<Resource, Link> architecture;
         protected final org.w3c.dom.Element eArchitectureGraph;
 
@@ -299,9 +299,9 @@ public class SNGReader implements SpecificationWrapper {
 
         protected final HashMap<Long, PortInfo> portIdToPortInfo = new HashMap<Long, PortInfo>();
 
-        public ArchitectureGraphReader(SNGReader sgxReader, Architecture<Resource, Link> architecture,
+        public ArchitectureGraphReader(SNGReader sngReader, Architecture<Resource, Link> architecture,
                 org.w3c.dom.Element eArchitectureGraph) throws SNGFormatErrorException {
-            this.sgxReader = sgxReader;
+            this.sngReader = sngReader;
             this.architecture = architecture;
             this.eArchitectureGraph = eArchitectureGraph;
 
@@ -311,7 +311,7 @@ public class SNGReader implements SpecificationWrapper {
 
         protected void parseResources() throws SNGFormatErrorException {
             for (org.w3c.dom.Element eResource : childElements(eArchitectureGraph, "resource")) {
-                Resource resource = sgxReader.createElement(eResource, Resource.class);
+                Resource resource = sngReader.createElement(eResource, Resource.class);
                 architecture.addVertex(resource);
                 for (org.w3c.dom.Element ePort : childElements(eResource, "port")) {
                     String directionStr = ePort.getAttribute("type");

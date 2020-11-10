@@ -17,14 +17,14 @@ import net.sf.opendse.optimization.io.SpecificationWrapperInstance;
 public class SpecificationWrapperSNG implements SpecificationWrapper {
 
     final private SpecificationWrapperInstance specificationWrapperInstance;
-    final private SNGReader sgxReader;
+    final private SNGReader sngReader;
 
     @Inject
     public SpecificationWrapperSNG(
-            @Constant(namespace = SpecificationWrapperSNG.class, value = "sgxFile") String sgxFileName)
+            @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName)
             throws IOException, FileNotFoundException, SNGFormatErrorException {
-        sgxReader = new SNGReader(sgxFileName);
-        specificationWrapperInstance = new SpecificationWrapperInstance(sgxReader.getSpecification());
+        sngReader = new SNGReader(sngFileName);
+        specificationWrapperInstance = new SpecificationWrapperInstance(sngReader.getSpecification());
     }
 
     @Override
