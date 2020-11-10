@@ -202,7 +202,7 @@ public class VPCConfigReader {
      * @param childName
      *            the tag name of the desired child elements
      * @return the desired child element
-     * @throws SGXFormatErrorException
+     * @throws VPCFormatErrorException
      */
     public static org.w3c.dom.Element childElement(final org.w3c.dom.Element parentElement, final String childName)
             throws VPCFormatErrorException {
@@ -224,7 +224,7 @@ public class VPCConfigReader {
      *            If true, the element is allowed to be missing
      * @return the desired child element or null if optional and the element is
      *         missing
-     * @throws SGXFormatErrorException
+     * @throws VPCFormatErrorException
      */
     public static org.w3c.dom.Element childElement(final org.w3c.dom.Element parentElement, final String childName,
             boolean optional) throws VPCFormatErrorException {
