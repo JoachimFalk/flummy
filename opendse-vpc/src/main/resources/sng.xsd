@@ -3,9 +3,15 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified">
 
+  <xs:simpleType name="TypeIdentifier">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([_a-zA-Z])+([_a-zA-Z0-9])*(::([_a-zA-Z])+([_a-zA-Z0-9])*)*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="Identifier">
     <xs:restriction base="xs:string">
-      <xs:pattern value="([_a-zA-Z])+([_a-zA-Z0-9])*"/>
+      <xs:pattern value="([_a-zA-Z])+([_a-zA-Z0-9])*([.]([_a-zA-Z])+([_a-zA-Z0-9])*)*"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -53,12 +59,12 @@
       <xs:element name="port" type="Port" maxOccurs="unbounded"/>
       <xs:element name="fsm" type="Fsm" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute name="name" type="Identifier"/>
+    <xs:attribute name="name" type="TypeIdentifier"/>
   </xs:complexType>
 
   <xs:complexType name="ActorInstance">
     <xs:attribute name="name" type="Identifier"/>
-    <xs:attribute name="type" type="Identifier"/>
+    <xs:attribute name="type" type="TypeIdentifier"/>
   </xs:complexType>
 
   <xs:complexType name="FifoPort">
