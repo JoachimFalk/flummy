@@ -30,7 +30,7 @@ import org.opt4j.core.start.Constant;
 public class SNGReaderModule extends IOModule {
 
     @File
-    @Constant(namespace = SpecificationWrapperSNG.class, value = "sgxFile")
+    @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile")
     protected String filename = "";
 
     public String getFilename() {
