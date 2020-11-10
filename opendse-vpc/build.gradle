@@ -44,7 +44,11 @@ compileJava {
 
 dependencies {
 //  analysis "dependencies", it
-    implementation project(':opendse')
+    if ((rootProject.subprojects.findAll { it.name == "opendse" }).isEmpty()) {
+        implementation 'com.github.FedorSmirnov89.opendse:build:7c8ff373b9'
+    } else {
+        implementation project(':opendse')
+    }
     implementation project(':LibSGX:opendse-sgxio')
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.3.1'
     implementation group: 'org.jdom', name: 'jdom', version: '1.1.3'
