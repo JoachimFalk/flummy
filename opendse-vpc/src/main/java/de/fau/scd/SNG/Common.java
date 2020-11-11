@@ -31,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import net.sf.opendse.model.Attributes;
@@ -53,13 +52,11 @@ import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 /**
  * The {@code Common} class contains common methods for reading and writing a
  * {@code Specification}.
- * 
+ *
  * @author Martin Lukasiewycz
- * 
+ *
  */
 public class Common {
-    
-    public static final String NS = "http://cs12.fau.de/sgx/v1";
 
     public static BidiMap<String, Class<?>> classMap = new DualHashBidiMap<String, Class<?>>();
 
@@ -135,7 +132,7 @@ public class Common {
 
     /**
      * Transforms a Base64 string into an object.
-     * 
+     *
      * @param s
      *            the string
      * @return the object
@@ -154,7 +151,7 @@ public class Common {
 
     /**
      * Transforms an object into a Base64 string.
-     * 
+     *
      * @param o
      *            the object
      * @return the string
