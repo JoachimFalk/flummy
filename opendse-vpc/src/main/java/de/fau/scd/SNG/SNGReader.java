@@ -40,33 +40,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.MatchResult;
-import java.util.function.BiFunction;
+//import java.util.function.BiFunction;
 
 import edu.uci.ics.jung.graph.util.EdgeType;
-import edu.uci.ics.jung.graph.util.Pair;
+//import edu.uci.ics.jung.graph.util.Pair;
 import net.sf.opendse.model.Application;
-import net.sf.opendse.model.Architecture;
+//import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Attributes;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Dependency;
-import net.sf.opendse.model.Edge;
+//import net.sf.opendse.model.Edge;
 import net.sf.opendse.model.Element;
-import net.sf.opendse.model.Function;
+//import net.sf.opendse.model.Function;
 import net.sf.opendse.model.IAttributes;
-import net.sf.opendse.model.Link;
-import net.sf.opendse.model.Mapping;
-import net.sf.opendse.model.Mappings;
-import net.sf.opendse.model.Node;
-import net.sf.opendse.model.Resource;
-import net.sf.opendse.model.Routings;
-import net.sf.opendse.model.Specification;
+//import net.sf.opendse.model.Link;
+//import net.sf.opendse.model.Mapping;
+//import net.sf.opendse.model.Mappings;
+//import net.sf.opendse.model.Node;
+//import net.sf.opendse.model.Resource;
+//import net.sf.opendse.model.Routings;
+//import net.sf.opendse.model.Specification;
 import net.sf.opendse.model.Task;
 import net.sf.opendse.model.parameter.ParameterRange;
 import net.sf.opendse.model.parameter.ParameterRangeDiscrete;
 import net.sf.opendse.model.parameter.ParameterSelect;
 import net.sf.opendse.model.parameter.ParameterUniqueID;
 import net.sf.opendse.model.parameter.Parameters;
-import net.sf.opendse.optimization.SpecificationWrapper;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -88,27 +87,27 @@ import org.xml.sax.SAXParseException;
 /**
  * The {@code SNGReader} reads a {@code Specification} from an
  * {@code InputStream} or file.
- * 
+ *
  * @author Joachim Falk
- * 
+ *
  */
-public class SNGReader implements SpecificationWrapper {
+public class SNGReader {
 
     static public class SNGFormatErrorException extends Exception {
         private static final long serialVersionUID = 3741956271022484454L;
 
         public SNGFormatErrorException(String message) {
             super(message);
-        }        
+        }
     }
-    
-    
+
+
     /**
      * Read specification from a file.
-     * 
+     *
      * @param filename
      *            The name of the file.
-     * @throws SNGFormatErrorException 
+     * @throws SNGFormatErrorException
      */
     public SNGReader(String filename) throws FileNotFoundException, SNGFormatErrorException {
         this(new File(filename));
@@ -116,10 +115,10 @@ public class SNGReader implements SpecificationWrapper {
 
     /**
      * Read specification from a file.
-     * 
+     *
      * @param file
      *            The file.
-     * @throws SNGFormatErrorException 
+     * @throws SNGFormatErrorException
      */
     public SNGReader(File file) throws FileNotFoundException, SNGFormatErrorException {
         this(new StreamSource(new FileInputStream(file), file.toURI().toASCIIString()));
@@ -127,10 +126,10 @@ public class SNGReader implements SpecificationWrapper {
 
     /**
      * Read specification from an input stream.
-     * 
+     *
      * @param in
      *            The input stream.
-     * @throws SNGFormatErrorException 
+     * @throws SNGFormatErrorException
      */
     public SNGReader(InputStream in) throws SNGFormatErrorException {
         this(new StreamSource(in, "<input stream>"));
@@ -138,10 +137,10 @@ public class SNGReader implements SpecificationWrapper {
 
     /**
      * Read specification from an input stream.
-     * 
+     *
      * @param in
      *            The input stream.
-     * @throws SNGFormatErrorException 
+     * @throws SNGFormatErrorException
      */
     protected SNGReader(StreamSource in) throws SNGFormatErrorException {
         try {
@@ -149,7 +148,7 @@ public class SNGReader implements SpecificationWrapper {
             StreamSource sources[] = new StreamSource[] {
                     new StreamSource(new StringReader(SngXSD.text), sngXSDUrl)
                 };
-            SchemaFactory factory = 
+            SchemaFactory factory =
                 SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setErrorHandler(new DOMErrorHandler());
             Schema schema = factory.newSchema(sources);
@@ -171,21 +170,17 @@ public class SNGReader implements SpecificationWrapper {
             docBuilder.setErrorHandler(new DOMErrorHandler());
             org.w3c.dom.Document doc = docBuilder.parse(in.getInputStream(), in.getSystemId());
             doc.normalize();
-            org.w3c.dom.Element eSpec = doc.getDocumentElement();
-            specification = toSpecification(eSpec);
-            // nu.xom.Builder parser2 = new nu.xom.Builder();
-            // nu.xom.Document doc2 = parser2.build(in);
-
-            // nu.xom.Element eSpec = doc2.getRootElement();
+            org.w3c.dom.Element eNetworkGraph = doc.getDocumentElement();
+            //specification = toSpecification(eSpec);
+            application = toApplication(eNetworkGraph);
         } catch (Exception ex) {
 //          ex.printStackTrace(System.err);
             throw new SNGFormatErrorException(ex.getMessage());
         }
     }
 
-    @Override
-    public Specification getSpecification() {
-        return specification;
+    public Application<Task, Dependency> getApplication() {
+        return application;
     }
 
     private static class DOMErrorHandler implements ErrorHandler {
@@ -229,176 +224,140 @@ public class SNGReader implements SpecificationWrapper {
         }
     }
 
-    protected final Specification specification;
+    protected final Application<Task, Dependency> application;
+
+    static protected class Port {
+        public enum Direction { IN, OUT };
+
+        public final String    name;
+        public final Direction direction;
+
+        Port(String n, Direction d) {
+            name      = n;
+            direction = d;
+        }
+    }
+
+    static protected class ActorType {
+        public final String name;
+        public final Map<String, Port> ports = new HashMap<String, Port>();
+
+        ActorType(String n) {
+            name = n;
+        }
+    }
+
+    static protected class ActorInstance {
+        public final String    name;
+        public final ActorType type;
+        public final Task      task;
+        public final Map<String, Port> unboundPorts = new HashMap<String, Port>();
+
+        ActorInstance(String name, ActorType type, Task task) {
+            this.name = name;
+            this.type = type;
+            this.task = task;
+            unboundPorts.putAll(type.ports);
+        }
+    }
 
     /**
-     * Convert a specification XML element to a specification
-     * 
-     * @param eSpec the specification XML element
-     * @return the specification
-     * @throws SNGFormatErrorException 
+     * Convert a specification XML element to an application
+     *
+     * @param eNetworkGraph the networkGraph XML element
+     * @return the application
+     * @throws SNGFormatErrorException
      */
-    protected Specification toSpecification(org.w3c.dom.Element eSpec) throws SNGFormatErrorException {
-//      System.err.println(eSpec.getNamespaceURI());
-        org.w3c.dom.Element eArchitectureGraph = childElement(eSpec, "architecturegraph");
-        org.w3c.dom.Element eProblemGraph;
-        try {
-            eProblemGraph = childElement(eSpec, "problemgraph");
-        }
-        catch(SNGFormatErrorException ex) {
-            org.w3c.dom.Element eProcess = childElement(eSpec, "process");
-            eProblemGraph = childElement(eProcess, "problemgraph");
-            String nameAtt = eProcess.getAttribute("name");
-            String idAtt = eProcess.getAttribute("id");
-            eProblemGraph.setAttribute("name", nameAtt);
-            eProblemGraph.setAttribute("id", idAtt);
-        }
-        org.w3c.dom.Element eMappings = childElement(eSpec, "mappings");
-        org.w3c.dom.Element eRoutings = childElement(eSpec, "routings", true);
-        
-        readTypedefs(eSpec);
+    protected Application<Task, Dependency> toApplication(org.w3c.dom.Element eNetworkGraph) throws SNGFormatErrorException {
+        Application<Task, Dependency> application = new Application<Task, Dependency>();
 
-        Architecture<Resource, Link> architecture = toArchitecture(eArchitectureGraph);
-        ProblemGraph problemGraph = toProblemGraph(eProblemGraph);
-        Mappings<Task, Resource> mappings = toMappings(eMappings);
-        
-        Application<Task, Dependency> application = toApplication(problemGraph);
+        final Map<String, ActorType>     actorTypes     = new HashMap<String, ActorType>();
+        final Map<String, ActorInstance> actorInstances = new HashMap<String, ActorInstance>();
 
-        Specification specification;
-
-        if (eRoutings != null && eRoutings.getChildNodes().getLength() > 0) {
-            assert false: "FIXME: Implement this!";
-//          Routings<Task, Resource, Link> routings = toRoutings(eRoutings, architecture, application);
-//          specification = new Specification(application, architecture, mappings, routings);
-            specification = null;
-        } else {
-            specification = new Specification(application, architecture, mappings);
+        for (org.w3c.dom.Element eActorType : childElements(eNetworkGraph, "actorType")) {
+            final ActorType actorType = toActorType(eActorType);
+            if (actorTypes.containsKey(actorType.name))
+                throw new SNGFormatErrorException("Duplicate actor type \""+actorType.name+"\"!");
+            actorTypes.put(actorType.name, actorType);
         }
-        
-        addAttributes(eSpec, specification);
-        return specification;
+        for (org.w3c.dom.Element eActorInstance : childElements(eNetworkGraph, "actorInstance")) {
+            final ActorInstance actorInstance = toActorInstance(eActorInstance, actorTypes);
+            if (actorInstances.containsKey(actorInstance.name))
+                throw new SNGFormatErrorException("Duplicate actor instance \""+actorInstance.name+"\"!");
+            actorInstances.put(actorInstance.name, actorInstance);
+            application.addVertex(actorInstance.task);
+        }
+        for (org.w3c.dom.Element eFifo : childElements(eNetworkGraph, "fifo")) {
+            int size    = Integer.valueOf(eFifo.getAttribute("size"));
+            int initial = Integer.valueOf(eFifo.getAttribute("initial"));
+
+            final org.w3c.dom.Element eSource = childElement(eFifo, "source");
+            final String sourceActor = eSource.getAttribute("actor");
+            final String sourcePort  = eSource.getAttribute("port");
+            final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
+            if (sourceActorInstance == null)
+                throw new SNGFormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
+
+            final Communication message = new Communication(sourceActor+"."+sourcePort);
+            {
+                Dependency dependency = new Dependency(createUniqeName());
+                application.addEdge(dependency, sourceActorInstance.task, message, EdgeType.DIRECTED);
+            }
+            final org.w3c.dom.Element eTarget = childElement(eFifo, "target");
+            final String targetActor = eTarget.getAttribute("actor");
+            final String targetPort  = eTarget.getAttribute("port");
+            final ActorInstance targetActorInstance = actorInstances.get(targetActor);
+            if (targetActorInstance == null)
+                throw new SNGFormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
+            {
+                Dependency dependency = new Dependency(createUniqeName());
+                application.addEdge(dependency, message, targetActorInstance.task, EdgeType.DIRECTED);
+            }
+        }
+        return application;
     }
 
-    protected static class ArchitectureGraphReader {
-        
-        protected final SNGReader sngReader;
-        protected final Architecture<Resource, Link> architecture;
-        protected final org.w3c.dom.Element eArchitectureGraph;
+    /**
+     * Convert a actorType XML element to an ActorType
+     *
+     * @param eActorType the actorType XML element
+     * @return an ActorType
+     * @throws SNGFormatErrorException
+     */
+    protected ActorType toActorType(org.w3c.dom.Element eActorType) throws SNGFormatErrorException {
+        final String    actorTypeName = eActorType.getAttribute("name");
+        final ActorType actorType     = new ActorType(actorTypeName);
 
-        protected enum PortDirection {
-            In, Out
-        };
-
-        /// Map from the id of a port to the resource containing this port and
-        /// the direction of the port.
-        static class PortInfo {
-            final public PortDirection direction;
-            final public Resource resource;
-
-            public PortInfo(PortDirection direction, Resource resource) {
-                this.direction = direction;
-                this.resource = resource;
-            }
+        for (org.w3c.dom.Element ePort : childElements(eActorType, "actorType")) {
+            String name = ePort.getAttribute("name");
+            String type = ePort.getAttribute("type");
+            Port.Direction d = Port.Direction.valueOf(type.toUpperCase());
+            if (actorType.ports.containsKey(name))
+                throw new SNGFormatErrorException("Duplicate actor port \""+name+"\" in actor type \""+actorTypeName+"\"!");
+            actorType.ports.put(name, new Port(name, d));
         }
-
-        protected final HashMap<Long, PortInfo> portIdToPortInfo = new HashMap<Long, PortInfo>();
-
-        public ArchitectureGraphReader(SNGReader sngReader, Architecture<Resource, Link> architecture,
-                org.w3c.dom.Element eArchitectureGraph) throws SNGFormatErrorException {
-            this.sngReader = sngReader;
-            this.architecture = architecture;
-            this.eArchitectureGraph = eArchitectureGraph;
-
-            parseResources();
-            parseEdges();
-        }
-
-        protected void parseResources() throws SNGFormatErrorException {
-            for (org.w3c.dom.Element eResource : childElements(eArchitectureGraph, "resource")) {
-                Resource resource = sngReader.createElement(eResource, Resource.class);
-                architecture.addVertex(resource);
-                for (org.w3c.dom.Element ePort : childElements(eResource, "port")) {
-                    String directionStr = ePort.getAttribute("type");
-                    assert directionStr.equals("in")
-                            || directionStr.equals("out") : "Oops, illegal port direction for tag " + ePort;
-                    PortDirection directionEnum = directionStr.equals("in") ? PortDirection.In : PortDirection.Out;
-                    portIdToPortInfo.put(parseId(ePort), new PortInfo(directionEnum, resource));
-                }
-            }
-        }
-
-        protected void parseEdges() throws SNGFormatErrorException {
-            final HashMap<Pair<Resource>, Link> links = new HashMap<Pair<Resource>, Link>();
-
-            for (org.w3c.dom.Element eEdge : childElements(eArchitectureGraph, "edge")) {
-                long idSource = parseId(eEdge, "source");
-                long idTarget = parseId(eEdge, "target");
-                PortInfo portInfoSource = portIdToPortInfo.get(idSource);
-                PortInfo portInfoTarget = portIdToPortInfo.get(idTarget);
-                if (portInfoSource == null) {
-                    throw new SNGFormatErrorException("Source " + idSource + " of link " + eEdge + " not found!");
-                }
-                if (portInfoSource.direction != PortDirection.Out) {
-                    throw new SNGFormatErrorException("Illegal port direction " + portInfoSource.direction
-                            + " for source of link " + eEdge + "!");
-                }
-                if (portInfoTarget == null) {
-                    throw new SNGFormatErrorException("Target " + idTarget + " of link " + eEdge + " not found!");
-                }
-                if (portInfoTarget.direction != PortDirection.In) {
-                    throw new SNGFormatErrorException("Illegal port direction " + portInfoTarget.direction
-                            + " for target of link " + eEdge + "!");
-                }
-                Link reverseLink = links.get(new Pair<Resource>(portInfoTarget.resource, portInfoSource.resource));
-                // if we have edges r1 -> r2 and r2 -> r1, we will add an
-                // undirected
-                // edge between r1 and r2 to the architecture graph.
-                if (reverseLink != null) {
-                    architecture.removeEdge(reverseLink);
-                    Link link = new Link(eEdge.getAttribute("id"));
-                    architecture.addEdge(link, portInfoSource.resource, portInfoTarget.resource, EdgeType.UNDIRECTED);
-                    links.put(new Pair<Resource>(portInfoSource.resource, portInfoTarget.resource), link);
-                } else {
-                    Link link = new Link(eEdge.getAttribute("id"));
-                    architecture.addEdge(link, portInfoSource.resource, portInfoTarget.resource, EdgeType.DIRECTED);
-                    links.put(new Pair<Resource>(portInfoSource.resource, portInfoTarget.resource), link);
-                }
-            }
-        }
-
-//      protected void parseLink(nu.xom.Element eLink, Architecture<Resource, Link> architecture)
-//              throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException,
-//              NoSuchMethodException {
-//          Link link = toEdge(eLink, null);
-//
-//          String type = eLink.getAttributeValue("orientation");
-//          EdgeType edgeType = EdgeType.UNDIRECTED;
-//          if (type != null) {
-//              edgeType = EdgeType.valueOf(type);
-//          }
-//
-//          String srcName = eLink.getAttributeValue("source");
-//          Resource source = architecture.getVertex(srcName);
-//          if (source == null) {
-//              throw new IllegalArgumentException("Source of link " + link + " not found: " + srcName);
-//          }
-//
-//          String dstName = eLink.getAttributeValue("destination");
-//          Resource destination = architecture.getVertex(dstName);
-//          if (destination == null) {
-//              throw new IllegalArgumentException("Destination of link " + link + " not found: " + dstName);
-//          }
-//
-//          architecture.addEdge(link, source, destination, edgeType);
-//      } 
-    };
-    
-    protected Architecture<Resource, Link> toArchitecture(org.w3c.dom.Element eArchitectureGraph) throws SNGFormatErrorException {
-        Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();
-        new ArchitectureGraphReader (this, architecture, eArchitectureGraph);
-        return architecture;
+        return actorType;
     }
-    
+
+    /**
+     * Convert a actorInstance XML element to an ActorInstance
+     *
+     * @param eActorInstance the actorInstance XML element
+     * @return an ActorInstance
+     * @throws SNGFormatErrorException
+     */
+    protected ActorInstance toActorInstance(org.w3c.dom.Element eActorInstance, Map<String, ActorType> actorTypes)
+            throws SNGFormatErrorException
+    {
+        final String type = eActorInstance.getAttribute("type");
+        final String name = eActorInstance.getAttribute("name");
+        final ActorType actorType = actorTypes.get(type);
+        if (actorType == null)
+            throw new SNGFormatErrorException("Unknown actor type \""+type+"\" for actor instance \""+name+"\"!");
+        final Task task = new Task(name);
+        return new ActorInstance(name, actorType, task);
+    }
+/*
     protected static class ProblemGraph {
         public final List<Task> actors   = new ArrayList<Task>();
         public final List<Task> channels = new ArrayList<Task>();
@@ -428,9 +387,9 @@ public class SNGReader implements SpecificationWrapper {
             public final List<Task> channels;
         }
 
-        public final List<ConnectionInfo> connectionInfos = new ArrayList<ConnectionInfo>();        
+        public final List<ConnectionInfo> connectionInfos = new ArrayList<ConnectionInfo>();
     }
-    
+
     protected class ProblemGraphReader {
 
         protected final ProblemGraph problemGraph;
@@ -555,224 +514,7 @@ public class SNGReader implements SpecificationWrapper {
             }
         }
     }
-    
-    protected ProblemGraph toProblemGraph(org.w3c.dom.Element eProblemGraph) throws SNGFormatErrorException {
-        ProblemGraph problemGraph = new ProblemGraph();   
-        // Empty set of ports for the top problem graph.
-        Map<Long, ProblemGraph.ConnectionInfo> pgPorts =  new HashMap<Long, ProblemGraph.ConnectionInfo>();        
-        new ProblemGraphReader(problemGraph, pgPorts, eProblemGraph);
-        return problemGraph;
-    }
-        
-    protected Application<Task, Dependency> toApplication(ProblemGraph problemGraph) throws SNGFormatErrorException {
-        Application<Task, Dependency> application = new Application<Task, Dependency>();       
-        
-        for (Task task: problemGraph.actors) {
-            application.addVertex(task);            
-        }
-
-        // Maps a channel to a list of consumer actors.
-        Map<Task, List<Task>> channelConnections = new HashMap<Task, List<Task>>();
-        
-        for (ProblemGraph.ConnectionInfo ci : problemGraph.connectionInfos) {
-            if (ci.actorPortDirection == ProblemGraph.PortDirection.In)
-                for (Task inputChannel : ci.channels) {                
-                    channelConnections.compute(inputChannel, new BiFunction<Task, List<Task>, List<Task>>() {
-                        public List<Task> apply(Task inputChannel, List<Task> consumerActors) {
-                            if (consumerActors == null) {
-                                consumerActors = new ArrayList<Task>();
-                            }
-                            consumerActors.add(ci.actor);
-                            return consumerActors;
-                        }
-                    });
-                }
-        }
-        for (ProblemGraph.ConnectionInfo ci : problemGraph.connectionInfos) {
-            if (ci.actorPortDirection == ProblemGraph.PortDirection.Out) {
-                Communication message = createElement(ci.eActorPort, Communication.class);
-                {
-                    Dependency dependency = new Dependency(createUniqeName());
-                    application.addEdge(dependency, ci.actor, message, EdgeType.DIRECTED);
-                }
-                for (Task outputChannel : ci.channels) {
-                    for (Task consumerActor : channelConnections.get(outputChannel)) {
-                        Dependency dependency = new Dependency(createUniqeName());
-                        application.addEdge(dependency, message, consumerActor, EdgeType.DIRECTED);                        
-                    }
-                }
-            }
-        }        
-//        nu.xom.Elements eTasks = eApplication.getChildElements("task", Common.NS);
-//        for (nu.xom.Element eTask : iterable(eTasks)) {
-//            Task task = toNode(eTask, null);
-//            application.addVertex(task);
-//        }
-//        nu.xom.Elements eCommunications = eApplication.getChildElements("communication", Common.NS);
-//        for (nu.xom.Element eCommunication : iterable(eCommunications)) {
-//            Communication communication = toNode(eCommunication, null);
-//            application.addVertex(communication);
-//        }
-//
-//        nu.xom.Elements eDependencies = eApplication.getChildElements("dependency", Common.NS);
-//        for (nu.xom.Element eDependency : iterable(eDependencies)) {
-//            parseDependency(eDependency, application);
-//        }
-//
-//        nu.xom.Element eFunctions = eApplication.getFirstChildElement("functions", Common.NS);
-//        if (eFunctions != null) {
-//            nu.xom.Elements eFuncs = eFunctions.getChildElements("function", Common.NS);
-//            for (nu.xom.Element eFunc : iterable(eFuncs)) {
-//                Task task = application.getVertex(eFunc.getAttributeValue("anchor"));
-//                Function<Task, Dependency> function = application.getFunction(task);
-//                Attributes attributes = toAttributes(eFunc.getFirstChildElement("attributes", Common.NS));
-//                setAttributes(function, attributes);
-//            }
-//        }
-        return application;
-    }
-    
-    
-
-//    protected void parseDependency(nu.xom.Element eDependency, Application<Task, Dependency> application)
-//            throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException,
-//            NoSuchMethodException {
-//        Dependency dependency = toEdge(eDependency, null);
-//
-//        String srcName = eDependency.getAttributeValue("source");
-//        Task source = application.getVertex(srcName);
-//        if (source == null) {
-//            throw new IllegalArgumentException("Source of dependency " + srcName + " not found: " + srcName);
-//        }
-//
-//        String dstName = eDependency.getAttributeValue("destination");
-//        Task destination = application.getVertex(dstName);
-//        if (destination == null) {
-//            throw new IllegalArgumentException("Destination of dependency " + dependency + " not found: " + dstName);
-//        }
-//
-//        application.addEdge(dependency, source, destination, EdgeType.DIRECTED);
-//    }
-
-    protected Mappings<Task, Resource> toMappings(org.w3c.dom.Element eMappings) throws SNGFormatErrorException {
-        Mappings<Task, Resource> mappings = new Mappings<Task, Resource>();
-
-        for (org.w3c.dom.Element eMapping : childElements(eMappings, "mapping")) {
-            Task     task     = getElement(eMapping,  "source",  Task.class);
-            Resource resource = getElement(eMapping,  "target",  Resource.class);
-            Mapping<Task, Resource> mapping = new Mapping<Task, Resource>(createUniqeName(eMapping), task, resource);
-            addAttributes(eMapping, mapping);
-            mappings.add(mapping);
-        }
-        return mappings;
-    }
-     
-//    protected Routings<Task, Resource, Link> toRoutings(nu.xom.Element eRoutings,
-//            Architecture<Resource, Link> architecture, Application<Task, Dependency> application)
-//            throws IllegalArgumentException, SecurityException, ClassNotFoundException, InstantiationException,
-//            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-//        Routings<Task, Resource, Link> routings = new Routings<Task, Resource, Link>();
-//
-//        nu.xom.Elements eRoutingList = eRoutings.getChildElements("routing", Common.NS);
-//        for (nu.xom.Element eRouting : iterable(eRoutingList)) {
-//            String sourceId = eRouting.getAttributeValue("source");
-//            Task source = application.getVertex(sourceId);
-//
-//            Architecture<Resource, Link> routing = toRouting(eRouting, architecture, application);
-//            routings.set(source, routing);
-//        }
-//
-//        return routings;
-//    }
-//
-//    protected Architecture<Resource, Link> toRouting(nu.xom.Element eRouting, Architecture<Resource, Link> architecture,
-//            Application<Task, Dependency> application)
-//            throws IllegalArgumentException, SecurityException, ClassNotFoundException, InstantiationException,
-//            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-//        Map<String, Resource> map = new HashMap<String, Resource>();
-//        Architecture<Resource, Link> routing = new Architecture<Resource, Link>();
-//
-//        nu.xom.Elements eResources = eRouting.getChildElements("resource", Common.NS);
-//        for (nu.xom.Element eResource : iterable(eResources)) {
-//            Resource parent = architecture.getVertex(eResource.getAttributeValue("id"));
-//            Resource resource = toNode(eResource, parent);
-//            routing.addVertex(resource);
-//            map.put(resource.getId(), resource);
-//        }
-//
-//        nu.xom.Elements eLinks = eRouting.getChildElements("link", Common.NS);
-//        for (nu.xom.Element eLink : iterable(eLinks)) {
-//            Link parent = architecture.getEdge(eLink.getAttributeValue("id"));
-//            Link link = toEdge(eLink, parent);
-//
-//            String type = eLink.getAttributeValue("orientation");
-//            EdgeType edgeType = EdgeType.UNDIRECTED;
-//            if (type != null) {
-//                edgeType = EdgeType.valueOf(type);
-//            }
-//
-//            Resource source = map.get(eLink.getAttributeValue("source"));
-//            Resource destination = map.get(eLink.getAttributeValue("destination"));
-//
-//            routing.addEdge(link, source, destination, edgeType);
-//        }
-//
-//        return routing;
-//    }
-//    
-//    @SuppressWarnings("unchecked")
-//    protected <N extends Node> N toNode(nu.xom.Element eNode, N parent)
-//            throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException,
-//            InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
-//        Class<N> type = getClass(eNode);
-//
-//        N node = null;
-//
-//        if (parent == null) {
-//            String id = eNode.getAttributeValue("id");
-//            if (knownElements.containsKey(id)) {
-//                node = (N) knownElements.get(id);
-//            } else {
-//                node = type.getConstructor(String.class).newInstance(id);
-//                knownElements.put(node.getId(), node);
-//            }
-//        } else {
-//            node = type.getConstructor(Element.class).newInstance(parent);
-//        }
-//
-//        nu.xom.Elements eAttributes = eNode.getChildElements("attributes", Common.NS);
-//        if (eAttributes.size() > 0) {
-//            Attributes attributes = toAttributes(eAttributes.get(0));
-//            setAttributes(node, attributes);
-//        }
-//
-//        return node;
-//
-//    }
-//
-//    protected <E extends Edge> E toEdge(nu.xom.Element eEdge, E parent)
-//            throws ClassNotFoundException, IllegalArgumentException, SecurityException, InstantiationException,
-//            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-//        Class<E> type = getClass(eEdge);
-//
-//        E edge = null;
-//
-//        if (parent == null) {
-//            String id = eEdge.getAttributeValue("id");
-//            edge = type.getConstructor(String.class).newInstance(id);
-//        } else {
-//            edge = type.getConstructor(Element.class).newInstance(parent);
-//        }
-//
-//        nu.xom.Elements eAttributes = eEdge.getChildElements("attributes", Common.NS);
-//        if (eAttributes.size() > 0) {
-//            Attributes attributes = toAttributes(eAttributes.get(0));
-//            setAttributes(edge, attributes);
-//        }
-//
-//        return edge;
-//    }    
-
+  */
     protected Map<Long,   Element> knownElements = new HashMap<Long, Element>();
 
     protected <E extends Element> E createElement(org.w3c.dom.Element eElement, Class<E> type)
@@ -809,7 +551,7 @@ public class SNGReader implements SpecificationWrapper {
     }
 
     protected Map<String, Integer> knownNames    = new HashMap<String, Integer>();
-    
+
     protected String createUniqeName(org.w3c.dom.Element eElement) {
         String name = eElement.getAttribute("name");
         // Fall back to id attribute.
@@ -817,13 +559,13 @@ public class SNGReader implements SpecificationWrapper {
             name = eElement.getAttribute("id");
         return createUniqeName(name, false);
     }
-    
+
     protected String createUniqeName() {
-        return createUniqeName("__anonymous", true);        
+        return createUniqeName("__anonymous", true);
     }
 
     protected String createUniqeName(String name, boolean numbered) {
-        // Enforce unique names as names are used as IDs inside OpenDSE. 
+        // Enforce unique names as names are used as IDs inside OpenDSE.
         Integer repeatEntry = knownNames.get(name);
         if (numbered && repeatEntry == null) {
             repeatEntry = 0;
@@ -833,7 +575,7 @@ public class SNGReader implements SpecificationWrapper {
             int repeat = repeatEntry-1;
             do {
                 repeat++;
-                newName = name + "_" + Integer.toString(repeat);                            
+                newName = name + "_" + Integer.toString(repeat);
             } while ((repeatEntry = knownNames.get(newName)) != null);
             knownNames.put(name, repeat);
             name = newName;
@@ -841,7 +583,7 @@ public class SNGReader implements SpecificationWrapper {
         knownNames.put(name, 1);
         return name;
     }
-    
+
     static protected
     long parseId(org.w3c.dom.Element eElement) throws SNGFormatErrorException {
         return parseId(eElement, "id");
@@ -849,25 +591,25 @@ public class SNGReader implements SpecificationWrapper {
 
     static protected
     long parseId(org.w3c.dom.Element eElement, String attribute) throws SNGFormatErrorException {
-        String id = eElement.getAttribute(attribute);        
+        String id = eElement.getAttribute(attribute);
         if (id == null) {
             throw new SNGFormatErrorException("Missing attribute " + attribute + " for element " + eElement);
-        }        
+        }
         if (!id.startsWith("id")) {
             throw new SNGFormatErrorException("Wrong format for id " + id + " for element " + eElement);
         }
         for (int i = 2; i < id.length(); ++i) {
             if (id.charAt(i) < '0' || id.charAt(i) > '9') {
                 throw new SNGFormatErrorException("Wrong format for id " + id + " for element " + eElement);
-            }            
+            }
         }
         try {
             return Long.parseLong(id.substring(2));
         } catch (NumberFormatException e) {
             throw new SNGFormatErrorException("Wrong format for id " + id + " for element " + eElement);
-        }        
+        }
     }
-    
+
     @SuppressWarnings("unchecked")
     protected <C> Class<C> getClass(nu.xom.Element eElement) throws ClassNotFoundException {
         Class<C> type = null;
@@ -960,7 +702,7 @@ public class SNGReader implements SpecificationWrapper {
         } catch (ClassNotFoundException e) {
             System.err.println("Class " + type.getValue() + " not found. Ignoring attribute value " + value.getValue());
             return null;
-        }        
+        }
         if (parameter != null) {
             if (parameter.getValue().equals("RANGE")) {
                 return getRange(value.getValue());
@@ -990,7 +732,7 @@ public class SNGReader implements SpecificationWrapper {
     /**
      * Constructs an attribute collection that contains all passed elements and
      * their corresponding class.
-     * 
+     *
      * @param eAttribute
      *            the attribute element to add the collection to
      * @param clazz
@@ -1016,11 +758,11 @@ public class SNGReader implements SpecificationWrapper {
         }
         return map;
     }
-    
+
     /**
      * Constructs an attribute collection that contains all passed elements and
      * their corresponding class.
-     * 
+     *
      * @param eAttribute
      *            the attribute element to add the collection to
      * @param clazz
@@ -1092,7 +834,7 @@ public class SNGReader implements SpecificationWrapper {
 
     /**
      * Parse the {@link ParameterRange}.
-     * 
+     *
      * @param value
      *            the string to parse
      * @return the corresponding parameter
@@ -1113,7 +855,7 @@ public class SNGReader implements SpecificationWrapper {
 
     /**
      * Parse the {@link ParameterRangeDiscrete}.
-     * 
+     *
      * @param value
      *            the string to parse
      * @return the corresponding parameter
@@ -1133,7 +875,7 @@ public class SNGReader implements SpecificationWrapper {
 
     /**
      * Parse the {@link ParameterSelect}.
-     * 
+     *
      * @param value
      *            the string to parse
      * @return the corresponding parameter
@@ -1153,7 +895,7 @@ public class SNGReader implements SpecificationWrapper {
             }
         } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
                 | InvocationTargetException | NoSuchMethodException e) {
-            scanner.close();            
+            scanner.close();
             throw new IllegalArgumentException("type value mismatch for attribute " + eAttribute);
         }
 
@@ -1172,7 +914,7 @@ public class SNGReader implements SpecificationWrapper {
 
     /**
      * Parse the {@link ParameterUniqueID}.
-     * 
+     *
      * @param value
      *            the string to parse
      * @return the corresponding parameter
@@ -1189,11 +931,11 @@ public class SNGReader implements SpecificationWrapper {
 
         return Parameters.uniqueID(def, identifier);
     }
-    
+
     /**
      * Gets an iterable list of child elements named {@param childName} of the
      * parent element {@param parentElement}.
-     * 
+     *
      * @param parentElement
      *            the parent element
      * @param childName
@@ -1202,24 +944,24 @@ public class SNGReader implements SpecificationWrapper {
      */
     protected static Iterable<org.w3c.dom.Element> childElements(final org.w3c.dom.Element parentElement, final String childName) {
         return new Iterable<org.w3c.dom.Element>() {
-            
+
             @Override
             public Iterator<org.w3c.dom.Element> iterator() {
                 return new Iterator<org.w3c.dom.Element>() {
                     private int c = -1;
                     private final org.w3c.dom.NodeList nodes = parentElement.getChildNodes();
-                    
+
                     {
                         skip();
                     }
-                    
+
                     private int skip() {
                         int old = c++;
                         while (hasNext() && !nodes.item(c).getNodeName().equals(childName))
                             ++c;
-                        return old;                        
+                        return old;
                     }
-                    
+
                     @Override
                     public boolean hasNext() {
                         return nodes.getLength() > c;
@@ -1243,7 +985,7 @@ public class SNGReader implements SpecificationWrapper {
      * Gets the single child element named {@param childName} of the parent
      * element {@param parentElement}. If there are more than one or no child
      * elements with the requested name, an exception is thrown.
-     * 
+     *
      * @param parentElement
      *            the parent element
      * @param childName
@@ -1255,14 +997,14 @@ public class SNGReader implements SpecificationWrapper {
             throws SNGFormatErrorException {
         return childElement(parentElement, childName, false);
     }
-    
+
     /**
      * Gets the single child element named {@param childName} of the parent
      * element {@param parentElement}. If there are more than one child element
      * with the requested name, an exception is thrown. If the element is
      * optional {@param optional} and not present, then null is returned.
      * Otherwise, if not optional and missing an exception is thrown.
-     * 
+     *
      * @param parentElement
      *            the parent element
      * @param childName

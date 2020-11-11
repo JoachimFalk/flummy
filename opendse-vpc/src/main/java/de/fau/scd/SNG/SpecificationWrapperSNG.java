@@ -29,7 +29,14 @@ import org.opt4j.core.start.Constant;
 import com.google.inject.Inject;
 
 import de.fau.scd.SNG.SNGReader.SNGFormatErrorException;
+import net.sf.opendse.model.Application;
+import net.sf.opendse.model.Architecture;
+import net.sf.opendse.model.Dependency;
+import net.sf.opendse.model.Link;
+import net.sf.opendse.model.Mappings;
+import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
+import net.sf.opendse.model.Task;
 import net.sf.opendse.optimization.SpecificationWrapper;
 import net.sf.opendse.optimization.io.SpecificationTransformer;
 import net.sf.opendse.optimization.io.SpecificationWrapperInstance;
@@ -37,14 +44,21 @@ import net.sf.opendse.optimization.io.SpecificationWrapperInstance;
 public class SpecificationWrapperSNG implements SpecificationWrapper {
 
     final private SpecificationWrapperInstance specificationWrapperInstance;
-    final private SNGReader sngReader;
 
     @Inject
     public SpecificationWrapperSNG(
             @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName)
             throws IOException, FileNotFoundException, SNGFormatErrorException {
-        sngReader = new SNGReader(sngFileName);
-        specificationWrapperInstance = new SpecificationWrapperInstance(sngReader.getSpecification());
+        SNGReader sngReader = new SNGReader(sngFileName);
+
+        Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();
+        Mappings<Task, Resource> mappings = new Mappings<Task, Resource>();
+
+        Application<Task, Dependency> application = sngReader.getApplication();
+
+        Specification specification = new Specification(application, architecture, mappings);
+
+        specificationWrapperInstance = new SpecificationWrapperInstance(specification);
     }
 
     @Override
