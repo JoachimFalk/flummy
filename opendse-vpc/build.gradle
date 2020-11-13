@@ -55,16 +55,16 @@ dependencies {
 
 task javaWrapVPCDTD(type: JavaWrapXSDandDTDFiles) {
     description       = "Wrap vpc.dtd into java file for consumption by the VPCEvaluator."
-    inPackage         = "de.fau.scd.VPC.helper"
+    inPackage         = "de.fau.scd.VPC.io"
     srcXSDandDTDFiles = parent.project.files("vpc.dtd")
-    sourceDir         = project.file("${buildDir}/src/main/java/de/fau/scd/VPC/helper")
+    sourceDir         = project.file("${buildDir}/src/main/java/de/fau/scd/VPC/io")
 }
 
 task javaWrapSNGXSD(type: JavaWrapXSDandDTDFiles) {
     description       = "Wrap sng.xsd into java file for consumption by the SNGReader."
-    inPackage         = "de.fau.scd.SNG"
+    inPackage         = "de.fau.scd.VPC.io"
     srcXSDandDTDFiles = files("src/main/resources/sng.xsd")
-    sourceDir         = project.file("${buildDir}/src/main/java/de/fau/scd/SNG")
+    sourceDir         = project.file("${buildDir}/src/main/java/de/fau/scd/VPC/io")
 }
 
 sourceSets {

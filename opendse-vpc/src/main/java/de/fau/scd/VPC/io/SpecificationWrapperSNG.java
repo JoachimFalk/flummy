@@ -18,7 +18,7 @@
  *   along with this library; if not, write to the Free Software Foundation, Inc.,
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
-package de.fau.scd.SNG;
+package de.fau.scd.VPC.io;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +28,6 @@ import org.opt4j.core.start.Constant;
 
 import com.google.inject.Inject;
 
-import de.fau.scd.SNG.SNGReader.SNGFormatErrorException;
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Dependency;
@@ -47,8 +46,10 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
 
     @Inject
     public SpecificationWrapperSNG(
-            @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName)
-            throws IOException, FileNotFoundException, SNGFormatErrorException {
+        @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate") String vpcConfigTemplate
+        ) throws IOException, FileNotFoundException, SNGReader.SNGFormatErrorException
+    {
         SNGReader sngReader = new SNGReader(sngFileName);
 
         Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();

@@ -18,7 +18,7 @@
  *   along with this library; if not, write to the Free Software Foundation, Inc.,
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
-package de.fau.scd.SNG;
+package de.fau.scd.VPC.helper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -106,7 +106,7 @@ public class Common {
     }
 
     @SuppressWarnings("rawtypes")
-    protected static Object toInstance(String value, Class<?> clazz) throws IllegalArgumentException, SecurityException,
+    public static Object toInstance(String value, Class<?> clazz) throws IllegalArgumentException, SecurityException,
             InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         if (!clazz.isEnum()) {
             Constructor constructor = clazz.getConstructor(String.class);
@@ -124,7 +124,7 @@ public class Common {
         return null;
     }
 
-    protected static void setAttributes(IAttributes e, Attributes attributes) {
+    public static void setAttributes(IAttributes e, Attributes attributes) {
         for (String name : attributes.keySet()) {
             e.setAttribute(name, attributes.get(name));
         }
