@@ -28,6 +28,10 @@ import org.opt4j.core.start.Constant;
 
 import com.google.inject.Inject;
 
+import de.fau.scd.VPC.helper.UniquePool;
+import de.fau.scd.VPC.io.SNGReader.SNGFormatErrorException;
+import de.fau.scd.VPC.io.VPCConfigReader.VPCFormatErrorException;
+
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Dependency;
@@ -48,14 +52,19 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
     public SpecificationWrapperSNG(
         @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate") String vpcConfigTemplate
-        ) throws IOException, FileNotFoundException, SNGReader.SNGFormatErrorException
+        ) throws IOException, FileNotFoundException, SNGFormatErrorException, VPCFormatErrorException
     {
+        UniquePool uniquePool = new UniquePool();
+
         SNGReader sngReader = new SNGReader(sngFileName);
+        VPCConfigReader vpcConfigReader = new VPCConfigReader(vpcConfigTemplate);
 
         Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();
         Mappings<Task, Resource> mappings = new Mappings<Task, Resource>();
 
-        Application<Task, Dependency> application = sngReader.getApplication();
+        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool);
+
+        Application<Task, Dependency> application = sngImporter.getApplication();
 
         Specification specification = new Specification(application, architecture, mappings);
 
