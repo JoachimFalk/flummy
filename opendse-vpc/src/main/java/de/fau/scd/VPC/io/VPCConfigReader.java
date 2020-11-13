@@ -19,7 +19,7 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-package de.fau.scd.VPC.helper;
+package de.fau.scd.VPC.io;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +39,8 @@ import javax.xml.transform.stream.StreamSource;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import de.fau.scd.VPC.io.VpcDTD;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;

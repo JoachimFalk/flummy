@@ -57,7 +57,8 @@ import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.SchedulerTypeEnum;
 import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.TraceTypeEnum;
 import de.fau.scd.VPC.helper.ObjectiveInfo;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
-
+import de.fau.scd.VPC.io.VPCConfigReader;
+import de.fau.scd.VPC.io.VPCConfigReader.VPCFormatErrorException;
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Attributes;
@@ -73,9 +74,6 @@ import net.sf.opendse.model.Specification;
 import net.sf.opendse.model.Task;
 import net.sf.opendse.optimization.ImplementationEvaluator;
 import net.sf.opendse.model.Routings;
-
-import de.fau.scd.VPC.helper.VPCConfigReader;
-import de.fau.scd.VPC.helper.VPCConfigReader.VPCFormatErrorException;
 
 //import javax.xml.parsers.DocumentBuilder;
 //import javax.xml.parsers.DocumentBuilderFactory;

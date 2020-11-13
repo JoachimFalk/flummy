@@ -1,4 +1,4 @@
-package de.fau.scd.SNG;
+package de.fau.scd.VPC.helper;
 
 // Copyright 2003-2010 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
 // www.source-code.biz, www.inventec.ch/chdh

@@ -18,11 +18,11 @@
  *   along with this library; if not, write to the Free Software Foundation, Inc.,
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
-package de.fau.scd.SNG;
+package de.fau.scd.VPC.io;
 
-import static de.fau.scd.SNG.Common.classMap;
-import static de.fau.scd.SNG.Common.setAttributes;
-import static de.fau.scd.SNG.Common.toInstance;
+import static de.fau.scd.VPC.helper.Common.classMap;
+import static de.fau.scd.VPC.helper.Common.setAttributes;
+import static de.fau.scd.VPC.helper.Common.toInstance;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -83,6 +83,8 @@ import javax.xml.validation.SchemaFactory;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import de.fau.scd.VPC.helper.Common;
 
 /**
  * The {@code SNGReader} reads a {@code Specification} from an

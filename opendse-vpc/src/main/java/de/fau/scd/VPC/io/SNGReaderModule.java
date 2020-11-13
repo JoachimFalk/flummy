@@ -18,28 +18,46 @@
  *   along with this library; if not, write to the Free Software Foundation, Inc.,
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
-package de.fau.scd.SNG;
+package de.fau.scd.VPC.io;
 
 import net.sf.opendse.optimization.SpecificationWrapper;
 import net.sf.opendse.optimization.io.IOModule;
 
 import org.opt4j.core.config.annotations.File;
+import org.opt4j.core.config.annotations.Info;
+import org.opt4j.core.config.annotations.Order;
 import org.opt4j.core.start.Constant;
 
 public class SNGReaderModule extends IOModule {
 
-    @File
+    @Info("The dataflow graph given as SNG XML file.")
+    @Order(0)
     @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile")
-    protected String filename = "";
+    @File
+    protected String sngFile = "";
 
-    public String getFilename() {
-        return filename;
+    public String getSngFile() {
+        return sngFile;
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setSngFile(String sngFile) {
+        this.sngFile = sngFile;
+    }
+    
+    @Info("The architecture given as VPC configuration XML template file.")
+    @Order(10)
+    @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate")
+    @File
+    protected String vpcConfigTemplate = "";
+
+    public String getVpcConfigTemplate() {
+        return vpcConfigTemplate;
     }
 
+    public void setVpcConfigTemplate(String vpcConfigTemplate) {
+        this.vpcConfigTemplate = vpcConfigTemplate;
+    }
+    
     @Override
     protected void config() {
         bind(SpecificationWrapper.class).to(SpecificationWrapperSNG.class).in(SINGLETON);
