@@ -45,11 +45,10 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
- * The {@code SNGReader} reads a {@code Specification} from an
- * {@code InputStream} or file.
+ * The {@code SNGReader} reads a dataflow graph in SNG XML format into a
+ * {@code org.w3c.dom.Document} from an {@code InputStream} or file.
  *
  * @author Joachim Falk
- *
  */
 public class SNGReader {
 

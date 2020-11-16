@@ -45,6 +45,12 @@ import de.fau.scd.VPC.io.VpcDTD;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
+/**
+ * The {@code VPCConfigReader} reads an XML VPC configuration into a
+ * {@code org.w3c.dom.Document} from an {@code InputStream} or file.
+ *
+ * @author Joachim Falk
+ */
 public class VPCConfigReader {
 
     @SuppressWarnings("serial")
