@@ -42,6 +42,12 @@ import net.sf.opendse.model.Dependency;
 import net.sf.opendse.model.IAttributes;
 import net.sf.opendse.model.Task;
 
+/**
+ * The {@code SNGImporter} converts a dataflow graph in SNG XML format given as
+ * a {@code org.w3c.dom.Document} into an {@code Application}.
+ *
+ * @author Joachim Falk
+ */
 public class SNGImporter {
 
 

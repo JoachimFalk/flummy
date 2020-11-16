@@ -59,15 +59,14 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         SNGReader sngReader = new SNGReader(sngFileName);
         VPCConfigReader vpcConfigReader = new VPCConfigReader(vpcConfigTemplate);
 
-        Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();
-        Mappings<Task, Resource> mappings = new Mappings<Task, Resource>();
-
         SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool);
-
         Application<Task, Dependency> application = sngImporter.getApplication();
 
-        Specification specification = new Specification(application, architecture, mappings);
+        VPCConfigImporter vpcConfigImporter = new VPCConfigImporter(vpcConfigReader,uniquePool, application);
+        Architecture<Resource, Link> architecture = vpcConfigImporter.getArchitecture();
+        Mappings<Task, Resource> mappings = vpcConfigImporter.getMappings();
 
+        Specification specification = new Specification(application, architecture, mappings);
         specificationWrapperInstance = new SpecificationWrapperInstance(specification);
     }
 
