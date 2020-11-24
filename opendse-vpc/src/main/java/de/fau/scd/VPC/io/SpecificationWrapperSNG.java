@@ -28,9 +28,7 @@ import org.opt4j.core.start.Constant;
 
 import com.google.inject.Inject;
 
-import de.fau.scd.VPC.helper.UniquePool;
-import de.fau.scd.VPC.io.SNGReader.SNGFormatErrorException;
-import de.fau.scd.VPC.io.VPCConfigReader.VPCFormatErrorException;
+import de.fau.scd.VPC.io.Common.FormatErrorException;
 
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
@@ -52,7 +50,7 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
     public SpecificationWrapperSNG(
         @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate") String vpcConfigTemplate
-        ) throws IOException, FileNotFoundException, SNGFormatErrorException, VPCFormatErrorException
+        ) throws IOException, FileNotFoundException, FormatErrorException
     {
         UniquePool uniquePool = new UniquePool();
 

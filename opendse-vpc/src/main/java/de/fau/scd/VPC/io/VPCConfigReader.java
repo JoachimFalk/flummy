@@ -26,8 +26,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,23 +49,16 @@ import org.xml.sax.InputSource;
  *
  * @author Joachim Falk
  */
-public class VPCConfigReader {
-
-    @SuppressWarnings("serial")
-    static public class VPCFormatErrorException extends Exception {
-        public VPCFormatErrorException(String message) {
-            super(message);
-        }
-    }
+public class VPCConfigReader extends Common {
 
     /**
      * Read specification from a file.
      *
      * @param filename
      *            The name of the file.
-     * @throws VPCFormatErrorException
+     * @throws FormatErrorException
      */
-    public VPCConfigReader(String filename) throws FileNotFoundException, VPCFormatErrorException {
+    public VPCConfigReader(String filename) throws FileNotFoundException, FormatErrorException {
         this(new File(filename));
     }
 
@@ -76,9 +67,9 @@ public class VPCConfigReader {
      *
      * @param file
      *            The file.
-     * @throws VPCFormatErrorException
+     * @throws FormatErrorException
      */
-    public VPCConfigReader(File file) throws FileNotFoundException, VPCFormatErrorException {
+    public VPCConfigReader(File file) throws FileNotFoundException, FormatErrorException {
         this(new StreamSource(new FileInputStream(file), file.toURI().toASCIIString()));
     }
 
@@ -87,9 +78,9 @@ public class VPCConfigReader {
      *
      * @param in
      *            The input stream.
-     * @throws VPCFormatErrorException
+     * @throws FormatErrorException
      */
-    public VPCConfigReader(InputStream in) throws VPCFormatErrorException {
+    public VPCConfigReader(InputStream in) throws FormatErrorException {
         this(new StreamSource(in, "<input stream>"));
     }
 
@@ -106,9 +97,9 @@ public class VPCConfigReader {
      *
      * @param in
      *            The input stream.
-     * @throws VPCFormatErrorException
+     * @throws FormatErrorException
      */
-    protected VPCConfigReader(StreamSource in) throws VPCFormatErrorException {
+    protected VPCConfigReader(StreamSource in) throws FormatErrorException {
         try {
 //          String networkgraphXSDUrl = "networkgraph.xsd";
 //          StreamSource sources[] = new StreamSource[] {
@@ -141,114 +132,8 @@ public class VPCConfigReader {
             doc.normalize();
         } catch (Exception ex) {
 //          ex.printStackTrace(System.err);
-            throw new VPCFormatErrorException(ex.getMessage());
+            throw new FormatErrorException(ex.getMessage());
         }
-    }
-
-    /**
-     * Gets an iterable list of child elements named {@param childName} of the
-     * parent element {@param parentElement}.
-     *
-     * @param parentElement
-     *            the parent element
-     * @param childName
-     *            the tag name of the desired child elements
-     * @return the iterable element objects
-     */
-    public static Iterable<org.w3c.dom.Element> childElements(final org.w3c.dom.Element parentElement, final String childName) {
-        return new Iterable<org.w3c.dom.Element>() {
-
-            @Override
-            public Iterator<org.w3c.dom.Element> iterator() {
-                return new Iterator<org.w3c.dom.Element>() {
-                    private int c = -1;
-                    private int old = -1;
-                    private final org.w3c.dom.NodeList nodes = parentElement.getChildNodes();
-
-                    {
-                        skip();
-                    }
-
-                    private int skip() {
-                        old = c++;
-                        while (hasNext() && !nodes.item(c).getNodeName().equals(childName))
-                            ++c;
-                        return old;
-                    }
-
-                    @Override
-                    public boolean hasNext() {
-                        return nodes.getLength() > c;
-                    }
-
-                    @Override
-                    public org.w3c.dom.Element next() {
-                        if (!hasNext())
-                            throw new NoSuchElementException();
-                        return (org.w3c.dom.Element) nodes.item(skip());
-                    }
-
-                    @Override
-                    public void remove() {
-                        if (old == -1)
-                            throw new IllegalStateException();
-                        parentElement.removeChild(nodes.item(old));
-                        --c;
-                    }
-                };
-            }
-        };
-    }
-
-    /**
-     * Gets the single child element named {@param childName} of the parent
-     * element {@param parentElement}. If there are more than one or no child
-     * elements with the requested name, an exception is thrown.
-     *
-     * @param parentElement
-     *            the parent element
-     * @param childName
-     *            the tag name of the desired child elements
-     * @return the desired child element
-     * @throws VPCFormatErrorException
-     */
-    public static org.w3c.dom.Element childElement(final org.w3c.dom.Element parentElement, final String childName)
-            throws VPCFormatErrorException {
-        return childElement(parentElement, childName, false);
-    }
-
-    /**
-     * Gets the single child element named {@param childName} of the parent
-     * element {@param parentElement}. If there are more than one child element
-     * with the requested name, an exception is thrown. If the element is
-     * optional {@param optional} and not present, then null is returned.
-     * Otherwise, if not optional and missing an exception is thrown.
-     *
-     * @param parentElement
-     *            the parent element
-     * @param childName
-     *            the tag name of the desired child elements
-     * @param optional
-     *            If true, the element is allowed to be missing
-     * @return the desired child element or null if optional and the element is
-     *         missing
-     * @throws VPCFormatErrorException
-     */
-    public static org.w3c.dom.Element childElement(final org.w3c.dom.Element parentElement, final String childName,
-            boolean optional) throws VPCFormatErrorException {
-        Iterator<org.w3c.dom.Element> iter = childElements(parentElement, childName).iterator();
-        if (!iter.hasNext()) {
-            if (!optional)
-                throw new VPCFormatErrorException(
-                        "Parent element " + parentElement + " is missing a " + childName + " child element!");
-            else
-                return null;
-        }
-        org.w3c.dom.Element retval = iter.next();
-        if (iter.hasNext())
-            throw new VPCFormatErrorException(
-                    "Parent element " + parentElement + " must only have one " + childName + " child element!");
-        return retval;
     }
 
     private static class MyResolver implements EntityResolver {

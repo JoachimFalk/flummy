@@ -1,4 +1,4 @@
-package de.fau.scd.VPC.helper;
+package de.fau.scd.VPC.io;
 
 // Copyright 2003-2010 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
 // www.source-code.biz, www.inventec.ch/chdh
@@ -17,11 +17,11 @@ package de.fau.scd.VPC.helper;
 
 /**
  * A Base64 encoder/decoder.
- * 
+ *
  * <p>
  * This class is used to encode and decode data in Base64 format as described in
  * RFC 1521.
- * 
+ *
  * <p>
  * Project home page:
  * <a href="http://www.source-code.biz/base64coder/java/">www.
@@ -29,7 +29,7 @@ package de.fau.scd.VPC.helper;
  * Author: Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland<br>
  * Multi-licensed: EPL / LGPL / GPL / AL / BSD.
  */
-public class Base64Coder {
+class Base64Coder {
 
     // The line separator string of the operating system.
     private static final String systemLineSeparator = System.getProperty("line.separator");
@@ -60,7 +60,7 @@ public class Base64Coder {
     /**
      * Encodes a string into Base64 format. No blanks or line breaks are
      * inserted.
-     * 
+     *
      * @param s
      *            A String to be encoded.
      * @return A String containing the Base64 encoded data.
@@ -73,7 +73,7 @@ public class Base64Coder {
      * Encodes a byte array into Base 64 format and breaks the output into lines
      * of 76 characters. This method is compatible with
      * <code>sun.misc.BASE64Encoder.encodeBuffer(byte[])</code>.
-     * 
+     *
      * @param in
      *            An array containing the data bytes to be encoded.
      * @return A String containing the Base64 encoded data, broken into lines.
@@ -85,7 +85,7 @@ public class Base64Coder {
     /**
      * Encodes a byte array into Base 64 format and breaks the output into
      * lines.
-     * 
+     *
      * @param in
      *            An array containing the data bytes to be encoded.
      * @param iOff
@@ -119,7 +119,7 @@ public class Base64Coder {
     /**
      * Encodes a byte array into Base64 format. No blanks or line breaks are
      * inserted in the output.
-     * 
+     *
      * @param in
      *            An array containing the data bytes to be encoded.
      * @return A character array containing the Base64 encoded data.
@@ -131,7 +131,7 @@ public class Base64Coder {
     /**
      * Encodes a byte array into Base64 format. No blanks or line breaks are
      * inserted in the output.
-     * 
+     *
      * @param in
      *            An array containing the data bytes to be encoded.
      * @param iLen
@@ -145,7 +145,7 @@ public class Base64Coder {
     /**
      * Encodes a byte array into Base64 format. No blanks or line breaks are
      * inserted in the output.
-     * 
+     *
      * @param in
      *            An array containing the data bytes to be encoded.
      * @param iOff
@@ -183,7 +183,7 @@ public class Base64Coder {
     /**
      * Decodes a string from Base64 format. No blanks or line breaks are allowed
      * within the Base64 encoded input data.
-     * 
+     *
      * @param s
      *            A Base64 String to be decoded.
      * @return A String containing the decoded data.
@@ -199,7 +199,7 @@ public class Base64Coder {
      * and blanks. CR, LF, Tab and Space characters are ignored in the input
      * data. This method is compatible with
      * <code>sun.misc.BASE64Decoder.decodeBuffer(String)</code>.
-     * 
+     *
      * @param s
      *            A Base64 String to be decoded.
      * @return An array containing the decoded data bytes.
@@ -220,7 +220,7 @@ public class Base64Coder {
     /**
      * Decodes a byte array from Base64 format. No blanks or line breaks are
      * allowed within the Base64 encoded input data.
-     * 
+     *
      * @param s
      *            A Base64 String to be decoded.
      * @return An array containing the decoded data bytes.
@@ -234,7 +234,7 @@ public class Base64Coder {
     /**
      * Decodes a byte array from Base64 format. No blanks or line breaks are
      * allowed within the Base64 encoded input data.
-     * 
+     *
      * @param in
      *            A character array containing the Base64 encoded data.
      * @return An array containing the decoded data bytes.
@@ -248,7 +248,7 @@ public class Base64Coder {
     /**
      * Decodes a byte array from Base64 format. No blanks or line breaks are
      * allowed within the Base64 encoded input data.
-     * 
+     *
      * @param in
      *            A character array containing the Base64 encoded data.
      * @param iOff

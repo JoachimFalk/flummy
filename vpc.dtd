@@ -15,21 +15,24 @@ name CDATA #REQUIRED>
 type CDATA #REQUIRED
 name CDATA #REQUIRED>
 
-<!ELEMENT component ((attribute)*)>
+<!ELEMENT component ((attribute|opendseattr)*)>
 <!ATTLIST component
 name ID #REQUIRED
 type CDATA #IMPLIED
 scheduler CDATA #REQUIRED>
 
-<!ELEMENT attribute (attribute|parameter)*>
+<!ELEMENT attribute (attribute|opendseattr)*>
 <!ATTLIST attribute 
 type CDATA #REQUIRED
 value CDATA #IMPLIED>
 
-<!ELEMENT parameter EMPTY>
-<!ATTLIST parameter
-type CDATA #REQUIRED
-value CDATA #REQUIRED>
+<!ELEMENT opendseattr (opendseattr)*>
+<!ATTLIST opendseattr
+name     CDATA #REQUIRED
+cxxType  CDATA #IMPLIED
+javaType CDATA #IMPLIED
+type     CDATA #IMPLIED
+value    CDATA #IMPLIED>
 
 <!ELEMENT distributions (distribution)*>
 

@@ -29,8 +29,8 @@ import java.util.regex.Pattern;
 
 import org.w3c.dom.Attr;
 
-import de.fau.scd.VPC.helper.UniquePool;
-import de.fau.scd.VPC.io.VPCConfigReader.VPCFormatErrorException;
+import de.fau.scd.VPC.io.Common.FormatErrorException;
+
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Dependency;
@@ -46,7 +46,7 @@ public class VPCConfigImporter {
         VPCConfigReader vpcConfigReader
       , UniquePool uniquePool
       , Application<Task, Dependency> application
-      ) throws VPCFormatErrorException
+      ) throws FormatErrorException
     {
         this.uniquePool  = uniquePool;
         this.application = application;
@@ -67,47 +67,48 @@ public class VPCConfigImporter {
     }
 
     protected Architecture<Resource, Link> toArchitecture(org.w3c.dom.Element eResources
-      ) throws VPCFormatErrorException
+      ) throws FormatErrorException
     {
         final Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();
 
-        for (org.w3c.dom.Element eComponent : SNGReader.childElements(eResources, "component")) {
+        for (org.w3c.dom.Element eComponent : VPCConfigReader.childElements(eResources, "component")) {
             final String name = eComponent.getAttribute("name");
             final Resource resource = new Resource(name);
 
             if (resouceInstances.containsKey(name))
-                throw new VPCFormatErrorException("Duplicate resouce \""+name+"\"!");
+                throw new FormatErrorException("Duplicate resouce \""+name+"\"!");
             resouceInstances.put(name, resource);
+            AttributeHelper.addAttributes(eComponent, resource);
             architecture.addVertex(resource);
         }
         return architecture;
     }
 
     protected Mappings<Task, Resource> toMappings(org.w3c.dom.Element eResources
-      ) throws VPCFormatErrorException
+      ) throws FormatErrorException
     {
         final Mappings<Task, Resource> mappings = new Mappings<Task, Resource>();
-        
+
         final Pattern timeRegex = Pattern.compile("(-?[0-9]*(\\.[0-9]+)?([eE][-+]?[0-9]+)?) *(fs|ps|ns|us|ms|s|sec)");
 
         for (org.w3c.dom.Element eMapping : VPCConfigReader.childElements(eResources, "mapping")) {
             final List<Task>     sources = new ArrayList<Task>();
             final List<Resource> targets = new ArrayList<Resource>();
-            String mappingName; 
+            String mappingName;
             {
                 final Attr    source         = eMapping.getAttributeNode("source");
                 final Attr    sourceRegex    = eMapping.getAttributeNode("sourceRegex");
                 final boolean sourceOptional = Boolean.valueOf(eMapping.getAttribute("sourceOptional"));
 
                 if (source != null && sourceRegex != null) {
-                    throw new VPCFormatErrorException("For mappings, source and sourceRegex must not both be defined!");
+                    throw new FormatErrorException("For mappings, source and sourceRegex must not both be defined!");
                 } else if (source == null && sourceRegex == null) {
-                    throw new VPCFormatErrorException("For mappings, either source or sourceRegex must be defined!");
+                    throw new FormatErrorException("For mappings, either source or sourceRegex must be defined!");
                 } else if (source != null) {
                     mappingName = source.getValue() + " -> ";
                     Task sourceTask = application.getVertex(source.getValue());
                     if (sourceTask == null && !sourceOptional)
-                        throw new VPCFormatErrorException("Unknown source task \""+source+"\" in mapping!");
+                        throw new FormatErrorException("Unknown source task \""+source+"\" in mapping!");
                     else
                         sources.add(sourceTask);
                 } else {
@@ -119,7 +120,7 @@ public class VPCConfigImporter {
                             sources.add(sourceTask);
                     }
                     if (sources.isEmpty() && !sourceOptional)
-                        throw new VPCFormatErrorException("Source regex \""+sourceRegex+"\" did non match any task in mapping!");
+                        throw new FormatErrorException("Source regex \""+sourceRegex+"\" did non match any task in mapping!");
                 }
             }
             {
@@ -128,14 +129,14 @@ public class VPCConfigImporter {
                 final boolean targetOptional = Boolean.valueOf(eMapping.getAttribute("targetOptional"));
 
                 if (target != null && targetRegex != null) {
-                    throw new VPCFormatErrorException("For mappings, source and sourceRegex must not both be defined!");
+                    throw new FormatErrorException("For mappings, source and sourceRegex must not both be defined!");
                 } else if (target == null && targetRegex == null) {
-                    throw new VPCFormatErrorException("For mappings, either source or sourceRegex must be defined!");
+                    throw new FormatErrorException("For mappings, either source or sourceRegex must be defined!");
                 } else if (target != null) {
                     mappingName += target.getValue();
                     Resource targetResource = architecture.getVertex(target.getValue());
                     if (targetResource == null && !targetOptional)
-                        throw new VPCFormatErrorException("Unknown target resource \""+target+"\" in mapping!");
+                        throw new FormatErrorException("Unknown target resource \""+target+"\" in mapping!");
                     else
                         targets.add(targetResource);
                 } else {
@@ -147,7 +148,7 @@ public class VPCConfigImporter {
                             targets.add(targetResource);
                     }
                     if (targets.isEmpty() && !targetOptional)
-                        throw new VPCFormatErrorException("Regex regex \""+targetRegex+"\" did non match any resource in mapping!");
+                        throw new FormatErrorException("Regex regex \""+targetRegex+"\" did non match any resource in mapping!");
                 }
             }
             final Map<String, Object> vpcActorDelay = new HashMap<String, Object>();
@@ -159,7 +160,7 @@ public class VPCConfigImporter {
                     String delayText = delay.getValue();
                     Matcher m = timeRegex.matcher(delayText);
                     if (m.matches()) {
-                        double v = Double.valueOf(m.group(1)); 
+                        double v = Double.valueOf(m.group(1));
                         if (m.group(4).equals("fs")) {
                             v *= 1E-15;
                         } else if (m.group(4).equals("ps")) {
@@ -174,13 +175,13 @@ public class VPCConfigImporter {
                             assert m.group(4).equals("s") || m.group(4).equals("sec")
                                 : "Internal error in time unit handling!";
                         }
-                        value = new Double(v);    
+                        value = new Double(v);
                     } else
-                        throw new VPCFormatErrorException("Can parse delay value "+ delayText + " for timing "+name+" in mapping " + mappingName + "!");                                            
+                        throw new FormatErrorException("Can parse delay value "+ delayText + " for timing "+name+" in mapping " + mappingName + "!");
                 } else
-                    throw new VPCFormatErrorException("Missing delay value for timing "+name+" in mapping " + mappingName + "!");                    
+                    throw new FormatErrorException("Missing delay value for timing "+name+" in mapping " + mappingName + "!");
                 if (vpcActorDelay.containsKey(name))
-                    throw new VPCFormatErrorException("Dupicate timing "+name+" in mapping " + mappingName + "!");
+                    throw new FormatErrorException("Dupicate timing "+name+" in mapping " + mappingName + "!");
                 vpcActorDelay.put(name, value);
             }
             for (Task source : sources) {
@@ -188,6 +189,7 @@ public class VPCConfigImporter {
                     final String name = uniquePool.createUniqeName(source.getId()+" -> "+target.getId(), false);
                     final Mapping<Task, Resource> mapping = new Mapping<Task, Resource>(name, source, target);
                     mapping.setAttribute("vpc-actor-delay", vpcActorDelay);
+                    AttributeHelper.addAttributes(eMapping, mapping);
                     mappings.add(mapping);
                 }
             }

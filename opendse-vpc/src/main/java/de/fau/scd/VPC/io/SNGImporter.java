@@ -20,26 +20,17 @@
  */
 package de.fau.scd.VPC.io;
 
-import static de.fau.scd.VPC.helper.Common.classMap;
-import static de.fau.scd.VPC.helper.Common.setAttributes;
-import static de.fau.scd.VPC.helper.Common.toInstance;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.fau.scd.VPC.helper.Common;
-import de.fau.scd.VPC.helper.UniquePool;
-import de.fau.scd.VPC.io.SNGReader.SNGFormatErrorException;
+import de.fau.scd.VPC.io.Common.FormatErrorException;
+
 import edu.uci.ics.jung.graph.util.EdgeType;
+
 import net.sf.opendse.model.Application;
-import net.sf.opendse.model.Attributes;
+//import net.sf.opendse.model.Attributes;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Dependency;
-import net.sf.opendse.model.IAttributes;
 import net.sf.opendse.model.Task;
 
 /**
@@ -51,7 +42,7 @@ import net.sf.opendse.model.Task;
 public class SNGImporter {
 
 
-    SNGImporter(SNGReader sngReader, UniquePool uniquePool) throws SNGFormatErrorException
+    SNGImporter(SNGReader sngReader, UniquePool uniquePool) throws FormatErrorException
     {
         this.uniquePool  = uniquePool;
         this.application = toApplication(sngReader.getDocumentElement());
@@ -103,7 +94,7 @@ public class SNGImporter {
      * @return the application
      * @throws SNGFormatErrorException
      */
-    protected Application<Task, Dependency> toApplication(org.w3c.dom.Element eNetworkGraph) throws SNGFormatErrorException {
+    protected Application<Task, Dependency> toApplication(org.w3c.dom.Element eNetworkGraph) throws FormatErrorException {
         Application<Task, Dependency> application = new Application<Task, Dependency>();
 
         final Map<String, ActorType>     actorTypes     = new HashMap<String, ActorType>();
@@ -112,13 +103,13 @@ public class SNGImporter {
         for (org.w3c.dom.Element eActorType : SNGReader.childElements(eNetworkGraph, "actorType")) {
             final ActorType actorType = toActorType(eActorType);
             if (actorTypes.containsKey(actorType.name))
-                throw new SNGFormatErrorException("Duplicate actor type \""+actorType.name+"\"!");
+                throw new FormatErrorException("Duplicate actor type \""+actorType.name+"\"!");
             actorTypes.put(actorType.name, actorType);
         }
         for (org.w3c.dom.Element eActorInstance : SNGReader.childElements(eNetworkGraph, "actorInstance")) {
             final ActorInstance actorInstance = toActorInstance(eActorInstance, actorTypes);
             if (actorInstances.containsKey(actorInstance.name))
-                throw new SNGFormatErrorException("Duplicate actor instance \""+actorInstance.name+"\"!");
+                throw new FormatErrorException("Duplicate actor instance \""+actorInstance.name+"\"!");
             actorInstances.put(actorInstance.name, actorInstance);
             application.addVertex(actorInstance.task);
         }
@@ -131,7 +122,7 @@ public class SNGImporter {
             final String sourcePort  = eSource.getAttribute("port");
             final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
             if (sourceActorInstance == null)
-                throw new SNGFormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
+                throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
 
             final Communication message = new Communication(sourceActor+"."+sourcePort);
             {
@@ -143,7 +134,7 @@ public class SNGImporter {
             final String targetPort  = eTarget.getAttribute("port");
             final ActorInstance targetActorInstance = actorInstances.get(targetActor);
             if (targetActorInstance == null)
-                throw new SNGFormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
+                throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
             {
                 Dependency dependency = new Dependency(uniquePool.createUniqeName());
                 application.addEdge(dependency, message, targetActorInstance.task, EdgeType.DIRECTED);
@@ -159,7 +150,7 @@ public class SNGImporter {
      * @return an ActorType
      * @throws SNGFormatErrorException
      */
-    protected ActorType toActorType(org.w3c.dom.Element eActorType) throws SNGFormatErrorException {
+    protected ActorType toActorType(org.w3c.dom.Element eActorType) throws FormatErrorException {
         final String    actorTypeName = eActorType.getAttribute("name");
         final ActorType actorType     = new ActorType(actorTypeName);
 
@@ -168,7 +159,7 @@ public class SNGImporter {
             String type = ePort.getAttribute("type");
             Port.Direction d = Port.Direction.valueOf(type.toUpperCase());
             if (actorType.ports.containsKey(name))
-                throw new SNGFormatErrorException("Duplicate actor port \""+name+"\" in actor type \""+actorTypeName+"\"!");
+                throw new FormatErrorException("Duplicate actor port \""+name+"\" in actor type \""+actorTypeName+"\"!");
             actorType.ports.put(name, new Port(name, d));
         }
         return actorType;
@@ -182,174 +173,15 @@ public class SNGImporter {
      * @throws SNGFormatErrorException
      */
     protected ActorInstance toActorInstance(org.w3c.dom.Element eActorInstance, Map<String, ActorType> actorTypes)
-            throws SNGFormatErrorException
+            throws FormatErrorException
     {
         final String type = eActorInstance.getAttribute("type");
         final String name = eActorInstance.getAttribute("name");
         final ActorType actorType = actorTypes.get(type);
         if (actorType == null)
-            throw new SNGFormatErrorException("Unknown actor type \""+type+"\" for actor instance \""+name+"\"!");
+            throw new FormatErrorException("Unknown actor type \""+type+"\" for actor instance \""+name+"\"!");
         final Task task = new Task(name);
         return new ActorInstance(name, actorType, task);
-    }
-
-
-    protected Class<?> getClass(String name) throws ClassNotFoundException {
-        if (classMap.containsKey(name)) {
-            return classMap.get(name);
-        } else {
-            return Class.forName(name);
-        }
-    }
-
-    protected <E extends IAttributes> void addAttributes(org.w3c.dom.Element eElement, E element) {
-        Attributes attributes = new Attributes();
-        {
-            org.w3c.dom.Attr name = eElement.getAttributeNode("name");
-            if (name != null) {
-                attributes.put("name", name.getValue());
-            }
-            org.w3c.dom.Attr id = eElement.getAttributeNode("id");
-            if (id != null) {
-                attributes.put("SNGID", id.getValue());
-            }
-        }
-        for (org.w3c.dom.Element eAttribute : SNGReader.childElements(eElement, "opendseattr")) {
-            org.w3c.dom.Attr name = eAttribute.getAttributeNode("name");
-            if (name == null) {
-                throw new IllegalArgumentException("no name given for attribute " + eAttribute);
-            }
-            Object value = toAttribute(eAttribute);
-            attributes.put(name.getValue(), value);
-        }
-        if (!attributes.isEmpty())
-            setAttributes(element, attributes);
-    }
-
-    protected Object toAttribute(org.w3c.dom.Element eAttribute) {
-        org.w3c.dom.Attr type = eAttribute.getAttributeNode("type");
-        org.w3c.dom.Attr javaType = eAttribute.getAttributeNode("javaType");
-        org.w3c.dom.Attr value = eAttribute.getAttributeNode("value");
-
-        if (type == null && javaType == null) {
-            throw new IllegalArgumentException("no type given for attribute " + eAttribute);
-        }
-        Class<?> clazz = classMap.get(type.getValue());
-        try {
-            if (clazz == null)
-                clazz = Class.forName(javaType.getValue());
-        } catch (ClassNotFoundException e) {
-            System.err.println("Class " + type.getValue() + " not found. Ignoring attribute value " + value.getValue());
-            return null;
-        }
-        {
-            if (Map.class.isAssignableFrom(clazz)) {
-                return toAttributeMap(eAttribute, clazz);
-            } else if (Collection.class.isAssignableFrom(clazz)) {
-                return toAttributeCollection(eAttribute, clazz);
-            } else {
-                if (value == null) {
-                    throw new IllegalArgumentException("no value given for attribute " + eAttribute);
-                }
-                return toAttributeObject(eAttribute, clazz, value.getValue());
-            }
-        }
-    }
-
-    /**
-     * Constructs an attribute collection that contains all passed elements and
-     * their corresponding class.
-     *
-     * @param eAttribute
-     *            the attribute element to add the collection to
-     * @param clazz
-     *            the class of the objects that are to create
-     * @return the constructed collection
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object toAttributeMap(org.w3c.dom.Element eAttribute, Class<?> clazz) {
-        Map map;
-        try {
-            map = (Map) clazz.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            throw new IllegalArgumentException("type value mismatch for attribute " + eAttribute);
-        }
-        for (org.w3c.dom.Element eNestedAttribute : SNGReader.childElements(eAttribute, "opendseattr")) {
-            org.w3c.dom.Attr name = eNestedAttribute.getAttributeNode("name");
-            if (name == null) {
-                throw new IllegalArgumentException("no name given for attribute " + eAttribute);
-            }
-            Object value = toAttribute(eNestedAttribute);
-            map.put(name.getValue(), value);
-        }
-        return map;
-    }
-
-    /**
-     * Constructs an attribute collection that contains all passed elements and
-     * their corresponding class.
-     *
-     * @param eAttribute
-     *            the attribute element to add the collection to
-     * @param clazz
-     *            the class of the objects that are to create
-     * @return the constructed collection
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object toAttributeCollection(org.w3c.dom.Element eAttribute, Class<?> clazz) {
-        Collection collectionAttribute;
-        try {
-            collectionAttribute = (Collection) clazz.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            throw new IllegalArgumentException("type value mismatch for attribute " + eAttribute);
-        }
-        for (org.w3c.dom.Element eNestedAttribute : SNGReader.childElements(eAttribute, "opendseattr")) {
-            Object actualEntry = toAttribute(eNestedAttribute);
-            collectionAttribute.add(actualEntry);
-        }
-        return collectionAttribute;
-    }
-
-    /**
-     * Constructs an instance of the passed class that contains the passed
-     * value.
-     *
-     * @param eAttribute
-     *            the XML attribute to convert
-     * @param clazz
-     *            the class of the object that is to create
-     * @param value
-     *            the value of the object that is to create
-     * @return the constructed object
-     */
-    protected Object toAttributeObject(org.w3c.dom.Element eAttribute, Class<?> clazz, String value) {
-        Object object = null;
-
-        if (clazz.equals(Boolean.class)) {
-            if (value.equals("0")) {
-                    value = "false";
-            } else if (value.equals("1")) {
-                    value = "true";
-            }
-        }
-        try {
-            object = toInstance(value, clazz);
-        } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
-                | InvocationTargetException | NoSuchMethodException e) {
-        }
-        // "fallback procedure"
-        if (object == null && clazz.equals(Serializable.class)) {
-            try {
-                object = Common.fromString(value);
-            } catch (ClassNotFoundException | IOException e2) {
-            }
-        }
-        if (object == null) {
-            throw new IllegalArgumentException("type value mismatch for attribute " + eAttribute);
-        }
-        return object;
     }
 
     protected final UniquePool uniquePool;
