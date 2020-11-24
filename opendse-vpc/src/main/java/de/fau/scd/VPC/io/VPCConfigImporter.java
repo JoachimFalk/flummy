@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Attr;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
-
+import edu.uci.ics.jung.graph.util.EdgeType;
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Dependency;
@@ -53,7 +53,8 @@ public class VPCConfigImporter {
 
         org.w3c.dom.Element eVPCConfig = vpcConfigReader.getDocumentElement();
         org.w3c.dom.Element eResources = VPCConfigReader.childElement(eVPCConfig, "resources");
-        architecture = toArchitecture(eResources);
+        org.w3c.dom.Element eLinks     = VPCConfigReader.childElement(eVPCConfig, "links");
+        architecture = toArchitecture(eResources, eLinks);
         org.w3c.dom.Element eMappings = VPCConfigReader.childElement(eVPCConfig, "mappings");
         mappings = toMappings(eMappings);
     }
@@ -66,7 +67,9 @@ public class VPCConfigImporter {
         return mappings;
     }
 
-    protected Architecture<Resource, Link> toArchitecture(org.w3c.dom.Element eResources
+    protected Architecture<Resource, Link> toArchitecture(
+        org.w3c.dom.Element eResources
+      , org.w3c.dom.Element eLinks            
       ) throws FormatErrorException
     {
         final Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();
@@ -80,6 +83,80 @@ public class VPCConfigImporter {
             resouceInstances.put(name, resource);
             AttributeHelper.addAttributes(eComponent, resource);
             architecture.addVertex(resource);
+        }
+        for (org.w3c.dom.Element eLink : VPCConfigReader.childElements(eLinks, "link")) {
+            final String type = eLink.getAttribute("type");
+            boolean directed = type.equals("DIRECTED");
+            if (!type.isEmpty() && !type.equals("DIRECTED") && !type.equals("UNDIRECTED"))
+                throw new FormatErrorException("Link type must either be DIRECTED or UNDIRECTED!");
+            
+            final List<Resource> sources = new ArrayList<Resource>();
+            final List<Resource> targets = new ArrayList<Resource>();
+            //String linkName;
+            {
+                final Attr    source         = eLink.getAttributeNode("source");
+                final Attr    sourceRegex    = eLink.getAttributeNode("sourceRegex");
+
+                if (source != null && sourceRegex != null) {
+                    throw new FormatErrorException("For links, source and sourceRegex must not both be defined!");
+                } else if (source == null && sourceRegex == null) {
+                    throw new FormatErrorException("For links, either source or sourceRegex must be defined!");
+                } else if (source != null) {
+                    //linkName = source.getValue();
+                    Resource sourceResource = architecture.getVertex(source.getValue());
+                    if (sourceResource == null)
+                        throw new FormatErrorException("Unknown source resource \""+source.getValue()+"\" in link!");
+                    else
+                        sources.add(sourceResource);
+                } else {
+                    //linkName = "regex:" + sourceRegex.getValue();
+                    Pattern regex = Pattern.compile(sourceRegex.getValue());
+                    for (Resource sourceResource : architecture.getVertices()) {
+                        Matcher m = regex.matcher(sourceResource.getId());
+                        if (m.find())
+                            sources.add(sourceResource);
+                    }
+                    if (sources.isEmpty())
+                        throw new FormatErrorException("Source regex \""+sourceRegex.getValue()+"\" did non match any resource in link!");
+                }
+            }
+            //linkName += directed ? " -> " : " - ";
+            {
+                final Attr    target         = eLink.getAttributeNode("target");
+                final Attr    targetRegex    = eLink.getAttributeNode("targetRegex");
+
+                if (target != null && targetRegex != null) {
+                    throw new FormatErrorException("For links, source and sourceRegex must not both be defined!");
+                } else if (target == null && targetRegex == null) {
+                    throw new FormatErrorException("For links, either source or sourceRegex must be defined!");
+                } else if (target != null) {
+                    //linkName += target.getValue();
+                    Resource targetResource = architecture.getVertex(target.getValue());
+                    if (targetResource == null)
+                        throw new FormatErrorException("Unknown target resource \""+target.getValue()+"\" in link!");
+                    else
+                        targets.add(targetResource);
+                } else {
+                    //linkName += "regex:" + targetRegex.getValue();
+                    Pattern regex = Pattern.compile(targetRegex.getValue());
+                    for (Resource targetResource : architecture.getVertices()) {
+                        Matcher m = regex.matcher(targetResource.getId());
+                        if (m.find())
+                            targets.add(targetResource);
+                    }
+                    if (targets.isEmpty())
+                        throw new FormatErrorException("Regex regex \""+targetRegex.getValue()+"\" did non match any resource in link!");
+                }
+            }
+            String connector = directed ? " -> " : " - ";
+            for (Resource source : sources) {
+                for (Resource target : targets) {
+                    final String name = uniquePool.createUniqeName(source.getId()+connector+target.getId(), false);
+                    final Link   link = new Link(name);
+                    architecture.addEdge(link, source, target, directed ? EdgeType.DIRECTED : EdgeType.UNDIRECTED);
+                    AttributeHelper.addAttributes(eLink, link);
+                }
+            }
         }
         return architecture;
     }

@@ -124,7 +124,7 @@ public class SNGImporter {
             if (sourceActorInstance == null)
                 throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
 
-            final Communication message = new Communication(sourceActor+"."+sourcePort);
+            final Communication message = new Communication(uniquePool.createUniqeName(sourceActor+"."+sourcePort, true));
             {
                 Dependency dependency = new Dependency(uniquePool.createUniqeName());
                 application.addEdge(dependency, sourceActorInstance.task, message, EdgeType.DIRECTED);
