@@ -25,7 +25,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.Iterator;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -44,22 +43,15 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import de.fau.scd.VPC.io.Common.FormatErrorException;
+
 /**
  * The {@code SNGReader} reads a dataflow graph in SNG XML format into a
  * {@code org.w3c.dom.Document} from an {@code InputStream} or file.
  *
  * @author Joachim Falk
  */
-public class SNGReader {
-
-    static public class SNGFormatErrorException extends Exception {
-        private static final long serialVersionUID = 3741956271022484454L;
-
-        public SNGFormatErrorException(String message) {
-            super(message);
-        }
-    }
-
+public class SNGReader extends Common {
 
     /**
      * Read specification from a file.
@@ -68,7 +60,7 @@ public class SNGReader {
      *            The name of the file.
      * @throws SNGFormatErrorException
      */
-    public SNGReader(String filename) throws FileNotFoundException, SNGFormatErrorException {
+    public SNGReader(String filename) throws FileNotFoundException, FormatErrorException {
         this(new File(filename));
     }
 
@@ -79,7 +71,7 @@ public class SNGReader {
      *            The file.
      * @throws SNGFormatErrorException
      */
-    public SNGReader(File file) throws FileNotFoundException, SNGFormatErrorException {
+    public SNGReader(File file) throws FileNotFoundException, FormatErrorException {
         this(new StreamSource(new FileInputStream(file), file.toURI().toASCIIString()));
     }
 
@@ -90,7 +82,7 @@ public class SNGReader {
      *            The input stream.
      * @throws SNGFormatErrorException
      */
-    public SNGReader(InputStream in) throws SNGFormatErrorException {
+    public SNGReader(InputStream in) throws FormatErrorException {
         this(new StreamSource(in, "<input stream>"));
     }
 
@@ -101,7 +93,7 @@ public class SNGReader {
      *            The input stream.
      * @throws SNGFormatErrorException
      */
-    protected SNGReader(StreamSource in) throws SNGFormatErrorException {
+    protected SNGReader(StreamSource in) throws FormatErrorException {
         try {
             String sngXSDUrl = "sng.xsd";
             StreamSource sources[] = new StreamSource[] {
@@ -131,7 +123,7 @@ public class SNGReader {
             doc.normalize();
         } catch (Exception ex) {
 //          ex.printStackTrace(System.err);
-            throw new SNGFormatErrorException(ex.getMessage());
+            throw new FormatErrorException(ex.getMessage());
         }
     }
 
@@ -182,107 +174,6 @@ public class SNGReader {
             System.err.println();
             System.err.flush();
         }
-    }
-
-
-    /**
-     * Gets an iterable list of child elements named {@param childName} of the
-     * parent element {@param parentElement}.
-     *
-     * @param parentElement
-     *            the parent element
-     * @param childName
-     *            the tag name of the desired child elements
-     * @return the iterable element objects
-     */
-    protected static Iterable<org.w3c.dom.Element> childElements(final org.w3c.dom.Element parentElement, final String childName) {
-        return new Iterable<org.w3c.dom.Element>() {
-
-            @Override
-            public Iterator<org.w3c.dom.Element> iterator() {
-                return new Iterator<org.w3c.dom.Element>() {
-                    private int c = -1;
-                    private final org.w3c.dom.NodeList nodes = parentElement.getChildNodes();
-
-                    {
-                        skip();
-                    }
-
-                    private int skip() {
-                        int old = c++;
-                        while (hasNext() && !nodes.item(c).getNodeName().equals(childName))
-                            ++c;
-                        return old;
-                    }
-
-                    @Override
-                    public boolean hasNext() {
-                        return nodes.getLength() > c;
-                    }
-
-                    @Override
-                    public org.w3c.dom.Element next() {
-                        return (org.w3c.dom.Element) nodes.item(skip());
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new RuntimeException("invalid operation: remove");
-                    }
-                };
-            }
-        };
-    }
-
-    /**
-     * Gets the single child element named {@param childName} of the parent
-     * element {@param parentElement}. If there are more than one or no child
-     * elements with the requested name, an exception is thrown.
-     *
-     * @param parentElement
-     *            the parent element
-     * @param childName
-     *            the tag name of the desired child elements
-     * @return the desired child element
-     * @throws SNGFormatErrorException
-     */
-    protected static org.w3c.dom.Element childElement(final org.w3c.dom.Element parentElement, final String childName)
-            throws SNGFormatErrorException {
-        return childElement(parentElement, childName, false);
-    }
-
-    /**
-     * Gets the single child element named {@param childName} of the parent
-     * element {@param parentElement}. If there are more than one child element
-     * with the requested name, an exception is thrown. If the element is
-     * optional {@param optional} and not present, then null is returned.
-     * Otherwise, if not optional and missing an exception is thrown.
-     *
-     * @param parentElement
-     *            the parent element
-     * @param childName
-     *            the tag name of the desired child elements
-     * @param optional
-     *            If true, the element is allowed to be missing
-     * @return the desired child element or null if optional and the element is
-     *         missing
-     * @throws SNGFormatErrorException
-     */
-    protected static org.w3c.dom.Element childElement(final org.w3c.dom.Element parentElement, final String childName,
-            boolean optional) throws SNGFormatErrorException {
-        Iterator<org.w3c.dom.Element> iter = childElements(parentElement, childName).iterator();
-        if (!iter.hasNext()) {
-            if (!optional)
-                throw new SNGFormatErrorException(
-                        "Parent element " + parentElement + " is missing a " + childName + " child element!");
-            else
-                return null;
-        }
-        org.w3c.dom.Element retval = iter.next();
-        if (iter.hasNext())
-            throw new SNGFormatErrorException(
-                    "Parent element " + parentElement + " must only have one " + childName + " child element!");
-        return retval;
     }
 
     protected final org.w3c.dom.Document doc;

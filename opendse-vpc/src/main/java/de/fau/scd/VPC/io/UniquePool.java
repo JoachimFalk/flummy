@@ -18,12 +18,12 @@
  *   along with this library; if not, write to the Free Software Foundation, Inc.,
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
-package de.fau.scd.VPC.helper;
+package de.fau.scd.VPC.io;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class UniquePool {
+class UniquePool {
 
     public String createUniqeName(org.w3c.dom.Element eElement) {
         String name = eElement.getAttribute("name");

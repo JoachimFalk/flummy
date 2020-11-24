@@ -58,7 +58,8 @@ import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.TraceTypeEnum;
 import de.fau.scd.VPC.helper.ObjectiveInfo;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import de.fau.scd.VPC.io.VPCConfigReader;
-import de.fau.scd.VPC.io.VPCConfigReader.VPCFormatErrorException;
+import de.fau.scd.VPC.io.Common.FormatErrorException;
+
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Attributes;
@@ -189,7 +190,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
       , @VPCConfigTemplate String vpcConfigTemplate
       ) throws
         FileNotFoundException
-      , VPCFormatErrorException
+      , FormatErrorException
     {
         this.simulatorExecutable    = simulatorExecutable;
         this.simulatorEnvironment   = simulatorEnvironment;
@@ -217,7 +218,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
             processResources(implementation, eResources);
             org.w3c.dom.Element eMappings = VPCConfigReader.childElement(eVPCConfig, "mappings");
             processMappings(implementation, eMappings);
-        } catch (VPCFormatErrorException ex) {
+        } catch (FormatErrorException ex) {
             ex.printStackTrace();
             infeasible = true;
         }
