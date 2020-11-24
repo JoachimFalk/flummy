@@ -1,6 +1,6 @@
-<!ELEMENT vpcconfiguration (distributions?,resources,mappings,topology?)>
+<!ELEMENT vpcconfiguration (distributions?,resources,links?,mappings,topology?)>
 <!ATTLIST vpcconfiguration
-seed CDATA #IMPLIED
+seed       CDATA #IMPLIED
 resultFile CDATA #IMPLIED>
 
 <!ELEMENT resources ((observer|tracer|component)*)>
@@ -17,13 +17,13 @@ name CDATA #REQUIRED>
 
 <!ELEMENT component ((attribute|opendseattr)*)>
 <!ATTLIST component
-name ID #REQUIRED
-type CDATA #IMPLIED
+name      ID #REQUIRED
+type      CDATA #IMPLIED
 scheduler CDATA #REQUIRED>
 
 <!ELEMENT attribute (attribute|opendseattr)*>
 <!ATTLIST attribute 
-type CDATA #REQUIRED
+type  CDATA #REQUIRED
 value CDATA #IMPLIED>
 
 <!ELEMENT opendseattr (opendseattr)*>
@@ -38,36 +38,46 @@ value    CDATA #IMPLIED>
 
 <!ELEMENT distribution EMPTY>
 <!ATTLIST distribution
-name ID #REQUIRED
-type CDATA #REQUIRED
+name       ID #REQUIRED
+type       CDATA #REQUIRED
 parameter1 CDATA #IMPLIED
 parameter2 CDATA #IMPLIED
 parameter3 CDATA #IMPLIED
-scale CDATA #IMPLIED
-data CDATA #IMPLIED
-min CDATA #IMPLIED
-fixed CDATA #IMPLIED
-seed CDATA #IMPLIED
-base IDREF #IMPLIED
-max CDATA #IMPLIED>
+scale      CDATA #IMPLIED
+data       CDATA #IMPLIED
+min        CDATA #IMPLIED
+fixed      CDATA #IMPLIED
+seed       CDATA #IMPLIED
+base       IDREF #IMPLIED
+max        CDATA #IMPLIED>
 
 <!ELEMENT mappings (mapping)*>
 
-<!ELEMENT mapping (attribute|timing)*>
+<!ELEMENT mapping (attribute|opendseattr|timing)*>
 <!ATTLIST mapping
-source CDATA #IMPLIED
-target IDREF #IMPLIED
+source      CDATA #IMPLIED
+target      IDREF #IMPLIED
 sourceRegex CDATA #IMPLIED
 targetRegex CDATA #IMPLIED>
 
 <!ELEMENT timing EMPTY>
 <!ATTLIST timing
-powermode CDATA #IMPLIED
-delay   CDATA #IMPLIED
-dii     CDATA #IMPLIED
-latency CDATA #IMPLIED
+powermode    CDATA #IMPLIED
+delay        CDATA #IMPLIED
+dii          CDATA #IMPLIED
+latency      CDATA #IMPLIED
 distribution IDREF #IMPLIED
-fname   CDATA #IMPLIED>
+fname        CDATA #IMPLIED>
+
+<!ELEMENT links (link)*>
+
+<!ELEMENT link (opendseattr)*>
+<!ATTLIST link
+type        CDATA #IMPLIED
+source      IDREF #IMPLIED
+target      IDREF #IMPLIED
+sourceRegex CDATA #IMPLIED
+targetRegex CDATA #IMPLIED>
 
 <!ELEMENT topology (route)*>
 <!ATTLIST topology
