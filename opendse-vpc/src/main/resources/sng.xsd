@@ -77,6 +77,7 @@
       <xs:element name="source" type="FifoPort"/>
       <xs:element name="target" type="FifoPort"/>
     </xs:sequence>
+    <xs:attribute name="name" type="xs:string" default=""/>
     <xs:attribute name="size" type="xs:positiveInteger" default="1"/>
     <xs:attribute name="initial" type="xs:nonNegativeInteger" default="0"/>
   </xs:complexType>

@@ -69,7 +69,7 @@ public class VPCConfigImporter {
 
     protected Architecture<Resource, Link> toArchitecture(
         org.w3c.dom.Element eResources
-      , org.w3c.dom.Element eLinks            
+      , org.w3c.dom.Element eLinks
       ) throws FormatErrorException
     {
         final Architecture<Resource, Link> architecture = new Architecture<Resource, Link>();
@@ -89,7 +89,7 @@ public class VPCConfigImporter {
             boolean directed = type.equals("DIRECTED");
             if (!type.isEmpty() && !type.equals("DIRECTED") && !type.equals("UNDIRECTED"))
                 throw new FormatErrorException("Link type must either be DIRECTED or UNDIRECTED!");
-            
+
             final List<Resource> sources = new ArrayList<Resource>();
             final List<Resource> targets = new ArrayList<Resource>();
             //String linkName;
@@ -265,7 +265,8 @@ public class VPCConfigImporter {
                 for (Resource target : targets) {
                     final String name = uniquePool.createUniqeName(source.getId()+" -> "+target.getId(), false);
                     final Mapping<Task, Resource> mapping = new Mapping<Task, Resource>(name, source, target);
-                    mapping.setAttribute("vpc-actor-delay", vpcActorDelay);
+                    if (!vpcActorDelay.isEmpty())
+                        mapping.setAttribute("vpc-actor-delay", vpcActorDelay);
                     AttributeHelper.addAttributes(eMapping, mapping);
                     mappings.add(mapping);
                 }

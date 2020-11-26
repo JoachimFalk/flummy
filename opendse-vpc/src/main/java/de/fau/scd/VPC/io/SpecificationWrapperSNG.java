@@ -29,6 +29,7 @@ import org.opt4j.core.start.Constant;
 import com.google.inject.Inject;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
+import de.fau.scd.VPC.io.SNGImporter.FIFOTranslation;
 
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
@@ -50,7 +51,9 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
     public SpecificationWrapperSNG(
         @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate") String vpcConfigTemplate
-      , @Constant(namespace = SpecificationWrapperSNG.class, value = "generateMulticast") boolean generateMulticast
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "fifoTranslation")   FIFOTranslation fifoTranslation
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "multicastMessages") boolean multicastMessages
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "shareFIFOBuffers")  boolean shareFIFOBuffers
         ) throws IOException, FileNotFoundException, FormatErrorException
     {
         UniquePool uniquePool = new UniquePool();
@@ -58,7 +61,18 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         SNGReader sngReader = new SNGReader(sngFileName);
         VPCConfigReader vpcConfigReader = new VPCConfigReader(vpcConfigTemplate);
 
-        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool, generateMulticast);
+        Boolean generateMulticast = null;
+        switch (fifoTranslation) {
+        case FIFO_IS_MESSAGE:
+            generateMulticast = multicastMessages;
+            break;
+        case FIFO_IS_MEMORY_TASK:
+            generateMulticast = shareFIFOBuffers;
+            break;
+        }
+        assert generateMulticast != null : "Oops, internal error!";
+
+        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool, fifoTranslation, generateMulticast);
         Application<Task, Dependency> application = sngImporter.getApplication();
 
         VPCConfigImporter vpcConfigImporter = new VPCConfigImporter(vpcConfigReader,uniquePool, application);

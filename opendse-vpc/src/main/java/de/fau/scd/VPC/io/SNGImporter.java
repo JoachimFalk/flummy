@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
-
 import edu.uci.ics.jung.graph.util.EdgeType;
 
 import net.sf.opendse.model.Application;
@@ -41,14 +40,20 @@ import net.sf.opendse.model.Task;
  */
 public class SNGImporter {
 
+    public enum FIFOTranslation {
+        FIFO_IS_MESSAGE
+      , FIFO_IS_MEMORY_TASK
+    };
 
     SNGImporter(
-        SNGReader  sngReader
-      , UniquePool uniquePool
-      , boolean    generateMulticast
+        SNGReader       sngReader
+      , UniquePool      uniquePool
+      , FIFOTranslation fifoTranslation
+      , boolean         generateMulticast
       ) throws FormatErrorException
     {
         this.uniquePool   = uniquePool;
+        this.fifoTranslat = fifoTranslation;
         this.genMulticast = generateMulticast;
         this.application  = toApplication(sngReader.getDocumentElement());
     }
@@ -81,14 +86,31 @@ public class SNGImporter {
     static private class ActorInstance {
         public final String    name;
         public final ActorType type;
-        public final Task      task;
+        public final Task      exeTask;
         public final Map<String, Port> unboundPorts = new HashMap<String, Port>();
 
-        ActorInstance(String name, ActorType type, Task task) {
+        ActorInstance(String name, ActorType type) {
             this.name = name;
             this.type = type;
-            this.task = task;
+            this.exeTask = new Task(name);
             unboundPorts.putAll(type.ports);
+        }
+    }
+
+    static private class CommInstance {
+        public final String        name;
+        public final Communication msg;
+        public final Task          memTask;
+
+        CommInstance(String msgName) {
+            this.name    = msgName;
+            this.msg     = new Communication(msgName);
+            this.memTask = null;
+        }
+        CommInstance(String msgName, String fifoName) {
+            this.name    = msgName;
+            this.msg     = new Communication(msgName);
+            this.memTask = new Task(fifoName);
         }
     }
 
@@ -104,7 +126,7 @@ public class SNGImporter {
 
         final Map<String, ActorType>     actorTypes     = new HashMap<String, ActorType>();
         final Map<String, ActorInstance> actorInstances = new HashMap<String, ActorInstance>();
-        final Map<String, Communication> messages       = new HashMap<String, Communication>();
+        final Map<String, CommInstance>  commInstances  = new HashMap<String, CommInstance>();
 
         for (org.w3c.dom.Element eActorType : SNGReader.childElements(eNetworkGraph, "actorType")) {
             final ActorType actorType = toActorType(eActorType);
@@ -117,40 +139,78 @@ public class SNGImporter {
             if (actorInstances.containsKey(actorInstance.name))
                 throw new FormatErrorException("Duplicate actor instance \""+actorInstance.name+"\"!");
             actorInstances.put(actorInstance.name, actorInstance);
-            application.addVertex(actorInstance.task);
+            if (fifoTranslat == FIFOTranslation.FIFO_IS_MEMORY_TASK)
+                actorInstance.exeTask.setAttribute("vpc-task-type", "EXE");
+            application.addVertex(actorInstance.exeTask);
         }
         for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
-            int size    = Integer.valueOf(eFifo.getAttribute("size"));
-            int initial = Integer.valueOf(eFifo.getAttribute("initial"));
+            String name  = eFifo.getAttribute("name");
+            int size     = Integer.valueOf(eFifo.getAttribute("size"));
+            int initial  = Integer.valueOf(eFifo.getAttribute("initial"));
 
             final org.w3c.dom.Element eSource = SNGReader.childElement(eFifo, "source");
             final String sourceActor = eSource.getAttribute("actor");
             final String sourcePort  = eSource.getAttribute("port");
-            final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
-            if (sourceActorInstance == null)
-                throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
-            Communication message;
-            {
-                String messageName = sourceActor+"."+sourcePort;
-                if (!genMulticast)
-                    messageName = uniquePool.createUniqeName(messageName, true);
-                message = messages.get(messageName);
-                if (message == null) {
-                    message = new Communication(messageName);
-                    messages.put(messageName, message);
-                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    application.addEdge(dependency, sourceActorInstance.task, message, EdgeType.DIRECTED);
-                }
-            }
             final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
             final String targetActor = eTarget.getAttribute("actor");
             final String targetPort  = eTarget.getAttribute("port");
+
+            final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
+            if (sourceActorInstance == null)
+                throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
             final ActorInstance targetActorInstance = actorInstances.get(targetActor);
             if (targetActorInstance == null)
                 throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
-            {
-                Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                application.addEdge(dependency, message, targetActorInstance.task, EdgeType.DIRECTED);
+            String messageName = sourceActor+"."+sourcePort;
+            if (!genMulticast)
+                messageName = uniquePool.createUniqeName(messageName, true);
+            switch (fifoTranslat) {
+            case FIFO_IS_MESSAGE: {
+                CommInstance commInstance = commInstances.get(messageName);
+                if (commInstance == null) {
+                    commInstance = new CommInstance(messageName);
+                    commInstances.put(messageName, commInstance);
+                    {
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                    }
+                }
+                {
+                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                    application.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                }
+                break;
+              }
+            case FIFO_IS_MEMORY_TASK: {
+                CommInstance commInstance = commInstances.get(messageName);
+                if (commInstance == null) {
+                    if (!genMulticast)
+                        commInstance = new CommInstance(messageName, name);
+                    else
+                        commInstance = new CommInstance(messageName, "cf:"+messageName);
+                    commInstances.put(messageName, commInstance);
+                    {
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                    }
+                    {
+                        commInstance.memTask.setAttribute("vpc-task-type", "MEM");
+                        application.addVertex(commInstance.memTask);
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, commInstance.msg, commInstance.memTask, EdgeType.DIRECTED);
+                    }
+                }
+                Communication readMsg = new Communication(targetActor+"."+targetPort);
+                {
+                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                    application.addEdge(dependency, commInstance.memTask, readMsg, EdgeType.DIRECTED);
+                }
+                {
+                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                    application.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                }
+                break;
+            }
             }
         }
         return application;
@@ -193,12 +253,12 @@ public class SNGImporter {
         final ActorType actorType = actorTypes.get(type);
         if (actorType == null)
             throw new FormatErrorException("Unknown actor type \""+type+"\" for actor instance \""+name+"\"!");
-        final Task task = new Task(name);
-        return new ActorInstance(name, actorType, task);
+        return new ActorInstance(name, actorType);
     }
 
-    protected final UniquePool uniquePool;
-    protected final boolean    genMulticast;
+    protected final UniquePool      uniquePool;
+    protected final FIFOTranslation fifoTranslat;
+    protected final boolean         genMulticast;
 
     protected final Application<Task, Dependency> application;
 }
