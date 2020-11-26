@@ -42,10 +42,15 @@ import net.sf.opendse.model.Task;
 public class SNGImporter {
 
 
-    SNGImporter(SNGReader sngReader, UniquePool uniquePool) throws FormatErrorException
+    SNGImporter(
+        SNGReader  sngReader
+      , UniquePool uniquePool
+      , boolean    generateMulticast
+      ) throws FormatErrorException
     {
-        this.uniquePool  = uniquePool;
-        this.application = toApplication(sngReader.getDocumentElement());
+        this.uniquePool   = uniquePool;
+        this.genMulticast = generateMulticast;
+        this.application  = toApplication(sngReader.getDocumentElement());
     }
 
     public Application<Task, Dependency> getApplication() {
@@ -99,6 +104,7 @@ public class SNGImporter {
 
         final Map<String, ActorType>     actorTypes     = new HashMap<String, ActorType>();
         final Map<String, ActorInstance> actorInstances = new HashMap<String, ActorInstance>();
+        final Map<String, Communication> messages       = new HashMap<String, Communication>();
 
         for (org.w3c.dom.Element eActorType : SNGReader.childElements(eNetworkGraph, "actorType")) {
             final ActorType actorType = toActorType(eActorType);
@@ -123,11 +129,18 @@ public class SNGImporter {
             final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
             if (sourceActorInstance == null)
                 throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
-
-            final Communication message = new Communication(uniquePool.createUniqeName(sourceActor+"."+sourcePort, true));
+            Communication message;
             {
-                Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                application.addEdge(dependency, sourceActorInstance.task, message, EdgeType.DIRECTED);
+                String messageName = sourceActor+"."+sourcePort;
+                if (!genMulticast)
+                    messageName = uniquePool.createUniqeName(messageName, true);
+                message = messages.get(messageName);
+                if (message == null) {
+                    message = new Communication(messageName);
+                    messages.put(messageName, message);
+                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                    application.addEdge(dependency, sourceActorInstance.task, message, EdgeType.DIRECTED);
+                }
             }
             final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
             final String targetActor = eTarget.getAttribute("actor");
@@ -185,6 +198,7 @@ public class SNGImporter {
     }
 
     protected final UniquePool uniquePool;
+    protected final boolean    genMulticast;
 
     protected final Application<Task, Dependency> application;
 }

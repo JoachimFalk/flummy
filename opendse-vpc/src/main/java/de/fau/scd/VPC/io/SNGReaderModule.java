@@ -43,9 +43,9 @@ public class SNGReaderModule extends IOModule {
     public void setSngFile(String sngFile) {
         this.sngFile = sngFile;
     }
-    
+
     @Info("The architecture given as VPC configuration XML template file.")
-    @Order(10)
+    @Order(1)
     @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate")
     @File
     protected String vpcConfigTemplate = "";
@@ -57,10 +57,24 @@ public class SNGReaderModule extends IOModule {
     public void setVpcConfigTemplate(String vpcConfigTemplate) {
         this.vpcConfigTemplate = vpcConfigTemplate;
     }
-    
+
+    @Info("Generate multicast communication for writes generating tokens for multiple recipients.")
+    @Order(2)
+    @Constant(namespace = SpecificationWrapperSNG.class, value = "generateMulticast")
+    protected boolean generateMulticast = true;
+
+    public boolean getGenerateMulticast() {
+        return generateMulticast;
+    }
+
+    public void setGenerateMulticast(boolean generateMulticast) {
+        this.generateMulticast = generateMulticast;
+    }
+
     @Override
     protected void config() {
         bind(SpecificationWrapper.class).to(SpecificationWrapperSNG.class).in(SINGLETON);
     }
+
 
 }
