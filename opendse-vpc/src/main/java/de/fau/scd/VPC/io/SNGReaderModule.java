@@ -20,12 +20,15 @@
  */
 package de.fau.scd.VPC.io;
 
+import de.fau.scd.VPC.io.SNGImporter.FIFOTranslation;
+
 import net.sf.opendse.optimization.SpecificationWrapper;
 import net.sf.opendse.optimization.io.IOModule;
 
 import org.opt4j.core.config.annotations.File;
 import org.opt4j.core.config.annotations.Info;
 import org.opt4j.core.config.annotations.Order;
+import org.opt4j.core.config.annotations.Required;
 import org.opt4j.core.start.Constant;
 
 public class SNGReaderModule extends IOModule {
@@ -58,23 +61,50 @@ public class SNGReaderModule extends IOModule {
         this.vpcConfigTemplate = vpcConfigTemplate;
     }
 
-    @Info("Generate multicast communication for writes generating tokens for multiple recipients.")
-    @Order(2)
-    @Constant(namespace = SpecificationWrapperSNG.class, value = "generateMulticast")
-    protected boolean generateMulticast = true;
+    @Info("Select how FIFOs are translated into the DSE model.")
+    @Order(3)
+    @Constant(value = "fifoTranslation", namespace = SpecificationWrapperSNG.class)
+    protected FIFOTranslation fifoTranslation = FIFOTranslation.FIFO_IS_MEMORY_TASK;
 
-    public boolean getGenerateMulticast() {
-        return generateMulticast;
+    public FIFOTranslation getFifoTranslation() {
+        return fifoTranslation;
     }
 
-    public void setGenerateMulticast(boolean generateMulticast) {
-        this.generateMulticast = generateMulticast;
+    public void setFifoTranslation(FIFOTranslation fifoTranslation) {
+        this.fifoTranslation = fifoTranslation;
+    }
+
+    @Info("If true, multicast communication is generated for FIFOs into which identical data is written.")
+    @Order(2)
+    @Constant(namespace = SpecificationWrapperSNG.class, value = "multicastMessages")
+    @Required(property = "fifoTranslation", elements = { "FIFO_IS_MESSAGE" })
+    protected boolean multicastMessages = true;
+
+    public boolean getMulticastMessages() {
+        return multicastMessages;
+    }
+
+    public void setMulticastMessages(boolean multicastMessages) {
+        this.multicastMessages = multicastMessages;
+    }
+
+    @Info("If true, only one memory task is generated for FIFOs into which identical data is written.")
+    @Order(2)
+    @Constant(namespace = SpecificationWrapperSNG.class, value = "shareFIFOBuffers")
+    @Required(property = "fifoTranslation", elements = { "FIFO_IS_MEMORY_TASK" })
+    protected boolean shareFIFOBuffers = true;
+
+    public boolean getShareFIFOBuffers() {
+        return shareFIFOBuffers;
+    }
+
+    public void setShareFIFOBuffers(boolean shareFIFOBuffers) {
+        this.shareFIFOBuffers = shareFIFOBuffers;
     }
 
     @Override
     protected void config() {
         bind(SpecificationWrapper.class).to(SpecificationWrapperSNG.class).in(SINGLETON);
     }
-
 
 }
