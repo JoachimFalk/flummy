@@ -50,6 +50,7 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
     public SpecificationWrapperSNG(
         @Constant(namespace = SpecificationWrapperSNG.class, value = "sngFile") String sngFileName
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate") String vpcConfigTemplate
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "generateMulticast") boolean generateMulticast
         ) throws IOException, FileNotFoundException, FormatErrorException
     {
         UniquePool uniquePool = new UniquePool();
@@ -57,7 +58,7 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         SNGReader sngReader = new SNGReader(sngFileName);
         VPCConfigReader vpcConfigReader = new VPCConfigReader(vpcConfigTemplate);
 
-        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool);
+        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool, generateMulticast);
         Application<Task, Dependency> application = sngImporter.getApplication();
 
         VPCConfigImporter vpcConfigImporter = new VPCConfigImporter(vpcConfigReader,uniquePool, application);
