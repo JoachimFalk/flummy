@@ -140,7 +140,7 @@ public class SNGImporter {
                 throw new FormatErrorException("Duplicate actor instance \""+actorInstance.name+"\"!");
             actorInstances.put(actorInstance.name, actorInstance);
             if (fifoTranslat == FIFOTranslation.FIFO_IS_MEMORY_TASK)
-                actorInstance.exeTask.setAttribute("vpc-task-type", "EXE");
+                actorInstance.exeTask.setAttribute("smoc-task-type", "EXE");
             application.addVertex(actorInstance.exeTask);
         }
         for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
@@ -170,6 +170,8 @@ public class SNGImporter {
                 if (commInstance == null) {
                     commInstance = new CommInstance(messageName);
                     commInstances.put(messageName, commInstance);
+                    commInstance.msg.setAttribute("smoc-token-size", 4711);
+                    application.addVertex(commInstance.msg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
                         application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
@@ -189,25 +191,34 @@ public class SNGImporter {
                     else
                         commInstance = new CommInstance(messageName, "cf:"+messageName);
                     commInstances.put(messageName, commInstance);
+                    commInstance.msg.setAttribute("smoc-token-size", 4711);
+                    application.addVertex(commInstance.msg);
+                    commInstance.memTask.setAttribute("smoc-task-type", "MEM");
+                    commInstance.memTask.setAttribute("smoc-token-capacity", size);
+                    commInstance.memTask.setAttribute("smoc-token-initial", initial);
+                    commInstance.memTask.setAttribute("smoc-token-size", 4711);
+                    application.addVertex(commInstance.memTask);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
                         application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
                     }
                     {
-                        commInstance.memTask.setAttribute("vpc-task-type", "MEM");
-                        application.addVertex(commInstance.memTask);
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
                         application.addEdge(dependency, commInstance.msg, commInstance.memTask, EdgeType.DIRECTED);
                     }
                 }
-                Communication readMsg = new Communication(targetActor+"."+targetPort);
                 {
-                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    application.addEdge(dependency, commInstance.memTask, readMsg, EdgeType.DIRECTED);
-                }
-                {
-                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    application.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                    Communication readMsg = new Communication(targetActor+"."+targetPort);
+                    readMsg.setAttribute("smoc-token-size", 4711);
+                    application.addVertex(readMsg);
+                    {
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, commInstance.memTask, readMsg, EdgeType.DIRECTED);
+                    }
+                    {
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                    }
                 }
                 break;
             }
