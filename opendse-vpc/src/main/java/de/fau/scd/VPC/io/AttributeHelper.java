@@ -184,25 +184,16 @@ class AttributeHelper {
     protected static Object toAttributeObject(org.w3c.dom.Element eAttribute, Class<?> clazz, String value) {
         Object object = null;
 
-        {
-            if (clazz.equals(Boolean.class)) {
-                if (value.equals("0")) {
-                        value = "false";
-                } else if (value.equals("1")) {
-                        value = "true";
-                }
-            }
+        try {
+            object = AttributeHelper.toInstance(value, clazz);
+        } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
+                | InvocationTargetException | NoSuchMethodException e) {
+        }
+        // "fallback procedure"
+        if (object == null && clazz.equals(Serializable.class)) {
             try {
-                object = AttributeHelper.toInstance(value, clazz);
-            } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
-                    | InvocationTargetException | NoSuchMethodException e) {
-            }
-            // "fallback procedure"
-            if (object == null && clazz.equals(Serializable.class)) {
-                try {
-                    object = AttributeHelper.fromString(value);
-                } catch (IOException | ClassNotFoundException e) {
-                }
+                object = AttributeHelper.fromString(value);
+            } catch (IOException | ClassNotFoundException e) {
             }
         }
         if (object == null) {
@@ -262,6 +253,13 @@ class AttributeHelper {
     protected static Object toInstance(String value, Class<?> clazz) throws IllegalArgumentException, SecurityException,
             InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         if (!clazz.isEnum()) {
+            if (clazz.equals(Boolean.class)) {
+                if (value.equals("0")) {
+                    value = "false";
+                } else if (value.equals("1")) {
+                    value = "true";
+                }
+            }
             Constructor constructor = clazz.getConstructor(String.class);
             if (constructor != null) {
                 return constructor.newInstance(value.trim());

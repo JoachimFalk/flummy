@@ -20,6 +20,7 @@
  */
 package de.fau.scd.VPC.io;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -173,10 +174,19 @@ public class VPCConfigImporter {
             final List<Resource> targets = new ArrayList<Resource>();
             String mappingName;
             {
-                final Attr    source         = eMapping.getAttributeNode("source");
-                final Attr    sourceRegex    = eMapping.getAttributeNode("sourceRegex");
-                final boolean sourceOptional = Boolean.valueOf(eMapping.getAttribute("sourceOptional"));
-
+                final Attr source         = eMapping.getAttributeNode("source");
+                final Attr sourceRegex    = eMapping.getAttributeNode("sourceRegex");
+                boolean    sourceOptional = false;
+                {
+                    final Attr attr = eMapping.getAttributeNode("sourceOptional");
+                    if (attr != null)
+                        try {
+                            sourceOptional = (Boolean) AttributeHelper.toInstance(attr.getValue(), Boolean.class);
+                        } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
+                                | InvocationTargetException | NoSuchMethodException e) {
+                            throw new FormatErrorException("Mapping attribute sourceOptional must be a boolean not \""+attr.getValue()+"\"!");                        
+                        }                    
+                }
                 if (source != null && sourceRegex != null) {
                     throw new FormatErrorException("For mappings, source and sourceRegex must not both be defined!");
                 } else if (source == null && sourceRegex == null) {
@@ -201,10 +211,19 @@ public class VPCConfigImporter {
                 }
             }
             {
-                final Attr    target         = eMapping.getAttributeNode("target");
-                final Attr    targetRegex    = eMapping.getAttributeNode("targetRegex");
-                final boolean targetOptional = Boolean.valueOf(eMapping.getAttribute("targetOptional"));
-
+                final Attr target         = eMapping.getAttributeNode("target");
+                final Attr targetRegex    = eMapping.getAttributeNode("targetRegex");
+                boolean    targetOptional = false;
+                {
+                    final Attr attr = eMapping.getAttributeNode("targetOptional");
+                    if (attr != null)
+                        try {
+                            targetOptional = (Boolean) AttributeHelper.toInstance(attr.getValue(), Boolean.class);
+                        } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
+                                | InvocationTargetException | NoSuchMethodException e) {
+                            throw new FormatErrorException("Mapping attribute targetOptional must be a boolean not \""+attr.getValue()+"\"!");                        
+                        }                    
+                }                
                 if (target != null && targetRegex != null) {
                     throw new FormatErrorException("For mappings, source and sourceRegex must not both be defined!");
                 } else if (target == null && targetRegex == null) {
