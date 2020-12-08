@@ -55,10 +55,12 @@ max        CDATA #IMPLIED>
 
 <!ELEMENT mapping (attribute|opendseattr|timing)*>
 <!ATTLIST mapping
-source      CDATA #IMPLIED
-target      IDREF #IMPLIED
-sourceRegex CDATA #IMPLIED
-targetRegex CDATA #IMPLIED>
+source         CDATA #IMPLIED
+target         IDREF #IMPLIED
+sourceRegex    CDATA #IMPLIED
+targetRegex    CDATA #IMPLIED
+sourceOptional CDATA #IMPLIED
+targetOptional CDATA #IMPLIED>
 
 <!ELEMENT timing EMPTY>
 <!ATTLIST timing
