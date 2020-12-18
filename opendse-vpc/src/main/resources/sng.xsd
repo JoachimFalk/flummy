@@ -67,29 +67,53 @@
     <xs:attribute name="type" type="TypeIdentifier"/>
   </xs:complexType>
 
-  <xs:complexType name="FifoPort">
+  <xs:complexType name="ActorPortRef">
     <xs:attribute name="actor" type="Identifier"/>
     <xs:attribute name="port" type="Identifier"/>
   </xs:complexType>
 
+  <xs:complexType name="OpenDSEAttr">
+    <xs:sequence>
+      <xs:element name="opendseattr" type="OpenDSEAttr" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name"/>
+    <xs:attribute name="cxxType"/>
+    <xs:attribute name="javaType"/>
+    <xs:attribute name="type"/>
+    <xs:attribute name="value"/>
+  </xs:complexType>
+
   <xs:complexType name="Fifo">
     <xs:sequence>
-      <xs:element name="source" type="FifoPort"/>
-      <xs:element name="target" type="FifoPort"/>
+      <xs:element name="opendseattr" type="OpenDSEAttr" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="source"      type="ActorPortRef"/>
+      <xs:element name="target"      type="ActorPortRef"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" default=""/>
     <xs:attribute name="size" type="xs:positiveInteger" default="1"/>
     <xs:attribute name="initial" type="xs:nonNegativeInteger" default="0"/>
   </xs:complexType>
 
+  <xs:complexType name="Register">
+    <xs:sequence>
+      <xs:element name="opendseattr" type="OpenDSEAttr" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="source"      type="ActorPortRef" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="target"      type="ActorPortRef" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" default=""/>
+  </xs:complexType>
+
   <xs:complexType name="NetworkGraph">
     <xs:sequence>
       <xs:element name="actorType" type="ActorType" maxOccurs="unbounded"/>
       <xs:element name="actorInstance" type="ActorInstance" maxOccurs="unbounded"/>
-      <xs:element name="fifo" type="Fifo" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="fifo"     type="Fifo"/>
+        <xs:element name="register" type="Register"/>
+      </xs:choice>
     </xs:sequence>
   </xs:complexType>
-    
+
   <xs:element name="networkGraph" type="NetworkGraph"/>
 
 </xs:schema>

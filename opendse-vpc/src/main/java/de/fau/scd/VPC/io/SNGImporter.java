@@ -164,13 +164,13 @@ public class SNGImporter {
             String messageName = sourceActor+"."+sourcePort;
             if (!genMulticast)
                 messageName = uniquePool.createUniqeName(messageName, true);
+            CommInstance commInstance = commInstances.get(messageName);
             switch (fifoTranslat) {
             case FIFO_IS_MESSAGE: {
-                CommInstance commInstance = commInstances.get(messageName);
                 if (commInstance == null) {
                     commInstance = new CommInstance(messageName);
                     commInstances.put(messageName, commInstance);
-                    commInstance.msg.setAttribute("smoc-token-size", 4711);
+                    AttributeHelper.addAttributes(eFifo, commInstance.msg);
                     application.addVertex(commInstance.msg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -184,19 +184,18 @@ public class SNGImporter {
                 break;
               }
             case FIFO_IS_MEMORY_TASK: {
-                CommInstance commInstance = commInstances.get(messageName);
                 if (commInstance == null) {
                     if (!genMulticast)
                         commInstance = new CommInstance(messageName, name);
                     else
                         commInstance = new CommInstance(messageName, "cf:"+messageName);
                     commInstances.put(messageName, commInstance);
-                    commInstance.msg.setAttribute("smoc-token-size", 4711);
+//                  commInstance.msg.setAttribute("smoc-token-size", 4711);
                     application.addVertex(commInstance.msg);
                     commInstance.memTask.setAttribute("smoc-task-type", "MEM");
                     commInstance.memTask.setAttribute("smoc-token-capacity", size);
                     commInstance.memTask.setAttribute("smoc-token-initial", initial);
-                    commInstance.memTask.setAttribute("smoc-token-size", 4711);
+                    AttributeHelper.addAttributes(eFifo, commInstance.memTask);
                     application.addVertex(commInstance.memTask);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -209,7 +208,7 @@ public class SNGImporter {
                 }
                 {
                     Communication readMsg = new Communication(targetActor+"."+targetPort);
-                    readMsg.setAttribute("smoc-token-size", 4711);
+//                  readMsg.setAttribute("smoc-token-size", 4711);
                     application.addVertex(readMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -223,6 +222,103 @@ public class SNGImporter {
                 break;
             }
             }
+        }
+        switch (fifoTranslat) {
+        case FIFO_IS_MESSAGE:
+            for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
+                if (!SNGReader.childElements(eRegister, "target").iterator().hasNext())
+                    continue;
+                
+                for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {
+                    final String sourceActor = eSource.getAttribute("actor");
+                    final String sourcePort  = eSource.getAttribute("port");                
+                    final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
+                    if (sourceActorInstance == null)
+                        throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
+    
+                    String messageName = sourceActor+"."+sourcePort;
+                    if (!genMulticast)
+                        messageName = uniquePool.createUniqeName(messageName, true);
+                    CommInstance commInstance = commInstances.get(messageName);
+                    if (commInstance == null) {
+                        commInstance = new CommInstance(messageName);
+                        commInstances.put(messageName, commInstance);
+                        AttributeHelper.addAttributes(eRegister, commInstance.msg);
+                        application.addVertex(commInstance.msg);
+                        {
+                            Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                            application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                        }
+                    }
+                    for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
+                        final String targetActor = eTarget.getAttribute("actor");
+                        final String targetPort  = eTarget.getAttribute("port");
+                        final ActorInstance targetActorInstance = actorInstances.get(targetActor);
+                        if (targetActorInstance == null)
+                            throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
+    
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                    }                
+                }
+            }
+            break;
+        case FIFO_IS_MEMORY_TASK:
+            for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
+                String name  = eRegister.getAttribute("name");
+                
+                Task memTask = new Task(name);
+                memTask.setAttribute("smoc-task-type", "MEM");
+                memTask.setAttribute("smoc-token-capacity", 1);
+
+                AttributeHelper.addAttributes(eRegister, memTask);
+    
+                for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {
+                    final String sourceActor = eSource.getAttribute("actor");
+                    final String sourcePort  = eSource.getAttribute("port");                
+                    final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
+                    if (sourceActorInstance == null)
+                        throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
+    
+                    String messageName = sourceActor+"."+sourcePort;
+                    if (!genMulticast)
+                        messageName = uniquePool.createUniqeName(messageName, true);
+                    CommInstance commInstance = commInstances.get(messageName);
+                    if (commInstance == null) {
+                        commInstance = new CommInstance(messageName);
+                        commInstances.put(messageName, commInstance);
+                        application.addVertex(commInstance.msg);
+                        {
+                            Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                            application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                        }
+                    }
+                    {
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, commInstance.msg, memTask, EdgeType.DIRECTED);
+                    }
+                }
+                for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
+                    final String targetActor = eTarget.getAttribute("actor");
+                    final String targetPort  = eTarget.getAttribute("port");
+                    final ActorInstance targetActorInstance = actorInstances.get(targetActor);
+                    if (targetActorInstance == null)
+                        throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
+                    
+                    Communication readMsg = new Communication(targetActor+"."+targetPort);
+//                  readMsg.setAttribute("smoc-token-size", 4711);
+                    application.addVertex(readMsg);
+                    {
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, memTask, readMsg, EdgeType.DIRECTED);
+                    }
+                    {
+                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                        application.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                    }
+                }                
+            }    
+            break;
         }
         return application;
     }
