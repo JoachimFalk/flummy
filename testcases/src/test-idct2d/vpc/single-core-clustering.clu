@@ -1,0 +1,3 @@
+cluster0: pgTop.mIdct2D.block2Row pgTop.mIdct2D.idctRow.scale1 pgTop.mIdct2D.idctRow.scale2 pgTop.mIdct2D.idctRow.fly1 pgTop.mIdct2D.idctRow.fly2 pgTop.mIdct2D.idctRow.fly3 pgTop.mIdct2D.idctRow.addSub1 pgTop.mIdct2D.idctRow.addSub2 pgTop.mIdct2D.idctRow.addSub3 pgTop.mIdct2D.idctRow.addSub4 pgTop.mIdct2D.idctRow.addSub5 pgTop.mIdct2D.idctRow.addSub6 pgTop.mIdct2D.idctRow.addSub7 pgTop.mIdct2D.idctRow.addSub8 pgTop.mIdct2D.idctRow.addSub9 pgTop.mIdct2D.idctRow.addSub10
+cluster1: pgTop.mIdct2D.idctColumn.addSub5 pgTop.mIdct2D.idctColumn.addSub8 pgTop.mIdct2D.idctColumn.addSub10 pgTop.mIdct2D.rangeAdjust pgTop.mIdct2D.column2block pgTop.mSnk
+cluster2: pgTop.mIdct2D.idctColumn.scale1 pgTop.mIdct2D.idctColumn.scale2 pgTop.mIdct2D.idctColumn.addSub1
