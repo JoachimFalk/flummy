@@ -70,12 +70,12 @@
      <hop component="CPU1">
        <hop component="BUS">
          <hop component="MEM1">
-           <desthop channel="cf_top.foo.src_top.foo.snk2_1"/>
-           <desthop channel="cf_top.foo.src_top.foo.snk1_1"/>
+           <desthop channel="top.foo.cf:src->snk1"/>
+           <desthop channel="top.foo.cf:src->snk2"/>
          </hop>
          <hop component="MEM2">
-           <desthop channel="cf_top.foo.src_top.snk3_1"/>
-           <desthop channel="cf_top.foo.src_top.snk4_1"/>
+           <desthop channel="top.cf:foo->snk3"/>
+           <desthop channel="top.cf:foo->snk4"/>
          </hop>
        </hop>
      </hop>
