@@ -76,15 +76,17 @@ class m_h_foo: public smoc_graph {
 public:
   smoc_port_out<T> out;
 protected:
-  m_h_src<int>     src;
-  m_h_sink<int>    snk1, snk2;
+  m_h_src<T>     src;
+  m_h_sink<T>    snk1, snk2;
 public:
   m_h_foo(sc_core::sc_module_name name, size_t iter)
     : smoc_graph(name),
       src("src", iter),
       snk1("snk1"), snk2("snk2") {
-    connectNodePorts(src.out, snk1.in);
-    connectNodePorts(src.out, snk2.in);
+    smoc_fifo<T> cfSrcSnk1("cf:src->snk1", 1);
+    cfSrcSnk1.connect(src.out).connect(snk1.in);
+    smoc_fifo<T> cfSrcSnk2("cf:src->snk2", 1);
+    cfSrcSnk2.connect(src.out).connect(snk2.in);
     src.out(out);
   }
 };
@@ -98,8 +100,10 @@ public:
     : smoc_graph(name),
       foo("foo", iter),
       snk3("snk3"), snk4("snk4") {
-    connectNodePorts(foo.out, snk3.in);
-    connectNodePorts(foo.out, snk4.in);
+    smoc_fifo<int> cfFooSnk3("cf:foo->snk3", 1);
+    cfFooSnk3.connect(foo.out).connect(snk3.in);
+    smoc_fifo<int> cfFooSnk4("cf:foo->snk4", 1);
+    cfFooSnk4.connect(foo.out).connect(snk4.in);
   }
 };
 
