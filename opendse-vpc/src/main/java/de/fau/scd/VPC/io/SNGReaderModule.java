@@ -21,6 +21,7 @@
 package de.fau.scd.VPC.io;
 
 import de.fau.scd.VPC.config.annotations.Text;
+import de.fau.scd.VPC.config.properties.Arguments;
 import de.fau.scd.VPC.config.properties.Environment;
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
 import de.fau.scd.VPC.io.SNGImporter.FIFOTranslation;
@@ -84,19 +85,27 @@ public class SNGReaderModule extends IOModule {
         this.simulatorExecutable = simulatorExecutable;
     }
     
+    protected static class SimulatorArgumentsImpl
+        extends
+            Arguments
+        implements
+            SpecificationWrapperSNG.SimulatorArguments
+//        , VPCEvaluator.SimulatorArguments
+    {
+    }
+    
     @Info("Arguments for the SysteMoC virtual prototype.")
     @Order(2)
-    @Constant(namespace = SpecificationWrapperSNG.class, value = "simulatorArguments")
     @Required(property = "dfgSource", elements = { "DFG_FROM_SIM_EXPORT" })
     @Text
-    protected String simulatorArguments = "";
+    protected SimulatorArgumentsImpl simulatorArguments = new SimulatorArgumentsImpl();
 
     public String getSimulatorArguments() {
-        return simulatorArguments;
+        return simulatorArguments.toString();
     }
 
     public void setSimulatorArguments(String simulatorArguments) {
-        this.simulatorArguments = simulatorArguments;
+        this.simulatorArguments.assign(simulatorArguments);
     }
 
     @SuppressWarnings("serial")
@@ -182,6 +191,7 @@ public class SNGReaderModule extends IOModule {
     protected void config() {
         bind(SpecificationWrapper.class).to(SpecificationWrapperSNG.class).asEagerSingleton();//in(SINGLETON);
         bind(SpecificationWrapperSNG.SimulatorEnvironment.class).toInstance(simulatorEnvironment);
+        bind(SpecificationWrapperSNG.SimulatorArguments.class).toInstance(simulatorArguments);
     }
 
 }
