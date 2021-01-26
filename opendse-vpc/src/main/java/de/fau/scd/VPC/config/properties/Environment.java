@@ -19,54 +19,43 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-package de.fau.scd.VPC.helper;
+package de.fau.scd.VPC.config.properties;
 
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.function.IntConsumer;
 
 @SuppressWarnings("serial")
-public class Objectives extends LinkedList<ObjectiveInfo> {
+public class Environment extends TreeMap<String, String> {
 
-    public Objectives() {
+    public Environment() {
         super();
     }
 
-    public Objectives(String encoding) {
+    public Environment(String encoding) {
         super();
 
         CharIterator in = new CharIterator(encoding);
 
         while (in.hasNext()) {
-            String objName    = deQuote(in, ',');
-            String objSign    = deQuote(in, ',');
-            String parseFile  = deQuote(in, ',');
-            String parseRegex = deQuote(in, ';');
-            this.add(new ObjectiveInfo(
-                objName
-              , objSign
-              , parseFile
-              , parseRegex));
+            String var   = deQuote(in, '=');
+            String value = deQuote(in, ';');
+            this.put(var, value);
         }
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        Iterator<ObjectiveInfo> i = iterator();
+        Iterator<Entry<String, String>> i = entrySet().iterator();
         while (i.hasNext()) {
-            ObjectiveInfo objInfo = i.next();
-            enQuote(sb, objInfo.getObjName());
-            sb.append(',');
-            enQuote(sb, objInfo.getObjSign().name());
-            sb.append(',');
-            enQuote(sb, objInfo.getParseFile().toString());
-            sb.append(',');
-            enQuote(sb, objInfo.getParseRegex().pattern());
+            Entry<String, String> e = i.next();
+            enQuote(sb, e.getKey());
+            sb.append('=');
+            enQuote(sb, e.getValue());
             if (i.hasNext())
                 sb.append(';');
         }
@@ -76,7 +65,7 @@ public class Objectives extends LinkedList<ObjectiveInfo> {
     protected void enQuote(StringBuilder sb, String value) {
         for(int n = 0, m = value.length() ; n < m ; ++n) {
             char c = value.charAt(n);
-            if (c == '\\' || c == ';' || c == ',')
+            if (c == '\\' || c == ';')
                 sb.append('\\');
             sb.append(c);
         }
@@ -120,7 +109,7 @@ public class Objectives extends LinkedList<ObjectiveInfo> {
         char c = '\0';
         while (in.hasNext()) {
             c = (char) in.nextInt();
-            if (c == ';' || c == ',' || c == end) {
+            if (c == ';' || c == end) {
                 break;
             } else if (c != '\\') {
                 value += c;
@@ -138,7 +127,18 @@ public class Objectives extends LinkedList<ObjectiveInfo> {
         return value;
     }
 
-    public List<ObjectiveInfo> getObjectives() {
-        return Collections.unmodifiableList(this);
+    public String [] getEnvironment() {
+        String[] retval = new String[size()];
+
+        int i = 0;
+        for (Entry<String, String> e : entrySet()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(e.getKey());
+            sb.append('=');
+            sb.append(e.getValue());
+            retval[i++] = sb.toString();
+        }
+        return retval;
     }
+
 }

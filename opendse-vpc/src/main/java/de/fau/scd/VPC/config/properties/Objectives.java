@@ -19,43 +19,54 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-package de.fau.scd.VPC.helper;
+package de.fau.scd.VPC.config.properties;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
-import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.function.IntConsumer;
 
 @SuppressWarnings("serial")
-public class Environment extends TreeMap<String, String> {
+public class Objectives extends LinkedList<ObjectiveInfo> {
 
-    public Environment() {
+    public Objectives() {
         super();
     }
 
-    public Environment(String encoding) {
+    public Objectives(String encoding) {
         super();
 
         CharIterator in = new CharIterator(encoding);
 
         while (in.hasNext()) {
-            String var   = deQuote(in, '=');
-            String value = deQuote(in, ';');
-            this.put(var, value);
+            String objName    = deQuote(in, ',');
+            String objSign    = deQuote(in, ',');
+            String parseFile  = deQuote(in, ',');
+            String parseRegex = deQuote(in, ';');
+            this.add(new ObjectiveInfo(
+                objName
+              , objSign
+              , parseFile
+              , parseRegex));
         }
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        Iterator<Entry<String, String>> i = entrySet().iterator();
+        Iterator<ObjectiveInfo> i = iterator();
         while (i.hasNext()) {
-            Entry<String, String> e = i.next();
-            enQuote(sb, e.getKey());
-            sb.append('=');
-            enQuote(sb, e.getValue());
+            ObjectiveInfo objInfo = i.next();
+            enQuote(sb, objInfo.getObjName());
+            sb.append(',');
+            enQuote(sb, objInfo.getObjSign().name());
+            sb.append(',');
+            enQuote(sb, objInfo.getParseFile().toString());
+            sb.append(',');
+            enQuote(sb, objInfo.getParseRegex().pattern());
             if (i.hasNext())
                 sb.append(';');
         }
@@ -65,7 +76,7 @@ public class Environment extends TreeMap<String, String> {
     protected void enQuote(StringBuilder sb, String value) {
         for(int n = 0, m = value.length() ; n < m ; ++n) {
             char c = value.charAt(n);
-            if (c == '\\' || c == ';')
+            if (c == '\\' || c == ';' || c == ',')
                 sb.append('\\');
             sb.append(c);
         }
@@ -109,7 +120,7 @@ public class Environment extends TreeMap<String, String> {
         char c = '\0';
         while (in.hasNext()) {
             c = (char) in.nextInt();
-            if (c == ';' || c == end) {
+            if (c == ';' || c == ',' || c == end) {
                 break;
             } else if (c != '\\') {
                 value += c;
@@ -127,18 +138,7 @@ public class Environment extends TreeMap<String, String> {
         return value;
     }
 
-    public String [] getEnvironment() {
-        String[] retval = new String[size()];
-
-        int i = 0;
-        for (Entry<String, String> e : entrySet()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(e.getKey());
-            sb.append('=');
-            sb.append(e.getValue());
-            retval[i++] = sb.toString();
-        }
-        return retval;
+    public List<ObjectiveInfo> getObjectives() {
+        return Collections.unmodifiableList(this);
     }
-
 }

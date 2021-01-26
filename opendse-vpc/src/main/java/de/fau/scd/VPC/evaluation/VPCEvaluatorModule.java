@@ -31,20 +31,18 @@ import org.opt4j.core.config.annotations.Order;
 import org.opt4j.core.config.annotations.Required;
 import org.opt4j.core.config.annotations.Panel;
 
-import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorExecutable;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorEnvironment;
+import net.sf.opendse.optimization.evaluator.EvaluatorModule;
+import de.fau.scd.VPC.config.properties.Environment;
+import de.fau.scd.VPC.config.properties.Objectives;
+import de.fau.scd.VPC.config.visualization.PropertyPanel;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.FireActorInLoop;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
+import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorEnvironment;
+import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorExecutable;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCObjectives;
-
-import net.sf.opendse.optimization.evaluator.EvaluatorModule;
-
-import de.fau.scd.VPC.helper.Environment;
-import de.fau.scd.VPC.helper.Objectives;
-import de.fau.scd.VPC.helper.PropertyPanel;
 
 @Panel(value = PropertyPanel.class)
 public class VPCEvaluatorModule extends EvaluatorModule {

@@ -26,7 +26,6 @@ package de.fau.scd.VPC.helper;
 
 import java.io.IOException;
 import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Files;
 
 import net.sf.opendse.model.Specification;
@@ -34,12 +33,11 @@ import net.sf.opendse.model.Specification;
 public class TempDirectoryHandler {
     private static final String TEMP_DIRECTORY = "TEMP_DIRECTORY_VPC";
 
-    private static Path topTempDirectory = null;
+    private static TempDirectoryHandler topTempDirectory = null;
 
-    private static Integer tempDirectoryCounter = 0;
+    private Integer tempDirectoryCounter = 0;
 
-    synchronized
-    int getTempDirectoryCounter() {
+    synchronized private int getTempDirectoryCounter() {
         return tempDirectoryCounter++;
     }
 
@@ -47,14 +45,17 @@ public class TempDirectoryHandler {
 
     private TempDirectoryCleanups tempDirectoryCleanups;
 
-    private TempDirectoryHandler(Specification implementation) throws IOException {
-        if (topTempDirectory == null) {
-            topTempDirectory = Files.createTempDirectory("opendse-vpc-");
-        }
-        tempDirectory = new File(topTempDirectory.toFile(), String.format("dse_%05d", getTempDirectoryCounter()));
+    private TempDirectoryHandler(TempDirectoryHandler parent, Specification implementation) throws IOException {
+        tempDirectory = new File(parent.getDirectory(), String.format("dse_%05d", parent.getTempDirectoryCounter()));
         tempDirectory.mkdir();
         tempDirectory.deleteOnExit();
         implementation.setAttribute(TEMP_DIRECTORY, this);
+    }
+
+    public TempDirectoryHandler(File file) {
+        tempDirectory = file;
+        tempDirectory.mkdir();
+        tempDirectory.deleteOnExit();
     }
 
     public File getDirectory() {
@@ -72,11 +73,22 @@ public class TempDirectoryHandler {
             return tempDirectoryHandler;
         else {
             try {
-                return new TempDirectoryHandler(implementation);
+                return new TempDirectoryHandler(getTempDirectoryHandler(), implementation);
             } catch (IOException e1) {
                 throw new RuntimeException("Could not create temporary diectory!");
             }
         }
+    }
+
+    synchronized public static TempDirectoryHandler getTempDirectoryHandler() {
+        if (topTempDirectory == null) {
+            try {
+                topTempDirectory = new TempDirectoryHandler(Files.createTempDirectory("opendse-vpc-").toFile());
+            } catch (IOException e1) {
+                throw new RuntimeException("Could not create temporary diectory!");
+            }
+        }
+        return topTempDirectory;
     }
 
     /**
@@ -103,7 +115,8 @@ public class TempDirectoryHandler {
      */
     @Override
     protected void finalize() throws Throwable {
-//      System.err.println("TempDirectoryHandler.finalize() for "+getDirectory());
+        // System.err.println("TempDirectoryHandler.finalize() for
+        // "+getDirectory());
         if (tempDirectoryCleanups == null) {
             delete(tempDirectory);
         } else {

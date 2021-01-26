@@ -19,7 +19,7 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-package de.fau.scd.VPC.helper;
+package de.fau.scd.VPC.config.properties;
 
 import java.io.File;
 import java.util.regex.Pattern;
