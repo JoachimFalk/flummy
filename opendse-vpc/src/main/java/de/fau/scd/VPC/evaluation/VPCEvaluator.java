@@ -7,6 +7,7 @@
  *   2017 FAU -- Franz-Josef Streit <franz-josef.streit@fau.de>
  *   2020 FAU -- Martin Letras <martin.letras@fau.de>
  *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
  * 
  *   This library is free software; you can redistribute it and/or modify it under
  *   the terms of the GNU Lesser General Public License as published by the Free
@@ -42,19 +43,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.opt4j.core.DoubleValue;
 import org.opt4j.core.Objective;
 import org.opt4j.core.Objectives;
-import org.opt4j.core.Value;
-import org.opt4j.core.Objective.Sign;
-import org.opt4j.core.problem.Evaluator;
-import org.opt4j.core.start.Constant;
 
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 
-import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.SchedulerTypeEnum;
-import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.TraceTypeEnum;
 import de.fau.scd.VPC.config.properties.ObjectiveInfo;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import de.fau.scd.VPC.io.VPCConfigReader;
@@ -62,14 +56,10 @@ import de.fau.scd.VPC.io.Common.FormatErrorException;
 
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
-import net.sf.opendse.model.Attributes;
-import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Dependency;
-import net.sf.opendse.model.Function;
 import net.sf.opendse.model.ICommunication;
 import net.sf.opendse.model.Link;
 import net.sf.opendse.model.Mapping;
-import net.sf.opendse.model.Mappings;
 import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
 import net.sf.opendse.model.Task;
@@ -111,75 +101,13 @@ public class VPCEvaluator implements ImplementationEvaluator {
         public List<ObjectiveInfo> getObjectives();
     }
 
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface SchedulerType {
-    }
-
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface TimeSlice{
-    }
-
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface FireActorInLoop{
-    }
-
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface TraceType{
-    }
-
     protected final String   simulatorExecutable;
     protected final String[] simulatorArguments;
     protected final String[] simulatorEnvironment;
 
     protected final VPCObjectives vpcObjectives;
 
-    protected final SchedulerTypeEnum schedulerType;
-
-    protected final double timeSlice;
-
-    protected final boolean fireActorInLoop;
-
-    protected final TraceTypeEnum traceType;
-
     protected final VPCConfigReader vpcConfigTemplate;
-
-    // Labels for generating the VPC configuration file
-    static protected final String configFileName = "config.xml";
-
-    static protected final String dtdFileName = "vpc.dtd";
-
-    static protected final String VPCCONFIGURATION = "vpcconfiguration";
-
-    static protected final String RESOURCES = "resources";
-
-    static protected final String SCHEDULER = "scheduler";
-
-    static protected final String COMPONENT = "component";
-
-    static protected final String MAPPINGS = "mappings";
-
-    static protected final String MAPPING = "mapping";
-
-    static protected final String DISTRIBUTION = "distribution";
-
-    static protected final String TRACING = "tracing";
-
-    static protected final String TYPE = "type";
-
-    static protected final String VALUE = "value";
-
-    static protected final String NAMESTR = "name";
-
-    static protected final String ATTRIBUTE = "attribute";
-
-    static protected final String TOPOLOGY = "topology";
-
-    static protected final String PARAMETER = "parameter";
-
 
     // Constructor of the VPC evaluator
     @Inject
@@ -189,14 +117,6 @@ public class VPCEvaluator implements ImplementationEvaluator {
       , SimulatorArguments   simulatorArguments
       , SimulatorEnvironment simulatorEnvironment
       , VPCObjectives        vpcObjectives
-      , @SchedulerType
-        SchedulerTypeEnum    schedulerType
-      , @TimeSlice
-        double               timeSlice
-      , @FireActorInLoop
-        boolean              fireActorInLoop
-      , @TraceType
-        TraceTypeEnum        traceType
       , @VPCConfigTemplate
         String               vpcConfigTemplate
       ) throws
@@ -207,10 +127,6 @@ public class VPCEvaluator implements ImplementationEvaluator {
         this.simulatorArguments     = simulatorArguments.getArguments();
         this.simulatorEnvironment   = simulatorEnvironment.getEnvironment();
         this.vpcObjectives          = vpcObjectives;
-        this.schedulerType          = schedulerType;
-        this.timeSlice              = timeSlice;
-        this.fireActorInLoop        = fireActorInLoop;
-        this.traceType              = traceType;
         this.vpcConfigTemplate      = new VPCConfigReader(vpcConfigTemplate);
     }
 
