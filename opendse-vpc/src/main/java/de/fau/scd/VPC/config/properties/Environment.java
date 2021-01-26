@@ -22,11 +22,9 @@
 package de.fau.scd.VPC.config.properties;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
 import java.util.TreeMap;
 import java.util.Map.Entry;
-import java.util.function.IntConsumer;
 
 @SuppressWarnings("serial")
 public class Environment extends TreeMap<String, String> {
@@ -37,14 +35,7 @@ public class Environment extends TreeMap<String, String> {
 
     public Environment(String encoding) {
         super();
-
-        CharIterator in = new CharIterator(encoding);
-
-        while (in.hasNext()) {
-            String var   = deQuote(in, '=');
-            String value = deQuote(in, ';');
-            this.put(var, value);
-        }
+        assign(encoding);
     }
 
     public String toString() {
@@ -62,6 +53,23 @@ public class Environment extends TreeMap<String, String> {
         return sb.toString();
     }
 
+    public void assign(Environment env) {
+        if (env != this) {
+            clear(); putAll(env);
+        }
+    }
+
+    public void assign(String encoding) {
+        clear();
+
+        PrimitiveIterator.OfInt in = encoding.chars().iterator();
+        while (in.hasNext()) {
+            String var   = deQuote(encoding, in, '=');
+            String value = deQuote(encoding, in, ';');
+            this.put(var, value);
+        }
+    }
+
     protected void enQuote(StringBuilder sb, String value) {
         for(int n = 0, m = value.length() ; n < m ; ++n) {
             char c = value.charAt(n);
@@ -71,40 +79,7 @@ public class Environment extends TreeMap<String, String> {
         }
     }
 
-    static class CharIterator implements PrimitiveIterator.OfInt {
-        int cur = 0;
-
-        CharIterator(String str) {
-            this.str = str;
-        }
-
-        public boolean hasNext() {
-            return cur < str.length();
-        }
-
-        public int nextInt() {
-            if (hasNext()) {
-                return str.charAt(cur++);
-            } else {
-                throw new NoSuchElementException();
-            }
-        }
-
-        @Override
-        public void forEachRemaining(IntConsumer block) {
-            for (; cur < str.length(); cur++) {
-                block.accept(str.charAt(cur));
-            }
-        }
-
-        public String getString() {
-            return str;
-        }
-
-        protected final String str;
-    }
-
-    protected String deQuote(CharIterator in, char end) {
+    protected String deQuote(String encoding, PrimitiveIterator.OfInt in, char end) {
         String value = "";
         char c = '\0';
         while (in.hasNext()) {
@@ -117,7 +92,7 @@ public class Environment extends TreeMap<String, String> {
                 if (!in.hasNext())
                     throw new RuntimeException(
                         "Escape char '\\' must not be the last" +
-                        " char in \""+in.getString()+"\"!");
+                        " char in \""+encoding+"\"!");
                 value += (char) in.nextInt();
             }
         }
