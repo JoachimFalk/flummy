@@ -26,10 +26,17 @@
 
 package de.fau.scd.VPC.evaluation;
 
+//import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+//import java.lang.annotation.Retention;
+
 import org.opt4j.core.config.annotations.File;
 import org.opt4j.core.config.annotations.Info;
 import org.opt4j.core.config.annotations.Order;
-import org.opt4j.core.config.annotations.Required;
+//import org.opt4j.core.config.annotations.Required;
+
+//import com.google.inject.BindingAnnotation;
+
 import org.opt4j.core.config.annotations.Panel;
 
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
@@ -42,10 +49,6 @@ import de.fau.scd.VPC.config.properties.Objectives;
 
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
 
-import de.fau.scd.VPC.evaluation.VPCEvaluator.FireActorInLoop;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorExecutable;
 
@@ -142,109 +145,129 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.objectives.assign(objs);
     }
 
-    public enum SchedulerTypeEnum {
-        /**
-         * Use TDMA scheduler
-         */
-        TDMA,
-        /**
-         * Use FLEXRAY scheduler
-         */
-        FLEXRAY,
-        /**
-         * Use TTCC scheduler
-         */
-        TTCC,
-        /**
-         * Use Round Robin scheduler
-         */
-        RR,
-        /**
-         * Use Round Robin no-preemption scheduler
-         */
-        RRNOPRE,
-        /**
-         * Use Static Priority scheduler
-         */
-        SP,
-        /**
-         * Use Static Priority no-preemption scheduler
-         */
-        SPNOPRE,
-        /**
-         * Use First come first served scheduler
-         */
-        FCFS,
-        /**
-         * Use Rate monotonic scheduler
-         */
-        RM,
-        /**
-         * Use AVB scheduler
-         */
-        AVB,
-        /**
-         * Use MOST scheduler
-         */
-        MOST,
-        /**
-         * Use STREAMSHAPER scheduler
-         */
-        STREAMSHAPER
-    }
-
-    @Info("Choose the scheduler for the VPC simulation")
-    @Order(20)
-    protected SchedulerTypeEnum schedulerType = SchedulerTypeEnum.RRNOPRE;
-
-    public SchedulerTypeEnum getSchedulerType() {
-        return schedulerType;
-    }
-
-    public void setSchedulerType(SchedulerTypeEnum schedulerType) {
-        this.schedulerType = schedulerType;
-    }
-
-    @Order(21)
-    @Required(property = "schedulerType", elements = { "RR" })
-    protected double timeSlice = 0.00017;
-
-    public double getTimeSlice() {
-        return this.timeSlice;
-    }
-
-    public void setTimeSlice(double timeSlice) {
-        this.timeSlice = timeSlice;
-    }
-
-    @Order(22)
-    @Required(property = "schedulerType", elements = { "RRNOPRE" })
-    protected boolean fireActorInLoop = false;
-
-    public boolean getFireActorInLoop() {
-        return this.fireActorInLoop;
-    }
-
-    public void setFireActorInLoop(boolean fireActorInLoop) {
-        this.fireActorInLoop = fireActorInLoop;
-    }
-
-    public enum TraceTypeEnum {
-        PAJE,
-        VCD
-    }
-
-    @Order(30)
-    @Info("Select the trace format")
-    protected TraceTypeEnum traceType = TraceTypeEnum.PAJE;
-
-    public TraceTypeEnum getTraceType() {
-        return this.traceType;
-    }
-
-    public void setTraceType(TraceTypeEnum traceType) {
-        this.traceType = traceType;
-    }
+//  @Retention(RUNTIME)
+//  @BindingAnnotation
+//  public @interface SchedulerType {
+//  }
+//
+//  @Retention(RUNTIME)
+//  @BindingAnnotation
+//  public @interface TimeSlice{
+//  }
+//
+//  @Retention(RUNTIME)
+//  @BindingAnnotation
+//  public @interface FireActorInLoop{
+//  }
+//
+//  @Retention(RUNTIME)
+//  @BindingAnnotation
+//  public @interface TraceType{
+//  }
+//
+//  public enum SchedulerTypeEnum {
+//      /**
+//       * Use TDMA scheduler
+//       */
+//      TDMA,
+//      /**
+//       * Use FLEXRAY scheduler
+//       */
+//      FLEXRAY,
+//      /**
+//       * Use TTCC scheduler
+//       */
+//      TTCC,
+//      /**
+//       * Use Round Robin scheduler
+//       */
+//      RR,
+//      /**
+//       * Use Round Robin no-preemption scheduler
+//       */
+//      RRNOPRE,
+//      /**
+//       * Use Static Priority scheduler
+//       */
+//      SP,
+//      /**
+//       * Use Static Priority no-preemption scheduler
+//       */
+//      SPNOPRE,
+//      /**
+//       * Use First come first served scheduler
+//       */
+//      FCFS,
+//      /**
+//       * Use Rate monotonic scheduler
+//       */
+//      RM,
+//      /**
+//       * Use AVB scheduler
+//       */
+//      AVB,
+//      /**
+//       * Use MOST scheduler
+//       */
+//      MOST,
+//      /**
+//       * Use STREAMSHAPER scheduler
+//       */
+//      STREAMSHAPER
+//  }
+//
+//  @Info("Choose the scheduler for the VPC simulation")
+//  @Order(20)
+//  protected SchedulerTypeEnum schedulerType = SchedulerTypeEnum.RRNOPRE;
+//
+//  public SchedulerTypeEnum getSchedulerType() {
+//      return schedulerType;
+//  }
+//
+//  public void setSchedulerType(SchedulerTypeEnum schedulerType) {
+//      this.schedulerType = schedulerType;
+//  }
+//
+//  @Order(21)
+//  @Required(property = "schedulerType", elements = { "RR" })
+//  protected double timeSlice = 0.00017;
+//
+//  public double getTimeSlice() {
+//      return this.timeSlice;
+//  }
+//
+//  public void setTimeSlice(double timeSlice) {
+//      this.timeSlice = timeSlice;
+//  }
+//
+//  @Order(22)
+//  @Required(property = "schedulerType", elements = { "RRNOPRE" })
+//  protected boolean fireActorInLoop = false;
+//
+//  public boolean getFireActorInLoop() {
+//      return this.fireActorInLoop;
+//  }
+//
+//  public void setFireActorInLoop(boolean fireActorInLoop) {
+//      this.fireActorInLoop = fireActorInLoop;
+//  }
+//
+//  public enum TraceTypeEnum {
+//      PAJE,
+//      VCD
+//  }
+//
+//  @Order(30)
+//  @Info("Select the trace format")
+//  protected TraceTypeEnum traceType = TraceTypeEnum.PAJE;
+//
+//  public TraceTypeEnum getTraceType() {
+//      return this.traceType;
+//  }
+//
+//  public void setTraceType(TraceTypeEnum traceType) {
+//      this.traceType = traceType;
+//  }
 
     @Override
     protected void config() {
@@ -252,10 +275,10 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         bind(VPCEvaluator.SimulatorEnvironment.class).toInstance(simulatorEnvironment);
         bind(VPCEvaluator.SimulatorArguments.class).toInstance(simulatorArguments);
         bind(VPCEvaluator.VPCObjectives.class).toInstance(objectives);
-        bindConstant(SchedulerType.class).to(schedulerType);
-        bindConstant(TimeSlice.class).to(timeSlice);
-        bindConstant(FireActorInLoop.class).to(fireActorInLoop);
-        bindConstant(TraceType.class).to(traceType);
+//      bindConstant(SchedulerType.class).to(schedulerType);
+//      bindConstant(TimeSlice.class).to(timeSlice);
+//      bindConstant(FireActorInLoop.class).to(fireActorInLoop);
+//      bindConstant(TraceType.class).to(traceType);
         bindConstant(VPCConfigTemplate.class).to(vpcConfigTemplate);
         bindEvaluator(VPCEvaluator.class);
     }
