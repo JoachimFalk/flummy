@@ -99,6 +99,10 @@ public class VPCEvaluator implements ImplementationEvaluator {
     public @interface SimulatorExecutable {
     }
 
+    public interface SimulatorArguments {
+        public String [] getArguments();
+    }
+
     public interface SimulatorEnvironment {
         public String [] getEnvironment();
     }
@@ -127,9 +131,9 @@ public class VPCEvaluator implements ImplementationEvaluator {
     public @interface TraceType{
     }
 
-    protected final String simulatorExecutable;
-
-    protected final SimulatorEnvironment simulatorEnvironment;
+    protected final String   simulatorExecutable;
+    protected final String[] simulatorArguments;
+    protected final String[] simulatorEnvironment;
 
     protected final VPCObjectives vpcObjectives;
 
@@ -180,20 +184,28 @@ public class VPCEvaluator implements ImplementationEvaluator {
     // Constructor of the VPC evaluator
     @Inject
     public VPCEvaluator(
-        @SimulatorExecutable String simulatorExecutable
+        @SimulatorExecutable
+        String               simulatorExecutable
+      , SimulatorArguments   simulatorArguments
       , SimulatorEnvironment simulatorEnvironment
-      , VPCObjectives vpcObjectives
-      , @SchedulerType SchedulerTypeEnum schedulerType
-      , @TimeSlice double timeSlice
-      , @FireActorInLoop boolean fireActorInLoop
-      , @TraceType TraceTypeEnum traceType
-      , @VPCConfigTemplate String vpcConfigTemplate
+      , VPCObjectives        vpcObjectives
+      , @SchedulerType
+        SchedulerTypeEnum    schedulerType
+      , @TimeSlice
+        double               timeSlice
+      , @FireActorInLoop
+        boolean              fireActorInLoop
+      , @TraceType
+        TraceTypeEnum        traceType
+      , @VPCConfigTemplate
+        String               vpcConfigTemplate
       ) throws
         FileNotFoundException
       , FormatErrorException
     {
         this.simulatorExecutable    = simulatorExecutable;
-        this.simulatorEnvironment   = simulatorEnvironment;
+        this.simulatorArguments     = simulatorArguments.getArguments();
+        this.simulatorEnvironment   = simulatorEnvironment.getEnvironment();
         this.vpcObjectives          = vpcObjectives;
         this.schedulerType          = schedulerType;
         this.timeSlice              = timeSlice;
@@ -262,21 +274,26 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //      double simTime = Double.MAX_VALUE;
 
         try {
-            String[] cmd = {
-                    this.simulatorExecutable
-                  , "--systemoc-vpc-config"
-                  , outputVPCConfig.getCanonicalPath()
-                };
-//          String[] env = simulatorEnvironment.getEnvironment();
-//          System.err.println("==============");
-//          for (int n = 0, m = env.length; n < m; ++n) {
-//              System.err.println(env[n]);
+            ArrayList<String> cmd = new ArrayList<String>();
+            cmd.add(this.simulatorExecutable);
+            cmd.add("--systemoc-vpc-config");
+            cmd.add(outputVPCConfig.getCanonicalPath());
+            for (String arg : simulatorArguments) {
+                cmd.add(arg);
+            }
+//          System.err.println("==== CMD =====");
+//          for (String arg : cmd) {
+//              System.err.println(arg);
+//          }
+//          System.err.println("==== ENV =====");
+//          for (String env : simulatorEnvironment) {
+//              System.err.println(env);
 //          }
 //          System.err.println("==============");
-
-            Process exec_process = Runtime.getRuntime().exec(cmd,
-                    simulatorEnvironment.getEnvironment(),
-                    tempDirectoryHandler.getDirectory());
+            Process exec_process = Runtime.getRuntime().exec(
+                cmd.toArray(new String[0]),
+                simulatorEnvironment,
+                tempDirectoryHandler.getDirectory());
             int status = exec_process.waitFor();
             if (status != 0)
                 infeasible = true;
