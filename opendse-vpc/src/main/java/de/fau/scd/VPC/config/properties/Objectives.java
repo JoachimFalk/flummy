@@ -3,6 +3,7 @@
 /*
  * Copyright (c)
  *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
  * 
  *   This library is free software; you can redistribute it and/or modify it under
  *   the terms of the GNU Lesser General Public License as published by the Free
@@ -25,9 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
-import java.util.function.IntConsumer;
 
 @SuppressWarnings("serial")
 public class Objectives extends LinkedList<ObjectiveInfo> {
@@ -38,14 +37,25 @@ public class Objectives extends LinkedList<ObjectiveInfo> {
 
     public Objectives(String encoding) {
         super();
+        assign(encoding);
+    }
 
-        CharIterator in = new CharIterator(encoding);
+    public void assign(Objectives objs) {
+        if (objs != this) {
+            this.clear();
+            this.addAll(objs);
+        }
+    }
+
+    public void assign(String encoding) {
+        clear();
+        PrimitiveIterator.OfInt in = encoding.chars().iterator();
 
         while (in.hasNext()) {
-            String objName    = deQuote(in, ',');
-            String objSign    = deQuote(in, ',');
-            String parseFile  = deQuote(in, ',');
-            String parseRegex = deQuote(in, ';');
+            String objName    = deQuote(encoding, in, ',');
+            String objSign    = deQuote(encoding, in, ',');
+            String parseFile  = deQuote(encoding, in, ',');
+            String parseRegex = deQuote(encoding, in, ';');
             this.add(new ObjectiveInfo(
                 objName
               , objSign
@@ -82,40 +92,7 @@ public class Objectives extends LinkedList<ObjectiveInfo> {
         }
     }
 
-    static class CharIterator implements PrimitiveIterator.OfInt {
-        int cur = 0;
-
-        CharIterator(String str) {
-            this.str = str;
-        }
-
-        public boolean hasNext() {
-            return cur < str.length();
-        }
-
-        public int nextInt() {
-            if (hasNext()) {
-                return str.charAt(cur++);
-            } else {
-                throw new NoSuchElementException();
-            }
-        }
-
-        @Override
-        public void forEachRemaining(IntConsumer block) {
-            for (; cur < str.length(); cur++) {
-                block.accept(str.charAt(cur));
-            }
-        }
-
-        public String getString() {
-            return str;
-        }
-
-        protected final String str;
-    }
-
-    protected String deQuote(CharIterator in, char end) {
+    protected String deQuote(String encoding, PrimitiveIterator.OfInt in, char end) {
         String value = "";
         char c = '\0';
         while (in.hasNext()) {
@@ -128,7 +105,7 @@ public class Objectives extends LinkedList<ObjectiveInfo> {
                 if (!in.hasNext())
                     throw new RuntimeException(
                         "Escape char '\\' must not be the last" +
-                        " char in \""+in.getString()+"\"!");
+                        " char in \""+encoding+"\"!");
                 value += (char) in.nextInt();
             }
         }
