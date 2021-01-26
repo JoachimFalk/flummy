@@ -91,10 +91,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     }
 
     public void setSimulatorEnvironment(Environment env) {
-        if (env != simulatorEnvironment) {
-            this.simulatorEnvironment.clear();
-            this.simulatorEnvironment.putAll(env);
-        }
+        this.simulatorEnvironment.assign(env);
     }
 
     @SuppressWarnings("serial")
