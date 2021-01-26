@@ -7,6 +7,7 @@
  *   2017 FAU -- Franz-Josef Streit <franz-josef.streit@fau.de>
  *   2020 FAU -- Martin Letras <martin.letras@fau.de>
  *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
  * 
  *   This library is free software; you can redistribute it and/or modify it under
  *   the terms of the GNU Lesser General Public License as published by the Free
@@ -138,10 +139,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     }
 
     public void setObjectives(Objectives objs) {
-        if (objs != objectives) {
-            this.objectives.clear();
-            this.objectives.addAll(objs);
-        }
+        this.objectives.assign(objs);
     }
 
     public enum SchedulerTypeEnum {
