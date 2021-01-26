@@ -55,7 +55,7 @@ import com.google.inject.Inject;
 
 import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.SchedulerTypeEnum;
 import de.fau.scd.VPC.evaluation.VPCEvaluatorModule.TraceTypeEnum;
-import de.fau.scd.VPC.helper.ObjectiveInfo;
+import de.fau.scd.VPC.config.properties.ObjectiveInfo;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import de.fau.scd.VPC.io.VPCConfigReader;
 import de.fau.scd.VPC.io.Common.FormatErrorException;

@@ -19,7 +19,7 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-package de.fau.scd.VPC.helper;
+package de.fau.scd.VPC.config.visualization;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -37,6 +37,8 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.opt4j.core.config.Property;
+
+import de.fau.scd.VPC.config.properties.Environment;
 
 @SuppressWarnings("serial")
 public class EnvironmentPanel
