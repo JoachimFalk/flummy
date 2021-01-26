@@ -45,7 +45,7 @@ compileJava {
 dependencies {
 //  analysis "dependencies", it
     if ((rootProject.subprojects.findAll { it.name == "opendse" }).isEmpty()) {
-        implementation 'com.github.FedorSmirnov89.opendse:build:7c8ff373b9'
+        implementation 'com.github.JoachimFalk:dse-opendse:21f735bf01'
     } else {
         implementation project(':opendse')
     }
