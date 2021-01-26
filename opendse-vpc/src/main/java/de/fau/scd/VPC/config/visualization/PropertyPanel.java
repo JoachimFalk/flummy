@@ -73,12 +73,17 @@ public class PropertyPanel extends org.opt4j.core.config.visualization.PropertyP
 
             field.addFocusListener(new FocusAdapter() {
                 @Override
-                public void focusLost(FocusEvent e) {
+                public void focusLost(FocusEvent ev) {
                     String value = format(property, field.getText());
                     try {
                         property.setValue(value);
                     } catch (InvocationTargetException ex) {
-                        System.err.println(ex.getMessage());
+                        Throwable e = ex;
+                        while (e != null && e instanceof InvocationTargetException) {
+                            e = ((InvocationTargetException) e).getCause();
+                        }
+                        if (e != null && e.getMessage() != null)
+                            System.err.println(e.getMessage());
                     } finally {
                         field.setText(property.getValue().toString());
                         update();
@@ -89,14 +94,18 @@ public class PropertyPanel extends org.opt4j.core.config.visualization.PropertyP
             field.addKeyListener(new KeyAdapter() {
 
                 @Override
-                public void keyReleased(KeyEvent e) {
+                public void keyReleased(KeyEvent ev) {
                     String value = format(property, field.getText());
 
                     try {
                         property.setValue(value);
                     } catch (InvocationTargetException ex) {
-                        System.err.println(ex.getMessage());
-                        field.setText(property.getValue().toString());
+                        Throwable e = ex;
+                        while (e != null && e instanceof InvocationTargetException) {
+                            e = ((InvocationTargetException) e).getCause();
+                        }
+                        if (e != null && e.getMessage() != null)
+                            System.err.println(e.getMessage());
                     }
                 }
             });
