@@ -32,33 +32,24 @@ import org.opt4j.core.config.annotations.Required;
 import org.opt4j.core.config.annotations.Panel;
 
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
+
+import de.fau.scd.VPC.config.annotations.Text;
+
+import de.fau.scd.VPC.config.properties.Arguments;
 import de.fau.scd.VPC.config.properties.Environment;
 import de.fau.scd.VPC.config.properties.Objectives;
+
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
+
 import de.fau.scd.VPC.evaluation.VPCEvaluator.FireActorInLoop;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.SchedulerType;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorEnvironment;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorExecutable;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TimeSlice;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.TraceType;
 import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCObjectives;
+import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorExecutable;
 
 @Panel(value = PropertyPanel.class)
 public class VPCEvaluatorModule extends EvaluatorModule {
-
-    @Info("The VPC configuration template.")
-    @Order(0)
-    @File
-    protected String vpcConfigTemplate = "";
-
-    public String getVpcConfigTemplate() {
-        return vpcConfigTemplate;
-    }
-
-    public void setVpcConfigTemplate(String vpcConfigTemplate) {
-        this.vpcConfigTemplate = vpcConfigTemplate;
-    }
 
     @Info("The VPC simulator executable")
     @Order(1)
@@ -73,17 +64,39 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.simulatorExecutable = exe;
     }
 
+
+    protected static class SimulatorArgumentsImpl
+    extends
+        Arguments
+    implements
+        VPCEvaluator.SimulatorArguments
+    {
+    }
+
+    @Info("Arguments for the VPC simulator executable")
+    @Order(2)
+    @Text
+    protected SimulatorArgumentsImpl simulatorArguments = new SimulatorArgumentsImpl();
+
+    public String getSimulatorArguments() {
+        return simulatorArguments.toString();
+    }
+
+    public void setSimulatorArguments(String simulatorArguments) {
+        this.simulatorArguments.assign(simulatorArguments);
+    }
+
     @SuppressWarnings("serial")
     protected static class SimulatorEnvironmentImpl
         extends
             Environment
         implements
-            SimulatorEnvironment
+            VPCEvaluator.SimulatorEnvironment
     {
     }
 
     @Info("Environment for the VPC simulator executable")
-    @Order(2)
+    @Order(3)
     protected final SimulatorEnvironmentImpl simulatorEnvironment = new SimulatorEnvironmentImpl();
 
     public Environment getSimulatorEnvironment() {
@@ -99,12 +112,25 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         extends
             Objectives
         implements
-            VPCObjectives
+            VPCEvaluator.VPCObjectives
     {
     }
 
+    @Info("The VPC configuration template.")
+    @Order(10)
+    @File
+    protected String vpcConfigTemplate = "";
+
+    public String getVpcConfigTemplate() {
+        return vpcConfigTemplate;
+    }
+
+    public void setVpcConfigTemplate(String vpcConfigTemplate) {
+        this.vpcConfigTemplate = vpcConfigTemplate;
+    }
+
     @Info("Objectives of the VPC evaluator")
-    @Order(3)
+    @Order(15)
     protected final VPCObjectivesImpl objectives = new VPCObjectivesImpl();
 
     public Objectives getObjectives() {
@@ -170,7 +196,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     }
 
     @Info("Choose the scheduler for the VPC simulation")
-    @Order(5)
+    @Order(20)
     protected SchedulerTypeEnum schedulerType = SchedulerTypeEnum.RRNOPRE;
 
     public SchedulerTypeEnum getSchedulerType() {
@@ -181,7 +207,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.schedulerType = schedulerType;
     }
 
-    @Order(6)
+    @Order(21)
     @Required(property = "schedulerType", elements = { "RR" })
     protected double timeSlice = 0.00017;
 
@@ -193,7 +219,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.timeSlice = timeSlice;
     }
 
-    @Order(7)
+    @Order(22)
     @Required(property = "schedulerType", elements = { "RRNOPRE" })
     protected boolean fireActorInLoop = false;
 
@@ -210,7 +236,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         VCD
     }
 
-    @Order(8)
+    @Order(30)
     @Info("Select the trace format")
     protected TraceTypeEnum traceType = TraceTypeEnum.PAJE;
 
@@ -225,8 +251,9 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     @Override
     protected void config() {
         bindConstant(SimulatorExecutable.class).to(simulatorExecutable);
-        bind(SimulatorEnvironment.class).toInstance(simulatorEnvironment);
-        bind(VPCObjectives.class).toInstance(objectives);
+        bind(VPCEvaluator.SimulatorEnvironment.class).toInstance(simulatorEnvironment);
+        bind(VPCEvaluator.SimulatorArguments.class).toInstance(simulatorArguments);
+        bind(VPCEvaluator.VPCObjectives.class).toInstance(objectives);
         bindConstant(SchedulerType.class).to(schedulerType);
         bindConstant(TimeSlice.class).to(timeSlice);
         bindConstant(FireActorInLoop.class).to(fireActorInLoop);
