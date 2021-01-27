@@ -35,6 +35,7 @@ import edu.uci.ics.jung.graph.util.EdgeType;
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Dependency;
+import net.sf.opendse.model.ICommunication;
 import net.sf.opendse.model.Link;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Mappings;
@@ -184,8 +185,8 @@ public class VPCConfigImporter {
                             sourceOptional = (Boolean) AttributeHelper.toInstance(attr.getValue(), Boolean.class);
                         } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
                                 | InvocationTargetException | NoSuchMethodException e) {
-                            throw new FormatErrorException("Mapping attribute sourceOptional must be a boolean not \""+attr.getValue()+"\"!");                        
-                        }                    
+                            throw new FormatErrorException("Mapping attribute sourceOptional must be a boolean not \""+attr.getValue()+"\"!");
+                        }
                 }
                 if (source != null && sourceRegex != null) {
                     throw new FormatErrorException("For mappings, source and sourceRegex must not both be defined!");
@@ -194,6 +195,9 @@ public class VPCConfigImporter {
                 } else if (source != null) {
                     mappingName = source.getValue() + " -> ";
                     Task sourceTask = application.getVertex(source.getValue());
+                    // Ignore messages
+                    if (sourceTask instanceof ICommunication)
+                        sourceTask = null;
                     if (sourceTask == null && !sourceOptional)
                         throw new FormatErrorException("Unknown source task \""+source+"\" in mapping!");
                     else
@@ -202,6 +206,9 @@ public class VPCConfigImporter {
                     mappingName = "regex:" + sourceRegex.getValue() + " -> ";
                     Pattern regex = Pattern.compile(sourceRegex.getValue());
                     for (Task sourceTask : application.getVertices()) {
+                        // Skip messages
+                        if (sourceTask instanceof ICommunication)
+                            continue;
                         Matcher m = regex.matcher(sourceTask.getId());
                         if (m.find())
                             sources.add(sourceTask);
@@ -221,9 +228,9 @@ public class VPCConfigImporter {
                             targetOptional = (Boolean) AttributeHelper.toInstance(attr.getValue(), Boolean.class);
                         } catch (IllegalArgumentException | SecurityException | InstantiationException | IllegalAccessException
                                 | InvocationTargetException | NoSuchMethodException e) {
-                            throw new FormatErrorException("Mapping attribute targetOptional must be a boolean not \""+attr.getValue()+"\"!");                        
-                        }                    
-                }                
+                            throw new FormatErrorException("Mapping attribute targetOptional must be a boolean not \""+attr.getValue()+"\"!");
+                        }
+                }
                 if (target != null && targetRegex != null) {
                     throw new FormatErrorException("For mappings, source and sourceRegex must not both be defined!");
                 } else if (target == null && targetRegex == null) {
@@ -281,6 +288,7 @@ public class VPCConfigImporter {
                 vpcActorDelay.put(name, value);
             }
             for (Task source : sources) {
+                assert !(source instanceof ICommunication) : "Massages cannot be mapped!";
                 for (Resource target : targets) {
                     final String name = uniquePool.createUniqeName(source.getId()+" -> "+target.getId(), false);
                     final Mapping<Task, Resource> mapping = new Mapping<Task, Resource>(name, source, target);
