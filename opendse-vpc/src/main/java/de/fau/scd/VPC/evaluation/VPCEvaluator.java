@@ -26,14 +26,11 @@
 
 package de.fau.scd.VPC.evaluation;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,7 +43,6 @@ import java.util.regex.Pattern;
 import org.opt4j.core.Objective;
 import org.opt4j.core.Objectives;
 
-import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 
 import de.fau.scd.VPC.config.properties.ObjectiveInfo;
@@ -79,55 +75,38 @@ import javax.xml.transform.dom.DOMSource;
 
 public class VPCEvaluator implements ImplementationEvaluator {
 
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface VPCConfigTemplate {
-    }
-
-    @Retention(RUNTIME)
-    @BindingAnnotation
-    public @interface SimulatorExecutable {
-    }
-
-    public interface SimulatorArguments {
-        public String [] getArguments();
-    }
-
-    public interface SimulatorEnvironment {
-        public String [] getEnvironment();
-    }
-
     public interface VPCObjectives {
         public List<ObjectiveInfo> getObjectives();
     }
 
-    protected final String   simulatorExecutable;
-    protected final String[] simulatorArguments;
-    protected final String[] simulatorEnvironment;
+    public interface SimInfo {
+        public String    getExecutable();
+        public String [] getArguments();
+        public String [] getEnvironment();
+        public String    getVpcConfigTemplate();
+    }
 
-    protected final VPCObjectives vpcObjectives;
-
+    protected final String          simulatorExecutable;
+    protected final String[]        simulatorArguments;
+    protected final String[]        simulatorEnvironment;
     protected final VPCConfigReader vpcConfigTemplate;
+
+    protected final VPCObjectives   vpcObjectives;
 
     // Constructor of the VPC evaluator
     @Inject
     public VPCEvaluator(
-        @SimulatorExecutable
-        String               simulatorExecutable
-      , SimulatorArguments   simulatorArguments
-      , SimulatorEnvironment simulatorEnvironment
-      , VPCObjectives        vpcObjectives
-      , @VPCConfigTemplate
-        String               vpcConfigTemplate
+        SimInfo       simInfo
+      , VPCObjectives vpcObjectives
       ) throws
         FileNotFoundException
       , FormatErrorException
     {
-        this.simulatorExecutable    = simulatorExecutable;
-        this.simulatorArguments     = simulatorArguments.getArguments();
-        this.simulatorEnvironment   = simulatorEnvironment.getEnvironment();
+        this.simulatorExecutable    = simInfo.getExecutable();
+        this.simulatorArguments     = simInfo.getArguments();
+        this.simulatorEnvironment   = simInfo.getEnvironment();
+        this.vpcConfigTemplate      = new VPCConfigReader(simInfo.getVpcConfigTemplate());
         this.vpcObjectives          = vpcObjectives;
-        this.vpcConfigTemplate      = new VPCConfigReader(vpcConfigTemplate);
     }
 
     @Override

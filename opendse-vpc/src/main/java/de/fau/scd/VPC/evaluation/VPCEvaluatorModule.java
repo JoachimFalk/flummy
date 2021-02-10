@@ -27,17 +27,17 @@
 package de.fau.scd.VPC.evaluation;
 
 //import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 //import java.lang.annotation.Retention;
+//import com.google.inject.BindingAnnotation;
 
 import org.opt4j.core.config.annotations.File;
 import org.opt4j.core.config.annotations.Info;
 import org.opt4j.core.config.annotations.Order;
-//import org.opt4j.core.config.annotations.Required;
-
-//import com.google.inject.BindingAnnotation;
-
 import org.opt4j.core.config.annotations.Panel;
+import org.opt4j.core.config.annotations.Required;
+import org.opt4j.core.start.Constant;
+
+import com.google.inject.Inject;
 
 import net.sf.opendse.optimization.evaluator.EvaluatorModule;
 
@@ -48,15 +48,27 @@ import de.fau.scd.VPC.config.properties.Environment;
 import de.fau.scd.VPC.config.properties.Objectives;
 
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
-
-import de.fau.scd.VPC.evaluation.VPCEvaluator.VPCConfigTemplate;
-import de.fau.scd.VPC.evaluation.VPCEvaluator.SimulatorExecutable;
+import de.fau.scd.VPC.io.SpecificationWrapperSNG;
 
 @Panel(value = PropertyPanel.class)
 public class VPCEvaluatorModule extends EvaluatorModule {
 
+    @Info("Reuse setup from SNGReader. To enable this, you must have an SNGReader module configured with DFG_FROM_SIM_EXPORT.")
+    @Order(0)
+    protected boolean useSNGReaderSetup = false;
+
+    public boolean getUseSNGReaderSetup() {
+        return useSNGReaderSetup;
+    }
+
+    public void setUseSNGReaderSetup(boolean useSNGReaderSetup) {
+        this.useSNGReaderSetup = useSNGReaderSetup;
+    }
+
     @Info("The VPC simulator executable")
     @Order(1)
+    @Constant(namespace = VPCEvaluatorModule.class, value = "simulatorExecutable")
+    @Required(property = "useSNGReaderSetup", value = false)
     @File
     protected String simulatorExecutable = "";
 
@@ -68,17 +80,12 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.simulatorExecutable = exe;
     }
 
-
-    protected static class SimulatorArgumentsImpl
-    extends
-        Arguments
-    implements
-        VPCEvaluator.SimulatorArguments
-    {
+    protected static class SimulatorArgumentsImpl extends Arguments {
     }
 
     @Info("Arguments for the VPC simulator executable")
     @Order(2)
+    @Required(property = "useSNGReaderSetup", value = false)
     @Text
     protected SimulatorArgumentsImpl simulatorArguments = new SimulatorArgumentsImpl();
 
@@ -91,16 +98,12 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     }
 
     @SuppressWarnings("serial")
-    protected static class SimulatorEnvironmentImpl
-        extends
-            Environment
-        implements
-            VPCEvaluator.SimulatorEnvironment
-    {
+    protected static class SimulatorEnvironmentImpl extends Environment {
     }
 
     @Info("Environment for the VPC simulator executable")
     @Order(3)
+    @Required(property = "useSNGReaderSetup", value = false)
     protected final SimulatorEnvironmentImpl simulatorEnvironment = new SimulatorEnvironmentImpl();
 
     public Environment getSimulatorEnvironment() {
@@ -111,17 +114,10 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         this.simulatorEnvironment.assign(env);
     }
 
-    @SuppressWarnings("serial")
-    protected static class VPCObjectivesImpl
-        extends
-            Objectives
-        implements
-            VPCEvaluator.VPCObjectives
-    {
-    }
-
     @Info("The VPC configuration template.")
     @Order(10)
+    @Constant(namespace = VPCEvaluatorModule.class, value = "vpcConfigTemplate")
+    @Required(property = "useSNGReaderSetup", value = false)
     @File
     protected String vpcConfigTemplate = "";
 
@@ -131,6 +127,110 @@ public class VPCEvaluatorModule extends EvaluatorModule {
 
     public void setVpcConfigTemplate(String vpcConfigTemplate) {
         this.vpcConfigTemplate = vpcConfigTemplate;
+    }
+
+    protected static class SimInfoLocal
+    implements
+        VPCEvaluator.SimInfo
+    {
+        @Inject
+        public SimInfoLocal(
+            @Constant(namespace = VPCEvaluatorModule.class, value = "simulatorExecutable")
+            String                   simulatorExecutable
+          , SimulatorArgumentsImpl   simulatorArguments
+          , SimulatorEnvironmentImpl simulatorEnvironment
+          , @Constant(namespace = VPCEvaluatorModule.class, value = "vpcConfigTemplate")
+            String                   vpcConfigTemplate
+            )
+        {
+            this.simExecutable     = simulatorExecutable;
+            this.simArguments      = simulatorArguments.getArguments();
+            this.simEnvironment    = simulatorEnvironment.getEnvironment();
+            this.vpcConfigTemplate = vpcConfigTemplate;
+        }
+
+        @Override
+        public String getExecutable() {
+            return simExecutable;
+        }
+
+        @Override
+        public String[] getArguments() {
+            return simArguments;
+        }
+
+        @Override
+        public String[] getEnvironment() {
+            return simEnvironment;
+        }
+
+        @Override
+        public String getVpcConfigTemplate() {
+            return vpcConfigTemplate;
+        }
+
+        protected final String   simExecutable;
+        protected final String[] simArguments;
+        protected final String[] simEnvironment;
+        protected final String   vpcConfigTemplate;
+    }
+
+    protected static class SimInfoSNGReader
+    implements
+        VPCEvaluator.SimInfo
+    {
+        @Inject
+        public SimInfoSNGReader(
+            @Constant(namespace = SpecificationWrapperSNG.class, value = "simulatorExecutable")
+            String               simulatorExecutable
+          , SpecificationWrapperSNG.SimulatorArguments
+                                 simulatorArguments
+          , SpecificationWrapperSNG.SimulatorEnvironment
+                                 simulatorEnvironment
+          , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate")
+            String               vpcConfigTemplate
+            )
+        {
+            this.simExecutable     = simulatorExecutable;
+            this.simArguments      = simulatorArguments.getArguments();
+            this.simEnvironment    = simulatorEnvironment.getEnvironment();
+            this.vpcConfigTemplate = vpcConfigTemplate;
+        }
+
+        @Override
+        public String getExecutable() {
+            return simExecutable;
+        }
+
+        @Override
+        public String[] getArguments() {
+            return simArguments;
+        }
+
+        @Override
+        public String[] getEnvironment() {
+            return simEnvironment;
+        }
+
+        @Override
+        public String getVpcConfigTemplate() {
+            return vpcConfigTemplate;
+        }
+
+        protected final String   simExecutable;
+        protected final String[] simArguments;
+        protected final String[] simEnvironment;
+        protected final String   vpcConfigTemplate;
+    }
+
+
+    @SuppressWarnings("serial")
+    protected static class VPCObjectivesImpl
+        extends
+            Objectives
+        implements
+            VPCEvaluator.VPCObjectives
+    {
     }
 
     @Info("Objectives of the VPC evaluator")
@@ -271,15 +371,18 @@ public class VPCEvaluatorModule extends EvaluatorModule {
 
     @Override
     protected void config() {
-        bindConstant(SimulatorExecutable.class).to(simulatorExecutable);
-        bind(VPCEvaluator.SimulatorEnvironment.class).toInstance(simulatorEnvironment);
-        bind(VPCEvaluator.SimulatorArguments.class).toInstance(simulatorArguments);
+        if (useSNGReaderSetup) {
+            bind(VPCEvaluator.SimInfo.class).to(SimInfoSNGReader.class);
+        } else {
+            bind(SimulatorArgumentsImpl.class).toInstance(simulatorArguments);
+            bind(SimulatorEnvironmentImpl.class).toInstance(simulatorEnvironment);
+            bind(VPCEvaluator.SimInfo.class).to(SimInfoLocal.class);
+        }
         bind(VPCEvaluator.VPCObjectives.class).toInstance(objectives);
 //      bindConstant(SchedulerType.class).to(schedulerType);
 //      bindConstant(TimeSlice.class).to(timeSlice);
 //      bindConstant(FireActorInLoop.class).to(fireActorInLoop);
 //      bindConstant(TraceType.class).to(traceType);
-        bindConstant(VPCConfigTemplate.class).to(vpcConfigTemplate);
         bindEvaluator(VPCEvaluator.class);
     }
 

@@ -27,7 +27,6 @@ import de.fau.scd.VPC.config.visualization.PropertyPanel;
 import de.fau.scd.VPC.io.SNGImporter.FIFOTranslation;
 import de.fau.scd.VPC.io.SpecificationWrapperSNG.DFGSource;
 import de.fau.scd.VPC.io.SpecificationWrapperSNG;
-import de.fau.scd.VPC.evaluation.VPCEvaluator;
 
 import net.sf.opendse.optimization.SpecificationWrapper;
 import net.sf.opendse.optimization.io.IOModule;
@@ -114,7 +113,6 @@ public class SNGReaderModule extends IOModule {
             Environment
         implements
             SpecificationWrapperSNG.SimulatorEnvironment
-          , VPCEvaluator.SimulatorEnvironment
     {
     }
     
