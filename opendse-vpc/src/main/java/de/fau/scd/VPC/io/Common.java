@@ -3,6 +3,7 @@
 /*
  * Copyright (c)
  *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
  * 
  *   This library is free software; you can redistribute it and/or modify it under
  *   the terms of the GNU Lesser General Public License as published by the Free
@@ -40,6 +41,7 @@ public class Common {
             @Override
             public Iterator<org.w3c.dom.Element> iterator() {
                 return new Iterator<org.w3c.dom.Element>() {
+                    private org.w3c.dom.Element cur = null;
                     private int c = -1;
                     private final org.w3c.dom.NodeList nodes = parentElement.getChildNodes();
 
@@ -61,12 +63,16 @@ public class Common {
 
                     @Override
                     public org.w3c.dom.Element next() {
-                        return (org.w3c.dom.Element) nodes.item(skip());
+                        cur = (org.w3c.dom.Element) nodes.item(skip());
+                        return cur;
                     }
 
                     @Override
                     public void remove() {
-                        throw new RuntimeException("invalid operation: remove");
+                        if (cur == null)
+                            throw new IllegalStateException();
+                        parentElement.removeChild(cur);
+                        --c;
                     }
                 };
             }
