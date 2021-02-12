@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -111,10 +112,10 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
     @Override
     public Specification evaluate(Specification implementation, Objectives objectives) {
-        boolean infeasible = false;
+        boolean error = false;
 
         // Extract the working directory
-        TempDirectoryHandler tempDirectoryHandler   = TempDirectoryHandler.getTempDirectoryHandler(implementation);
+        TempDirectoryHandler tempDirectoryHandler = TempDirectoryHandler.getTempDirectoryHandler(implementation);
 
         org.w3c.dom.Document vpcDocument = (org.w3c.dom.Document) vpcConfigTemplate.getDocument().cloneNode(true);
 
@@ -123,11 +124,14 @@ public class VPCEvaluator implements ImplementationEvaluator {
         try {
             org.w3c.dom.Element eResources = VPCConfigReader.childElement(eVPCConfig, "resources");
             processResources(implementation, eResources);
+            org.w3c.dom.Element eLinks = VPCConfigReader.childElement(eVPCConfig, "links", true);
+            if (eLinks != null)
+                processLinks(implementation, eLinks);
             org.w3c.dom.Element eMappings = VPCConfigReader.childElement(eVPCConfig, "mappings");
             processMappings(implementation, eMappings);
         } catch (FormatErrorException ex) {
             ex.printStackTrace();
-            infeasible = true;
+            error = true;
         }
 
         File outputVPCConfig = new File(tempDirectoryHandler.getDirectory(), "vpc.config.xml");
@@ -148,7 +152,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
             transf.transform(source, new StreamResult(outputVPCConfig));
         } catch (TransformerException ex) {
             ex.printStackTrace();
-            infeasible = true;
+            error = true;
         }
 
 //      // Create the VPC configuration
@@ -168,36 +172,55 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
 //      double simTime = Double.MAX_VALUE;
 
-        try {
-            ArrayList<String> cmd = new ArrayList<String>();
-            cmd.add(this.simulatorExecutable);
-            cmd.add("--systemoc-vpc-config");
-            cmd.add(outputVPCConfig.getCanonicalPath());
-            for (String arg : simulatorArguments) {
-                cmd.add(arg);
+        {
+            try {
+                ArrayList<String> cmd = new ArrayList<String>();
+                cmd.add(this.simulatorExecutable);
+                cmd.add("--systemoc-vpc-config");
+                cmd.add(outputVPCConfig.getCanonicalPath());
+                for (String arg : simulatorArguments) {
+                    cmd.add(arg);
+                }
+                Process simProcess = Runtime.getRuntime().exec(
+                    cmd.toArray(new String[0]),
+                    simulatorEnvironment,
+                    tempDirectoryHandler.getDirectory());
+                int status = simProcess.waitFor();
+                if (status != 0) {
+                    error = true;
+                    System.err.print("Simulation");
+                    for (String arg : cmd) {
+                        System.err.print(" "+arg);
+                    }
+                    System.err.println(" terminated with status "+status+"!");
+                    System.err.println("==== ENV =====");
+                    for (String env : simulatorEnvironment) {
+                        System.err.println(env);
+                    }
+                    System.err.println("==============");
+                    BufferedReader stdout = new BufferedReader(
+                        new InputStreamReader(simProcess.getInputStream()));
+                    for (String line = stdout.readLine();
+                         line != null;
+                         line = stdout.readLine()) {
+                        System.err.println(line);
+                    }
+                    BufferedReader stderr = new BufferedReader(
+                        new InputStreamReader(simProcess.getErrorStream()));
+                    for (String line = stderr.readLine();
+                         line != null;
+                         line = stderr.readLine()) {
+                        System.err.println(line);
+                    }
+                    System.err.println("==============");
+                }
+            } catch (IOException e) {
+                System.err.println("Got an exception during I/O with simulation:\n" + e);
+                error = true;
+            } catch (InterruptedException e) {
+                System.err.println("Got an exception during simulation:\n" + e);
+                error = true;
             }
-//          System.err.println("==== CMD =====");
-//          for (String arg : cmd) {
-//              System.err.println(arg);
-//          }
-//          System.err.println("==== ENV =====");
-//          for (String env : simulatorEnvironment) {
-//              System.err.println(env);
-//          }
-//          System.err.println("==============");
-            Process exec_process = Runtime.getRuntime().exec(
-                cmd.toArray(new String[0]),
-                simulatorEnvironment,
-                tempDirectoryHandler.getDirectory());
-            int status = exec_process.waitFor();
-            if (status != 0)
-                infeasible = true;
-        } catch (IOException e) {
-            System.err.println("Got an exception during I/O with simulation:\n" + e);
-            infeasible = true;
-        } catch (InterruptedException e) {
-            System.err.println("Got an exception during simulation:\n" + e);
-            infeasible = true;
         }
         for (ObjectiveInfo objInfo : vpcObjectives.getObjectives()) {
             Double objValue = null;
@@ -232,7 +255,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
             } catch (IOException e) {
                 System.err.println("Got an exception during reading results:\n" + e);
             }
-            if (infeasible || objValue == null)
+            if (error || objValue == null)
                 objectives.add(objInfo.getObjective(), Objective.INFEASIBLE);
             else
                 objectives.add(objInfo.getObjective(), objValue);
@@ -383,6 +406,16 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //      }
 //
 //      return resources;
+    }
+
+    private void processLinks(
+        Specification       implementation
+      , org.w3c.dom.Element eLinks
+      )
+    {
+
+
+
     }
 
     private void processMappings(
