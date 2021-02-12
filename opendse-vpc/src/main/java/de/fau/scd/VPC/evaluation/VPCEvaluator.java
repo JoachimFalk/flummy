@@ -35,9 +35,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -413,9 +415,23 @@ public class VPCEvaluator implements ImplementationEvaluator {
       , org.w3c.dom.Element eLinks
       )
     {
-
-
-
+        Set<String> resources = new HashSet<>();
+        for (Resource res : implementation.getArchitecture().getVertices()) {
+            resources.add(res.getId());
+        }
+        Iterator<org.w3c.dom.Element> eLinkIter =
+                VPCConfigReader.childElements(eLinks, "link").iterator();
+        while (eLinkIter.hasNext()) {
+            org.w3c.dom.Element eLink = eLinkIter.next();
+            org.w3c.dom.Attr source = eLink.getAttributeNode("source");
+            org.w3c.dom.Attr target = eLink.getAttributeNode("target");
+            if (source != null && !resources.contains(source.getNodeValue()) ||
+                target != null && !resources.contains(target.getNodeValue())) {
+                // Source or target Resource is missing; Remove link from VPC configuration file.
+                eLinkIter.remove();
+                continue;
+            }
+        }
     }
 
     private void processMappings(
