@@ -94,6 +94,8 @@ namespace SystemC_VPC {
     if (iter == tracerByType.end())
       throw TracerTypeUnknown(type);
 
+    ComponentTracer *tracer = nullptr;
+
     if (name) {
       TracerByName &tracerByName = getTracerByName();
       std::pair<TracerByName::iterator, bool> status =
@@ -101,13 +103,18 @@ namespace SystemC_VPC {
       if (!status.second)
         throw ConfigException("Duplicate name "+std::string(name)+ " for creating component tracer of type "+std::string(type)+"!");
       try {
-        return status.first->second = iter->second(attrs)->getComponentTracer();
+        tracer = iter->second(attrs)->getComponentTracer();
+        status.first->second = tracer;
       } catch (...) {
         tracerByName.erase(status.first);
         throw;
       }
-    } else
-      return iter->second(attrs)->getComponentTracer();
+    } else {
+      tracer = iter->second(attrs)->getComponentTracer();
+    }
+    assert(tracer != nullptr);
+    assert(!strcmp(tracer->getType(), type) && "Oops, type of tracer does not match request!");
+    return tracer;
   }
 
   ComponentTracer::Ptr getComponentTracer(const char *name) {
