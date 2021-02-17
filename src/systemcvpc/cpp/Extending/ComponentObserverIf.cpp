@@ -94,6 +94,8 @@ namespace SystemC_VPC {
     if (iter == observerByType.end())
       throw ObserverTypeUnknown(type);
 
+    ComponentObserver *observer = nullptr;
+
     if (name) {
       ObserverByName &observerByName = getObserverByName();
       std::pair<ObserverByName::iterator, bool> status =
@@ -101,13 +103,18 @@ namespace SystemC_VPC {
       if (!status.second)
         throw ConfigException("Duplicate name "+std::string(name)+ " for creating component observer of type "+std::string(type)+"!");
       try {
-        return status.first->second = iter->second(attrs)->getComponentObserver();
+        observer = iter->second(attrs)->getComponentObserver();
+        status.first->second = observer;
       } catch (...) {
         observerByName.erase(status.first);
         throw;
       }
-    } else
-      return iter->second(attrs)->getComponentObserver();
+    } else {
+      observer = iter->second(attrs)->getComponentObserver();
+    }
+    assert(observer != nullptr);
+    assert(!strcmp(observer->getType(), type) && "Oops, type of observer does not match request!");
+    return observer;
   }
 
   ComponentObserver::Ptr getComponentObserver(const char *name) {
