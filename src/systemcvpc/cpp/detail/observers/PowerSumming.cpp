@@ -109,7 +109,7 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
     , ComponentObserver(
           reinterpret_cast<char *>(static_cast<Extending::ComponentObserverIf *>(this)) -
           reinterpret_cast<char *>(static_cast<ComponentObserver              *>(this))
-        , "DB")
+        , "PowerSumming")
     , energySum(0)
   {
     for (Attribute const &attr : attrs) {
