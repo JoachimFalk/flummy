@@ -23,6 +23,8 @@
 #include <systemcvpc/ComponentObserver.hpp>
 #include <systemcvpc/Extending/ComponentObserverIf.hpp>
 
+#include <CoSupport/String/quoting.hpp>
+
 #include <systemc>
 
 #include <boost/variant.hpp>
@@ -82,13 +84,50 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
 
     class DeadlineInfo {
     public:
-      DeadlineInfo(std::string const &startActorName)
-        : startActor(startActorName) {}
-      DeadlineInfo(boost::regex const &startActorRegex)
-        : startActor(startActorRegex) {}
+      struct EndActor {
+        EndActor(std::string const &endActor, sc_core::sc_time const &d)
+          : endActor(endActor), deadline(d) {}
 
+        std::string      endActor;
+        sc_core::sc_time deadline;
+      };
 
-      bool matchStartActor(std::string const &actorName) const {
+      typedef std::vector<EndActor> EndActors;
+
+      DeadlineInfo(std::string const &startActorName, EndActors &&endActors)
+        : startActor(startActorName), endActors(endActors) {}
+      DeadlineInfo(boost::regex const &startActorRegex, EndActors &&endActors)
+        : startActor(startActorRegex), endActors(endActors) {}
+
+      bool matchStartActor(std::string const &actorName, EndActors &endActors) const {
+        endActors.clear();
+
+        switch (startActor.which()) {
+          case 0: {
+            boost::smatch m;
+            if (!regex_match(actorName, m, boost::get<boost::regex const &>(startActor)))
+              return false;
+            std::map<std::string, std::string> vars;
+            int groupNr = 0;
+            for (boost::smatch::value_type const &group : m)
+              vars.insert(std::make_pair(std::to_string(groupNr++), group.str()));
+            for (DeadlineInfo::EndActor ea : this->endActors) {
+              std::string endActor = CoSupport::String::dequote(
+                  CoSupport::String::QuoteMode::DOUBLE_NO_QUOTES
+                , ea.endActor.c_str()
+                , vars);
+              endActors.push_back(EndActor(endActor, ea.deadline));
+            }
+            return true;
+          }
+          case 1: {
+            if (actorName != boost::get<std::string const &>(startActor))
+              return false;
+            endActors = this->endActors;
+            return true;
+          }
+        }
+
         switch (startActor.which()) {
           case 0:
             return regex_match(actorName,
@@ -98,19 +137,9 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
         }
         return false;
       }
-
-      struct EndActor {
-        EndActor(std::string const &endActor, sc_core::sc_time const &d)
-          : endActor(endActor), deadline(d) {}
-
-        std::string      endActor;
-        sc_core::sc_time deadline;
-      };
-
-      std::list<EndActor> endActors;
-
     protected:
       boost::variant<boost::regex, std::string> startActor;
+      EndActors                                 endActors;
     };
 
     typedef std::list<DeadlineInfo> DeadlineInfos;
@@ -151,16 +180,10 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
           throw ConfigException(msg.str());
         }
       } else if (attr.getType() == "startActor" || attr.getType() == "startActorRegex") {
-        if (attr.getType() == "startActor")
-          deadlineInfos.push_back(DeadlineInfo(attr.getValue()));
-        else
-          deadlineInfos.push_back(DeadlineInfo(boost::regex(attr.getValue())));
-        DeadlineInfo &di = deadlineInfos.back();
-
+        DeadlineInfo::EndActors endActors;
         for (Attribute const &attr : attr.getAttributes()) {
           if (attr.getType() == "endActor") {
-            di.endActors.push_back(DeadlineInfo::EndActor(attr.getValue(), sc_core::SC_ZERO_TIME));
-
+            endActors.push_back(DeadlineInfo::EndActor(attr.getValue(), sc_core::SC_ZERO_TIME));
           } else {
             std::stringstream msg;
 
@@ -170,6 +193,10 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
             throw ConfigException(msg.str());
           }
         }
+        if (attr.getType() == "startActor")
+          deadlineInfos.push_back(DeadlineInfo(attr.getValue(), std::move(endActors)));
+        else
+          deadlineInfos.push_back(DeadlineInfo(boost::regex(attr.getValue()), std::move(endActors)));
       } else {
         std::stringstream msg;
 
@@ -208,22 +235,26 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
     DMTask &dmTask = static_cast<DMTask &>(ot);
 
     switch (TaskOperation((int) to & (int) TaskOperation::MEMOP_MASK)) {
-      case TaskOperation::ALLOCATE:
+      case TaskOperation::ALLOCATE: {
         new (&dmTask) DMTask();
         sassert(tasks.insert(Tasks::value_type(t.getName(), &dmTask)).second);
 
+        DeadlineInfo::EndActors endActors;
+
         for (DeadlineInfo di : deadlineInfos) {
-          if (di.matchStartActor(t.getName())) {
+          if (di.matchStartActor(t.getName(), endActors)) {
             *resultFile << "start actor " << t.getName() << std::endl;
-            for (DeadlineInfo::EndActor ea : di.endActors) {
+            for (DeadlineInfo::EndActor ea : endActors) {
               *resultFile << "end actor " << ea.endActor << ": " << ea.deadline << std::endl;
             }
           }
         }
         break;
-      case TaskOperation::DEALLOCATE:
+      }
+      case TaskOperation::DEALLOCATE: {
         dmTask.~DMTask();
         break;
+      }
     }
   }
 
