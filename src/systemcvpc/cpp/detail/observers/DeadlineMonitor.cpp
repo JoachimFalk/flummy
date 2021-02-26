@@ -75,26 +75,57 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
 
     std::unique_ptr<std::ostream> resultFile;
 
-    class DMTask: public OTask {
-    public:
-      DMTask() {}
-
-    };
+    class DMTask;
 
     typedef std::map<std::string, DMTask *> Tasks;
     Tasks                                   tasks;
 
+    class EndActor {
+    public:
+      EndActor(std::string const &name, sc_core::sc_time const &d)
+        : name(name), actor(nullptr), deadline(d) {}
+
+      std::string const      &getName() const
+        { return name; }
+      DMTask                 *getActor() const
+        { return actor; }
+      sc_core::sc_time const &getDeadline() const
+        { return deadline; }
+
+      DMTask **resolveActor(Tasks const &tasks) {
+        Tasks::const_iterator iter = tasks.find(name);
+        if (iter != tasks.end()) {
+          actor = iter->second;
+          return nullptr;
+        } else
+          return &actor;
+      }
+    protected:
+      std::string       name;
+      DMTask           *actor;
+      sc_core::sc_time  deadline;
+    };
+
+    typedef std::list<EndActor>                 EndActors;
+    typedef std::map<std::string, DMTask **>   PendingEndActors;
+
+    // List of EndActors missing their actor attribute
+    PendingEndActors pendingEndActors;
+
+    class DMTask: public OTask {
+    public:
+      DMTask() {}
+
+      /// If this is a start actor, this will point to
+      /// all the end actors.
+      EndActors endActors;
+      /// If this is an end actor this will store all
+      /// active (absolute) deadlines.
+      std::list<sc_core::sc_time> activeDeadlines;
+    };
+
     class DeadlineInfo {
     public:
-      struct EndActor {
-        EndActor(std::string const &endActor, sc_core::sc_time const &d)
-          : endActor(endActor), deadline(d) {}
-
-        std::string      endActor;
-        sc_core::sc_time deadline;
-      };
-
-      typedef std::vector<EndActor> EndActors;
 
       DeadlineInfo(std::string const &startActorName, EndActors &&endActors)
         : startActor(startActorName), endActors(endActors) {}
@@ -113,12 +144,12 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
             int groupNr = 0;
             for (boost::smatch::value_type const &group : m)
               vars.insert(std::make_pair(std::to_string(groupNr++), group.str()));
-            for (DeadlineInfo::EndActor ea : this->endActors) {
+            for (EndActor const &ea : this->endActors) {
               std::string endActor = CoSupport::String::dequote(
                   CoSupport::String::QuoteMode::DOUBLE_NO_QUOTES
-                , ea.endActor.c_str()
+                , ea.getName().c_str()
                 , vars);
-              endActors.push_back(EndActor(endActor, ea.deadline));
+              endActors.push_back(EndActor(endActor, ea.getDeadline()));
             }
             return true;
           }
@@ -182,7 +213,7 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
           throw ConfigException(msg.str());
         }
       } else if (attr.getType() == "startActor" || attr.getType() == "startActorRegex") {
-        DeadlineInfo::EndActors endActors;
+        EndActors endActors;
         for (Attribute const &attr : attr.getAttributes()) {
           if (attr.getType() == "endActor") {
             bool             deadlineSpecified = false;
@@ -203,7 +234,7 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
             if (!deadlineSpecified)
               throw ConfigException("DeadlineMonitor component observers require exactly one "
                   "deadline attribute inside the endActor attribute!");
-            endActors.push_back(DeadlineInfo::EndActor(attr.getValue(), deadline));
+            endActors.push_back(EndActor(attr.getValue(), deadline));
           } else {
             std::stringstream msg;
 
@@ -258,14 +289,21 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
       case TaskOperation::ALLOCATE: {
         new (&dmTask) DMTask();
         sassert(tasks.insert(Tasks::value_type(t.getName(), &dmTask)).second);
-
-        DeadlineInfo::EndActors endActors;
-
+        // Resolve pending end actors
+        {
+          PendingEndActors::iterator iter = pendingEndActors.find(t.getName());
+          if (iter != pendingEndActors.end()) {
+            *iter->second = &dmTask;
+            pendingEndActors.erase(iter);
+          }
+        }
         for (DeadlineInfo di : deadlineInfos) {
-          if (di.matchStartActor(t.getName(), endActors)) {
+          if (di.matchStartActor(t.getName(), dmTask.endActors)) {
             *resultFile << "start actor " << t.getName() << std::endl;
-            for (DeadlineInfo::EndActor ea : endActors) {
-              *resultFile << "end actor " << ea.endActor << ": " << ea.deadline << std::endl;
+            for (EndActor &ea : dmTask.endActors) {
+              *resultFile << "end actor " << ea.getName() << ": " << ea.getDeadline() << std::endl;
+              if (DMTask **pending = ea.resolveActor(tasks))
+                sassert(pendingEndActors.insert(std::make_pair(ea.getName(), pending)).second);
             }
           }
         }
@@ -288,8 +326,24 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
     DMTask &dmTask = static_cast<DMTask &>(ot);
 
     switch (TaskInstanceOperation((int) tio & ~ (int) TaskInstanceOperation::MEMOP_MASK)) {
+      case TaskInstanceOperation::RELEASE:
+        for (EndActor const &ea : dmTask.endActors) {
+          ea.getActor()->activeDeadlines.push_back(
+              sc_core::sc_time_stamp() + ea.getDeadline());
+        }
+        break;
       case TaskInstanceOperation::FINISHLAT:
-        *resultFile << ti.getName() << std::endl;
+        if (!dmTask.activeDeadlines.empty()) {
+          sc_core::sc_time const &now = sc_core::sc_time_stamp();
+          sc_core::sc_time const &absDeadline = dmTask.activeDeadlines.front();
+          *resultFile << ti.getName() << "@" << now << " deadline: " << absDeadline << std::endl;
+          if (absDeadline < now) {
+            *resultFile << ti.getName() << " had " << (now-absDeadline) << " deadline violation!" << std::endl;
+          } else {
+            *resultFile << ti.getName() << " had " << (absDeadline-now) << " slack!" << std::endl;
+          }
+          dmTask.activeDeadlines.pop_front();
+        }
         break;
       default:
         break;
