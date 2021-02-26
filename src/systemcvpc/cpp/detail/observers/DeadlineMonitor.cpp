@@ -23,6 +23,8 @@
 #include <systemcvpc/ComponentObserver.hpp>
 #include <systemcvpc/Extending/ComponentObserverIf.hpp>
 
+#include "../common.hpp"
+
 #include <CoSupport/String/quoting.hpp>
 
 #include <systemc>
@@ -183,13 +185,31 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
         DeadlineInfo::EndActors endActors;
         for (Attribute const &attr : attr.getAttributes()) {
           if (attr.getType() == "endActor") {
-            endActors.push_back(DeadlineInfo::EndActor(attr.getValue(), sc_core::SC_ZERO_TIME));
+            bool             deadlineSpecified = false;
+            sc_core::sc_time deadline;
+            for (Attribute const &attr : attr.getAttributes()) {
+              if (!deadlineSpecified && attr.getType() == "deadline") {
+                deadlineSpecified = true;
+                deadline = Detail::createSC_Time(attr.getValue().c_str());
+              } else {
+                std::stringstream msg;
+
+                msg << "DeadlineMonitor component observers do not support the " << attr.getType();
+                msg << " attribute inside an endActor attribute!";
+                msg << " Only a single deadline attribute is supported.";
+                throw ConfigException(msg.str());
+              }
+            }
+            if (!deadlineSpecified)
+              throw ConfigException("DeadlineMonitor component observers require exactly one "
+                  "deadline attribute inside the endActor attribute!");
+            endActors.push_back(DeadlineInfo::EndActor(attr.getValue(), deadline));
           } else {
             std::stringstream msg;
 
             msg << "DeadlineMonitor component observers do not support the " << attr.getType();
             msg << " attribute inside a startActor or startActorRegex attribute!";
-            msg << "Only the endActor attribute is supported.";
+            msg << " Only the endActor attribute is supported.";
             throw ConfigException(msg.str());
           }
         }
