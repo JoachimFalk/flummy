@@ -60,7 +60,6 @@ public:
     : base_type() {}
   Time(sc_core::sc_time const &time)
     : base_type(time.to_seconds() * sec) {}
-
   template <typename U, typename T>
   Time(boost::units::quantity<U, T> v)
     : base_type(v) {}
