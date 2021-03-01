@@ -22,6 +22,7 @@
 #include <systemcvpc/ConfigException.hpp>
 #include <systemcvpc/ComponentObserver.hpp>
 #include <systemcvpc/Extending/ComponentObserverIf.hpp>
+#include <systemcvpc/Time.hpp>
 
 #include "../common.hpp"
 
@@ -35,6 +36,8 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <list>
+#include <vector>
 #include <cassert>
 #include <memory> // for std::unique_ptr
 
@@ -106,40 +109,93 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
       sc_core::sc_time  deadline;
     };
 
-    typedef std::list<EndActor>                 EndActors;
-    typedef std::map<std::string, DMTask **>   PendingEndActors;
+    typedef std::list<EndActor>                EndActors;
+
+    class ReportGroup {
+    public:
+      ReportGroup(std::string const &name)
+        : name(name) {
+//      std::cout << "ReportGroup(" << name << ")" << std::endl;
+      }
+
+      std::string const &getName() const
+        { return name; }
+      Time        const &getMax() const
+        { return max; }
+
+      void report(Time const &violation) {
+        if (violation > max)
+          max = violation;
+      }
+//    std::vector<SystemC_VPC::Time> violations;
+    protected:
+      std::string name;
+      Time        max;
+    };
+
+    typedef std::map<std::string, ReportGroup> ReportGroups;
+    ReportGroups                               reportGroups;
+
+    struct PendingEndActor {
+      PendingEndActor(DMTask *startActor, DMTask **endActor)
+        : startActor(startActor), endActor(endActor) {}
+
+      DMTask  *startActor;
+      DMTask **endActor;
+    };
 
     // List of EndActors missing their actor attribute
-    PendingEndActors pendingEndActors;
+    typedef std::map<std::string, PendingEndActor> PendingEndActors;
+    PendingEndActors                               pendingEndActors;
 
     class DMTask: public OTask {
     public:
-      DMTask() {}
+      DMTask()
+        : reportGroup(nullptr)
+        , reportGroupReport(nullptr) {}
 
       /// If this is a start actor, this will point to
       /// all the end actors.
       EndActors endActors;
+      /// If this is a start actor, this will point to
+      /// the reportGroup
+      ReportGroup *reportGroup;
+
       /// If this is an end actor this will store all
       /// active (absolute) deadlines.
       std::list<sc_core::sc_time> activeDeadlines;
+      /// If this is an end actor this will point to
+      /// the reportGroup to which deadline violations
+      /// will be reported.
+      ReportGroup *reportGroupReport;
     };
 
     class DeadlineInfo {
     public:
 
-      DeadlineInfo(std::string const &startActorName, EndActors &&endActors)
-        : startActor(startActorName), endActors(endActors) {}
-      DeadlineInfo(boost::regex const &startActorRegex, EndActors &&endActors)
-        : startActor(startActorRegex), endActors(endActors) {}
+      DeadlineInfo(
+          std::string const &startActorName
+        , ReportGroup *reportGroup
+        , EndActors &&endActors)
+        : startActor(startActorName)
+        , reportGroup(reportGroup)
+        , endActors(endActors) {}
+      DeadlineInfo(
+          boost::regex const &startActorRegex
+        , ReportGroup *reportGroup
+        , EndActors &&endActors)
+        : startActor(startActorRegex)
+        , reportGroup(reportGroup)
+        , endActors(endActors) {}
 
-      bool matchStartActor(std::string const &actorName, EndActors &endActors) const {
+      ReportGroup *matchStartActor(std::string const &actorName, EndActors &endActors) {
         endActors.clear();
 
         switch (startActor.which()) {
           case 0: {
             boost::smatch m;
             if (!regex_match(actorName, m, boost::get<boost::regex const &>(startActor)))
-              return false;
+              return nullptr;
             std::map<std::string, std::string> vars;
             int groupNr = 0;
             for (boost::smatch::value_type const &group : m)
@@ -151,28 +207,21 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
                 , vars);
               endActors.push_back(EndActor(endActor, ea.getDeadline()));
             }
-            return true;
+            return reportGroup;
           }
           case 1: {
             if (actorName != boost::get<std::string const &>(startActor))
-              return false;
+              return nullptr;
             endActors = this->endActors;
-            return true;
+            return reportGroup;
           }
         }
-
-        switch (startActor.which()) {
-          case 0:
-            return regex_match(actorName,
-                boost::get<boost::regex const &>(startActor));
-          case 1:
-            return actorName == boost::get<std::string const &>(startActor);
-        }
-        return false;
+        return nullptr;
       }
     protected:
-      boost::variant<boost::regex, std::string> startActor;
-      EndActors                                 endActors;
+      boost::variant<boost::regex, std::string>  startActor;
+      ReportGroup                               *reportGroup;
+      EndActors                                  endActors;
     };
 
     typedef std::list<DeadlineInfo> DeadlineInfos;
@@ -213,6 +262,7 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
           throw ConfigException(msg.str());
         }
       } else if (attr.getType() == "startActor" || attr.getType() == "startActorRegex") {
+        std::string reportName = attr.getValue();
         EndActors endActors;
         for (Attribute const &attr : attr.getAttributes()) {
           if (attr.getType() == "endActor") {
@@ -235,19 +285,25 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
               throw ConfigException("DeadlineMonitor component observers require exactly one "
                   "deadline attribute inside the endActor attribute!");
             endActors.push_back(EndActor(attr.getValue(), deadline));
+          } else if (attr.getType() == "reportName") {
+            reportName = attr.getValue();
           } else {
             std::stringstream msg;
 
             msg << "DeadlineMonitor component observers do not support the " << attr.getType();
             msg << " attribute inside a startActor or startActorRegex attribute!";
-            msg << " Only the endActor attribute is supported.";
+            msg << " Only the endActor and the reportName attributes are supported.";
             throw ConfigException(msg.str());
           }
         }
+        std::pair<ReportGroups::iterator, bool> status =
+            reportGroups.insert(std::make_pair(reportName, ReportGroup(reportName)));
+        assert(status.second);
+        ReportGroup &reportGroup = status.first->second;
         if (attr.getType() == "startActor")
-          deadlineInfos.push_back(DeadlineInfo(attr.getValue(), std::move(endActors)));
+          deadlineInfos.push_back(DeadlineInfo(attr.getValue(), &reportGroup, std::move(endActors)));
         else
-          deadlineInfos.push_back(DeadlineInfo(boost::regex(attr.getValue()), std::move(endActors)));
+          deadlineInfos.push_back(DeadlineInfo(boost::regex(attr.getValue()), &reportGroup, std::move(endActors)));
       } else {
         std::stringstream msg;
 
@@ -264,7 +320,10 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
 
   DeadlineMonitor::~DeadlineMonitor()
   {
-//  *resultFile << "Sum: " << energySum << std::endl;
+    *resultFile << "SUMMARY:" << std::endl;
+    for (ReportGroups::value_type const &rp : reportGroups) {
+      *resultFile << "  " << rp.second.getName() << ": Max = " << rp.second.getMax() << std::endl;
+    }
   }
   
   bool DeadlineMonitor::addAttribute(Attribute const &attr) {
@@ -293,17 +352,21 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
         {
           PendingEndActors::iterator iter = pendingEndActors.find(t.getName());
           if (iter != pendingEndActors.end()) {
-            *iter->second = &dmTask;
+            dmTask.reportGroupReport = iter->second.startActor->reportGroup;
+            *iter->second.endActor = &dmTask;
             pendingEndActors.erase(iter);
           }
         }
         for (DeadlineInfo di : deadlineInfos) {
-          if (di.matchStartActor(t.getName(), dmTask.endActors)) {
+          if (ReportGroup *rg = di.matchStartActor(t.getName(), dmTask.endActors)) {
+            dmTask.reportGroup = rg;
             *resultFile << "start actor " << t.getName() << std::endl;
             for (EndActor &ea : dmTask.endActors) {
               *resultFile << "end actor " << ea.getName() << ": " << ea.getDeadline() << std::endl;
               if (DMTask **pending = ea.resolveActor(tasks))
-                sassert(pendingEndActors.insert(std::make_pair(ea.getName(), pending)).second);
+                sassert(pendingEndActors.insert(std::make_pair(
+                    ea.getName()
+                  , PendingEndActor(&dmTask, pending))).second);
             }
           }
         }
@@ -338,6 +401,7 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
           sc_core::sc_time const &absDeadline = dmTask.activeDeadlines.front();
           *resultFile << ti.getName() << "@" << now << " deadline: " << absDeadline << std::endl;
           if (absDeadline < now) {
+            dmTask.reportGroup->report(now-absDeadline);
             *resultFile << ti.getName() << " had " << (now-absDeadline) << " deadline violation!" << std::endl;
           } else {
             *resultFile << ti.getName() << " had " << (absDeadline-now) << " slack!" << std::endl;

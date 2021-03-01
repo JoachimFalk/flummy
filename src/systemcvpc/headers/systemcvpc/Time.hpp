@@ -34,6 +34,8 @@
 //#include <boost/units/systems/si/io.hpp>
 #include <boost/units/static_rational.hpp>
 
+#include <sysc/kernel/sc_time.h>
+
 #include <iostream>
 
 namespace SystemC_VPC {
@@ -41,14 +43,23 @@ namespace SystemC_VPC {
 typedef boost::units::make_scaled_unit<boost::units::si::time,
   boost::units::scale<10, boost::units::static_rational<-12> > >::type picosecond_unit;
 
-picosecond_unit picosecond;
+extern boost::units::si::time sec;
+extern picosecond_unit        ps;
 
 class Time
   : public boost::units::quantity<picosecond_unit, int64_t>
 {
-  typedef Time this_type;
+  typedef Time  this_type;
+  typedef boost::units::quantity<
+      picosecond_unit
+    , int64_t>  base_type;
+
+  friend std::ostream &operator <<(std::ostream &out, this_type const &t);
 public:
-  typedef boost::units::quantity<picosecond_unit, int64_t> base_type;
+  Time()
+    : base_type() {}
+  Time(sc_core::sc_time const &time)
+    : base_type(time.to_seconds() * sec) {}
 
   template <typename U, typename T>
   Time(boost::units::quantity<U, T> v)
