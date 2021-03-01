@@ -41,15 +41,20 @@ namespace SystemC_VPC {
 typedef boost::units::make_scaled_unit<boost::units::si::time,
   boost::units::scale<10, boost::units::static_rational<-12> > >::type picosecond_unit;
 
-picosecond_unit picosecond;
+extern picosecond_unit picosecond;
 
 class Time
   : public boost::units::quantity<picosecond_unit, int64_t>
 {
-  typedef Time this_type;
-public:
-  typedef boost::units::quantity<picosecond_unit, int64_t> base_type;
+  typedef Time  this_type;
+  typedef boost::units::quantity<
+      picosecond_unit
+    , int64_t>  base_type;
 
+  friend std::ostream &operator <<(std::ostream &out, this_type const &t);
+public:
+  Time()
+    : base_type() {}
   template <typename U, typename T>
   Time(boost::units::quantity<U, T> v)
     : base_type(v) {}

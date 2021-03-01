@@ -33,6 +33,8 @@
 
 namespace SystemC_VPC {
 
+picosecond_unit picosecond;
+
 std::ostream &operator <<(std::ostream &out, Time const &t) {
   std::stringstream msg;
   msg << boost::units::engineering_prefix
