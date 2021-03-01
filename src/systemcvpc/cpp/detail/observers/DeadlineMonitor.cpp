@@ -247,13 +247,13 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
           reinterpret_cast<char *>(static_cast<ComponentObserver              *>(this))
         , "DeadlineMonitor")
   {
-    for (Attribute const &attr : attrs) {
-      if (attr.getType() == "resultFileName") {
+    for (Attribute const &attr1 : attrs) {
+      if (attr1.getType() == "resultFileName") {
         if (resultFile) {
           throw ConfigException(
               "Duplicate attribute resultFileName in DeadlineMonitor component observer!");
         }
-        std::string const &resultFileName = attr.getValue();
+        std::string const &resultFileName = attr1.getValue();
         resultFile.reset(new std::ofstream(resultFileName));
         if (!resultFile->good()) {
           std::stringstream msg;
@@ -261,21 +261,21 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
           msg << "DeadlineMonitor component observer failed to open " << resultFileName << " for output: " << strerror(errno);
           throw ConfigException(msg.str());
         }
-      } else if (attr.getType() == "startActor" || attr.getType() == "startActorRegex") {
-        std::string reportName = attr.getValue();
+      } else if (attr1.getType() == "startActor" || attr1.getType() == "startActorRegex") {
         EndActors endActors;
-        for (Attribute const &attr : attr.getAttributes()) {
-          if (attr.getType() == "endActor") {
+        std::string reportName = attr1.getValue();
+        for (Attribute const &attr2 : attr1.getAttributes()) {
+          if (attr2.getType() == "endActor") {
             bool             deadlineSpecified = false;
             sc_core::sc_time deadline;
-            for (Attribute const &attr : attr.getAttributes()) {
-              if (!deadlineSpecified && attr.getType() == "deadline") {
+            for (Attribute const &attr3 : attr2.getAttributes()) {
+              if (!deadlineSpecified && attr3.getType() == "deadline") {
                 deadlineSpecified = true;
-                deadline = Detail::createSC_Time(attr.getValue().c_str());
+                deadline = Detail::createSC_Time(attr3.getValue().c_str());
               } else {
                 std::stringstream msg;
 
-                msg << "DeadlineMonitor component observers do not support the " << attr.getType();
+                msg << "DeadlineMonitor component observers do not support the " << attr3.getType();
                 msg << " attribute inside an endActor attribute!";
                 msg << " Only a single deadline attribute is supported.";
                 throw ConfigException(msg.str());
@@ -284,13 +284,13 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
             if (!deadlineSpecified)
               throw ConfigException("DeadlineMonitor component observers require exactly one "
                   "deadline attribute inside the endActor attribute!");
-            endActors.push_back(EndActor(attr.getValue(), deadline));
-          } else if (attr.getType() == "reportName") {
-            reportName = attr.getValue();
+            endActors.push_back(EndActor(attr2.getValue(), deadline));
+          } else if (attr2.getType() == "reportName") {
+            reportName = attr2.getValue();
           } else {
             std::stringstream msg;
 
-            msg << "DeadlineMonitor component observers do not support the " << attr.getType();
+            msg << "DeadlineMonitor component observers do not support the " << attr2.getType();
             msg << " attribute inside a startActor or startActorRegex attribute!";
             msg << " Only the endActor and the reportName attributes are supported.";
             throw ConfigException(msg.str());
@@ -300,14 +300,14 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
             reportGroups.insert(std::make_pair(reportName, ReportGroup(reportName)));
         assert(status.second);
         ReportGroup &reportGroup = status.first->second;
-        if (attr.getType() == "startActor")
-          deadlineInfos.push_back(DeadlineInfo(attr.getValue(), &reportGroup, std::move(endActors)));
+        if (attr1.getType() == "startActor")
+          deadlineInfos.push_back(DeadlineInfo(attr1.getValue(), &reportGroup, std::move(endActors)));
         else
-          deadlineInfos.push_back(DeadlineInfo(boost::regex(attr.getValue()), &reportGroup, std::move(endActors)));
+          deadlineInfos.push_back(DeadlineInfo(boost::regex(attr1.getValue()), &reportGroup, std::move(endActors)));
       } else {
         std::stringstream msg;
 
-        msg << "DeadlineMonitor component observers do not support the "+attr.getType()+" attribute! ";
+        msg << "DeadlineMonitor component observers do not support the "+attr1.getType()+" attribute! ";
         msg << "Only the resultFileName, startActor, or startActorRegex attributes are supported.";
         throw ConfigException(msg.str());
       }
