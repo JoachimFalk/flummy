@@ -401,7 +401,8 @@ namespace SystemC_VPC { namespace Detail { namespace Observers {
           sc_core::sc_time const &absDeadline = dmTask.activeDeadlines.front();
           *resultFile << ti.getName() << "@" << now << " deadline: " << absDeadline << std::endl;
           if (absDeadline < now) {
-            dmTask.reportGroup->report(now-absDeadline);
+            assert(dmTask.reportGroupReport != nullptr);
+            dmTask.reportGroupReport->report(now-absDeadline);
             *resultFile << ti.getName() << " had " << (now-absDeadline) << " deadline violation!" << std::endl;
           } else {
             *resultFile << ti.getName() << " had " << (absDeadline-now) << " slack!" << std::endl;
