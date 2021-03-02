@@ -1,7 +1,7 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 # vim: set sw=2 ts=8 sts=2 et:
 
-from __future__ import print_function
+#from __future__ import print_function
 import argparse
 import sys
 import os
