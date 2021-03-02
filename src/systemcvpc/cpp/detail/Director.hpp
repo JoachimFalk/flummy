@@ -36,8 +36,6 @@
 #include <systemcvpc/Attribute.hpp>
 #include <systemcvpc/datatypes.hpp>
 
-#include <boost/function.hpp>
-
 #include <string>
 #include <map>
 #include <vector>
