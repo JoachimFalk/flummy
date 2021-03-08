@@ -223,6 +223,18 @@ public class VPCEvaluatorModule extends EvaluatorModule {
         protected final String   vpcConfigTemplate;
     }
 
+    @Info("Ignore routing information for VPC simulation")
+    @Order(15)
+    @Constant(namespace = VPCEvaluatorModule.class, value = "vpcIgnoreRouting")
+    protected boolean vpcIgnoreRouting = true;
+
+    public boolean getVpcIgnoreRouting() {
+        return vpcIgnoreRouting;
+    }
+
+    public void setVpcIgnoreRouting(boolean vpcIgnoreRouting) {
+        this.vpcIgnoreRouting = vpcIgnoreRouting;
+    }
 
     @SuppressWarnings("serial")
     protected static class VPCObjectivesImpl
@@ -234,7 +246,7 @@ public class VPCEvaluatorModule extends EvaluatorModule {
     }
 
     @Info("Objectives of the VPC evaluator")
-    @Order(15)
+    @Order(20)
     protected final VPCObjectivesImpl objectives = new VPCObjectivesImpl();
 
     public Objectives getObjectives() {
