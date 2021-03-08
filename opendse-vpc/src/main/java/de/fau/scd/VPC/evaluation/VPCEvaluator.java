@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 
 import org.opt4j.core.Objective;
 import org.opt4j.core.Objectives;
+import org.opt4j.core.start.Constant;
 
 import com.google.inject.Inject;
 
@@ -52,13 +53,13 @@ import de.fau.scd.VPC.config.properties.ObjectiveInfo;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import de.fau.scd.VPC.io.VPCConfigReader;
 import de.fau.scd.VPC.io.Common.FormatErrorException;
-
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Dependency;
 import net.sf.opendse.model.ICommunication;
 import net.sf.opendse.model.Link;
 import net.sf.opendse.model.Mapping;
+import net.sf.opendse.model.Mappings;
 import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
 import net.sf.opendse.model.Task;
@@ -77,7 +78,7 @@ import javax.xml.transform.dom.DOMSource;
 
 
 public class VPCEvaluator implements ImplementationEvaluator {
-
+    
     public interface VPCObjectives {
         public List<ObjectiveInfo> getObjectives();
     }
@@ -93,13 +94,20 @@ public class VPCEvaluator implements ImplementationEvaluator {
     protected final String[]        simulatorArguments;
     protected final String[]        simulatorEnvironment;
     protected final VPCConfigReader vpcConfigTemplate;
-
+    protected final boolean         vpcIgnoreRouting;
     protected final VPCObjectives   vpcObjectives;
+
+    @Override
+    public int getPriority() {
+        return 10;
+    }
 
     // Constructor of the VPC evaluator
     @Inject
     public VPCEvaluator(
         SimInfo       simInfo
+      , @Constant(namespace = VPCEvaluatorModule.class, value = "vpcIgnoreRouting")
+        boolean       vpcIgnoreRouting
       , VPCObjectives vpcObjectives
       ) throws
         FileNotFoundException
@@ -109,6 +117,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
         this.simulatorArguments     = simInfo.getArguments();
         this.simulatorEnvironment   = simInfo.getEnvironment();
         this.vpcConfigTemplate      = new VPCConfigReader(simInfo.getVpcConfigTemplate());
+        this.vpcIgnoreRouting       = vpcIgnoreRouting;
         this.vpcObjectives          = vpcObjectives;
     }
 
@@ -131,6 +140,19 @@ public class VPCEvaluator implements ImplementationEvaluator {
                 processLinks(implementation, eLinks);
             org.w3c.dom.Element eMappings = VPCConfigReader.childElement(eVPCConfig, "mappings");
             processMappings(implementation, eMappings);
+            org.w3c.dom.Element eTopology = VPCConfigReader.childElement(eVPCConfig, "topology", vpcIgnoreRouting);
+            if (vpcIgnoreRouting) {
+                org.w3c.dom.Element eTopologyIgnore =
+                    vpcDocument.createElement("topology");
+                eTopologyIgnore.setAttribute("default", "ignore");
+                if (eTopology != null) {
+                    eVPCConfig.replaceChild(eTopologyIgnore, eTopology);                    
+                } else {
+                    eVPCConfig.appendChild(eTopologyIgnore);
+                }
+            } else {                
+                processTopology(implementation, eTopology);                
+            }
         } catch (FormatErrorException ex) {
             ex.printStackTrace();
             error = true;
@@ -267,7 +289,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
     }
 
     // Method that extracts the architecture graph and specifies the scheduler
-    private void processResources(
+    protected void processResources(
         Specification       implementation
       , org.w3c.dom.Element eResources
       )
@@ -410,7 +432,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //      return resources;
     }
 
-    private void processLinks(
+    protected void processLinks(
         Specification       implementation
       , org.w3c.dom.Element eLinks
       )
@@ -434,7 +456,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
         }
     }
 
-    private void processMappings(
+    protected void processMappings(
         Specification       implementation
       , org.w3c.dom.Element eMappings
       )
@@ -603,11 +625,25 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //      }
 //      return mappings;
     }
-
-    @Override
-    public int getPriority() {
-        // TODO Auto-generated method stub
-        return 0;
+    
+    protected void processTopology(
+        Specification       implementation
+      , org.w3c.dom.Element eTopology
+      )
+    {
+        Application<Task, Dependency> application = implementation.getApplication();
+        Mappings<Task, Resource> mappings = implementation.getMappings();
+        Routings<Task, Resource, Link> routings = implementation.getRoutings();
+        for (Task message : routings.getTasks()) {
+            assert message instanceof ICommunication;
+            Architecture<Resource, Link> routing = routings.get(message);
+            Collection<Task> predecessor = application.getPredecessors(message);
+            assert predecessor.size() == 1;
+            Set<Mapping<Task, Resource> > srcMapping = mappings.get(predecessor.iterator().next());
+            assert srcMapping.size() == 1;
+            Resource srcHop =  srcMapping.iterator().next().getTarget();
+            assert false;
+        }
     }
 
 //  private Element routingsToJdom( Routings<Task,Resource,Link> oneToOneRoutings, Specification implementation, Element resources) {
