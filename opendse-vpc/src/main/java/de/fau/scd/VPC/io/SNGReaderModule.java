@@ -125,9 +125,8 @@ public class SNGReaderModule extends IOModule {
         return simulatorEnvironment;
     }
 
-    public void setSimulatorEnvironment(Environment simulatorEnvironment) {
-        this.simulatorEnvironment.clear();
-        this.simulatorEnvironment.putAll(simulatorEnvironment);
+    public void setSimulatorEnvironment(Environment env) {
+        this.simulatorEnvironment.assign(env);
     }
 
     @Info("The architecture given as VPC configuration XML template file.")
