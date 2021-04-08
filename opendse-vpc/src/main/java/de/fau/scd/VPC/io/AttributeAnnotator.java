@@ -21,15 +21,60 @@
 
 package de.fau.scd.VPC.io;
 
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.google.inject.Inject;
+
+import de.fau.scd.VPC.config.properties.AttributeAnnotation;
+import net.sf.opendse.model.Mapping;
+import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
+import net.sf.opendse.model.Task;
 import net.sf.opendse.optimization.io.SpecificationTransformer;
 
 public class AttributeAnnotator implements SpecificationTransformer {
-
+    
+    private List<AttributeAnnotation> attrAnnotationList;
+    
+    interface AttributeAnnotations {
+        public List<AttributeAnnotation> getAttributeAnnotation();
+    }
+    
+    @Inject
+    public AttributeAnnotator(AttributeAnnotations attributeAnnotations) {
+        this.attrAnnotationList = attributeAnnotations.getAttributeAnnotation();
+    }
+    
     @Override
     public void transform(Specification specification) {
-        // TODO Auto-generated method stub
+       for (Task t : specification.getApplication()) {          
+           for (AttributeAnnotation aa : attrAnnotationList) {
+               Matcher m = aa.getElemRegex().matcher(t.getId());
+               if (m.find()) {
+                   t.setAttribute(aa.getAttrName(), aa.getAttrValue());
+               }
+           }
+       }
+       
+       for (Resource r : specification.getArchitecture()) {
+           for (AttributeAnnotation aa : attrAnnotationList) {
+               Matcher m = aa.getElemRegex().matcher(r.getId());
+               if (m.find()) {
+                   r.setAttribute(aa.getAttrName(), aa.getAttrValue());
+               }
+           }
+       }
 
+       for (Mapping<Task, Resource> mp : specification.getMappings()) {
+           for (AttributeAnnotation aa : attrAnnotationList) {
+               Matcher m = aa.getElemRegex().matcher(mp.getId());
+               if (m.find()) {
+                   mp.setAttribute(aa.getAttrName(), aa.getAttrValue());
+               }
+           }
+       }
     }
 
     @Override

@@ -61,7 +61,7 @@ public class AttributeAnnotationsPanel
             new Object[]{"Spec. element", "attr. name", "attr. type", "attr. value"}, 0);
         for (AttributeAnnotation an : attributeAnnotations) {
             tableModel.addRow(new Object[]{
-                an.getElemRegex()
+                an.getElemRegex().pattern()
               , an.getAttrName()
               , an.getAttrType()
               , an.getAttrValue().toString() });
