@@ -27,18 +27,25 @@ import org.opt4j.core.config.annotations.Panel;
 //import org.opt4j.core.config.annotations.Required;
 
 import de.fau.scd.VPC.config.properties.AttributeAnnotations;
-
+import de.fau.scd.VPC.config.properties.Objectives;
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
-
+import de.fau.scd.VPC.evaluation.VPCEvaluator;
 import net.sf.opendse.optimization.io.IOModule;
 
 @Panel(value = PropertyPanel.class)
 public class AttributeAnnotatorModule extends IOModule {
-
+    
+    protected static class AttributeAnnotationsImpl
+    extends
+        AttributeAnnotations
+    implements
+        AttributeAnnotator.AttributeAnnotations
+    {
+    }
     @Info("Additional attributes to annotated to the specification")
 //  @Order(3)
 //  @Required(property = "dfgSource", elements = { "DFG_FROM_SIM_EXPORT" })
-    protected final AttributeAnnotations attributeAnnotations = new AttributeAnnotations();
+    protected final AttributeAnnotationsImpl attributeAnnotations = new AttributeAnnotationsImpl();
 
     public AttributeAnnotations getAttributeAnnotations() {
         return attributeAnnotations;
@@ -51,6 +58,8 @@ public class AttributeAnnotatorModule extends IOModule {
     @Override
     protected void config() {
         bindSpecificationTransformer(AttributeAnnotator.class);
+        bind(AttributeAnnotator.AttributeAnnotations.class).toInstance(attributeAnnotations);
+        
     }
 
 }
