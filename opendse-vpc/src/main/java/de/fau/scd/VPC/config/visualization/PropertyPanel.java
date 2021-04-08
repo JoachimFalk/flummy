@@ -3,17 +3,18 @@
 /*
  * Copyright (c)
  *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
- * 
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *
  *   This library is free software; you can redistribute it and/or modify it under
  *   the terms of the GNU Lesser General Public License as published by the Free
  *   Software Foundation; either version 2 of the License, or (at your option) any
  *   later version.
- * 
+ *
  *   This library is distributed in the hope that it will be useful, but WITHOUT
  *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
  *   details.
- * 
+ *
  *   You should have received a copy of the GNU Lesser General Public License
  *   along with this library; if not, write to the Free Software Foundation, Inc.,
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
@@ -22,7 +23,7 @@
 package de.fau.scd.VPC.config.visualization;
 
 import java.awt.Component;
-import java.awt.Dimension;
+//import java.awt.Dimension;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
@@ -38,6 +39,7 @@ import org.opt4j.core.config.visualization.FileChooser;
 import org.opt4j.core.config.visualization.Format;
 
 import de.fau.scd.VPC.config.annotations.Text;
+import de.fau.scd.VPC.config.properties.AttributeAnnotations;
 import de.fau.scd.VPC.config.properties.Environment;
 import de.fau.scd.VPC.config.properties.Objectives;
 
@@ -58,9 +60,11 @@ public class PropertyPanel extends org.opt4j.core.config.visualization.PropertyP
             return new EnvironmentPanel(property);
         } else if (type.isAssignableFrom(Objectives.class)) {
             return new ObjectivesPanel(property);
+        } else if (type.isAssignableFrom(AttributeAnnotations.class)) {
+            return new AttributeAnnotationsPanel(property);
         } else if (textAnotation != null && type.isAssignableFrom(String.class)) {
             final JTextArea   field = new JTextArea(textAnotation.rows(), 0);
-            final JScrollPane scroll = new JScrollPane(field); 
+            final JScrollPane scroll = new JScrollPane(field);
 
             field.setLineWrap(true);
             field.setWrapStyleWord(true);
@@ -109,13 +113,13 @@ public class PropertyPanel extends org.opt4j.core.config.visualization.PropertyP
                     }
                 }
             });
-            
+
             scroll.setMinimumSize(scroll.getPreferredSize());
-            
+
 //          System.out.println(scroll.getMinimumSize());
 //          System.out.println(scroll.getPreferredSize());
 //          System.out.println(scroll.getSize());
-            
+
             return scroll;
         } else {
             return super.createComponent(property);

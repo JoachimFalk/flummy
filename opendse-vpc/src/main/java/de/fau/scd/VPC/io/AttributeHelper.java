@@ -3,17 +3,18 @@
 /*
  * Copyright (c)
  *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
- * 
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *
  *   This library is free software; you can redistribute it and/or modify it under
  *   the terms of the GNU Lesser General Public License as published by the Free
  *   Software Foundation; either version 2 of the License, or (at your option) any
  *   later version.
- * 
+ *
  *   This library is distributed in the hope that it will be useful, but WITHOUT
  *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
  *   details.
- * 
+ *
  *   You should have received a copy of the GNU Lesser General Public License
  *   along with this library; if not, write to the Free Software Foundation, Inc.,
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
@@ -57,7 +58,7 @@ import org.apache.commons.collections15.bidimap.DualHashBidiMap;
  *
  * @author Joachim Falk
  */
-class AttributeHelper {
+public class AttributeHelper {
 
     public static <E extends IAttributes> void addAttributes(org.w3c.dom.Element eElement, E element) {
         Attributes attributes = new Attributes();
@@ -107,7 +108,11 @@ class AttributeHelper {
                 if (value == null) {
                     throw new IllegalArgumentException("no value given for attribute " + eAttribute);
                 }
-                return toAttributeObject(eAttribute, clazz, value.getValue());
+                Object object = toAttributeObject(clazz, value.getValue());
+                if (object == null) {
+                    throw new IllegalArgumentException("type value mismatch for attribute " + eAttribute);
+                }
+                return object;
             }
         }
     }
@@ -173,15 +178,13 @@ class AttributeHelper {
      * Constructs an instance of the passed class that contains the passed
      * value.
      *
-     * @param eAttribute
-     *            the XML attribute to convert
      * @param clazz
-     *            the class of the object that is to create
+     *            the class of the object that is to be created
      * @param value
-     *            the value of the object that is to create
+     *            the value of the object that is to be created
      * @return the constructed object
      */
-    protected static Object toAttributeObject(org.w3c.dom.Element eAttribute, Class<?> clazz, String value) {
+    protected static Object toAttributeObject(Class<?> clazz, String value) {
         Object object = null;
 
         try {
@@ -196,10 +199,24 @@ class AttributeHelper {
             } catch (IOException | ClassNotFoundException e) {
             }
         }
-        if (object == null) {
-            throw new IllegalArgumentException("type value mismatch for attribute " + eAttribute);
-        }
         return object;
+    }
+
+    /**
+     * Constructs an instance of the passed class name that contains the passed
+     * value.
+     *
+     * @param type
+     *            the class name of the object that is to be created
+     * @param value
+     *            the value of the object that is to to be created
+     * @return the constructed object
+     */
+    public static Object toAttributeObject(String type, String value) {
+        Class<?> clazz =  AttributeHelper.classMap.get(type);
+        if (clazz == null)
+            throw new IllegalArgumentException("Unknown opendseattr type " + type + "!");
+        return toAttributeObject(clazz, value);
     }
 
     protected static BidiMap<String, Class<?>> classMap = new DualHashBidiMap<String, Class<?>>();
@@ -292,7 +309,7 @@ class AttributeHelper {
      * @throws ClassNotFoundException
      *             thrown in case the class does not exist
      */
-    public static Object fromString(String s) throws IOException, ClassNotFoundException {
+    protected static Object fromString(String s) throws IOException, ClassNotFoundException {
         byte[] data = Base64Coder.decode(s);
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
         Object o = ois.readObject();
@@ -309,7 +326,7 @@ class AttributeHelper {
      * @throws IOException
      *             thrown in case of an IO error
      */
-    public static String toString(Serializable o) throws IOException {
+    protected static String toString(Serializable o) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(o);
