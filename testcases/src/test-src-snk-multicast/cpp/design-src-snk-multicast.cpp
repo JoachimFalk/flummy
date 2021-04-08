@@ -21,6 +21,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 
 #include <systemoc/smoc_moc.hpp>
 #include <systemoc/smoc_port.hpp>
@@ -115,5 +116,11 @@ int sc_main (int argc, char **argv) {
   
   smoc_top_moc<m_h_top> top("top", iter);
   sc_core::sc_start();
+  {
+    std::ofstream result("throughput.txt");
+    result << "Throughput: "
+           << iter / sc_core::sc_time_stamp().to_seconds()
+           << std::endl;
+  }
   return 0;
 }
