@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Attr;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
+import de.fau.scd.VPC.properties.ApplicationPropertyService;
+import de.fau.scd.VPC.properties.SpecificationPropertyService;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
@@ -254,10 +256,10 @@ public class VPCConfigImporter {
                         throw new FormatErrorException("Regex regex \""+targetRegex+"\" did non match any resource in mapping!");
                 }
             }
-            final Map<String, Object> vpcActorDelay = new HashMap<String, Object>();
+            final Map<String, Double> vpcActorDelay = new HashMap<String, Double>();
             for (org.w3c.dom.Element eTiming : VPCConfigReader.childElements(eMapping, "timing")) {
                 final String name  = eTiming.getAttribute("name");
-                Object       value;
+                Double       value;
                 final Attr   delay = eTiming.getAttributeNode("delay");
                 if (delay != null) {
                     String delayText = delay.getValue();
@@ -284,7 +286,7 @@ public class VPCConfigImporter {
                 } else
                     throw new FormatErrorException("Missing delay value for timing "+name+" in mapping " + mappingName + "!");
                 if (vpcActorDelay.containsKey(name))
-                    throw new FormatErrorException("Dupicate timing "+name+" in mapping " + mappingName + "!");
+                    throw new FormatErrorException("Duplicate timing "+name+" in mapping " + mappingName + "!");
                 vpcActorDelay.put(name, value);
             }
             for (Task source : sources) {
@@ -293,7 +295,8 @@ public class VPCConfigImporter {
                     final String name = uniquePool.createUniqeName(source.getId()+" -> "+target.getId(), false);
                     final Mapping<Task, Resource> mapping = new Mapping<Task, Resource>(name, source, target);
                     if (!vpcActorDelay.isEmpty())
-                        mapping.setAttribute("vpc-actor-delay", vpcActorDelay);
+                        // mapping.setAttribute("vpc-actor-delay", vpcActorDelay);
+                        SpecificationPropertyService.setActorDelayMap(mapping, vpcActorDelay);
                     AttributeHelper.addAttributes(eMapping, mapping);
                     mappings.add(mapping);
                 }
