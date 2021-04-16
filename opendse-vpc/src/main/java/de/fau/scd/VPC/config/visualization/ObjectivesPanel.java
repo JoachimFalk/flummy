@@ -25,9 +25,13 @@ package de.fau.scd.VPC.config.visualization;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -35,8 +39,9 @@ import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
-import org.opt4j.core.Objective.Sign;
+import org.opt4j.core.Objective;
 import org.opt4j.core.config.Property;
 
 import de.fau.scd.VPC.config.properties.ObjectiveInfo;
@@ -60,13 +65,23 @@ public class ObjectivesPanel
         for (ObjectiveInfo e : objectives) {
             tableModel.addRow(new Object[]{
                 e.getObjName()
-              , e.getObjSign().name()
+              , e.getObjSign()
               , e.getParseFile().toString()
               , e.getParseRegex().pattern()});
         }
 //      tableModel.addRow(new Object[]{"foo", "bar"});
         tableModel.addTableModelListener(this);
         table = new JTable(tableModel);
+
+        {
+            TableColumn signColumn = table.getColumnModel().getColumn(1);
+            // Set up the editor for the attr. type column.
+            JComboBox<Objective.Sign> comboBox = new JComboBox<Objective.Sign>();
+            for (Objective.Sign objSign : Objective.Sign.values())
+                comboBox.addItem(objSign);
+            signColumn.setCellEditor(new DefaultCellEditor(comboBox));
+        }
+
         this.setViewportView(table);
 
         {
@@ -136,19 +151,25 @@ public class ObjectivesPanel
 //      System.err.println(e);
         objectives.clear();
         @SuppressWarnings("unchecked")
-        Vector<Vector<String>> rows = tableModel.getDataVector();
+        Vector<Vector<Object>> rows = tableModel.getDataVector();
 //      System.err.println(rows);
-        for (Vector<String> row : rows) {
-            String objName    = row.get(0);
-            String objSign    = row.get(1) != null ? row.get(1) : Sign.MIN.name();
-            String parseFile  = row.get(2) != null ? row.get(2) : "";
-            String parseRegex = row.get(3) != null ? row.get(3) : "";
+        for (Vector<Object> row : rows) {
+            final String         objName    = (String) row.get(0);
+            final Objective.Sign objSign    = row.get(1) != null
+                ? (Objective.Sign) row.get(1)
+                : Objective.Sign.MIN;
+            final String         parseFile  = row.get(2) != null
+                ? (String) row.get(2)
+                : "";
+            final String         parseRegex = row.get(3) != null
+                ? (String) row.get(3)
+                : "";
             if (objName != null) {
                 objectives.add(new ObjectiveInfo(
                     objName
                   , objSign
-                  , parseFile
-                  , parseRegex));
+                  , new File(parseFile)
+                  , Pattern.compile(parseRegex)));
             }
         }
         try {
