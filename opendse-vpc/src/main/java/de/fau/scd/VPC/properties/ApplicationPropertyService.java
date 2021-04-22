@@ -30,10 +30,10 @@ import net.sf.opendse.model.ICommunication;
 import net.sf.opendse.model.Task;
 
 public class ApplicationPropertyService {
-    
+
     private ApplicationPropertyService() {
     }
-    
+
     public static Double getDeadline(Task task) {
         return task.<Double>getAttribute("smoc-actor-deadline");
     }
@@ -42,14 +42,14 @@ public class ApplicationPropertyService {
     }
 
     public enum TaskType { EXE, MEM, MSG };
-    
+
     public static TaskType getTaskType(Task task) {
         if (task instanceof ICommunication)
             return TaskType.MSG;
         else {
             TaskType taskType = task.<TaskType>getAttribute("smoc-task-type");
             assert taskType != TaskType.MSG;
-            return taskType != null ? taskType : TaskType.EXE;            
+            return taskType != null ? taskType : TaskType.EXE;
         }
     }
     public static void setTaskType(Task task, TaskType taskType) {
@@ -57,41 +57,52 @@ public class ApplicationPropertyService {
             assert task instanceof ICommunication;
         } else {
             assert !(task instanceof ICommunication);
-            task.setAttribute("smoc-task-type", taskType);                    
-        }        
+            task.setAttribute("smoc-task-type", taskType);
+        }
     }
 
     /// Return the capacity of a FIFO or register in terms of tokens
     public static Integer getTokenCapacity(Task task) {
         assert getTaskType(task) == TaskType.MEM;
-        return task.<Integer>getAttribute("smoc-token-capacity");        
+        return task.<Integer>getAttribute("smoc-token-capacity");
     }
     /// Set the capacity of a FIFO or register in terms of tokens
     public static void setTokenCapacity(Task task, int capacity) {
         assert getTaskType(task) == TaskType.MEM;
-        task.setAttribute("smoc-token-capacity", capacity);        
+        task.setAttribute("smoc-token-capacity", capacity);
     }
 
     /// Return the number of initial tokens present in a FIFO
     public static Integer getInitialTokens(Task task) {
         assert getTaskType(task) == TaskType.MEM;
-        return task.<Integer>getAttribute("smoc-token-initial");        
+        return task.<Integer>getAttribute("smoc-token-initial");
     }
     /// Set the number of initial tokens present in a FIFO
     public static void setInitialTokens(Task task, int initial) {
         assert getTaskType(task) == TaskType.MEM;
-        task.setAttribute("smoc-token-initial", initial);        
+        task.setAttribute("smoc-token-initial", initial);
     }
 
     /// Return the size of a token in bytes
     public static Integer getTokenSize(Task task) {
         assert getTaskType(task) == TaskType.MEM;
-        return task.<Integer>getAttribute("smoc-token-size");        
+        return task.<Integer>getAttribute("smoc-token-size");
     }
     /// Set the size of a token in bytes
     public static void setTokenSize(Task task, int bytes) {
         assert getTaskType(task) == TaskType.MEM;
-        task.setAttribute("smoc-token-size", bytes);        
+        task.setAttribute("smoc-token-size", bytes);
+    }
+
+    /// Return the size of a message in bytes
+    public static Integer getMessagePayload(Task task) {
+        assert task instanceof ICommunication;
+        return task.<Integer>getAttribute("smoc-msg-payload");
+    }
+    /// Set the size of a message in bytes
+    public static void setMessagePayload(Task task, int bytes) {
+        assert task instanceof ICommunication;
+        task.setAttribute("smoc-msg-payload", bytes);
     }
 
 }

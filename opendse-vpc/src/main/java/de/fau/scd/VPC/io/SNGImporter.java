@@ -26,6 +26,7 @@ import java.util.Map;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
 import de.fau.scd.VPC.properties.ApplicationPropertyService;
+import de.fau.scd.VPC.properties.ApplicationPropertyService.TaskType;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
 import net.sf.opendse.model.Application;
@@ -174,6 +175,8 @@ public class SNGImporter {
                     commInstance = new CommInstance(messageName);
                     commInstances.put(messageName, commInstance);
                     AttributeHelper.addAttributes(eFifo, commInstance.msg);
+                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.msg);
+                    ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
                     application.addVertex(commInstance.msg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -193,13 +196,14 @@ public class SNGImporter {
                     else
                         commInstance = new CommInstance(messageName, "cf:"+messageName);
                     commInstances.put(messageName, commInstance);
-//                  commInstance.msg.setAttribute("smoc-token-size", 4711);
                     application.addVertex(commInstance.msg);
                     ApplicationPropertyService.setTaskType(commInstance.memTask,
                             ApplicationPropertyService.TaskType.MEM);
                     ApplicationPropertyService.setTokenCapacity(commInstance.memTask, size);
                     ApplicationPropertyService.setInitialTokens(commInstance.memTask, initial);
                     AttributeHelper.addAttributes(eFifo, commInstance.memTask);
+                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
+                    ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
                     application.addVertex(commInstance.memTask);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -212,7 +216,8 @@ public class SNGImporter {
                 }
                 {
                     Communication readMsg = new Communication(targetActor+"."+targetPort);
-//                  readMsg.setAttribute("smoc-token-size", 4711);
+                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
+                    ApplicationPropertyService.setMessagePayload(readMsg, tokenSize);
                     application.addVertex(readMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -232,14 +237,14 @@ public class SNGImporter {
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
                 if (!SNGReader.childElements(eRegister, "target").iterator().hasNext())
                     continue;
-                
+
                 for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {
                     final String sourceActor = eSource.getAttribute("actor");
-                    final String sourcePort  = eSource.getAttribute("port");                
+                    final String sourcePort  = eSource.getAttribute("port");
                     final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
                     if (sourceActorInstance == null)
                         throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
-    
+
                     String messageName = sourceActor+"."+sourcePort;
                     if (!genMulticast)
                         messageName = uniquePool.createUniqeName(messageName, true);
@@ -248,6 +253,8 @@ public class SNGImporter {
                         commInstance = new CommInstance(messageName);
                         commInstances.put(messageName, commInstance);
                         AttributeHelper.addAttributes(eRegister, commInstance.msg);
+                        int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.msg);
+                        ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
                         application.addVertex(commInstance.msg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -260,30 +267,31 @@ public class SNGImporter {
                         final ActorInstance targetActorInstance = actorInstances.get(targetActor);
                         if (targetActorInstance == null)
                             throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
-    
+
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
                         application.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
-                    }                
+                    }
                 }
             }
             break;
         case FIFO_IS_MEMORY_TASK:
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
                 String name  = eRegister.getAttribute("name");
-                
+
                 Task memTask = new Task(name);
                 ApplicationPropertyService.setTaskType(memTask,
                         ApplicationPropertyService.TaskType.MEM);
                 ApplicationPropertyService.setTokenCapacity(memTask, 1);
                 AttributeHelper.addAttributes(eRegister, memTask);
-    
+                int tokenSize = ApplicationPropertyService.getTokenSize(memTask);
+
                 for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {
                     final String sourceActor = eSource.getAttribute("actor");
-                    final String sourcePort  = eSource.getAttribute("port");                
+                    final String sourcePort  = eSource.getAttribute("port");
                     final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
                     if (sourceActorInstance == null)
                         throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
-    
+
                     String messageName = sourceActor+"."+sourcePort;
                     if (!genMulticast)
                         messageName = uniquePool.createUniqeName(messageName, true);
@@ -291,6 +299,7 @@ public class SNGImporter {
                     if (commInstance == null) {
                         commInstance = new CommInstance(messageName);
                         commInstances.put(messageName, commInstance);
+                        ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
                         application.addVertex(commInstance.msg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -308,9 +317,9 @@ public class SNGImporter {
                     final ActorInstance targetActorInstance = actorInstances.get(targetActor);
                     if (targetActorInstance == null)
                         throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
-                    
+
                     Communication readMsg = new Communication(targetActor+"."+targetPort);
-//                  readMsg.setAttribute("smoc-token-size", 4711);
+                    ApplicationPropertyService.setMessagePayload(readMsg, tokenSize);
                     application.addVertex(readMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
@@ -320,8 +329,8 @@ public class SNGImporter {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
                         application.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
-                }                
-            }    
+                }
+            }
             break;
         }
         return application;
