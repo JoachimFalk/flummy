@@ -3,6 +3,7 @@
 /*
  * Copyright (c)
  *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
  *
  *   This library is free software; you can redistribute it and/or modify it under
  *   the terms of the GNU Lesser General Public License as published by the Free
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
+import de.fau.scd.VPC.properties.ApplicationPropertyService;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
 import net.sf.opendse.model.Application;
@@ -140,7 +142,8 @@ public class SNGImporter {
                 throw new FormatErrorException("Duplicate actor instance \""+actorInstance.name+"\"!");
             actorInstances.put(actorInstance.name, actorInstance);
             if (fifoTranslat == FIFOTranslation.FIFO_IS_MEMORY_TASK)
-                actorInstance.exeTask.setAttribute("smoc-task-type", "EXE");
+                ApplicationPropertyService.setTaskType(actorInstance.exeTask,
+                        ApplicationPropertyService.TaskType.EXE);
             application.addVertex(actorInstance.exeTask);
         }
         for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
@@ -192,9 +195,10 @@ public class SNGImporter {
                     commInstances.put(messageName, commInstance);
 //                  commInstance.msg.setAttribute("smoc-token-size", 4711);
                     application.addVertex(commInstance.msg);
-                    commInstance.memTask.setAttribute("smoc-task-type", "MEM");
-                    commInstance.memTask.setAttribute("smoc-token-capacity", size);
-                    commInstance.memTask.setAttribute("smoc-token-initial", initial);
+                    ApplicationPropertyService.setTaskType(commInstance.memTask,
+                            ApplicationPropertyService.TaskType.MEM);
+                    ApplicationPropertyService.setTokenCapacity(commInstance.memTask, size);
+                    ApplicationPropertyService.setInitialTokens(commInstance.memTask, initial);
                     AttributeHelper.addAttributes(eFifo, commInstance.memTask);
                     application.addVertex(commInstance.memTask);
                     {
@@ -268,9 +272,9 @@ public class SNGImporter {
                 String name  = eRegister.getAttribute("name");
                 
                 Task memTask = new Task(name);
-                memTask.setAttribute("smoc-task-type", "MEM");
-                memTask.setAttribute("smoc-token-capacity", 1);
-
+                ApplicationPropertyService.setTaskType(memTask,
+                        ApplicationPropertyService.TaskType.MEM);
+                ApplicationPropertyService.setTokenCapacity(memTask, 1);
                 AttributeHelper.addAttributes(eRegister, memTask);
     
                 for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {

@@ -21,10 +21,12 @@
 
 package de.fau.scd.VPC.properties;
 
-import java.util.Map;
+import net.sf.opendse.model.ICommunication;
 
-import net.sf.opendse.model.Mapping;
-import net.sf.opendse.model.Resource;
+//import java.util.Map;
+
+//import net.sf.opendse.model.Mapping;
+//import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Task;
 
 public class ApplicationPropertyService {
@@ -32,12 +34,64 @@ public class ApplicationPropertyService {
     private ApplicationPropertyService() {
     }
     
-    public static void setDeadline(Task task, double deadline) {
+    public static Double getDeadline(Task task) {
+        return task.<Double>getAttribute("smoc-actor-deadline");
+    }
+        public static void setDeadline(Task task, double deadline) {
         task.setAttribute("smoc-actor-deadline", deadline);
     }
 
-    public static Double getDeadline(Task task) {
-        return task.<Double>getAttribute("smoc-actor-deadline");
-    }   
-   
+    public enum TaskType { EXE, MEM, MSG };
+    
+    public static TaskType getTaskType(Task task) {
+        if (task instanceof ICommunication)
+            return TaskType.MSG;
+        else {
+            TaskType taskType = task.<TaskType>getAttribute("smoc-task-type");
+            assert taskType != TaskType.MSG;
+            return taskType != null ? taskType : TaskType.EXE;            
+        }
+    }
+    public static void setTaskType(Task task, TaskType taskType) {
+        if (taskType == TaskType.MSG) {
+            assert task instanceof ICommunication;
+        } else {
+            assert !(task instanceof ICommunication);
+            task.setAttribute("smoc-task-type", taskType);                    
+        }        
+    }
+
+    /// Return the capacity of a FIFO or register in terms of tokens
+    public static Integer getTokenCapacity(Task task) {
+        assert getTaskType(task) == TaskType.MEM;
+        return task.<Integer>getAttribute("smoc-token-capacity");        
+    }
+    /// Set the capacity of a FIFO or register in terms of tokens
+    public static void setTokenCapacity(Task task, int capacity) {
+        assert getTaskType(task) == TaskType.MEM;
+        task.setAttribute("smoc-token-capacity", capacity);        
+    }
+
+    /// Return the number of initial tokens present in a FIFO
+    public static Integer getInitialTokens(Task task) {
+        assert getTaskType(task) == TaskType.MEM;
+        return task.<Integer>getAttribute("smoc-token-initial");        
+    }
+    /// Set the number of initial tokens present in a FIFO
+    public static void setInitialTokens(Task task, int initial) {
+        assert getTaskType(task) == TaskType.MEM;
+        task.setAttribute("smoc-token-initial", initial);        
+    }
+
+    /// Return the size of a token in bytes
+    public static Integer getTokenSize(Task task) {
+        assert getTaskType(task) == TaskType.MEM;
+        return task.<Integer>getAttribute("smoc-token-size");        
+    }
+    /// Set the size of a token in bytes
+    public static void setTokenSize(Task task, int bytes) {
+        assert getTaskType(task) == TaskType.MEM;
+        task.setAttribute("smoc-token-size", bytes);        
+    }
+
 }
