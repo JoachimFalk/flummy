@@ -26,7 +26,6 @@ import java.util.Map;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
 import de.fau.scd.VPC.properties.ApplicationPropertyService;
-import de.fau.scd.VPC.properties.ApplicationPropertyService.TaskType;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
 import net.sf.opendse.model.Application;
@@ -43,20 +42,20 @@ import net.sf.opendse.model.Task;
  */
 public class SNGImporter {
 
-    public enum FIFOTranslation {
-        FIFO_IS_MESSAGE
-      , FIFO_IS_MEMORY_TASK
+    public enum ChanTranslation {
+        CHANS_ARE_DROPPED
+      , CHANS_ARE_MEMORY_TASKS
     };
 
     SNGImporter(
-        SNGReader       sngReader
-      , UniquePool      uniquePool
-      , FIFOTranslation fifoTranslation
-      , boolean         generateMulticast
+        SNGReader          sngReader
+      , UniquePool         uniquePool
+      , ChanTranslation chanTranslation
+      , boolean            generateMulticast
       ) throws FormatErrorException
     {
         this.uniquePool   = uniquePool;
-        this.fifoTranslat = fifoTranslation;
+        this.chanTranslat = chanTranslation;
         this.genMulticast = generateMulticast;
         this.application  = toApplication(sngReader.getDocumentElement());
     }
@@ -142,7 +141,7 @@ public class SNGImporter {
             if (actorInstances.containsKey(actorInstance.name))
                 throw new FormatErrorException("Duplicate actor instance \""+actorInstance.name+"\"!");
             actorInstances.put(actorInstance.name, actorInstance);
-            if (fifoTranslat == FIFOTranslation.FIFO_IS_MEMORY_TASK)
+            if (chanTranslat == ChanTranslation.CHANS_ARE_MEMORY_TASKS)
                 ApplicationPropertyService.setTaskType(actorInstance.exeTask,
                         ApplicationPropertyService.TaskType.EXE);
             application.addVertex(actorInstance.exeTask);
@@ -169,8 +168,8 @@ public class SNGImporter {
             if (!genMulticast)
                 messageName = uniquePool.createUniqeName(messageName, true);
             CommInstance commInstance = commInstances.get(messageName);
-            switch (fifoTranslat) {
-            case FIFO_IS_MESSAGE: {
+            switch (chanTranslat) {
+            case CHANS_ARE_DROPPED: {
                 if (commInstance == null) {
                     commInstance = new CommInstance(messageName);
                     commInstances.put(messageName, commInstance);
@@ -189,7 +188,7 @@ public class SNGImporter {
                 }
                 break;
               }
-            case FIFO_IS_MEMORY_TASK: {
+            case CHANS_ARE_MEMORY_TASKS: {
                 if (commInstance == null) {
                     if (!genMulticast)
                         commInstance = new CommInstance(messageName, name);
@@ -232,8 +231,8 @@ public class SNGImporter {
             }
             }
         }
-        switch (fifoTranslat) {
-        case FIFO_IS_MESSAGE:
+        switch (chanTranslat) {
+        case CHANS_ARE_DROPPED:
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
                 if (!SNGReader.childElements(eRegister, "target").iterator().hasNext())
                     continue;
@@ -274,7 +273,7 @@ public class SNGImporter {
                 }
             }
             break;
-        case FIFO_IS_MEMORY_TASK:
+        case CHANS_ARE_MEMORY_TASKS:
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
                 String name  = eRegister.getAttribute("name");
 
@@ -377,7 +376,7 @@ public class SNGImporter {
     }
 
     protected final UniquePool      uniquePool;
-    protected final FIFOTranslation fifoTranslat;
+    protected final ChanTranslation chanTranslat;
     protected final boolean         genMulticast;
 
     protected final Application<Task, Dependency> application;

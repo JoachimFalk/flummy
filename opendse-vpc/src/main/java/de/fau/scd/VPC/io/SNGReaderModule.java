@@ -24,7 +24,7 @@ import de.fau.scd.VPC.config.annotations.Text;
 import de.fau.scd.VPC.config.properties.Arguments;
 import de.fau.scd.VPC.config.properties.Environment;
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
-import de.fau.scd.VPC.io.SNGImporter.FIFOTranslation;
+import de.fau.scd.VPC.io.SNGImporter.ChanTranslation;
 import de.fau.scd.VPC.io.SpecificationWrapperSNG.DFGSource;
 import de.fau.scd.VPC.io.SpecificationWrapperSNG;
 
@@ -143,23 +143,23 @@ public class SNGReaderModule extends IOModule {
         this.vpcConfigTemplate = vpcConfigTemplate;
     }
 
-    @Info("Select how FIFOs are translated into the DSE model.")
+    @Info("Select how channels are translated into the DSE model.")
     @Order(20)
-    @Constant(value = "fifoTranslation", namespace = SpecificationWrapperSNG.class)
-    protected FIFOTranslation fifoTranslation = FIFOTranslation.FIFO_IS_MEMORY_TASK;
+    @Constant(value = "chanTranslation", namespace = SpecificationWrapperSNG.class)
+    protected ChanTranslation chanTranslation = ChanTranslation.CHANS_ARE_MEMORY_TASKS;
 
-    public FIFOTranslation getFifoTranslation() {
-        return fifoTranslation;
+    public ChanTranslation getChanTranslation() {
+        return chanTranslation;
     }
 
-    public void setFifoTranslation(FIFOTranslation fifoTranslation) {
-        this.fifoTranslation = fifoTranslation;
+    public void setChanTranslation(ChanTranslation chanTranslation) {
+        this.chanTranslation = chanTranslation;
     }
 
     @Info("If true, multicast communication is generated for FIFOs into which identical data is written.")
     @Order(21)
     @Constant(namespace = SpecificationWrapperSNG.class, value = "multicastMessages")
-    @Required(property = "fifoTranslation", elements = { "FIFO_IS_MESSAGE" })
+    @Required(property = "chanTranslation", elements = { "CHANS_ARE_DROPPED" })
     protected boolean multicastMessages = true;
 
     public boolean getMulticastMessages() {
@@ -173,7 +173,7 @@ public class SNGReaderModule extends IOModule {
     @Info("If true, only one memory task is generated for FIFOs into which identical data is written.")
     @Order(21)
     @Constant(namespace = SpecificationWrapperSNG.class, value = "shareFIFOBuffers")
-    @Required(property = "fifoTranslation", elements = { "FIFO_IS_MEMORY_TASK" })
+    @Required(property = "chanTranslation", elements = { "CHANS_ARE_MEMORY_TASKS" })
     protected boolean shareFIFOBuffers = true;
 
     public boolean getShareFIFOBuffers() {
