@@ -85,7 +85,7 @@ public class ApplicationPropertyService {
 
     /// Return the size of a token in bytes
     public static Integer getTokenSize(Task task) {
-        assert getTaskType(task) == TaskType.MEM;
+        assert getTaskType(task) == TaskType.MEM || getTaskType(task) == TaskType.MSG;
         return task.<Integer>getAttribute("smoc-token-size");
     }
     /// Set the size of a token in bytes

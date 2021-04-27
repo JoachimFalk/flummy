@@ -33,7 +33,7 @@ import com.google.inject.Inject;
 
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import de.fau.scd.VPC.io.Common.FormatErrorException;
-import de.fau.scd.VPC.io.SNGImporter.FIFOTranslation;
+import de.fau.scd.VPC.io.SNGImporter.ChanTranslation;
 
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
@@ -76,8 +76,8 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
       , SimulatorEnvironment simulatorEnvironment
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate")
         String               vpcConfigTemplate
-      , @Constant(namespace = SpecificationWrapperSNG.class, value = "fifoTranslation")
-        FIFOTranslation      fifoTranslation
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "chanTranslation")
+        ChanTranslation      chanTranslation
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "multicastMessages")
         boolean              multicastMessages
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "shareFIFOBuffers")
@@ -129,17 +129,17 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         }
 
         Boolean generateMulticast = null;
-        switch (fifoTranslation) {
-        case FIFO_IS_MESSAGE:
+        switch (chanTranslation) {
+        case CHANS_ARE_DROPPED:
             generateMulticast = multicastMessages;
             break;
-        case FIFO_IS_MEMORY_TASK:
+        case CHANS_ARE_MEMORY_TASKS:
             generateMulticast = shareFIFOBuffers;
             break;
         }
         assert generateMulticast != null : "Oops, internal error!";
 
-        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool, fifoTranslation, generateMulticast);
+        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool, chanTranslation, generateMulticast);
         Application<Task, Dependency> application = sngImporter.getApplication();
 
         VPCConfigReader vpcConfigReader = new VPCConfigReader(vpcConfigTemplate);
