@@ -78,7 +78,7 @@ import javax.xml.transform.dom.DOMSource;
 
 
 public class VPCEvaluator implements ImplementationEvaluator {
-    
+
     public interface VPCObjectives {
         public List<ObjectiveInfo> getObjectives();
     }
@@ -146,12 +146,12 @@ public class VPCEvaluator implements ImplementationEvaluator {
                     vpcDocument.createElement("topology");
                 eTopologyIgnore.setAttribute("default", "ignore");
                 if (eTopology != null) {
-                    eVPCConfig.replaceChild(eTopologyIgnore, eTopology);                    
+                    eVPCConfig.replaceChild(eTopologyIgnore, eTopology);
                 } else {
                     eVPCConfig.appendChild(eTopologyIgnore);
                 }
-            } else {                
-                processTopology(implementation, eTopology);                
+            } else {
+                processTopology(implementation, eTopology);
             }
         } catch (FormatErrorException ex) {
             ex.printStackTrace();
@@ -625,25 +625,85 @@ public class VPCEvaluator implements ImplementationEvaluator {
 //      }
 //      return mappings;
     }
-    
+
+    static protected class Routing {
+        public final Task message;
+        public final Architecture<Resource, Link> routing;
+
+        public Routing(Task message, Architecture<Resource, Link> routing) {
+            this.message = message;
+            this.routing = routing;
+        }
+    }
+
     protected void processTopology(
         Specification       implementation
       , org.w3c.dom.Element eTopology
       )
     {
-        Application<Task, Dependency> application = implementation.getApplication();
-        Mappings<Task, Resource> mappings = implementation.getMappings();
+        Map<String, Routing> routes = new HashMap<>();
         Routings<Task, Resource, Link> routings = implementation.getRoutings();
         for (Task message : routings.getTasks()) {
             assert message instanceof ICommunication;
-            Architecture<Resource, Link> routing = routings.get(message);
-            Collection<Task> predecessor = application.getPredecessors(message);
-            assert predecessor.size() == 1;
-            Set<Mapping<Task, Resource> > srcMapping = mappings.get(predecessor.iterator().next());
-            assert srcMapping.size() == 1;
-            Resource srcHop =  srcMapping.iterator().next().getTarget();
-            assert false;
+            routes.put(message.getId(), new Routing(message, routings.get(message)));
         }
+        Iterator<org.w3c.dom.Element> eRouteIter =
+            VPCConfigReader.childElements(eTopology, "route").iterator();
+        while (eRouteIter.hasNext()) {
+            org.w3c.dom.Element eRoute = eRouteIter.next();
+            String name = eRoute.getAttribute("name");
+            Routing routing = routes.get(name);
+            if (routing == null) {
+                // Message is not routed; Remove route from VPC configuration file.
+                eRouteIter.remove();
+                continue;
+            }
+            {
+                org.w3c.dom.Node child;
+                while ((child = eRoute.getFirstChild()) != null)
+                    eRoute.removeChild(child);
+            }
+            processRoute(implementation, routing, eRoute);
+            routes.remove(name);
+        }
+
+        org.w3c.dom.Document vpcDocument = eTopology.getOwnerDocument();
+
+        for (Routing routing : routes.values()) {
+            org.w3c.dom.Element eRoute = vpcDocument.createElement("route");
+            eRoute.setAttribute("name", routing.message.getId());
+            eTopology.appendChild(eRoute);
+            processRoute(implementation, routing, eRoute);
+        }
+    }
+
+    protected void processRoute(
+            Specification       implementation
+          , Routing             routing
+          , org.w3c.dom.Element eRoute
+          )
+    {
+        Application<Task, Dependency> application = implementation.getApplication();
+        Mappings<Task, Resource> mappings = implementation.getMappings();
+
+        eRoute.setAttribute("type", "StaticRoute");
+
+  /*  <route name="sqrroot.a1.o1" type="StaticRoute" tracing="false">
+        <hop component="CPU">
+          <hop component="Bus">
+            <hop component="Mem">
+              <desthop/>
+            </hop>
+          </hop>
+        </hop>
+      </route>
+   */
+        Collection<Task> predecessor = application.getPredecessors(routing.message);
+        assert predecessor.size() == 1;
+        Set<Mapping<Task, Resource> > srcMapping = mappings.get(predecessor.iterator().next());
+        assert srcMapping.size() == 1;
+        Resource srcHop =  srcMapping.iterator().next().getTarget();
+
     }
 
 //  private Element routingsToJdom( Routings<Task,Resource,Link> oneToOneRoutings, Specification implementation, Element resources) {
