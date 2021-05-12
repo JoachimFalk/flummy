@@ -94,6 +94,7 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
   }
 
   void StaticImpl::finalize() {
+    assert(firstHopImpl != nullptr && "Oops, no route specified!");
     recurseHop(firstHopImpl);
   }
 
