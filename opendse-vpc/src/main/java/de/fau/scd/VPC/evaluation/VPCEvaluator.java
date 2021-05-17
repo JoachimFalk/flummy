@@ -37,8 +37,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,6 +55,8 @@ import de.fau.scd.VPC.config.properties.ObjectiveInfo;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import de.fau.scd.VPC.io.VPCConfigReader;
 import de.fau.scd.VPC.io.Common.FormatErrorException;
+import de.fau.scd.VPC.properties.ApplicationPropertyService;
+
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
 import net.sf.opendse.model.Dependency;
@@ -63,8 +67,10 @@ import net.sf.opendse.model.Mappings;
 import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
 import net.sf.opendse.model.Task;
-import net.sf.opendse.optimization.ImplementationEvaluator;
 import net.sf.opendse.model.Routings;
+
+import net.sf.opendse.optimization.ImplementationEvaluator;
+
 
 //import javax.xml.parsers.DocumentBuilder;
 //import javax.xml.parsers.DocumentBuilderFactory;
@@ -677,6 +683,16 @@ public class VPCEvaluator implements ImplementationEvaluator {
         }
     }
 
+    static private class HopInfo {
+        HopInfo(Resource res, org.w3c.dom.Element eParent) {
+            this.res     = res;
+            this.eParent = eParent;
+        }
+
+        final Resource            res;
+        final org.w3c.dom.Element eParent;
+    }
+
     protected void processRoute(
             Specification       implementation
           , Routing             routing
@@ -688,172 +704,102 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
         eRoute.setAttribute("type", "StaticRoute");
 
+        org.w3c.dom.Document vpcDocument = eRoute.getOwnerDocument();
+
+        boolean reverse = false;
+
+        Collection<Task> msgPreds = application.getPredecessors(routing.message);
+        Iterator<Task>   msgPredIter = msgPreds.iterator();
+        Task             msgPred = msgPredIter.next();
+        assert !msgPredIter.hasNext();
+
+        Collection<Task> msgSuccs = application.getSuccessors(routing.message);
+
+        Map<Resource, Collection<Task> > dstResources = new HashMap<>();
+
+        switch (ApplicationPropertyService.getTaskType(msgPred)) {
+            case MEM: { // Routing from memory to actor input port.
+                // VPC needs routings from ports (of actors) to memories while the exploration
+                // uses routings in data flow direction, e.g., there exists routings from memories
+                // to actor input ports. In this case, we have to reverse the direction of
+                // the routing for VPC.
+                Iterator<Mapping<Task, Resource> > dstMappings = mappings.get(msgPred).iterator();
+                Mapping<Task, Resource> dstMapping = dstMappings.next();
+                assert !dstMappings.hasNext();
+                dstResources.put(dstMapping.getTarget(), msgPreds);
+                Iterator<Task>   msgSuccIter = msgSuccs.iterator();
+                Task             msgSucc = msgSuccIter.next();
+                assert !msgSuccIter.hasNext();
+                // Reverse direction for VPC
+                msgPred = msgSucc;
+                reverse = true;
+                break;
+            }
+            case EXE: // Routing from actor output port to memories.
+                for (Task msgSucc : msgSuccs) {
+                    Iterator<Mapping<Task, Resource> > dstMappings = mappings.get(msgSucc).iterator();
+                    Mapping<Task, Resource> dstMapping = dstMappings.next();
+                    assert !dstMappings.hasNext();
+                    Collection<Task> msgSuccessors = dstResources.get(dstMapping.getTarget());
+                    if (msgSuccessors == null) {
+                        msgSuccessors = new ArrayList<Task>();
+                        dstResources.put(dstMapping.getTarget(), msgSuccessors);
+                    }
+                    msgSuccessors.add(dstMapping.getSource());
+                }
+                break;
+            default:
+                assert false : "Unsupported task type " + ApplicationPropertyService.getTaskType(msgPred) + "!";
+        }
+
+        Set<Mapping<Task, Resource> > srcMapping = mappings.get(msgPred);
+        assert srcMapping.size() == 1;
+
+        Queue<HopInfo> x = new LinkedList<>();
+        Set<Resource> v = new HashSet<>();
+        x.add(new HopInfo(srcMapping.iterator().next().getTarget(), eRoute));
+
+        do {
+            HopInfo  hopInfo = x.remove();
+            Resource srcRes  = hopInfo.res;
+
+            org.w3c.dom.Element eParent = hopInfo.eParent;
+
+            org.w3c.dom.Element eHop = vpcDocument.createElement("hop");
+            eHop.setAttribute("component", srcRes.getId());
+            eParent.appendChild(eHop);
+
+            Collection<Task> msgSuccessors = dstResources.get(srcRes);
+            if (msgSuccessors != null)
+                for (Task msgSucc : msgSuccessors) {
+                    org.w3c.dom.Element eDestHop = vpcDocument.createElement("desthop");
+                    eDestHop.setAttribute("channel", msgSucc.getId());
+                    eHop.appendChild(eDestHop);
+                }
+
+            Collection<Link> links = reverse
+                ? routing.routing.getInEdges(srcRes)
+                : routing.routing.getOutEdges(srcRes);
+            for (Link l : links) {
+                Resource dstRes = routing.routing.getOpposite(srcRes, l);
+                assert !v.contains(dstRes);
+                v.add(dstRes);
+                x.add(new HopInfo(dstRes, eHop));
+            }
+        } while (!x.isEmpty());
+
   /*  <route name="sqrroot.a1.o1" type="StaticRoute" tracing="false">
         <hop component="CPU">
           <hop component="Bus">
             <hop component="Mem">
-              <desthop/>
+              <desthop channel="cf:..."/>
             </hop>
           </hop>
         </hop>
       </route>
    */
-        Collection<Task> predecessor = application.getPredecessors(routing.message);
-        assert predecessor.size() == 1;
-        Set<Mapping<Task, Resource> > srcMapping = mappings.get(predecessor.iterator().next());
-        assert srcMapping.size() == 1;
-        Resource srcHop =  srcMapping.iterator().next().getTarget();
 
     }
 
-//  private Element routingsToJdom( Routings<Task,Resource,Link> oneToOneRoutings, Specification implementation, Element resources) {
-//      Element topology = new Element(TOPOLOGY);
-//      topology.setAttribute("tracing", "true");
-//
-//      Iterator<Task> iter = oneToOneRoutings.getTasks().iterator();
-//
-//      // loop over messages
-//      while (iter.hasNext()) {
-//          Task message = iter.next();
-//          Iterator<Architecture<Resource,Link>> siter = oneToOneRoutings.getRoutings().iterator();
-//
-//          // loop over every routing for a message (>1 if multicast)
-//          // Collection<IResource> hopsUsed = new LinkedList<IResource>();
-//          while (siter.hasNext()) {
-//              Architecture<Resource,Link> routing = siter.next();
-//    //        System.out.println("routing: " + routing.toString());
-//              routingToJdom(implementation, resources, topology, message, routing);
-//          }
-//      }
-//      return topology;
-//  }
-//
-//  private void routingToJdom(Specification implementation, Element resources,Element topology, Task message, Architecture<Resource,Link> routing) {
-//
-//      Collection<Task> preds = implementation.getApplication().getPredecessors(message);
-//      assert preds.size() == 1: "A message must only have one predecessor";
-//      Task predecessor = preds.iterator().next();
-//
-//    //assert implementation.getRoutings().get(task) .getBindings().get(predecessor).size() == 1 : "Did not expect task to be bound to more than one resource";
-//
-//      // find the right succ task
-//      for (Task successor : implementation.getApplication().getSuccessors(message)) {
-//    //    System.out.println("source " + task.toString());
-//          //assert implementation.getBindings().get(successor).size() == 1 : "Did not expect task to be bound to more than one resource";
-//    //    IResource target = implementation.getBindings().get(task).iterator().next().getTarget();
-//    //    System.out.println("target " + target.toString());
-//
-//          String msgName = message.<String> getAttribute("NAME");
-//          // Depending on the way the model is read into DSE, a message can either be a FIFO
-//          // or an edge connecting an actor to FIFO. Please refer to SysteMoCXMLInputOutput for
-//          // details. If the name of the message ends with "_push" this should be the connection
-//          // from the actor to the FIFO, otherwise the message ends with "_pull" representing
-//          // the edge from the FIFO to the actor.
-//
-//          if (msgName.endsWith("_push")) {
-//              Element pushRoute = new Element("route");
-//              topology.addContent(pushRoute);
-//              pushRoute.setAttribute("source", predecessor.<String> getAttribute("NAME"));
-//              pushRoute.setAttribute("destination", successor.<String> getAttribute("NAME"));
-//          } else if (msgName.endsWith("_pull")) {
-//              Element pullRoute = new Element("route");
-//              topology.addContent(pullRoute);
-//              pullRoute.setAttribute("source", predecessor.<String> getAttribute("NAME"));
-//              pullRoute.setAttribute("destination", successor.<String> getAttribute("NAME"));
-//          } else {
-//              // The message is a FIFO, create two route elements for VPC.
-//              Element pushRoute = new Element("route");
-//              topology.addContent(pushRoute);
-//              pushRoute.setAttribute("source", predecessor.<String> getAttribute("NAME"));
-//              pushRoute.setAttribute("destination", msgName);
-//
-//              Element pullRoute = new Element("route");
-//              topology.addContent(pullRoute);
-//              pullRoute.setAttribute("source", msgName);
-//              pullRoute.setAttribute("destination", successor.<String> getAttribute("NAME"));
-//          }
-//      }
-//  }
-
-    /**
-     * Extracts one to one routings from the implementation, i.e. hops on a one to one route have 0 or 1
-     * predecessor/successor. E.g. Unicast routes stay as is and multicast messages will be split into their different
-     * unicast equivalents
-     *
-     * @param implementation
-     * @return Map with routings per message
-     */
-    //private Map<Communication, List<Routing<IResource>>> extractRouting(Specification implementation) {
-  /*
-    private Map<ICommunication, List<Routing<IResource>>> extractRouting(
-            IImplementation<ITask, IResource, IMapping> implementation) {
-
-        Collection<ITask> receivingFunctions = getReceivingFunctions(implementation);
-          Map<ICommunication, List<Routing<IResource>>> oneToOneRoutings = new Hashtable<ICommunication, List<Routing<IResource>>>();
-          // traverse routing from each receiving function
-          for (ITask task : receivingFunctions) {
-            // find messages task depends on
-            Collection<ITask> messages = implementation.getApplication().getPredecessors(task);
-
-            for (ITask message : messages) {
-              // if message is already in 1:1 routings get List
-              List<Routing<IResource>> routingList;
-
-              if (oneToOneRoutings.containsKey(message)) {
-                routingList = oneToOneRoutings.get(message);
-              } else {
-                routingList = new LinkedList<Routing<IResource>>();
-                oneToOneRoutings.put((ICommunication) message, routingList);
-              }
-              // get last hop and build routing
-              // TODO: tasks are only mapped to one resource?!
-              Routing<IResource> oneToOneRouting = new Routing<IResource>();
-              routingList.add(oneToOneRouting);
-            }
-          }
-          return oneToOneRoutings;
-        }
-
-    */
-    private Routings<Task, Resource, Link>  extractRouting(Specification implementation) {
-        Collection<Task> receivingFunctions = getReceivingFunctions(implementation);
-        //Routings<Task,Resource,Link> oneToOneRoutings= new Routings<Task,Resource,Link>();
-        Routings<Task, Resource, Link> oneToOneRoutings = new Routings<Task, Resource, Link>();
-
-        // traverse routing from each receiving function
-        for (Task task : receivingFunctions) {
-            // find messages task depends on
-            Collection<Task> messages = implementation.getApplication().getPredecessors(task);
-            for (Task message : messages) {
-                // if message is already in 1:1 routings get List
-                Architecture<Resource, Link> routing;
-
-                if(oneToOneRoutings.getTasks().contains(message)) {
-                    routing = oneToOneRoutings.get(message);
-                }
-                else {
-                    routing = new Architecture<Resource, Link>();
-                    oneToOneRoutings.set(task, routing);
-                }
-            }
-        }
-        return oneToOneRoutings;
-    }
-
-    private Collection<Task> getReceivingFunctions(Specification implementation) {
-        Application<Task,Dependency> application = implementation.getApplication();
-
-        Collection<Task> receivingFunctions = new ArrayList<Task>();
-
-        for (Task task : application) {
-            //if (task instanceof IFunction) {
-            if (!(task instanceof ICommunication)) {
-                if (application.getInEdges(task).size() > 0) {
-                    receivingFunctions.add(task);
-                }
-            }
-        }
-        return receivingFunctions;
-    }
 }
 
