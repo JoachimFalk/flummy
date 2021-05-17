@@ -23,7 +23,7 @@ package de.fau.scd.VPC.properties;
 
 import net.sf.opendse.model.ICommunication;
 
-//import java.util.Map;
+import java.util.*;
 
 //import net.sf.opendse.model.Mapping;
 //import net.sf.opendse.model.Resource;
@@ -103,6 +103,41 @@ public class ApplicationPropertyService {
     public static void setMessagePayload(Task task, int bytes) {
         assert task instanceof ICommunication;
         task.setAttribute("smoc-msg-payload", bytes);
+    }
+
+    /// Return the size of a message in bytes
+    public static String getMessageReadChannel(Task task) {
+        assert task instanceof ICommunication;
+        return task.<String>getAttribute("smoc-msg-read-channel");
+    }
+    /// Set the size of a message in bytes
+    public static void setMessageReadChannel(Task task, String channelId) {
+        assert task instanceof ICommunication;
+        task.setAttribute("smoc-msg-read-channel", channelId);
+    }
+
+    /// Return channel ids (names) represented by the given MEM task
+    public static Collection<String> getRepresentedChannels(Task task) {
+        assert getTaskType(task) == TaskType.MEM;
+        Collection<String> representedChannels = task.<Collection<String>>getAttribute("smoc-represented-channels");
+        return representedChannels == null
+            ? Arrays.asList(task.getId())
+            : representedChannels;
+    }
+    /// Add a channel to be represented by the given MEM task
+    public static void addRepresentedChannel(Task task, String channelId) {
+        assert getTaskType(task) == TaskType.MEM;
+        Collection<String> channelIds = task.<Collection<String>>getAttribute("smoc-represented-channels");
+        if (channelIds == null) {
+            channelIds = new ArrayList<>();
+            task.setAttribute("smoc-represented-channels", channelIds);
+        }
+        channelIds.add(channelId);
+    }
+    /// Set channels represented by the given MEM task
+    public static void setRepresentedChannels(Task task, Collection<String> channelIds) {
+        assert getTaskType(task) == TaskType.MEM;
+        task.setAttribute("smoc-represented-channels", channelIds);
     }
 
 }
