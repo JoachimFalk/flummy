@@ -706,7 +706,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
 
         org.w3c.dom.Document vpcDocument = eRoute.getOwnerDocument();
 
-        boolean reverse = false;
+        boolean isRead = false;
 
         Collection<Task> msgPreds = application.getPredecessors(routing.message);
         Iterator<Task>   msgPredIter = msgPreds.iterator();
@@ -732,7 +732,7 @@ public class VPCEvaluator implements ImplementationEvaluator {
                 assert !msgSuccIter.hasNext();
                 // Reverse direction for VPC
                 msgPred = msgSucc;
-                reverse = true;
+                isRead = true;
                 break;
             }
             case EXE: // Routing from actor output port to memories.
@@ -772,12 +772,23 @@ public class VPCEvaluator implements ImplementationEvaluator {
             Collection<Task> msgSuccessors = dstResources.get(srcRes);
             if (msgSuccessors != null)
                 for (Task msgSucc : msgSuccessors) {
-                    org.w3c.dom.Element eDestHop = vpcDocument.createElement("desthop");
-                    eDestHop.setAttribute("channel", msgSucc.getId());
-                    eHop.appendChild(eDestHop);
+                    if (isRead) {
+                        org.w3c.dom.Element eDestHop = vpcDocument.createElement("desthop");
+                        eDestHop.setAttribute("channel",
+                            ApplicationPropertyService.getMessageReadChannel(routing.message));
+                        eHop.appendChild(eDestHop);
+                    } else {
+                        Collection<String> channelIds =
+                            ApplicationPropertyService.getRepresentedChannels(msgSucc);
+                        for (String channelId : channelIds) {
+                            org.w3c.dom.Element eDestHop = vpcDocument.createElement("desthop");
+                            eDestHop.setAttribute("channel", channelId);
+                            eHop.appendChild(eDestHop);
+                        }
+                    }
                 }
 
-            Collection<Link> links = reverse
+            Collection<Link> links = isRead
                 ? routing.routing.getInEdges(srcRes)
                 : routing.routing.getOutEdges(srcRes);
             for (Link l : links) {

@@ -213,10 +213,13 @@ public class SNGImporter {
                         application.addEdge(dependency, commInstance.msg, commInstance.memTask, EdgeType.DIRECTED);
                     }
                 }
+                if (genMulticast)
+                    ApplicationPropertyService.addRepresentedChannel(commInstance.memTask, name);
                 {
                     Communication readMsg = new Communication(targetActor+"."+targetPort);
                     int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
                     ApplicationPropertyService.setMessagePayload(readMsg, tokenSize);
+                    ApplicationPropertyService.setMessageReadChannel(readMsg, name);
                     application.addVertex(readMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
