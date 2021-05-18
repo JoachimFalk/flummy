@@ -37,7 +37,7 @@ public class ApplicationPropertyService {
     public static Double getDeadline(Task task) {
         return task.<Double>getAttribute("smoc-actor-deadline");
     }
-        public static void setDeadline(Task task, double deadline) {
+    public static void setDeadline(Task task, double deadline) {
         task.setAttribute("smoc-actor-deadline", deadline);
     }
 
