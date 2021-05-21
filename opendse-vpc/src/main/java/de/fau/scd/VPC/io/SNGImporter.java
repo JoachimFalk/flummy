@@ -124,7 +124,7 @@ public class SNGImporter {
      * @throws SNGFormatErrorException
      */
     protected Application<Task, Dependency> toApplication(org.w3c.dom.Element eNetworkGraph) throws FormatErrorException {
-        Application<Task, Dependency> application = new Application<Task, Dependency>();
+        Application<Task, Dependency> app = new Application<Task, Dependency>();
 
         final Map<String, ActorType>     actorTypes     = new HashMap<String, ActorType>();
         final Map<String, ActorInstance> actorInstances = new HashMap<String, ActorInstance>();
@@ -136,6 +136,7 @@ public class SNGImporter {
                 throw new FormatErrorException("Duplicate actor type \""+actorType.name+"\"!");
             actorTypes.put(actorType.name, actorType);
         }
+        // Translate actorInstances
         for (org.w3c.dom.Element eActorInstance : SNGReader.childElements(eNetworkGraph, "actorInstance")) {
             final ActorInstance actorInstance = toActorInstance(eActorInstance, actorTypes);
             if (actorInstances.containsKey(actorInstance.name))
@@ -144,8 +145,22 @@ public class SNGImporter {
             if (chanTranslat == ChanTranslation.CHANS_ARE_MEMORY_TASKS)
                 ApplicationPropertyService.setTaskType(actorInstance.exeTask,
                         ApplicationPropertyService.TaskType.EXE);
-            application.addVertex(actorInstance.exeTask);
+            app.addVertex(actorInstance.exeTask);
         }
+        // Translate FIFOs
+        translateFIFOs(eNetworkGraph, app, actorInstances, commInstances);
+        // Translate registers
+        translateRegisters(eNetworkGraph, app, actorInstances, commInstances);
+        return app;
+    }
+
+    protected void translateFIFOs(
+        org.w3c.dom.Element           eNetworkGraph
+      , Application<Task, Dependency> app
+      , Map<String, ActorInstance>    actorInstances
+      , Map<String, CommInstance>     commInstances
+      ) throws FormatErrorException
+    {
         for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
             String name  = eFifo.getAttribute("name");
             int size     = Integer.valueOf(eFifo.getAttribute("size"));
@@ -176,15 +191,15 @@ public class SNGImporter {
                     AttributeHelper.addAttributes(eFifo, commInstance.msg);
                     int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.msg);
                     ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
-                    application.addVertex(commInstance.msg);
+                    app.addVertex(commInstance.msg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
                     }
                 }
                 {
                     Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    application.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                    app.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                 }
                 break;
               }
@@ -195,7 +210,7 @@ public class SNGImporter {
                     else
                         commInstance = new CommInstance(messageName, "cf:"+messageName);
                     commInstances.put(messageName, commInstance);
-                    application.addVertex(commInstance.msg);
+                    app.addVertex(commInstance.msg);
                     ApplicationPropertyService.setTaskType(commInstance.memTask,
                             ApplicationPropertyService.TaskType.MEM);
                     ApplicationPropertyService.setTokenCapacity(commInstance.memTask, size);
@@ -203,14 +218,14 @@ public class SNGImporter {
                     AttributeHelper.addAttributes(eFifo, commInstance.memTask);
                     int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
                     ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
-                    application.addVertex(commInstance.memTask);
+                    app.addVertex(commInstance.memTask);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, commInstance.msg, commInstance.memTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, commInstance.msg, commInstance.memTask, EdgeType.DIRECTED);
                     }
                 }
                 if (genMulticast)
@@ -220,20 +235,29 @@ public class SNGImporter {
                     int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
                     ApplicationPropertyService.setMessagePayload(readMsg, tokenSize);
                     ApplicationPropertyService.setMessageReadChannel(readMsg, name);
-                    application.addVertex(readMsg);
+                    app.addVertex(readMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, commInstance.memTask, readMsg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, commInstance.memTask, readMsg, EdgeType.DIRECTED);
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
                 }
                 break;
             }
             }
         }
+    }
+
+    protected void translateRegisters(
+        org.w3c.dom.Element           eNetworkGraph
+      , Application<Task, Dependency> app
+      , Map<String, ActorInstance>    actorInstances
+      , Map<String, CommInstance>     commInstances
+      ) throws FormatErrorException
+    {
         switch (chanTranslat) {
         case CHANS_ARE_DROPPED:
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
@@ -257,10 +281,10 @@ public class SNGImporter {
                         AttributeHelper.addAttributes(eRegister, commInstance.msg);
                         int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.msg);
                         ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
-                        application.addVertex(commInstance.msg);
+                        app.addVertex(commInstance.msg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                            application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
                         }
                     }
                     for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
@@ -271,7 +295,7 @@ public class SNGImporter {
                             throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
 
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
                 }
             }
@@ -302,15 +326,15 @@ public class SNGImporter {
                         commInstance = new CommInstance(messageName);
                         commInstances.put(messageName, commInstance);
                         ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
-                        application.addVertex(commInstance.msg);
+                        app.addVertex(commInstance.msg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                            application.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
                         }
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, commInstance.msg, memTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, commInstance.msg, memTask, EdgeType.DIRECTED);
                     }
                 }
                 for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
@@ -322,20 +346,19 @@ public class SNGImporter {
 
                     Communication readMsg = new Communication(targetActor+"."+targetPort);
                     ApplicationPropertyService.setMessagePayload(readMsg, tokenSize);
-                    application.addVertex(readMsg);
+                    app.addVertex(readMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, memTask, readMsg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, memTask, readMsg, EdgeType.DIRECTED);
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        application.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
                 }
             }
             break;
         }
-        return application;
     }
 
     /**
