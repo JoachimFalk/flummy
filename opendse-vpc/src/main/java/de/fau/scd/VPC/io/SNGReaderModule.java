@@ -25,6 +25,7 @@ import de.fau.scd.VPC.config.properties.Arguments;
 import de.fau.scd.VPC.config.properties.Environment;
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
 import de.fau.scd.VPC.io.SNGImporter.ChanTranslation;
+import de.fau.scd.VPC.io.SNGImporter.FIFOMerging;
 import de.fau.scd.VPC.io.SpecificationWrapperSNG.DFGSource;
 import de.fau.scd.VPC.io.SpecificationWrapperSNG;
 
@@ -170,18 +171,22 @@ public class SNGReaderModule extends IOModule {
         this.multicastMessages = multicastMessages;
     }
 
-    @Info("If true, only one memory task is generated for FIFOs into which identical data is written.")
+    @Info(
+        "FIFOS_NO_MERGING -- one memory task per FIFO<br>"+
+        "FIFOS_SAME_CONTENT_MERGING -- one memory task is generated for FIFOs into which identical data is written<br>"+
+        "FIFOS_SAME_PRODUCER_MERGING -- one memory task is generated for all FIFOs written into by an actor<br>"
+        )
     @Order(21)
-    @Constant(namespace = SpecificationWrapperSNG.class, value = "shareFIFOBuffers")
+    @Constant(namespace = SpecificationWrapperSNG.class, value = "fifoMerging")
     @Required(property = "chanTranslation", elements = { "CHANS_ARE_MEMORY_TASKS" })
-    protected boolean shareFIFOBuffers = true;
+    protected FIFOMerging fifoMerging = FIFOMerging.FIFOS_SAME_CONTENT_MERGING;
 
-    public boolean getShareFIFOBuffers() {
-        return shareFIFOBuffers;
+    public FIFOMerging getFifoMerging() {
+        return fifoMerging;
     }
 
-    public void setShareFIFOBuffers(boolean shareFIFOBuffers) {
-        this.shareFIFOBuffers = shareFIFOBuffers;
+    public void setFifoMerging(FIFOMerging fifoMerging) {
+        this.fifoMerging = fifoMerging;
     }
 
     @Override

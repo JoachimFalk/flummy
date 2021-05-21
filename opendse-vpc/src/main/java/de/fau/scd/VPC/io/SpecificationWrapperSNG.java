@@ -34,6 +34,7 @@ import com.google.inject.Inject;
 import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import de.fau.scd.VPC.io.Common.FormatErrorException;
 import de.fau.scd.VPC.io.SNGImporter.ChanTranslation;
+import de.fau.scd.VPC.io.SNGImporter.FIFOMerging;
 
 import net.sf.opendse.model.Application;
 import net.sf.opendse.model.Architecture;
@@ -78,10 +79,10 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         String               vpcConfigTemplate
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "chanTranslation")
         ChanTranslation      chanTranslation
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "fifoMerging")
+        FIFOMerging          fifoMerging
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "multicastMessages")
         boolean              multicastMessages
-      , @Constant(namespace = SpecificationWrapperSNG.class, value = "shareFIFOBuffers")
-        boolean              shareFIFOBuffers
         ) throws IOException, FileNotFoundException, FormatErrorException
     {
         UniquePool uniquePool = new UniquePool();
@@ -128,18 +129,7 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
             break;
         }
 
-        Boolean generateMulticast = null;
-        switch (chanTranslation) {
-        case CHANS_ARE_DROPPED:
-            generateMulticast = multicastMessages;
-            break;
-        case CHANS_ARE_MEMORY_TASKS:
-            generateMulticast = shareFIFOBuffers;
-            break;
-        }
-        assert generateMulticast != null : "Oops, internal error!";
-
-        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool, chanTranslation, generateMulticast);
+        SNGImporter sngImporter = new SNGImporter(sngReader, uniquePool, chanTranslation, fifoMerging, multicastMessages);
         Application<Task, Dependency> application = sngImporter.getApplication();
 
         VPCConfigReader vpcConfigReader = new VPCConfigReader(vpcConfigTemplate);
