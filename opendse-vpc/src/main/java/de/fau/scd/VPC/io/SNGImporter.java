@@ -107,20 +107,37 @@ public class SNGImporter {
         }
     }
 
-    static private class CommInstance {
-        public final String        name;
-        public final Communication msg;
+    private class CommInstance {
+        public final Communication writeMsg;
         public final Task          memTask;
 
+        private final Map<String, Communication> readMsgs = new HashMap<>();
+
         CommInstance(String msgName) {
-            this.name    = msgName;
-            this.msg     = new Communication(msgName);
-            this.memTask = null;
+            this.writeMsg = new Communication(msgName);
+            this.memTask  = null;
         }
         CommInstance(String msgName, String fifoName) {
-            this.name    = msgName;
-            this.msg     = new Communication(msgName);
-            this.memTask = new Task(fifoName);
+            this.writeMsg = new Communication(msgName);
+            this.memTask  = new Task(fifoName);
+        }
+
+        Communication getReadMsg(Application<Task, Dependency> app, ActorInstance target, String name) {
+            Communication readMsg = readMsgs.get(name);
+            if (readMsg == null) {
+                readMsg = new Communication(name);
+                readMsgs.put(name, readMsg);
+                app.addVertex(readMsg);
+                {
+                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                    app.addEdge(dependency, memTask, readMsg, EdgeType.DIRECTED);
+                }
+                {
+                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                    app.addEdge(dependency, readMsg, target.exeTask, EdgeType.DIRECTED);
+                }
+            }
+            return readMsg;
         }
     }
 
@@ -192,18 +209,18 @@ public class SNGImporter {
                 if (commInstance == null) {
                     commInstance = new CommInstance(messageName);
                     commInstances.put(messageName, commInstance);
-                    AttributeHelper.addAttributes(eFifo, commInstance.msg);
-                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.msg);
-                    ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
-                    app.addVertex(commInstance.msg);
+                    AttributeHelper.addAttributes(eFifo, commInstance.writeMsg);
+                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.writeMsg);
+                    ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
+                    app.addVertex(commInstance.writeMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
                     }
                 }
                 {
                     Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    app.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                    app.addEdge(dependency, commInstance.writeMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                 }
             }
             break;
@@ -235,50 +252,54 @@ public class SNGImporter {
                     messageName = sourceActor+"."+sourcePort;
                     break;
                 case FIFOS_SAME_PRODUCER_MERGING:
-                    messageName = sourceActor;
+                    messageName = sourceActor+".out";
                     break;
                 }
                 CommInstance commInstance = commInstances.get(messageName);
                 if (commInstance == null) {
-                    if (!genMulticast)
+                    switch (fifoMerging) {
+                    case FIFOS_NO_MERGING:
                         commInstance = new CommInstance(messageName, name);
-                    else
+                        break;
+                    default:
                         commInstance = new CommInstance(messageName, "cf:"+messageName);
+                        break;
+                    }
                     commInstances.put(messageName, commInstance);
-                    app.addVertex(commInstance.msg);
+                    app.addVertex(commInstance.writeMsg);
                     ApplicationPropertyService.setTaskType(commInstance.memTask,
                             ApplicationPropertyService.TaskType.MEM);
                     ApplicationPropertyService.setTokenCapacity(commInstance.memTask, size);
                     ApplicationPropertyService.setInitialTokens(commInstance.memTask, initial);
                     AttributeHelper.addAttributes(eFifo, commInstance.memTask);
                     int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
-                    ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
+                    ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
                     app.addVertex(commInstance.memTask);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, commInstance.msg, commInstance.memTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, commInstance.writeMsg, commInstance.memTask, EdgeType.DIRECTED);
                     }
                 }
-                if (genMulticast)
+                if (fifoMerging != FIFOMerging.FIFOS_NO_MERGING)
                     ApplicationPropertyService.addRepresentedChannel(commInstance.memTask, name);
                 {
-                    Communication readMsg = new Communication(targetActor+"."+targetPort);
+                    Communication readMsg = null;
+                    switch (fifoMerging) {
+                    case FIFOS_NO_MERGING:
+                    case FIFOS_SAME_CONTENT_MERGING:
+                        readMsg = commInstance.getReadMsg(app, targetActorInstance, targetActor+"."+targetPort);
+                        break;
+                    case FIFOS_SAME_PRODUCER_MERGING:
+                        readMsg = commInstance.getReadMsg(app, targetActorInstance, targetActor+"."+sourceActor);
+                        break;
+                    }
                     int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
                     ApplicationPropertyService.setMessagePayload(readMsg, tokenSize);
                     ApplicationPropertyService.setMessageReadChannel(readMsg, name);
-                    app.addVertex(readMsg);
-                    {
-                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, commInstance.memTask, readMsg, EdgeType.DIRECTED);
-                    }
-                    {
-                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
-                    }
                 }
             }
             break;
@@ -312,13 +333,13 @@ public class SNGImporter {
                     if (commInstance == null) {
                         commInstance = new CommInstance(messageName);
                         commInstances.put(messageName, commInstance);
-                        AttributeHelper.addAttributes(eRegister, commInstance.msg);
-                        int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.msg);
-                        ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
-                        app.addVertex(commInstance.msg);
+                        AttributeHelper.addAttributes(eRegister, commInstance.writeMsg);
+                        int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.writeMsg);
+                        ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
+                        app.addVertex(commInstance.writeMsg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
                         }
                     }
                     for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
@@ -329,7 +350,7 @@ public class SNGImporter {
                             throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
 
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, commInstance.writeMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
                 }
             }
@@ -353,22 +374,22 @@ public class SNGImporter {
                         throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
 
                     String messageName = sourceActor+"."+sourcePort;
-                    if (!genMulticast)
+                    if (fifoMerging != FIFOMerging.FIFOS_NO_MERGING)
                         messageName = uniquePool.createUniqeName(messageName, true);
                     CommInstance commInstance = commInstances.get(messageName);
                     if (commInstance == null) {
                         commInstance = new CommInstance(messageName);
                         commInstances.put(messageName, commInstance);
-                        ApplicationPropertyService.setMessagePayload(commInstance.msg, tokenSize);
-                        app.addVertex(commInstance.msg);
+                        ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
+                        app.addVertex(commInstance.writeMsg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.msg, EdgeType.DIRECTED);
+                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
                         }
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, commInstance.msg, memTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, commInstance.writeMsg, memTask, EdgeType.DIRECTED);
                     }
                 }
                 for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
