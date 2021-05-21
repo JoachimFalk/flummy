@@ -47,15 +47,23 @@ public class SNGImporter {
       , CHANS_ARE_MEMORY_TASKS
     };
 
+    public enum FIFOMerging {
+        FIFOS_NO_MERGING
+      , FIFOS_SAME_CONTENT_MERGING
+      , FIFOS_SAME_PRODUCER_MERGING
+    };
+
     SNGImporter(
         SNGReader          sngReader
       , UniquePool         uniquePool
-      , ChanTranslation chanTranslation
+      , ChanTranslation    chanTranslation
+      , FIFOMerging        fifoMerging
       , boolean            generateMulticast
       ) throws FormatErrorException
     {
         this.uniquePool   = uniquePool;
         this.chanTranslat = chanTranslation;
+        this.fifoMerging  = fifoMerging;
         this.genMulticast = generateMulticast;
         this.application  = toApplication(sngReader.getDocumentElement());
     }
@@ -161,30 +169,26 @@ public class SNGImporter {
       , Map<String, CommInstance>     commInstances
       ) throws FormatErrorException
     {
-        for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
-            String name  = eFifo.getAttribute("name");
-            int size     = Integer.valueOf(eFifo.getAttribute("size"));
-            int initial  = Integer.valueOf(eFifo.getAttribute("initial"));
+        switch (chanTranslat) {
+        case CHANS_ARE_DROPPED:
+            for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
+                final org.w3c.dom.Element eSource = SNGReader.childElement(eFifo, "source");
+                final String sourceActor = eSource.getAttribute("actor");
+                final String sourcePort  = eSource.getAttribute("port");
+                final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
+                final String targetActor = eTarget.getAttribute("actor");
+                final String targetPort  = eTarget.getAttribute("port");
 
-            final org.w3c.dom.Element eSource = SNGReader.childElement(eFifo, "source");
-            final String sourceActor = eSource.getAttribute("actor");
-            final String sourcePort  = eSource.getAttribute("port");
-            final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
-            final String targetActor = eTarget.getAttribute("actor");
-            final String targetPort  = eTarget.getAttribute("port");
-
-            final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
-            if (sourceActorInstance == null)
-                throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
-            final ActorInstance targetActorInstance = actorInstances.get(targetActor);
-            if (targetActorInstance == null)
-                throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
-            String messageName = sourceActor+"."+sourcePort;
-            if (!genMulticast)
-                messageName = uniquePool.createUniqeName(messageName, true);
-            CommInstance commInstance = commInstances.get(messageName);
-            switch (chanTranslat) {
-            case CHANS_ARE_DROPPED: {
+                final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
+                if (sourceActorInstance == null)
+                    throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
+                final ActorInstance targetActorInstance = actorInstances.get(targetActor);
+                if (targetActorInstance == null)
+                    throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
+                String messageName = sourceActor+"."+sourcePort;
+                if (!genMulticast)
+                    messageName = uniquePool.createUniqeName(messageName, true);
+                CommInstance commInstance = commInstances.get(messageName);
                 if (commInstance == null) {
                     commInstance = new CommInstance(messageName);
                     commInstances.put(messageName, commInstance);
@@ -201,9 +205,40 @@ public class SNGImporter {
                     Dependency dependency = new Dependency(uniquePool.createUniqeName());
                     app.addEdge(dependency, commInstance.msg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                 }
-                break;
-              }
-            case CHANS_ARE_MEMORY_TASKS: {
+            }
+            break;
+        case CHANS_ARE_MEMORY_TASKS:
+            for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
+                String name  = eFifo.getAttribute("name");
+                int size     = Integer.valueOf(eFifo.getAttribute("size"));
+                int initial  = Integer.valueOf(eFifo.getAttribute("initial"));
+
+                final org.w3c.dom.Element eSource = SNGReader.childElement(eFifo, "source");
+                final String sourceActor = eSource.getAttribute("actor");
+                final String sourcePort  = eSource.getAttribute("port");
+                final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
+                final String targetActor = eTarget.getAttribute("actor");
+                final String targetPort  = eTarget.getAttribute("port");
+
+                final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
+                if (sourceActorInstance == null)
+                    throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
+                final ActorInstance targetActorInstance = actorInstances.get(targetActor);
+                if (targetActorInstance == null)
+                    throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
+                String messageName = null;
+                switch (fifoMerging) {
+                case FIFOS_NO_MERGING:
+                    messageName = uniquePool.createUniqeName(messageName, true);
+                    break;
+                case FIFOS_SAME_CONTENT_MERGING:
+                    messageName = sourceActor+"."+sourcePort;
+                    break;
+                case FIFOS_SAME_PRODUCER_MERGING:
+                    messageName = sourceActor;
+                    break;
+                }
+                CommInstance commInstance = commInstances.get(messageName);
                 if (commInstance == null) {
                     if (!genMulticast)
                         commInstance = new CommInstance(messageName, name);
@@ -245,9 +280,8 @@ public class SNGImporter {
                         app.addEdge(dependency, readMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
                 }
-                break;
             }
-            }
+            break;
         }
     }
 
@@ -403,6 +437,7 @@ public class SNGImporter {
 
     protected final UniquePool      uniquePool;
     protected final ChanTranslation chanTranslat;
+    protected final FIFOMerging     fifoMerging;
     protected final boolean         genMulticast;
 
     protected final Application<Task, Dependency> application;
