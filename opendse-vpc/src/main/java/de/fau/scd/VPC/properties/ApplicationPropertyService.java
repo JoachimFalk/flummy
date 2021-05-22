@@ -83,15 +83,18 @@ public class ApplicationPropertyService {
         task.setAttribute("smoc-token-initial", initial);
     }
 
+    /// Attribute name used to store the token size
+    static public final String attrTokenSize = "smoc-token-size";
+
     /// Return the size of a token in bytes
     public static Integer getTokenSize(Task task) {
-        assert getTaskType(task) == TaskType.MEM || getTaskType(task) == TaskType.MSG;
-        return task.<Integer>getAttribute("smoc-token-size");
+        assert getTaskType(task) == TaskType.MEM;
+        return task.<Integer>getAttribute(attrTokenSize);
     }
     /// Set the size of a token in bytes
     public static void setTokenSize(Task task, int bytes) {
         assert getTaskType(task) == TaskType.MEM;
-        task.setAttribute("smoc-token-size", bytes);
+        task.setAttribute(attrTokenSize, bytes);
     }
 
     /// Return the size of a message in bytes

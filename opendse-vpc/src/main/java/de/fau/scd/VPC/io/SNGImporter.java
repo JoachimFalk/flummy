@@ -21,17 +21,17 @@
  */
 package de.fau.scd.VPC.io;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import de.fau.scd.VPC.io.Common.FormatErrorException;
 import de.fau.scd.VPC.properties.ApplicationPropertyService;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
 import net.sf.opendse.model.Application;
-//import net.sf.opendse.model.Attributes;
+import net.sf.opendse.model.Attributes;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Dependency;
+import net.sf.opendse.model.IAttributes;
 import net.sf.opendse.model.Task;
 
 /**
@@ -107,38 +107,135 @@ public class SNGImporter {
         }
     }
 
-    private class CommInstance {
+    static private class ChanInfo {
+        public final String        name;
+        public final int           tokenCapacity;
+        public final int           initialTokens;
+        public final int           tokenSize;
+        public final ActorInstance sourceActor;
+        public final String        sourcePort;
+        public final ActorInstance targetActor;
+        public final String        targetPort;
+        public final Attributes    attrs;
+
+        private ChanInfo(Map<String, ActorInstance> actorInstances
+          , String     name
+          , int        tokenCapacity
+          , int        initialTokens
+          , int        tokenSize
+          , String     sourceActor
+          , String     sourcePort
+          , String     targetActor
+          , String     targetPort
+          , Attributes attrs) throws FormatErrorException
+        {
+            final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
+            if (sourceActorInstance == null)
+                throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
+            final ActorInstance targetActorInstance = actorInstances.get(targetActor);
+            if (targetActorInstance == null)
+                throw new FormatErrorException("Unknown target actor instance \""+targetActor+"\"!");
+
+            this.name = name;
+            this.tokenCapacity = tokenCapacity;
+            this.initialTokens = initialTokens;
+            this.tokenSize = tokenSize;
+            this.sourceActor = sourceActorInstance;
+            this.sourcePort = sourcePort;
+            this.targetActor = targetActorInstance;
+            this.targetPort = targetPort;
+            this.attrs = attrs;
+        }
+
+        static public ChanInfo forFIFO(
+            Map<String, ActorInstance> actorInstances
+          , org.w3c.dom.Element        eFifo
+          ) throws FormatErrorException
+        {
+            final Attributes attrs = new Attributes();
+            AttributeHelper.addAttributes(eFifo, attrs);
+            final org.w3c.dom.Element eSource = SNGReader.childElement(eFifo, "source");
+            final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
+            return new ChanInfo(actorInstances
+              , eFifo.getAttribute("name")
+              , Integer.valueOf(eFifo.getAttribute("size"))
+              , Integer.valueOf(eFifo.getAttribute("initial"))
+              , attrs.<Integer>getAttribute(ApplicationPropertyService.attrTokenSize)
+              , eSource.getAttribute("actor")
+              , eSource.getAttribute("port")
+              , eTarget.getAttribute("actor")
+              , eTarget.getAttribute("port")
+              , attrs
+              );
+        }
+    }
+
+    private class ReadInstance {
+        public ReadInstance(String msgName, ActorInstance target) {
+            this.msgName = msgName;
+            this.target  = target;
+        }
+
+        public void addChannel(ChanInfo chanInfo) {
+            payload += chanInfo.tokenSize;
+            representedChannels.add(chanInfo.name);
+        }
+
+        public void create(Task memTask, Application<Task, Dependency> app) {
+            Communication readMsg = new Communication(msgName);
+            app.addVertex(readMsg);
+            {
+                Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                app.addEdge(dependency, memTask, readMsg, EdgeType.DIRECTED);
+            }
+            {
+                Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                app.addEdge(dependency, readMsg, target.exeTask, EdgeType.DIRECTED);
+            }
+            ApplicationPropertyService.setMessagePayload(readMsg, payload);
+            /// FIXME: can be multiple
+            String name = representedChannels.iterator().next();
+            ApplicationPropertyService.setMessageReadChannel(readMsg, name);
+        }
+
+        private final String        msgName;
+        private final ActorInstance target;
+        private int                 payload = 0;
+        private final Set<String>   representedChannels = new HashSet<>();
+    }
+
+    private class ChanInstance {
         public final Communication writeMsg;
         public final Task          memTask;
 
-        private final Map<String, Communication> readMsgs = new HashMap<>();
-
-        CommInstance(String msgName) {
+        public ChanInstance(String msgName) {
             this.writeMsg = new Communication(msgName);
             this.memTask  = null;
         }
-        CommInstance(String msgName, String fifoName) {
+        public ChanInstance(String msgName, String chanName) {
             this.writeMsg = new Communication(msgName);
-            this.memTask  = new Task(fifoName);
+            this.memTask  = new Task(chanName);
         }
 
-        Communication getReadMsg(Application<Task, Dependency> app, ActorInstance target, String name) {
-            Communication readMsg = readMsgs.get(name);
-            if (readMsg == null) {
-                readMsg = new Communication(name);
-                readMsgs.put(name, readMsg);
-                app.addVertex(readMsg);
-                {
-                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    app.addEdge(dependency, memTask, readMsg, EdgeType.DIRECTED);
-                }
-                {
-                    Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    app.addEdge(dependency, readMsg, target.exeTask, EdgeType.DIRECTED);
-                }
+        public void addChannel(ChanInfo chanInfo, String readMsgName) {
+            ReadInstance readInstance = readInstances.get(readMsgName);
+            if (readInstance == null) {
+                readInstance = new ReadInstance(readMsgName, chanInfo.targetActor);
+                readInstances.put(readMsgName, readInstance);
             }
-            return readMsg;
+            readInstance.addChannel(chanInfo);
         }
+
+        public void create(Application<Task, Dependency> app) {
+
+            for (ReadInstance readInstance : readInstances.values()) {
+                readInstance.create(memTask, app);
+            }
+        }
+
+        private final Map<String, ReadInstance> readInstances = new HashMap<>();
+        /// Size of the memory task in bytes
+        private int size = 0;
     }
 
     /**
@@ -153,7 +250,7 @@ public class SNGImporter {
 
         final Map<String, ActorType>     actorTypes     = new HashMap<String, ActorType>();
         final Map<String, ActorInstance> actorInstances = new HashMap<String, ActorInstance>();
-        final Map<String, CommInstance>  commInstances  = new HashMap<String, CommInstance>();
+        final Map<String, ChanInstance>  chanInstances  = new HashMap<String, ChanInstance>();
 
         for (org.w3c.dom.Element eActorType : SNGReader.childElements(eNetworkGraph, "actorType")) {
             final ActorType actorType = toActorType(eActorType);
@@ -173,9 +270,11 @@ public class SNGImporter {
             app.addVertex(actorInstance.exeTask);
         }
         // Translate FIFOs
-        translateFIFOs(eNetworkGraph, app, actorInstances, commInstances);
+        translateFIFOs(eNetworkGraph, app, actorInstances, chanInstances);
         // Translate registers
-        translateRegisters(eNetworkGraph, app, actorInstances, commInstances);
+        translateRegisters(eNetworkGraph, app, actorInstances, chanInstances);
+        for (ChanInstance chanInstance : chanInstances.values())
+            chanInstance.create(app);
         return app;
     }
 
@@ -183,124 +282,94 @@ public class SNGImporter {
         org.w3c.dom.Element           eNetworkGraph
       , Application<Task, Dependency> app
       , Map<String, ActorInstance>    actorInstances
-      , Map<String, CommInstance>     commInstances
+      , Map<String, ChanInstance>     chanInstances
       ) throws FormatErrorException
     {
         switch (chanTranslat) {
         case CHANS_ARE_DROPPED:
             for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
-                final org.w3c.dom.Element eSource = SNGReader.childElement(eFifo, "source");
-                final String sourceActor = eSource.getAttribute("actor");
-                final String sourcePort  = eSource.getAttribute("port");
-                final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
-                final String targetActor = eTarget.getAttribute("actor");
-                final String targetPort  = eTarget.getAttribute("port");
-
-                final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
-                if (sourceActorInstance == null)
-                    throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
-                final ActorInstance targetActorInstance = actorInstances.get(targetActor);
-                if (targetActorInstance == null)
-                    throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
-                String messageName = sourceActor+"."+sourcePort;
+                ChanInfo chanInfo = ChanInfo.forFIFO(actorInstances, eFifo);
+                String writeMsgName = chanInfo.sourceActor.name+"."+chanInfo.sourcePort;
                 if (!genMulticast)
-                    messageName = uniquePool.createUniqeName(messageName, true);
-                CommInstance commInstance = commInstances.get(messageName);
-                if (commInstance == null) {
-                    commInstance = new CommInstance(messageName);
-                    commInstances.put(messageName, commInstance);
-                    AttributeHelper.addAttributes(eFifo, commInstance.writeMsg);
-                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.writeMsg);
-                    ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
-                    app.addVertex(commInstance.writeMsg);
+                    writeMsgName = uniquePool.createUniqeName(writeMsgName, true);
+                ChanInstance chanInstance = chanInstances.get(writeMsgName);
+                if (chanInstance == null) {
+                    chanInstance = new ChanInstance(writeMsgName);
+                    chanInstances.put(writeMsgName, chanInstance);
+                    IAttributes attrs = new Attributes();
+                    AttributeHelper.addAttributes(eFifo, attrs);
+                    int tokenSize = attrs.<Integer>getAttribute(ApplicationPropertyService.attrTokenSize);
+                    ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
+                    app.addVertex(chanInstance.writeMsg);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, chanInfo.sourceActor.exeTask, chanInstance.writeMsg, EdgeType.DIRECTED);
                     }
                 }
                 {
                     Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    app.addEdge(dependency, commInstance.writeMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                    app.addEdge(dependency, chanInstance.writeMsg, chanInfo.targetActor.exeTask, EdgeType.DIRECTED);
                 }
             }
             break;
         case CHANS_ARE_MEMORY_TASKS:
             for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
-                String name  = eFifo.getAttribute("name");
-                int size     = Integer.valueOf(eFifo.getAttribute("size"));
-                int initial  = Integer.valueOf(eFifo.getAttribute("initial"));
-
-                final org.w3c.dom.Element eSource = SNGReader.childElement(eFifo, "source");
-                final String sourceActor = eSource.getAttribute("actor");
-                final String sourcePort  = eSource.getAttribute("port");
-                final org.w3c.dom.Element eTarget = SNGReader.childElement(eFifo, "target");
-                final String targetActor = eTarget.getAttribute("actor");
-                final String targetPort  = eTarget.getAttribute("port");
-
-                final ActorInstance sourceActorInstance = actorInstances.get(sourceActor);
-                if (sourceActorInstance == null)
-                    throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
-                final ActorInstance targetActorInstance = actorInstances.get(targetActor);
-                if (targetActorInstance == null)
-                    throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
-                String messageName = null;
+                ChanInfo chanInfo = ChanInfo.forFIFO(actorInstances, eFifo);
+                String writeMsgName = null;
                 switch (fifoMerging) {
                 case FIFOS_NO_MERGING:
-                    messageName = uniquePool.createUniqeName(messageName, true);
+                    writeMsgName = uniquePool.createUniqeName(
+                        chanInfo.sourceActor.name+"."+chanInfo.sourcePort, true);
                     break;
                 case FIFOS_SAME_CONTENT_MERGING:
-                    messageName = sourceActor+"."+sourcePort;
+                    writeMsgName = chanInfo.sourceActor.name+"."+chanInfo.sourcePort;
                     break;
                 case FIFOS_SAME_PRODUCER_MERGING:
-                    messageName = sourceActor+".out";
+                    writeMsgName = chanInfo.sourceActor.name+".out";
                     break;
                 }
-                CommInstance commInstance = commInstances.get(messageName);
-                if (commInstance == null) {
+                ChanInstance chanInstance = chanInstances.get(writeMsgName);
+                if (chanInstance == null) {
                     switch (fifoMerging) {
                     case FIFOS_NO_MERGING:
-                        commInstance = new CommInstance(messageName, name);
+                        chanInstance = new ChanInstance(writeMsgName, chanInfo.name);
                         break;
                     default:
-                        commInstance = new CommInstance(messageName, "cf:"+messageName);
+                        chanInstance = new ChanInstance(writeMsgName, "cf:"+writeMsgName);
                         break;
                     }
-                    commInstances.put(messageName, commInstance);
-                    app.addVertex(commInstance.writeMsg);
-                    ApplicationPropertyService.setTaskType(commInstance.memTask,
+                    chanInstances.put(writeMsgName, chanInstance);
+                    app.addVertex(chanInstance.writeMsg);
+                    ApplicationPropertyService.setTaskType(chanInstance.memTask,
                             ApplicationPropertyService.TaskType.MEM);
-                    ApplicationPropertyService.setTokenCapacity(commInstance.memTask, size);
-                    ApplicationPropertyService.setInitialTokens(commInstance.memTask, initial);
-                    AttributeHelper.addAttributes(eFifo, commInstance.memTask);
-                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
-                    ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
-                    app.addVertex(commInstance.memTask);
+                    AttributeHelper.addAttributes(eFifo, chanInstance.memTask);
+                    ApplicationPropertyService.setTokenCapacity(chanInstance.memTask, chanInfo.tokenCapacity);
+                    ApplicationPropertyService.setInitialTokens(chanInstance.memTask, chanInfo.initialTokens);
+                    int tokenSize = ApplicationPropertyService.getTokenSizeX(chanInstance.memTask);
+                    ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
+                    app.addVertex(chanInstance.memTask);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, chanInfo.sourceActor.exeTask, chanInstance.writeMsg, EdgeType.DIRECTED);
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, commInstance.writeMsg, commInstance.memTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, chanInstance.writeMsg, chanInstance.memTask, EdgeType.DIRECTED);
                     }
                 }
                 if (fifoMerging != FIFOMerging.FIFOS_NO_MERGING)
-                    ApplicationPropertyService.addRepresentedChannel(commInstance.memTask, name);
-                {
-                    Communication readMsg = null;
-                    switch (fifoMerging) {
-                    case FIFOS_NO_MERGING:
-                    case FIFOS_SAME_CONTENT_MERGING:
-                        readMsg = commInstance.getReadMsg(app, targetActorInstance, targetActor+"."+targetPort);
-                        break;
-                    case FIFOS_SAME_PRODUCER_MERGING:
-                        readMsg = commInstance.getReadMsg(app, targetActorInstance, targetActor+"."+sourceActor);
-                        break;
-                    }
-                    int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.memTask);
-                    ApplicationPropertyService.setMessagePayload(readMsg, tokenSize);
-                    ApplicationPropertyService.setMessageReadChannel(readMsg, name);
+                    ApplicationPropertyService.addRepresentedChannel(chanInstance.memTask, chanInfo.name);
+                String readMsgName = null;
+                switch (fifoMerging) {
+                case FIFOS_NO_MERGING:
+                case FIFOS_SAME_CONTENT_MERGING:
+                    readMsgName = chanInfo.targetActor.name+"."+chanInfo.targetPort;
+                    break;
+                case FIFOS_SAME_PRODUCER_MERGING:
+                    readMsgName = chanInfo.targetActor.name+"."+chanInfo.sourceActor.name;
+                    break;
                 }
+                chanInstance.addChannel(chanInfo, readMsgName);
             }
             break;
         }
@@ -310,7 +379,7 @@ public class SNGImporter {
         org.w3c.dom.Element           eNetworkGraph
       , Application<Task, Dependency> app
       , Map<String, ActorInstance>    actorInstances
-      , Map<String, CommInstance>     commInstances
+      , Map<String, ChanInstance>    chanInstances
       ) throws FormatErrorException
     {
         switch (chanTranslat) {
@@ -329,17 +398,17 @@ public class SNGImporter {
                     String messageName = sourceActor+"."+sourcePort;
                     if (!genMulticast)
                         messageName = uniquePool.createUniqeName(messageName, true);
-                    CommInstance commInstance = commInstances.get(messageName);
-                    if (commInstance == null) {
-                        commInstance = new CommInstance(messageName);
-                        commInstances.put(messageName, commInstance);
-                        AttributeHelper.addAttributes(eRegister, commInstance.writeMsg);
-                        int tokenSize = ApplicationPropertyService.getTokenSize(commInstance.writeMsg);
-                        ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
-                        app.addVertex(commInstance.writeMsg);
+                    ChanInstance chanInstance = chanInstances.get(messageName);
+                    if (chanInstance == null) {
+                        chanInstance = new ChanInstance(messageName);
+                        chanInstances.put(messageName, chanInstance);
+                        AttributeHelper.addAttributes(eRegister, chanInstance.writeMsg);
+                        int tokenSize = ApplicationPropertyService.getTokenSizeX(chanInstance.writeMsg);
+                        ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
+                        app.addVertex(chanInstance.writeMsg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
+                            app.addEdge(dependency, sourceActorInstance.exeTask, chanInstance.writeMsg, EdgeType.DIRECTED);
                         }
                     }
                     for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
@@ -350,7 +419,7 @@ public class SNGImporter {
                             throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
 
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, commInstance.writeMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, chanInstance.writeMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
                 }
             }
@@ -364,7 +433,7 @@ public class SNGImporter {
                         ApplicationPropertyService.TaskType.MEM);
                 ApplicationPropertyService.setTokenCapacity(memTask, 1);
                 AttributeHelper.addAttributes(eRegister, memTask);
-                int tokenSize = ApplicationPropertyService.getTokenSize(memTask);
+                int tokenSize = ApplicationPropertyService.getTokenSizeX(memTask);
 
                 for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {
                     final String sourceActor = eSource.getAttribute("actor");
@@ -376,20 +445,20 @@ public class SNGImporter {
                     String messageName = sourceActor+"."+sourcePort;
                     if (fifoMerging != FIFOMerging.FIFOS_NO_MERGING)
                         messageName = uniquePool.createUniqeName(messageName, true);
-                    CommInstance commInstance = commInstances.get(messageName);
-                    if (commInstance == null) {
-                        commInstance = new CommInstance(messageName);
-                        commInstances.put(messageName, commInstance);
-                        ApplicationPropertyService.setMessagePayload(commInstance.writeMsg, tokenSize);
-                        app.addVertex(commInstance.writeMsg);
+                    ChanInstance chanInstance = chanInstances.get(messageName);
+                    if (chanInstance == null) {
+                        chanInstance = new ChanInstance(messageName);
+                        chanInstances.put(messageName, chanInstance);
+                        ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
+                        app.addVertex(chanInstance.writeMsg);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                            app.addEdge(dependency, sourceActorInstance.exeTask, commInstance.writeMsg, EdgeType.DIRECTED);
+                            app.addEdge(dependency, sourceActorInstance.exeTask, chanInstance.writeMsg, EdgeType.DIRECTED);
                         }
                     }
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, commInstance.writeMsg, memTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, chanInstance.writeMsg, memTask, EdgeType.DIRECTED);
                     }
                 }
                 for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
