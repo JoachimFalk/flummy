@@ -345,7 +345,7 @@ public class SNGImporter {
                     AttributeHelper.addAttributes(eFifo, chanInstance.memTask);
                     ApplicationPropertyService.setTokenCapacity(chanInstance.memTask, chanInfo.tokenCapacity);
                     ApplicationPropertyService.setInitialTokens(chanInstance.memTask, chanInfo.initialTokens);
-                    int tokenSize = ApplicationPropertyService.getTokenSizeX(chanInstance.memTask);
+                    int tokenSize = ApplicationPropertyService.getTokenSize(chanInstance.memTask);
                     ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
                     app.addVertex(chanInstance.memTask);
                     {
@@ -403,7 +403,7 @@ public class SNGImporter {
                         chanInstance = new ChanInstance(messageName);
                         chanInstances.put(messageName, chanInstance);
                         AttributeHelper.addAttributes(eRegister, chanInstance.writeMsg);
-                        int tokenSize = ApplicationPropertyService.getTokenSizeX(chanInstance.writeMsg);
+                        int tokenSize = ApplicationPropertyService.getTokenSize(chanInstance.writeMsg);
                         ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
                         app.addVertex(chanInstance.writeMsg);
                         {
@@ -433,7 +433,7 @@ public class SNGImporter {
                         ApplicationPropertyService.TaskType.MEM);
                 ApplicationPropertyService.setTokenCapacity(memTask, 1);
                 AttributeHelper.addAttributes(eRegister, memTask);
-                int tokenSize = ApplicationPropertyService.getTokenSizeX(memTask);
+                int tokenSize = ApplicationPropertyService.getTokenSize(memTask);
 
                 for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {
                     final String sourceActor = eSource.getAttribute("actor");
