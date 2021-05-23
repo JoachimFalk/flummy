@@ -215,27 +215,63 @@ public class SNGImporter {
         public ChanInstance(String msgName, String chanName) {
             this.writeMsg = new Communication(msgName);
             this.memTask  = new Task(chanName);
+            ApplicationPropertyService.setTaskType(memTask,
+                    ApplicationPropertyService.TaskType.MEM);
         }
 
         public void addChannel(ChanInfo chanInfo, String readMsgName) {
+            if (sourceActor == null)
+                sourceActor = chanInfo.sourceActor;
+            else
+                assert sourceActor == chanInfo.sourceActor;
+            if (dataSizes.get(chanInfo.sourcePort) == null)
+                writeMsgPayload += chanInfo.tokenSize;
+            // We unify data storage for all writes from the same port, i.e.,
+            // channels into which identical data is written.
+            {
+                Integer size = dataSizes.get(chanInfo.sourcePort);
+                if (size == null ||
+                    size < chanInfo.tokenCapacity * chanInfo.tokenSize)
+                    dataSizes.put(chanInfo.sourcePort,
+                            chanInfo.tokenCapacity * chanInfo.tokenSize);
+            }
             ReadInstance readInstance = readInstances.get(readMsgName);
             if (readInstance == null) {
                 readInstance = new ReadInstance(readMsgName, chanInfo.targetActor);
                 readInstances.put(readMsgName, readInstance);
             }
             readInstance.addChannel(chanInfo);
+            attrs.putAll(chanInfo.attrs);
         }
 
         public void create(Application<Task, Dependency> app) {
+            for (Map.Entry<String, Object> attr : attrs.entrySet()) {
+                memTask.setAttribute(attr.getKey(), attr.getValue());
+            }
+//          ApplicationPropertyService.setTokenCapacity(memTask, chanInfo.tokenCapacity);
+//          ApplicationPropertyService.setInitialTokens(memTask, chanInfo.initialTokens);
+            app.addVertex(memTask);
+            app.addVertex(writeMsg);
+            ApplicationPropertyService.setMessagePayload(writeMsg, writeMsgPayload);
+            {
+                Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                app.addEdge(dependency, sourceActor.exeTask, writeMsg, EdgeType.DIRECTED);
+            }
+            {
+                Dependency dependency = new Dependency(uniquePool.createUniqeName());
+                app.addEdge(dependency, writeMsg, memTask, EdgeType.DIRECTED);
+            }
 
             for (ReadInstance readInstance : readInstances.values()) {
                 readInstance.create(memTask, app);
             }
         }
 
+        private ActorInstance sourceActor = null;
+        private final Attributes attrs = new Attributes();
         private final Map<String, ReadInstance> readInstances = new HashMap<>();
-        /// Size of the memory task in bytes
-        private int size = 0;
+        private final Map<String, Integer>      dataSizes = new HashMap<>();
+        private int writeMsgPayload = 0;
     }
 
     /**
@@ -250,7 +286,6 @@ public class SNGImporter {
 
         final Map<String, ActorType>     actorTypes     = new HashMap<String, ActorType>();
         final Map<String, ActorInstance> actorInstances = new HashMap<String, ActorInstance>();
-        final Map<String, ChanInstance>  chanInstances  = new HashMap<String, ChanInstance>();
 
         for (org.w3c.dom.Element eActorType : SNGReader.childElements(eNetworkGraph, "actorType")) {
             final ActorType actorType = toActorType(eActorType);
@@ -270,11 +305,9 @@ public class SNGImporter {
             app.addVertex(actorInstance.exeTask);
         }
         // Translate FIFOs
-        translateFIFOs(eNetworkGraph, app, actorInstances, chanInstances);
+        translateFIFOs(eNetworkGraph, app, actorInstances);
         // Translate registers
-        translateRegisters(eNetworkGraph, app, actorInstances, chanInstances);
-        for (ChanInstance chanInstance : chanInstances.values())
-            chanInstance.create(app);
+        translateRegisters(eNetworkGraph, app, actorInstances);
         return app;
     }
 
@@ -282,37 +315,41 @@ public class SNGImporter {
         org.w3c.dom.Element           eNetworkGraph
       , Application<Task, Dependency> app
       , Map<String, ActorInstance>    actorInstances
-      , Map<String, ChanInstance>     chanInstances
       ) throws FormatErrorException
     {
         switch (chanTranslat) {
-        case CHANS_ARE_DROPPED:
+        case CHANS_ARE_DROPPED: {
+            final Map<String, Task> msgInstances = new HashMap<String, Task>();
+
             for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
                 ChanInfo chanInfo = ChanInfo.forFIFO(actorInstances, eFifo);
-                String writeMsgName = chanInfo.sourceActor.name+"."+chanInfo.sourcePort;
+                String msgName = chanInfo.sourceActor.name+"."+chanInfo.sourcePort;
                 if (!genMulticast)
-                    writeMsgName = uniquePool.createUniqeName(writeMsgName, true);
-                ChanInstance chanInstance = chanInstances.get(writeMsgName);
-                if (chanInstance == null) {
-                    chanInstance = new ChanInstance(writeMsgName);
-                    chanInstances.put(writeMsgName, chanInstance);
+                    msgName = uniquePool.createUniqeName(msgName, true);
+                Task msgTask = msgInstances.get(msgName);
+                if (msgTask == null) {
+                    msgTask = new Communication(msgName);
+                    msgInstances.put(msgName, msgTask);
                     IAttributes attrs = new Attributes();
                     AttributeHelper.addAttributes(eFifo, attrs);
                     int tokenSize = attrs.<Integer>getAttribute(ApplicationPropertyService.attrTokenSize);
-                    ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
-                    app.addVertex(chanInstance.writeMsg);
+                    ApplicationPropertyService.setMessagePayload(msgTask, tokenSize);
+                    app.addVertex(msgTask);
                     {
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, chanInfo.sourceActor.exeTask, chanInstance.writeMsg, EdgeType.DIRECTED);
+                        app.addEdge(dependency, chanInfo.sourceActor.exeTask, msgTask, EdgeType.DIRECTED);
                     }
                 }
                 {
                     Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                    app.addEdge(dependency, chanInstance.writeMsg, chanInfo.targetActor.exeTask, EdgeType.DIRECTED);
+                    app.addEdge(dependency, msgTask, chanInfo.targetActor.exeTask, EdgeType.DIRECTED);
                 }
             }
             break;
-        case CHANS_ARE_MEMORY_TASKS:
+        }
+        case CHANS_ARE_MEMORY_TASKS: {
+            final Map<String, ChanInstance>  chanInstances  = new HashMap<String, ChanInstance>();
+
             for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
                 ChanInfo chanInfo = ChanInfo.forFIFO(actorInstances, eFifo);
                 String writeMsgName = null;
@@ -339,23 +376,6 @@ public class SNGImporter {
                         break;
                     }
                     chanInstances.put(writeMsgName, chanInstance);
-                    app.addVertex(chanInstance.writeMsg);
-                    ApplicationPropertyService.setTaskType(chanInstance.memTask,
-                            ApplicationPropertyService.TaskType.MEM);
-                    AttributeHelper.addAttributes(eFifo, chanInstance.memTask);
-                    ApplicationPropertyService.setTokenCapacity(chanInstance.memTask, chanInfo.tokenCapacity);
-                    ApplicationPropertyService.setInitialTokens(chanInstance.memTask, chanInfo.initialTokens);
-                    int tokenSize = ApplicationPropertyService.getTokenSize(chanInstance.memTask);
-                    ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
-                    app.addVertex(chanInstance.memTask);
-                    {
-                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, chanInfo.sourceActor.exeTask, chanInstance.writeMsg, EdgeType.DIRECTED);
-                    }
-                    {
-                        Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, chanInstance.writeMsg, chanInstance.memTask, EdgeType.DIRECTED);
-                    }
                 }
                 if (fifoMerging != FIFOMerging.FIFOS_NO_MERGING)
                     ApplicationPropertyService.addRepresentedChannel(chanInstance.memTask, chanInfo.name);
@@ -371,7 +391,10 @@ public class SNGImporter {
                 }
                 chanInstance.addChannel(chanInfo, readMsgName);
             }
+            for (ChanInstance chanInstance : chanInstances.values())
+                chanInstance.create(app);
             break;
+        }
         }
     }
 
@@ -379,11 +402,12 @@ public class SNGImporter {
         org.w3c.dom.Element           eNetworkGraph
       , Application<Task, Dependency> app
       , Map<String, ActorInstance>    actorInstances
-      , Map<String, ChanInstance>    chanInstances
       ) throws FormatErrorException
     {
         switch (chanTranslat) {
-        case CHANS_ARE_DROPPED:
+        case CHANS_ARE_DROPPED: {
+            final Map<String, Task> msgInstances = new HashMap<String, Task>();
+
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
                 if (!SNGReader.childElements(eRegister, "target").iterator().hasNext())
                     continue;
@@ -395,20 +419,20 @@ public class SNGImporter {
                     if (sourceActorInstance == null)
                         throw new FormatErrorException("Unknown source actor instance \""+sourceActor+"\"!");
 
-                    String messageName = sourceActor+"."+sourcePort;
+                    String msgName = sourceActor+"."+sourcePort;
                     if (!genMulticast)
-                        messageName = uniquePool.createUniqeName(messageName, true);
-                    ChanInstance chanInstance = chanInstances.get(messageName);
-                    if (chanInstance == null) {
-                        chanInstance = new ChanInstance(messageName);
-                        chanInstances.put(messageName, chanInstance);
-                        AttributeHelper.addAttributes(eRegister, chanInstance.writeMsg);
-                        int tokenSize = ApplicationPropertyService.getTokenSize(chanInstance.writeMsg);
-                        ApplicationPropertyService.setMessagePayload(chanInstance.writeMsg, tokenSize);
-                        app.addVertex(chanInstance.writeMsg);
+                        msgName = uniquePool.createUniqeName(msgName, true);
+                    Task msgTask = msgInstances.get(msgName);
+                    if (msgTask == null) {
+                        msgTask = new Communication(msgName);
+                        msgInstances.put(msgName, msgTask);
+                        AttributeHelper.addAttributes(eRegister, msgTask);
+                        int tokenSize = ApplicationPropertyService.getTokenSize(msgTask);
+                        ApplicationPropertyService.setMessagePayload(msgTask, tokenSize);
+                        app.addVertex(msgTask);
                         {
                             Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                            app.addEdge(dependency, sourceActorInstance.exeTask, chanInstance.writeMsg, EdgeType.DIRECTED);
+                            app.addEdge(dependency, sourceActorInstance.exeTask, msgTask, EdgeType.DIRECTED);
                         }
                     }
                     for (org.w3c.dom.Element eTarget : SNGReader.childElements(eRegister, "target")) {
@@ -419,12 +443,15 @@ public class SNGImporter {
                             throw new FormatErrorException("Unknown target actor instance \""+targetActorInstance+"\"!");
 
                         Dependency dependency = new Dependency(uniquePool.createUniqeName());
-                        app.addEdge(dependency, chanInstance.writeMsg, targetActorInstance.exeTask, EdgeType.DIRECTED);
+                        app.addEdge(dependency, msgTask, targetActorInstance.exeTask, EdgeType.DIRECTED);
                     }
                 }
             }
             break;
-        case CHANS_ARE_MEMORY_TASKS:
+        }
+        case CHANS_ARE_MEMORY_TASKS: {
+            final Map<String, ChanInstance>  chanInstances  = new HashMap<String, ChanInstance>();
+
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
                 String name  = eRegister.getAttribute("name");
 
@@ -481,7 +508,10 @@ public class SNGImporter {
                     }
                 }
             }
+//          for (ChanInstance chanInstance : chanInstances.values())
+//              chanInstance.create(app);
             break;
+        }
         }
     }
 
