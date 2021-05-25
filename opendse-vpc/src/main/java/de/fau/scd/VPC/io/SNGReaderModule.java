@@ -144,8 +144,21 @@ public class SNGReaderModule extends IOModule {
         this.vpcConfigTemplate = vpcConfigTemplate;
     }
 
-    @Info("Select how channels are translated into the DSE model.")
+    @Info("Fill in missing routing information. This is needed for SAT decoding.")
     @Order(20)
+    @Constant(namespace = SpecificationWrapperSNG.class, value = "fillInRoutings")
+    protected boolean fillInRoutings = true;
+
+    public boolean getFillInRoutings() {
+        return fillInRoutings;
+    }
+
+    public void setFillInRoutings(boolean fillInRoutings) {
+        this.fillInRoutings = fillInRoutings;
+    }
+
+    @Info("Select how channels are translated into the DSE model.")
+    @Order(30)
     @Constant(value = "chanTranslation", namespace = SpecificationWrapperSNG.class)
     protected ChanTranslation chanTranslation = ChanTranslation.CHANS_ARE_MEMORY_TASKS;
 
@@ -158,7 +171,7 @@ public class SNGReaderModule extends IOModule {
     }
 
     @Info("If true, multicast communication is generated for FIFOs into which identical data is written.")
-    @Order(21)
+    @Order(31)
     @Constant(namespace = SpecificationWrapperSNG.class, value = "multicastMessages")
     @Required(property = "chanTranslation", elements = { "CHANS_ARE_DROPPED" })
     protected boolean multicastMessages = true;
@@ -176,7 +189,7 @@ public class SNGReaderModule extends IOModule {
         "FIFOS_SAME_CONTENT_MERGING -- one memory task is generated for FIFOs into which identical data is written<br>"+
         "FIFOS_SAME_PRODUCER_MERGING -- one memory task is generated for all FIFOs written into by an actor<br>"
         )
-    @Order(21)
+    @Order(31)
     @Constant(namespace = SpecificationWrapperSNG.class, value = "fifoMerging")
     @Required(property = "chanTranslation", elements = { "CHANS_ARE_MEMORY_TASKS" })
     protected FIFOMerging fifoMerging = FIFOMerging.FIFOS_SAME_CONTENT_MERGING;

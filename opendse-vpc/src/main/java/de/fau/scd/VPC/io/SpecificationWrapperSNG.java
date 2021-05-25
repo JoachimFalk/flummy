@@ -78,6 +78,8 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
       , SimulatorEnvironment simulatorEnvironment
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "vpcConfigTemplate")
         String               vpcConfigTemplate
+      , @Constant(namespace = SpecificationWrapperSNG.class, value = "fillInRoutings")
+        boolean              fillInRoutings
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "chanTranslation")
         ChanTranslation      chanTranslation
       , @Constant(namespace = SpecificationWrapperSNG.class, value = "fifoMerging")
@@ -138,7 +140,10 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         Architecture<Resource, Link> architecture = vpcConfigImporter.getArchitecture();
         Mappings<Task, Resource> mappings = vpcConfigImporter.getMappings();
 
-        this.specification = new Specification(application, architecture, mappings, null);
+        if (fillInRoutings)
+            this.specification = new Specification(application, architecture, mappings);
+        else
+            this.specification = new Specification(application, architecture, mappings, null);
     }
 
     protected final Specification specification;
