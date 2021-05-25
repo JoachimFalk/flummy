@@ -25,7 +25,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.opt4j.core.start.Constant;
 
@@ -45,8 +47,9 @@ import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
 import net.sf.opendse.model.Task;
 import net.sf.opendse.optimization.SpecificationWrapper;
+import net.sf.opendse.optimization.encoding.RoutingFilter;
 import net.sf.opendse.optimization.io.SpecificationTransformer;
-import net.sf.opendse.optimization.io.SpecificationWrapperInstance;
+//import net.sf.opendse.optimization.io.SpecificationWrapperInstance;
 
 public class SpecificationWrapperSNG implements SpecificationWrapper {
     
@@ -63,8 +66,6 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         public String [] getArguments();
     }
 
-    final private SpecificationWrapperInstance specificationWrapperInstance;
-    
     @Inject
     public SpecificationWrapperSNG(
         @Constant(namespace = SpecificationWrapperSNG.class, value = "dfgSource")
@@ -137,18 +138,39 @@ public class SpecificationWrapperSNG implements SpecificationWrapper {
         Architecture<Resource, Link> architecture = vpcConfigImporter.getArchitecture();
         Mappings<Task, Resource> mappings = vpcConfigImporter.getMappings();
 
-        Specification specification = new Specification(application, architecture, mappings);
-        specificationWrapperInstance = new SpecificationWrapperInstance(specification);
+        this.specification = new Specification(application, architecture, mappings, null);
     }
+
+    protected final Specification specification;
+    protected boolean init = false;
+
+    protected final  Set<SpecificationTransformer> transformers = new TreeSet<SpecificationTransformer>(
+        new Comparator<SpecificationTransformer>() {
+            @Override
+            public int compare(SpecificationTransformer o1, SpecificationTransformer o2) {
+                return ((Integer) o1.getPriority()).compareTo(o2.getPriority());
+            }
+        });
 
     @Override
     public Specification getSpecification() {
-        return specificationWrapperInstance.getSpecification();
+        if (!init) {
+            init = true;
+            if (transformers != null) {
+                for (SpecificationTransformer specificationTransformer : transformers) {
+                    System.out.println("Starting " + specificationTransformer);
+                    specificationTransformer.transform(specification);
+                }
+            }
+            if (specification.getRoutings() != null)
+                RoutingFilter.filter(this.specification);
+        }
+        return specification;
     }
 
     @Inject(optional = true)
     public void setSpecificationTransformers(Set<SpecificationTransformer> transformers) {
-        specificationWrapperInstance.setSpecificationTransformers(transformers);
+        this.transformers.addAll(transformers);
     }
 
 }
