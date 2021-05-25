@@ -61,26 +61,32 @@ public class ApplicationPropertyService {
         }
     }
 
+    /// Attribute name used to store the capacity of a FIFO in terms of tokens
+    static public final String attrTokenCapacity = "smoc-token-capacity";
+
     /// Return the capacity of a FIFO or register in terms of tokens
     public static Integer getTokenCapacity(Task task) {
         assert getTaskType(task) == TaskType.MEM;
-        return task.<Integer>getAttribute("smoc-token-capacity");
+        return task.<Integer>getAttribute(attrTokenCapacity);
     }
     /// Set the capacity of a FIFO or register in terms of tokens
     public static void setTokenCapacity(Task task, int capacity) {
         assert getTaskType(task) == TaskType.MEM;
-        task.setAttribute("smoc-token-capacity", capacity);
+        task.setAttribute(attrTokenCapacity, capacity);
     }
+
+    /// Attribute name used to store the initial number of tokens in a FIFO
+    static public final String attrInitialToken = "smoc-token-initial";
 
     /// Return the number of initial tokens present in a FIFO
     public static Integer getInitialTokens(Task task) {
         assert getTaskType(task) == TaskType.MEM;
-        return task.<Integer>getAttribute("smoc-token-initial");
+        return task.<Integer>getAttribute(attrInitialToken);
     }
     /// Set the number of initial tokens present in a FIFO
     public static void setInitialTokens(Task task, int initial) {
         assert getTaskType(task) == TaskType.MEM;
-        task.setAttribute("smoc-token-initial", initial);
+        task.setAttribute(attrInitialToken, initial);
     }
 
     /// Attribute name used to store the token size
@@ -95,6 +101,17 @@ public class ApplicationPropertyService {
     public static void setTokenSize(Task task, int bytes) {
         assert getTaskType(task) == TaskType.MEM;
         task.setAttribute(attrTokenSize, bytes);
+    }
+
+    /// Return the size of the required storage in bytes
+    public static Integer getStorageSize(Task task) {
+        assert getTaskType(task) == TaskType.MEM;
+        return task.<Integer>getAttribute("smoc-storage-size");
+    }
+    /// Set the size of the required storage in bytes
+    public static void setStorageSize(Task task, int bytes) {
+        assert getTaskType(task) == TaskType.MEM;
+        task.setAttribute("smoc-storage-size", bytes);
     }
 
     /// Return the size of a message in bytes

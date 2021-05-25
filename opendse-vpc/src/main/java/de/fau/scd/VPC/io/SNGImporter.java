@@ -145,6 +145,8 @@ public class SNGImporter {
             this.targetActor = targetActorInstance;
             this.targetPort = targetPort;
             this.attrs = attrs;
+            attrs.put(ApplicationPropertyService.attrTokenCapacity, tokenCapacity);
+            attrs.put(ApplicationPropertyService.attrInitialToken, initialTokens);
         }
 
         static public ChanInfo forFIFO(
@@ -224,15 +226,15 @@ public class SNGImporter {
                 sourceActor = chanInfo.sourceActor;
             else
                 assert sourceActor == chanInfo.sourceActor;
-            if (dataSizes.get(chanInfo.sourcePort) == null)
+            if (storageSizes.get(chanInfo.sourcePort) == null)
                 writeMsgPayload += chanInfo.tokenSize;
             // We unify data storage for all writes from the same port, i.e.,
             // channels into which identical data is written.
             {
-                Integer size = dataSizes.get(chanInfo.sourcePort);
+                Integer size = storageSizes.get(chanInfo.sourcePort);
                 if (size == null ||
                     size < chanInfo.tokenCapacity * chanInfo.tokenSize)
-                    dataSizes.put(chanInfo.sourcePort,
+                    storageSizes.put(chanInfo.sourcePort,
                             chanInfo.tokenCapacity * chanInfo.tokenSize);
             }
             ReadInstance readInstance = readInstances.get(readMsgName);
@@ -241,16 +243,36 @@ public class SNGImporter {
                 readInstances.put(readMsgName, readInstance);
             }
             readInstance.addChannel(chanInfo);
-            attrs.putAll(chanInfo.attrs);
+            for (Map.Entry<String, Object> attr : chanInfo.attrs.entrySet()) {
+                if (attrsInconsistent.contains(attr.getKey()))
+                        continue;
+                Object oldValue = attrs.put(attr.getKey(), attr.getValue());
+                if (oldValue != null) {
+                    boolean inconsistent = false;
+                    // Check for consistency
+                    if (!oldValue.getClass().equals(attr.getValue().getClass()))
+                        inconsistent = true;
+                    else
+                        inconsistent = !oldValue.equals(attr.getValue());
+                    if (inconsistent) {
+                        attrsInconsistent.add(attr.getKey());
+                        attrs.remove(attr.getKey());
+                    }
+                }
+            }
         }
 
         public void create(Application<Task, Dependency> app) {
+            app.addVertex(memTask);
+            {
+                int storageSize = 0;
+                for (Integer size : storageSizes.values())
+                    storageSize += size;
+                ApplicationPropertyService.setStorageSize(memTask, storageSize);
+            }
             for (Map.Entry<String, Object> attr : attrs.entrySet()) {
                 memTask.setAttribute(attr.getKey(), attr.getValue());
             }
-//          ApplicationPropertyService.setTokenCapacity(memTask, chanInfo.tokenCapacity);
-//          ApplicationPropertyService.setInitialTokens(memTask, chanInfo.initialTokens);
-            app.addVertex(memTask);
             app.addVertex(writeMsg);
             ApplicationPropertyService.setMessagePayload(writeMsg, writeMsgPayload);
             {
@@ -261,16 +283,18 @@ public class SNGImporter {
                 Dependency dependency = new Dependency(uniquePool.createUniqeName());
                 app.addEdge(dependency, writeMsg, memTask, EdgeType.DIRECTED);
             }
-
             for (ReadInstance readInstance : readInstances.values()) {
                 readInstance.create(memTask, app);
             }
         }
 
         private ActorInstance sourceActor = null;
-        private final Attributes attrs = new Attributes();
+        // Unification of all attributes from the represented channels
+        private final Attributes  attrs = new Attributes();
+        // Attribute names that have an inconsistent value and, thus, are not contained in attrs.
+        private final Set<String> attrsInconsistent = new HashSet<>();
         private final Map<String, ReadInstance> readInstances = new HashMap<>();
-        private final Map<String, Integer>      dataSizes = new HashMap<>();
+        private final Map<String, Integer>      storageSizes = new HashMap<>();
         private int writeMsgPayload = 0;
     }
 
@@ -461,6 +485,7 @@ public class SNGImporter {
                 ApplicationPropertyService.setTokenCapacity(memTask, 1);
                 AttributeHelper.addAttributes(eRegister, memTask);
                 int tokenSize = ApplicationPropertyService.getTokenSize(memTask);
+                ApplicationPropertyService.setStorageSize(memTask, tokenSize);
 
                 for (org.w3c.dom.Element eSource : SNGReader.childElements(eRegister, "source")) {
                     final String sourceActor = eSource.getAttribute("actor");
