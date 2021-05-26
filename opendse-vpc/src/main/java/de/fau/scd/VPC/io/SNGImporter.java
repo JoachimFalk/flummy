@@ -66,6 +66,22 @@ public class SNGImporter {
         this.fifoMerging  = fifoMerging;
         this.genMulticast = generateMulticast;
         this.application  = toApplication(sngReader.getDocumentElement());
+        {
+            int actors   = 0;
+            int channels = 0;
+            int messages = 0;
+            for (Task t : this.application) {
+                switch (ApplicationPropertyService.getTaskType(t)) {
+                    case EXE: ++actors; break;
+                    case MEM: ++channels; break;
+                    case MSG: ++messages; break;
+                }
+            }
+            System.out.println("Loaded SNG file with "
+                    + actors + " actors, "
+                    + channels + " channels, and "
+                    + messages + " messages!");
+        }
     }
 
     public Application<Task, Dependency> getApplication() {
