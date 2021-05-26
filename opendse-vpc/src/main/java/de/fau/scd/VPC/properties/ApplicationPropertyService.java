@@ -124,18 +124,32 @@ public class ApplicationPropertyService {
         assert task instanceof ICommunication;
         task.setAttribute("smoc-msg-payload", bytes);
     }
-
-    /// Return the size of a message in bytes
-    public static String getMessageReadChannel(Task task) {
+    
+    /// Return the channel ids (names) represented by a given read message
+    public static Map<String, String> getRepresentedReadChannels(Task task) {
         assert task instanceof ICommunication;
-        return task.<String>getAttribute("smoc-msg-read-channel");
-    }
-    /// Set the size of a message in bytes
-    public static void setMessageReadChannel(Task task, String channelId) {
+        Map<String, String>  representedChannels = task.<Map<String, String> >getAttribute("smoc-represented-read-channels");       
+        return representedChannels;
+    }     
+    /// Set channels represented by the given read message
+    public static void setRepresentedReadChannels(Task task, Map<String, String> channelIds) {
         assert task instanceof ICommunication;
-        task.setAttribute("smoc-msg-read-channel", channelId);
+        task.setAttribute("smoc-represented-read-channels", channelIds);
+    }
+    
+    /// Return the channel ids (names) represented by a given write message
+    public static Map<String, Set<String>>getRepresentedWriteChannels(Task task) {
+        assert task instanceof ICommunication;
+        Map<String, Set<String>>  representedChannels = task.<Map<String, Set<String>> >getAttribute("smoc-represented-write-channels");
+        return representedChannels;
+    }     
+    /// Set channels represented by the given write message
+    public static void setRepresentedWriteChannels(Task task, Map<String, Set<String>> channelIds) {
+        assert task instanceof ICommunication;
+        task.setAttribute("smoc-represented-write-channels", channelIds);
     }
 
+    
     /// Return channel ids (names) represented by the given MEM task
     public static Collection<String> getRepresentedChannels(Task task) {
         assert getTaskType(task) == TaskType.MEM;
