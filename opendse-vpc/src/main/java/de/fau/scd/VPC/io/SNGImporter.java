@@ -23,6 +23,8 @@ package de.fau.scd.VPC.io;
 
 import java.util.*;
 
+import org.apache.commons.collections15.multimap.MultiHashMap;
+
 import de.fau.scd.VPC.io.Common.FormatErrorException;
 import de.fau.scd.VPC.properties.ApplicationPropertyService;
 import edu.uci.ics.jung.graph.util.EdgeType;
@@ -197,6 +199,11 @@ public class SNGImporter {
         public void addChannel(ChanInfo chanInfo) {
             payload += chanInfo.tokenSize;
             representedChannels.add(chanInfo.name);
+            String fromActor = chanInfo.targetActor.name+"."+chanInfo.targetPort;
+            if (!mergingInfos.containsKey(fromActor)) 
+                mergingInfos.put(fromActor, chanInfo.name);
+            assert mergingInfos.get(fromActor).equals(chanInfo.name);
+            
         }
 
         public void create(Task memTask, Application<Task, Dependency> app) {
@@ -210,16 +217,17 @@ public class SNGImporter {
                 Dependency dependency = new Dependency(uniquePool.createUniqeName());
                 app.addEdge(dependency, readMsg, target.exeTask, EdgeType.DIRECTED);
             }
-            ApplicationPropertyService.setMessagePayload(readMsg, payload);
-            /// FIXME: can be multiple
-            String name = representedChannels.iterator().next();
-            ApplicationPropertyService.setMessageReadChannel(readMsg, name);
+            ApplicationPropertyService.setMessagePayload(readMsg, payload);         
+            ApplicationPropertyService.setRepresentedReadChannels(readMsg, mergingInfos);         
         }
 
         private final String        msgName;
         private final ActorInstance target;
         private int                 payload = 0;
         private final Set<String>   representedChannels = new HashSet<>();
+        // targetActor + targetPort to channel
+        private final Map<String, String> mergingInfos = new HashMap<String, String>();
+
     }
 
     private class ChanInstance {
@@ -237,13 +245,24 @@ public class SNGImporter {
                     ApplicationPropertyService.TaskType.MEM);
         }
 
-        public void addChannel(ChanInfo chanInfo, String readMsgName) {
+        public void addChannel(ChanInfo chanInfo, String readMsgName) {           
             if (sourceActor == null)
                 sourceActor = chanInfo.sourceActor;
             else
                 assert sourceActor == chanInfo.sourceActor;
             if (storageSizes.get(chanInfo.sourcePort) == null)
                 writeMsgPayload += chanInfo.tokenSize;
+            
+            String fromActor = chanInfo.sourceActor.name+"."+chanInfo.sourcePort;
+            if (!mergingInfos.containsKey(fromActor)) {
+                Set<String> mergedChannels = new HashSet<>();
+                mergedChannels.add(chanInfo.name);
+                mergingInfos.put(fromActor, mergedChannels);
+            } else {
+                Set<String> mergedChannels = mergingInfos.get(fromActor);
+                mergedChannels.add(chanInfo.name);
+                mergingInfos.put(fromActor, mergedChannels);
+            }
             // We unify data storage for all writes from the same port, i.e.,
             // channels into which identical data is written.
             {
@@ -291,6 +310,7 @@ public class SNGImporter {
             }
             app.addVertex(writeMsg);
             ApplicationPropertyService.setMessagePayload(writeMsg, writeMsgPayload);
+            ApplicationPropertyService.setRepresentedWriteChannels(writeMsg, mergingInfos);
             {
                 Dependency dependency = new Dependency(uniquePool.createUniqeName());
                 app.addEdge(dependency, sourceActor.exeTask, writeMsg, EdgeType.DIRECTED);
@@ -311,6 +331,8 @@ public class SNGImporter {
         private final Set<String> attrsInconsistent = new HashSet<>();
         private final Map<String, ReadInstance> readInstances = new HashMap<>();
         private final Map<String, Integer>      storageSizes = new HashMap<>();
+        // sourceActor + sourcePort to channels
+        private final Map<String, Set<String>> mergingInfos = new HashMap<>();
         private int writeMsgPayload = 0;
     }
 
@@ -389,10 +411,10 @@ public class SNGImporter {
         }
         case CHANS_ARE_MEMORY_TASKS: {
             final Map<String, ChanInstance>  chanInstances  = new HashMap<String, ChanInstance>();
-
             for (org.w3c.dom.Element eFifo : SNGReader.childElements(eNetworkGraph, "fifo")) {
                 ChanInfo chanInfo = ChanInfo.forFIFO(actorInstances, eFifo);
                 String writeMsgName = null;
+                
                 switch (fifoMerging) {
                 case FIFOS_NO_MERGING:
                     writeMsgName = uniquePool.createUniqeName(
@@ -402,7 +424,7 @@ public class SNGImporter {
                     writeMsgName = chanInfo.sourceActor.name+"."+chanInfo.sourcePort;
                     break;
                 case FIFOS_SAME_PRODUCER_MERGING:
-                    writeMsgName = chanInfo.sourceActor.name+".out";
+                    writeMsgName = chanInfo.sourceActor.name+".out";               
                     break;
                 }
                 ChanInstance chanInstance = chanInstances.get(writeMsgName);
