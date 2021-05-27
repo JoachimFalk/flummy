@@ -55,12 +55,13 @@ void         Static::addDest(std::string const &chan, Hop *parent) {
   return Routing::getImpl(this)->addDest(chan, parent);
 }
 
-Static::Hop *Static::getFirstHop() {
-  return Routing::getImpl(this)->getFirstHop();
+std::set<Static::Hop *> const &Static::getFirstHops() const {
+  return reinterpret_cast<std::set<Static::Hop *> const &>
+    (Routing::getImpl(this)->getFirstHops());
 }
 
-std::map<Component::Ptr, Static::Hop> const &Static::getHops() const {
-  return reinterpret_cast<std::map<Component::Ptr, Static::Hop> const &>
+std::set<Static::Hop *> const &Static::getHops() const {
+  return reinterpret_cast<std::set<Static::Hop *> const &>
     (Routing::getImpl(this)->getHops());
 }
 

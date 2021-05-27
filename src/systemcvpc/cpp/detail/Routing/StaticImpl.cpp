@@ -35,7 +35,6 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     , Static(
         reinterpret_cast<char *>(static_cast<AbstractRoute *>(this)) -
         reinterpret_cast<char *>(static_cast<Route         *>(this)))
-    , firstHopImpl(nullptr)
   {
   }
 
@@ -43,40 +42,39 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
     AbstractComponent::Ptr comp(
         static_cast<AbstractComponent *>(component.get()));
     std::pair<HopImpls::iterator, bool> status =
-        hopImpls.insert(std::make_pair(comp, HopImpl(component)));
+        hopImpls.insert(new HopImpl(component));
     assert(status.second);
-    HopImpl &hopImpl = status.first->second;
+    HopImpl *hopImpl = *status.first;
     if (!parent) {
-      assert(!firstHopImpl);
-      firstHopImpl = &hopImpl;
+      std::pair<HopImpls::iterator, bool> status =
+          firstHopImpls.insert(hopImpl);
+      assert(status.second);
     } else {
-      HopImpl &parentImpl = *static_cast<HopImpl *>(parent);
+      HopImpl *parentImpl = static_cast<HopImpl *>(parent);
 #ifndef NDEBUG
-      HopImpls::iterator iter = hopImpls.find(SystemC_VPC::getImpl(parent->getComponent()));
+      HopImpls::iterator iter = hopImpls.find(parentImpl);
       assert(iter != hopImpls.end());
-      assert(&iter->second == &parentImpl);
 #endif //NDEBUG
-      parentImpl.getChildHops().push_back(&hopImpl);
+      parentImpl->getChildHops().push_back(hopImpl);
     }
-    return &hopImpl;
+    return hopImpl;
   }
 
   void              StaticImpl::addDest(std::string const &chan, Hop *parent) {
-    HopImpl &parentImpl = *static_cast<HopImpl *>(parent);
+    HopImpl *parentImpl = static_cast<HopImpl *>(parent);
 #ifndef NDEBUG
-    HopImpls::iterator iter = hopImpls.find(SystemC_VPC::getImpl(parent->getComponent()));
+    HopImpls::iterator iter = hopImpls.find(parentImpl);
     assert(iter != hopImpls.end());
-    assert(&iter->second == &parentImpl);
 #endif //NDEBUG
-    acquireChannelInterface(chan, parentImpl.destinations);
+    acquireChannelInterface(chan, parentImpl->destinations);
   }
 
-  StaticImpl::Hop  *StaticImpl::getFirstHop() {
-    return firstHopImpl;
+  std::set<StaticImpl::Hop *> const &StaticImpl::getFirstHops() const {
+    return reinterpret_cast<std::set<Hop *> const &>(firstHopImpls);
   }
 
-  std::map<Component::Ptr, StaticImpl::Hop> const &StaticImpl::getHops() const {
-    return reinterpret_cast<std::map<Component::Ptr, Hop> const &>(hopImpls);
+  std::set<StaticImpl::Hop *> const &StaticImpl::getHops() const {
+    return reinterpret_cast<std::set<Hop *> const &>(hopImpls);
   }
 
   void StaticImpl::start(size_t quantitiy, void *userData, CallBack completed) {
@@ -94,8 +92,9 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
   }
 
   void StaticImpl::finalize() {
-    assert(firstHopImpl != nullptr && "Oops, no route specified!");
-    recurseHop(firstHopImpl);
+    assert(!firstHopImpls.empty() && "Oops, no route specified!");
+    for (HopImpl *firstHopImpl : firstHopImpls)
+      recurseHop(firstHopImpl);
   }
 
   void StaticImpl::MessageInstance::startHop(size_t hop) {
@@ -130,14 +129,14 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
   bool StaticImpl::closeStream(){
     for (HopImpls::value_type const &v : hopImpls) {
-      v.second.getComponent()->closeStream(getRouteId());
+      v->getComponent()->closeStream(getRouteId());
     }
     return true;
   }
 
   bool StaticImpl::addStream(){
     for (HopImpls::value_type const &v : hopImpls) {
-      v.second.getComponent()->addStream(getRouteId());
+      v->getComponent()->addStream(getRouteId());
     }
     return true;
   }

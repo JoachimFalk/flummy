@@ -66,9 +66,8 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     Hop  *addHop(Component::Ptr component, Hop *parent);
     void  addDest(std::string const &chan, Hop *parent);
-    Hop  *getFirstHop();
-
-    std::map<Component::Ptr, Hop> const &getHops() const;
+    std::set<Hop *> const &getFirstHops() const;
+    std::set<Hop *> const &getHops() const;
 
     bool addStream();
     bool closeStream();
@@ -104,11 +103,9 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
 
     void recurseHop(HopImpl *hopImpl);
 
-    HopImpl                    *firstHopImpl;
+    std::set<HopImpl *>         firstHopImpls;
 
-    typedef std::map<
-        AbstractComponent::Ptr,
-        HopImpl>                HopImpls;
+    typedef std::set<HopImpl *> HopImpls;
     HopImpls                    hopImpls;
 
     struct MessageInstance: public AbstractRoute::MessageInstance {
@@ -118,7 +115,13 @@ namespace SystemC_VPC { namespace Detail { namespace Routing {
           void           *userData,
           CallBack        completed)
         : AbstractRoute::MessageInstance(route, quantitiy, userData, completed)
-        , nextFreeCurrHop(1), currHop { route->firstHopImpl } { startHop(0); }
+        , nextFreeCurrHop(0)
+      {
+        for (HopImpl *firstHopImpl : route->firstHopImpls) {
+          currHop[nextFreeCurrHop] = firstHopImpl;
+          startHop(nextFreeCurrHop++);
+        }
+      }
     private:
       void startHop(size_t hop);
       void finishHop(size_t hop);

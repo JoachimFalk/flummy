@@ -48,8 +48,8 @@ public:
   Hop  *addHop(Component::Ptr component, Hop *parent = nullptr);
   void  addDest(std::string const &chan, Hop *parent);
 
-  Hop                                 *getFirstHop();
-  std::map<Component::Ptr, Hop> const &getHops() const;
+  std::set<Static::Hop *>       const &getFirstHops() const;
+  std::set<Static::Hop *>       const &getHops() const;
 
   bool addStream();
   bool closeStream();
