@@ -86,7 +86,7 @@ targetRegex CDATA #IMPLIED>
 tracing     CDATA #IMPLIED
 default     CDATA #IMPLIED
 >
-<!ELEMENT route (attribute*,hop?)>
+<!ELEMENT route (attribute*,hop*)>
 <!ATTLIST route
 name        CDATA #REQUIRED
 type        CDATA #REQUIRED

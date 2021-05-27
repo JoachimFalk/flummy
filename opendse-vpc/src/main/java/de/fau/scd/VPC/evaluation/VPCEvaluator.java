@@ -76,6 +76,7 @@ import net.sf.opendse.optimization.ImplementationEvaluator;
 //import javax.xml.parsers.DocumentBuilderFactory;
 //import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.swing.plaf.RootPaneUI;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -635,10 +636,12 @@ public class VPCEvaluator implements ImplementationEvaluator {
     static protected class Routing {
         public final Task message;
         public final Architecture<Resource, Link> routing;
+        public final Set<String> channels;
 
-        public Routing(Task message, Architecture<Resource, Link> routing) {
+        public Routing(Task message, Architecture<Resource, Link> routing, Set<String> channels) {
             this.message = message;
             this.routing = routing;
+            this.channels = channels;
         }
     }
 
@@ -647,19 +650,42 @@ public class VPCEvaluator implements ImplementationEvaluator {
       , org.w3c.dom.Element eTopology
       )
     {
-        Map<String, Routing> routes = new HashMap<>();
+        Map<String, Set<Routing>> routes = new HashMap<>();
         Routings<Task, Resource, Link> routings = implementation.getRoutings();
         for (Task message : routings.getTasks()) {
             assert message instanceof ICommunication;
-            routes.put(message.getId(), new Routing(message, routings.get(message)));
+            Map<String, Set<String> > writeChannels = ApplicationPropertyService.getRepresentedWriteChannels(message);
+            Map<String, String> readChannels = ApplicationPropertyService.getRepresentedReadChannels(message);
+            if (readChannels != null) {
+                assert writeChannels == null;
+                for (Map.Entry<String, String> entry : readChannels.entrySet()) {
+                    Set<String> channels = new HashSet<>();
+                    channels.add(entry.getValue());
+                    Set<Routing> routingSet = routes.get(entry.getKey());
+                    if (routingSet == null) 
+                        routingSet = new HashSet<>();
+                    routingSet.add(new Routing(message, routings.get(message), channels));
+                    routes.put(entry.getKey(), routingSet);
+                }
+            } else {
+                assert writeChannels != null;
+                for (Map.Entry<String, Set<String> > entry : writeChannels.entrySet()) {
+                    Set<String> channels = entry.getValue();
+                    Set<Routing> routingSet = routes.get(entry.getKey());
+                    if (routingSet == null) 
+                        routingSet = new HashSet<>();
+                    routingSet.add(new Routing(message, routings.get(message), channels));
+                    routes.put(entry.getKey(), routingSet);;
+                }
+            }
         }
         Iterator<org.w3c.dom.Element> eRouteIter =
             VPCConfigReader.childElements(eTopology, "route").iterator();
         while (eRouteIter.hasNext()) {
             org.w3c.dom.Element eRoute = eRouteIter.next();
             String name = eRoute.getAttribute("name");
-            Routing routing = routes.get(name);
-            if (routing == null) {
+            Set<Routing> routingSet = routes.get(name);
+            if (routingSet == null) {
                 // Message is not routed; Remove route from VPC configuration file.
                 eRouteIter.remove();
                 continue;
@@ -669,17 +695,23 @@ public class VPCEvaluator implements ImplementationEvaluator {
                 while ((child = eRoute.getFirstChild()) != null)
                     eRoute.removeChild(child);
             }
-            processRoute(implementation, routing, eRoute);
+            for (Routing routing : routingSet)
+                processRoute(implementation, routing, eRoute);
+            
             routes.remove(name);
         }
 
         org.w3c.dom.Document vpcDocument = eTopology.getOwnerDocument();
 
-        for (Routing routing : routes.values()) {
+        for (Map.Entry<String, Set<Routing> > entry : routes.entrySet()) {
+            
             org.w3c.dom.Element eRoute = vpcDocument.createElement("route");
-            eRoute.setAttribute("name", routing.message.getId());
+            eRoute.setAttribute("name", entry.getKey());
             eTopology.appendChild(eRoute);
-            processRoute(implementation, routing, eRoute);
+            for (Routing routing : entry.getValue())
+                processRoute(implementation, routing, eRoute);
+            
+
         }
     }
 
@@ -773,16 +805,15 @@ public class VPCEvaluator implements ImplementationEvaluator {
             if (msgSuccessors != null)
                 for (Task msgSucc : msgSuccessors) {
                     if (isRead) {
-                        org.w3c.dom.Element eDestHop = vpcDocument.createElement("desthop");
-                        eDestHop.setAttribute("channel",
-                            ApplicationPropertyService.getMessageReadChannel(routing.message));
+                        org.w3c.dom.Element eDestHop = vpcDocument.createElement("desthop");  
+                        Iterator<String> channel = routing.channels.iterator();
+                        eDestHop.setAttribute("channel", channel.next());
+                        assert !channel.hasNext();
                         eHop.appendChild(eDestHop);
                     } else {
-                        Collection<String> channelIds =
-                            ApplicationPropertyService.getRepresentedChannels(msgSucc);
-                        for (String channelId : channelIds) {
+                        for (String channelName : routing.channels) {
                             org.w3c.dom.Element eDestHop = vpcDocument.createElement("desthop");
-                            eDestHop.setAttribute("channel", channelId);
+                            eDestHop.setAttribute("channel", channelName);
                             eHop.appendChild(eDestHop);
                         }
                     }
