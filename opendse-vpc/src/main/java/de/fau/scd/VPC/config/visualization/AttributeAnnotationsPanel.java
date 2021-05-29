@@ -21,12 +21,10 @@
 
 package de.fau.scd.VPC.config.visualization;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
@@ -58,10 +56,11 @@ public class AttributeAnnotationsPanel
         this.attributeAnnotations = (AttributeAnnotations) property.getValue();
 
         tableModel = new DefaultTableModel(
-            new Object[]{"Spec. element", "attr. name", "attr. type", "attr. value"}, 0);
+            new Object[]{"type", "id. regex", "attr. name", "attr. type", "attr. value"}, 0);
         for (AttributeAnnotation an : attributeAnnotations) {
             tableModel.addRow(new Object[]{
-                an.getElemRegex().pattern()
+                an.getNodeType()
+              , an.getElemRegex().pattern()
               , an.getAttrName()
               , an.getAttrType()
               , an.getAttrValue().toString() });
@@ -70,7 +69,20 @@ public class AttributeAnnotationsPanel
         table = new JTable(tableModel);
 
         {
-            TableColumn attrTypeColumn = table.getColumnModel().getColumn(2);
+            TableColumn nodeTypeColumn = table.getColumnModel().getColumn(0);
+            // Set up the editor for the attr. type column.
+            JComboBox<AttributeAnnotation.NodeType> comboBox = new JComboBox<AttributeAnnotation.NodeType>();
+            for (AttributeAnnotation.NodeType nodeType : AttributeAnnotation.NodeType.values())
+                comboBox.addItem(nodeType);
+            nodeTypeColumn.setCellEditor(new DefaultCellEditor(comboBox));
+//          // Set up tool tips for the attr. type column.
+//          DefaultTableCellRenderer renderer =
+//                  new DefaultTableCellRenderer();
+//          renderer.setToolTipText("Click for combo box");
+//          attrTypeColumn.setCellRenderer(renderer);
+        }
+        {
+            TableColumn attrTypeColumn = table.getColumnModel().getColumn(3);
             // Set up the editor for the attr. type column.
             JComboBox<AttributeAnnotation.AttrType> comboBox = new JComboBox<AttributeAnnotation.AttrType>();
             for (AttributeAnnotation.AttrType attrType : AttributeAnnotation.AttrType.values())
@@ -154,12 +166,15 @@ public class AttributeAnnotationsPanel
         Vector<Vector<Object>> rows = tableModel.getDataVector();
 //      System.err.println(rows);
         for (Vector<Object> row : rows) {
-            final String elemRegex = (String) row.get(0);
-            final String attrName  = (String) row.get(1);
-            final AttributeAnnotation.AttrType attrType = (AttributeAnnotation.AttrType) row.get(2);
-            final String attrValue = (String) row.get(3);
-            if (elemRegex != null && attrName != null && attrType != null) {
+            final AttributeAnnotation.NodeType nodeType = (AttributeAnnotation.NodeType) row.get(0);
+            final String elemRegex = (String) row.get(1);
+            final String attrName  = (String) row.get(2);
+            final AttributeAnnotation.AttrType attrType = (AttributeAnnotation.AttrType) row.get(3);
+            final String attrValue = (String) row.get(4);
+            if (nodeType != null && elemRegex != null &&
+                attrName != null && attrType  != null) {
                 attributeAnnotations.add(new AttributeAnnotation(
+                    nodeType,
                     elemRegex, attrName, attrType
                   , attrValue != null ? attrValue : ""));
             }

@@ -21,6 +21,7 @@
 
 package de.fau.scd.VPC.io;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,46 +36,79 @@ import net.sf.opendse.model.Task;
 import net.sf.opendse.optimization.io.SpecificationTransformer;
 
 public class AttributeAnnotator implements SpecificationTransformer {
-    
+
     private List<AttributeAnnotation> attrAnnotationList;
-    
+
     interface AttributeAnnotations {
         public List<AttributeAnnotation> getAttributeAnnotation();
     }
-    
+
     @Inject
     public AttributeAnnotator(AttributeAnnotations attributeAnnotations) {
         this.attrAnnotationList = attributeAnnotations.getAttributeAnnotation();
     }
-    
+
     @Override
     public void transform(Specification specification) {
-       for (Task t : specification.getApplication()) {          
-           for (AttributeAnnotation aa : attrAnnotationList) {
-               Matcher m = aa.getElemRegex().matcher(t.getId());
-               if (m.find()) {
-                   t.setAttribute(aa.getAttrName(), aa.getAttrValue());
-               }
-           }
-       }
-       
-       for (Resource r : specification.getArchitecture()) {
-           for (AttributeAnnotation aa : attrAnnotationList) {
-               Matcher m = aa.getElemRegex().matcher(r.getId());
-               if (m.find()) {
-                   r.setAttribute(aa.getAttrName(), aa.getAttrValue());
-               }
-           }
-       }
 
-       for (Mapping<Task, Resource> mp : specification.getMappings()) {
-           for (AttributeAnnotation aa : attrAnnotationList) {
-               Matcher m = aa.getElemRegex().matcher(mp.getId());
-               if (m.find()) {
-                   mp.setAttribute(aa.getAttrName(), aa.getAttrValue());
-               }
-           }
-       }
+        List<AttributeAnnotation> applicationAttrAnnotations = new ArrayList<>();
+        List<AttributeAnnotation> architectureAttrAnnotations = new ArrayList<>();
+        List<AttributeAnnotation> mappingsAttrAnnotations = new ArrayList<>();
+        List<AttributeAnnotation> specificationAttrAnnotations = new ArrayList<>();
+
+        for (AttributeAnnotation aa : attrAnnotationList) {
+            switch (aa.getNodeType()) {
+                case APPLICATION:
+                    applicationAttrAnnotations.add(aa);
+                    break;
+                case ARCHITECTURE:
+                    architectureAttrAnnotations.add(aa);
+                    break;
+                case MAPPINGS:
+                    mappingsAttrAnnotations.add(aa);
+                    break;
+                case SPECIFICATION:
+                    if (aa.getElemRegex().pattern().isEmpty()) {
+                        specificationAttrAnnotations.add(aa);
+                    } else {
+                        applicationAttrAnnotations.add(aa);
+                        architectureAttrAnnotations.add(aa);
+                        mappingsAttrAnnotations.add(aa);
+                    }
+                    break;
+            }
+        }
+
+        for (Task t : specification.getApplication()) {
+            for (AttributeAnnotation aa : applicationAttrAnnotations) {
+                Matcher m = aa.getElemRegex().matcher(t.getId());
+                if (m.find()) {
+                    t.setAttribute(aa.getAttrName(), aa.getAttrValue());
+                }
+            }
+        }
+
+        for (Resource r : specification.getArchitecture()) {
+            for (AttributeAnnotation aa : architectureAttrAnnotations) {
+                Matcher m = aa.getElemRegex().matcher(r.getId());
+                if (m.find()) {
+                    r.setAttribute(aa.getAttrName(), aa.getAttrValue());
+                }
+            }
+        }
+
+        for (Mapping<Task, Resource> mp : specification.getMappings()) {
+            for (AttributeAnnotation aa : mappingsAttrAnnotations) {
+                Matcher m = aa.getElemRegex().matcher(mp.getId());
+                if (m.find()) {
+                    mp.setAttribute(aa.getAttrName(), aa.getAttrValue());
+                }
+            }
+        }
+
+        for (AttributeAnnotation aa : specificationAttrAnnotations) {
+            specification.setAttribute(aa.getAttrName(), aa.getAttrValue());
+        }
     }
 
     @Override
