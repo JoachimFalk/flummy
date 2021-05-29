@@ -27,14 +27,13 @@ import org.opt4j.core.config.annotations.Panel;
 //import org.opt4j.core.config.annotations.Required;
 
 import de.fau.scd.VPC.config.properties.AttributeAnnotations;
-import de.fau.scd.VPC.config.properties.Objectives;
 import de.fau.scd.VPC.config.visualization.PropertyPanel;
-import de.fau.scd.VPC.evaluation.VPCEvaluator;
 import net.sf.opendse.optimization.io.IOModule;
 
 @Panel(value = PropertyPanel.class)
 public class AttributeAnnotatorModule extends IOModule {
     
+    @SuppressWarnings("serial")
     protected static class AttributeAnnotationsImpl
     extends
         AttributeAnnotations

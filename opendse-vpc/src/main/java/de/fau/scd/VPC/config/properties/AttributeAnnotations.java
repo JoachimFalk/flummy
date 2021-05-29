@@ -51,12 +51,21 @@ public class AttributeAnnotations extends LinkedList<AttributeAnnotation> {
         PrimitiveIterator.OfInt in = encoding.chars().iterator();
 
         while (in.hasNext()) {
-            String elemRegex  = deQuote(encoding, in, ',');
+            String argString = deQuote(encoding, in, ',');
+            // Backward compatibility cruft
+            AttributeAnnotation.NodeType nodeType =
+                AttributeAnnotation.NodeType.SPECIFICATION;
+            try {
+                nodeType = AttributeAnnotation.NodeType.valueOf(argString);
+                argString = deQuote(encoding, in, ',');
+            } catch (IllegalArgumentException e) {}
+            String elemRegex  = argString;
             String attrName   = deQuote(encoding, in, ',');
             String attrType   = deQuote(encoding, in, ',');
             String attrValue  = deQuote(encoding, in, ';');
             this.add(new AttributeAnnotation(
-                elemRegex
+                nodeType
+              , elemRegex
               , attrName
               , AttributeAnnotation.AttrType.valueOf(attrType)
               , attrValue));
@@ -68,14 +77,16 @@ public class AttributeAnnotations extends LinkedList<AttributeAnnotation> {
 
         Iterator<AttributeAnnotation> i = iterator();
         while (i.hasNext()) {
-            AttributeAnnotation objInfo = i.next();
-            enQuote(sb, objInfo.getElemRegex().pattern());
+            AttributeAnnotation aa = i.next();
+            enQuote(sb, aa.getNodeType().name());
             sb.append(',');
-            enQuote(sb, objInfo.getAttrName());
+            enQuote(sb, aa.getElemRegex().pattern());
             sb.append(',');
-            enQuote(sb, objInfo.getAttrType().name());
+            enQuote(sb, aa.getAttrName());
             sb.append(',');
-            enQuote(sb, objInfo.getAttrValue().toString());
+            enQuote(sb, aa.getAttrType().name());
+            sb.append(',');
+            enQuote(sb, aa.getAttrValue().toString());
             if (i.hasNext())
                 sb.append(';');
         }

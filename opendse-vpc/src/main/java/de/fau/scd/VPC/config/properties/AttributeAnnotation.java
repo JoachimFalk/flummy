@@ -27,29 +27,41 @@ import de.fau.scd.VPC.io.AttributeHelper;
 
 public class AttributeAnnotation {
 
+    public enum NodeType {
+        SPECIFICATION, APPLICATION, ARCHITECTURE, MAPPINGS
+    }
+
     public enum AttrType {
         INT, DOUBLE, STRING, BOOL
     }
 
     public AttributeAnnotation(
-        Pattern elemRegex
-      , String  attrName
-      , Object  attrValue)
+        NodeType nodeType
+      , Pattern  elemRegex
+      , String   attrName
+      , Object   attrValue)
     {
+        this.nodeType  = nodeType;
         this.elemRegex = elemRegex;
         this.attrName  = attrName;
         this.attrValue = attrValue;
     }
 
     public AttributeAnnotation(
-        String   elemRegex
+        NodeType nodeType
+      , String   elemRegex
       , String   attrName
       , AttrType attrType
       , String   attrValue)
     {
+        this.nodeType  = nodeType;
         this.elemRegex = Pattern.compile(elemRegex);
         this.attrName  = attrName;
         this.attrValue = AttributeHelper.toAttributeObject(attrType.name(), attrValue);
+    }
+
+    public NodeType getNodeType() {
+        return nodeType;
     }
 
     public Pattern getElemRegex() {
@@ -80,6 +92,7 @@ public class AttributeAnnotation {
         return attrValue;
     }
 
+    protected final NodeType  nodeType;
     protected final Pattern   elemRegex;
     protected final String    attrName;
     protected final Object    attrValue;
