@@ -40,6 +40,7 @@ import org.opt4j.core.config.visualization.Format;
 
 import de.fau.scd.VPC.config.annotations.Text;
 import de.fau.scd.VPC.config.properties.AttributeAnnotations;
+import de.fau.scd.VPC.config.properties.AttributeLogs;
 import de.fau.scd.VPC.config.properties.Environment;
 import de.fau.scd.VPC.config.properties.Objectives;
 
@@ -62,6 +63,8 @@ public class PropertyPanel extends org.opt4j.core.config.visualization.PropertyP
             return new ObjectivesPanel(property);
         } else if (type.isAssignableFrom(AttributeAnnotations.class)) {
             return new AttributeAnnotationsPanel(property);
+        } else if (type.isAssignableFrom(AttributeLogs.class)) {
+            return new AttributeLogsPanel(property);
         } else if (textAnotation != null && type.isAssignableFrom(String.class)) {
             final JTextArea   field = new JTextArea(textAnotation.rows(), 0);
             final JScrollPane scroll = new JScrollPane(field);

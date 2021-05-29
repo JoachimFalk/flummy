@@ -24,8 +24,13 @@ import org.opt4j.core.common.logger.LoggerModule;
 import org.opt4j.core.common.logger.TsvLogger;
 import org.opt4j.core.config.annotations.Info;
 import org.opt4j.core.config.annotations.Order;
+import org.opt4j.core.config.annotations.Panel;
 import org.opt4j.core.start.Constant;
 
+import de.fau.scd.VPC.config.properties.AttributeLogs;
+import de.fau.scd.VPC.config.visualization.PropertyPanel;
+
+@Panel(value = PropertyPanel.class)
 public class VPCLoggerModule extends LoggerModule {
 
     @Info("Log working folder, e.g., where VPC simulations are performed.")
@@ -39,6 +44,27 @@ public class VPCLoggerModule extends LoggerModule {
 
     public void setLogWorkingFolder(boolean logWorkingFolder) {
         this.logWorkingFolder = logWorkingFolder;
+    }
+
+    @SuppressWarnings("serial")
+    protected static class AttributeLogsImpl
+    extends
+        AttributeLogs
+    implements
+        VPCLogger.AttributeLogs
+    {
+    }
+    @Info("Additional attributes to log")
+//  @Order(3)
+//  @Required(property = "dfgSource", elements = { "DFG_FROM_SIM_EXPORT" })
+    protected final AttributeLogsImpl attributeLogs = new AttributeLogsImpl();
+
+    public AttributeLogs getAttributeLogs() {
+        return attributeLogs;
+    }
+
+    public void setAttributeLogs(AttributeLogs als) {
+        this.attributeLogs.assign(als);
     }
 
     @Override
@@ -61,5 +87,8 @@ public class VPCLoggerModule extends LoggerModule {
             .to(evaluationStep);
         bindConstant("iterationStep", TsvLogger.class)
             .to(iterationStep);
+
+        bind(VPCLogger.AttributeLogs.class)
+            .toInstance(attributeLogs);
     }
 }
