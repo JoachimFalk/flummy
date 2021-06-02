@@ -148,7 +148,6 @@ public class ApplicationPropertyService {
         assert task instanceof ICommunication;
         task.setAttribute("smoc-represented-write-channels", channelIds);
     }
-
     
     /// Return channel ids (names) represented by the given MEM task
     public static Collection<String> getRepresentedChannels(Task task) {
@@ -173,5 +172,16 @@ public class ApplicationPropertyService {
         assert getTaskType(task) == TaskType.MEM;
         task.setAttribute("smoc-represented-channels", channelIds);
     }
+    
+    public static int getChannelSize(String channelId) {
+        assert channelSizes.containsKey(channelId);
+        return channelSizes.get(channelId);
+    }
+    
+    public static void setChannelSize(String channelId, int tokenSize) {
+        channelSizes.put(channelId, tokenSize);
+    }
+    
+    private static Map<String, Integer> channelSizes = new HashMap<>();
 
 }
