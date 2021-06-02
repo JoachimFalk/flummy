@@ -165,6 +165,7 @@ public class SNGImporter {
             this.attrs = attrs;
             attrs.put(ApplicationPropertyService.attrTokenCapacity, tokenCapacity);
             attrs.put(ApplicationPropertyService.attrInitialToken, initialTokens);
+            ApplicationPropertyService.setChannelSize(name, tokenSize);
         }
 
         static public ChanInfo forFIFO(
@@ -217,7 +218,7 @@ public class SNGImporter {
                 Dependency dependency = new Dependency(uniquePool.createUniqeName());
                 app.addEdge(dependency, readMsg, target.exeTask, EdgeType.DIRECTED);
             }
-            ApplicationPropertyService.setMessagePayload(readMsg, payload);         
+            ApplicationPropertyService.setMessagePayload(readMsg, payload); 
             ApplicationPropertyService.setRepresentedReadChannels(readMsg, mergingInfos);         
         }
 
@@ -516,7 +517,7 @@ public class SNGImporter {
 
             for (org.w3c.dom.Element eRegister : SNGReader.childElements(eNetworkGraph, "register")) {
                 String name  = eRegister.getAttribute("name");
-
+                
                 Task memTask = new Task(name);
                 ApplicationPropertyService.setTaskType(memTask,
                         ApplicationPropertyService.TaskType.MEM);
