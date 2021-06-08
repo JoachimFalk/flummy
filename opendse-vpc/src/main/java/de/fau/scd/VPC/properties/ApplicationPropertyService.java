@@ -149,30 +149,6 @@ public class ApplicationPropertyService {
         task.setAttribute("smoc-represented-write-channels", channelIds);
     }
     
-    /// Return channel ids (names) represented by the given MEM task
-    public static Collection<String> getRepresentedChannels(Task task) {
-        assert getTaskType(task) == TaskType.MEM;
-        Collection<String> representedChannels = task.<Collection<String>>getAttribute("smoc-represented-channels");
-        return representedChannels == null
-            ? Arrays.asList(task.getId())
-            : representedChannels;
-    }
-    /// Add a channel to be represented by the given MEM task
-    public static void addRepresentedChannel(Task task, String channelId) {
-        assert getTaskType(task) == TaskType.MEM;
-        Collection<String> channelIds = task.<Collection<String>>getAttribute("smoc-represented-channels");
-        if (channelIds == null) {
-            channelIds = new ArrayList<>();
-            task.setAttribute("smoc-represented-channels", channelIds);
-        }
-        channelIds.add(channelId);
-    }
-    /// Set channels represented by the given MEM task
-    public static void setRepresentedChannels(Task task, Collection<String> channelIds) {
-        assert getTaskType(task) == TaskType.MEM;
-        task.setAttribute("smoc-represented-channels", channelIds);
-    }
-    
     public static int getChannelSize(String channelId) {
         assert channelSizes.containsKey(channelId);
         return channelSizes.get(channelId);

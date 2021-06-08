@@ -440,8 +440,6 @@ public class SNGImporter {
                     }
                     chanInstances.put(writeMsgName, chanInstance);
                 }
-                if (fifoMerging != FIFOMerging.FIFOS_NO_MERGING)
-                    ApplicationPropertyService.addRepresentedChannel(chanInstance.memTask, chanInfo.name);
                 String readMsgName = null;
                 switch (fifoMerging) {
                 case FIFOS_NO_MERGING:
