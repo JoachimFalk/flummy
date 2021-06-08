@@ -124,40 +124,71 @@ public class ApplicationPropertyService {
         assert task instanceof ICommunication;
         task.setAttribute("smoc-msg-payload", bytes);
     }
-    
-    /// Return the channel ids (names) represented by a given read message
+
+    /// This function returns a map from <actor>.<actor port>, i.e.,
+    /// the original message name, to the original message size in bytes.
+    public static Map<String, Integer> getRepresentedMessagePayloads(Task task) {
+        assert task instanceof ICommunication;
+        return task.<Map<String, Integer> >getAttribute("smoc-represented-msg-payloads");
+    }
+    /// Sets a map from <actor>.<actor port>, i.e., the original message
+    /// name, to the original message size in bytes.
+    public static void setRepresentedMessagePayloads(Task task, Map<String, Integer> representedPayloads) {
+        assert task instanceof ICommunication;
+        task.setAttribute("smoc-represented-msg-payloads", representedPayloads);
+    }
+
+    /// Returns information which channels are accessed by this read message.
+    /// Hence, this method must only be used for tasks representing read messages.
+    /// Individual channel reads may be merged into a single read message
+    /// in the DSE model. In this case, the merged read message, i.e., the task,
+    /// will be annotated with information which reads from the VPC model have
+    /// been merged. For this purpose, this function returns a map from
+    /// <actor>.<input port> to <channel id>.
     public static Map<String, String> getRepresentedReadChannels(Task task) {
         assert task instanceof ICommunication;
-        Map<String, String>  representedChannels = task.<Map<String, String> >getAttribute("smoc-represented-read-channels");       
+        Map<String, String>  representedChannels = task.<Map<String, String> >getAttribute("smoc-represented-channels");
         return representedChannels;
-    }     
-    /// Set channels represented by the given read message
+    }
+    /// Sets a map from <actor>.<input port> to <channel id>.
+    /// Must only be used for tasks representing read messages
     public static void setRepresentedReadChannels(Task task, Map<String, String> channelIds) {
         assert task instanceof ICommunication;
-        task.setAttribute("smoc-represented-read-channels", channelIds);
+        task.setAttribute("smoc-represented-channels", channelIds);
     }
-    
-    /// Return the channel ids (names) represented by a given write message
+
+    /// This function returns a map from <actor>.<input port> to
+    /// <actor>.<output port> which produced the data.
+    /// Must only be used for tasks representing read messages
+    public static Map<String, String> getRepresentedProducers(Task task) {
+        assert task instanceof ICommunication;
+        Map<String, String>  representedChannels = task.<Map<String, String> >getAttribute("smoc-represented-producers");
+        return representedChannels;
+    }
+    /// Sets a map from <actor>.<input port> to
+    /// <actor>.<output port> which produced the data.
+    /// Must only be used for tasks representing read messages
+    public static void setRepresentedProducers(Task task, Map<String, String> channelIds) {
+        assert task instanceof ICommunication;
+        task.setAttribute("smoc-represented-producers", channelIds);
+    }
+
+    /// Hence, this method must only be used for tasks representing write messages.
+    /// Individual channel writes may be merged into a single write message
+    /// in the DSE model. In this case, the merged write message, i.e., the task,
+    /// will be annotated with information which write from the VPC model have
+    /// been merged and into which channels they wrote. For this purpose, this
+    /// function returns a map from <actor>.<output port> to <set of channel ids>.
     public static Map<String, Set<String>>getRepresentedWriteChannels(Task task) {
         assert task instanceof ICommunication;
-        Map<String, Set<String>>  representedChannels = task.<Map<String, Set<String>> >getAttribute("smoc-represented-write-channels");
+        Map<String, Set<String>>  representedChannels = task.<Map<String, Set<String>> >getAttribute("smoc-represented-channels");
         return representedChannels;
-    }     
-    /// Set channels represented by the given write message
+    }
+    /// Sets a map from <actor>.<output port> to <set of channel ids>.
+    /// Must only be used for tasks representing write messages
     public static void setRepresentedWriteChannels(Task task, Map<String, Set<String>> channelIds) {
         assert task instanceof ICommunication;
-        task.setAttribute("smoc-represented-write-channels", channelIds);
+        task.setAttribute("smoc-represented-channels", channelIds);
     }
-    
-    public static int getChannelSize(String channelId) {
-        assert channelSizes.containsKey(channelId);
-        return channelSizes.get(channelId);
-    }
-    
-    public static void setChannelSize(String channelId, int tokenSize) {
-        channelSizes.put(channelId, tokenSize);
-    }
-    
-    private static Map<String, Integer> channelSizes = new HashMap<>();
 
 }
