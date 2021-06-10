@@ -219,8 +219,10 @@ public class SNGImporter {
             }
             ApplicationPropertyService.setMessagePayload(readMsg, payload);
             ApplicationPropertyService.setRepresentedReadChannels(readMsg, origChannels);
-            ApplicationPropertyService.setRepresentedProducers(readMsg, origProducers);
-            ApplicationPropertyService.setRepresentedMessagePayloads(readMsg, origMsgPayloads);
+            if (fifoMerging == FIFOMerging.FIFOS_SAME_PRODUCER_MERGING) {
+                ApplicationPropertyService.setRepresentedProducers(readMsg, origProducers);
+                ApplicationPropertyService.setRepresentedMessagePayloads(readMsg, origMsgPayloads);
+            }
         }
 
         private final String        msgName;
@@ -321,7 +323,9 @@ public class SNGImporter {
             app.addVertex(writeMsg);
             ApplicationPropertyService.setMessagePayload(writeMsg, writeMsgPayload);
             ApplicationPropertyService.setRepresentedWriteChannels(writeMsg, mergingInfos);
-            ApplicationPropertyService.setRepresentedMessagePayloads(writeMsg, origMsgPayloads);
+            if (fifoMerging == FIFOMerging.FIFOS_SAME_PRODUCER_MERGING) {
+                ApplicationPropertyService.setRepresentedMessagePayloads(writeMsg, origMsgPayloads);
+            }
             {
                 Dependency dependency = new Dependency(uniquePool.createUniqeName());
                 app.addEdge(dependency, sourceActor.exeTask, writeMsg, EdgeType.DIRECTED);
