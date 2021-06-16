@@ -78,21 +78,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     void addAttribute(Attribute const &attribute);
 
-    /**
-     *
-     */
-    void requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
-    
-    /**
-     *
-     */
-    void execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
-    
-    /**
-     *
-     */
-    void abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
-    
     /*
      * from ComponentInterface
      */

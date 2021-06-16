@@ -71,27 +71,6 @@ namespace SystemC_VPC { namespace Detail {
     void diiExpired() { diiCallback(this); }
     void latExpired() { latCallback(this); }
 
-    void       ackBlockingCompute(){
-      blockAck = true;
-      blockingCompute->notify();
-    }
-    void       abortBlockingCompute(){
-      blockAck = false;
-      blockingCompute->notify();
-    }
-
-    void       resetBlockingCompute(){this->setBlockingCompute(NULL);}
-    void       setBlockingCompute(VPCEvent::Ptr blocker)
-      { blockingCompute = blocker; }
-    bool       isBlocking()
-      { return blockingCompute != NULL; }
-    bool       isAckedBlocking()
-      { return blockAck; }
-    void       setExec( bool exec ) {this->exec=exec;}
-    bool       isExec(  ) { return this->exec;}
-    void       setWrite( bool write ) {this->write=write;}
-    bool       isWrite(  ) { return this->write;}
-
     // Getters forwarding to taskImpl
     int              getPriority() const;
     sc_core::sc_time getPeriod() const;
@@ -119,12 +98,6 @@ namespace SystemC_VPC { namespace Detail {
 
     std::function<void (TaskInstanceImpl *)> const diiCallback;
     std::function<void (TaskInstanceImpl *)> const latCallback;
-
-    // JF: Other stuff I still don't understand
-    VPCEvent::Ptr blockingCompute;
-    bool       blockAck;
-    bool       exec;
-    bool       write;
   };
 
   typedef std::map<int, TaskInstanceImpl*>  TaskMap;
