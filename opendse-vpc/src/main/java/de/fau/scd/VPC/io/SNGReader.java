@@ -43,8 +43,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import de.fau.scd.VPC.io.Common.FormatErrorException;
-
 /**
  * The {@code SNGReader} reads a dataflow graph in SNG XML format into a
  * {@code org.w3c.dom.Document} from an {@code InputStream} or file.
