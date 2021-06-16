@@ -138,25 +138,6 @@ public class ApplicationPropertyService {
         task.setAttribute("smoc-represented-msg-payloads", representedPayloads);
     }
 
-    /// Returns information which channels are accessed by this read message.
-    /// Hence, this method must only be used for tasks representing read messages.
-    /// Individual channel reads may be merged into a single read message
-    /// in the DSE model. In this case, the merged read message, i.e., the task,
-    /// will be annotated with information which reads from the VPC model have
-    /// been merged. For this purpose, this function returns a map from
-    /// <actor>.<input port> to <channel id>.
-    public static Map<String, String> getRepresentedReadChannels(Task task) {
-        assert task instanceof ICommunication;
-        Map<String, String>  representedChannels = task.<Map<String, String> >getAttribute("smoc-represented-channels");
-        return representedChannels;
-    }
-    /// Sets a map from <actor>.<input port> to <channel id>.
-    /// Must only be used for tasks representing read messages
-    public static void setRepresentedReadChannels(Task task, Map<String, String> channelIds) {
-        assert task instanceof ICommunication;
-        task.setAttribute("smoc-represented-channels", channelIds);
-    }
-
     /// This function returns a map from <actor>.<input port> to
     /// <actor>.<output port> which produced the data.
     /// Must only be used for tasks representing read messages
@@ -173,6 +154,29 @@ public class ApplicationPropertyService {
         task.setAttribute("smoc-represented-producers", channelIds);
     }
 
+    private static String attrRepresentedReadChannels = "smoc-represented-read-channels";
+
+    /// Returns information which channels are accessed by this read message.
+    /// Hence, this method must only be used for tasks representing read messages.
+    /// Individual channel reads may be merged into a single read message
+    /// in the DSE model. In this case, the merged read message, i.e., the task,
+    /// will be annotated with information which reads from the VPC model have
+    /// been merged. For this purpose, this function returns a map from
+    /// <actor>.<input port> to <channel id>.
+    public static Map<String, String> getRepresentedReadChannels(Task task) {
+        assert task instanceof ICommunication;
+        Map<String, String>  representedChannels = task.<Map<String, String> >getAttribute(attrRepresentedReadChannels);
+        return representedChannels;
+    }
+    /// Sets a map from <actor>.<input port> to <channel id>.
+    /// Must only be used for tasks representing read messages
+    public static void setRepresentedReadChannels(Task task, Map<String, String> channelIds) {
+        assert task instanceof ICommunication;
+        task.setAttribute(attrRepresentedReadChannels, channelIds);
+    }
+
+    private static String attrRepresentedWriteChannels = "smoc-represented-write-channels";
+
     /// Hence, this method must only be used for tasks representing write messages.
     /// Individual channel writes may be merged into a single write message
     /// in the DSE model. In this case, the merged write message, i.e., the task,
@@ -181,14 +185,14 @@ public class ApplicationPropertyService {
     /// function returns a map from <actor>.<output port> to <set of channel ids>.
     public static Map<String, Set<String>>getRepresentedWriteChannels(Task task) {
         assert task instanceof ICommunication;
-        Map<String, Set<String>>  representedChannels = task.<Map<String, Set<String>> >getAttribute("smoc-represented-channels");
+        Map<String, Set<String>>  representedChannels = task.<Map<String, Set<String>> >getAttribute(attrRepresentedWriteChannels);
         return representedChannels;
     }
     /// Sets a map from <actor>.<output port> to <set of channel ids>.
     /// Must only be used for tasks representing write messages
     public static void setRepresentedWriteChannels(Task task, Map<String, Set<String>> channelIds) {
         assert task instanceof ICommunication;
-        task.setAttribute("smoc-represented-channels", channelIds);
+        task.setAttribute(attrRepresentedWriteChannels, channelIds);
     }
 
 }
