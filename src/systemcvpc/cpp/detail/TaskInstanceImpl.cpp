@@ -43,10 +43,6 @@ namespace SystemC_VPC { namespace Detail {
     , firingRuleInterface(firingRuleInterface)
     , diiCallback(diiCallback)
     , latCallback(latCallback)
-    , blockingCompute(nullptr)
-    , blockAck(false)
-    , exec(false)
-    , write(false)
   {}
 
   TaskInstanceImpl::~TaskInstanceImpl() {

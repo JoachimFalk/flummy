@@ -146,40 +146,9 @@ namespace SystemC_VPC { namespace Detail {
     finishDiiTaskInstance(runningTask);
   }
 
-/**
- *
- */
-void NonPreemptiveComponent::requestBlockingCompute(
-    TaskInstanceImpl* task, VPCEvent::Ptr blocker)
-{
-  task->setExec(false);
-  task->setBlockingCompute(blocker);
-  this->compute(task);
-}
-
-/**
- *
- */
-void NonPreemptiveComponent::execBlockingCompute(
-    TaskInstanceImpl* task, VPCEvent::Ptr blocker)
-{
-  task->setExec(true);
-  blockCompute.notify();
-}
-
-/**
- *
- */
-void NonPreemptiveComponent::abortBlockingCompute(
-    TaskInstanceImpl* task, VPCEvent::Ptr blocker)
-{
-  task->resetBlockingCompute();
-  blockCompute.notify();
-}
-
-NonPreemptiveComponent::~NonPreemptiveComponent() {
-  //this->setPowerConsumption(0.0);
-  //this->fireNotification(this);
-}
+  NonPreemptiveComponent::~NonPreemptiveComponent() {
+    //this->setPowerConsumption(0.0);
+    //this->fireNotification(this);
+  }
 
 } } // namespace SystemC_VPC::Detail

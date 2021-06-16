@@ -30,7 +30,6 @@
 #include <systemcvpc/Route.hpp>
 
 #include "detail/Configuration.hpp"
-#include "detail/Routing/BlockingTransport.hpp"
 #include "detail/Routing/StaticImpl.hpp"
 #include "detail/Routing/IgnoreImpl.hpp"
 
@@ -121,8 +120,6 @@ Route::Ptr createRoute(std::string const &name,
         return new Detail::Routing::StaticImpl(name);
       if (strcmp(type, Detail::Routing::IgnoreImpl::Type) == 0)
         return new Detail::Routing::IgnoreImpl(name);
-      else if (strcmp(type, Detail::Routing::BlockingTransport::Type) == 0)
-        return new Detail::Routing::BlockingTransport(name);
       else {
         assert(!"WTF?!");
         throw std::runtime_error("Unknown route type!");

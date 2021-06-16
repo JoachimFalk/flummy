@@ -69,21 +69,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void compute(TaskInstanceImpl* task);
 
-    /**
-     *
-     */
-    virtual void requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
-    
-    /**
-     *
-     */
-    virtual void execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
-    
-    /**
-     *
-     */
-    virtual void abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker);
-    
     /*
      * from ComponentInterface
      */
@@ -120,8 +105,6 @@ namespace SystemC_VPC { namespace Detail {
     sc_core::sc_event scheduleEvent;
 
     typedef CoSupport::SystemC::Event Event;
-
-    Event blockCompute;
 
     InternalLoadHysteresisGovernor *midPowerGov;
 

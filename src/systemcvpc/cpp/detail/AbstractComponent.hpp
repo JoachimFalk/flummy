@@ -178,21 +178,6 @@ namespace SystemC_VPC { namespace Detail {
      */
     virtual void check(TaskInstanceImpl* task) {}
 
-    /**
-     *
-     */
-    virtual void requestBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker)=0;
-
-    /**
-     *
-     */
-    virtual void execBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker)=0;
-
-    /**
-     *
-     */
-    virtual void abortBlockingCompute(TaskInstanceImpl* task, VPCEvent::Ptr blocker)=0;
-
     virtual void finalize();
 
     TaskInstanceImpl *executeHop(TaskImpl *taskImpl

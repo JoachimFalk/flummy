@@ -27,7 +27,6 @@
 #include <systemcvpc/Routing/Ignore.hpp>
 
 #include "detail/Configuration.hpp"
-#include "detail/Routing/BlockingTransport.hpp"
 #include "detail/Routing/IgnoreImpl.hpp"
 
 #include <iostream>

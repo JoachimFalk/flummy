@@ -27,7 +27,6 @@
 #include <systemcvpc/Routing/Static.hpp>
 
 #include "detail/Configuration.hpp"
-#include "detail/Routing/BlockingTransport.hpp"
 #include "detail/Routing/StaticImpl.hpp"
 
 #include <iostream>

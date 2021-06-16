@@ -121,7 +121,6 @@ libsystemcvpc_la_SOURCES = \
 	src/systemcvpc/cpp/detail/PreemptiveScheduler/MostSecondaryScheduler.cpp \
 	src/systemcvpc/cpp/detail/PreemptiveScheduler/StreamShaperScheduler.cpp \
 	\
-	src/systemcvpc/cpp/detail/Routing/BlockingTransport.cpp \
 	src/systemcvpc/cpp/detail/Routing/IgnoreImpl.cpp \
 	src/systemcvpc/cpp/detail/Routing/StaticImpl.cpp \
 	\
