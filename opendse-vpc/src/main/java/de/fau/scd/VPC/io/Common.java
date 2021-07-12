@@ -41,29 +41,28 @@ public class Common {
             @Override
             public Iterator<org.w3c.dom.Element> iterator() {
                 return new Iterator<org.w3c.dom.Element>() {
-                    private org.w3c.dom.Element cur = null;
-                    private int c = -1;
-                    private final org.w3c.dom.NodeList nodes = parentElement.getChildNodes();
+                    private org.w3c.dom.Element cur  = null;
+                    private org.w3c.dom.Element next;
 
                     {
-                        skip();
+                        this.next = skip(parentElement.getFirstChild());
                     }
 
-                    private int skip() {
-                        int old = c++;
-                        while (hasNext() && !nodes.item(c).getNodeName().equals(childName))
-                            ++c;
-                        return old;
+                    private org.w3c.dom.Element skip(org.w3c.dom.Node next) {
+                        while (next != null && !next.getNodeName().equals(childName))
+                            next = next.getNextSibling();
+                        return (org.w3c.dom.Element) next;
                     }
 
                     @Override
                     public boolean hasNext() {
-                        return nodes.getLength() > c;
+                        return next != null;
                     }
 
                     @Override
                     public org.w3c.dom.Element next() {
-                        cur = (org.w3c.dom.Element) nodes.item(skip());
+                        cur  = next;
+                        next = skip(next.getNextSibling());
                         return cur;
                     }
 
@@ -72,7 +71,7 @@ public class Common {
                         if (cur == null)
                             throw new IllegalStateException();
                         parentElement.removeChild(cur);
-                        --c;
+                        cur = null;
                     }
                 };
             }
