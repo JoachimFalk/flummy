@@ -23,8 +23,6 @@ package de.fau.scd.VPC.io;
 
 import java.util.*;
 
-import org.apache.commons.collections15.multimap.MultiHashMap;
-
 import de.fau.scd.VPC.io.Common.FormatErrorException;
 import de.fau.scd.VPC.properties.ApplicationPropertyService;
 import edu.uci.ics.jung.graph.util.EdgeType;
