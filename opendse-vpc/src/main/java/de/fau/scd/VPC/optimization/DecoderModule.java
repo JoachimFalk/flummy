@@ -36,6 +36,6 @@ public abstract class DecoderModule extends DesignSpaceExplorationModule {
         protected void bindCreatorDecoder(Class<? extends ImplementationCreatorDecoder> clazz) {
                 Multibinder<ImplementationCreatorDecoder> multibinder = Multibinder.newSetBinder(binder(),
                         ImplementationCreatorDecoder.class);
-                multibinder.addBinding().to(clazz);
+                multibinder.addBinding().to(clazz).asEagerSingleton();
         }
 }
