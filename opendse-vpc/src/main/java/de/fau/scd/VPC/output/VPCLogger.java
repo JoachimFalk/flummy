@@ -67,6 +67,8 @@ public class VPCLogger extends TsvLogger implements Logger {
         int iterationStep
       , @Constant(namespace = VPCLogger.class, value = "logWorkingFolder")
         boolean logWorkingFolder
+      , @Constant(namespace = VPCLogger.class, value = "logInfeasible")
+        boolean logInfeasible
       , AttributeLogs attributeLogs)
     {
         super(archive, filename, evaluationStep, iterationStep);
@@ -112,6 +114,7 @@ public class VPCLogger extends TsvLogger implements Logger {
         }
 
         this.logWorkingFolder = logWorkingFolder;
+        this.logInfeasibles = logInfeasible;
         this.out = initWriter(filename);
     }
 
@@ -182,6 +185,7 @@ public class VPCLogger extends TsvLogger implements Logger {
     private long startTime = -1;
 
     private final boolean logWorkingFolder;
+    private final boolean logInfeasibles;
 
     private final List<AttrLogEntry> attrLogEntries = new ArrayList<>();
     private final Map<String, List<AttrLogEntry> > applicationAttrLogEntries = new HashMap<>();
@@ -215,10 +219,8 @@ public class VPCLogger extends TsvLogger implements Logger {
                         break;
                     }
                 }
-                if (!feasible) {
-                    System.out.println("Is infeasible");
+                if (!feasible && !logInfeasibles)
                     continue;
-                }
             }
             if (logWorkingFolder) {
                 try {

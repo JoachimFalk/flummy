@@ -46,6 +46,19 @@ public class VPCLoggerModule extends LoggerModule {
         this.logWorkingFolder = logWorkingFolder;
     }
 
+    @Info("Log infeasible solutions.")
+    @Order(20)
+    @Constant(namespace = VPCLogger.class, value = "logInfeasible")
+    protected boolean logInfeasible = false;
+
+    public boolean getLogInfeasible() {
+        return logInfeasible;
+    }
+
+    public void setLogInfeasible(boolean logInfeasibles) {
+        this.logInfeasible = logInfeasibles;
+    }
+
     @SuppressWarnings("serial")
     protected static class AttributeLogsImpl
     extends
@@ -55,8 +68,7 @@ public class VPCLoggerModule extends LoggerModule {
     {
     }
     @Info("Additional attributes to log")
-//  @Order(3)
-//  @Required(property = "dfgSource", elements = { "DFG_FROM_SIM_EXPORT" })
+    @Order(30)
     protected final AttributeLogsImpl attributeLogs = new AttributeLogsImpl();
 
     public AttributeLogs getAttributeLogs() {
