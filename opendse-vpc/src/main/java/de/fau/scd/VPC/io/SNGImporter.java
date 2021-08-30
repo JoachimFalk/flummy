@@ -197,11 +197,14 @@ public class SNGImporter {
         public void addChannel(ChanInfo chanInfo) {
             assert chanInfo.targetActor == target;
             String origReadMsgName = chanInfo.targetActor.name+"."+chanInfo.targetPort;
-            assert origMsgPayloads.put(origReadMsgName, chanInfo.tokenSize) == null;
+            Object oldMsgPayloadEntry = origMsgPayloads.put(origReadMsgName, chanInfo.tokenSize);
+            assert oldMsgPayloadEntry == null;
             payload += chanInfo.tokenSize;
-            assert origChannels.put(origReadMsgName, chanInfo.name) == null;
+            Object oldChannelEnty = origChannels.put(origReadMsgName, chanInfo.name);
+            assert oldChannelEnty == null;
             String origWriteMsgName = chanInfo.sourceActor.name+"."+chanInfo.sourcePort;
-            assert origProducers.put(origReadMsgName, origWriteMsgName) == null;
+            Object oldProducerEntry = origProducers.put(origReadMsgName, origWriteMsgName);
+            assert oldProducerEntry == null;
         }
 
         public void create(Task memTask, Application<Task, Dependency> app) {
