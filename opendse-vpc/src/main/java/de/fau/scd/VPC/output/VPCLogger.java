@@ -20,8 +20,6 @@
  */
 package de.fau.scd.VPC.output;
 
-import static org.opt4j.core.Objective.INFEASIBLE;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,25 +27,26 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.regex.Matcher;
 
+import com.google.inject.Inject;
+
 import org.opt4j.core.Individual;
 import org.opt4j.core.Objective;
 import org.opt4j.core.Objectives;
-import org.opt4j.core.Value;
 import org.opt4j.core.common.logger.Logger;
 import org.opt4j.core.common.logger.TsvLogger;
 import org.opt4j.core.optimizer.Archive;
 import org.opt4j.core.start.Constant;
 
-import com.google.inject.Inject;
-
-import de.fau.scd.VPC.config.properties.AttributeLog;
-import de.fau.scd.VPC.helper.TempDirectoryHandler;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
 import net.sf.opendse.model.Task;
 import net.sf.opendse.optimization.ImplementationWrapper;
 import net.sf.opendse.optimization.SpecificationWrapper;
+
+import de.fau.scd.VPC.config.properties.AttributeLog;
+import de.fau.scd.VPC.helper.TempDirectoryHandler;
+import de.fau.scd.VPC.properties.ImplementationPropertyService;
 
 public class VPCLogger extends TsvLogger implements Logger {
 
@@ -211,17 +210,10 @@ public class VPCLogger extends TsvLogger implements Logger {
             String statisticsText = getStatistics(iteration, evaluation, time);
             String objectivesText = getIndividual(individual);
 
-            {
-                Boolean feasible = true;
-                for (Value<?> value : objectives.getValues()) {
-                    if (value == INFEASIBLE || value == null || value.getValue() == null) {
-                        feasible = false;
-                        break;
-                    }
-                }
-                if (!feasible && !logInfeasibles)
-                    continue;
-            }
+            if (ImplementationPropertyService.isInfeasible(implementation, objectives) &&
+                !logInfeasibles)
+                continue;
+
             if (logWorkingFolder) {
                 try {
                     TempDirectoryHandler tempDirectoryHandler = TempDirectoryHandler.getTempDirectoryHandler(implementation);
