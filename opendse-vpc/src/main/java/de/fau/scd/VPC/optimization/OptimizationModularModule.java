@@ -21,6 +21,8 @@
 
 package de.fau.scd.VPC.optimization;
 
+import org.opt4j.core.config.annotations.Info;
+import org.opt4j.core.config.annotations.Order;
 import org.opt4j.core.config.annotations.Parent;
 import org.opt4j.core.config.annotations.Required;
 import org.opt4j.core.problem.ProblemModule;
@@ -31,7 +33,7 @@ import com.google.inject.multibindings.Multibinder;
 
 //import net.sf.opendse.optimization.DesignSpaceExplorationCreator;
 //import net.sf.opendse.optimization.DesignSpaceExplorationDecoder;
-import net.sf.opendse.optimization.DesignSpaceExplorationEvaluator;
+//import net.sf.opendse.optimization.DesignSpaceExplorationEvaluator;
 import net.sf.opendse.optimization.DesignSpaceExplorationModule;
 import net.sf.opendse.optimization.ImplementationWidgetService;
 import net.sf.opendse.optimization.SpecificationToolBarService;
@@ -39,9 +41,12 @@ import net.sf.opendse.optimization.StagnationRestart;
 import net.sf.opendse.optimization.constraints.SpecificationConstraints;
 import net.sf.opendse.optimization.constraints.SpecificationConstraintsMulti;
 
+import de.fau.scd.VPC.optimization.ModularDSEEvaluator.DiscardImplementations;
+
 @Parent(DesignSpaceExplorationModule.class)
 public class OptimizationModularModule extends ProblemModule {
 
+    @Order(0)
     protected boolean stagnationRestartEnabled = true;
 
     public boolean isStagnationRestartEnabled() {
@@ -49,27 +54,43 @@ public class OptimizationModularModule extends ProblemModule {
     }
 
     public void setStagnationRestartEnabled(boolean stagnationRestartEnabled) {
-            this.stagnationRestartEnabled = stagnationRestartEnabled;
+        this.stagnationRestartEnabled = stagnationRestartEnabled;
     }
 
+    @Order(1)
     @Required(property = "stagnationRestartEnabled", elements = { "TRUE" })
     @Constant(value = "maximalNumberStagnatingGenerations", namespace = StagnationRestart.class)
     protected int maximalNumberStagnatingGenerations = 20;
 
     public int getMaximalNumberStagnatingGenerations() {
-            return maximalNumberStagnatingGenerations;
+        return maximalNumberStagnatingGenerations;
     }
 
     public void setMaximalNumberStagnatingGenerations(int maximalNumberStagnatingGenerations) {
-            this.maximalNumberStagnatingGenerations = maximalNumberStagnatingGenerations;
+        this.maximalNumberStagnatingGenerations = maximalNumberStagnatingGenerations;
+    }
+
+    @Order(10)
+    @Info("Should implementations be discarded after evaluation to save memory?")
+    @Constant(namespace = ModularDSEEvaluator.class, value = "discardImplementations")
+    protected DiscardImplementations discardImplementations =
+        DiscardImplementations.DISCARD_NO_IMPLEMENTATIONS;
+
+    public DiscardImplementations getDiscardImplementations() {
+        return discardImplementations;
+    }
+
+    public void setDiscardImplementations(DiscardImplementations discardImplementations) {
+        this.discardImplementations = discardImplementations;
     }
 
     /// This is a patched copy of OptimizationNewModule.config
     @Override
     protected void config() {
-        // Patch: Modified bindProblem call to use our ModularDSEDecoder.
+        // Patch: Modified bindProblem call to use our ModularDSECreator,
+        // ModularDSEDecoder, and ModularDSEEvaluator.
         bindProblem(ModularDSECreator.class, ModularDSEDecoder.class,
-                DesignSpaceExplorationEvaluator.class);
+                ModularDSEEvaluator.class);
         /* Original was:
          * bindProblem(DesignSpaceExplorationCreator.class, DesignSpaceExplorationDecoder.class,
          *      DesignSpaceExplorationEvaluator.class);
