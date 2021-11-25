@@ -1,9 +1,24 @@
-// vim: set syntax=groovy sts=4 ts=8 et:
-
-plugins {
-//  id 'de.jfalk.gradle.utilities'
-    id 'java-library'
-}
+// vim: set syntax=groovy sts=2 ts=8 et:
+// -*- tab-width:8; indent-tabs-mode:nil; c-basic-offset:2; -*-
+/*
+ * Copyright (c)
+ *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
+ *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
+ * 
+ *   This library is free software; you can redistribute it and/or modify it under
+ *   the terms of the GNU Lesser General Public License as published by the Free
+ *   Software Foundation; either version 2 of the License, or (at your option) any
+ *   later version.
+ * 
+ *   This library is distributed in the hope that it will be useful, but WITHOUT
+ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *   FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ *   details.
+ * 
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with this library; if not, write to the Free Software Foundation, Inc.,
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+ */
 
 // Here, ``this'' is the current org.gradle.api.Project
 //this.buildDir = 'obj-gradle'
@@ -36,14 +51,25 @@ class JavaWrapXSDandDTDFiles extends DefaultTask {
     }
 }
 
+plugins {
+    id 'java-library'
+}
+
 if (javaBuild) {
+
+repositories {
+  maven {
+      name "jitpack"
+      url 'https://jitpack.io'
+  }
+  mavenCentral()
+}
 
 compileJava {
     options.debug = true
 }
 
 dependencies {
-//  analysis "dependencies", it
     if ((rootProject.subprojects.findAll { it.name == "opendse" }).isEmpty()) {
         implementation 'com.github.JoachimFalk:dse-opendse:21f735bf01'
     } else {
@@ -69,9 +95,7 @@ task javaWrapSNGXSD(type: JavaWrapXSDandDTDFiles) {
 
 sourceSets {
     main {
-//      analysis("main", it)
         java {
-//          analysis("main.java", it)
             srcDir "src/main/java"
             srcDir "${buildDir}/src/main/java"
         }

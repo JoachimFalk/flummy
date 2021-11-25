@@ -9,6 +9,7 @@ Release
 Release-VPC
 Release-VPC-noVCD
 .classpath
+.gradle
 *.user
 .settings/org.eclipse.buildship.core.prefs
 /bin/
