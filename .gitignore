@@ -13,3 +13,4 @@ Release-VPC-noVCD
 *.user
 .settings/org.eclipse.buildship.core.prefs
 /bin/
+/build/

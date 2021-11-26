@@ -2,9 +2,6 @@
 // -*- tab-width:8; indent-tabs-mode:nil; c-basic-offset:2; -*-
 /*
  * Copyright (c)
- *   2016 FAU -- Joachim Falk <joachim.falk@fau.de>
- *   2017 FAU -- Simone Müller <simone.mueller@fau.de>
- *   2020 FAU -- Joachim Falk <joachim.falk@fau.de>
  *   2021 FAU -- Joachim Falk <joachim.falk@fau.de>
  * 
  *   This library is free software; you can redistribute it and/or modify it under
@@ -22,20 +19,8 @@
  *   59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-apply plugin: 'org.gradle.lifecycle-base'
+apply plugin: 'java-library'
 
-if (rootProject.getPath() == getPath()) {
-  wrapper {
-      distributionType = Wrapper.DistributionType.ALL
-      gradleVersion = '4.9'
-  }
-  ext.cxxBuild = false
-  ext.javaBuild = true
-}
-
-if (cxxBuild) {
-  apply from: 'build-cpp.gradle'
-}
-if (javaBuild) {
-  apply from: 'build-java.gradle'
+dependencies {
+    runtime project('opendse-vpc')
 }
