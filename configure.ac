@@ -53,17 +53,15 @@ ACJF_CHECK_CROSSTOOL(CC, gcc)
 ACJF_CHECK_CROSSTOOL(CXX, g++)
 ACJF_CHECK_CROSSTOOL(AR, ar)
 ACJF_CHECK_CROSSTOOL(RANLIB, ranlib)
-ACJF_CHECK_CROSSTOOL(NM, nm)
 AC_PROG_CXXCPP
 AC_PROG_CPP
 # Checks for programs.
-#AC_PROG_LIBTOOL
 #AC_PROG_INSTALL
 #AC_PROG_LN_S
 #AC_PROG_MAKE_SET
 
 AC_ENABLE_SHARED
-AC_PROG_LIBTOOL
+LT_INIT
 
 ACJF_ARG_DEBUG([yes], [], [-DNDEBUG])
 if test x"$enable_debug" = x"yes"; then
@@ -123,7 +121,7 @@ AC_CONFIG_FILES(
  [src/systemcvpc/headers/Makefile]dnl
  [pkgconfig/libsystemcvpc.pc]dnl
 )
-AC_CONFIG_HEADER(
+AC_CONFIG_HEADERS(
  [src/systemcvpc/cpp/config.h]dnl
  [src/systemcvpc/headers/systemcvpc/vpc_config.h]dnl
 )
